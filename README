@@ -1,1 +1,22 @@
 Android Management App
+
+IDE: Eclipse
+Usage:
+1. File->Import->Android->Existing Android Code Into Workspace->Import android-support-design, android-support-recyclerview, android-support-v7-appcompat Project In android-support-libraries folder->Finish.
+2. For android-support-v7-appcompat Project:
+	2.1 Right Click on libs/android-support-v4.jar->Build Path->Add to Build Path
+	2.2 Right Click on libs/android-support-v7-appcompat.jar->Build Path->Add to Build Path
+	2.3 Right Click on android-support-v7-appcompat Project Name->Properties->Java Build Path->Uncheck Android Dependences
+	2.4 Right Click on android-support-v7-appcompat Project Name->Properties->Android->Check "Is Library"
+3. For android-support-recycleview Project:
+	3.1 Right Click on libs/android-support-recycleview.jar->Build Path->Add to Build Path
+	3.3 Right Click on android-support-recyclerview Project Name->Properties->Java Build Path->Uncheck Android Dependences
+	3.4 Right Click on android-support-recyclerview Project Name->Properties->Android->Check "Is Library"
+4. For android-support-design Project:
+	3.1 Right Click on libs/android-support-design.jar->Build Path->Add to Build Path
+	3.3 Right Click on android-support-design Project Name->Properties->Java Build Path->Uncheck Android Dependences
+	3.4 Right Click on android-support-design Project Name->Properties->Android->Check "Is Library"
+	3.4 Right Click on android-support-design Project Name->Properties->Android->Add android-support-v7-appcompat And android-support-recycleview As Libraries
+5. For HCFSMgmtApp Project:
+	5.1 Right Click on android-support-design Project Name->Properties->Android->Add android-support-v7-appcompat And android-support-design As Libraries
+6. Project->Clean (Project is on the top toolbar) 

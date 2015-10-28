@@ -1,8 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">HCFSMgmtApp</string>
 
-    <string name="app_name">HelloJNI</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="nav_drawer_open">Open navigation drawer</string>
+    <string name="nav_drawer_close">Close navigation drawer</string>
+    <string name="nav_homepage">首頁</string>
+    <string name="nav_default_mountpoint">系統</string>
+    <string name="nav_settings">設定</string>
+    <string name="nav_about">關於</string>
+    
+    <string name="notify_network_connected">偵測網路連線已恢復。</string>
+    <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線。</string>
+
     <string name="action_settings">Settings</string>
-
 </resources>

@@ -14,5 +14,7 @@ public class HCFSApiUtils {
 	public static native String total_storage();
 	public static native String avail_storage();
 	public static native String used_storage();
+	public static native void start_sync_to_cloud();
+	public static native void stop_sync_to_cloud();
 	
 }
