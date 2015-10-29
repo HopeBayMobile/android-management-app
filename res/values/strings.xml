@@ -10,6 +10,7 @@
     
     <string name="notify_network_connected">偵測網路連線已恢復。</string>
     <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線。</string>
+    <string name="notify_upload_completed">本地端資料已上傳至雲端空間。</string>
 
     <string name="action_settings">Settings</string>
 </resources>
