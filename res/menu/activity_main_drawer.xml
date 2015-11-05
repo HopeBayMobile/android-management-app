@@ -4,36 +4,36 @@
     <group android:id="@+id/group_homepage" >
         <item
             android:id="@+id/nav_homepage"
-            android:icon="@android:drawable/ic_menu_share"
+            android:icon="@drawable/ic_home_white"
             android:title="@string/nav_homepage">
         </item>
     </group>
     <group android:id="@+id/group_mountpoint" >
         <item
             android:id="@+id/nav_default_mountpoint"
-            android:icon="@android:drawable/ic_menu_share"
+            android:icon="@drawable/ic_cloud_upload_white"
             android:title="@string/nav_default_mountpoint"/>
         <item
             android:id="@+id/nav_send_11"
-            android:icon="@android:drawable/ic_menu_send"
+            android:icon="@drawable/ic_cloud_upload_white"
             android:title="共用空間1"/>
         <item
             android:id="@+id/nav_send_12"
-            android:icon="@android:drawable/ic_menu_send"
+            android:icon="@drawable/ic_cloud_upload_white"
             android:title="共用空間2"/>
         <item
             android:id="@+id/nav_send_123"
-            android:icon="@android:drawable/ic_menu_send"
-            android:title="新增掛載點"/>
+            android:icon="@drawable/ic_add_circle_white"
+            android:title="@string/nav_add_mountpoint"/>
     </group>
     <group android:id="@+id/group_setting_about" >
         <item
             android:id="@+id/nav_settings"
-            android:icon="@android:drawable/ic_menu_share"
+            android:icon="@drawable/ic_settings_white"
             android:title="@string/nav_settings"/>
         <item
             android:id="@+id/nav_about"
-            android:icon="@android:drawable/ic_menu_send"
+            android:icon="@drawable/ic_info_white"
             android:title="@string/nav_about"/>
     </group>
 

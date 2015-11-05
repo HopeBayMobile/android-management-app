@@ -13,5 +13,16 @@
 			<accessrule kind="nonaccessible" pattern="com/android/internal/**"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry kind="src" path="/android-support-design"/>
+	<classpathentry kind="src" path="/android-support-recyclerview"/>
+	<classpathentry kind="lib" path="D:/Users/Aaronchu/AppData/Local/Android/sdk/platforms/android-19/android.jar" sourcepath="D:/Users/Aaronchu/AppData/Local/Android/sdk/sources/android-19">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/D:/Users/Aaronchu/AppData/Local/Android/sdk/docs/reference"/>
+		</attributes>
+		<accessrules>
+			<accessrule kind="nonaccessible" pattern="com/android/internal/**"/>
+		</accessrules>
+	</classpathentry>
+	<classpathentry kind="src" path="/android-support-v7-appcompat"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

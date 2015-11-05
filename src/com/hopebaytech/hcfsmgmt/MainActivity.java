@@ -1,7 +1,7 @@
 package com.hopebaytech.hcfsmgmt;
 
-import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
+import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
 import com.hopebaytech.hcfsmgmt.fragment.HomepageFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -9,24 +9,22 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -40,8 +38,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		setContentView(R.layout.activity_main);
 
 		initialize();
-		// TextView textView = (TextView) findViewById(R.id.text_view);
-		// textView.setText(HCFSApiUtils.helloJNI("66666666666666"));
+		
+		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+		
+//		Log.d(HCFSMgmtUtils.TAG, HCFSApiUtils.helloJNI("test"));
+		Log.d(HCFSMgmtUtils.TAG, telephonyManager.getDeviceId());
 	}
 
 	private void initialize() {
@@ -51,14 +52,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 		toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-
-		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Snackbar.make(view, "snackbar", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-			}
-		});
 
 		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
@@ -100,12 +93,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		}
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		// Inflate the menu; this adds items to the action bar if it is present.
+//		getMenuInflater().inflate(R.menu.main, menu);
+//		return true;
+//	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -134,6 +127,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 			toolbar.setTitle(getString(R.string.nav_homepage));
 			ft.replace(R.id.fragment_container, new HomepageFragment());
 			Toast.makeText(this, getString(R.string.nav_homepage), Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.nav_default_mountpoint) {
+			toolbar.setTitle(getString(R.string.nav_default_mountpoint));
+			ft.replace(R.id.fragment_container, new FileManagementFragment());
+			Toast.makeText(this, getString(R.string.nav_default_mountpoint), Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_settings) {
 			toolbar.setTitle(getString(R.string.nav_settings));
 			ft.replace(R.id.fragment_container, new SettingsFragment(this));
