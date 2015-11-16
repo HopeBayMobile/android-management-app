@@ -6,14 +6,12 @@ import com.hopebaytech.hcfsmgmt.fragment.HomepageFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -22,15 +20,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	private Toolbar toolbar;
-	private HCFSMgmtReceiver networkStateChangedReceiver = new HCFSMgmtReceiver();
+	// private HCFSMgmtReceiver networkStateChangedReceiver = new
+	// HCFSMgmtReceiver();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +35,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		setContentView(R.layout.activity_main);
 
 		initialize();
-		
-		TelephonyManager telephonyManager = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-		
-//		Log.d(HCFSMgmtUtils.TAG, HCFSApiUtils.helloJNI("test"));
-		Log.d(HCFSMgmtUtils.TAG, telephonyManager.getDeviceId());
+
+		// Log.d(HCFSMgmtUtils.TAG, HCFSApiUtils.helloJNI("test"));
 	}
 
 	private void initialize() {
@@ -67,8 +61,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		ft.commit();
 
 		Intent intent = new Intent(this, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.NOTIFY_UPLOAD_COMPLETED_ALARM_INTENT_ACTION);
-		boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent, PendingIntent.FLAG_NO_CREATE) != null;
+		intent.setAction(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION);
+		boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
+				PendingIntent.FLAG_NO_CREATE) != null;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, false);
 		if (notifyUploadCompletedPref) {
@@ -93,12 +88,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		}
 	}
 
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		// Inflate the menu; this adds items to the action bar if it is present.
-//		getMenuInflater().inflate(R.menu.main, menu);
-//		return true;
-//	}
+	// @Override
+	// public boolean onCreateOptionsMenu(Menu menu) {
+	// // Inflate the menu; this adds items to the action bar if it is present.
+	// getMenuInflater().inflate(R.menu.main, menu);
+	// return true;
+	// }
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -124,21 +119,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		if (id == R.id.nav_homepage) {
-			toolbar.setTitle(getString(R.string.nav_homepage));
-			ft.replace(R.id.fragment_container, new HomepageFragment());
-			Toast.makeText(this, getString(R.string.nav_homepage), Toast.LENGTH_SHORT).show();
+			String title = getString(R.string.nav_homepage);
+			toolbar.setTitle(title);
+			ft.replace(R.id.fragment_container, new HomepageFragment(), title);
+			// Toast.makeText(this, getString(R.string.nav_homepage),
+			// Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_default_mountpoint) {
-			toolbar.setTitle(getString(R.string.nav_default_mountpoint));
-			ft.replace(R.id.fragment_container, new FileManagementFragment());
-			Toast.makeText(this, getString(R.string.nav_default_mountpoint), Toast.LENGTH_SHORT).show();
+			String title = getString(R.string.nav_default_mountpoint);
+			toolbar.setTitle(title);
+			ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(), title);
+			// Toast.makeText(this, getString(R.string.nav_default_mountpoint),
+			// Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_settings) {
-			toolbar.setTitle(getString(R.string.nav_settings));
-			ft.replace(R.id.fragment_container, new SettingsFragment(this));
-			Toast.makeText(this, getString(R.string.nav_settings), Toast.LENGTH_SHORT).show();
+			String title = getString(R.string.nav_settings);
+			toolbar.setTitle(title);
+			ft.replace(R.id.fragment_container, new SettingsFragment(this), title);
+			// Toast.makeText(this, getString(R.string.nav_settings),
+			// Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_about) {
-			toolbar.setTitle(getString(R.string.nav_about));
-			ft.replace(R.id.fragment_container, new AboutFragment());
-			Toast.makeText(this, getString(R.string.nav_about), Toast.LENGTH_SHORT).show();
+			String title = getString(R.string.nav_about);
+			toolbar.setTitle(title);
+			ft.replace(R.id.fragment_container, new AboutFragment(), title);
+			// Toast.makeText(this, getString(R.string.nav_about),
+			// Toast.LENGTH_SHORT).show();
 		}
 		ft.commit();
 
@@ -150,15 +153,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	@Override
 	protected void onResume() {
 		super.onResume();
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-		registerReceiver(networkStateChangedReceiver, filter);
+		// IntentFilter filter = new IntentFilter();
+		// filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		// filter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
+		// filter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
+		// filter.addAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+		// registerReceiver(networkStateChangedReceiver, filter);
 	}
 
 	@Override
 	protected void onPause() {
-		unregisterReceiver(networkStateChangedReceiver);
+		// unregisterReceiver(networkStateChangedReceiver);
 		super.onPause();
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+			String tag = getString(R.string.nav_default_mountpoint);
+			Fragment fragment = getFragmentManager().findFragmentByTag(tag);
+			if (fragment != null && fragment.isVisible()) {
+				if (fragment instanceof FileManagementFragment) {
+					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
+					if (fileManagementFragment.onBackPressed())
+						return true;
+				}
+			}
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 
 }

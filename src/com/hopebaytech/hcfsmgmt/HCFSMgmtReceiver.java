@@ -1,13 +1,9 @@
 package com.hopebaytech.hcfsmgmt;
 
-import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
-import com.hopebaytech.hcfsmgmt.services.CheckUploadCompletedService;
+import com.hopebaytech.hcfsmgmt.services.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
@@ -23,12 +19,13 @@ import android.util.Log;
 
 public class HCFSMgmtReceiver extends BroadcastReceiver {
 
-	private SharedPreferences sharedPreferences;
+	 private SharedPreferences sharedPreferences;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		final String action = intent.getAction();
+		Log.d(HCFSMgmtUtils.TAG, action);
 		if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
 			detectNetworkStatusAndSyncToCloud(context);
 			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
@@ -37,43 +34,54 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 			}
 		} else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 			detectNetworkStatusAndSyncToCloud(context);
-		} else if (action.equals(HCFSMgmtUtils.NOTIFY_UPLOAD_COMPLETED_ALARM_INTENT_ACTION)) {
-			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
-			if (notifyUploadCompletedPref) {
-				Intent intentService = new Intent(context, CheckUploadCompletedService.class);
+		} else if (action.equals(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION)) {
+			int operation = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, -1);
+			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			switch (operation) {
+			case HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED:
+				intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
 				context.startService(intentService);
+				break;
+			case HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE:
+				intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
+				context.startService(intentService);
+				break;
+			default:
+				break;
 			}
 		}
 	}
 
 	private void startSyncToCloud(Context context, String logMsg) {
 		Editor editor = sharedPreferences.edit();
-		boolean is_first_network_connected_received = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED, true);		
+		boolean is_first_network_connected_received = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED,
+				true);
 		if (is_first_network_connected_received) {
 			Log.d(HCFSMgmtUtils.TAG, logMsg);
 			notify_network_status(context, HCFSMgmtUtils.ID_NOTIFY_NETWORK_STATUS_CHANGED, context.getString(R.string.app_name),
 					context.getString(R.string.notify_network_connected));
 			// HCFSApiUtils.start_sync_to_cloud();
-//			is_first_network_connected_received = false;
+			// is_first_network_connected_received = false;
 			editor.putBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED, false);
 		}
-//		is_first_network_disconnected_received = true;
+		// is_first_network_disconnected_received = true;
 		editor.putBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED, true);
 		editor.commit();
 	}
 
 	private void stopSyncToCloud(Context context, String logMsg) {
 		Editor editor = sharedPreferences.edit();
-		boolean is_first_network_disconnected_received = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED, true);
+		boolean is_first_network_disconnected_received = sharedPreferences
+				.getBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED, true);
 		if (is_first_network_disconnected_received) {
 			Log.d(HCFSMgmtUtils.TAG, logMsg);
 			notify_network_status(context, HCFSMgmtUtils.ID_NOTIFY_NETWORK_STATUS_CHANGED, context.getString(R.string.app_name),
 					context.getString(R.string.notify_network_disconnected));
 			// HCFSApiUtils.stop_sync_to_cloud();
-//			is_first_network_disconnected_received = false;
+			// is_first_network_disconnected_received = false;
 			editor.putBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED, false);
 		}
-//		is_first_network_connected_received = true;
+		// is_first_network_connected_received = true;
 		editor.putBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED, true);
 		editor.commit();
 	}

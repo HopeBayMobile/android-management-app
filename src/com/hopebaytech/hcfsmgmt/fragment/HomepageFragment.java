@@ -5,10 +5,12 @@ import com.hopebaytech.hcfsmgmt.R;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.text.Html;
 import android.text.Spanned;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 
 public class HomepageFragment extends Fragment {
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.home_page_fragment, container, false);
@@ -64,6 +67,13 @@ public class HomepageFragment extends Fragment {
 		progressBar.setSecondaryProgress(100);
 
 		FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.add_new_mount_point);
+		ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fab.getLayoutParams();
+		TypedValue typedValue = new TypedValue();
+		getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, typedValue, true);
+		int baseBottom = getResources().getDimensionPixelSize(typedValue.resourceId);
+		int bottomMargin = (int) (baseBottom + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, getResources().getDisplayMetrics()));
+		int rightMargin = (int) getResources().getDimension(R.dimen.fab_right_margin);
+		params.setMargins(0, 0, rightMargin, bottomMargin);
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -73,6 +83,8 @@ public class HomepageFragment extends Fragment {
 				// Snackbar.LENGTH_LONG).setAction("Action", null).show();
 			}
 		});
+		fab.setTranslationY(bottomMargin);
+		fab.animate().translationY(0).setDuration(100).setStartDelay(300);
 
 		return view;
 	}
