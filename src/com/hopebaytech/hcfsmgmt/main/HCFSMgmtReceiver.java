@@ -1,11 +1,10 @@
-package com.hopebaytech.hcfsmgmt;
+package com.hopebaytech.hcfsmgmt.main;
 
+import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.services.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +13,6 @@ import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 public class HCFSMgmtReceiver extends BroadcastReceiver {
@@ -53,14 +51,15 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 	}
 
 	private void startSyncToCloud(Context context, String logMsg) {
+		
 		Editor editor = sharedPreferences.edit();
 		boolean is_first_network_connected_received = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED,
 				true);
 		if (is_first_network_connected_received) {
 			Log.d(HCFSMgmtUtils.TAG, logMsg);
-			notify_network_status(context, HCFSMgmtUtils.ID_NOTIFY_NETWORK_STATUS_CHANGED, context.getString(R.string.app_name),
+			notify_network_status(context, HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED, context.getString(R.string.app_name),
 					context.getString(R.string.notify_network_connected));
-			// HCFSApiUtils.start_sync_to_cloud();
+			HCFSMgmtUtils.startSyncToCloud();
 			// is_first_network_connected_received = false;
 			editor.putBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED, false);
 		}
@@ -75,9 +74,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 				.getBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED, true);
 		if (is_first_network_disconnected_received) {
 			Log.d(HCFSMgmtUtils.TAG, logMsg);
-			notify_network_status(context, HCFSMgmtUtils.ID_NOTIFY_NETWORK_STATUS_CHANGED, context.getString(R.string.app_name),
+			notify_network_status(context, HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED, context.getString(R.string.app_name),
 					context.getString(R.string.notify_network_disconnected));
-			// HCFSApiUtils.stop_sync_to_cloud();
+			HCFSMgmtUtils.stopSyncToCloud();
 			// is_first_network_disconnected_received = false;
 			editor.putBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED, false);
 		}
@@ -86,19 +85,20 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 		editor.commit();
 	}
 
-	private void notify_network_status(Context context, int id_notify, String notify_title, String notify_content) {
+	private void notify_network_status(Context context, int notify_id, String notify_title, String notify_content) {
 		boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY, false);
 		if (notifyConnFailedRecoveryPref) {
-			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-			NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-
-			int defaults = 0;
-			defaults |= Notification.DEFAULT_VIBRATE;
-			builder.setWhen(System.currentTimeMillis()).setSmallIcon(R.drawable.ic_launcher).setContentTitle(notify_title)
-					.setContentText(notify_content).setAutoCancel(true).setDefaults(defaults);
-
-			Notification notification = builder.build();
-			notificationManager.notify(id_notify, notification);
+			HCFSMgmtUtils.notifyEvent(context, notify_id, notify_title, notify_content);
+//			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+//			NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+//
+//			int defaults = 0;
+//			defaults |= Notification.DEFAULT_VIBRATE;
+//			builder.setWhen(System.currentTimeMillis()).setSmallIcon(R.drawable.ic_launcher).setContentTitle(notify_title)
+//					.setContentText(notify_content).setAutoCancel(true).setDefaults(defaults);
+//
+//			Notification notification = builder.build();
+//			notificationManager.notify(id_notify, notification);
 		}
 	}
 

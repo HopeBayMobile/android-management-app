@@ -1,11 +1,13 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import com.hopebaytech.hcfsmgmt.db.AppDAO;
+import java.io.File;
+
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 
 public class AppInfo extends ItemInfo {
@@ -14,8 +16,6 @@ public class AppInfo extends ItemInfo {
 	private int uid;
 	private ApplicationInfo appInfo;
 	private String packageName;
-	private String sourceDir;
-	private String nativeLibraryDir;
 	private String[] sharedLibraryFiles;
 	private int appSize;
 
@@ -39,14 +39,6 @@ public class AppInfo extends ItemInfo {
 		this.uid = uid;
 	}
 
-	public String getPackageName() {
-		return appInfo.packageName;
-	}
-
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
-
 	public String getSourceDir() {
 		/* Default sourceDir = /data/app/<package-name>-1/base.apk */
 		String sourceDir = appInfo.sourceDir;
@@ -54,9 +46,20 @@ public class AppInfo extends ItemInfo {
 		String sourceDirWithoutApkEnd = sourceDir.substring(0, lastIndex);
 		return sourceDirWithoutApkEnd;
 	}
-
-	public void setSourceDir(String sourceDir) {
-		this.sourceDir = sourceDir;
+	
+	@Nullable
+	public String getExternalDir() {
+		String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+		File externalAndroidFile = new File(externalPath);
+		for (File type : externalAndroidFile.listFiles()) {
+			File[] typeName = type.listFiles();
+			for (File fileName : typeName) {
+				if (fileName.getName().equals(getPackageName())) {
+					return fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+				}
+			}
+		}
+		return null;
 	}
 
 	public String getDataDir() {
@@ -70,10 +73,6 @@ public class AppInfo extends ItemInfo {
 	@Nullable
 	public String[] getSharedLibraryFiles() {
 		return sharedLibraryFiles;
-	}
-
-	public void setSharedLibraryFiles(String[] sharedLibraryFiles) {
-		this.sharedLibraryFiles = sharedLibraryFiles;
 	}
 
 	public int getAppSize() {
@@ -90,6 +89,17 @@ public class AppInfo extends ItemInfo {
 
 	public void setDbId(long dbId) {
 		this.dbId = dbId;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+	
+	public String getPackageName() {
+		if (packageName == null) {
+			packageName = appInfo.packageName;
+		}
+		return packageName;
 	}
 
 }

@@ -44,7 +44,7 @@
             android:layout_marginBottom="@dimen/progressbar_home_page_vertical_margin"
             android:layout_marginTop="@dimen/progressbar_home_page_vertical_margin"
             android:progress="66"
-            android:progressDrawable="@drawable/my_progressbar" />
+             />
 
         <RelativeLayout
             android:layout_width="match_parent"

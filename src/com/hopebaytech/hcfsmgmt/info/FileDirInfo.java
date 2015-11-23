@@ -16,6 +16,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,7 +27,10 @@ public class FileDirInfo extends ItemInfo {
 	public static final String MIME_TYPE_IMAGE = "image";
 	public static final String MIME_TYPE_VIDEO = "video";
 	public static final String MIME_TYPE_AUDIO = "audio";
-	public static final String MIME_TYPE_APPLICATION_APK = "application/vnd.android.package-archive";
+	public static final String MIME_TYPE_APPLICATION = "application";
+	public static final String MIME_SUBTYPE_APK = "vnd.android.package-archive";
+	public static final String MIME_SUBTYPE_OGG = "ogg";
+	public static final String MIME_SUBTYPE_PNG = "png";
 	private File currentFile;
 
 	public FileDirInfo(Context context) {
@@ -43,47 +47,57 @@ public class FileDirInfo extends ItemInfo {
 				Log.d(HCFSMgmtUtils.TAG, "mimeType: " + mimeType);
 				int width, height;
 				width = height = (int) context.getResources().getDimension(R.dimen.item_image_height_width);
-				if (mimeType.contains(MIME_TYPE_IMAGE)) {
-					if (mimeType.contains("png")) {
-						Bitmap image = BitmapFactory.decodeFile(filePath);
-						Bitmap thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
-//						return new BitmapDrawable(context.getResources(), thumbImage);
-						return thumbImage;
-					} else {
-//						return new BitmapDrawable(context.getResources(), getThumbnail(absoluteFilePath));
-						Bitmap thumbImage = getImageThumbnail(filePath);
-						if (thumbImage == null) {
+				try {
+					if (mimeType.contains(MIME_TYPE_IMAGE)) {
+						if (mimeType.contains(MIME_SUBTYPE_PNG)) {
 							Bitmap image = BitmapFactory.decodeFile(filePath);
+							Bitmap thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+							// return new BitmapDrawable(context.getResources(), thumbImage);
+							return thumbImage;
+						} else {
+							// return new BitmapDrawable(context.getResources(), getThumbnail(absoluteFilePath));
+							Bitmap thumbImage = getImageThumbnail(filePath);
+							if (thumbImage == null) {
+								Bitmap image = BitmapFactory.decodeFile(filePath);
+								thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+							}
+							return thumbImage;
+						}
+					} else if (mimeType.contains(MIME_TYPE_VIDEO)) {
+						Bitmap thumbImage = getVideoThumbnail(filePath);
+						if (thumbImage == null) {
+							Bitmap image = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
 							thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
 						}
 						return thumbImage;
+					} else if (mimeType.contains(MIME_TYPE_APPLICATION)) {
+						if (mimeType.contains(MIME_SUBTYPE_APK)) {
+							String archiveFilePath = filePath;
+							PackageManager pm = context.getPackageManager();
+							PackageInfo packageInfo = pm.getPackageArchiveInfo(archiveFilePath, PackageManager.GET_ACTIVITIES);
+							ApplicationInfo appInfo = packageInfo.applicationInfo;
+							appInfo.sourceDir = archiveFilePath;
+							appInfo.publicSourceDir = archiveFilePath;
+							return appInfo.loadIcon(pm);
+						} else if (mimeType.contains(MIME_SUBTYPE_OGG)) {
+							return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+						}
+					} else if (mimeType.contains(MIME_TYPE_AUDIO)) {
+						return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
 					}
-				} else if (mimeType.contains(MIME_TYPE_VIDEO)) {
-					Bitmap thumbImage = getVideoThumbnail(filePath);
-					if (thumbImage == null) {
-						Bitmap image = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
-						thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
-					}
-					return thumbImage;
-				} else if (mimeType.contains(MIME_TYPE_APPLICATION_APK)) {
-					String archiveFilePath = filePath;
-					PackageManager pm = context.getPackageManager();
-					PackageInfo packageInfo = pm.getPackageArchiveInfo(archiveFilePath, PackageManager.GET_ACTIVITIES);
-					ApplicationInfo appInfo = packageInfo.applicationInfo;
-					appInfo.sourceDir = archiveFilePath;
-					appInfo.publicSourceDir = archiveFilePath;
-					return appInfo.loadIcon(pm);
-				} else if (mimeType.contains(MIME_TYPE_AUDIO)) {
-					return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
-				} else {
+					return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+				} catch (Exception e) {
+					// Incorrect file type
 					return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 				}
 			} else {
+				// Unknown file type
 				return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 			}
 		}
 	}
-	
+
+	@Nullable
 	private Bitmap getImageThumbnail(String path) {
 		ContentResolver cr = context.getContentResolver();
 		Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID },
@@ -96,7 +110,8 @@ public class FileDirInfo extends ItemInfo {
 		ca.close();
 		return null;
 	}
-	
+
+	@Nullable
 	private Bitmap getVideoThumbnail(String path) {
 		ContentResolver cr = context.getContentResolver();
 		Cursor ca = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID },
@@ -119,7 +134,7 @@ public class FileDirInfo extends ItemInfo {
 	}
 
 	public String getFilePath() {
-		return currentFile.getAbsolutePath();
+		return currentFile.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
 	}
 
 	public String getFileName() {
@@ -130,6 +145,7 @@ public class FileDirInfo extends ItemInfo {
 		return getMimeType(currentFile.getAbsolutePath());
 	}
 
+	@Nullable
 	public static String getMimeType(String url) {
 		String type = null;
 		String extension = getFileExtensionFromUrl(url);
@@ -138,7 +154,7 @@ public class FileDirInfo extends ItemInfo {
 		}
 		return type;
 	}
-	
+
 	private static String getFileExtensionFromUrl(String url) {
 		if (!TextUtils.isEmpty(url)) {
 			int filenamePos = url.lastIndexOf('/');

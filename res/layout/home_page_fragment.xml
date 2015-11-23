@@ -1,157 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/home_page_content_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
-    <android.support.v4.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="@dimen/fragment_vertical_padding"
-            android:paddingTop="@dimen/fragment_vertical_padding" >
+            android:background="#BF000000"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/fragment_horizontal_padding" >
+
+            <ImageView
+                android:id="@+id/iconView"
+                android:layout_width="@dimen/item_image_height_width"
+                android:layout_height="@dimen/item_image_height_width"
+                android:src="@android:drawable/sym_def_app_icon" />
+
+            <TextView
+                android:id="@+id/network_conn_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:text="連線正常"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
             <LinearLayout
-                android:id="@+id/transmitSatusTitle"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
+                android:layout_height="match_parent"
                 android:orientation="vertical" >
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <HorizontalScrollView
+                    android:id="@+id/mount_point_scrollview"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="@dimen/fragment_horizontal_margin"
-                    android:layout_marginRight="@dimen/fragment_horizontal_margin"
-                    android:text="@string/home_page_transmit_status_title"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
+                    android:background="?attr/colorAccent"
+                    android:scrollbars="none" >
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/fragment_horizontal_margin"
-                    android:layout_marginRight="@dimen/fragment_horizontal_margin"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingBottom="5dp"
-                    android:paddingTop="5dp" >
-
-                    <ImageView
-                        android:id="@+id/iconView"
-                        android:layout_width="@dimen/item_image_height_width"
-                        android:layout_height="@dimen/item_image_height_width"
-                        android:src="@android:drawable/sym_def_app_icon" />
-
-                    <TextView
-                        android:id="@+id/textViewTitle"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginStart="5dp"
-                        android:text="連線正常, 連線中斷, 資料傳輸中, 嘗試連線中, 連線速度緩慢"
-                        android:textColor="@android:color/black" />
+                        android:orientation="horizontal" >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:drawableTop="@android:drawable/sym_def_app_icon"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/fragment_vertical_padding"
+                            android:paddingLeft="@dimen/fragment_horizontal_padding"
+                            android:paddingRight="@dimen/fragment_horizontal_padding"
+                            android:paddingTop="@dimen/fragment_vertical_padding"
+                            android:text="@string/nav_default_mountpoint"
+                            android:textColor="@android:color/white" />
+                    </LinearLayout>
+                </HorizontalScrollView>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="@dimen/fragment_vertical_padding" >
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginLeft="@dimen/fragment_horizontal_margin"
+                        android:layout_marginRight="@dimen/fragment_horizontal_margin"
+                        android:text="@string/home_page_space_usage_title"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <include
+                        android:id="@+id/cloud_storage"
+                        layout="@layout/home_page_usage_item" />
+
+                    <View style="@style/Divider" />
+
+                    <include
+                        android:id="@+id/local_storage"
+                        layout="@layout/home_page_usage_item" />
+
+                    <View style="@style/Divider" />
+
+                    <include
+                        android:id="@+id/pinned_storage"
+                        layout="@layout/home_page_usage_item" />
+
+                    <View style="@style/Divider" />
+
+                    <include
+                        android:id="@+id/to_be_upload_data"
+                        layout="@layout/home_page_usage_item" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/networkTrafficTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginLeft="@dimen/fragment_horizontal_margin"
+                        android:layout_marginRight="@dimen/fragment_horizontal_margin"
+                        android:text="@string/home_page_network_traffic_title"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <include
+                        android:id="@+id/network_xfer_today"
+                        layout="@layout/home_page_xfer_item" />
                 </LinearLayout>
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/mountPointTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/transmitSatusTitle"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="@dimen/fragment_horizontal_margin"
-                    android:layout_marginRight="@dimen/fragment_horizontal_margin"
-                    android:text="@string/home_page_mount_point_title"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <include layout="@layout/home_page_usage_item" />
-
-                <View style="@style/Divider" />
-
-                <include layout="@layout/home_page_usage_item" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/spaceUsageContent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/mountPointTitle"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="@dimen/fragment_horizontal_margin"
-                    android:layout_marginRight="@dimen/fragment_horizontal_margin"
-                    android:text="@string/home_page_space_usage_title"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <include
-                    android:id="@+id/cloud_storage"
-                    layout="@layout/home_page_usage_item" />
-
-                <View style="@style/Divider" />
-
-                <include
-                    android:id="@+id/local_storage"
-                    layout="@layout/home_page_usage_item" />
-
-                <View style="@style/Divider" />
-
-                <include
-                    android:id="@+id/pinned_storage"
-                    layout="@layout/home_page_usage_item" />
-
-                <View style="@style/Divider" />
-
-                <include
-                    android:id="@+id/to_be_upload_data"
-                    layout="@layout/home_page_usage_item" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/networkTrafficContext"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/spaceUsageContent"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/networkTrafficTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="@dimen/fragment_horizontal_margin"
-                    android:layout_marginRight="@dimen/fragment_horizontal_margin"
-                    android:text="@string/home_page_network_traffic_title"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <include
-                    android:id="@+id/the_amount_of_network_traffic_today"
-                    layout="@layout/home_page_usage_item" />
-            </LinearLayout>
-        </RelativeLayout>
-    </android.support.v4.widget.NestedScrollView>
+        </android.support.v4.widget.NestedScrollView>
+    </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_new_mount_point"
+        app:layout_behavior="com.hopebaytech.hcfsmgmt.main.ScrollAwareFABBehavior"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
+        android:layout_marginBottom="@dimen/fab_bottom_margin"
         android:layout_marginRight="@dimen/fab_right_margin"
-        android:layout_marginBottom="?attr/actionBarSize"
         app:layout_anchor="@id/home_page_content_view"
         app:layout_anchorGravity="bottom|right|end"
         android:src="@drawable/ic_add_white" />

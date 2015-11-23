@@ -14,15 +14,7 @@
             android:icon="@drawable/ic_cloud_upload_white"
             android:title="@string/nav_default_mountpoint"/>
         <item
-            android:id="@+id/nav_send_11"
-            android:icon="@drawable/ic_cloud_upload_white"
-            android:title="共用空間1"/>
-        <item
-            android:id="@+id/nav_send_12"
-            android:icon="@drawable/ic_cloud_upload_white"
-            android:title="共用空間2"/>
-        <item
-            android:id="@+id/nav_send_123"
+            android:id="@+id/nav_add_mountpoint"
             android:icon="@drawable/ic_add_circle_white"
             android:title="@string/nav_add_mountpoint"/>
     </group>

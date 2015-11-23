@@ -19,6 +19,8 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(AppDAO.CREATE_TABLE);
 		db.execSQL(DataTypeDAO.CREATE_TABLE);
+		db.execSQL(ServiceFileDirDAO.CREATE_TABLE);
+		db.execSQL(ServiceAppDAO.CREATE_TABLE);
 	}
 
 	@Override

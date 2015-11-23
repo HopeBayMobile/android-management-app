@@ -98,14 +98,10 @@ public class DataTypeDAO {
     	return result;
     }
     
-    public long getCount() {
+    public int getCount() {
     	openDbIfClosed();
-    	long result = 0;
-    	Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_NAME, null);
-    	if (cursor.moveToFirst()) {
-    		result = cursor.getLong(cursor.getColumnIndex(KEY_ID)); 
-    	}
-    	return result;
+    	Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+    	return cursor.getCount();
     }
 
 }

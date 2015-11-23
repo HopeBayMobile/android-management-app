@@ -1,5 +1,6 @@
-package com.hopebaytech.hcfsmgmt;
+package com.hopebaytech.hcfsmgmt.main;
 
+import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
 import com.hopebaytech.hcfsmgmt.fragment.HomepageFragment;
@@ -26,17 +27,12 @@ import android.view.MenuItem;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
 	private Toolbar toolbar;
-	// private HCFSMgmtReceiver networkStateChangedReceiver = new
-	// HCFSMgmtReceiver();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
 		initialize();
-
-		// Log.d(HCFSMgmtUtils.TAG, HCFSApiUtils.helloJNI("test"));
 	}
 
 	private void initialize() {
@@ -130,6 +126,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 			ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(), title);
 			// Toast.makeText(this, getString(R.string.nav_default_mountpoint),
 			// Toast.LENGTH_SHORT).show();
+		} else if (id == R.id.nav_add_mountpoint) {
+			Intent intent = new Intent(this, AddMountPointActivity.class);
+			startActivity(intent);
+			
+//			String title = getString(R.string.nav_default_mountpoint);
+//			toolbar.setTitle(title);
+//			ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(), title);
+			// Toast.makeText(this, getString(R.string.nav_default_mountpoint),
+			// Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_settings) {
 			String title = getString(R.string.nav_settings);
 			toolbar.setTitle(title);
@@ -153,17 +158,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// IntentFilter filter = new IntentFilter();
-		// filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-		// filter.addAction(Intent.ACTION_MEDIA_SCANNER_FINISHED);
-		// filter.addAction(Intent.ACTION_MEDIA_SCANNER_STARTED);
-		// filter.addAction(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-		// registerReceiver(networkStateChangedReceiver, filter);
 	}
 
 	@Override
 	protected void onPause() {
-		// unregisterReceiver(networkStateChangedReceiver);
 		super.onPause();
 	}
 

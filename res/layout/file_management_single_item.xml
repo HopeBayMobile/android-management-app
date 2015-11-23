@@ -17,8 +17,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-        android:gravity="center"
-        android:layout_toLeftOf="@+id/pinView" >
+        android:layout_toLeftOf="@+id/pinView"
+        android:gravity="center" >
 
         <ImageView
             android:id="@+id/iconView"
@@ -32,7 +32,8 @@
             android:id="@+id/itemName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"
             android:textColor="@android:color/black" />
     </LinearLayout>

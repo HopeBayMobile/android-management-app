@@ -22,7 +22,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.hopebaytech.hcfsmgmt.MainActivity"
+            android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,9 +30,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.hopebaytech.hcfsmgmt.AddMountPointActivity" />
+        <activity android:name="com.hopebaytech.hcfsmgmt.main.AddMountPointActivity" />
 
-        <receiver android:name="com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver" >
+        <receiver android:name="com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

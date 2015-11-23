@@ -1,15 +1,20 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import com.hopebaytech.hcfsmgmt.AddMountPointActivity;
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.main.AddMountPointActivity;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.text.Html;
-import android.text.Spanned;
+import android.support.v4.content.ContextCompat;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,59 +26,87 @@ import android.widget.TextView;
 
 public class HomepageFragment extends Fragment {
 
-	@SuppressWarnings("deprecation")
+	private NetworkBroadcastReceiver networkStatusRecevier;
+	private HCFSStatInfo statInfo;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		networkStatusRecevier = new NetworkBroadcastReceiver();
+		statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+	}
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.home_page_fragment, container, false);
+		return view;
+	}
 
-		LinearLayout cloud_storage = (LinearLayout) view.findViewById(R.id.cloud_storage);
-		TextView cloud_storage_title = (TextView) cloud_storage.findViewById(R.id.textViewTitle);
-		TextView cloud_storage_usage = (TextView) cloud_storage.findViewById(R.id.textViewUsage);
-		ImageView cloud_storage_imageview = (ImageView) cloud_storage.findViewById(R.id.iconView);
-		cloud_storage_title.setText(getString(R.string.home_page_cloud_storage));
-		cloud_storage_usage.setText("10.4 / 11.7GB");
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
 
-		LinearLayout local_storage = (LinearLayout) view.findViewById(R.id.local_storage);
-		TextView local_storage_title = (TextView) local_storage.findViewById(R.id.textViewTitle);
-		TextView local_storage_usage = (TextView) local_storage.findViewById(R.id.textViewUsage);
-		local_storage_title.setText(getString(R.string.home_page_local_storage));
-		local_storage_usage.setText("8.2 / 29.9GB");
+		View view = getView();
+		
+		LinearLayout cloudStorage = (LinearLayout) view.findViewById(R.id.cloud_storage);
+		TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
+		TextView cloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
+		ImageView cloudStorageImageview = (ImageView) cloudStorage.findViewById(R.id.iconView);
+		ProgressBar cloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
+		cloudStorageTitle.setText(getString(R.string.home_page_cloud_storage));
+		cloudStorageUsage.setText(statInfo.getCloudUsed() + " / " + statInfo.getCloudTotal());
+		cloudStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
+		cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
 
-		LinearLayout pinned_storage = (LinearLayout) view.findViewById(R.id.pinned_storage);
-		TextView pinned_storage_title = (TextView) pinned_storage.findViewById(R.id.textViewTitle);
-		TextView pinned_storage_usage = (TextView) pinned_storage.findViewById(R.id.textViewUsage);
-		pinned_storage_title.setText(getString(R.string.home_page_pinned_storage));
-		pinned_storage_usage.setText("10.4 / 11.7GB");
+		LinearLayout localStorage = (LinearLayout) view.findViewById(R.id.local_storage);
+		TextView localStorageTitle = (TextView) localStorage.findViewById(R.id.textViewTitle);
+		TextView localStorageUsage = (TextView) localStorage.findViewById(R.id.textViewUsage);
+		ProgressBar localStorageProgressBar = (ProgressBar) localStorage.findViewById(R.id.progressBar);
+		localStorageTitle.setText(getString(R.string.home_page_local_storage));
+		localStorageUsage.setText(statInfo.getCacheUsed() + " / " + statInfo.getCloudTotal());
+		localStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
+		localStorageProgressBar.setProgress(statInfo.getCacheUsedPercentage());
 
-		LinearLayout to_be_upload_data = (LinearLayout) view.findViewById(R.id.to_be_upload_data);
-		TextView to_be_upload_data_title = (TextView) to_be_upload_data.findViewById(R.id.textViewTitle);
-		TextView to_be_upload_data_usage = (TextView) to_be_upload_data.findViewById(R.id.textViewUsage);
-		to_be_upload_data_title.setText(getString(R.string.home_page_to_be_upladed_data));
-		to_be_upload_data_usage.setText("10.4 / 11.7GB");
+		LinearLayout pinnedStorage = (LinearLayout) view.findViewById(R.id.pinned_storage);
+		TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
+		TextView pinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
+		ProgressBar pinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
+		pinnedStorageTitle.setText(getString(R.string.home_page_pinned_storage));
+		pinnedStorageUsage.setText(statInfo.getPinTotal() + " / " + statInfo.getPinMax());
+		pinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
+		pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
 
-		LinearLayout the_amount_of_network_traffic_today = (LinearLayout) view.findViewById(R.id.the_amount_of_network_traffic_today);
-		TextView the_amount_of_network_traffic_today_title = (TextView) the_amount_of_network_traffic_today.findViewById(R.id.textViewTitle);
-		TextView the_amount_of_network_traffic_today_usage = (TextView) the_amount_of_network_traffic_today.findViewById(R.id.textViewUsage);
-		ProgressBar progressBar = (ProgressBar) the_amount_of_network_traffic_today.findViewById(R.id.progressBar);
-		int holo_blue_light = getResources().getColor(android.R.color.holo_blue_light);
-		int holo_red_light = getResources().getColor(android.R.color.holo_red_light);
-		String str_holo_blue_bright = "#" + Integer.toHexString(holo_blue_light).substring(2);
-		String str_holo_red_light = "#" + Integer.toHexString(holo_red_light).substring(2);
-		Spanned textContent = Html.fromHtml(
-				"<font color=\"" + str_holo_blue_bright + "\">下載 125MB</font> / <font color=\"" + str_holo_red_light + "\">上傳 207MB</font>");
-		the_amount_of_network_traffic_today_title.setText(getString(R.string.home_page_the_amount_of_network_traffic_today));
-		the_amount_of_network_traffic_today_usage.setText(textContent);
-		progressBar.setProgress(40);
-		progressBar.setSecondaryProgress(100);
+		LinearLayout toBeUploadData = (LinearLayout) view.findViewById(R.id.to_be_upload_data);
+		TextView toBeUploadDataTitle = (TextView) toBeUploadData.findViewById(R.id.textViewTitle);
+		TextView toBeUploadDataUsage = (TextView) toBeUploadData.findViewById(R.id.textViewUsage);
+		ProgressBar toBeUploadDataUsageProgressBar = (ProgressBar) toBeUploadData.findViewById(R.id.progressBar);
+		toBeUploadDataTitle.setText(getString(R.string.home_page_to_be_upladed_data));
+		toBeUploadDataUsage.setText(statInfo.getCacheDirtyUsed() + " / " + statInfo.getCloudTotal());
+		toBeUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
+		toBeUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
+
+		LinearLayout network_xfer_today = (LinearLayout) view.findViewById(R.id.network_xfer_today);
+		TextView network_xfer_today_title = (TextView) network_xfer_today.findViewById(R.id.textViewTitle);
+		TextView network_xfer_up = (TextView) network_xfer_today.findViewById(R.id.xfer_up);
+		TextView network_xfer_down = (TextView) network_xfer_today.findViewById(R.id.xfer_down);
+		ProgressBar xferProgressBar = (ProgressBar) network_xfer_today.findViewById(R.id.progressBar);
+		String xferDownload = statInfo.getXferDownload();
+		String xferUpload = statInfo.getXferUpload();
+		network_xfer_today_title.setText(getString(R.string.home_page_the_amount_of_network_traffic_today));
+		network_xfer_up.setText(xferUpload);
+		network_xfer_down.setText(xferDownload);
+		xferProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.xfer_progressbar));
+		xferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
+		xferProgressBar.setSecondaryProgress(100);
 
 		FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.add_new_mount_point);
-		ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fab.getLayoutParams();
+		// ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fab.getLayoutParams();
 		TypedValue typedValue = new TypedValue();
 		getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, typedValue, true);
 		int baseBottom = getResources().getDimensionPixelSize(typedValue.resourceId);
-		int bottomMargin = (int) (baseBottom + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, getResources().getDisplayMetrics()));
-		int rightMargin = (int) getResources().getDimension(R.dimen.fab_right_margin);
-		params.setMargins(0, 0, rightMargin, bottomMargin);
+		// int bottomMargin = (int) (baseBottom + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, getResources().getDisplayMetrics()));
+		// int rightMargin = (int) getResources().getDimension(R.dimen.fab_right_margin);
+		// params.setMargins(0, 0, rightMargin, bottomMargin);
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -83,10 +116,41 @@ public class HomepageFragment extends Fragment {
 				// Snackbar.LENGTH_LONG).setAction("Action", null).show();
 			}
 		});
-		fab.setTranslationY(bottomMargin);
+		fab.setTranslationY(baseBottom + getResources().getDimension(R.dimen.fab_bottom_margin));
 		fab.animate().translationY(0).setDuration(100).setStartDelay(300);
 
-		return view;
+	}
+
+	public class NetworkBroadcastReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			final String action = intent.getAction();
+			if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+				ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+				NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
+				TextView networkConnStatus = (TextView) getActivity().findViewById(R.id.network_conn_status);
+				if (netInfo != null && netInfo.isConnected()) {
+					networkConnStatus.setText(getString(R.string.home_page_network_status_connected));
+				} else {
+					networkConnStatus.setText(getString(R.string.home_page_network_status_disconnected));
+				}
+			}
+		}
+
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+		getActivity().registerReceiver(networkStatusRecevier, filter);
+	}
+
+	@Override
+	public void onPause() {
+		getActivity().unregisterReceiver(networkStatusRecevier);
+		super.onPause();
 	}
 
 }

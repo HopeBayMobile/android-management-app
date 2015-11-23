@@ -13,9 +13,19 @@
     <string name="notify_network_connected">偵測網路連線已恢復。</string>
     <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線。</string>
     <string name="notify_upload_completed">本地端資料已上傳至雲端空間。</string>
-    
-    <string name="home_page_mount_point_title">雲端掛載空間</string>
-    <string name="home_page_transmit_status_title">連線/傳輸狀態</string>
+    <string name="notify_pin_app_failure">釘選應用程式失敗</string>
+    <string name="notify_pin_file_dir_failure">釘選檔案失敗</string>
+    <string name="notify_pin_image_failure">釘選圖片失敗</string>
+    <string name="notify_pin_video_failure">釘選視訊失敗</string>
+    <string name="notify_pin_audio_failure">釘選音樂失敗</string>
+    <string name="notify_unpin_app_failure">取消釘選應用程式失敗</string>
+    <string name="notify_unpin_file_dir_failure">取消釘選檔案失敗</string>
+    <string name="notify_unpin_image_failure">取消釘選圖片失敗</string>
+    <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
+    <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
+
+    <string name="home_page_network_status_connected">連線正常</string>
+    <string name="home_page_network_status_disconnected">連線中斷</string>
     <string name="home_page_space_usage_title">空間使用量</string>
     <string name="home_page_cloud_storage">雲端空間</string>
     <string name="home_page_local_storage">本地空間</string>
@@ -49,5 +59,13 @@
 
     <string name="file_management_menu_list">清單</string>
     <string name="file_management_menu_grid">圖示</string>
+    
+    <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
+    <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
+    <string name="hcfs_management_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>
+    <string name="hcfs_management_service_image_failed_to_unpin">圖片類型取消釘選失敗數量</string>
+    <string name="hcfs_management_service_video_failed_to_unpin">視訊類型取消釘選失敗數量</string>
+    <string name="hcfs_management_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
+    
     
 </resources>
