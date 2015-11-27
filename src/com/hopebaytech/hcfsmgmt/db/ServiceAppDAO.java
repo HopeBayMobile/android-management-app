@@ -15,6 +15,7 @@ public class ServiceAppDAO {
 	public static final String TABLE_NAME = "service_app";
 	public static final String KEY_ID = "_id";
 	public static final String APP_NAME_COLUMN = "app_name";
+	public static final String PACKAGE_NAME_COLUMN = "package_name";
     public static final String PIN_STATUS_COLUMN = "pin_status";
     public static final String DATA_DIR_COLUMN = "data_dir";
     public static final String SOURCE_DIR_COLUMN = "source_dir";
@@ -23,6 +24,7 @@ public class ServiceAppDAO {
     		"CREATE TABLE " + TABLE_NAME + " (" + 
     		KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
     		APP_NAME_COLUMN + " TEXT NOT NULL, " +
+    		PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
     		PIN_STATUS_COLUMN + " INTEGER NOT NULL, " + 
     		DATA_DIR_COLUMN + " TEXT NOT NULL, " +
     		SOURCE_DIR_COLUMN + " TEXT NOT NULL, " +
@@ -48,6 +50,7 @@ public class ServiceAppDAO {
     	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(APP_NAME_COLUMN, appInfo.getAppName());
+    	contentValues.put(PACKAGE_NAME_COLUMN, appInfo.getPackageName());
     	contentValues.put(PIN_STATUS_COLUMN, appInfo.isPinned());
     	contentValues.put(DATA_DIR_COLUMN, appInfo.getDataDir());
     	contentValues.put(SOURCE_DIR_COLUMN, appInfo.getSourceDir());
@@ -90,6 +93,7 @@ public class ServiceAppDAO {
     	openDbIfClosed();
     	ServiceAppInfo result = new ServiceAppInfo();
     	result.setAppName(cursor.getString(cursor.getColumnIndex(APP_NAME_COLUMN)));
+    	result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
     	result.setDataDir(cursor.getString(cursor.getColumnIndex(DATA_DIR_COLUMN)));
     	result.setSourceDir(cursor.getString(cursor.getColumnIndex(SOURCE_DIR_COLUMN)));
     	String externalDir = cursor.getString(cursor.getColumnIndex(EXTERNAL_DIR_COLUMN));

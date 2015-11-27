@@ -15,6 +15,7 @@ public class HCFSApiUtils {
 	public static native String setHCFSProperty(String key, String value);
 	public static native String getHCFSStat();
 	public static native String unpin(String unpinPath);
+	public static native String reboot();
 	
 	public static native String helloJNI(String str);
 	public static native String is_login();

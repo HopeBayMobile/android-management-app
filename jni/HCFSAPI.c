@@ -10,28 +10,29 @@ extern void HCFS_set_config(char **json_res, char *key, char *value);
 extern void HCFS_set_property(char **json_res, char *key, char *value);
 extern void HCFS_stat(char **json_res);
 extern void HCFS_unpin_path(char **json_res, char *unpin_path);
+extern void HCFS_reboot(char **json_res);
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
-//		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
-//	char *json_res;
-//	char *pathname = (*jEnv)->GetStringUTFChars(jEnv, jFilePath, 0);
-//	HCFS_file_status(&json_res, pathname);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	free(pathname);
-//	return result;
-//}
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
+		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
+	char *json_res;
+	char *pathname = (*jEnv)->GetStringUTFChars(jEnv, jFilePath, 0);
+	HCFS_file_status(&json_res, pathname);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free(json_res);
+	free(pathname);
+	return result;
+}
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSConfig(
-//		JNIEnv *jEnv, jobject jObject, jstring jKey) {
-//	char *json_res;
-//	char *key = (*jEnv)->GetStringUTFChars(jEnv, jKey, 0);
-//	HCFS_get_config(&json_res, key);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	free(key);
-//	return result;
-//}
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSConfig(
+		JNIEnv *jEnv, jobject jObject, jstring jKey) {
+	char *json_res;
+	char *key = (*jEnv)->GetStringUTFChars(jEnv, jKey, 0);
+	HCFS_get_config(&json_res, key);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free(json_res);
+	free(key);
+	return result;
+}
 
 //JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSProperty(
 //		JNIEnv *jEnv, jobject jObject, jstring jKey) {
@@ -66,16 +67,16 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_unpin
 	return result;
 }
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getPinStatus(
-//		JNIEnv *jEnv, jobject jObject, jstring jString) {
-//	char *json_res;
-//	char *pathname = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
-//	HCFS_pin_status(&json_res, pathname);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	free(pathname);
-//	return result;
-//}
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getPinStatus(
+		JNIEnv *jEnv, jobject jObject, jstring jString) {
+	char *json_res;
+	char *pathname = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
+	HCFS_pin_status(&json_res, pathname);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free(json_res);
+	free(pathname);
+	return result;
+}
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHCFSConfig(
 		JNIEnv *jEnv, jobject jObject, jstring jKey, jstring jValue) {
@@ -99,21 +100,30 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHC
 //	return result;
 //}
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSStat(
-//		JNIEnv *jEnv, jobject jObject, jstring jString) {
-//	char *json_res;
-//	HCFS_stat(&json_res);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	return result;
-//}
-
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_helloJNI(
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSStat(
 		JNIEnv *jEnv, jobject jObject, jstring jString) {
+	char *json_res;
+	HCFS_stat(&json_res);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free(json_res);
+	return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_reboot(
+		JNIEnv *jEnv, jobject jObject) {
+	char *json_res;
+	HCFS_reboot(&json_res);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free(json_res);
+	return result;
+}
+
+//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_helloJNI(
+//		JNIEnv *jEnv, jobject jObject, jstring jString) {
 //	const char *nativeString = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
 //	return (*jEnv)->NewStringUTF(jEnv, helloC(nativeString));
 //	return (*jEnv)->NewStringUTF(jEnv, nativeString);
-
+//
 //	char g_imei[32];
 //	char imei_start[PROP_VALUE_MAX];
 //	int ir = __system_property_get("ro.product.model", imei_start);
@@ -124,4 +134,4 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_hello
 //		strcpy(g_imei, imei_start);
 //	}
 //	return (*jEnv)->NewStringUTF(jEnv, g_imei);
-}
+//}

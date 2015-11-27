@@ -4,6 +4,7 @@ public class ServiceAppInfo {
 
 	private boolean isPinned;
 	private String appName;
+	private String packageName;
 	private String sourceDir;
 	private String dataDir;
 	private String externalDir;
@@ -46,6 +47,14 @@ public class ServiceAppInfo {
 
 	public void setExternalDir(String externalDir) {
 		this.externalDir = externalDir;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
 	}
 
 }

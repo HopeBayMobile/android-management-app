@@ -39,6 +39,7 @@ public class HCFSMgmtUtils {
 
 	public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
 	public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
+	public static final int REQUEST_CODE_GOOGLE_SIGN_IN = 102;
 
 	public static final String DATA_STATUS_CLOUD = "cloud";
 	public static final String DATA_STATUS_HYBRID = "hybrid";
@@ -60,6 +61,7 @@ public class HCFSMgmtUtils {
 	public static final String INTENT_KEY_PIN_APP_EXTERNAL_DIR = "intent_key_pin_app_external_dir";
 	public static final String INTENT_KEY_PIN_APP_PIN_STATUS = "intent_key_pin_app_pin_status";
 	public static final String INTENT_KEY_PIN_APP_NAME = "intent_key_pin_app_name";
+	public static final String INTENT_KEY_PIN_PACKAGE_NAME = "intent_key_pin_package_name";
 
 	public static final int INTERVAL_NOTIFY_UPLAOD_COMPLETED = 60; // minutes
 	public static final int INTERVAL_PIN_DATA_TYPE_FILE = 60; // minutes
@@ -67,7 +69,19 @@ public class HCFSMgmtUtils {
 	public static final boolean deafultPinnedStatus = false;
 
 	public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
-	public static final String REPLACE_FILE_PATH_NEW = "/storage/emulated/legacy/";
+	public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
+
+	public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
+	public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
+	public static final String HCFS_CONFIG_SWIFT_USER = "swift_user";
+	public static final String HCFS_CONFIG_SWIFT_PASS = "swift_pass";
+	public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
+	public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
+	public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
+	
+	public static final String GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
+	public static final String GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
+	public static final String GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
 
 	public static void activate() {
 
@@ -288,48 +302,49 @@ public class HCFSMgmtUtils {
 		NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
 		bigStyle.bigText(notify_message);
 
-		Notification notifcaition = new NotificationCompat.Builder(context)
-				.setWhen(System.currentTimeMillis())
-				 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-				 .setTicker(notify_title)
-				 .setContentTitle(notify_title)
-				 .setContentText(notify_message)
-				 .setAutoCancel(true)
-				 .setStyle(bigStyle)
-				 .setDefaults(defaults)
-				 .build();
+		Notification notifcaition = new NotificationCompat.Builder(context).setWhen(System.currentTimeMillis())
+				.setSmallIcon(android.R.drawable.sym_def_app_icon).setTicker(notify_title).setContentTitle(notify_title)
+				.setContentText(notify_message).setAutoCancel(true).setStyle(bigStyle).setDefaults(defaults).build();
 
 		NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 		notificationManagerCompat.notify(notify_id, notifcaition);
 	}
 
 	public static void startSyncToCloud() {
-//		HCFSApiUtils.setHCFSProperty("cloudsync", "on");
+		// HCFSApiUtils.setHCFSProperty("cloudsync", "on");
 	}
 
 	public static void stopSyncToCloud() {
-//		HCFSApiUtils.setHCFSProperty("cloudsync", "off");
+		// HCFSApiUtils.setHCFSProperty("cloudsync", "off");
 	}
 
 	@Nullable
 	public static HCFSStatInfo getHCFSStatInfo() {
 		HCFSStatInfo hcfsStatInfo = null;
 		try {
-//			String jsonResult = HCFSApiUtils.getHCFSStat();
-			String jsonResult = "{ \"data\": { \"cloud_total\": 107374182400, \"cloud_used\": 35433480192, \"cache_total\": 85899345920, \"cache_dirty\": 382730240, \"cache_clean\": 12884901888, \"pin_max\": 68719476736, \"pin_total\": 14431090114, \"xfer_up\": 104857600, \"xfer_down\": 31457280, \"cloud_conn\": true} }";
+			String jsonResult = HCFSApiUtils.getHCFSStat();
+			// String jsonResult = "{ \"data\": { \"cloud_total\": 107374182400, \"cloud_used\": 35433480192, \"cache_total\": 85899345920,
+			// \"cache_dirty\": 382730240, \"cache_clean\": 12884901888, \"pin_max\": 68719476736, \"pin_total\": 14431090114, \"xfer_up\": 104857600,
+			// \"xfer_down\": 31457280, \"cloud_conn\": true} }";
 			JSONObject jObject = new JSONObject(jsonResult);
 			JSONObject dataObj = jObject.getJSONObject("data");
-			hcfsStatInfo = new HCFSStatInfo();
-			hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_TOTAL));
-			hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
-			hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
-			hcfsStatInfo.setCacheDirtyUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_DIRTY));
-			hcfsStatInfo.setCacheCleanUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_CLEAN));
-			hcfsStatInfo.setPinTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_PIN_TOTAL));
-			hcfsStatInfo.setPinMax(dataObj.getLong(HCFSStatInfo.STAT_DATA_PIN_MAX));
-			hcfsStatInfo.setXferUpload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_UP));
-			hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
-			hcfsStatInfo.setCloudConn(dataObj.getBoolean(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
+			boolean isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "getHCFSStatInfo: " + jsonResult);
+				hcfsStatInfo = new HCFSStatInfo();
+				// hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_TOTAL));
+				hcfsStatInfo.setCloudTotal(107374182400L);
+				hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
+				hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
+				hcfsStatInfo.setCacheDirtyUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_DIRTY));
+				hcfsStatInfo.setPinTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_PIN_TOTAL));
+				hcfsStatInfo.setPinMax(dataObj.getLong(HCFSStatInfo.STAT_DATA_PIN_MAX));
+				hcfsStatInfo.setXferUpload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_UP));
+				hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
+				hcfsStatInfo.setCloudConn(dataObj.getBoolean(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "getHCFSStatInfo: " + jsonResult);
+			}
 		} catch (JSONException e) {
 			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
 		}
@@ -362,47 +377,114 @@ public class HCFSMgmtUtils {
 
 	public static boolean pinFileOrDirectory(String filePath) {
 		boolean isSuccess = deafultPinnedStatus;
-		// try {
-		// String jsonResult = HCFSApiUtils.pin(filePath);
-		// JSONObject jObject = new JSONObject(jsonResult);
-		// isSuccess = jObject.getBoolean("result");
-		// } catch (JSONException e) {
-		// Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-		// }
-
-		if (isSuccess) {
-			Log.i(HCFSMgmtUtils.TAG, "Pin " + filePath + ": " + isSuccess);
-		} else {
-			Log.e(HCFSMgmtUtils.TAG, "Pin " + filePath + ": " + isSuccess);
+		try {
+			String jsonResult = HCFSApiUtils.pin(filePath);
+			JSONObject jObject = new JSONObject(jsonResult);
+			isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "Pin " + filePath + ": " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "Pin " + filePath + ": " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
 		}
+
 		return isSuccess;
 	}
 
 	public static boolean unpinFileOrDirectory(String filePath) {
 		boolean isSuccess = deafultPinnedStatus;
-		// try {
-		// String jsonResult = HCFSApiUtils.unpin(filePath);
-		// JSONObject jObject = new JSONObject(jsonResult);
-		// } catch (JSONException e) {
-		// Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-		// }
-		if (isSuccess) {
-			Log.i(HCFSMgmtUtils.TAG, "Unpin " + filePath + ": " + isSuccess);
-		} else {
-			Log.e(HCFSMgmtUtils.TAG, "Unpin " + filePath + ": " + isSuccess);
+		try {
+			String jsonResult = HCFSApiUtils.unpin(filePath);
+			JSONObject jObject = new JSONObject(jsonResult);
+			isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "Unpin " + filePath + ": " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "Unpin " + filePath + ": " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
 		}
+
 		return isSuccess;
 	}
 
 	public static boolean isPathPinned(String pathName) {
-		boolean isSuccess = deafultPinnedStatus;
-		// try {
-		// String jsonResult = HCFSApiUtils.getPinStatus(pathName);
-		// JSONObject jObject = new JSONObject(jsonResult);
-		// ?
-		// } catch (JSONException e) {
-		// Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-		// }
+		boolean isPinned = deafultPinnedStatus;
+		try {
+			String jsonResult = HCFSApiUtils.getPinStatus(pathName);
+			JSONObject jObject = new JSONObject(jsonResult);
+			boolean isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "isPathPinned: " + jsonResult);
+				int code = jObject.getInt("code");
+				if (code == 1) {
+					isPinned = true;
+				} else {
+					isPinned = false;
+				}
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "pathName: " + pathName);
+				Log.e(HCFSMgmtUtils.TAG, "isPathPinned: " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		return isPinned;
+	}
+
+	public static String getHCFSConfig(String key) {
+		String resultStr = null;
+		try {
+			String jsonResult = HCFSApiUtils.getHCFSConfig(key);
+			JSONObject jObject = new JSONObject(jsonResult);
+			boolean isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				JSONObject dataObj = jObject.getJSONObject("data");
+				resultStr = dataObj.getString(key);
+				Log.i(HCFSMgmtUtils.TAG, "getHCFSConfig: " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "getHCFSConfig: " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		return resultStr;
+	}
+
+	public static boolean setHCFSConfig(String key, String value) {
+		boolean isSuccess = false;
+		try {
+			String jsonResult = HCFSApiUtils.setHCFSConfig(key, value);
+			JSONObject jObject = new JSONObject(jsonResult);
+			isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "setHCFSConfig: " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "setHCFSConfig: " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		return isSuccess;
+	}
+	
+	public static boolean reboot() {
+		boolean isSuccess = false;
+		try {
+			String jsonResult = HCFSApiUtils.reboot();
+			JSONObject jObject = new JSONObject(jsonResult);
+			isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "reboot: " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "reboot: " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
 		return isSuccess;
 	}
 

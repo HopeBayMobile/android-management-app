@@ -9,6 +9,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 public class AppInfo extends ItemInfo {
 
@@ -97,6 +98,7 @@ public class AppInfo extends ItemInfo {
 	
 	public String getPackageName() {
 		if (packageName == null) {
+			Log.i(HCFSMgmtUtils.TAG, "getPackageName - NULL" );
 			packageName = appInfo.packageName;
 		}
 		return packageName;

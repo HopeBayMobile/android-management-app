@@ -16,10 +16,15 @@
             android:defaultValue="true"
             android:key="pref_notify_upload_completed"
             android:title="通知上傳資料完成" />
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="pref_notify_lack_of_local_space"
-            android:title="通知本地暫存空間不足" />
+
+        <ListPreference
+            android:defaultValue="90"
+            android:dialogTitle="請選擇通知的比例"
+            android:entries="@array/pref_notify_local_storage_used_ratio_name"
+            android:entryValues="@array/pref_notify_local_storage_used_ratio_value"
+            android:key="pref_notify_local_storage_used_ratio"
+            android:summary="請選擇通知的比例"
+            android:title="通知本地空間使用率" />
     </PreferenceCategory>
 
 </PreferenceScreen>

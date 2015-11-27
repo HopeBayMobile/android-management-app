@@ -9,7 +9,6 @@ public class HCFSStatInfo {
 	public static final String STAT_DATA_CLOUD_USED = "cloud_used";
 	public static final String STAT_DATA_CACHE_TOTAL = "cache_total";
 	public static final String STAT_DATA_CACHE_DIRTY = "cache_dirty";
-	public static final String STAT_DATA_CACHE_CLEAN = "cache_clean";
 	public static final String STAT_DATA_PIN_TOTAL = "pin_total";
 	public static final String STAT_DATA_PIN_MAX = "pin_max";
 	public static final String STAT_DATA_XFER_UP = "xfer_up";
@@ -20,7 +19,7 @@ public class HCFSStatInfo {
 	private long cloudUsed; // bytes
 	private long cacheTotal; // bytes
 	private long cacheDirtyUsed; // bytes
-	private long cacheCleanUsed; // bytes
+	private long cacheUsed; // bytes
 	private long pinMax; // bytes
 	private long pinTotal; // bytes
 	private long xferUpload; // bytes
@@ -28,7 +27,7 @@ public class HCFSStatInfo {
 	private boolean cloudConn;
 
 	public String getCacheUsed() {
-		return convertByteToProperUnit(cacheDirtyUsed + cacheCleanUsed);
+		return convertByteToProperUnit(cacheUsed);
 	}
 
 	public String getCloudTotal() {
@@ -61,14 +60,6 @@ public class HCFSStatInfo {
 
 	public void setCacheDirtyUsed(long cacheDirtyUsed) {
 		this.cacheDirtyUsed = cacheDirtyUsed;
-	}
-
-	public String getCacheCleanUsed() {
-		return convertByteToProperUnit(cacheCleanUsed);
-	}
-
-	public void setCacheCleanUsed(long cacheCleanUsed) {
-		this.cacheCleanUsed = cacheCleanUsed;
 	}
 
 	public String getPinTotal() {
@@ -143,7 +134,7 @@ public class HCFSStatInfo {
 	}
 
 	public int getCacheUsedPercentage() {
-		return (int) ((float) (cacheDirtyUsed + cacheCleanUsed) / cloudTotal * 100);
+		return (int) ((float) cacheUsed / cloudTotal * 100);
 	}
 
 	public int getPinnedUsedPercentage() {

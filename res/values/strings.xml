@@ -47,7 +47,6 @@
         <item>@string/file_management_spinner_data_type</item>
         <item>@string/file_management_spinner_files</item>
     </string-array>
-    
     <string name="file_management_list_data_type_image">圖片</string>
     <string name="file_management_list_data_type_video">視訊</string>
     <string name="file_management_list_data_type_audio">音樂</string>
@@ -56,9 +55,11 @@
         <item>@string/file_management_list_data_type_video</item>
         <item>@string/file_management_list_data_type_audio</item>
     </string-array>
-
     <string name="file_management_menu_list">清單</string>
     <string name="file_management_menu_grid">圖示</string>
+    <string name="file_management_not_allowed_to_pin_image">圖片資料型態已釘選，無法取消釘選圖片檔案</string>
+    <string name="file_management_not_allowed_to_pin_video">視訊資料型態已釘選，無法取消釘選視訊檔案</string>
+    <string name="file_management_not_allowed_to_pin_audio">音樂資料型態已釘選，無法取消釘選音樂檔案</string>
     
     <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
     <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
@@ -67,5 +68,31 @@
     <string name="hcfs_management_service_video_failed_to_unpin">視訊類型取消釘選失敗數量</string>
     <string name="hcfs_management_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
     
+    <string name="settings_local_storage_used_ratio">空間使用率達  %s 時進行通知"</string>
+    <string-array name="pref_notify_local_storage_used_ratio_name">
+        <item>90%</item>
+        <item>80%</item>
+        <item>70%</item>
+        <item>60%</item>
+        <item>50%</item>
+    </string-array>
+    <string-array name="pref_notify_local_storage_used_ratio_value">
+        <item>90</item>
+        <item>80</item>
+        <item>70</item>
+        <item>60</item>
+        <item>50</item>
+    </string-array>
+    
+    <string name="activate_cloud_storage_username">帳號</string>
+    <string name="activate_cloud_storage_password">密碼</string>
+    <string name="activate_cloud_storage_activate">啟用</string>
+    <string name="activate_cloud_storage_forget_password"><u>忘記密碼</u></string>
+    <string name="activate_cloud_storage_or">或</string>
+    <string name="activate_cloud_storage_google_activate"><u>使用 Google 帳號啟用</u></string>
+    
+    <string name="activate_cloud_activate_transition">ActivateTransition</string>
+    
+    <string name="server_client_id">584185841160-g8ane8qnaqiust9d2nu4299edkq5lt9t.apps.googleusercontent.com</string>
     
 </resources>
