@@ -114,10 +114,11 @@ public class HCFSMgmtService extends Service {
 	}
 
 	private void notifyUploadCompleted() {
+		Log.d(HCFSMgmtUtils.TAG, "notifyUploadCompleted");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
 		if (notifyUploadCompletedPref) {
-			boolean isUploadCompleted = true; // need to call HCFS API for checking upload status
+			boolean isUploadCompleted = HCFSMgmtUtils.isDataUploadCompleted();
 			if (isUploadCompleted) {
 				int id_notify = HCFSMgmtUtils.NOTIFY_ID_UPLOAD_COMPLETED;
 				String notify_title = getString(R.string.app_name);
@@ -132,43 +133,22 @@ public class HCFSMgmtService extends Service {
 		boolean isPinned = info.isPinned();
 		if (isPinned) {
 			if (!HCFSMgmtUtils.pinApp(info)) {
-//				AppDAO appDAO = new AppDAO(this); 
-//				AppInfo appInfo = new AppInfo(this);
-//				appInfo.setPinned(!isPinned);
-//				appInfo.setPackageName(info.getPackageName());
-//				appDAO.update(appInfo);
-//				
-//				int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//				String notify_title = getString(R.string.app_name);
-//				String notify_message = getString(R.string.notify_pin_app_failure) + ": " + info.getAppName();
-//				HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
 				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_pin_app_failure));
 			}
 		} else {
 			if (!HCFSMgmtUtils.unpinApp(info)) {
-//				AppDAO appDAO = new AppDAO(this); 
-//				AppInfo appInfo = new AppInfo(this);
-//				appInfo.setPinned(!isPinned);
-//				appInfo.setPackageName(info.getPackageName());
-//				appDAO.update(appInfo);
-//				
-//				int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//				String notify_title = getString(R.string.app_name);
-//				String notify_message = getString(R.string.notify_unpin_app_failure) + ": " + info.getAppName();
-//				HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
-				
 				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_unpin_app_failure));
 			}
 		}
 	}
-	
+
 	private void handleAppFailureOfPinOrUnpin(boolean isPinned, ServiceAppInfo info, String notifyMsg) {
-		AppDAO appDAO = new AppDAO(this); 
+		AppDAO appDAO = new AppDAO(this);
 		AppInfo appInfo = new AppInfo(this);
 		appInfo.setPinned(!isPinned);
 		appInfo.setPackageName(info.getPackageName());
 		appDAO.update(appInfo);
-		
+
 		int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 		String notify_title = getString(R.string.app_name);
 		String notify_message = notifyMsg + ": " + info.getAppName();
@@ -177,7 +157,9 @@ public class HCFSMgmtService extends Service {
 
 	private void pinOrUnpinDataTypeFile() {
 		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinDataTypeFile");
+
 		String notify_title = getString(R.string.app_name);
+		ArrayList<String> notifyMessageList = new ArrayList<String>();
 		DataTypeDAO dataTypeDAO = new DataTypeDAO(this);
 		boolean isImagePinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_IMAGE);
 		ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(this);
@@ -188,9 +170,7 @@ public class HCFSMgmtService extends Service {
 					imgFailedToPinCount++;
 				}
 			}
-			int notify_id = HCFSMgmtUtils.NOTIFY_ID_IMAGE_PIN_UNPIN_FAILURE;
-			String notify_message = getString(R.string.hcfs_management_service_image_failed_to_pin) + ": " + imgFailedToPinCount;
-			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+			notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_pin) + ": " + imgFailedToPinCount);
 		} else {
 			int imgFailedToUnpinCount = 0;
 			for (String path : imagePaths) {
@@ -198,9 +178,7 @@ public class HCFSMgmtService extends Service {
 					imgFailedToUnpinCount++;
 				}
 			}
-			int notify_id = HCFSMgmtUtils.NOTIFY_ID_IMAGE_PIN_UNPIN_FAILURE;
-			String notify_message = getString(R.string.hcfs_management_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount;
-			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+			notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount);
 		}
 
 		boolean isVideoPinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_VIDEO);
@@ -212,9 +190,7 @@ public class HCFSMgmtService extends Service {
 					videoFailedToPinCount++;
 				}
 			}
-			int notify_id = HCFSMgmtUtils.NOTIFY_ID_VIDEO_PIN_UNPIN_FAILURE;
-			String notify_message = getString(R.string.hcfs_management_service_video_failed_to_pin) + ": " + videoFailedToPinCount;
-			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+			notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_pin) + ": " + videoFailedToPinCount);
 		} else {
 			int videoFailedToUnpinCount = 0;
 			for (String path : videoPaths) {
@@ -222,9 +198,7 @@ public class HCFSMgmtService extends Service {
 					videoFailedToUnpinCount++;
 				}
 			}
-			int notify_id = HCFSMgmtUtils.NOTIFY_ID_VIDEO_PIN_UNPIN_FAILURE;
-			String notify_message = getString(R.string.hcfs_management_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount;
-			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+			notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount);
 		}
 
 		boolean isAudioPinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_AUDIO);
@@ -236,9 +210,7 @@ public class HCFSMgmtService extends Service {
 					audioFailedToPinCount++;
 				}
 			}
-			int notify_id = HCFSMgmtUtils.NOTIFY_ID_AUDIO_PIN_UNPIN_FAILURE;
-			String notify_message = getString(R.string.hcfs_management_service_audio_failed_to_pin) + ": " + audioFailedToPinCount;
-			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+			notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_pin) + ": " + audioFailedToPinCount);
 		} else {
 			int audioFailedToUnpinCount = 0;
 			for (String path : audioPaths) {
@@ -246,10 +218,19 @@ public class HCFSMgmtService extends Service {
 					audioFailedToUnpinCount++;
 				}
 			}
-			int notify_id = HCFSMgmtUtils.NOTIFY_ID_AUDIO_PIN_UNPIN_FAILURE;
-			String notify_message = getString(R.string.hcfs_management_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount;
-			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+			notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount);
 		}
+
+		StringBuilder notify_message = new StringBuilder();
+		for (int i = 0; i < notifyMessageList.size(); i++) {
+			notify_message.append(notifyMessageList.get(i));
+			if (i < notifyMessageList.size() - 1) {
+				notify_message.append("\n");
+			}
+		}
+		int notify_id = HCFSMgmtUtils.NOTIFY_ID_PIN_UNPIN_FAILURE;
+		HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message.toString());
+
 	}
 
 	private void pinOrUnpinFileOrDrectory(ServiceFileDirInfo info) {

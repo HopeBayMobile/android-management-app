@@ -142,8 +142,6 @@ public class HomepageFragment extends Fragment {
 			public void onClick(View view) {
 				Intent intent = new Intent(getActivity(), AddMountPointActivity.class);
 				startActivity(intent);
-				// Snackbar.make(view, "snackbar",
-				// Snackbar.LENGTH_LONG).setAction("Action", null).show();
 			}
 		});
 		fab.setTranslationY(baseBottom + getResources().getDimension(R.dimen.fab_bottom_margin));

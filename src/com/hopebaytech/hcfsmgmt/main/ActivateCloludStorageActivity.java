@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,22 +31,61 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activate_cloud_storage_activity);
-
-		if (isActivated()) {
-			Intent intent = new Intent(ActivateCloludStorageActivity.this, MainActivity.class);
-			startActivity(intent);
-			finish();
-		} else {
-			initialize();
-		}
-
+		initialize();
 	}
 
-	private boolean isActivated() {
-		if (HCFSMgmtUtils.getHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT) != null)
-			return true;
-		return false;
-	}
+	// @Override
+	// protected void onStart() {
+	// super.onStart();
+	//
+	// showProgressDialog();
+	// mHandler.post(new Runnable() {
+	// @Override
+	// public void run() {
+	//
+	// if (isActivated()) {
+	// OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+	// if (opr.isDone()) {
+	// Log.w(HCFSMgmtUtils.TAG, "opr.isDone()");
+	// runOnUiThread(new Runnable() {
+	// public void run() {
+	// hideProgressDialog();
+	// }
+	// });
+	// GoogleSignInResult googleSignInResult = opr.get();
+	// handleSignInResult(googleSignInResult);
+	// } else {
+	// Log.w(HCFSMgmtUtils.TAG, "opr.isDone() - else");
+	// opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+	// @Override
+	// public void onResult(GoogleSignInResult googleSignInResult) {
+	// Log.w(HCFSMgmtUtils.TAG, "setResultCallback");
+	// runOnUiThread(new Runnable() {
+	// public void run() {
+	// hideProgressDialog();
+	// }
+	// });
+	// handleSignInResult(googleSignInResult);
+	// }
+	// });
+	// }
+	// } else {
+	// runOnUiThread(new Runnable() {
+	// public void run() {
+	// hideProgressDialog();
+	// }
+	// });
+	// }
+	// }
+	// });
+	//
+	// }
+
+	// private boolean isActivated() {
+	// if (HCFSMgmtUtils.getHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT) != null)
+	// return true;
+	// return false;
+	// }
 
 	private void initialize() {
 
@@ -61,25 +101,31 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 				// [END configure_signin]
 
 		// Build GoogleAPIClient with the Google Sign-In API and the above options.
-		mGoogleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-				.addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
+		mGoogleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this, this).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
 
 		Button activate = (Button) findViewById(R.id.activate);
 		activate.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "swift");
-				HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "foxconn");
-				HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "foxconn");
-				HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "foxconnfoxconnfoxconn");
-				HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "61.219.202.66:18080");
-				HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "foxconn_test");
-				HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "http");
-				HCFSMgmtUtils.reboot();
 
-				// Intent intent = new Intent(ActivateCloludStorageActivity.this, MainActivity.class);
-				// startActivity(intent);
-				// finish();
+				EditText username = (EditText) findViewById(R.id.username);
+				EditText password = (EditText) findViewById(R.id.password);
+//				if (username.getText().toString().equals("hopebay") && password.getText().toString().equals("54323013")) {
+					HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "swift");
+					HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "test");
+					HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "tester");
+					HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "testing");
+					HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "10.0.6.1:8080");
+					HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "rd_private_container");
+					HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "http");
+					HCFSMgmtUtils.reboot();
+//				} else {
+//					Snackbar.make(findViewById(android.R.id.content), "帳號密碼錯誤", Snackbar.LENGTH_SHORT).show();
+//				}
+
+				 Intent intent = new Intent(ActivateCloludStorageActivity.this, MainActivity.class);
+				 startActivity(intent);
+				 finish();
 			}
 		});
 
@@ -131,7 +177,6 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
-		// TODO Auto-generated method stub
 		// An unresolvable error has occurred and Google APIs (including Sign-In) will not
 		// be available.
 		Log.d(HCFSMgmtUtils.TAG, "onConnectionFailed:" + connectionResult);
@@ -176,7 +221,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 				// TODO(user): send token to server and validate server-side
 			} else {
 				// Show signed-out UI.
-				Log.e(HCFSMgmtUtils.TAG, "Failed");
+				Log.e(HCFSMgmtUtils.TAG, "Failed to sign in");
 			}
 			// [END get_id_token]
 		}

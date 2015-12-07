@@ -98,7 +98,6 @@ public class AppInfo extends ItemInfo {
 	
 	public String getPackageName() {
 		if (packageName == null) {
-			Log.i(HCFSMgmtUtils.TAG, "getPackageName - NULL" );
 			packageName = appInfo.packageName;
 		}
 		return packageName;

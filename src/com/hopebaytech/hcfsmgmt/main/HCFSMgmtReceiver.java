@@ -23,7 +23,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		final String action = intent.getAction();
-		Log.d(HCFSMgmtUtils.TAG, action);
+		Log.d(HCFSMgmtUtils.TAG, "action: " + action);
 		if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
 			detectNetworkStatusAndSyncToCloud(context);
 			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
@@ -34,6 +34,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 			detectNetworkStatusAndSyncToCloud(context);
 		} else if (action.equals(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION)) {
 			int operation = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, -1);
+			Log.d(HCFSMgmtUtils.TAG, "operation: " + operation);
 			Intent intentService = new Intent(context, HCFSMgmtService.class);
 			switch (operation) {
 			case HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED:

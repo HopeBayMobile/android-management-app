@@ -33,9 +33,7 @@ public class HCFSMgmtUtils {
 
 	public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
 	public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
-	public static final int NOTIFY_ID_IMAGE_PIN_UNPIN_FAILURE = 2;
-	public static final int NOTIFY_ID_VIDEO_PIN_UNPIN_FAILURE = 3;
-	public static final int NOTIFY_ID_AUDIO_PIN_UNPIN_FAILURE = 4;
+	public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 2;
 
 	public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
 	public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
@@ -78,7 +76,7 @@ public class HCFSMgmtUtils {
 	public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
 	public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
 	public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
-	
+
 	public static final String GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
 	public static final String GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
 	public static final String GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
@@ -306,6 +304,18 @@ public class HCFSMgmtUtils {
 				.setSmallIcon(android.R.drawable.sym_def_app_icon).setTicker(notify_title).setContentTitle(notify_title)
 				.setContentText(notify_message).setAutoCancel(true).setStyle(bigStyle).setDefaults(defaults).build();
 
+//		Notification notifcaition = new Notification.Builder(context)
+//			     .setContentTitle(notify_title)
+//			     .setContentText(notify_message)
+//			     .setSmallIcon(android.R.drawable.sym_def_app_icon)
+//			     .setStyle(new Notification.InboxStyle()
+//			         .addLine("11111111")
+//			         .addLine("22222222")
+//			         )
+//			     .build();
+			 
+		
+		
 		NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 		notificationManagerCompat.notify(notify_id, notifcaition);
 	}
@@ -436,7 +446,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static String getHCFSConfig(String key) {
-		String resultStr = null;
+		String resultStr = "";
 		try {
 			String jsonResult = HCFSApiUtils.getHCFSConfig(key);
 			JSONObject jObject = new JSONObject(jsonResult);
@@ -470,7 +480,7 @@ public class HCFSMgmtUtils {
 		}
 		return isSuccess;
 	}
-	
+
 	public static boolean reboot() {
 		boolean isSuccess = false;
 		try {
@@ -486,6 +496,14 @@ public class HCFSMgmtUtils {
 			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
 		}
 		return isSuccess;
+	}
+	
+	public static boolean isDataUploadCompleted() {
+		HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
+		if (hcfsStatInfo != null) {
+			return hcfsStatInfo.getCacheDirtyUsed().equals("0B") ? true : false;
+		}
+		return false;
 	}
 
 }
