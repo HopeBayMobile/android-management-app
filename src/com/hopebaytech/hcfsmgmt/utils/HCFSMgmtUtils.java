@@ -18,6 +18,7 @@ import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
 import android.os.SystemClock;
 import android.provider.MediaStore;
@@ -29,7 +30,7 @@ import android.util.Log;
 public class HCFSMgmtUtils {
 
 	public static final String TAG = "HopeBay";
-	public static final String HCFS_MANAGEMENT_ALARM_INTENT_ACTION = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
+	public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
 	public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
 	public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
@@ -52,6 +53,9 @@ public class HCFSMgmtUtils {
 	public static final int INTENT_VALUE_PIN_DATA_TYPE_FILE = 201;
 	public static final int INTENT_VALUE_PIN_APP = 202;
 	public static final int INTENT_VALUE_PIN_FILE_DIRECTORY = 203;
+	public static final int INTENT_VALUE_LAUNCH_UID_DATABASE = 204;
+	public static final int INTENT_VALUE_ADD_UID_TO_DATABASE = 205;
+	public static final int INTENT_VALUE_REMOVE_UID_FROM_DATABASE = 206;
 	public static final String INTENT_KEY_PIN_FILE_DIR_FILEAPTH = "intent_key_pin_firdir_filepath";
 	public static final String INTENT_KEY_PIN_FILE_DIR_PIN_STATUS = "intent_key_pin_firdir_pin_status";
 	public static final String INTENT_KEY_PIN_APP_DATA_DIR = "intent_key_pin_app_data_dir";
@@ -60,6 +64,9 @@ public class HCFSMgmtUtils {
 	public static final String INTENT_KEY_PIN_APP_PIN_STATUS = "intent_key_pin_app_pin_status";
 	public static final String INTENT_KEY_PIN_APP_NAME = "intent_key_pin_app_name";
 	public static final String INTENT_KEY_PIN_PACKAGE_NAME = "intent_key_pin_package_name";
+	public static final String INTENT_KEY_SERVER_CLIENT_ID = "server_client_id";
+	public static final String INTENT_KEY_UID = "intent_key_uid";
+	public static final String INTENT_KEY_PACKAGE_NAME = "intent_key_package_name";
 
 	public static final int INTERVAL_NOTIFY_UPLAOD_COMPLETED = 60; // minutes
 	public static final int INTERVAL_PIN_DATA_TYPE_FILE = 60; // minutes
@@ -80,6 +87,8 @@ public class HCFSMgmtUtils {
 	public static final String GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
 	public static final String GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
 	public static final String GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
+	
+	public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
 	public static void activate() {
 
@@ -93,7 +102,7 @@ public class HCFSMgmtUtils {
 	public static void startPinDataTypeFileAlarm(Context context) {
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION);
+		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
 		boolean isAlarmExist = (PendingIntent.getBroadcast(context, HCFSMgmtUtils.REQUEST_CODE_PIN_DATA_TYPE_FILE, intent,
 				PendingIntent.FLAG_NO_CREATE) != null);
@@ -123,7 +132,7 @@ public class HCFSMgmtUtils {
 	public static void stopPinDataTypeFileAlarm(Context context) {
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION);
+		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
 		boolean isAlarmExist = (PendingIntent.getBroadcast(context, HCFSMgmtUtils.REQUEST_CODE_PIN_DATA_TYPE_FILE, intent,
 				PendingIntent.FLAG_NO_CREATE) != null);
@@ -147,7 +156,7 @@ public class HCFSMgmtUtils {
 		Log.d(HCFSMgmtUtils.TAG, "HCFSMgmtUtils: startNotifyUploadCompletedAlarm");
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION);
+		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
 		PendingIntent pi = PendingIntent.getBroadcast(context, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
 				PendingIntent.FLAG_UPDATE_CURRENT);
@@ -161,7 +170,7 @@ public class HCFSMgmtUtils {
 		Log.d(HCFSMgmtUtils.TAG, "HCFSMgmtUtils: stopNotifyUploadCompletedAlarm");
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION);
+		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
 		PendingIntent pi = PendingIntent.getBroadcast(context, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
 				PendingIntent.FLAG_CANCEL_CURRENT);
@@ -210,7 +219,9 @@ public class HCFSMgmtUtils {
 			final int index = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
 			for (int i = 0; i < cursor.getCount(); i++) {
 				String path = cursor.getString(index);
-				videoPaths.add(path);
+				if (path.startsWith(EXTERNAL_STORAGE_SDCARD0_PREFIX)) {
+					videoPaths.add(path);
+				}
 				cursor.moveToNext();
 			}
 			cursor.close();
@@ -242,7 +253,9 @@ public class HCFSMgmtUtils {
 			int index = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
 			for (int i = 0; i < cursor.getCount(); i++) {
 				String path = cursor.getString(index);
-				audioPaths.add(path);
+				if (path.startsWith(EXTERNAL_STORAGE_SDCARD0_PREFIX)) {
+					audioPaths.add(path);
+				}
 				cursor.moveToNext();
 			}
 			cursor.close();
@@ -274,7 +287,9 @@ public class HCFSMgmtUtils {
 			final int index = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
 			for (int i = 0; i < cursor.getCount(); i++) {
 				String path = cursor.getString(index);
-				imagePaths.add(path);
+				if (path.startsWith(EXTERNAL_STORAGE_SDCARD0_PREFIX)) {
+					imagePaths.add(path);
+				}
 				cursor.moveToNext();
 			}
 			cursor.close();
@@ -303,18 +318,6 @@ public class HCFSMgmtUtils {
 		Notification notifcaition = new NotificationCompat.Builder(context).setWhen(System.currentTimeMillis())
 				.setSmallIcon(android.R.drawable.sym_def_app_icon).setTicker(notify_title).setContentTitle(notify_title)
 				.setContentText(notify_message).setAutoCancel(true).setStyle(bigStyle).setDefaults(defaults).build();
-
-//		Notification notifcaition = new Notification.Builder(context)
-//			     .setContentTitle(notify_title)
-//			     .setContentText(notify_message)
-//			     .setSmallIcon(android.R.drawable.sym_def_app_icon)
-//			     .setStyle(new Notification.InboxStyle()
-//			         .addLine("11111111")
-//			         .addLine("22222222")
-//			         )
-//			     .build();
-			 
-		
 		
 		NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 		notificationManagerCompat.notify(notify_id, notifcaition);
@@ -346,6 +349,7 @@ public class HCFSMgmtUtils {
 				hcfsStatInfo.setCloudTotal(107374182400L);
 				hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
 				hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
+				hcfsStatInfo.setCacheUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_USED));
 				hcfsStatInfo.setCacheDirtyUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_DIRTY));
 				hcfsStatInfo.setPinTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_PIN_TOTAL));
 				hcfsStatInfo.setPinMax(dataObj.getLong(HCFSStatInfo.STAT_DATA_PIN_MAX));
@@ -504,6 +508,10 @@ public class HCFSMgmtUtils {
 			return hcfsStatInfo.getCacheDirtyUsed().equals("0B") ? true : false;
 		}
 		return false;
+	}
+	
+	public static boolean isSystemPackage(ApplicationInfo packageInfo) {
+		return ((packageInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true : false;
 	}
 
 }

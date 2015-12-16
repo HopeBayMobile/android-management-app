@@ -46,10 +46,21 @@
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" />
 
-        <receiver android:name="com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver" >
+        <receiver
+            android:name="com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver"
+            android:enabled="true"
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+
+                <data android:scheme="package" />
             </intent-filter>
         </receiver>
 

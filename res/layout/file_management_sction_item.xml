@@ -21,15 +21,29 @@
             android:paddingBottom="10dp" >
 
             <TextView
+                android:id="@+id/storage_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="內部儲存空間"
+                tools:text="@string/file_management_internal_storatge_name"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/internal_storage_space_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="大小 3.9 GB" />
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_management_section_item_internal_storage_space" />
+
+                <TextView
+                    android:id="@+id/local_storage_space"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="@string/file_management_section_item_calculating" />
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -37,24 +51,49 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" >
 
-            <TextView
+            <LinearLayout
+                android:id="@+id/total_storage_space_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="總空間 11.7 GB" />
+                android:orientation="horizontal" >
 
-            <TextView
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_management_section_item_total_storage_space" />
+
+                <TextView
+                    android:id="@+id/total_storage_space"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="@string/file_management_section_item_calculating" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/available_storage_space_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="可用空間 1.3 GB" />
+                android:orientation="horizontal" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/file_management_section_item_available_storage_space" />
+
+                <TextView
+                    android:id="@+id/available_storage_space"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="@string/file_management_section_item_calculating" />
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-    <ImageView
+    <com.hopebaytech.hcfsmgmt.customview.CircleDisplay
         android:id="@+id/iconView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:src="@android:drawable/sym_def_app_icon" />
+        android:layout_centerVertical="true" />
 
 </RelativeLayout>

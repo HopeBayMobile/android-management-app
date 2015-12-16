@@ -23,18 +23,47 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		final String action = intent.getAction();
-		Log.d(HCFSMgmtUtils.TAG, "action: " + action);
+		Log.d(HCFSMgmtUtils.TAG, "HCFSMgmtReceiver action: " + action);
 		if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+			// Detect network status and determine whether sync data to cloud 
 			detectNetworkStatusAndSyncToCloud(context);
+			
+			// Start a notification alarm for completed data upload
 			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
 			if (notifyUploadCompletedPref) {
 				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(context);
 			}
+			
+			// Start an alarm for periodic pin/unpin data type file 
+			if (HCFSMgmtUtils.deafultPinnedStatus) {
+				HCFSMgmtUtils.startPinDataTypeFileAlarm(context);
+			}
+			
+			// Create uid database if it not exists or update it
+			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE);
+			context.startService(intentService);
 		} else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 			detectNetworkStatusAndSyncToCloud(context);
-		} else if (action.equals(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION)) {
+		} else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
+			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+			String packageName = intent.getData().getSchemeSpecificPart();
+			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE);
+			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
+			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
+			context.startService(intentService); 
+		} else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
+			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+			String packageName = intent.getData().getSchemeSpecificPart();
+			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE);
+			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
+			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
+			context.startService(intentService);
+		} else if (action.equals(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM)) {
 			int operation = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, -1);
-			Log.d(HCFSMgmtUtils.TAG, "operation: " + operation);
+			Log.d(HCFSMgmtUtils.TAG, "HCFSMgmtReceiver operation: " + operation);
 			Intent intentService = new Intent(context, HCFSMgmtService.class);
 			switch (operation) {
 			case HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED:
@@ -52,7 +81,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 	}
 
 	private void startSyncToCloud(Context context, String logMsg) {
-		
 		Editor editor = sharedPreferences.edit();
 		boolean is_first_network_connected_received = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED,
 				true);
@@ -90,16 +118,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 		boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY, false);
 		if (notifyConnFailedRecoveryPref) {
 			HCFSMgmtUtils.notifyEvent(context, notify_id, notify_title, notify_content);
-//			NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-//			NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-//
-//			int defaults = 0;
-//			defaults |= Notification.DEFAULT_VIBRATE;
-//			builder.setWhen(System.currentTimeMillis()).setSmallIcon(R.drawable.ic_launcher).setContentTitle(notify_title)
-//					.setContentText(notify_content).setAutoCancel(true).setDefaults(defaults);
-//
-//			Notification notification = builder.build();
-//			notificationManager.notify(id_notify, notification);
 		}
 	}
 

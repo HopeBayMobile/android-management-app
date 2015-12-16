@@ -1,6 +1,6 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import java.util.Locale;
+import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 public class HCFSStatInfo {
 
@@ -9,12 +9,13 @@ public class HCFSStatInfo {
 	public static final String STAT_DATA_CLOUD_USED = "cloud_used";
 	public static final String STAT_DATA_CACHE_TOTAL = "cache_total";
 	public static final String STAT_DATA_CACHE_DIRTY = "cache_dirty";
+	public static final String STAT_DATA_CACHE_USED = "cache_used";
 	public static final String STAT_DATA_PIN_TOTAL = "pin_total";
 	public static final String STAT_DATA_PIN_MAX = "pin_max";
 	public static final String STAT_DATA_XFER_UP = "xfer_up";
 	public static final String STAT_DATA_XFER_DOWN = "xfer_down";
 	public static final String STAT_DATA_CLOUD_CONN = "cloud_conn";
-	
+
 	private long cloudTotal; // bytes
 	private long cloudUsed; // bytes
 	private long cacheTotal; // bytes
@@ -27,11 +28,15 @@ public class HCFSStatInfo {
 	private boolean cloudConn;
 
 	public String getCacheUsed() {
-		return convertByteToProperUnit(cacheUsed);
+		return UnitConverter.convertByteToProperUnit(cacheUsed);
+	}
+
+	public void setCacheUsed(long cacheUsed) {
+		this.cacheUsed = cacheUsed;
 	}
 
 	public String getCloudTotal() {
-		return convertByteToProperUnit(cloudTotal);
+		return UnitConverter.convertByteToProperUnit(cloudTotal);
 	}
 
 	public void setCloudTotal(long cloudTotal) {
@@ -39,7 +44,7 @@ public class HCFSStatInfo {
 	}
 
 	public String getCloudUsed() {
-		return convertByteToProperUnit(cloudUsed);
+		return UnitConverter.convertByteToProperUnit(cloudUsed);
 	}
 
 	public void setCloudUsed(long cloudUsed) {
@@ -47,7 +52,7 @@ public class HCFSStatInfo {
 	}
 
 	public String getCacheTotal() {
-		return convertByteToProperUnit(cacheTotal);
+		return UnitConverter.convertByteToProperUnit(cacheTotal);
 	}
 
 	public void setCacheTotal(long cacheTotal) {
@@ -55,7 +60,7 @@ public class HCFSStatInfo {
 	}
 
 	public String getCacheDirtyUsed() {
-		return convertByteToProperUnit(cacheDirtyUsed);
+		return UnitConverter.convertByteToProperUnit(cacheDirtyUsed);
 	}
 
 	public void setCacheDirtyUsed(long cacheDirtyUsed) {
@@ -63,7 +68,7 @@ public class HCFSStatInfo {
 	}
 
 	public String getPinTotal() {
-		return convertByteToProperUnit(pinTotal);
+		return UnitConverter.convertByteToProperUnit(pinTotal);
 	}
 
 	public void setPinTotal(long pinTotal) {
@@ -71,7 +76,7 @@ public class HCFSStatInfo {
 	}
 
 	public String getPinMax() {
-		return convertByteToProperUnit(pinMax);
+		return UnitConverter.convertByteToProperUnit(pinMax);
 	}
 
 	public void setPinMax(long pinMax) {
@@ -79,11 +84,11 @@ public class HCFSStatInfo {
 	}
 
 	public String getXferDownload() {
-		return convertByteToProperUnit(xferDownload);
+		return UnitConverter.convertByteToProperUnit(xferDownload);
 	}
 
 	public String getXferUpload() {
-		return convertByteToProperUnit(xferUpload);
+		return UnitConverter.convertByteToProperUnit(xferUpload);
 	}
 
 	public void setXferUpload(long xferUpload) {
@@ -91,7 +96,7 @@ public class HCFSStatInfo {
 	}
 
 	public String getBwDownload() {
-		return convertByteToProperUnit(xferDownload);
+		return UnitConverter.convertByteToProperUnit(xferDownload);
 	}
 
 	public void setXferDownload(long xferDownload) {
@@ -106,28 +111,26 @@ public class HCFSStatInfo {
 		this.cloudConn = cloudConn;
 	}
 
-	private String convertByteToProperUnit(long amount) {
-		float result = amount;
-		String[] unit = new String[] {
-			"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"
-		};
-		int unitIndex = 0;
-		while (true) {
-			float tmp = result / 1000f;
-			if ((long) tmp > 0) {
-				result = tmp;
-				unitIndex++;
-			} else {
-				break;
-			}
-		}
-		
-		if (result == (long) result) {
-			return String.format(Locale.getDefault(), "%d" + unit[unitIndex], (long) result);
-		} else {
-			return String.format(Locale.getDefault(), "%.1f" + unit[unitIndex], result);
-		}
-	}
+//	private String convertByteToProperUnit(long amount) {
+//		float result = amount;
+//		String[] unit = new String[] { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
+//		int unitIndex = 0;
+//		while (true) {
+//			float tmp = result / 1000f;
+//			if ((long) tmp > 0) {
+//				result = tmp;
+//				unitIndex++;
+//			} else {
+//				break;
+//			}
+//		}
+//
+//		if (result == (long) result) {
+//			return String.format(Locale.getDefault(), "%d" + unit[unitIndex], (long) result);
+//		} else {
+//			return String.format(Locale.getDefault(), "%.1f" + unit[unitIndex], result);
+//		}
+//	}
 
 	public int getCloudUsedPercentage() {
 		return (int) ((float) cloudUsed / cloudTotal * 100);

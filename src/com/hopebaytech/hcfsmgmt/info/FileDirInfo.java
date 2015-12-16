@@ -32,9 +32,11 @@ public class FileDirInfo extends ItemInfo {
 	public static final String MIME_SUBTYPE_OGG = "ogg";
 	public static final String MIME_SUBTYPE_PNG = "png";
 	private File currentFile;
+	private Context context;
 
 	public FileDirInfo(Context context) {
 		super(context);
+		this.context = context;
 	}
 
 	public Object getIconImage() {
@@ -43,8 +45,8 @@ public class FileDirInfo extends ItemInfo {
 		} else {
 			String filePath = currentFile.getAbsolutePath();
 			String mimeType = getMimeType();
+			Log.d(HCFSMgmtUtils.TAG, currentFile.getName() + ": " + mimeType);
 			if (mimeType != null) {
-				Log.d(HCFSMgmtUtils.TAG, "mimeType: " + mimeType);
 				int width, height;
 				width = height = (int) context.getResources().getDimension(R.dimen.item_image_height_width);
 				try {

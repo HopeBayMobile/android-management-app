@@ -8,9 +8,11 @@ public class DataTypeInfo extends ItemInfo {
 
 	private String dataType;
 	private int icon_drawable_res_id;
+	private Context context;
 	
 	public DataTypeInfo(Context context) {
 		super(context);
+		this.context = context;
 	}
 	
 	public Drawable getIconImage() {

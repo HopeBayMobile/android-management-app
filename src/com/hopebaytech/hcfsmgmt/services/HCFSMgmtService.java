@@ -10,15 +10,19 @@ import com.hopebaytech.hcfsmgmt.db.AppDAO;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceAppDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -28,14 +32,15 @@ public class HCFSMgmtService extends Service {
 	private ExecutorService cacheExecutor;
 	private ServiceFileDirDAO serviceFileDirDAO;
 	private ServiceAppDAO serviceAppDAO;
+	private UidDAO uidDAO;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
 		cacheExecutor = Executors.newCachedThreadPool();
 		serviceFileDirDAO = new ServiceFileDirDAO(this);
 		serviceAppDAO = new ServiceAppDAO(this);
+		uidDAO = new UidDAO(this);
 	}
 
 	@Override
@@ -75,8 +80,39 @@ public class HCFSMgmtService extends Service {
 						serviceFileDirInfo.setPinned(
 								intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_PIN_STATUS, HCFSMgmtUtils.deafultPinnedStatus));
 						serviceFileDirDAO.insert(serviceFileDirInfo);
-						pinOrUnpinFileOrDrectory(serviceFileDirInfo);
+						pinOrUnpinFileOrDirectory(serviceFileDirInfo);
 						serviceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
+						break;
+					case HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE:
+						Log.d(HCFSMgmtUtils.TAG, "Launch UID database");
+						uidDAO.deleteAll();
+						PackageManager pm = getPackageManager();
+						List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+						for (ApplicationInfo packageInfo : packages) {
+							if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
+								int uid = packageInfo.uid;
+								String packageName = packageInfo.packageName;
+								uidDAO.insert(new UidInfo(uid, packageName));
+							};
+						}
+						break;
+					case HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE:
+						int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
+						String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
+						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_ADDED (uid): " + uid);
+						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_ADDED (packageName): " + packageName);
+						if (uidDAO.get(packageName) == null) {
+							uidDAO.insert(new UidInfo(uid, packageName));
+						}
+						break;
+					case HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE:
+						uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
+						packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
+						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_REMOVED (uid): " + uid);
+						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_REMOVED (packageName): " + packageName);
+						if (uidDAO.get(packageName) != null) {
+							uidDAO.delete(packageName);
+						}
 						break;
 					default:
 						break;
@@ -84,13 +120,16 @@ public class HCFSMgmtService extends Service {
 				}
 			});
 		} else {
+			/* Service is restarted and then execute the uncompleted pin/unpin operation 
+			 * when user manually close app and removes it from background. 
+			 */
 			cacheExecutor.execute(new Runnable() {
 				@Override
 				public void run() {
 					if (serviceFileDirDAO.getCount() > 0) {
 						List<ServiceFileDirInfo> infoList = serviceFileDirDAO.getAll();
 						for (final ServiceFileDirInfo info : infoList) {
-							pinOrUnpinFileOrDrectory(info);
+							pinOrUnpinFileOrDirectory(info);
 							serviceFileDirDAO.delete(info.getFilePath());
 						}
 					}
@@ -112,7 +151,7 @@ public class HCFSMgmtService extends Service {
 		return super.onStartCommand(intent, flags, startId);
 		// return START_REDELIVER_INTENT;
 	}
-
+	
 	private void notifyUploadCompleted() {
 		Log.d(HCFSMgmtUtils.TAG, "notifyUploadCompleted");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -133,16 +172,17 @@ public class HCFSMgmtService extends Service {
 		boolean isPinned = info.isPinned();
 		if (isPinned) {
 			if (!HCFSMgmtUtils.pinApp(info)) {
-				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_pin_app_failure));
+//				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_pin_app_failure)); TODO
 			}
 		} else {
 			if (!HCFSMgmtUtils.unpinApp(info)) {
-				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_unpin_app_failure));
+//				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_unpin_app_failure)); TODO
 			}
 		}
 	}
 
 	private void handleAppFailureOfPinOrUnpin(boolean isPinned, ServiceAppInfo info, String notifyMsg) {
+		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinFailure: " + info.getAppName());
 		AppDAO appDAO = new AppDAO(this);
 		AppInfo appInfo = new AppInfo(this);
 		appInfo.setPinned(!isPinned);
@@ -233,7 +273,7 @@ public class HCFSMgmtService extends Service {
 
 	}
 
-	private void pinOrUnpinFileOrDrectory(ServiceFileDirInfo info) {
+	private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
 		String filePath = info.getFilePath();
 		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinFileOrDrectory: " + filePath);
 		boolean isPinned = info.isPinned();

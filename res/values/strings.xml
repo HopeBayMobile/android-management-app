@@ -6,6 +6,7 @@
     <string name="nav_drawer_close">Close navigation drawer</string>
     <string name="nav_homepage">首頁</string>
     <string name="nav_default_mountpoint">系統</string>
+    <string name="nav_sdcard1">SD卡</string>
     <string name="nav_add_mountpoint">新增雲端空間</string>
     <string name="nav_settings">設定</string>
     <string name="nav_about">關於</string>
@@ -24,6 +25,8 @@
     <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
     <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
 
+    <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
+    
     <string name="home_page_network_status_connected">連線正常</string>
     <string name="home_page_network_status_disconnected">連線中斷</string>
     <string name="home_page_space_usage_title">空間使用量</string>
@@ -60,6 +63,14 @@
     <string name="file_management_not_allowed_to_pin_image">圖片資料型態已釘選，無法取消釘選圖片檔案</string>
     <string name="file_management_not_allowed_to_pin_video">視訊資料型態已釘選，無法取消釘選視訊檔案</string>
     <string name="file_management_not_allowed_to_pin_audio">音樂資料型態已釘選，無法取消釘選音樂檔案</string>
+    <string name="file_management_popup_menu_pin">釘選</string>
+    <string name="file_management_popup_menu_unpin">取消釘選</string>
+    <string name="file_management_internal_storatge_name">內部儲存空間</string>
+    <string name="file_management_sdcard1_storatge_name">SD卡儲存空間</string>
+    <string name="file_management_section_item_calculating">計算中&#8230;</string>
+    <string name="file_management_section_item_total_storage_space">總空間:&#160;</string>
+    <string name="file_management_section_item_available_storage_space">可用空間:&#160;</string>
+    <string name="file_management_section_item_internal_storage_space">本地空間:&#160;</string>
     
     <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
     <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>

@@ -25,7 +25,6 @@
             android:layout_width="@dimen/item_image_height_width"
             android:layout_height="@dimen/item_image_height_width"
             android:paddingRight="@dimen/item_image_horizontal_padding"
-            android:scaleType="centerInside"
             android:src="@android:drawable/sym_def_app_icon" />
 
         <TextView

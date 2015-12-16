@@ -9,7 +9,6 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 public class AppInfo extends ItemInfo {
 
@@ -19,9 +18,11 @@ public class AppInfo extends ItemInfo {
 	private String packageName;
 	private String[] sharedLibraryFiles;
 	private int appSize;
+	private Context context;
 
 	public AppInfo(Context context) {
 		super(context);
+		this.context = context;
 	}
 
 	public int getUid() {

@@ -1,34 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/gridItemLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
     android:paddingBottom="@dimen/fragment_vertical_padding"
     android:paddingLeft="@dimen/fragment_horizontal_padding"
     android:paddingRight="@dimen/fragment_horizontal_padding"
     android:paddingTop="@dimen/fragment_vertical_padding" >
 
-    <ImageView
-        android:id="@+id/gridImage"
-        android:layout_width="@dimen/item_image_height_width"
-        android:layout_height="@dimen/item_image_height_width"
-        android:scaleType="centerInside"
-        android:src="@android:drawable/sym_def_app_icon" />
-
-    <TextView
-        android:id="@+id/gridText"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:gravity="center"
-        android:maxLines="2"
-        android:text="GridItem"
-        android:textColor="@android:color/black" >
-    </TextView>
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical" >
 
-</LinearLayout>
+        <ImageView
+            android:id="@+id/gridImage"
+            android:layout_width="@dimen/item_image_height_width"
+            android:layout_height="@dimen/item_image_height_width"
+            android:src="@android:drawable/sym_def_app_icon" />
+
+        <TextView
+            android:id="@+id/gridText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="2"
+            android:textColor="@android:color/black" >
+        </TextView>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/pinImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/pinned" />
+
+</RelativeLayout>

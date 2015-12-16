@@ -1,6 +1,9 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -16,7 +19,10 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,6 +39,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
@@ -41,8 +48,12 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+	private final int NAV_MENU_SDCARD1_ID = (int) (Math.random() * Integer.MAX_VALUE);
+	private SDCardBroadcastReceiver sdCardReceiver;
 	private Toolbar toolbar;
 	private Handler mHandler;
+	private NavigationView mNavigationView;
+	private String sdcard1_path;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,12 +64,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 	private void initialize() {
 
+		// Initialize default value set in xml/settings_preferences.xml file
+		PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false);
+
 		HandlerThread handlerThread = new HandlerThread(MainActivity.class.getSimpleName());
 		handlerThread.start();
 		mHandler = new Handler(handlerThread.getLooper());
-
-		// Initialize default value set in xml/settings_preferences.xml file
-		PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false);
+		
+		sdCardReceiver = new SDCardBroadcastReceiver();
+		
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+		filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+		filter.addDataScheme("file");
+		registerReceiver(sdCardReceiver, filter);
 
 		toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -68,23 +87,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		drawer.setDrawerListener(toggle);
 		toggle.syncState();
 
-		final NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-		navigationView.setNavigationItemSelectedListener(this);
+		mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+		mNavigationView.setNavigationItemSelectedListener(this);
 		if (getIntent().getExtras() != null) {
-			navigationView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+			mNavigationView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
 				@Override
 				public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-					navigationView.removeOnLayoutChangeListener(this);
+					mNavigationView.removeOnLayoutChangeListener(this);
 
-					TextView displayName = (TextView) navigationView.findViewById(R.id.display_name);
+					TextView displayName = (TextView) mNavigationView.findViewById(R.id.display_name);
 					displayName.setText(getIntent().getStringExtra(HCFSMgmtUtils.GOOGLE_SIGN_IN_DISPLAY_NAME));
 
-					TextView email = (TextView) navigationView.findViewById(R.id.email);
+					TextView email = (TextView) mNavigationView.findViewById(R.id.email);
 					email.setText(getIntent().getStringExtra(HCFSMgmtUtils.GOOGLE_SIGN_IN_EMAIL));
 
 					final Uri photoUri = (Uri) getIntent().getParcelableExtra(HCFSMgmtUtils.GOOGLE_SIGN_IN_PHOTO_URI);
 					if (photoUri != null) {
-						final ImageView photo = (ImageView) navigationView.findViewById(R.id.photo);
+						final ImageView photo = (ImageView) mNavigationView.findViewById(R.id.photo);
 						mHandler.post(new Runnable() {
 							@Override
 							public void run() {
@@ -114,14 +133,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				}
 			});
 		}
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					BufferedReader br = new BufferedReader(new FileReader(new File("/proc/mounts")));
+					try {
+						String line;
+						while ((line = br.readLine()) != null) {
+							if (line.contains("sdcard1") && line.contains("fuse")) {
+								sdcard1_path = line.split("\\s")[1];
+								runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										Menu menu = mNavigationView.getMenu();
+										for (int i = 0; i < menu.size(); i++) {
+											if (menu.getItem(i).getTitle().equals(getString(R.string.nav_default_mountpoint))) {
+												MenuItem menuItem = menu.add(R.id.group_mountpoint, NAV_MENU_SDCARD1_ID, i + 1,
+														getString(R.string.nav_sdcard1));
+												menuItem.setIcon(R.drawable.ic_sd_storage_black);
+												break;
+											}
+										}
+									}
+								});
+								break;
+							}
+						}
+					} finally {
+						br.close();
+					}
+				} catch (Exception e) {
+					Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+				}
+			}
+		});
 
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
-		ft.replace(R.id.fragment_container, new HomepageFragment());
+		ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
 		ft.commit();
 
 		Intent intent = new Intent(this, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.HCFS_MANAGEMENT_ALARM_INTENT_ACTION);
+		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
 		boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
 				PendingIntent.FLAG_NO_CREATE) != null;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -148,61 +202,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		}
 	}
 
-	// @Override
-	// public boolean onCreateOptionsMenu(Menu menu) {
-	// // Inflate the menu; this adds items to the action bar if it is present.
-	// getMenuInflater().inflate(R.menu.main, menu);
-	// return true;
-	// }
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-
-		// noinspection SimplifiableIfStatement
-		if (id == R.id.action_settings) {
-			return true;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}
-
 	@Override
 	public boolean onNavigationItemSelected(MenuItem item) {
 		// Handle navigation view item clicks here.
-
 		int id = item.getItemId();
-
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		if (id == R.id.nav_homepage) {
 			ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
-			// Toast.makeText(this, getString(R.string.nav_homepage),
-			// Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_default_mountpoint) {
-			ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(), FileManagementFragment.TAG);
-			// Toast.makeText(this, getString(R.string.nav_default_mountpoint),
-			// Toast.LENGTH_SHORT).show();
+			boolean isSDCard1 = false;
+			ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1), FileManagementFragment.TAG);
 		} else if (id == R.id.nav_add_mountpoint) {
 			Intent intent = new Intent(this, AddMountPointActivity.class);
 			startActivity(intent);
-
-			// String title = getString(R.string.nav_default_mountpoint);
-			// toolbar.setTitle(title);
-			// ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(), title);
-			// Toast.makeText(this, getString(R.string.nav_default_mountpoint),
-			// Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_settings) {
 			ft.replace(R.id.fragment_container, SettingsFragment.newInstance(), SettingsFragment.TAG);
-			// Toast.makeText(this, getString(R.string.nav_settings),
-			// Toast.LENGTH_SHORT).show();
 		} else if (id == R.id.nav_about) {
 			ft.replace(R.id.fragment_container, AboutFragment.newInstance(), AboutFragment.TAG);
-			// Toast.makeText(this, getString(R.string.nav_about),
-			// Toast.LENGTH_SHORT).show();
+		} else if (id == NAV_MENU_SDCARD1_ID) {
+			boolean isSDCard1 = true;
+			ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1, sdcard1_path), FileManagementFragment.TAG);
 		}
 		ft.commit();
 
@@ -212,28 +232,82 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-
-	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+//			Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
+//			if (fragment != null && fragment.isVisible()) {
+//				if (fragment instanceof FileManagementFragment) {
+//					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
+//					if (fileManagementFragment.onBackPressed()) 
+//						return true;
+//				} 
+////				else if (fragment instanceof InternalFileMgmtFragment) {
+////					InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
+////					if (internalFileMgmtFragment.onBackPressed()) 
+////						return true;
+////				}
+//			}
+//		}
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 			Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
 			if (fragment != null && fragment.isVisible()) {
 				if (fragment instanceof FileManagementFragment) {
 					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
-					if (fileManagementFragment.onBackPressed())
+					if (fileManagementFragment.onBackPressed()) 
 						return true;
-				}
+				} 
+//				else if (fragment instanceof InternalFileMgmtFragment) {
+//					InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
+//					if (internalFileMgmtFragment.onBackPressed()) 
+//						return true;
+//				}
 			}
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+
+	public class SDCardBroadcastReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			final String action = intent.getAction();
+			Log.d(HCFSMgmtUtils.TAG, "SDCARD action: " + action);                
+			sdcard1_path = intent.getData().getSchemeSpecificPart().replace("///", "/");
+			if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						Menu menu = mNavigationView.getMenu();
+						MenuItem menuItem = menu.add(R.id.group_mountpoint, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
+						menuItem.setIcon(R.drawable.ic_sd_storage_black);
+					}
+				});
+			} else if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						Menu menu = mNavigationView.getMenu();
+						menu.removeItem(NAV_MENU_SDCARD1_ID);
+					}
+				});
+			}
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		unregisterReceiver(sdCardReceiver);
+		super.onDestroy();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		/**
+         * Must override this function and comment out "super.onSaveInstanceState(outState)"
+         * in order not to save fragment state. For issue that getActivity() will get null
+         * when backing to app from background (long time). In this situation, fragment
+         * is already detached from activity, so that getActivity() cannot get instance.
+         */
+//		super.onSaveInstanceState(outState);
 	}
 
 }

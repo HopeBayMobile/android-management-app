@@ -1,5 +1,13 @@
 package com.hopebaytech.hcfsmgmt.main;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+
+import org.json.JSONObject;
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -21,8 +29,9 @@ import android.util.Log;
 
 public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-	private GoogleApiClient mGoogleApiClient;
 	private Handler mHandler;
+//	private final String authUrl = "https://terafonnreg.hopebaytech.com/register/auth";
+	private final String authUrl = "https://terafonnreg.hopebaytech.com/api/register/auth";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -32,19 +41,6 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 		HandlerThread handlerThread = new HandlerThread(LoadingActivity.class.getSimpleName());
 		handlerThread.start();
 		mHandler = new Handler(handlerThread.getLooper());
-
-		// [START configure_signin]
-		// Request only the user's ID token, which can be used to identify the
-		// user securely to your backend. This will contain the user's basic
-		// profile (name, profile picture URL, etc) so you should not need to
-		// make an additional call to personalize your application.
-		GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-				.requestIdToken(getString(R.string.server_client_id)).requestEmail().build();
-				// [END configure_signin]
-
-		// Build GoogleAPIClient with the Google Sign-In API and the above options.
-		mGoogleApiClient = new GoogleApiClient.Builder(this).enableAutoManage(this, this).addApi(Auth.GOOGLE_SIGN_IN_API, gso).build();
-
 	}
 
 	@Override
@@ -54,24 +50,87 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				Log.d(HCFSMgmtUtils.TAG, "onStart");
+				final String[] server_client_id = new String[1];
+				final GoogleApiClient[] mGoogleApiClient = new GoogleApiClient[1];
+				try {
+					URL url = new URL(authUrl);
+					HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
+					conn.setDoInput(true);
+					int responseCode = conn.getResponseCode();
+					if (responseCode == HttpsURLConnection.HTTP_OK) {
+						BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+						StringBuilder sb = new StringBuilder();
+						String line;
+						while ((line = bufferedReader.readLine()) != null) {
+							sb.append(line);
+						}
+
+						String jsonResponse = sb.toString();
+						Log.i(HCFSMgmtUtils.TAG, "content: " + jsonResponse);
+						if (!jsonResponse.isEmpty()) {
+							JSONObject jObj = new JSONObject(jsonResponse);
+							JSONObject dataObj = jObj.getJSONObject("data");
+							JSONObject authObj = dataObj.getJSONObject("google-oauth2");
+							server_client_id[0] = authObj.getString("client_id");
+							Log.i(HCFSMgmtUtils.TAG, "server_client_id: " + server_client_id[0]);
+
+							runOnUiThread(new Runnable() {
+								public void run() {
+									// Request only the user's ID token, which can be used to identify the
+									// user securely to your backend. This will contain the user's basic
+									// profile (name, profile picture URL, etc) so you should not need to
+									// make an additional call to personalize your application.
+									GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+											.requestIdToken(server_client_id[0]).requestEmail().build();
+
+									// Build GoogleAPIClient with the Google Sign-In API and the above options.
+									mGoogleApiClient[0] = new GoogleApiClient.Builder(LoadingActivity.this)
+											.enableAutoManage(LoadingActivity.this, LoadingActivity.this).addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+											.build();
+
+									synchronized (LoadingActivity.this) {
+										Log.d(HCFSMgmtUtils.TAG, "notify");
+										LoadingActivity.this.notify();
+									}
+								}
+							});
+							bufferedReader.close();
+
+							synchronized (LoadingActivity.this) {
+								Log.d(HCFSMgmtUtils.TAG, "wait");
+								LoadingActivity.this.wait();
+							}
+						}
+					}
+					conn.disconnect();
+				} catch (Exception e) {
+					Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+				}
+
 				if (isActivated()) {
 					Log.d(HCFSMgmtUtils.TAG, "Activated");
-					OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-					if (opr.isDone()) {
-						GoogleSignInResult googleSignInResult = opr.get();
-						handleSignInResult(googleSignInResult);
+					if (mGoogleApiClient[0] != null) {
+						OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient[0]);
+						if (opr.isDone()) {
+							GoogleSignInResult googleSignInResult = opr.get();
+							handleSignInResult(googleSignInResult);
+						} else {
+							opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+								@Override
+								public void onResult(GoogleSignInResult googleSignInResult) {
+									handleSignInResult(googleSignInResult);
+								}
+							});
+						}
 					} else {
-						opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-							@Override
-							public void onResult(GoogleSignInResult googleSignInResult) {
-								handleSignInResult(googleSignInResult);
-							}
-						});
+						Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
+						startActivity(intent);
+						finish();
 					}
 				} else {
 					Log.d(HCFSMgmtUtils.TAG, "NOT Activated");
 					Intent intent = new Intent(LoadingActivity.this, ActivateCloludStorageActivity.class);
+					intent.putExtra(HCFSMgmtUtils.INTENT_KEY_SERVER_CLIENT_ID, server_client_id[0]);
 					startActivity(intent);
 					finish();
 				}
@@ -106,7 +165,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		// An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
-		Log.d(HCFSMgmtUtils.TAG, "onConnectionFailed:" + connectionResult);
+		Log.d(HCFSMgmtUtils.TAG, "onConnectionFailed: " + connectionResult);
 		Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
 		startActivity(intent);
 		finish();

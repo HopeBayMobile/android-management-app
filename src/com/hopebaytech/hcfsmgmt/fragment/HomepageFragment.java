@@ -71,7 +71,8 @@ public class HomepageFragment extends Fragment {
 			public void onClick(View v) {
 				FragmentManager fm = getFragmentManager();
 				FragmentTransaction ft = fm.beginTransaction();
-				ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(), FileManagementFragment.TAG);
+				boolean isSDCard1 = false;
+				ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1), FileManagementFragment.TAG);
 				ft.commit();
 			}
 		});
