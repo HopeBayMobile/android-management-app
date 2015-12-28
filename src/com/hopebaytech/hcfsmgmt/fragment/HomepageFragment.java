@@ -17,12 +17,12 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.Toolbar;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -55,15 +55,7 @@ public class HomepageFragment extends Fragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-		toolbar.setTitle(getString(R.string.app_name));
-
 		View view = getView();
-
-		// StatFs statFs = new StatFs(Environment.getDataDirectory().getPath());
-		// Log.w(HCFSMgmtUtils.TAG, "Environment.getDataDirectory().getPath(): " + Environment.getDataDirectory().getPath());
-		// Log.w(HCFSMgmtUtils.TAG, "statFs.getTotalBytes(): " + statFs.getTotalBytes());
-		// Log.w(HCFSMgmtUtils.TAG, "statFs.getFreeBytes(): " + statFs.getFreeBytes());
 
 		TextView system = (TextView) view.findViewById(R.id.system);
 		system.setOnClickListener(new OnClickListener() {
@@ -81,37 +73,44 @@ public class HomepageFragment extends Fragment {
 			LinearLayout cloudStorage = (LinearLayout) view.findViewById(R.id.cloud_storage);
 			TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
 			TextView cloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
-//			ImageView cloudStorageImageview = (ImageView) cloudStorage.findViewById(R.id.iconView);
+			ImageView cloudStorageImageview = (ImageView) cloudStorage.findViewById(R.id.iconView);
 			ProgressBar cloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
 			cloudStorageTitle.setText(getString(R.string.home_page_cloud_storage));
 			cloudStorageUsage.setText(statInfo.getCloudUsed() + " / " + statInfo.getCloudTotal());
+			cloudStorageImageview.setImageResource(R.drawable.cloudspace_128x128);
 			cloudStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
 			cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
 
 			LinearLayout localStorage = (LinearLayout) view.findViewById(R.id.local_storage);
 			TextView localStorageTitle = (TextView) localStorage.findViewById(R.id.textViewTitle);
 			TextView localStorageUsage = (TextView) localStorage.findViewById(R.id.textViewUsage);
+			ImageView localStorageImageview = (ImageView) localStorage.findViewById(R.id.iconView);
 			ProgressBar localStorageProgressBar = (ProgressBar) localStorage.findViewById(R.id.progressBar);
 			localStorageTitle.setText(getString(R.string.home_page_local_storage));
 			localStorageUsage.setText(statInfo.getCacheUsed() + " / " + statInfo.getCloudTotal());
+			localStorageImageview.setImageResource(R.drawable.localspace_128x128);
 			localStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
 			localStorageProgressBar.setProgress(statInfo.getCacheUsedPercentage());
 
 			LinearLayout pinnedStorage = (LinearLayout) view.findViewById(R.id.pinned_storage);
 			TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
 			TextView pinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
+			ImageView pinnedStorageImageview = (ImageView) pinnedStorage.findViewById(R.id.iconView);
 			ProgressBar pinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
 			pinnedStorageTitle.setText(getString(R.string.home_page_pinned_storage));
 			pinnedStorageUsage.setText(statInfo.getPinTotal() + " / " + statInfo.getPinMax());
+			pinnedStorageImageview.setImageResource(R.drawable.pinspace_128x128);
 			pinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
 			pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
 
 			LinearLayout toBeUploadData = (LinearLayout) view.findViewById(R.id.to_be_upload_data);
 			TextView toBeUploadDataTitle = (TextView) toBeUploadData.findViewById(R.id.textViewTitle);
 			TextView toBeUploadDataUsage = (TextView) toBeUploadData.findViewById(R.id.textViewUsage);
+			ImageView toBeUploadDataUsageImageview = (ImageView) toBeUploadData.findViewById(R.id.iconView);
 			ProgressBar toBeUploadDataUsageProgressBar = (ProgressBar) toBeUploadData.findViewById(R.id.progressBar);
 			toBeUploadDataTitle.setText(getString(R.string.home_page_to_be_upladed_data));
 			toBeUploadDataUsage.setText(statInfo.getCacheDirtyUsed() + " / " + statInfo.getCloudTotal());
+			toBeUploadDataUsageImageview.setImageResource(R.drawable.uploading_128x128);
 			toBeUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
 			toBeUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
 
@@ -119,25 +118,28 @@ public class HomepageFragment extends Fragment {
 			TextView network_xfer_today_title = (TextView) network_xfer_today.findViewById(R.id.textViewTitle);
 			TextView network_xfer_up = (TextView) network_xfer_today.findViewById(R.id.xfer_up);
 			TextView network_xfer_down = (TextView) network_xfer_today.findViewById(R.id.xfer_down);
+			ImageView networkXferImageview = (ImageView) network_xfer_today.findViewById(R.id.iconView);
 			ProgressBar xferProgressBar = (ProgressBar) network_xfer_today.findViewById(R.id.progressBar);
 			String xferDownload = statInfo.getXferDownload();
 			String xferUpload = statInfo.getXferUpload();
 			network_xfer_today_title.setText(getString(R.string.home_page_the_amount_of_network_traffic_today));
 			network_xfer_up.setText(xferUpload);
 			network_xfer_down.setText(xferDownload);
+			networkXferImageview.setImageResource(R.drawable.load_128x128);
 			xferProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.xfer_progressbar));
-			xferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
-			xferProgressBar.setSecondaryProgress(100);
+			if (xferDownload.equals("0B") && xferUpload.equals("0B")) {
+				xferProgressBar.setProgress(0);
+				xferProgressBar.setSecondaryProgress(0);
+			} else {
+				xferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
+				xferProgressBar.setSecondaryProgress(100);
+			}
 		}
 
 		FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.add_new_mount_point);
-		// ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) fab.getLayoutParams();
 		TypedValue typedValue = new TypedValue();
 		getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, typedValue, true);
 		int baseBottom = getResources().getDimensionPixelSize(typedValue.resourceId);
-		// int bottomMargin = (int) (baseBottom + TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 15, getResources().getDisplayMetrics()));
-		// int rightMargin = (int) getResources().getDimension(R.dimen.fab_right_margin);
-		// params.setMargins(0, 0, rightMargin, bottomMargin);
 		fab.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {

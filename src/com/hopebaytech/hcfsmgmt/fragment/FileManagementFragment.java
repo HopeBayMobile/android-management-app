@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.customview.CircleDisplay;
-import com.hopebaytech.hcfsmgmt.db.AppDAO;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment.GridRecyclerViewAdapter.GridRecyclerViewHolder;
 import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment.LinearRecyclerViewAdapter.LinearRecyclerViewHolder;
@@ -55,7 +54,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.PopupMenu.OnMenuItemClickListener;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
@@ -83,7 +81,7 @@ public class FileManagementFragment extends Fragment {
 	private DividerItemDecoration mDividerItemDecoration;
 	private ArrayAdapter<String> mSpinnerAdapter;
 	private Handler mHandler;
-	private AppDAO mAppDAO;
+//	private AppDAO mAppDAO;
 	private DataTypeDAO mDataTypeDAO;
 	private ProgressBar mProgressCircle;
 	private Spinner mSpinner;
@@ -140,7 +138,7 @@ public class FileManagementFragment extends Fragment {
 
 		mDividerItemDecoration = new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL);
 
-		mAppDAO = new AppDAO(getActivity());
+//		mAppDAO = new AppDAO(getActivity()); TODO
 		mDataTypeDAO = new DataTypeDAO(getActivity());
 
 		String[] spinner_array = null;
@@ -168,13 +166,6 @@ public class FileManagementFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-
-		Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-		if (isSDCard1) {
-			toolbar.setTitle(getString(R.string.nav_sdcard1));
-		} else {
-			toolbar.setTitle(getString(R.string.nav_default_mountpoint));
-		}
 
 		View view = getView();
 		mProgressCircle = (ProgressBar) view.findViewById(R.id.progress_circle);
@@ -319,7 +310,7 @@ public class FileManagementFragment extends Fragment {
 				dbDataTypeInfo = mDataTypeDAO.get(HCFSMgmtUtils.DATA_TYPE_AUDIO);
 			}
 
-			boolean isDataTypePinned = HCFSMgmtUtils.deafultPinnedStatus;
+			boolean isDataTypePinned = HCFSMgmtUtils.DEFAULT_PINNED_STATUS;
 			if (dbDataTypeInfo != null) {
 				isDataTypePinned = dbDataTypeInfo.isPinned();
 				dataTypeInfo.setPinned(isDataTypePinned);
@@ -399,14 +390,16 @@ public class FileManagementFragment extends Fragment {
 				appInfo.setApplicationInfo(packageInfo);
 				appInfo.setItemName(packageInfo.loadLabel(pm).toString());
 
-				AppInfo dbAppInfo = mAppDAO.get(packageInfo.packageName);
-				if (dbAppInfo != null) {
-					boolean isAppPinned = dbAppInfo.isPinned();
-					appInfo.setPinned(isAppPinned);
-				} else {
-					appInfo.setPinned(HCFSMgmtUtils.deafultPinnedStatus);
-					mAppDAO.insert(appInfo);
-				}
+//				AppInfo dbAppInfo = mAppDAO.get(packageInfo.packageName); TODO
+//				if (dbAppInfo != null) {
+//					boolean isAppPinned = dbAppInfo.isPinned();
+//					appInfo.setPinned(isAppPinned);
+//				} else {
+//					appInfo.setPinned(HCFSMgmtUtils.deafultPinnedStatus);
+//					mAppDAO.insert(appInfo);
+//				}
+				boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo.getSourceDir(), appInfo.getDataDir());
+				appInfo.setPinned(isAppPinned);
 				items.add(appInfo);
 				// getPackageSize(pm, packageInfo);
 			}
@@ -484,18 +477,9 @@ public class FileManagementFragment extends Fragment {
 		public void onBindViewHolder(final GridRecyclerViewHolder holder, int position) {
 			final ItemInfo item = items.get(position);
 			holder.setItemInfo(item);
-			if (isSDCard1) {
-				holder.pinImageView.setVisibility(View.GONE);
-			} else {
-				Log.w(HCFSMgmtUtils.TAG, "onBindViewHolder: " + item.isPinned());
-				if (item.isPinned()) {
-					holder.pinImageView.setVisibility(View.VISIBLE);
-				} else {
-					holder.pinImageView.setVisibility(View.GONE);
-				}
-			}
+			holder.pinImageView.setVisibility(View.GONE);
 			holder.gridTextView.setText(item.getItemName());
-			holder.gridImageView.setImageDrawable(null);
+			holder.gridImageView.setImageDrawable(null);			
 
 			executor.execute(new Runnable() {
 				@Override
@@ -524,6 +508,36 @@ public class FileManagementFragment extends Fragment {
 					});
 				}
 			});
+			
+			if (!isSDCard1) {
+				holder.pinImageView.setVisibility(View.GONE);
+				executor.execute(new Runnable() {
+					@Override 
+					public void run() {
+						if (item instanceof AppInfo) {
+							AppInfo appInfo = (AppInfo) item;
+							boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo.getSourceDir(), appInfo.getDataDir());
+							item.setPinned(isAppPinned);
+						} else if (item instanceof DataTypeInfo) {
+							// DataTypeInfo dataTypeInfo = (DataTypeInfo) item;
+						} else if (item instanceof FileDirInfo) {
+							FileDirInfo fileDirInfo = (FileDirInfo) item;
+							boolean isPinned = HCFSMgmtUtils.isPathPinned(fileDirInfo.getFilePath());
+							item.setPinned(isPinned);
+						}
+						getActivity().runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								if (item.isPinned()) {
+									holder.pinImageView.setVisibility(View.VISIBLE);
+								} else {
+									holder.pinImageView.setVisibility(View.GONE);
+								}
+							}
+						});
+					}
+				});
+			}
 		}
 
 		@Override
@@ -748,15 +762,15 @@ public class FileManagementFragment extends Fragment {
 				}
 			});
 
-			if (isSDCard1) {
-				holder.pinView.setVisibility(View.GONE);
-			} else {
+			if (!isSDCard1) {
 				holder.pinView.setImageDrawable(null);
 				executor.execute(new Runnable() {
 					@Override
 					public void run() {
 						if (item instanceof AppInfo) {
-							// AppInfo appInfo = (AppInfo) item;
+							AppInfo appInfo = (AppInfo) item;
+							boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo.getSourceDir(), appInfo.getDataDir());
+							item.setPinned(isAppPinned);
 						} else if (item instanceof DataTypeInfo) {
 							// DataTypeInfo dataTypeInfo = (DataTypeInfo) item;
 						} else if (item instanceof FileDirInfo) {
@@ -928,7 +942,7 @@ public class FileManagementFragment extends Fragment {
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				mAppDAO.update(appInfo);
+//				mAppDAO.update(appInfo); TODO
 
 				Intent intent = new Intent(getActivity(), HCFSMgmtService.class);
 				intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_APP);
@@ -1130,6 +1144,9 @@ public class FileManagementFragment extends Fragment {
 							StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
 							localStorageSpace = totalStorageSpace = statFs.getTotalBytes();
 							availableStorageSpace = statFs.getAvailableBytes();
+							Log.d(HCFSMgmtUtils.TAG, "localStorageSpace: " + localStorageSpace);
+							Log.d(HCFSMgmtUtils.TAG, "totalStorageSpace: " + totalStorageSpace);
+							Log.d(HCFSMgmtUtils.TAG, "availableStorageSpace: " + availableStorageSpace);
 						}
 
 						getActivity().runOnUiThread(new Runnable() {
@@ -1361,9 +1378,9 @@ public class FileManagementFragment extends Fragment {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (mAppDAO != null) {
-			mAppDAO.close();
-		}
+//		if (mAppDAO != null) { TODO
+//			mAppDAO.close();
+//		}
 
 		if (mDataTypeDAO != null) {
 			mDataTypeDAO.close();

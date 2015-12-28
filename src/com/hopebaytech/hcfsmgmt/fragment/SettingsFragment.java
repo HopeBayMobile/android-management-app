@@ -43,9 +43,6 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
-		Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-		toolbar.setTitle(getString(R.string.nav_settings));
 	}
 
 	@Override

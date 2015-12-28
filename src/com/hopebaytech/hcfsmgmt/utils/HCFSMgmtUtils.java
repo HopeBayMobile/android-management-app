@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +33,12 @@ public class HCFSMgmtUtils {
 	public static final String TAG = "HopeBay";
 	public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
+	public static final boolean ENABLE_AUTH = false;
+	public static final boolean DEFAULT_PINNED_STATUS = false;
+	public static final int INTERVAL_NOTIFY_UPLAOD_COMPLETED = 60; // minutes
+	public static final int INTERVAL_PIN_DATA_TYPE_FILE = 60; // minutes
+	public static final int INTERVAL_RESET_XFER = 1440; // minutes
+
 	public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
 	public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
 	public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 2;
@@ -39,6 +46,7 @@ public class HCFSMgmtUtils {
 	public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
 	public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
 	public static final int REQUEST_CODE_GOOGLE_SIGN_IN = 102;
+	public static final int REQUEST_CODE_RESET_XFER = 103;
 
 	public static final String DATA_STATUS_CLOUD = "cloud";
 	public static final String DATA_STATUS_HYBRID = "hybrid";
@@ -56,6 +64,7 @@ public class HCFSMgmtUtils {
 	public static final int INTENT_VALUE_LAUNCH_UID_DATABASE = 204;
 	public static final int INTENT_VALUE_ADD_UID_TO_DATABASE = 205;
 	public static final int INTENT_VALUE_REMOVE_UID_FROM_DATABASE = 206;
+	public static final int INTENT_VALUE_RESET_XFER = 207;
 	public static final String INTENT_KEY_PIN_FILE_DIR_FILEAPTH = "intent_key_pin_firdir_filepath";
 	public static final String INTENT_KEY_PIN_FILE_DIR_PIN_STATUS = "intent_key_pin_firdir_pin_status";
 	public static final String INTENT_KEY_PIN_APP_DATA_DIR = "intent_key_pin_app_data_dir";
@@ -68,11 +77,6 @@ public class HCFSMgmtUtils {
 	public static final String INTENT_KEY_UID = "intent_key_uid";
 	public static final String INTENT_KEY_PACKAGE_NAME = "intent_key_package_name";
 
-	public static final int INTERVAL_NOTIFY_UPLAOD_COMPLETED = 60; // minutes
-	public static final int INTERVAL_PIN_DATA_TYPE_FILE = 60; // minutes
-
-	public static final boolean deafultPinnedStatus = false;
-
 	public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
 	public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
 
@@ -84,18 +88,16 @@ public class HCFSMgmtUtils {
 	public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
 	public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
 
-	public static final String GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
-	public static final String GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
-	public static final String GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
-	
+	public static final String ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
+	public static final String ITENT_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
+	public static final String ITENT_GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
+
 	public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
-	public static void activate() {
-
-	}
-
 	public static boolean isAppPinned(String sourceDir, String dataDir) {
-		// if (HCFSApiUtils.get_pin_status(sourceDir) & HCFSApiUtils.get_pin_status(sourceDir)) return true;
+		Log.d(TAG, "isAppPinned");
+		if (isPathPinned(sourceDir) & isPathPinned(dataDir))
+			return true;
 		return false;
 	}
 
@@ -117,7 +119,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static boolean isDataTypePinned(DataTypeDAO dataTypeDAO, String dataType) {
-		boolean isPinned = HCFSMgmtUtils.deafultPinnedStatus;
+		boolean isPinned = HCFSMgmtUtils.DEFAULT_PINNED_STATUS;
 		DataTypeInfo dataTypeInfo = dataTypeDAO.get(dataType);
 		if (dataTypeInfo != null) {
 			if (dataTypeInfo.isPinned()) {
@@ -150,6 +152,23 @@ public class HCFSMgmtUtils {
 				am.cancel(pi);
 			}
 		}
+	}
+
+	public static void startResetXferAlarm(Context context) {
+		Log.d(HCFSMgmtUtils.TAG, "HCFSMgmtUtils: startResetXferAlarm");
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_RESET_XFER);
+		PendingIntent pi = PendingIntent.getBroadcast(context, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(System.currentTimeMillis());
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+
+		long intervalMillis = HCFSMgmtUtils.INTERVAL_RESET_XFER * 60000;
+		am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
 	}
 
 	public static void startNotifyUploadCompletedAlarm(Context context) {
@@ -318,17 +337,19 @@ public class HCFSMgmtUtils {
 		Notification notifcaition = new NotificationCompat.Builder(context).setWhen(System.currentTimeMillis())
 				.setSmallIcon(android.R.drawable.sym_def_app_icon).setTicker(notify_title).setContentTitle(notify_title)
 				.setContentText(notify_message).setAutoCancel(true).setStyle(bigStyle).setDefaults(defaults).build();
-		
+
 		NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 		notificationManagerCompat.notify(notify_id, notifcaition);
 	}
 
 	public static void startSyncToCloud() {
-		// HCFSApiUtils.setHCFSProperty("cloudsync", "on");
+		String jsonResult = HCFSApiUtils.setHCFSSyncStatus(1);
+		Log.d(TAG, "startSyncToCloud: " + jsonResult);
 	}
 
 	public static void stopSyncToCloud() {
-		// HCFSApiUtils.setHCFSProperty("cloudsync", "off");
+		String jsonResult = HCFSApiUtils.setHCFSSyncStatus(0);
+		Log.d(TAG, "stopSyncToCloud: " + jsonResult);
 	}
 
 	@Nullable
@@ -345,7 +366,7 @@ public class HCFSMgmtUtils {
 			if (isSuccess) {
 				Log.i(HCFSMgmtUtils.TAG, "getHCFSStatInfo: " + jsonResult);
 				hcfsStatInfo = new HCFSStatInfo();
-				// hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_TOTAL));
+				// hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_TOTAL)); TODO
 				hcfsStatInfo.setCloudTotal(107374182400L);
 				hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
 				hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
@@ -390,7 +411,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static boolean pinFileOrDirectory(String filePath) {
-		boolean isSuccess = deafultPinnedStatus;
+		boolean isSuccess = DEFAULT_PINNED_STATUS;
 		try {
 			String jsonResult = HCFSApiUtils.pin(filePath);
 			JSONObject jObject = new JSONObject(jsonResult);
@@ -408,7 +429,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static boolean unpinFileOrDirectory(String filePath) {
-		boolean isSuccess = deafultPinnedStatus;
+		boolean isSuccess = DEFAULT_PINNED_STATUS;
 		try {
 			String jsonResult = HCFSApiUtils.unpin(filePath);
 			JSONObject jObject = new JSONObject(jsonResult);
@@ -426,7 +447,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static boolean isPathPinned(String pathName) {
-		boolean isPinned = deafultPinnedStatus;
+		boolean isPinned = DEFAULT_PINNED_STATUS;
 		try {
 			String jsonResult = HCFSApiUtils.getPinStatus(pathName);
 			JSONObject jObject = new JSONObject(jsonResult);
@@ -501,7 +522,24 @@ public class HCFSMgmtUtils {
 		}
 		return isSuccess;
 	}
-	
+
+	public static boolean reloadConfig() {
+		boolean isSuccess = false;
+		try {
+			String jsonResult = HCFSApiUtils.reloadConfig();
+			JSONObject jObject = new JSONObject(jsonResult);
+			isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "reloadConfig: " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "reloadConfig: " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		return isSuccess;
+	}
+
 	public static boolean isDataUploadCompleted() {
 		HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
 		if (hcfsStatInfo != null) {
@@ -509,9 +547,26 @@ public class HCFSMgmtUtils {
 		}
 		return false;
 	}
-	
+
 	public static boolean isSystemPackage(ApplicationInfo packageInfo) {
 		return ((packageInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true : false;
+	}
+	
+	public static boolean resetXfer() {
+		boolean isSuccess = false;
+		try {
+			String jsonResult = HCFSApiUtils.resetXfer();
+			JSONObject jObject = new JSONObject(jsonResult);
+			isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				Log.i(HCFSMgmtUtils.TAG, "resetXfer: " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "resetXfer: " + jsonResult);
+			}
+		} catch (JSONException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		return isSuccess;
 	}
 
 }

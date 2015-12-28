@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
     android:clickable="true"
     android:gravity="center_vertical"
     android:paddingBottom="@dimen/fragment_vertical_padding"
@@ -33,7 +32,7 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
                 android:text="@string/home_page_cloud_storage"
-                android:textColor="@android:color/black" />
+                android:textColor="@color/colorHomePageProgressBarText" />
         </RelativeLayout>
 
         <ProgressBar
@@ -43,8 +42,8 @@
             android:layout_height="@dimen/progressbar_home_page_height"
             android:layout_marginBottom="@dimen/progressbar_home_page_vertical_margin"
             android:layout_marginTop="@dimen/progressbar_home_page_vertical_margin"
-            android:progress="66"
-             />
+            android:progressDrawable="@drawable/storage_progressbar"
+            android:progress="66" />
 
         <RelativeLayout
             android:layout_width="match_parent"

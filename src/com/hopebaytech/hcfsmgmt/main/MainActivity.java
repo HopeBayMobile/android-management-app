@@ -59,10 +59,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		initialize();
+		init();
 	}
 
-	private void initialize() {
+	private void init() {
 
 		// Initialize default value set in xml/settings_preferences.xml file
 		PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false);
@@ -80,10 +80,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		registerReceiver(sdCardReceiver, filter);
 
 		toolbar = (Toolbar) findViewById(R.id.toolbar);
+		toolbar.setLogo(R.drawable.terafonn_logo);
+		toolbar.setTitle("");
 		setSupportActionBar(toolbar);
 
-		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
+		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);		
+		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);		
 		drawer.setDrawerListener(toggle);
 		toggle.syncState();
 
@@ -96,12 +98,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 					mNavigationView.removeOnLayoutChangeListener(this);
 
 					TextView displayName = (TextView) mNavigationView.findViewById(R.id.display_name);
-					displayName.setText(getIntent().getStringExtra(HCFSMgmtUtils.GOOGLE_SIGN_IN_DISPLAY_NAME));
+					displayName.setText(getIntent().getStringExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME));
 
 					TextView email = (TextView) mNavigationView.findViewById(R.id.email);
-					email.setText(getIntent().getStringExtra(HCFSMgmtUtils.GOOGLE_SIGN_IN_EMAIL));
+					email.setText(getIntent().getStringExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL));
 
-					final Uri photoUri = (Uri) getIntent().getParcelableExtra(HCFSMgmtUtils.GOOGLE_SIGN_IN_PHOTO_URI);
+					final Uri photoUri = (Uri) getIntent().getParcelableExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI);
 					if (photoUri != null) {
 						final ImageView photo = (ImageView) mNavigationView.findViewById(R.id.photo);
 						mHandler.post(new Runnable() {

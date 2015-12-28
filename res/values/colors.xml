@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#ff8800</color>
+    <color name="colorPrimaryDark">#4D4D4D</color>
+    <color name="colorAccent">#8CC63F</color>
     <color name="colorDivider">#90AAAAAA</color>
+    
     <color name="colorGreen">#FF99CC00</color>
     <color name="colorRed">#FFFF4444</color>
+    
+    <color name="colorActionBarNavMenu">#656565</color>
+    
+    <color name="colorHomePageMountPointText">#333333</color>
+    <color name="colorHomePageStorageProgressBarBackgound">#F0F0F0</color>
+    <color name="colorHomePageStorageProgressBar">#BDBF62</color>
+    <color name="colorHomePageXferProgressBarPrimary">#8CC63F</color>
+    <color name="colorHomePageXferProgressBarSecondary">#0071BC</color>
+    <color name="colorHomePageProgressBarText">#4D4D4D</color>
     
 </resources>

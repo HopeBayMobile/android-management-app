@@ -15,16 +15,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#BF000000"
+            android:background="@color/colorAccent"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingLeft="@dimen/fragment_horizontal_padding" >
 
             <ImageView
-                android:id="@+id/iconView"
+                android:id="@+id/network_conn_status_icon"
                 android:layout_width="@dimen/item_image_height_width"
                 android:layout_height="@dimen/item_image_height_width"
-                android:src="@android:drawable/sym_def_app_icon" />
+                android:src="@drawable/connect_96x96" />
 
             <TextView
                 android:id="@+id/network_conn_status"
@@ -50,28 +50,63 @@
                     android:id="@+id/mount_point_scrollview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorAccent"
+                    android:fillViewport="true"
                     android:scrollbars="none" >
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal" >
+                        android:background="@drawable/cloud_storage_bar"
+                        android:orientation="horizontal"
+                        android:weightSum="3" >
 
                         <TextView
                             android:id="@+id/system"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:background="?attr/selectableItemBackground"
                             android:clickable="true"
-                            android:drawableTop="@android:drawable/sym_def_app_icon"
+                            android:drawableTop="@drawable/system_192x192"
                             android:gravity="center"
                             android:paddingBottom="@dimen/fragment_vertical_padding"
                             android:paddingLeft="@dimen/fragment_horizontal_padding"
                             android:paddingRight="@dimen/fragment_horizontal_padding"
                             android:paddingTop="@dimen/fragment_vertical_padding"
                             android:text="@string/nav_default_mountpoint"
-                            android:textColor="@android:color/white" />
+                            android:textColor="@color/colorHomePageMountPointText" />
+
+                        <TextView
+                            android:id="@+id/cloud_storage_2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:drawableTop="@drawable/addspace_192x192"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/fragment_vertical_padding"
+                            android:paddingLeft="@dimen/fragment_horizontal_padding"
+                            android:paddingRight="@dimen/fragment_horizontal_padding"
+                            android:paddingTop="@dimen/fragment_vertical_padding"
+                            android:text="@string/nav_add_mountpoint"
+                            android:textColor="@color/colorHomePageMountPointText" />
+
+                        <TextView
+                            android:id="@+id/cloud_storage_3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:drawableTop="@drawable/addspace_192x192"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/fragment_vertical_padding"
+                            android:paddingLeft="@dimen/fragment_horizontal_padding"
+                            android:paddingRight="@dimen/fragment_horizontal_padding"
+                            android:paddingTop="@dimen/fragment_vertical_padding"
+                            android:text="@string/nav_add_mountpoint"
+                            android:textColor="@color/colorHomePageMountPointText" />
                     </LinearLayout>
                 </HorizontalScrollView>
 
@@ -88,7 +123,8 @@
                         android:layout_marginLeft="@dimen/fragment_horizontal_margin"
                         android:layout_marginRight="@dimen/fragment_horizontal_margin"
                         android:text="@string/home_page_space_usage_title"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@color/colorAccent" />
 
                     <include
                         android:id="@+id/cloud_storage"
@@ -126,7 +162,8 @@
                         android:layout_marginLeft="@dimen/fragment_horizontal_margin"
                         android:layout_marginRight="@dimen/fragment_horizontal_margin"
                         android:text="@string/home_page_network_traffic_title"
-                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="@color/colorAccent" />
 
                     <include
                         android:id="@+id/network_xfer_today"
@@ -138,7 +175,6 @@
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_new_mount_point"
-        app:layout_behavior="com.hopebaytech.hcfsmgmt.main.ScrollAwareFABBehavior"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
@@ -146,6 +182,7 @@
         android:layout_marginRight="@dimen/fab_right_margin"
         app:layout_anchor="@id/home_page_content_view"
         app:layout_anchorGravity="bottom|right|end"
+        app:layout_behavior="com.hopebaytech.hcfsmgmt.main.ScrollAwareFABBehavior"
         android:src="@drawable/ic_add_white" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -3,8 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
-    android:clickable="true"
     android:gravity="center_vertical"
     android:paddingBottom="@dimen/fragment_vertical_padding"
     android:paddingLeft="@dimen/fragment_horizontal_padding"
@@ -65,8 +63,8 @@
                     android:id="@+id/xfer_down"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="10.4GB"
-                    android:textColor="@color/colorRed" />
+                    android:text="0B"
+                    android:textColor="@color/colorHomePageXferProgressBarPrimary" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -84,8 +82,8 @@
                     android:id="@+id/xfer_up"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="11.7GB"
-                    android:textColor="@color/colorGreen" />
+                    android:text="0B"
+                    android:textColor="@color/colorHomePageXferProgressBarSecondary" />
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>

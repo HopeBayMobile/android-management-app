@@ -1,13 +1,18 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Fragment;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class AboutFragment extends Fragment {
 
@@ -28,9 +33,19 @@ public class AboutFragment extends Fragment {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-
-		Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-		toolbar.setTitle(getString(R.string.nav_about));
+		
+		View view = getView();
+		TextView system_app = (TextView) view.findViewById(R.id.version_app);
+		try {
+			String versionName = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0).versionName;
+			system_app.setText(versionName);
+		} catch (NameNotFoundException e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		
+		TextView system_version = (TextView) view.findViewById(R.id.version_system);
+		system_version.setText(getString(R.string.version_system));
+		
 	}
 
 

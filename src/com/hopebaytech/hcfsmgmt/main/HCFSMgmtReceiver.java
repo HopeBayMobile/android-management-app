@@ -20,59 +20,66 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 	 private SharedPreferences sharedPreferences;
 
 	@Override
-	public void onReceive(Context context, Intent intent) {
-		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+	public void onReceive(Context mContext, Intent intent) {
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 		final String action = intent.getAction();
 		Log.d(HCFSMgmtUtils.TAG, "HCFSMgmtReceiver action: " + action);
 		if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
 			// Detect network status and determine whether sync data to cloud 
-			detectNetworkStatusAndSyncToCloud(context);
+			detectNetworkStatusAndSyncToCloud(mContext);
 			
 			// Start a notification alarm for completed data upload
 			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
 			if (notifyUploadCompletedPref) {
-				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(context);
+				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(mContext);
 			}
 			
 			// Start an alarm for periodic pin/unpin data type file 
-			if (HCFSMgmtUtils.deafultPinnedStatus) {
-				HCFSMgmtUtils.startPinDataTypeFileAlarm(context);
+			if (HCFSMgmtUtils.DEFAULT_PINNED_STATUS) {
+				HCFSMgmtUtils.startPinDataTypeFileAlarm(mContext);
 			}
 			
+			// Start reset xfer alarm
+			HCFSMgmtUtils.startResetXferAlarm(mContext);
+			
 			// Create uid database if it not exists or update it
-			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			Intent intentService = new Intent(mContext, HCFSMgmtService.class);
 			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE);
-			context.startService(intentService);
+			mContext.startService(intentService);
 		} else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-			detectNetworkStatusAndSyncToCloud(context);
+			detectNetworkStatusAndSyncToCloud(mContext);
 		} else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
-			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			Intent intentService = new Intent(mContext, HCFSMgmtService.class);
 			int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
 			String packageName = intent.getData().getSchemeSpecificPart();
 			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE);
 			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
 			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
-			context.startService(intentService); 
+			mContext.startService(intentService); 
 		} else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
-			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			Intent intentService = new Intent(mContext, HCFSMgmtService.class);
 			int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
 			String packageName = intent.getData().getSchemeSpecificPart();
 			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE);
 			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
 			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
-			context.startService(intentService);
+			mContext.startService(intentService);
 		} else if (action.equals(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM)) {
 			int operation = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, -1);
 			Log.d(HCFSMgmtUtils.TAG, "HCFSMgmtReceiver operation: " + operation);
-			Intent intentService = new Intent(context, HCFSMgmtService.class);
+			Intent intentService = new Intent(mContext, HCFSMgmtService.class);
 			switch (operation) {
 			case HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED:
 				intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
-				context.startService(intentService);
+				mContext.startService(intentService);
 				break;
 			case HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE:
 				intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
-				context.startService(intentService);
+				mContext.startService(intentService);
+				break;
+			case HCFSMgmtUtils.INTENT_VALUE_RESET_XFER:
+				intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_RESET_XFER);
+				mContext.startService(intentService);
 				break;
 			default:
 				break;

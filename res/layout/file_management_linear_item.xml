@@ -33,6 +33,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:singleLine="true"
             android:textColor="@android:color/black" />
     </LinearLayout>

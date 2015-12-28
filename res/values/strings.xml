@@ -2,12 +2,22 @@
 
     <string name="app_name">TeraFonn</string>
     
+    <string name="loading_alert_dialog_title">提示</string>
+    <string name="loading_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
+    <string name="loading_alert_dialog_exit">離開</string>
+    
+    <string name="activate_cloud_storage_processing_msg">處理中，請稍後&#8230;</string>
+    <string name="activate_cloud_storage_snackbar_require_username_password">請輸入帳號密碼</string>
+    <string name="activate_cloud_storage_alert_dialog_title">提示</string>
+    <string name="activate_cloud_storage_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
+    <string name="activate_cloud_storage_alert_dialog_exit">確定</string>
+    
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
     <string name="nav_homepage">首頁</string>
     <string name="nav_default_mountpoint">系統</string>
     <string name="nav_sdcard1">SD卡</string>
-    <string name="nav_add_mountpoint">新增雲端空間</string>
+    <string name="nav_add_mountpoint">新增共用空間</string>
     <string name="nav_settings">設定</string>
     <string name="nav_about">關於</string>
     
@@ -100,10 +110,15 @@
     <string name="activate_cloud_storage_activate">啟用</string>
     <string name="activate_cloud_storage_forget_password"><u>忘記密碼</u></string>
     <string name="activate_cloud_storage_or">或</string>
-    <string name="activate_cloud_storage_google_activate"><u>使用 Google 帳號啟用</u></string>
+    <string name="activate_cloud_storage_google_activate"><u>使用Google帳號啟用</u></string>
     
     <string name="activate_cloud_activate_transition">ActivateTransition</string>
     
     <string name="server_client_id">584185841160-g8ane8qnaqiust9d2nu4299edkq5lt9t.apps.googleusercontent.com</string>
+    
+    <string name="version_system_title">System Version</string>
+    <string name="version_app_title">App Version</string>
+    <string name="version_system">2.0.2.0003</string>
+    
     
 </resources>

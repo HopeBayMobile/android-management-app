@@ -6,13 +6,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.AppDAO;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceAppDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
-import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -64,7 +62,7 @@ public class HCFSMgmtService extends Service {
 					case HCFSMgmtUtils.INTENT_VALUE_PIN_APP:
 						ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
 						serviceAppInfo
-								.setPinned(intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_PIN_STATUS, HCFSMgmtUtils.deafultPinnedStatus));
+								.setPinned(intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_PIN_STATUS, HCFSMgmtUtils.DEFAULT_PINNED_STATUS));
 						serviceAppInfo.setAppName(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_NAME));
 						serviceAppInfo.setPackageName(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_PACKAGE_NAME));
 						serviceAppInfo.setDataDir(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_DATA_DIR));
@@ -78,7 +76,7 @@ public class HCFSMgmtService extends Service {
 						ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
 						serviceFileDirInfo.setFilePath(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_FILEAPTH));
 						serviceFileDirInfo.setPinned(
-								intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_PIN_STATUS, HCFSMgmtUtils.deafultPinnedStatus));
+								intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_PIN_STATUS, HCFSMgmtUtils.DEFAULT_PINNED_STATUS));
 						serviceFileDirDAO.insert(serviceFileDirInfo);
 						pinOrUnpinFileOrDirectory(serviceFileDirInfo);
 						serviceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
@@ -113,6 +111,9 @@ public class HCFSMgmtService extends Service {
 						if (uidDAO.get(packageName) != null) {
 							uidDAO.delete(packageName);
 						}
+						break;
+					case HCFSMgmtUtils.INTENT_VALUE_RESET_XFER:
+						HCFSMgmtUtils.resetXfer();
 						break;
 					default:
 						break;
@@ -172,22 +173,22 @@ public class HCFSMgmtService extends Service {
 		boolean isPinned = info.isPinned();
 		if (isPinned) {
 			if (!HCFSMgmtUtils.pinApp(info)) {
-//				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_pin_app_failure)); TODO
+				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_pin_app_failure)); 
 			}
 		} else {
 			if (!HCFSMgmtUtils.unpinApp(info)) {
-//				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_unpin_app_failure)); TODO
+				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_unpin_app_failure)); 
 			}
 		}
 	}
 
 	private void handleAppFailureOfPinOrUnpin(boolean isPinned, ServiceAppInfo info, String notifyMsg) {
 		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinFailure: " + info.getAppName());
-		AppDAO appDAO = new AppDAO(this);
-		AppInfo appInfo = new AppInfo(this);
-		appInfo.setPinned(!isPinned);
-		appInfo.setPackageName(info.getPackageName());
-		appDAO.update(appInfo);
+//		AppDAO appDAO = new AppDAO(this); TODO
+//		AppInfo appInfo = new AppInfo(this);
+//		appInfo.setPinned(!isPinned);
+//		appInfo.setPackageName(info.getPackageName());
+//		appDAO.update(appInfo);
 
 		int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 		String notify_title = getString(R.string.app_name);
