@@ -1,30 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="同步設定" >
+    <PreferenceCategory android:title="@string/settings_section_sync" >
         <SwitchPreference
             android:defaultValue="true"
             android:key="pref_sync_wifi_only"
-            android:title="WIFI連線時上傳資料" />
+            android:title="@string/settings_section_sync_wifi_only" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="通知設定" >
+    <PreferenceCategory android:title="@string/settings_section_notify" >
         <SwitchPreference
             android:defaultValue="false"
             android:key="pref_notify_conn_failed_recovery"
-            android:title="通知連線中斷/恢復" />
+            android:title="@string/settings_section_notify_conn_failed_recovery" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="pref_notify_upload_completed"
-            android:title="通知上傳資料完成" />
+            android:title="@string/settings_section_notify_upload_completed" />
 
         <ListPreference
             android:defaultValue="90"
-            android:dialogTitle="請選擇通知的比例"
+            android:dialogTitle="@string/settings_section_notify_local_storage_used_ratio_dialog_title"
             android:entries="@array/pref_notify_local_storage_used_ratio_name"
             android:entryValues="@array/pref_notify_local_storage_used_ratio_value"
             android:key="pref_notify_local_storage_used_ratio"
-            android:summary="請選擇通知的比例"
-            android:title="通知本地空間使用率" />
+            android:summary="@string/settings_section_notify_local_storage_used_ratio_summary"
+            android:title="@string/settings_section_notify_local_storage_used_ratio_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>

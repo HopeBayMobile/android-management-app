@@ -24,8 +24,9 @@
                 android:id="@+id/storage_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="@string/file_management_internal_storatge_name"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="@color/colorFileManagementStorageTypeTitle"
+                tools:text="@string/file_management_internal_storatge_name" />
 
             <LinearLayout
                 android:id="@+id/internal_storage_space_field"
@@ -36,12 +37,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_internal_storage_space" />
+                    android:text="@string/file_management_section_item_internal_storage_space"
+                    android:textColor="@color/colorFileManagementLocalStorageText" />
 
                 <TextView
                     android:id="@+id/local_storage_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/colorFileManagementLocalStorageText"
                     tools:text="@string/file_management_section_item_calculating" />
             </LinearLayout>
         </LinearLayout>
@@ -60,12 +63,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_total_storage_space" />
+                    android:text="@string/file_management_section_item_total_storage_space"
+                    android:textColor="@color/colorFileManagementTotalStorageText" />
 
                 <TextView
                     android:id="@+id/total_storage_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/colorFileManagementTotalStorageText"
                     tools:text="@string/file_management_section_item_calculating" />
             </LinearLayout>
 
@@ -78,12 +83,14 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_available_storage_space" />
+                    android:text="@string/file_management_section_item_available_storage_space"
+                    android:textColor="@color/colorFileManagementAvailStorageText" />
 
                 <TextView
                     android:id="@+id/available_storage_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/colorFileManagementAvailStorageText"
                     tools:text="@string/file_management_section_item_calculating" />
             </LinearLayout>
         </LinearLayout>
@@ -91,8 +98,8 @@
 
     <com.hopebaytech.hcfsmgmt.customview.CircleDisplay
         android:id="@+id/iconView"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true" />
 

@@ -16,9 +16,11 @@ public class AppInfo extends ItemInfo {
 	private int uid;
 	private ApplicationInfo appInfo;
 	private String packageName;
+	private String externalDir;
 	private String[] sharedLibraryFiles;
 	private int appSize;
 	private Context context;
+	private int status = -1;
 
 	public AppInfo(Context context) {
 		super(context);
@@ -48,20 +50,37 @@ public class AppInfo extends ItemInfo {
 		String sourceDirWithoutApkEnd = sourceDir.substring(0, lastIndex);
 		return sourceDirWithoutApkEnd;
 	}
-	
+
 	@Nullable
 	public String getExternalDir() {
+		// Log.w(HCFSMgmtUtils.TAG, "getExternalDir");
+		// String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+		// File externalAndroidFile = new File(externalPath);
+		// for (File type : externalAndroidFile.listFiles()) {
+		// File[] typeName = type.listFiles();
+		// for (File fileName : typeName) {
+		// Log.w(HCFSMgmtUtils.TAG, "fileName.getName(): " + fileName.getName());
+		// if (fileName.getName().equals(getPackageName())) {
+		// return fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+		// }
+		// }
+		// }
+		// return null;
+		return externalDir;
+	}
+
+	public void findToSetExternalDir() {
 		String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
 		File externalAndroidFile = new File(externalPath);
 		for (File type : externalAndroidFile.listFiles()) {
 			File[] typeName = type.listFiles();
 			for (File fileName : typeName) {
 				if (fileName.getName().equals(getPackageName())) {
-					return fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+					this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+					break;
 				}
 			}
 		}
-		return null;
 	}
 
 	public String getDataDir() {
@@ -96,12 +115,40 @@ public class AppInfo extends ItemInfo {
 	public void setPackageName(String packageName) {
 		this.packageName = packageName;
 	}
-	
+
 	public String getPackageName() {
 		if (packageName == null) {
 			packageName = appInfo.packageName;
 		}
 		return packageName;
+	}
+
+	public int getAppStatus() {
+		int srcStatus = HCFSMgmtUtils.getDirStatus(getSourceDir());
+		int dataStatus = HCFSMgmtUtils.getDirStatus(getDataDir());
+		if (getExternalDir() != null) {
+			int exeternalStatus = HCFSMgmtUtils.getDirStatus(getExternalDir());
+			if (srcStatus == FileStatus.LOCAL && dataStatus == FileStatus.LOCAL && exeternalStatus == FileStatus.LOCAL) {
+				status = FileStatus.LOCAL;
+			} else if (srcStatus == FileStatus.CLOUD && dataStatus == FileStatus.CLOUD && exeternalStatus == FileStatus.CLOUD) {
+				status = FileStatus.CLOUD;
+			} else {
+				status = FileStatus.HYBRID;
+			}
+		} else {
+			if (srcStatus == FileStatus.LOCAL && dataStatus == FileStatus.LOCAL) {
+				status = FileStatus.LOCAL;
+			} else if (srcStatus == FileStatus.CLOUD && dataStatus == FileStatus.CLOUD) {
+				status = FileStatus.CLOUD;
+			} else {
+				status = FileStatus.HYBRID;
+			}
+		}
+		return status;
+	}
+
+	public Drawable getPinImage() {
+		return super.getPinImage(getAppStatus());
 	}
 
 }

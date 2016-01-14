@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll"
-            android:background="#BF000000"
+            android:background="@color/colorFileManagementSpinnerBar"
             android:orientation="horizontal"
             android:paddingBottom="@dimen/fragment_vertical_padding"
             android:paddingLeft="@dimen/fragment_horizontal_padding"

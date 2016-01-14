@@ -28,7 +28,7 @@ public class UidDAO {
 	}
 
 	public void openDbIfClosed() {
-		db = UidPkgNameDBHelper.getDataBase(context);
+		db = Uid2PkgDBHelper.getDataBase(context);
 	}
 
 	public void close() {

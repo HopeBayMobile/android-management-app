@@ -1,6 +1,8 @@
 
 package com.hopebaytech.hcfsmgmt.customview;
 
+import java.text.DecimalFormat;
+
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,7 +13,6 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.PointF;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -20,10 +21,6 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
-
-import java.text.DecimalFormat;
-
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 /**
  * Simple custom-view for displaying values (with and without animation) and selecting values onTouch().
@@ -62,13 +59,13 @@ public class CircleDisplay extends View implements OnGestureListener {
 	private float mValueWidthPercent = 20f;
 
 	/** if enabled, the whole circle is drawn */
-	private boolean mDrawWhole = false;
-	
+	private boolean mDrawWhole = true;
+
 	/** if enabled, the inner circle is drawn */
-	private boolean mDrawInner = false;
+	private boolean mDrawInner = true;
 
 	/** if enabled, the center text is drawn */
-	private boolean mDrawText = false;
+	private boolean mDrawText = true;
 
 	/** if enabled, touching and therefore selecting values is enabled */
 	private boolean mTouchEnabled = false;
@@ -79,17 +76,20 @@ public class CircleDisplay extends View implements OnGestureListener {
 	/** the decimalformat responsible for formatting the values in the view */
 	private DecimalFormat mFormatValue = new DecimalFormat("###,###,###,##0.0");
 
+	/** the decimalformat responsible for formatting the values in the view */
+	private String mCapacityValue = "0B";
+
 	/** array that contains values for the custom-text */
 	private String[] mCustomText = null;
 
-	/**
-	 * rect object that represents the bounds of the view, needed for drawing the circle
-	 */
-	private RectF mCircleBox = new RectF();
-
 	private Paint mArcPaint;
+	private Paint mWholeCirclePaint;
 	private Paint mInnerCirclePaint;
-	private Paint mTextPaint;
+	private Paint mCapacityTextPaint;
+	private Paint mPercentageTextPaint;
+
+	private int mWidth = 130;
+	private int mHeight = 130;
 
 	/** object animator for doing the drawing animations */
 	private ObjectAnimator mDrawAnimator;
@@ -111,21 +111,29 @@ public class CircleDisplay extends View implements OnGestureListener {
 
 	private void init() {
 
-		mBoxSetup = false;
-
 		mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mArcPaint.setStyle(Style.FILL);
-		mArcPaint.setColor(Color.rgb(255, 136, 0));
+		mArcPaint.setColor(Color.rgb(0, 113, 188));
+
+		mWholeCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mWholeCirclePaint.setStyle(Style.FILL);
+		mWholeCirclePaint.setColor(Color.rgb(230, 230, 230));
 
 		mInnerCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mInnerCirclePaint.setStyle(Style.FILL);
 		mInnerCirclePaint.setColor(Color.WHITE);
 
-		mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mTextPaint.setStyle(Style.STROKE);
-		mTextPaint.setTextAlign(Align.CENTER);
-		mTextPaint.setColor(Color.BLACK);
-		mTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 24f));
+		mCapacityTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mCapacityTextPaint.setStyle(Style.STROKE);
+		mCapacityTextPaint.setTextAlign(Align.CENTER);
+		mCapacityTextPaint.setColor(Color.BLACK);
+		mCapacityTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 22f));
+
+		mPercentageTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mPercentageTextPaint.setStyle(Style.STROKE);
+		mPercentageTextPaint.setTextAlign(Align.CENTER);
+		mPercentageTextPaint.setColor(Color.BLACK);
+		mPercentageTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 14f));
 
 		mDrawAnimator = ObjectAnimator.ofFloat(this, "phase", 0f, 1.0f).setDuration(3000);
 		mDrawAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -133,17 +141,40 @@ public class CircleDisplay extends View implements OnGestureListener {
 		mGestureDetector = new GestureDetector(getContext(), this);
 	}
 
-	/** boolean flag that indicates if the box has been setup */
-	private boolean mBoxSetup = false;
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+		int width, height;
+
+		// Measure Width
+		if (widthMode == MeasureSpec.EXACTLY) {
+			width = widthSize;
+		} else if (widthMode == MeasureSpec.AT_MOST) {
+			width = Math.min(mWidth, widthSize);
+		} else {
+			width = mWidth;
+		}
+
+		// Measure Height
+		if (heightMode == MeasureSpec.EXACTLY) {
+			height = heightSize;
+		} else if (heightMode == MeasureSpec.AT_MOST) {
+			height = Math.min(mHeight, heightSize);
+		} else {
+			height = mHeight;
+		}
+
+		width = height = Math.min(width, height);
+		setMeasuredDimension(width, height);
+	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-
-		if (!mBoxSetup) {
-			mBoxSetup = true;
-			setupBox();
-		}
 
 		if (mDrawWhole) {
 			drawWholeCircle(canvas);
@@ -158,7 +189,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 			if (mCustomText != null)
 				drawCustomText(canvas);
 			else
-				drawText(canvas); 
+				drawText(canvas);
 		}
 	}
 
@@ -168,7 +199,9 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * @param c
 	 */
 	private void drawText(Canvas c) {
-		c.drawText(mFormatValue.format(mValue * mPhase) + "" + mUnit, getWidth() / 2, getHeight() / 2 + mTextPaint.descent(), mTextPaint);
+		c.drawText(mFormatValue.format(mValue * mPhase) + "" + mUnit, getWidth() / 2, getHeight() / 5 * 2 + mCapacityTextPaint.descent(),
+				mCapacityTextPaint);
+		c.drawText(mCapacityValue, getWidth() / 2, getHeight() / 5 * 3 + mPercentageTextPaint.descent(), mPercentageTextPaint);
 	}
 
 	/**
@@ -181,7 +214,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 		int index = (int) ((mValue * mPhase) / mStepSize);
 
 		if (index < mCustomText.length) {
-			c.drawText(mCustomText[index], getWidth() / 2, getHeight() / 2 + mTextPaint.descent(), mTextPaint);
+			c.drawText(mCustomText[index], getWidth() / 2, getHeight() / 2 + mCapacityTextPaint.descent(), mCapacityTextPaint);
 		} else {
 			Log.e(LOG_TAG, "Custom text array not long enough.");
 		}
@@ -193,11 +226,11 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * @param c
 	 */
 	private void drawWholeCircle(Canvas c) {
-		mArcPaint.setAlpha(mDimAlpha);
+		// mWholeCirclePaint.setAlpha(mDimAlpha);
 
 		float r = getRadius();
 
-		c.drawCircle(getWidth() / 2, getHeight() / 2, r, mArcPaint);
+		c.drawCircle(getWidth() / 2, getHeight() / 2, r, mWholeCirclePaint);
 	}
 
 	/**
@@ -221,24 +254,11 @@ public class CircleDisplay extends View implements OnGestureListener {
 
 		float angle = mAngle * mPhase;
 
-		c.drawArc(mCircleBox, mStartAngle, angle, true, mArcPaint);
-
+		// c.drawArc(mCircleBox, mStartAngle, angle, true, mArcPaint);
+		c.drawArc(0, 0, getHeight(), getWidth(), mStartAngle, angle, true, mArcPaint);
 		// Log.i(LOG_TAG, "CircleBox bounds: " + mCircleBox.toString() +
 		// ", Angle: " + angle + ", StartAngle: " + mStartAngle);
-		
-	}
 
-	/**
-	 * sets up the bounds of the view
-	 */
-	private void setupBox() {
-
-		int width = getWidth();
-		int height = getHeight();
-
-		float diameter = getDiameter();
-
-		mCircleBox = new RectF(width / 2 - diameter / 2, height / 2 - diameter / 2, width / 2 + diameter / 2, height / 2 + diameter / 2);
 	}
 
 	/**
@@ -248,10 +268,11 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * @param total
 	 * @param animated
 	 */
-	public void showValue(float toShow, float total, boolean animated) {
+	public void showValue(float toShow, float total, String capacity, boolean animated) {
 		mAngle = calcAngle(toShow / total * 100f);
 		mValue = toShow;
 		mMaxValue = total;
+		mCapacityValue = capacity;
 
 		if (animated)
 			startAnim();
@@ -358,7 +379,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 	public void setDrawInnerCircle(boolean enabled) {
 		mDrawInner = enabled;
 	}
-	
+
 	/**
 	 * set this to true to draw the whole circle, default: false
 	 * 
@@ -400,8 +421,35 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * 
 	 * @param color
 	 */
-	public void setColor(int color) {
+	public void setArcColor(int color) {
 		mArcPaint.setColor(color);
+	}
+
+	/**
+	 * set the color of the whole circle
+	 * 
+	 * @param color
+	 */
+	public void setWholeCircleColor(int color) {
+		mWholeCirclePaint.setColor(color);
+	}
+
+	/**
+	 * set the color of the percentage text
+	 * 
+	 * @param color
+	 */
+	public void setPercentageTextColor(int color) {
+		mPercentageTextPaint.setColor(color);
+	}
+
+	/**
+	 * set the color of the capacity text
+	 * 
+	 * @param color
+	 */
+	public void setCapacityTextColor(int color) {
+		mCapacityTextPaint.setColor(color);
 	}
 
 	/**
@@ -410,7 +458,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * @param size
 	 */
 	public void setTextSize(float size) {
-		mTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), size));
+		mCapacityTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), size));
 	}
 
 	/**
@@ -485,7 +533,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 			mInnerCirclePaint = p;
 			break;
 		case PAINT_TEXT:
-			mTextPaint = p;
+			mCapacityTextPaint = p;
 			break;
 		}
 	}
@@ -780,75 +828,41 @@ public class CircleDisplay extends View implements OnGestureListener {
 	}
 
 	@Override
+	public String toString() {
+		return "CircleDisplay [mWidth=" + mWidth + ", mHeight=" + mHeight + "]";
+	}
+
+	public void resize(int width, int height) {
+		this.mWidth = width;
+		this.mHeight = height;
+
+		getLayoutParams().width = mWidth;
+		getLayoutParams().height = mHeight;
+	}
+
+	@Override
 	public boolean onDown(MotionEvent e) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void onLongPress(MotionEvent e) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void onShowPress(MotionEvent e) {
-		// TODO Auto-generated method stub
-
+		
 	}
 
-	// @Override
-	// protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-	//
-	// int desiredWidth = 300;
-	// int desiredHeight = 300;
-	//
-	// int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-	// int widthSize = MeasureSpec.getSize(widthMeasureSpec);
-	// int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-	// int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-	//
-	// int width;
-	// int height;
-	//
-	// // Measure Width
-	// if (widthMode == MeasureSpec.EXACTLY) {
-	// // Must be this size
-	// width = widthSize;
-	// } else if (widthMode == MeasureSpec.AT_MOST) {
-	// // Can't be bigger than...
-	// width = Math.min(desiredWidth, widthSize);
-	// } else {
-	// // Be whatever you want
-	// width = desiredWidth;
-	// }
-	//
-	// // Measure Height
-	// if (heightMode == MeasureSpec.EXACTLY) {
-	// // Must be this size
-	// height = heightSize;
-	// } else if (heightMode == MeasureSpec.AT_MOST) {
-	// // Can't be bigger than...
-	// height = Math.min(desiredHeight, heightSize);
-	// } else {
-	// // Be whatever you want
-	// height = desiredHeight;
-	// }
-	//
-	// // MUST CALL THIS
-	// setMeasuredDimension(width, height);
-	// }
+	@Override
+	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+		return false;
+	}
+
+	@Override
+	public void onLongPress(MotionEvent e) {
+		
+	}
+
+	@Override
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+		return false;
+	}
 
 }

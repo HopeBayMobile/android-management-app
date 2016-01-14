@@ -35,11 +35,36 @@ public class ItemInfo {
 		this.infoName = infoName;
 	}
 
-	public Drawable getPinImage() {
-		Drawable pinDrawable;
+	public Drawable getPinImage(int status) {
+		Drawable pinDrawable = null;
+//		if (isPinned) {
+//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
+//		} else {
+//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned);
+//		}
 		if (isPinned) {
-			pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
+			if (status == FileStatus.LOCAL) {
+				pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
+			} else if (status == FileStatus.HYBRID || status == FileStatus.CLOUD) {
+				pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
+			} else {
+				// pinDrawable = ContextCompat.getDrawable(context, R.drawable.default);
+			}
 		} else {
+			switch (status) {
+			case FileStatus.LOCAL:
+				// TODO local image
+				break;
+			case FileStatus.HYBRID:
+				// TODO hybrid image
+				break;
+			case FileStatus.CLOUD:
+				// TODO cloud image
+				break;
+			default:
+				// pinDrawable = ContextCompat.getDrawable(context, R.drawable.default);
+				break;
+			}
 			pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned);
 		}
 		return pinDrawable;
@@ -53,13 +78,13 @@ public class ItemInfo {
 		this.isPinned = isPinned;
 	}
 
-	public int getDataStatus() {
-		return dataStatus;
-	}
-
-	public void setDataStatus(int dataStatus) {
-		this.dataStatus = dataStatus;
-	}
+//	public int getDataStatus() {
+//		return dataStatus;
+//	}
+//
+//	public void setDataStatus(int dataStatus) {
+//		this.dataStatus = dataStatus;
+//	}
 
 //	protected void onFileDirPinUnpinClick(final FileDirInfo fileInfo, PinUnpinIconChanger iconChanger) {
 //		iconChanger.setPinUnpinIcon();

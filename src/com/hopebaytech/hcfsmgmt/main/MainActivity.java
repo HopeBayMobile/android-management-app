@@ -191,6 +191,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(this);
 			}
 		}
+		
+		intent = new Intent(this, HCFSMgmtReceiver.class);
+		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+		boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent,
+				PendingIntent.FLAG_NO_CREATE) != null;
+		if (!isResetXferAlarmExist) {
+			HCFSMgmtUtils.startResetXferAlarm(this);
+		} else {
+			Log.w(HCFSMgmtUtils.TAG, "isResetXferAlarmExist");
+		}
 
 	}
 

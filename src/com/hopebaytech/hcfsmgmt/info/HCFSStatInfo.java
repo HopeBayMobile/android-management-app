@@ -1,6 +1,9 @@
 package com.hopebaytech.hcfsmgmt.info;
 
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
+
+import android.util.Log;
 
 public class HCFSStatInfo {
 
@@ -110,46 +113,60 @@ public class HCFSStatInfo {
 	public void setCloudConn(boolean cloudConn) {
 		this.cloudConn = cloudConn;
 	}
-
-//	private String convertByteToProperUnit(long amount) {
-//		float result = amount;
-//		String[] unit = new String[] { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
-//		int unitIndex = 0;
-//		while (true) {
-//			float tmp = result / 1000f;
-//			if ((long) tmp > 0) {
-//				result = tmp;
-//				unitIndex++;
-//			} else {
-//				break;
-//			}
-//		}
-//
-//		if (result == (long) result) {
-//			return String.format(Locale.getDefault(), "%d" + unit[unitIndex], (long) result);
-//		} else {
-//			return String.format(Locale.getDefault(), "%.1f" + unit[unitIndex], result);
-//		}
-//	}
-
+                                                                                                                                                                      
 	public int getCloudUsedPercentage() {
-		return (int) ((float) cloudUsed / cloudTotal * 100);
+		int percentage;
+		float tmp = ((float) cloudUsed / cloudTotal * 100);
+		if (tmp > 0 && tmp < 1) {
+			percentage = 1;
+		} else {
+			percentage = (int) ((float) cloudUsed / cloudTotal * 100);
+		}
+		return percentage;
 	}
 
 	public int getCacheUsedPercentage() {
-		return (int) ((float) cacheUsed / cloudTotal * 100);
+		int percentage;
+		float tmp = ((float) cacheUsed / cloudTotal * 100);
+		if (tmp > 0 && tmp < 1) {
+			percentage = 1;
+		} else {
+			percentage = (int) ((float) cacheUsed / cloudTotal * 100);
+		}
+		return percentage;
 	}
 
 	public int getPinnedUsedPercentage() {
-		return (int) ((float) pinTotal / pinMax * 100);
+		int percentage;
+		float tmp = ((float) pinTotal / pinMax * 100);
+		if (tmp > 0 && tmp < 1) {
+			percentage = 1;
+		} else {
+			percentage = (int) ((float) pinTotal / pinMax * 100);
+		}
+		return percentage;
 	}
 
 	public int getDirtyPercentage() {
-		return (int) ((float) cacheDirtyUsed / cloudTotal * 100);
+		int percentage;
+		float tmp = ((float) cacheDirtyUsed / cloudTotal * 100);
+		if (tmp > 0 && tmp < 1) {
+			percentage = 1;
+		} else {
+			percentage = (int) ((float) cacheDirtyUsed / cloudTotal * 100);
+		}
+		return percentage;
 	}
 
 	public int getXterDownloadPercentage() {
-		return (int) ((float) xferDownload / (xferUpload + xferDownload) * 100);
+		int percentage;
+		float tmp = ((float) xferDownload / (xferUpload + xferDownload) * 100);
+		if (tmp > 0 && tmp < 1) {
+			percentage = 1;
+		} else {
+			percentage = (int) ((float) xferDownload / (xferUpload + xferDownload) * 100);
+		}
+		return percentage;
 	}
 
 }

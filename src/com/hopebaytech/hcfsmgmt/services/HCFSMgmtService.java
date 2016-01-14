@@ -91,7 +91,8 @@ public class HCFSMgmtService extends Service {
 								int uid = packageInfo.uid;
 								String packageName = packageInfo.packageName;
 								uidDAO.insert(new UidInfo(uid, packageName));
-							};
+							}
+							;
 						}
 						break;
 					case HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE:
@@ -121,8 +122,9 @@ public class HCFSMgmtService extends Service {
 				}
 			});
 		} else {
-			/* Service is restarted and then execute the uncompleted pin/unpin operation 
-			 * when user manually close app and removes it from background. 
+			/**
+			 * Service is restarted and then execute the uncompleted pin/unpin operation 
+			 * when user manually close app and removes it from background.
 			 */
 			cacheExecutor.execute(new Runnable() {
 				@Override
@@ -152,7 +154,7 @@ public class HCFSMgmtService extends Service {
 		return super.onStartCommand(intent, flags, startId);
 		// return START_REDELIVER_INTENT;
 	}
-	
+
 	private void notifyUploadCompleted() {
 		Log.d(HCFSMgmtUtils.TAG, "notifyUploadCompleted");
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -173,23 +175,17 @@ public class HCFSMgmtService extends Service {
 		boolean isPinned = info.isPinned();
 		if (isPinned) {
 			if (!HCFSMgmtUtils.pinApp(info)) {
-				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_pin_app_failure)); 
+				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_pin_app_failure));
 			}
 		} else {
 			if (!HCFSMgmtUtils.unpinApp(info)) {
-				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_unpin_app_failure)); 
+				handleAppFailureOfPinOrUnpin(isPinned, info, getString(R.string.notify_unpin_app_failure));
 			}
 		}
 	}
 
 	private void handleAppFailureOfPinOrUnpin(boolean isPinned, ServiceAppInfo info, String notifyMsg) {
 		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinFailure: " + info.getAppName());
-//		AppDAO appDAO = new AppDAO(this); TODO
-//		AppInfo appInfo = new AppInfo(this);
-//		appInfo.setPinned(!isPinned);
-//		appInfo.setPackageName(info.getPackageName());
-//		appDAO.update(appInfo);
-
 		int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 		String notify_title = getString(R.string.app_name);
 		String notify_message = notifyMsg + ": " + info.getAppName();
@@ -211,7 +207,9 @@ public class HCFSMgmtService extends Service {
 					imgFailedToPinCount++;
 				}
 			}
-			notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_pin) + ": " + imgFailedToPinCount);
+			if (imgFailedToPinCount != 0) {
+				notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_pin) + ": " + imgFailedToPinCount);
+			}
 		} else {
 			int imgFailedToUnpinCount = 0;
 			for (String path : imagePaths) {
@@ -219,7 +217,9 @@ public class HCFSMgmtService extends Service {
 					imgFailedToUnpinCount++;
 				}
 			}
-			notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount);
+			if (imgFailedToUnpinCount != 0) {
+				notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount);
+			}
 		}
 
 		boolean isVideoPinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_VIDEO);
@@ -231,7 +231,9 @@ public class HCFSMgmtService extends Service {
 					videoFailedToPinCount++;
 				}
 			}
-			notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_pin) + ": " + videoFailedToPinCount);
+			if (videoFailedToPinCount != 0) {
+				notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_pin) + ": " + videoFailedToPinCount);
+			}
 		} else {
 			int videoFailedToUnpinCount = 0;
 			for (String path : videoPaths) {
@@ -239,7 +241,9 @@ public class HCFSMgmtService extends Service {
 					videoFailedToUnpinCount++;
 				}
 			}
-			notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount);
+			if (videoFailedToUnpinCount != 0) {
+				notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount);
+			}
 		}
 
 		boolean isAudioPinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_AUDIO);
@@ -251,7 +255,9 @@ public class HCFSMgmtService extends Service {
 					audioFailedToPinCount++;
 				}
 			}
-			notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_pin) + ": " + audioFailedToPinCount);
+			if (audioFailedToPinCount != 0) {
+				notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_pin) + ": " + audioFailedToPinCount);
+			}
 		} else {
 			int audioFailedToUnpinCount = 0;
 			for (String path : audioPaths) {
@@ -259,19 +265,22 @@ public class HCFSMgmtService extends Service {
 					audioFailedToUnpinCount++;
 				}
 			}
-			notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount);
-		}
-
-		StringBuilder notify_message = new StringBuilder();
-		for (int i = 0; i < notifyMessageList.size(); i++) {
-			notify_message.append(notifyMessageList.get(i));
-			if (i < notifyMessageList.size() - 1) {
-				notify_message.append("\n");
+			if (audioFailedToUnpinCount != 0) {
+				notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount);
 			}
 		}
-		int notify_id = HCFSMgmtUtils.NOTIFY_ID_PIN_UNPIN_FAILURE;
-		HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message.toString());
 
+		if (notifyMessageList.size() != 0) {
+			StringBuilder notify_message = new StringBuilder();
+			for (int i = 0; i < notifyMessageList.size(); i++) {
+				notify_message.append(notifyMessageList.get(i));
+				if (i < notifyMessageList.size() - 1) {
+					notify_message.append("\n");
+				}
+			}
+			int notify_id = HCFSMgmtUtils.NOTIFY_ID_PIN_UNPIN_FAILURE;
+			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message.toString());
+		}
 	}
 
 	private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {

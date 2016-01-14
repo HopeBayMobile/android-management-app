@@ -17,6 +17,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -160,11 +161,26 @@ public class HomepageFragment extends Fragment {
 			if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 				ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 				NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-				TextView networkConnStatus = (TextView) getActivity().findViewById(R.id.network_conn_status);
-				if (netInfo != null && netInfo.isConnected()) {
-					networkConnStatus.setText(getString(R.string.home_page_network_status_connected));
+				ImageView networkConnStatusImage = (ImageView) getView().findViewById(R.id.network_conn_status_icon);
+				TextView networkConnStatusText = (TextView) getView().findViewById(R.id.network_conn_status);
+				if (netInfo != null) {
+					if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
+						Log.d(HCFSMgmtUtils.TAG, "NetworkBroadcastReceiver: Connected");
+						networkConnStatusImage.setImageResource(R.drawable.connect_96x96);
+						networkConnStatusText.setText(getString(R.string.home_page_network_status_connected));
+					} else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
+						Log.d(HCFSMgmtUtils.TAG, "NetworkBroadcastReceiver: Connecting");
+						networkConnStatusImage.setImageResource(R.drawable.connect_connecting_96x96);
+						networkConnStatusText.setText(getString(R.string.home_page_network_status_connecting));
+					} else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
+						Log.d(HCFSMgmtUtils.TAG, "NetworkBroadcastReceiver: Disconnected");
+						networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
+						networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
+					}
 				} else {
-					networkConnStatus.setText(getString(R.string.home_page_network_status_disconnected));
+					Log.d(HCFSMgmtUtils.TAG, "Network dosen't exist");
+					networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
+					networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
 				}
 			}
 		}

@@ -16,13 +16,11 @@ public class DataTypeDAO {
 	public static final String KEY_ID = "_id";
 	public static final String TYPE_COLUMN = "type";
     public static final String PIN_STATUS_COLUMN = "pin_status";
-    public static final String DATA_STATUS_COLUMN = "data_status";
     public static final String CREATE_TABLE = 
     		"CREATE TABLE " + TABLE_NAME + " (" + 
     		KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
     		TYPE_COLUMN + " TEXT NOT NULL, " +
-    		PIN_STATUS_COLUMN + " INTEGER NOT NULL, " + 
-    		DATA_STATUS_COLUMN + " INTEGER NOT NULL)";
+    		PIN_STATUS_COLUMN + " INTEGER NOT NULL)";
     
     private SQLiteDatabase db;
     private Context context;
@@ -45,7 +43,6 @@ public class DataTypeDAO {
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(TYPE_COLUMN, dataTypeInfo.getDataType());
     	contentValues.put(PIN_STATUS_COLUMN, dataTypeInfo.isPinned());
-    	contentValues.put(DATA_STATUS_COLUMN, dataTypeInfo.getDataStatus());
     	return db.insert(TABLE_NAME, null, contentValues);
     }
     
@@ -54,7 +51,6 @@ public class DataTypeDAO {
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(TYPE_COLUMN, dataTypeInfo.getDataType());
     	contentValues.put(PIN_STATUS_COLUMN, dataTypeInfo.isPinned());
-    	contentValues.put(DATA_STATUS_COLUMN, dataTypeInfo.getDataStatus());
     	
     	String where = TYPE_COLUMN + "='" + dataTypeInfo.getDataType() + "'";
     	return db.update(TABLE_NAME, contentValues, where, null) > 0;
@@ -94,7 +90,6 @@ public class DataTypeDAO {
     	DataTypeInfo result = new DataTypeInfo(context);
     	result.setDataType(cursor.getString(cursor.getColumnIndex(TYPE_COLUMN)));
     	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 0 ? false : true);
-    	result.setDataStatus(cursor.getInt(cursor.getColumnIndex(DATA_STATUS_COLUMN)));
     	return result;
     }
     

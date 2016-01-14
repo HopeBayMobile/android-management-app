@@ -8,7 +8,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.info.FileStatus;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
@@ -34,7 +36,7 @@ public class HCFSMgmtUtils {
 	public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
 	public static final boolean ENABLE_AUTH = false;
-	public static final boolean DEFAULT_PINNED_STATUS = false;
+	public static final boolean DEFAULT_PINNED_STATUS = true;
 	public static final int INTERVAL_NOTIFY_UPLAOD_COMPLETED = 60; // minutes
 	public static final int INTERVAL_PIN_DATA_TYPE_FILE = 60; // minutes
 	public static final int INTERVAL_RESET_XFER = 1440; // minutes
@@ -94,11 +96,16 @@ public class HCFSMgmtUtils {
 
 	public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
-	public static boolean isAppPinned(String sourceDir, String dataDir) {
-		Log.d(TAG, "isAppPinned");
-		if (isPathPinned(sourceDir) & isPathPinned(dataDir))
-			return true;
-		return false;
+	public static boolean isAppPinned(AppInfo appInfo) {
+		Log.d(TAG, "isAppPinned: " + appInfo.getItemName());
+		String sourceDir = appInfo.getSourceDir();
+		String dataDir = appInfo.getDataDir();
+		String externalDir = appInfo.getExternalDir();
+		if (externalDir == null) {
+			return isPathPinned(sourceDir) & isPathPinned(dataDir);
+		} else {
+			return isPathPinned(sourceDir) & isPathPinned(dataDir) & isPathPinned(externalDir);
+		}
 	}
 
 	public static void startPinDataTypeFileAlarm(Context context) {
@@ -161,11 +168,12 @@ public class HCFSMgmtUtils {
 		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_RESET_XFER);
 		PendingIntent pi = PendingIntent.getBroadcast(context, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-		
+
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(System.currentTimeMillis());
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
 
 		long intervalMillis = HCFSMgmtUtils.INTERVAL_RESET_XFER * 60000;
 		am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
@@ -446,6 +454,72 @@ public class HCFSMgmtUtils {
 		return isSuccess;
 	}
 
+	public static int getDirStatus(String pathName) {
+		int status = FileStatus.LOCAL;
+		try {
+			String jsonResult = HCFSApiUtils.getDirStatus(pathName);
+			JSONObject jObject = new JSONObject(jsonResult);
+			boolean isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				int code = jObject.getInt("code");
+				if (code == 0) {
+					JSONObject dataObj = jObject.getJSONObject("data");
+					int num_local = dataObj.getInt("num_local");
+					int num_hybrid = dataObj.getInt("num_hybrid");
+					int num_cloud = dataObj.getInt("num_cloud");
+
+					if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
+						status = FileStatus.LOCAL;
+					} else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
+						status = FileStatus.LOCAL;
+					} else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
+						status = FileStatus.CLOUD;
+					} else {
+						status = FileStatus.HYBRID;
+					}
+					Log.i(HCFSMgmtUtils.TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+				} else {
+					Log.e(HCFSMgmtUtils.TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+				}
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+			}
+
+		} catch (Exception e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		return status;
+	}
+
+	public static int getFileStatus(String pathName) {
+		int status = FileStatus.LOCAL;
+		try {
+			String jsonResult = HCFSApiUtils.getFileStatus(pathName);
+			JSONObject jObject = new JSONObject(jsonResult);
+			boolean isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				int code = jObject.getInt("code");
+				switch (code) {
+				case 0:
+					status = FileStatus.LOCAL;
+					break;
+				case 1:
+					status = FileStatus.CLOUD;
+					break;
+				case 2:
+					status = FileStatus.HYBRID;
+					break;
+				}
+				Log.i(HCFSMgmtUtils.TAG, "getFileStatus[" + pathName + "]: " + jsonResult);
+			} else {
+				Log.e(HCFSMgmtUtils.TAG, "getFileStatus: " + jsonResult);
+			}
+		} catch (Exception e) {
+			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		}
+		return status;
+	}
+
 	public static boolean isPathPinned(String pathName) {
 		boolean isPinned = DEFAULT_PINNED_STATUS;
 		try {
@@ -453,7 +527,7 @@ public class HCFSMgmtUtils {
 			JSONObject jObject = new JSONObject(jsonResult);
 			boolean isSuccess = jObject.getBoolean("result");
 			if (isSuccess) {
-				Log.i(HCFSMgmtUtils.TAG, "isPathPinned: " + jsonResult);
+				Log.i(HCFSMgmtUtils.TAG, "isPathPinned[" + pathName + "]: " + jsonResult);
 				int code = jObject.getInt("code");
 				if (code == 1) {
 					isPinned = true;
@@ -461,8 +535,7 @@ public class HCFSMgmtUtils {
 					isPinned = false;
 				}
 			} else {
-				Log.e(HCFSMgmtUtils.TAG, "pathName: " + pathName);
-				Log.e(HCFSMgmtUtils.TAG, "isPathPinned: " + jsonResult);
+				Log.i(HCFSMgmtUtils.TAG, "isPathPinned[" + pathName + "]: " + jsonResult);
 			}
 		} catch (JSONException e) {
 			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
@@ -551,7 +624,7 @@ public class HCFSMgmtUtils {
 	public static boolean isSystemPackage(ApplicationInfo packageInfo) {
 		return ((packageInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true : false;
 	}
-	
+
 	public static boolean resetXfer() {
 		boolean isSuccess = false;
 		try {

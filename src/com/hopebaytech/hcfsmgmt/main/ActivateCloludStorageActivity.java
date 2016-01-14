@@ -34,7 +34,6 @@ import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -48,6 +47,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -97,10 +97,17 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 						Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
 					} else {
 						if (HCFSMgmtUtils.ENABLE_AUTH) {
+							View view = ActivateCloludStorageActivity.this.getCurrentFocus();
+							if (view != null) {
+								InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+								imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+							}
 							showProgressDialog();
 							mHandler.post(new Runnable() {
 								@Override
 								public void run() {
+									boolean isFailedToSetHCFSConf = false;
+									boolean isFailedToAuth = false;
 									HttpsURLConnection conn = null;
 									try {
 										URL url = new URL("https://terafonnreg.hopebaytech.com/api/register/login/");
@@ -153,23 +160,38 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												Log.d(HCFSMgmtUtils.TAG, "user: " + user);
 												Log.d(HCFSMgmtUtils.TAG, "password: " + password);
 												Log.d(HCFSMgmtUtils.TAG, "backend_url: " + backend_url);
+												Log.d(HCFSMgmtUtils.TAG, "bucket: " + bucket);
 												Log.d(HCFSMgmtUtils.TAG, "protocol: " + protocol);
 
-												HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type);
-												HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, account);
-												HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, user);
-												HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, password);
-												HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, backend_url);
-												HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, bucket);
-												HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, protocol);
-												HCFSMgmtUtils.reloadConfig();
-
-												Intent intent = new Intent(ActivateCloludStorageActivity.this, MainActivity.class);
-												startActivity(intent);
-												finish();
+												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type)) {
+													isFailedToSetHCFSConf = true;
+												}
+												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, account)) {
+													isFailedToSetHCFSConf = true;
+												}
+												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, user)) {
+													isFailedToSetHCFSConf = true;
+												}
+												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, password)) {
+													isFailedToSetHCFSConf = true;
+												}
+												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, backend_url)) {
+													isFailedToSetHCFSConf = true;
+												}
+												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, bucket)) {
+													isFailedToSetHCFSConf = true;
+												}
+												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, protocol)) {
+													isFailedToSetHCFSConf = true;
+												}
+												if (!HCFSMgmtUtils.reloadConfig()) {
+													isFailedToSetHCFSConf = true;
+												}
+												isFailedToAuth = false;
 											} else {
 												String msg = jsonObj.getString("msg");
 												Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
+												isFailedToAuth = true;
 											}
 										}
 										// TODO Need to handle the situation that the number of backend account is not enough.
@@ -188,9 +210,40 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 											conn.disconnect();
 										}
 									}
+
+									final boolean mIsFailedToSetHCFSConf = isFailedToSetHCFSConf;
+									final boolean mIsFailedToAuth = isFailedToAuth;
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											hideProgressDialog();
+											if (!mIsFailedToAuth) {
+												if (mIsFailedToSetHCFSConf) {
+													String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
+													Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
+													mHandler.post(new Runnable() {
+														@Override
+														public void run() {
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "");
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "");
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "");
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "");
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "");
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "");
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "");
+														}
+													});
+												} else {
+													Intent intent = new Intent(ActivateCloludStorageActivity.this, MainActivity.class);
+													startActivity(intent);
+													finish();
+												}
+											} 
+										}
+									});
+
 								}
 							});
-							hideProgressDialog();
 						} else {
 							HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "swift");
 							HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "test");
@@ -209,7 +262,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 				} else {
 					AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloludStorageActivity.this);
 					builder.setTitle(getString(R.string.activate_cloud_storage_alert_dialog_title));
-					builder.setMessage(getString(R.string.activate_cloud_storage_alert_dialog_message));			
+					builder.setMessage(getString(R.string.activate_cloud_storage_alert_dialog_message));
 					builder.setPositiveButton(getString(R.string.activate_cloud_storage_alert_dialog_exit), null);
 					builder.show();
 				}
@@ -274,10 +327,12 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 				final GoogleSignInAccount acct = result.getSignInAccount();
 				final String idToken = acct.getIdToken();
 				Log.d(HCFSMgmtUtils.TAG, "onActivityResult - idToken: " + idToken);
+
 				mHandler.post(new Runnable() {
 					@Override
 					public void run() {
 						HttpsURLConnection conn = null;
+						boolean isFailedToSetHCFSConf = false;
 						try {
 							URL url = new URL("https://terafonnreg.hopebaytech.com/api/register/login/");
 							conn = (HttpsURLConnection) url.openConnection();
@@ -335,43 +390,69 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 								Log.d(HCFSMgmtUtils.TAG, "backend_url: " + backend_url);
 								Log.d(HCFSMgmtUtils.TAG, "protocol: " + protocol);
 
-								HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type);
-								HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, account);
-								HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, user);
-								HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, password);
-								HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, backend_url);
-								HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, bucket);
-								HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, protocol);
-								HCFSMgmtUtils.reloadConfig();
+								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type)) {
+									isFailedToSetHCFSConf = true;
+								}
+								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, account)) {
+									isFailedToSetHCFSConf = true;
+								}
+								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, user)) {
+									isFailedToSetHCFSConf = true;
+								}
+								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, password)) {
+									isFailedToSetHCFSConf = true;
+								}
+								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, backend_url)) {
+									isFailedToSetHCFSConf = true;
+								}
+								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, bucket)) {
+									isFailedToSetHCFSConf = true;
+								}
+								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, protocol)) {
+									isFailedToSetHCFSConf = true;
+								}
+								if (!HCFSMgmtUtils.reloadConfig()) {
+									isFailedToSetHCFSConf = true;
+								}
 
-								// Intent intent = new Intent(ActivateCloludStorageActivity.this, MainActivity.class);
-								// intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, acct.getDisplayName());
-								// intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, acct.getEmail());
-								// intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, acct.getPhotoUrl());
-								// startActivity(intent);
-								// finish();
 							}
 							// TODO Need to handle the situation that the number of backend account is not enough.
 							// else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
 							// Snackbar.make(findViewById(android.R.id.content), getString(R.string.active_cloud_storage_auth_fail),
 							// Snackbar.LENGTH_LONG).show();
 							// }
-						} catch (MalformedURLException e) {
-							Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-						} catch (IOException e) {
-							Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-						} catch (JSONException e) {
+						} catch (Exception e) {
 							Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
 						} finally {
 							if (conn != null) {
 								conn.disconnect();
 							}
 						}
+						final boolean mIsFailedToSetHCFSConf = isFailedToSetHCFSConf;
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								hideProgressDialog();
+								if (mIsFailedToSetHCFSConf) {
+									Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+									String failureMessage = getString(R.string.activate_cloud_storage_failed_to_activate);
+									Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
+								} else {
+									Intent intent = new Intent(ActivateCloludStorageActivity.this, MainActivity.class);
+									intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, acct.getDisplayName());
+									intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, acct.getEmail());
+									intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, acct.getPhotoUrl());
+									startActivity(intent);
+									finish();
+								}
+							}
+						});
 					}
 				});
-				hideProgressDialog();
 			} else {
-				Log.e(HCFSMgmtUtils.TAG, "Failed to sign in Google");
+				String failureMessage = getString(R.string.activate_cloud_storage_failed_to_signin_google_acount);
+				Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
+				Log.e(HCFSMgmtUtils.TAG, "Failed to sign in Google account.");
 			}
 		}
 

@@ -10,6 +10,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+/**
+ * Store uncompleted pin/unpin operations when user manually close app.
+ */
 public class ServiceAppDAO {
 	
 	public static final String TABLE_NAME = "service_app";

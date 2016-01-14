@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -33,6 +34,7 @@ public class FileDirInfo extends ItemInfo {
 	public static final String MIME_SUBTYPE_PNG = "png";
 	private File currentFile;
 	private Context context;
+	private int status = -1;
 
 	public FileDirInfo(Context context) {
 		super(context);
@@ -171,6 +173,20 @@ public class FileDirInfo extends ItemInfo {
 			}
 		}
 		return "";
+	}
+
+	public int getFileDirStatus() {
+		int status;
+		if (currentFile.isDirectory()) {
+			status = HCFSMgmtUtils.getDirStatus(getFilePath());
+		} else {
+			status = HCFSMgmtUtils.getFileStatus(getFilePath());
+		}
+		return status;
+	}
+
+	public Drawable getPinImage() {
+		return super.getPinImage(getFileDirStatus());
 	}
 
 }

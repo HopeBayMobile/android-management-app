@@ -35,6 +35,7 @@ import android.view.WindowManager;
 public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
 	private Handler mHandler;
+	private GoogleApiClient mGoogleApiClient;
 	private final String authUrl = "https://terafonnreg.hopebaytech.com/api/register/auth";
 
 	@Override
@@ -46,18 +47,19 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 		HandlerThread handlerThread = new HandlerThread(LoadingActivity.class.getSimpleName());
 		handlerThread.start();
 		mHandler = new Handler(handlerThread.getLooper());
-
+		
+		init();
 	}
-
-	@Override
-	protected void onStart() {
+	
+	public void init() {
+		Log.d(HCFSMgmtUtils.TAG, "init");
 		super.onStart();
 		if (NetworkUtils.isNetworkConnected(this)) {
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
 					final String[] server_client_id = new String[1];
-					final GoogleApiClient[] mGoogleApiClient = new GoogleApiClient[1];
+					// final GoogleApiClient[] mGoogleApiClient = new GoogleApiClient[1];
 					try {
 						URL url = new URL(authUrl);
 						HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -80,32 +82,31 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 								server_client_id[0] = authObj.getString("client_id");
 								Log.i(HCFSMgmtUtils.TAG, "server_client_id: " + server_client_id[0]);
 
-								runOnUiThread(new Runnable() {
+								Thread signInInitThread = new Thread(new Runnable() {
 									public void run() {
-										// Request only the user's ID token, which can be used to identify the
-										// user securely to your backend. This will contain the user's basic
-										// profile (name, profile picture URL, etc) so you should not need to
-										// make an additional call to personalize your application.
+										/**
+										 * Request only the user's ID token, which can be used to identify the
+										 * user securely to your backend. This will contain the user's basic
+										 * profile (name, profile picture URL, etc) so you should not need to
+										 * make an additional call to personalize your application.
+										 */
 										GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 												.requestIdToken(server_client_id[0]).requestEmail().build();
 
-										// Build GoogleAPIClient with the Google Sign-In API and the above options.
-										mGoogleApiClient[0] = new GoogleApiClient.Builder(LoadingActivity.this)
-												.enableAutoManage(LoadingActivity.this, LoadingActivity.this).addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+										/** Build GoogleAPIClient with the Google Sign-In API and the above options. */
+										mGoogleApiClient = new GoogleApiClient.Builder(LoadingActivity.this)
+												.enableAutoManage(LoadingActivity.this, LoadingActivity.this)
+												.addApi(Auth.GOOGLE_SIGN_IN_API, gso)
 												.build();
-
-										synchronized (LoadingActivity.this) {
-											Log.d(HCFSMgmtUtils.TAG, "notify");
-											LoadingActivity.this.notify();
-										}
+//										mGoogleApiClient.connect();
+												// mGoogleApiClient[0] = new GoogleApiClient.Builder(LoadingActivity.this)
+												// .enableAutoManage(LoadingActivity.this, LoadingActivity.this).addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+												// .build();
 									}
 								});
+								runOnUiThread(signInInitThread);
 								bufferedReader.close();
-
-								synchronized (LoadingActivity.this) {
-									Log.d(HCFSMgmtUtils.TAG, "wait");
-									LoadingActivity.this.wait();
-								}
+								signInInitThread.join();
 							}
 						}
 						conn.disconnect();
@@ -115,8 +116,8 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 
 					if (isActivated()) {
 						Log.d(HCFSMgmtUtils.TAG, "Activated");
-						if (mGoogleApiClient[0] != null) {
-							OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient[0]);
+						if (mGoogleApiClient != null) {
+							OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
 							if (opr.isDone()) {
 								GoogleSignInResult googleSignInResult = opr.get();
 								handleSignInResult(googleSignInResult);
@@ -145,7 +146,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 		} else {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle(getString(R.string.loading_alert_dialog_title));
-			builder.setMessage(getString(R.string.loading_alert_dialog_message));			
+			builder.setMessage(getString(R.string.loading_alert_dialog_message));
 			builder.setPositiveButton(getString(R.string.loading_alert_dialog_exit), new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
