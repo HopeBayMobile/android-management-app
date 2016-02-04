@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.larvalabs.svgandroid.SVG;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -14,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
@@ -25,6 +27,8 @@ import android.webkit.MimeTypeMap;
 
 public class FileDirInfo extends ItemInfo {
 
+	private final String CLASS_NAME = this.getClass().getSimpleName();
+
 	public static final String MIME_TYPE_IMAGE = "image";
 	public static final String MIME_TYPE_VIDEO = "video";
 	public static final String MIME_TYPE_AUDIO = "audio";
@@ -32,34 +36,98 @@ public class FileDirInfo extends ItemInfo {
 	public static final String MIME_SUBTYPE_APK = "vnd.android.package-archive";
 	public static final String MIME_SUBTYPE_OGG = "ogg";
 	public static final String MIME_SUBTYPE_PNG = "png";
+	public static final String MIME_SUBTYPE_SVG = "svg";
 	private File currentFile;
 	private Context context;
-	private int status = -1;
 
 	public FileDirInfo(Context context) {
 		super(context);
 		this.context = context;
 	}
 
-	public Object getIconImage() {
+	// public Object getIconImage() {
+	// if (currentFile.isDirectory()) {
+	// return ContextCompat.getDrawable(context, R.drawable.ic_folder_black);
+	// } else {
+	// String filePath = currentFile.getAbsolutePath();
+	// String mimeType = getMimeType();
+	// Log.d(HCFSMgmtUtils.TAG, currentFile.getName() + ": " + mimeType);
+	// if (mimeType != null) {
+	// int width, height;
+	// width = height = (int) context.getResources().getDimension(R.dimen.item_image_height_width);
+	// try {
+	// if (mimeType.contains(MIME_TYPE_IMAGE)) {
+	// if (mimeType.contains(MIME_SUBTYPE_PNG)) {
+	// Bitmap image = BitmapFactory.decodeFile(filePath);
+	// Bitmap thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+	// // return new BitmapDrawable(context.getResources(), thumbImage);
+	// return thumbImage;
+	// } else {
+	// // return new BitmapDrawable(context.getResources(), getThumbnail(absoluteFilePath));
+	// Bitmap thumbImage = getImageThumbnail(filePath);
+	// if (thumbImage == null) {
+	// Bitmap image = BitmapFactory.decodeFile(filePath);
+	// thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+	// }
+	// return thumbImage;
+	// }
+	// } else if (mimeType.contains(MIME_TYPE_VIDEO)) {
+	// Bitmap thumbImage = getVideoThumbnail(filePath);
+	// if (thumbImage == null) {
+	// Bitmap image = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
+	// thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+	// }
+	// return thumbImage;
+	// } else if (mimeType.contains(MIME_TYPE_APPLICATION)) {
+	// if (mimeType.contains(MIME_SUBTYPE_APK)) {
+	// String archiveFilePath = filePath;
+	// PackageManager pm = context.getPackageManager();
+	// PackageInfo packageInfo = pm.getPackageArchiveInfo(archiveFilePath, PackageManager.GET_ACTIVITIES);
+	// ApplicationInfo appInfo = packageInfo.applicationInfo;
+	// appInfo.sourceDir = archiveFilePath;
+	// appInfo.publicSourceDir = archiveFilePath;
+	// return appInfo.loadIcon(pm);
+	// } else if (mimeType.contains(MIME_SUBTYPE_OGG)) {
+	// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+	// }
+	// } else if (mimeType.contains(MIME_TYPE_AUDIO)) {
+	// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+	// }
+	// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+	// } catch (Exception e) {
+	// // Incorrect file type
+	// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+	// }
+	// } else {
+	// // Unknown file type
+	// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+	// }
+	// }
+	// }
+
+	public Bitmap getIconImage() {
 		if (currentFile.isDirectory()) {
-			return ContextCompat.getDrawable(context, R.drawable.ic_folder_black);
+			Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_folder_black);
+			return ((BitmapDrawable) drawable).getBitmap();
+			// return ContextCompat.getDrawable(context, R.drawable.ic_folder_black);
 		} else {
 			String filePath = currentFile.getAbsolutePath();
 			String mimeType = getMimeType();
-			Log.d(HCFSMgmtUtils.TAG, currentFile.getName() + ": " + mimeType);
+			String logMsg = "filePath=" + filePath + ", mimeType=" + mimeType;
+			HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getIconImage", logMsg);
 			if (mimeType != null) {
 				int width, height;
 				width = height = (int) context.getResources().getDimension(R.dimen.item_image_height_width);
 				try {
 					if (mimeType.contains(MIME_TYPE_IMAGE)) {
 						if (mimeType.contains(MIME_SUBTYPE_PNG)) {
+							/** Show PNG file with alpha supported */
 							Bitmap image = BitmapFactory.decodeFile(filePath);
 							Bitmap thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
-							// return new BitmapDrawable(context.getResources(), thumbImage);
 							return thumbImage;
+						} else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
+							// TODO show svg file
 						} else {
-							// return new BitmapDrawable(context.getResources(), getThumbnail(absoluteFilePath));
 							Bitmap thumbImage = getImageThumbnail(filePath);
 							if (thumbImage == null) {
 								Bitmap image = BitmapFactory.decodeFile(filePath);
@@ -82,21 +150,31 @@ public class FileDirInfo extends ItemInfo {
 							ApplicationInfo appInfo = packageInfo.applicationInfo;
 							appInfo.sourceDir = archiveFilePath;
 							appInfo.publicSourceDir = archiveFilePath;
-							return appInfo.loadIcon(pm);
+							return ((BitmapDrawable) appInfo.loadIcon(pm)).getBitmap();
 						} else if (mimeType.contains(MIME_SUBTYPE_OGG)) {
-							return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+							Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+							return ((BitmapDrawable) drawable).getBitmap();
+							// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
 						}
 					} else if (mimeType.contains(MIME_TYPE_AUDIO)) {
-						return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+						Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+						return ((BitmapDrawable) drawable).getBitmap();
+						// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
 					}
-					return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+					Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+					return ((BitmapDrawable) drawable).getBitmap();
+					// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 				} catch (Exception e) {
 					// Incorrect file type
-					return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+					Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+					return ((BitmapDrawable) drawable).getBitmap();
+					// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 				}
 			} else {
 				// Unknown file type
-				return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+				Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+				return ((BitmapDrawable) drawable).getBitmap();
+				// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 			}
 		}
 	}
@@ -104,14 +182,14 @@ public class FileDirInfo extends ItemInfo {
 	@Nullable
 	private Bitmap getImageThumbnail(String path) {
 		ContentResolver cr = context.getContentResolver();
-		Cursor ca = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID },
+		Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID },
 				MediaStore.MediaColumns.DATA + "=?", new String[] { path }, null);
-		if (ca != null && ca.moveToFirst()) {
-			int id = ca.getInt(ca.getColumnIndex(MediaStore.MediaColumns._ID));
-			ca.close();
+		if (cursor != null && cursor.moveToFirst()) {
+			int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+			cursor.close();
 			return MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
 		}
-		ca.close();
+		cursor.close();
 		return null;
 	}
 
@@ -138,7 +216,8 @@ public class FileDirInfo extends ItemInfo {
 	}
 
 	public String getFilePath() {
-		return currentFile.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+		// return currentFile.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+		return currentFile.getAbsolutePath();
 	}
 
 	public String getFileName() {
@@ -175,8 +254,13 @@ public class FileDirInfo extends ItemInfo {
 		return "";
 	}
 
+	@Override
+	public int getLocationStatus() {
+		return getFileDirStatus();
+	}
+
 	public int getFileDirStatus() {
-		int status;
+		int status = 0;
 		if (currentFile.isDirectory()) {
 			status = HCFSMgmtUtils.getDirStatus(getFilePath());
 		} else {

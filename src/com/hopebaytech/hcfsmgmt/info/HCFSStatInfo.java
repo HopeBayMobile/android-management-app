@@ -1,15 +1,13 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
-
-import android.util.Log;
 
 public class HCFSStatInfo {
 
 	public static final String STAT_DATA = "data";
 	public static final String STAT_DATA_CLOUD_TOTAL = "cloud_total";
 	public static final String STAT_DATA_CLOUD_USED = "cloud_used";
+	public static final String STAT_DATA_VOL_USED = "vol_used";
 	public static final String STAT_DATA_CACHE_TOTAL = "cache_total";
 	public static final String STAT_DATA_CACHE_DIRTY = "cache_dirty";
 	public static final String STAT_DATA_CACHE_USED = "cache_used";
@@ -19,16 +17,25 @@ public class HCFSStatInfo {
 	public static final String STAT_DATA_XFER_DOWN = "xfer_down";
 	public static final String STAT_DATA_CLOUD_CONN = "cloud_conn";
 
-	private long cloudTotal; // bytes
-	private long cloudUsed; // bytes
-	private long cacheTotal; // bytes
-	private long cacheDirtyUsed; // bytes
-	private long cacheUsed; // bytes
-	private long pinMax; // bytes
-	private long pinTotal; // bytes
-	private long xferUpload; // bytes
-	private long xferDownload; // bytes
+	private long cloudTotal; /* in bytes */
+	private long cloudUsed; /* in bytes */
+	private long volUsed; /* in bytes */
+	private long cacheTotal; /* in bytes */
+	private long cacheDirtyUsed; /* in bytes */
+	private long cacheUsed; /* in bytes */
+	private long pinMax; /* in bytes */
+	private long pinTotal; /* in bytes */
+	private long xferUpload; /* in bytes */
+	private long xferDownload; /* in bytes */
 	private boolean cloudConn;
+	
+	public String getVolUsed() {
+		return UnitConverter.convertByteToProperUnit(volUsed);
+	}
+
+	public void setVolUsed(long volUsed) {
+		this.volUsed = volUsed;
+	}
 
 	public String getCacheUsed() {
 		return UnitConverter.convertByteToProperUnit(cacheUsed);
@@ -57,6 +64,10 @@ public class HCFSStatInfo {
 	public String getCacheTotal() {
 		return UnitConverter.convertByteToProperUnit(cacheTotal);
 	}
+	
+	public long getRawCacheTotal() {
+		return cacheTotal;
+	}
 
 	public void setCacheTotal(long cacheTotal) {
 		this.cacheTotal = cacheTotal;
@@ -65,6 +76,10 @@ public class HCFSStatInfo {
 	public String getCacheDirtyUsed() {
 		return UnitConverter.convertByteToProperUnit(cacheDirtyUsed);
 	}
+	
+	public long getRawCacheDirtyUsed() {
+		return cacheDirtyUsed;
+	}
 
 	public void setCacheDirtyUsed(long cacheDirtyUsed) {
 		this.cacheDirtyUsed = cacheDirtyUsed;
@@ -72,6 +87,10 @@ public class HCFSStatInfo {
 
 	public String getPinTotal() {
 		return UnitConverter.convertByteToProperUnit(pinTotal);
+	}
+	
+	public long getRawPinTotal() {
+		return pinTotal;
 	}
 
 	public void setPinTotal(long pinTotal) {

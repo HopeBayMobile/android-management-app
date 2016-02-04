@@ -34,6 +34,7 @@ import android.view.WindowManager;
 
 public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
+	private final String CLASSNAME = this.getClass().getSimpleName();
 	private Handler mHandler;
 	private GoogleApiClient mGoogleApiClient;
 	private final String authUrl = "https://terafonnreg.hopebaytech.com/api/register/auth";
@@ -44,7 +45,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.loading_activity);
 
-		HandlerThread handlerThread = new HandlerThread(LoadingActivity.class.getSimpleName());
+		HandlerThread handlerThread = new HandlerThread(getClass().getSimpleName());
 		handlerThread.start();
 		mHandler = new Handler(handlerThread.getLooper());
 		
@@ -52,7 +53,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 	}
 	
 	public void init() {
-		Log.d(HCFSMgmtUtils.TAG, "init");
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", null);
 		super.onStart();
 		if (NetworkUtils.isNetworkConnected(this)) {
 			mHandler.post(new Runnable() {
@@ -111,11 +112,11 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 						}
 						conn.disconnect();
 					} catch (Exception e) {
-						Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+						HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
 					}
 
 					if (isActivated()) {
-						Log.d(HCFSMgmtUtils.TAG, "Activated");
+						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "Activated");
 						if (mGoogleApiClient != null) {
 							OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
 							if (opr.isDone()) {
@@ -135,7 +136,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 							finish();
 						}
 					} else {
-						Log.d(HCFSMgmtUtils.TAG, "NOT Activated");
+						HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", "NOT Activated");
 						Intent intent = new Intent(LoadingActivity.this, ActivateCloludStorageActivity.class);
 						intent.putExtra(HCFSMgmtUtils.INTENT_KEY_SERVER_CLIENT_ID, server_client_id[0]);
 						startActivity(intent);
@@ -163,8 +164,8 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 		return false;
 	}
 
-	private void handleSignInResult(GoogleSignInResult result) {
-		Log.d(HCFSMgmtUtils.TAG, "handleSignInResult");
+	private void handleSignInResult(GoogleSignInResult result) {		
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "handleSignInResult", null);
 		Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
 		if (result.isSuccess()) {
 			GoogleSignInAccount acct = result.getSignInAccount();
@@ -183,7 +184,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		// An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
-		Log.d(HCFSMgmtUtils.TAG, "onConnectionFailed: " + connectionResult);
+		HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onConnectionFailed", connectionResult.toString());
 		Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
 		startActivity(intent);
 		finish();

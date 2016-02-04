@@ -1,10 +1,6 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.R.drawable;
-import com.hopebaytech.hcfsmgmt.R.id;
-import com.hopebaytech.hcfsmgmt.R.layout;
-import com.hopebaytech.hcfsmgmt.R.string;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

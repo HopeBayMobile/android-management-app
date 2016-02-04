@@ -11,6 +11,7 @@ import com.hopebaytech.hcfsmgmt.db.ServiceAppDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -31,6 +32,7 @@ public class HCFSMgmtService extends Service {
 	private ServiceFileDirDAO serviceFileDirDAO;
 	private ServiceAppDAO serviceAppDAO;
 	private UidDAO uidDAO;
+	private final String CLASSNAME = getClass().getSimpleName();
 
 	@Override
 	public void onCreate() {
@@ -49,75 +51,89 @@ public class HCFSMgmtService extends Service {
 	@Override
 	public int onStartCommand(final Intent intent, int flags, int startId) {
 		if (intent != null) {
-			final int operation = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
+			final String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
 			cacheExecutor.execute(new Runnable() {
 				public void run() {
-					switch (operation) {
-					case HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED:
+					if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED)) {
 						notifyUploadCompleted();
-						break;
-					case HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE:
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE)) {
 						pinOrUnpinDataTypeFile();
-						break;
-					case HCFSMgmtUtils.INTENT_VALUE_PIN_APP:
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_APP)) {
+						boolean default_pinned_status = HCFSMgmtUtils.DEFAULT_PINNED_STATUS;
+						boolean isAppPinned = intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_PIN_STATUS, default_pinned_status);
+						String appName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_NAME);
+						String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_PACKAGE_NAME);
+						String dataDir = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_DATA_DIR);
+						String sourceDir = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_SOURCE_DIR);
+						String exeternalDir = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_EXTERNAL_DIR);
+
 						ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
-						serviceAppInfo
-								.setPinned(intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_PIN_STATUS, HCFSMgmtUtils.DEFAULT_PINNED_STATUS));
-						serviceAppInfo.setAppName(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_NAME));
-						serviceAppInfo.setPackageName(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_PACKAGE_NAME));
-						serviceAppInfo.setDataDir(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_DATA_DIR));
-						serviceAppInfo.setSourceDir(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_SOURCE_DIR));
-						serviceAppInfo.setExternalDir(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_EXTERNAL_DIR));
+						serviceAppInfo.setPinned(isAppPinned);
+						serviceAppInfo.setAppName(appName);
+						serviceAppInfo.setPackageName(packageName);
+						serviceAppInfo.setDataDir(dataDir);
+						serviceAppInfo.setSourceDir(sourceDir);
+						serviceAppInfo.setExternalDir(exeternalDir);
 						serviceAppDAO.insert(serviceAppInfo);
 						pinOrUnpinApp(serviceAppInfo);
 						serviceAppDAO.delete(serviceAppInfo);
-						break;
-					case HCFSMgmtUtils.INTENT_VALUE_PIN_FILE_DIRECTORY:
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_FILE_DIRECTORY)) {
+						boolean default_pinned_status = HCFSMgmtUtils.DEFAULT_PINNED_STATUS;
+						boolean isFileDirPinned = intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_PIN_STATUS, default_pinned_status);
+						String filePath = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_FILEAPTH);
+
 						ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
-						serviceFileDirInfo.setFilePath(intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_FILEAPTH));
-						serviceFileDirInfo.setPinned(
-								intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_PIN_STATUS, HCFSMgmtUtils.DEFAULT_PINNED_STATUS));
+						serviceFileDirInfo.setPinned(isFileDirPinned);
+						serviceFileDirInfo.setFilePath(filePath);
 						serviceFileDirDAO.insert(serviceFileDirInfo);
 						pinOrUnpinFileOrDirectory(serviceFileDirInfo);
 						serviceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
-						break;
-					case HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE:
-						Log.d(HCFSMgmtUtils.TAG, "Launch UID database");
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE)) {
+						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", "Launch UID database");
 						uidDAO.deleteAll();
 						PackageManager pm = getPackageManager();
 						List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 						for (ApplicationInfo packageInfo : packages) {
-							if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
+//							if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
 								int uid = packageInfo.uid;
 								String packageName = packageInfo.packageName;
 								uidDAO.insert(new UidInfo(uid, packageName));
-							}
-							;
+//							}							
 						}
-						break;
-					case HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE:
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE)) {
 						int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
 						String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
-						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_ADDED (uid): " + uid);
-						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_ADDED (packageName): " + packageName);
 						if (uidDAO.get(packageName) == null) {
+							String logMsg = "[PACKAGE_ADDED] uid=" + uid + ", packageName=" + packageName;
+							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", logMsg);
 							uidDAO.insert(new UidInfo(uid, packageName));
 						}
-						break;
-					case HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE:
-						uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
-						packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
-						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_REMOVED (uid): " + uid);
-						Log.d(HCFSMgmtUtils.TAG, "PACKAGE_REMOVED (packageName): " + packageName);
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE)) {
+						int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
+						String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
 						if (uidDAO.get(packageName) != null) {
+							String logMsg = "[PACKAGE_REMOVED] uid=" + uid + ", packageName=" + packageName;
+							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", logMsg);
 							uidDAO.delete(packageName);
 						}
-						break;
-					case HCFSMgmtUtils.INTENT_VALUE_RESET_XFER:
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_RESET_XFER)) {
 						HCFSMgmtUtils.resetXfer();
-						break;
-					default:
-						break;
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+						String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+						String key_pref = SettingsFragment.KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+						String storage_used_ratio = sharedPreferences.getString(key_pref, defaultValue);
+						HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+						long rawCacheDirtyUsed = statInfo.getRawCacheDirtyUsed();
+						long rawPinTotal = statInfo.getRawPinTotal();
+						long rawCacheTotal = statInfo.getRawCacheTotal();
+						long max = Math.max(rawCacheDirtyUsed, rawPinTotal);
+						if ((max / rawCacheTotal) > Integer.valueOf(storage_used_ratio)) {
+							int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+							String notify_title = getString(R.string.app_name);
+							String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storage_used_ratio);
+							HCFSMgmtUtils.notifyEvent(getApplicationContext(), notify_id, notify_title, notify_message);
+						}
 					}
 				}
 			});
@@ -156,7 +172,7 @@ public class HCFSMgmtService extends Service {
 	}
 
 	private void notifyUploadCompleted() {
-		Log.d(HCFSMgmtUtils.TAG, "notifyUploadCompleted");
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "notifyUploadCompleted", null);
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
 		if (notifyUploadCompletedPref) {
@@ -171,7 +187,7 @@ public class HCFSMgmtService extends Service {
 	}
 
 	private void pinOrUnpinApp(ServiceAppInfo info) {
-		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinApp: " + info.getAppName());
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "pinOrUnpinApp", info.getAppName());
 		boolean isPinned = info.isPinned();
 		if (isPinned) {
 			if (!HCFSMgmtUtils.pinApp(info)) {
@@ -185,7 +201,7 @@ public class HCFSMgmtService extends Service {
 	}
 
 	private void handleAppFailureOfPinOrUnpin(boolean isPinned, ServiceAppInfo info, String notifyMsg) {
-		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinFailure: " + info.getAppName());
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "pinOrUnpinFailure", info.getAppName());
 		int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 		String notify_title = getString(R.string.app_name);
 		String notify_message = notifyMsg + ": " + info.getAppName();
@@ -193,7 +209,7 @@ public class HCFSMgmtService extends Service {
 	}
 
 	private void pinOrUnpinDataTypeFile() {
-		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinDataTypeFile");
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "pinOrUnpinDataTypeFile", null);
 
 		String notify_title = getString(R.string.app_name);
 		ArrayList<String> notifyMessageList = new ArrayList<String>();
@@ -285,7 +301,7 @@ public class HCFSMgmtService extends Service {
 
 	private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
 		String filePath = info.getFilePath();
-		Log.d(HCFSMgmtUtils.TAG, "pinOrUnpinFileOrDrectory: " + filePath);
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
 		boolean isPinned = info.isPinned();
 		if (isPinned) {
 			boolean isSuccess = HCFSMgmtUtils.pinFileOrDirectory(filePath);

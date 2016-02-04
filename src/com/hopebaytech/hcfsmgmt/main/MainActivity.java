@@ -48,6 +48,7 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+	private final String CLASSNAME = getClass().getSimpleName();
 	private final int NAV_MENU_SDCARD1_ID = (int) (Math.random() * Integer.MAX_VALUE);
 	private SDCardBroadcastReceiver sdCardReceiver;
 	private Toolbar toolbar;
@@ -118,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 									BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
 									bitmap = BitmapFactory.decodeStream(bInputStream);
 								} catch (Exception e) {
-									Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+									HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
 								}
 								final Bitmap photoBmp = bitmap;
 								if (photoBmp != null) {
@@ -166,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 						br.close();
 					}
 				} catch (Exception e) {
-					Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+					HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
 				}
 			}
 		});
@@ -199,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		if (!isResetXferAlarmExist) {
 			HCFSMgmtUtils.startResetXferAlarm(this);
 		} else {
-			Log.w(HCFSMgmtUtils.TAG, "isResetXferAlarmExist");
+			HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "init", "ResetXferAlarm is already exist");
 		}
 
 	}
@@ -225,9 +226,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		} else if (id == R.id.nav_default_mountpoint) {
 			boolean isSDCard1 = false;
 			ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1), FileManagementFragment.TAG);
-		} else if (id == R.id.nav_add_mountpoint) {
-			Intent intent = new Intent(this, AddMountPointActivity.class);
-			startActivity(intent);
 		} else if (id == R.id.nav_settings) {
 			ft.replace(R.id.fragment_container, SettingsFragment.newInstance(), SettingsFragment.TAG);
 		} else if (id == R.id.nav_about) {
@@ -282,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			final String action = intent.getAction();
-			Log.d(HCFSMgmtUtils.TAG, "SDCARD action: " + action);                
+			HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "sdcard_action=" + action);
 			sdcard1_path = intent.getData().getSchemeSpecificPart().replace("///", "/");
 			if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
 				runOnUiThread(new Runnable() {

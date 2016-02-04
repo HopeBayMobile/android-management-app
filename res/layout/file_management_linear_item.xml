@@ -31,9 +31,8 @@
             android:id="@+id/itemName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"
+            android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@android:color/black" />
     </LinearLayout>

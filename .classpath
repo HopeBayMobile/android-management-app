@@ -13,6 +13,7 @@
 			<accessrule kind="nonaccessible" pattern="com/android/internal/**"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry kind="lib" path="libs/universal-image-loader-1.9.5.jar"/>
 	<classpathentry kind="src" path="/android-support-design"/>
 	<classpathentry kind="src" path="/android-support-recyclerview"/>
 	<classpathentry kind="lib" path="D:/Users/Aaronchu/AppData/Local/Android/sdk/platforms/android-19/android.jar" sourcepath="D:/Users/Aaronchu/AppData/Local/Android/sdk/sources/android-19">

@@ -9,12 +9,12 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 public class SettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
 
 	public static final String TAG = SettingsFragment.class.getSimpleName();
+	public static final String CLASSNAME = SettingsFragment.class.getSimpleName();
 	public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
 	public static final String KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY = "pref_notify_conn_failed_recovery";
 	public static final String KEY_PREF_NOTIFY_UPLAOD_COMPLETED = "pref_notify_upload_completed";
@@ -60,21 +60,11 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-		Log.d(HCFSMgmtUtils.TAG, "key: " + key);
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onSharedPreferenceChanged", "key=" + key);
 		if (key.equals(KEY_PREF_SYNC_WIFI_ONLY)) {
-			// boolean syncWifiOnlyPref = sharedPreferences.getBoolean(key, false);
-			// if (syncWifiOnlyPref) {
-			//
-			// } else {
-			//
-			// }
+			HCFSMgmtUtils.detectNetworkStatusAndSyncToCloud(getActivity());
 		} else if (key.equals(KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY)) {
-			// boolean notifyConnFailedRevoeryPref = sharedPreferences.getBoolean(key, false);
-			// if (notifyConnFailedRevoeryPref) {
-			//
-			// } else {
-			//
-			// }
+			
 		} else if (key.equals(KEY_PREF_NOTIFY_UPLAOD_COMPLETED)) {
 			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(key, false);
 			if (notifyUploadCompletedPref) {
@@ -83,12 +73,12 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(getActivity());
 			}
 		} else if (key.equals(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
-			ListPreference storage_used_ratio = (ListPreference) findPreference(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+			ListPreference storage_used_ratio = (ListPreference) findPreference(key);
 			String ratio = storage_used_ratio.getValue() + "%%";
 			String summary = getString(R.string.settings_local_storage_used_ratio, ratio);
 			storage_used_ratio.setSummary(summary);
-
 		}
+		
 	}
 
 }

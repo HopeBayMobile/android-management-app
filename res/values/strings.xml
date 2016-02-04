@@ -23,9 +23,9 @@
     <string name="nav_settings">設定</string>
     <string name="nav_about">關於</string>
     
-    <string name="notify_network_connected">偵測網路連線已恢復。</string>
-    <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線。</string>
-    <string name="notify_upload_completed">本地端資料已上傳至雲端空間。</string>
+    <string name="notify_network_connected">偵測網路連線已恢復</string>
+    <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線</string>
+    <string name="notify_upload_completed">本地端資料已上傳至雲端空間</string>
     <string name="notify_pin_app_failure">釘選應用程式失敗</string>
     <string name="notify_pin_file_dir_failure">釘選檔案失敗</string>
     <string name="notify_pin_image_failure">釘選圖片失敗</string>
@@ -36,6 +36,7 @@
     <string name="notify_unpin_image_failure">取消釘選圖片失敗</string>
     <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
     <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
+    <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達  %s</string>
 
     <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
     
@@ -43,8 +44,8 @@
     <string name="home_page_network_status_connecting">嘗試連線</string>
     <string name="home_page_network_status_disconnected">連線中斷</string>
     <string name="home_page_space_usage_title">空間使用量</string>
-    <string name="home_page_cloud_storage">雲端空間</string>
-    <string name="home_page_local_storage">本地空間</string>
+    <string name="home_page_used_space">已使用空間</string>
+    <string name="home_page_local_storage">快取空間</string>
     <string name="home_page_pinned_storage">釘選空間</string>
     <string name="home_page_network_traffic_title">資料傳輸量</string>
     <string name="home_page_the_amount_of_network_traffic_today">本日資料傳輸</string>
@@ -55,7 +56,7 @@
     <string name="file_management_hint_no_file">這個資料夾是空的</string>
     <string name="file_management_snackbar_refresh">重新整理</string>
     <string name="file_management_snackbar_unkown_type_file">無可開啟此類型檔案的應用程式</string>
-    <string name="file_management_spinner_apps">依安裝程式顯示</string>
+    <string name="file_management_spinner_apps">依應用程式顯示</string>
     <string name="file_management_spinner_data_type">依資料型態顯示</string>
     <string name="file_management_spinner_files">依檔案顯示</string>
     <string-array name="file_management_spinner">
@@ -100,7 +101,7 @@
     <string name="settings_section_notify_local_storage_used_ratio_dialog_title">請選擇通知的比例</string>
     <string name="settings_section_notify_local_storage_used_ratio_summary">請選擇通知的比例</string>
     <string name="settings_section_notify_local_storage_used_ratio_title">通知本地空間使用率</string>
-    <string name="settings_local_storage_used_ratio">空間使用率達  %s 時進行通知"</string>
+    <string name="settings_local_storage_used_ratio">本地空間使用率達  %s 時進行通知"</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
         <item>80%</item>
@@ -129,6 +130,6 @@
     
     <string name="version_system_title">System Version</string>
     <string name="version_app_title">App Version</string>
-    <string name="version_system">2.0.2.0005</string>
+    <string name="version_system">2.0.3.0172(CI)</string>
     
 </resources>

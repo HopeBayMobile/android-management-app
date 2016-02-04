@@ -2,13 +2,11 @@ package com.hopebaytech.hcfsmgmt.main;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -18,7 +16,6 @@ import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.gms.auth.api.Auth;
@@ -54,6 +51,7 @@ import android.widget.TextView;
 
 public class ActivateCloludStorageActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
+	private final String CLASSNAME = this.getClass().getSimpleName();
 	private GoogleSignInOptions gso;
 	private GoogleApiClient mGoogleApiClient;
 	private Handler mHandler;
@@ -73,7 +71,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 		mHandler = new Handler(handlerThread.getLooper());
 
 		String server_client_id = getIntent().getStringExtra(HCFSMgmtUtils.INTENT_KEY_SERVER_CLIENT_ID);
-		Log.w(HCFSMgmtUtils.TAG, "server_client_id: " + server_client_id);
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "server_client_id=" + server_client_id);
 		if (server_client_id != null) {
 			// Request only the user's ID token, which can be used to identify the
 			// user securely to your backend. This will contain the user's basic
@@ -129,7 +127,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 										outputStream.close();
 
 										int responseCode = conn.getResponseCode();
-										Log.d(HCFSMgmtUtils.TAG, "Auth response code: " + responseCode);
+										HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "responseCode=" + responseCode);
 										if (responseCode == HttpsURLConnection.HTTP_OK) {
 											// Retrieve response content
 											InputStream inputStream = conn.getInputStream();
@@ -140,11 +138,13 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												sb.append(line);
 											}
 											inputStream.close();
-											Log.d(HCFSMgmtUtils.TAG, "response: " + sb.toString());
+											HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "response=" + sb.toString());
 
 											JSONObject jsonObj = new JSONObject(sb.toString());
 											boolean result = jsonObj.getBoolean("result");
 											if (result) {
+												isFailedToAuth = false;
+												
 												JSONObject data = jsonObj.getJSONObject("data");
 												String backend_type = data.getString("backend_type");
 												String account = data.getString("account").split(":")[0];
@@ -155,13 +155,13 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												boolean isTLS = data.getBoolean("TLS");
 												String protocol = isTLS ? "https" : "http";
 
-												Log.d(HCFSMgmtUtils.TAG, "backend_type: " + backend_type);
-												Log.d(HCFSMgmtUtils.TAG, "account: " + account);
-												Log.d(HCFSMgmtUtils.TAG, "user: " + user);
-												Log.d(HCFSMgmtUtils.TAG, "password: " + password);
-												Log.d(HCFSMgmtUtils.TAG, "backend_url: " + backend_url);
-												Log.d(HCFSMgmtUtils.TAG, "bucket: " + bucket);
-												Log.d(HCFSMgmtUtils.TAG, "protocol: " + protocol);
+												HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "backend_type=" + backend_type);
+												HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "account=" + account);
+												HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "user=" + user);
+												HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "password=" + password);
+												HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "backend_url=" + backend_url);
+												HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "bucket=" + bucket);
+												HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "protocol=" + protocol);
 
 												if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type)) {
 													isFailedToSetHCFSConf = true;
@@ -187,24 +187,22 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												if (!HCFSMgmtUtils.reloadConfig()) {
 													isFailedToSetHCFSConf = true;
 												}
-												isFailedToAuth = false;
 											} else {
+												isFailedToAuth = true;
+												
 												String msg = jsonObj.getString("msg");
 												Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
-												isFailedToAuth = true;
 											}
 										}
 										// TODO Need to handle the situation that the number of backend account is not enough.
 										// else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
 										// Snackbar.make(findViewById(android.R.id.content), getString(R.string.active_cloud_storage_auth_fail),
 										// Snackbar.LENGTH_LONG).show();
-										// }
-									} catch (MalformedURLException e) {
-										Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-									} catch (IOException e) {
-										Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-									} catch (JSONException e) {
-										Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+										// }									
+									} catch (Exception e) {
+										isFailedToAuth = true;
+										isFailedToSetHCFSConf = true;
+										HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
 									} finally {
 										if (conn != null) {
 											conn.disconnect();
@@ -238,7 +236,10 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 													startActivity(intent);
 													finish();
 												}
-											} 
+											} else {
+												String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
+												Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
+											}
 										}
 									});
 
@@ -313,7 +314,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
 		// An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
-		Log.d(HCFSMgmtUtils.TAG, "onConnectionFailed:" + connectionResult);
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onConnectionFailed", "connectionResult=" + connectionResult);
 	}
 
 	@Override
@@ -326,7 +327,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 				showProgressDialog();
 				final GoogleSignInAccount acct = result.getSignInAccount();
 				final String idToken = acct.getIdToken();
-				Log.d(HCFSMgmtUtils.TAG, "onActivityResult - idToken: " + idToken);
+				HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "idToken=" + idToken);
 
 				mHandler.post(new Runnable() {
 					@Override
@@ -345,8 +346,8 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 							params.add(new BasicNameValuePair("provider", "google-oauth2"));
 							params.add(new BasicNameValuePair("token", idToken));
 							params.add(new BasicNameValuePair("imei_code", getDeviceIMEI()));
-							Log.d(HCFSMgmtUtils.TAG, "IMEI: " + getDeviceIMEI());
-							Log.d(HCFSMgmtUtils.TAG, "idToken: " + idToken);
+							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "IMEI=" + getDeviceIMEI());
+							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "idToken=" + idToken);
 
 							OutputStream outputStream = conn.getOutputStream();
 							BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
@@ -356,7 +357,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 							outputStream.close();
 
 							int responseCode = conn.getResponseCode();
-							Log.d(HCFSMgmtUtils.TAG, "Auth response code: " + responseCode);
+							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "responseCode=" + responseCode);
 							if (responseCode == HttpsURLConnection.HTTP_OK) {
 								// Retrieve response content
 								InputStream inputStream = conn.getInputStream();
@@ -367,7 +368,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 									sb.append(line);
 								}
 								inputStream.close();
-								Log.d(HCFSMgmtUtils.TAG, "response: " + sb.toString());
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "response=" + sb.toString());
 
 								JSONObject jsonObj = new JSONObject(sb.toString());
 								JSONObject data = jsonObj.getJSONObject("data");
@@ -383,12 +384,12 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 									protocol = "https";
 								}
 
-								Log.d(HCFSMgmtUtils.TAG, "backend_type: " + backend_type);
-								Log.d(HCFSMgmtUtils.TAG, "account: " + account);
-								Log.d(HCFSMgmtUtils.TAG, "user: " + user);
-								Log.d(HCFSMgmtUtils.TAG, "password: " + password);
-								Log.d(HCFSMgmtUtils.TAG, "backend_url: " + backend_url);
-								Log.d(HCFSMgmtUtils.TAG, "protocol: " + protocol);
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "backend_type=" + backend_type);
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "account=" + account);
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "user=" + user);
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "password=" + password);
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "backend_url=" + backend_url);
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "protocol=" + protocol);
 
 								if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type)) {
 									isFailedToSetHCFSConf = true;
@@ -452,7 +453,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 			} else {
 				String failureMessage = getString(R.string.activate_cloud_storage_failed_to_signin_google_acount);
 				Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
-				Log.e(HCFSMgmtUtils.TAG, "Failed to sign in Google account.");
+				HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onActivityResult", "Failed to sign in Google account.");
 			}
 		}
 
@@ -481,7 +482,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 
 	private String getDeviceIMEI() {
 		String imei = ((TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-		Log.d(HCFSMgmtUtils.TAG, "getDeviceIMEI(): " + imei);
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceIMEI", "imei=" + imei);
 		return imei == null ? "" : imei;
 	}
 

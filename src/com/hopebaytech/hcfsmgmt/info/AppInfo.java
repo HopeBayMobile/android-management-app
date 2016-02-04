@@ -6,6 +6,8 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.support.annotation.Nullable;
@@ -31,8 +33,8 @@ public class AppInfo extends ItemInfo {
 		return uid;
 	}
 
-	public Drawable getIconImage() {
-		return context.getPackageManager().getApplicationIcon(appInfo);
+	public Bitmap getIconImage() {
+		return ((BitmapDrawable) context.getPackageManager().getApplicationIcon(appInfo)).getBitmap();
 	}
 
 	public void setApplicationInfo(ApplicationInfo appInfo) {
@@ -121,6 +123,11 @@ public class AppInfo extends ItemInfo {
 			packageName = appInfo.packageName;
 		}
 		return packageName;
+	}
+	
+	@Override
+	public int getLocationStatus() {
+		return getAppStatus();
 	}
 
 	public int getAppStatus() {
