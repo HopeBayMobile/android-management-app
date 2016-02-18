@@ -34,7 +34,7 @@ import android.view.WindowManager;
 
 public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-	private final String CLASSNAME = this.getClass().getSimpleName();
+	private final String CLASSNAME = getClass().getSimpleName();
 	private Handler mHandler;
 	private GoogleApiClient mGoogleApiClient;
 	private final String authUrl = "https://terafonnreg.hopebaytech.com/api/register/auth";
@@ -60,7 +60,6 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 				@Override
 				public void run() {
 					final String[] server_client_id = new String[1];
-					// final GoogleApiClient[] mGoogleApiClient = new GoogleApiClient[1];
 					try {
 						URL url = new URL(authUrl);
 						HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();
@@ -75,13 +74,13 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 							}
 
 							String jsonResponse = sb.toString();
-							Log.i(HCFSMgmtUtils.TAG, "content: " + jsonResponse);
+							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "jsonResponse=" + jsonResponse);
 							if (!jsonResponse.isEmpty()) {
 								JSONObject jObj = new JSONObject(jsonResponse);
 								JSONObject dataObj = jObj.getJSONObject("data");
 								JSONObject authObj = dataObj.getJSONObject("google-oauth2");
 								server_client_id[0] = authObj.getString("client_id");
-								Log.i(HCFSMgmtUtils.TAG, "server_client_id: " + server_client_id[0]);
+								HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "server_client_id=" + server_client_id[0]);
 
 								Thread signInInitThread = new Thread(new Runnable() {
 									public void run() {

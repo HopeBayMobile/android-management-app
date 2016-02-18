@@ -62,7 +62,7 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 
 		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onSharedPreferenceChanged", "key=" + key);
 		if (key.equals(KEY_PREF_SYNC_WIFI_ONLY)) {
-			HCFSMgmtUtils.detectNetworkStatusAndSyncToCloud(getActivity());
+			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(getActivity());
 		} else if (key.equals(KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY)) {
 			
 		} else if (key.equals(KEY_PREF_NOTIFY_UPLAOD_COMPLETED)) {

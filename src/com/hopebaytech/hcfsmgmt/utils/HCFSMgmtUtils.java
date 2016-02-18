@@ -17,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 
+import android.R.menu;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -26,6 +27,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.SystemClock;
@@ -44,9 +47,10 @@ public class HCFSMgmtUtils {
 
 	public static final boolean ENABLE_AUTH = true;
 	public static final boolean DEFAULT_PINNED_STATUS = true;
-	public static final int LOGLEVEL = Log.WARN;
+	public static final int LOGLEVEL = Log.DEBUG;
 
-	public static final int INTERVAL_ONE_MINUTE = 60 * 1000;
+	public static final int INTERVAL_TEN_SECONDS = 10 * 1000;
+	public static final int INTERVAL_ONE_MINUTE = 6 * INTERVAL_TEN_SECONDS;
 	public static final int INTERVAL_ONE_HOUR = 60 * INTERVAL_ONE_MINUTE;
 	public static final int INTERVAL_NOTIFY_UPLAOD_COMPLETED = INTERVAL_ONE_HOUR;
 	public static final int INTERVAL_PIN_DATA_TYPE_FILE = INTERVAL_ONE_HOUR;
@@ -66,10 +70,6 @@ public class HCFSMgmtUtils {
 	public static final String DATA_STATUS_CLOUD = "cloud";
 	public static final String DATA_STATUS_HYBRID = "hybrid";
 	public static final String DATA_STATUS_LOCAL = "local";
-
-	public static final String DATA_TYPE_IMAGE = "image";
-	public static final String DATA_TYPE_VIDEO = "video";
-	public static final String DATA_TYPE_AUDIO = "audio";
 
 	public static final String INTENT_KEY_OPERATION = "intent_key_action";
 	public static final String INTENT_KEY_PIN_FILE_DIR_FILEAPTH = "intent_key_pin_firdir_filepath";
@@ -118,8 +118,8 @@ public class HCFSMgmtUtils {
 	public static final String ITENT_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
 	public static final String ITENT_GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
 
-	public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
-	public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
+	// public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
+	// public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
 
 	public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
@@ -132,25 +132,6 @@ public class HCFSMgmtUtils {
 			return isPathPinned(sourceDir) & isPathPinned(dataDir);
 		} else {
 			return isPathPinned(sourceDir) & isPathPinned(dataDir) & isPathPinned(externalDir);
-		}
-	}
-
-	public static void startPinDataTypeFileAlarm(Context context) {
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
-		int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
-		int flags = PendingIntent.FLAG_NO_CREATE;
-		boolean isAlarmExist = (PendingIntent.getBroadcast(context, requestCode, intent, flags) != null);
-		if (!isAlarmExist) {
-			log(Log.DEBUG, CLASSNAME, "startPinDataTypeFileAlarm", null);
-			requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
-			flags = PendingIntent.FLAG_UPDATE_CURRENT;
-			PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-			long triggerAtMillis = SystemClock.elapsedRealtime();
-			long intervalMillis = INTERVAL_PIN_DATA_TYPE_FILE;
-			am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
 		}
 	}
 
@@ -168,32 +149,49 @@ public class HCFSMgmtUtils {
 	}
 
 	public static void stopPinDataTypeFileAlarm(Context context) {
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		log(Log.DEBUG, CLASSNAME, "stopPinDataTypeFileAlarm", null);
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
-		boolean isAlarmExist = (PendingIntent.getBroadcast(context, REQUEST_CODE_PIN_DATA_TYPE_FILE, intent, PendingIntent.FLAG_NO_CREATE) != null);
-		if (isAlarmExist) {
-			DataTypeDAO dataTypeDAO = new DataTypeDAO(context);
-			boolean isImageTypePinned = isDataTypePinned(dataTypeDAO, DATA_TYPE_IMAGE);
-			boolean isVideoTypePinned = isDataTypePinned(dataTypeDAO, DATA_TYPE_VIDEO);
-			boolean isAudioTypePinned = isDataTypePinned(dataTypeDAO, DATA_TYPE_AUDIO);
-			dataTypeDAO.close();
-			if (!isImageTypePinned && !isVideoTypePinned && !isAudioTypePinned) {
-				log(Log.DEBUG, CLASSNAME, "stopPinDataTypeFileAlarm", null);
-				PendingIntent pi = PendingIntent.getBroadcast(context, REQUEST_CODE_PIN_DATA_TYPE_FILE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-				pi.cancel();
-				am.cancel(pi);
-			}
-		}
+
+		int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
+		int flags = PendingIntent.FLAG_CANCEL_CURRENT;
+		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+		pi.cancel();
+
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		am.cancel(pi);
+	}
+
+	public static void startPinDataTypeFileAlarm(Context context) {
+		stopPinDataTypeFileAlarm(context);
+		
+		log(Log.DEBUG, CLASSNAME, "startPinDataTypeFileAlarm", null);
+		
+		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
+
+		int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
+		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		long triggerAtMillis = SystemClock.elapsedRealtime();
+		long intervalMillis = INTERVAL_PIN_DATA_TYPE_FILE;
+		am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
 	}
 
 	public static void startResetXferAlarm(Context context) {
+		stopResetXferAlarm(context);
+		
 		log(Log.DEBUG, CLASSNAME, "startResetXferAlarm", null);
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
+
 		int requestCode = REQUEST_CODE_RESET_XFER;
 		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
 		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
@@ -204,20 +202,41 @@ public class HCFSMgmtUtils {
 		calendar.set(Calendar.MINUTE, 59);
 		calendar.set(Calendar.SECOND, 59);
 
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		long intervalMillis = INTERVAL_RESET_XFER;
 		am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
 	}
+	
+	public static void stopResetXferAlarm(Context context) {
+		log(Log.DEBUG, CLASSNAME, "stopResetXferAlarm", null);
+		
+		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
+		
+		int requestCode = REQUEST_CODE_RESET_XFER;
+		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+		pi.cancel();
+		
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		am.cancel(pi);
+	}
 
 	public static void startNotifyUploadCompletedAlarm(Context context) {
+		stopNotifyUploadCompletedAlarm(context);
+		
 		log(Log.DEBUG, CLASSNAME, "startNotifyUploadCompletedAlarm", null);
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
+
 		int requestCode = REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED;
 		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
 		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		long triggerAtMillis = SystemClock.elapsedRealtime();
 		long intervalMillis = INTERVAL_NOTIFY_UPLAOD_COMPLETED;
 		am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
@@ -225,14 +244,17 @@ public class HCFSMgmtUtils {
 
 	public static void stopNotifyUploadCompletedAlarm(Context context) {
 		log(Log.DEBUG, CLASSNAME, "stopNotifyUploadCompletedAlarm", null);
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
+
 		int requestCode = REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED;
 		int flags = PendingIntent.FLAG_CANCEL_CURRENT;
 		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 		pi.cancel();
+
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		am.cancel(pi);
 	}
 
@@ -265,12 +287,13 @@ public class HCFSMgmtUtils {
 	}
 
 	@Nullable
-	public static ArrayList<String> getAvailableVideoPaths(Context context) {
+	public static ArrayList<String> getAvailableVideoPaths(Context context, long dateUpdated) {
 		ArrayList<String> videoPaths = null;
 		ContentResolver resolver = context.getContentResolver();
-		String[] projection = { MediaStore.Video.Media._ID, MediaStore.Video.Media.DATA };
+		String[] projection = { MediaStore.Video.Media._ID, MediaStore.Video.Media.DATA, MediaStore.Audio.Media.DATE_ADDED };
 		/* External storage */
-		Cursor cursor = resolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Video.Media._ID);
+		String selection = MediaStore.Audio.Media.DATE_ADDED + " > " + dateUpdated;
+		Cursor cursor = resolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Video.Media._ID);
 		if (cursor != null) {
 			videoPaths = new ArrayList<String>();
 			cursor.moveToFirst();
@@ -299,12 +322,13 @@ public class HCFSMgmtUtils {
 	}
 
 	@Nullable
-	public static ArrayList<String> getAvailableAudioPaths(Context context) {
+	public static ArrayList<String> getAvailableAudioPaths(Context context, long dateUpdated) {
 		ArrayList<String> audioPaths = null;
 		ContentResolver resolver = context.getContentResolver();
-		String[] projection = { MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DATA };
+		String[] projection = { MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.DATE_ADDED };
 		/* External storage */
-		Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Audio.Media._ID);
+		String selection = MediaStore.Audio.Media.DATE_ADDED + " > " + dateUpdated;
+		Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Audio.Media._ID);
 		if (cursor != null) {
 			audioPaths = new ArrayList<String>();
 			cursor.moveToFirst();
@@ -333,12 +357,13 @@ public class HCFSMgmtUtils {
 	}
 
 	@Nullable
-	public static ArrayList<String> getAvailableImagePaths(Context context) {
+	public static ArrayList<String> getAvailableImagePaths(Context context, long dateUpdated) {
+		/* External storage */
 		ArrayList<String> imagePaths = null;
 		ContentResolver resolver = context.getContentResolver();
-		String[] projection = { MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA };
-		/* External storage */
-		Cursor cursor = resolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, MediaStore.Images.Media._ID);
+		String[] projection = { MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA, MediaStore.Audio.Media.DATE_ADDED };
+		String selection = MediaStore.Audio.Media.DATE_ADDED + " > " + dateUpdated;
+		Cursor cursor = resolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Images.Media._ID);
 		if (cursor != null) {
 			imagePaths = new ArrayList<String>();
 			cursor.moveToFirst();
@@ -352,6 +377,7 @@ public class HCFSMgmtUtils {
 			}
 			cursor.close();
 		}
+
 		/* Internal storage */
 		// cursor = resolver.query(MediaStore.Images.Media.INTERNAL_CONTENT_URI,
 		// projection, null, null, MediaStore.Images.Media._ID);
@@ -373,9 +399,10 @@ public class HCFSMgmtUtils {
 		NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
 		bigStyle.bigText(notify_message);
 
-		Notification notifcaition = new NotificationCompat.Builder(context).setWhen(System.currentTimeMillis())
-				.setSmallIcon(R.drawable.ic_terafonn_logo).setTicker(notify_title).setContentTitle(notify_title).setContentText(notify_message)
-				.setAutoCancel(true).setStyle(bigStyle).setDefaults(defaults).build();
+		Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_terafonn_logo);
+		Notification notifcaition = new NotificationCompat.Builder(context).setWhen(System.currentTimeMillis()).setSmallIcon(R.drawable.ic_system_bar)
+				.setLargeIcon(largeIcon).setTicker(notify_title).setContentTitle(notify_title).setContentText(notify_message).setAutoCancel(true)
+				.setStyle(bigStyle).setDefaults(defaults).build();
 
 		NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 		notificationManagerCompat.notify(notify_id, notifcaition);
@@ -456,13 +483,14 @@ public class HCFSMgmtUtils {
 			String jsonResult = HCFSApiUtils.pin(filePath);
 			JSONObject jObject = new JSONObject(jsonResult);
 			isSuccess = jObject.getBoolean("result");
+			String logMsg = "operation=Pin, filePath=" + filePath + ", jsonResult=" + jsonResult;
 			if (isSuccess) {
-				Log.i(TAG, "Pin " + filePath + ": " + jsonResult);
+				log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
 			} else {
-				Log.e(TAG, "Pin " + filePath + ": " + jsonResult);
+				log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", logMsg);
 			}
 		} catch (JSONException e) {
-			Log.e(TAG, Log.getStackTraceString(e));
+			log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
 		}
 		return isSuccess;
 	}
@@ -473,13 +501,14 @@ public class HCFSMgmtUtils {
 			String jsonResult = HCFSApiUtils.unpin(filePath);
 			JSONObject jObject = new JSONObject(jsonResult);
 			isSuccess = jObject.getBoolean("result");
+			String logMsg = "operation=Unpin, filePath=" + filePath + ", jsonResult=" + jsonResult;
 			if (isSuccess) {
-				Log.i(TAG, "Unpin " + filePath + ": " + jsonResult);
+				log(Log.INFO, CLASSNAME, "unpinFileOrDirectory", logMsg);
 			} else {
-				Log.e(TAG, "Unpin " + filePath + ": " + jsonResult);
+				log(Log.ERROR, CLASSNAME, "unpinFileOrDirectory", logMsg);
 			}
 		} catch (JSONException e) {
-			Log.e(TAG, Log.getStackTraceString(e));
+			log(Log.ERROR, CLASSNAME, "unpinFileOrDirectory", Log.getStackTraceString(e));
 		}
 		return isSuccess;
 	}
@@ -487,7 +516,11 @@ public class HCFSMgmtUtils {
 	public static int getDirStatus(String pathName) {
 		int status = FileStatus.LOCAL;
 		try {
+			// String logMsg = "pathName=" + pathName + ", startTime=" + System.currentTimeMillis();
+			// HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
 			String jsonResult = HCFSApiUtils.getDirStatus(pathName);
+			// logMsg = "pathName=" + pathName + ", endTime=" + System.currentTimeMillis();
+			// HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
 			String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
 			JSONObject jObject = new JSONObject(jsonResult);
 			boolean isSuccess = jObject.getBoolean("result");
@@ -522,6 +555,7 @@ public class HCFSMgmtUtils {
 			HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", Log.getStackTraceString(e));
 			// Log.e(TAG, Log.getStackTraceString(e));
 		}
+
 		return status;
 	}
 
@@ -688,7 +722,7 @@ public class HCFSMgmtUtils {
 		return isSuccess;
 	}
 
-	public static void detectNetworkStatusAndSyncToCloud(Context context) {
+	public static void detectNetworkAndSyncDataToCloud(Context context) {
 		log(Log.DEBUG, CLASSNAME, "detectNetworkStatusAndSyncToCloud", null);
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -761,22 +795,40 @@ public class HCFSMgmtUtils {
 	}
 
 	public static void startNotifyLocalStorageUsedRatioAlarm(Context context) {
+		stopNotifyLocalStorageUsedRatioAlarm(context);
+		
 		log(Log.DEBUG, CLASSNAME, "startNotifyLocalStorageUsedRatioAlarm", null);
-		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+
 		int requestCode = REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO;
 		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
 		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		long triggerAtMillis = SystemClock.elapsedRealtime();
 		long intervalMillis = INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO;
 		am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
 	}
+	
+	public static void stopNotifyLocalStorageUsedRatioAlarm(Context context) {
+		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+
+		int requestCode = REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+		pi.cancel();
+
+		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+		am.cancel(pi);
+	}
 
 	public static void log(int logLevel, String className, String funcName, String logMsg) {
-		if (logLevel == LOGLEVEL) {
+		if (logLevel >= LOGLEVEL) {
 			if (logMsg == null) {
 				logMsg = "";
 			}
@@ -793,7 +845,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static void log(int logLevel, String className, String innerClassName, String funcName, String logMsg) {
-		if (logLevel == LOGLEVEL) {
+		if (logLevel >= LOGLEVEL) {
 			if (logMsg == null) {
 				logMsg = "";
 			}

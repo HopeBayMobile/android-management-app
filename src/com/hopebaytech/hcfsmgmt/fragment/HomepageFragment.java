@@ -172,15 +172,15 @@ public class HomepageFragment extends Fragment {
 				TextView networkConnStatusText = (TextView) getView().findViewById(R.id.network_conn_status);
 				if (netInfo != null) {
 					if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
-						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Connected");
+						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connected");
 						networkConnStatusImage.setImageResource(R.drawable.connect_96x96);
 						networkConnStatusText.setText(getString(R.string.home_page_network_status_connected));
 					} else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
-						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Connecting");
+						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connecting");
 						networkConnStatusImage.setImageResource(R.drawable.connect_connecting_96x96);
 						networkConnStatusText.setText(getString(R.string.home_page_network_status_connecting));
 					} else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
-						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Disconnected");
+						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is disconnected");
 						networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
 						networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
 					}

@@ -90,6 +90,8 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHC
 	HCFS_set_config(&json_res, key, value);
 	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
 	free(json_res);
+	free(key);
+	free(value);
 	return result;
 }
 

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hopebaytech.hcfsmgmt"
     android:versionCode="1"
-    android:versionName="1.0.0019" >
+    android:versionName="1.0.0020" >
 
     <uses-sdk
         android:minSdkVersion="21"
@@ -64,7 +64,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.hopebaytech.hcfsmgmt.services.HCFSMgmtService" />
+        <service android:name="com.hopebaytech.hcfsmgmt.service.HCFSMgmtService" />
     </application>
 
 </manifest>

@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.larvalabs.svgandroid.SVG;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -216,7 +215,6 @@ public class FileDirInfo extends ItemInfo {
 	}
 
 	public String getFilePath() {
-		// return currentFile.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
 		return currentFile.getAbsolutePath();
 	}
 
@@ -271,6 +269,11 @@ public class FileDirInfo extends ItemInfo {
 
 	public Drawable getPinImage() {
 		return super.getPinImage(getFileDirStatus());
+	}
+
+	@Override
+	public int hashCode() {
+		return getFilePath().hashCode();
 	}
 
 }

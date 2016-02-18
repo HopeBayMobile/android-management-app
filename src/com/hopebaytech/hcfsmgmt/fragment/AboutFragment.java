@@ -43,7 +43,6 @@ public class AboutFragment extends Fragment {
 		
 		TextView system_version = (TextView) view.findViewById(R.id.version_system);
 		system_version.setText(getString(R.string.version_system));
-		
 	}
 
 

@@ -2,11 +2,13 @@ package com.hopebaytech.hcfsmgmt.info;
 
 import java.util.ArrayList;
 
+import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
@@ -16,6 +18,7 @@ public class DataTypeInfo extends ItemInfo {
 	private String dataType;
 	private int icon_drawable_res_id;
 	private Context context;
+	private long date_updated;
 
 	public DataTypeInfo(Context context) {
 		super(context);
@@ -39,20 +42,19 @@ public class DataTypeInfo extends ItemInfo {
 	}
 
 	public int getDataTypeStatus() {
-		HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getDataTypeStatus", null);
-		int status;
-		if (dataType.equals(HCFSMgmtUtils.DATA_TYPE_IMAGE)) {
-			ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(context);
-			status = getStatus(imagePaths);
-		} else if (dataType.equals(HCFSMgmtUtils.DATA_TYPE_VIDEO)) {
-			ArrayList<String> videoPaths = HCFSMgmtUtils.getAvailableVideoPaths(context);
-			status = getStatus(videoPaths);
-		} else if (dataType.equals(HCFSMgmtUtils.DATA_TYPE_AUDIO)) {
-			ArrayList<String> audioPaths = HCFSMgmtUtils.getAvailableAudioPaths(context);
-			status = getStatus(audioPaths);
-		} else {
-			status = -1;
-		}
+		int status = FileStatus.LOCAL;
+//		if (dataType.equals(DataTypeDAO.DATA_TYPE_IMAGE)) {
+//			ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(context);
+//			status = getStatus(imagePaths);
+//		} else if (dataType.equals(DataTypeDAO.DATA_TYPE_VIDEO)) {
+//			ArrayList<String> videoPaths = HCFSMgmtUtils.getAvailableVideoPaths(context);
+//			status = getStatus(videoPaths);
+//		} else if (dataType.equals(DataTypeDAO.DATA_TYPE_AUDIO)) {
+//			ArrayList<String> audioPaths = HCFSMgmtUtils.getAvailableAudioPaths(context);
+//			status = getStatus(audioPaths);
+//		} else {
+//			status = -1;
+//		}
 		return status;
 	}
 
@@ -90,6 +92,23 @@ public class DataTypeInfo extends ItemInfo {
 			status = FileStatus.HYBRID;
 		}
 		return status;
+	}
+
+	public long getDateUpdated() {
+		return date_updated;
+	}
+
+	public void setDateUpdated(long date_updated) {
+		this.date_updated = date_updated;
+	}
+	
+	public Drawable getPinImage() {
+		return super.getPinImage(FileStatus.LOCAL);
+	}
+
+	@Override
+	public int hashCode() {
+		return getDataType().hashCode();
 	}
 
 }

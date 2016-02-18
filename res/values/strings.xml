@@ -85,6 +85,8 @@
     <string name="file_management_section_item_total_storage_space">總空間:&#160;</string>
     <string name="file_management_section_item_available_storage_space">可用空間:&#160;</string>
     <string name="file_management_section_item_internal_storage_space">本地空間:&#160;</string>
+    <string name="file_management_pin_datetype">現有的%1$s於一小時內陸續釘選且之後新增的%2$s預設為釘選狀態</string>
+    <string name="file_management_unpin_datetype">現有的%1$s於一小時內陸續解除釘選且之後新增的%2$s預設為非釘選狀態</string>
     
     <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
     <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
@@ -130,6 +132,6 @@
     
     <string name="version_system_title">System Version</string>
     <string name="version_app_title">App Version</string>
-    <string name="version_system">2.0.3.0172(CI)</string>
+    <string name="version_system">-</string>
     
 </resources>

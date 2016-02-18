@@ -78,7 +78,8 @@ public class AppInfo extends ItemInfo {
 			File[] typeName = type.listFiles();
 			for (File fileName : typeName) {
 				if (fileName.getName().equals(getPackageName())) {
-					this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+//					this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+					this.externalDir = fileName.getAbsolutePath();
 					break;
 				}
 			}
@@ -156,6 +157,11 @@ public class AppInfo extends ItemInfo {
 
 	public Drawable getPinImage() {
 		return super.getPinImage(getAppStatus());
+	}
+
+	@Override
+	public int hashCode() {
+		return getSourceDir().hashCode();
 	}
 
 }

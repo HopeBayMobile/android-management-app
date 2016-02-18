@@ -1,4 +1,4 @@
-package com.hopebaytech.hcfsmgmt.services;
+package com.hopebaytech.hcfsmgmt.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,7 @@ import com.hopebaytech.hcfsmgmt.db.ServiceAppDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
@@ -28,11 +29,11 @@ import android.util.Log;
 
 public class HCFSMgmtService extends Service {
 
+	private final String CLASSNAME = getClass().getSimpleName();
 	private ExecutorService cacheExecutor;
 	private ServiceFileDirDAO serviceFileDirDAO;
 	private ServiceAppDAO serviceAppDAO;
 	private UidDAO uidDAO;
-	private final String CLASSNAME = getClass().getSimpleName();
 
 	@Override
 	public void onCreate() {
@@ -52,6 +53,7 @@ public class HCFSMgmtService extends Service {
 	public int onStartCommand(final Intent intent, int flags, int startId) {
 		if (intent != null) {
 			final String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
+			HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", "operation=" + operation);
 			cacheExecutor.execute(new Runnable() {
 				public void run() {
 					if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED)) {
@@ -94,17 +96,17 @@ public class HCFSMgmtService extends Service {
 						PackageManager pm = getPackageManager();
 						List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 						for (ApplicationInfo packageInfo : packages) {
-//							if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
-								int uid = packageInfo.uid;
-								String packageName = packageInfo.packageName;
-								uidDAO.insert(new UidInfo(uid, packageName));
-//							}							
+							// if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
+							int uid = packageInfo.uid;
+							String packageName = packageInfo.packageName;
+							uidDAO.insert(new UidInfo(uid, packageName));
+							// }
 						}
 					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE)) {
 						int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
 						String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
 						if (uidDAO.get(packageName) == null) {
-							String logMsg = "[PACKAGE_ADDED] uid=" + uid + ", packageName=" + packageName;
+							String logMsg = "operation=" + operation + ", uid=" + uid + ", packageName=" + packageName;
 							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", logMsg);
 							uidDAO.insert(new UidInfo(uid, packageName));
 						}
@@ -112,7 +114,7 @@ public class HCFSMgmtService extends Service {
 						int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
 						String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
 						if (uidDAO.get(packageName) != null) {
-							String logMsg = "[PACKAGE_REMOVED] uid=" + uid + ", packageName=" + packageName;
+							String logMsg = "operation=" + operation + ", uid=" + uid + ", packageName=" + packageName;
 							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", logMsg);
 							uidDAO.delete(packageName);
 						}
@@ -139,8 +141,7 @@ public class HCFSMgmtService extends Service {
 			});
 		} else {
 			/**
-			 * Service is restarted and then execute the uncompleted pin/unpin operation 
-			 * when user manually close app and removes it from background.
+			 * Service is restarted and then execute the uncompleted pin/unpin operation when user manually close app and removes it from background.
 			 */
 			cacheExecutor.execute(new Runnable() {
 				@Override
@@ -211,82 +212,125 @@ public class HCFSMgmtService extends Service {
 	private void pinOrUnpinDataTypeFile() {
 		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "pinOrUnpinDataTypeFile", null);
 
-		String notify_title = getString(R.string.app_name);
-		ArrayList<String> notifyMessageList = new ArrayList<String>();
 		DataTypeDAO dataTypeDAO = new DataTypeDAO(this);
-		boolean isImagePinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_IMAGE);
-		ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(this);
-		if (isImagePinned) {
-			int imgFailedToPinCount = 0;
-			for (String path : imagePaths) {
-				if (!HCFSMgmtUtils.pinFileOrDirectory(path)) {
-					imgFailedToPinCount++;
+		ArrayList<String> notifyMessageList = new ArrayList<String>();
+
+		DataTypeInfo imageTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
+		if (imageTypeInfo != null) {
+			String dataType = imageTypeInfo.getDataType();
+			boolean isImagePinned = imageTypeInfo.isPinned();
+			long dateUpdated = imageTypeInfo.getDateUpdated();
+			ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(this, dateUpdated);
+			long processTimeSeconds = System.currentTimeMillis() / 1000;
+			if (imagePaths != null) {
+				if (isImagePinned) {
+					int imgFailedToPinCount = 0;
+					for (String path : imagePaths) {
+						if (!HCFSMgmtUtils.pinFileOrDirectory(path)) {
+							imgFailedToPinCount++;
+						}
+					}
+					if (imgFailedToPinCount != 0) {
+						notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_pin) + ": " + imgFailedToPinCount);
+					}
+				} else {
+					int imgFailedToUnpinCount = 0;
+					for (String path : imagePaths) {
+						if (!HCFSMgmtUtils.unpinFileOrDirectory(path)) {
+							imgFailedToUnpinCount++;
+						}
+					}
+					if (imgFailedToUnpinCount != 0) {
+						notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount);
+					}
 				}
-			}
-			if (imgFailedToPinCount != 0) {
-				notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_pin) + ": " + imgFailedToPinCount);
-			}
-		} else {
-			int imgFailedToUnpinCount = 0;
-			for (String path : imagePaths) {
-				if (!HCFSMgmtUtils.unpinFileOrDirectory(path)) {
-					imgFailedToUnpinCount++;
+				imageTypeInfo.setDateUpdated(processTimeSeconds);
+				boolean isSuccess = dataTypeDAO.update(dataType, imageTypeInfo, DataTypeDAO.DATE_UPDATED_COLUMN);
+				if (!isSuccess) {
+					HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "pinOrUnpinFileOrDirectory", "msg=Failed to upate datatype table, dataType=" + dataType
+							+ ", column=" + DataTypeDAO.DATE_UPDATED_COLUMN + ", dateUpdated=" + imageTypeInfo.getDateUpdated());
 				}
-			}
-			if (imgFailedToUnpinCount != 0) {
-				notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount);
 			}
 		}
 
-		boolean isVideoPinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_VIDEO);
-		ArrayList<String> videoPaths = HCFSMgmtUtils.getAvailableVideoPaths(this);
-		if (isVideoPinned) {
-			int videoFailedToPinCount = 0;
-			for (String path : videoPaths) {
-				if (!HCFSMgmtUtils.pinFileOrDirectory(path)) {
-					videoFailedToPinCount++;
+		DataTypeInfo videoTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
+		if (videoTypeInfo != null) {
+			String dataType = videoTypeInfo.getDataType();
+			boolean isVideoPinned = videoTypeInfo.isPinned();
+			long dateUpdated = videoTypeInfo.getDateUpdated();
+			ArrayList<String> videoPaths = HCFSMgmtUtils.getAvailableVideoPaths(this, dateUpdated);
+			long processTimeSeconds = System.currentTimeMillis() / 1000;
+			if (videoPaths != null) {
+				if (isVideoPinned) {
+					int videoFailedToPinCount = 0;
+					for (String path : videoPaths) {
+						if (!HCFSMgmtUtils.pinFileOrDirectory(path)) {
+							videoFailedToPinCount++;
+						}
+					}
+					if (videoFailedToPinCount != 0) {
+						notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_pin) + ": " + videoFailedToPinCount);
+					}
+				} else {
+					int videoFailedToUnpinCount = 0;
+					for (String path : videoPaths) {
+						if (!HCFSMgmtUtils.unpinFileOrDirectory(path)) {
+							videoFailedToUnpinCount++;
+						}
+					}
+					if (videoFailedToUnpinCount != 0) {
+						notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount);
+					}
 				}
-			}
-			if (videoFailedToPinCount != 0) {
-				notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_pin) + ": " + videoFailedToPinCount);
-			}
-		} else {
-			int videoFailedToUnpinCount = 0;
-			for (String path : videoPaths) {
-				if (!HCFSMgmtUtils.unpinFileOrDirectory(path)) {
-					videoFailedToUnpinCount++;
+				videoTypeInfo.setDateUpdated(processTimeSeconds);
+				boolean isSuccess = dataTypeDAO.update(dataType, videoTypeInfo, DataTypeDAO.DATE_UPDATED_COLUMN);
+				if (!isSuccess) {
+					HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "pinOrUnpinFileOrDirectory", "msg=Failed to upate datatype table, dataType=" + dataType
+							+ ", column=" + DataTypeDAO.DATE_UPDATED_COLUMN + ", dateUpdated=" + videoTypeInfo.getDateUpdated());
 				}
-			}
-			if (videoFailedToUnpinCount != 0) {
-				notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount);
 			}
 		}
 
-		boolean isAudioPinned = HCFSMgmtUtils.isDataTypePinned(dataTypeDAO, HCFSMgmtUtils.DATA_TYPE_AUDIO);
-		ArrayList<String> audioPaths = HCFSMgmtUtils.getAvailableAudioPaths(this);
-		if (isAudioPinned) {
-			int audioFailedToPinCount = 0;
-			for (String path : audioPaths) {
-				if (!HCFSMgmtUtils.pinFileOrDirectory(path)) {
-					audioFailedToPinCount++;
+		DataTypeInfo audioTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);
+		if (audioTypeInfo != null) {
+			String dataType = audioTypeInfo.getDataType();
+			boolean isAudioPinned = audioTypeInfo.isPinned();
+			long dateUpdated = audioTypeInfo.getDateUpdated();
+			ArrayList<String> audioPaths = HCFSMgmtUtils.getAvailableAudioPaths(this, dateUpdated);
+			long processTimeSeconds = System.currentTimeMillis() / 1000;
+			if (audioPaths != null) {
+				if (isAudioPinned) {
+					int audioFailedToPinCount = 0;
+					for (String path : audioPaths) {
+						if (!HCFSMgmtUtils.pinFileOrDirectory(path)) {
+							audioFailedToPinCount++;
+						}
+					}
+					if (audioFailedToPinCount != 0) {
+						notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_pin) + ": " + audioFailedToPinCount);
+					}
+				} else {
+					int audioFailedToUnpinCount = 0;
+					for (String path : audioPaths) {
+						if (!HCFSMgmtUtils.unpinFileOrDirectory(path)) {
+							audioFailedToUnpinCount++;
+						}
+					}
+					if (audioFailedToUnpinCount != 0) {
+						notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount);
+					}
 				}
-			}
-			if (audioFailedToPinCount != 0) {
-				notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_pin) + ": " + audioFailedToPinCount);
-			}
-		} else {
-			int audioFailedToUnpinCount = 0;
-			for (String path : audioPaths) {
-				if (!HCFSMgmtUtils.unpinFileOrDirectory(path)) {
-					audioFailedToUnpinCount++;
+				audioTypeInfo.setDateUpdated(processTimeSeconds);
+				boolean isSuccess = dataTypeDAO.update(dataType, audioTypeInfo, DataTypeDAO.DATE_UPDATED_COLUMN);
+				if (!isSuccess) {
+					HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "pinOrUnpinFileOrDirectory", "msg=Failed to upate datatype table, dataType=" + dataType
+							+ ", column=" + DataTypeDAO.DATE_UPDATED_COLUMN + ", dateUpdated=" + audioTypeInfo.getDateUpdated());
 				}
-			}
-			if (audioFailedToUnpinCount != 0) {
-				notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount);
 			}
 		}
 
 		if (notifyMessageList.size() != 0) {
+			String notify_title = getString(R.string.app_name);
 			StringBuilder notify_message = new StringBuilder();
 			for (int i = 0; i < notifyMessageList.size(); i++) {
 				notify_message.append(notifyMessageList.get(i));
@@ -301,7 +345,8 @@ public class HCFSMgmtService extends Service {
 
 	private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
 		String filePath = info.getFilePath();
-		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
+		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "pinOrUnpinFileOrDirectory",
+				"filePath=" + filePath + ", threadName=" + Thread.currentThread().getName());
 		boolean isPinned = info.isPinned();
 		if (isPinned) {
 			boolean isSuccess = HCFSMgmtUtils.pinFileOrDirectory(filePath);

@@ -18,6 +18,8 @@ public abstract class ItemInfo {
 //	protected BaseFileMgmtFragment baseFileMgmtFragment;
 	private boolean isPinned;
 	private String infoName;
+	private boolean isProcessing;
+	private long lastProcessTime;
 	
 	public ItemInfo(Context context) {
 		this.context = context;
@@ -27,9 +29,25 @@ public abstract class ItemInfo {
 //		this.context = context;
 //		this.baseFileMgmtFragment = baseFileMgmtFragment;		
 //	}
-
+	
 	public String getItemName() {
 		return infoName;
+	}
+
+	public long getLastProcessTime() {
+		return lastProcessTime;
+	}
+
+	public void setLastProcessTime(long lastProcessTime) {
+		this.lastProcessTime = lastProcessTime;
+	}
+
+	public boolean isProcessing() {
+		return isProcessing;
+	}
+
+	public void setProcessing(boolean isProcessing) {
+		this.isProcessing = isProcessing;
 	}
 
 	public void setItemName(String infoName) {
@@ -83,5 +101,7 @@ public abstract class ItemInfo {
 	public abstract Bitmap getIconImage();
 	
 	public abstract int getLocationStatus();
+	
+	public abstract int hashCode();
 
 }

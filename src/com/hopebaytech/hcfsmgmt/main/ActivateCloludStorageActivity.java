@@ -107,6 +107,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 									boolean isFailedToSetHCFSConf = false;
 									boolean isFailedToAuth = false;
 									HttpsURLConnection conn = null;
+									int responseCode = 0;
 									try {
 										URL url = new URL("https://terafonnreg.hopebaytech.com/api/register/login/");
 										conn = (HttpsURLConnection) url.openConnection();
@@ -126,7 +127,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 										bufferedWriter.close();
 										outputStream.close();
 
-										int responseCode = conn.getResponseCode();
+										responseCode = conn.getResponseCode();
 										HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "responseCode=" + responseCode);
 										if (responseCode == HttpsURLConnection.HTTP_OK) {
 											// Retrieve response content
@@ -138,7 +139,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												sb.append(line);
 											}
 											inputStream.close();
-											HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "response=" + sb.toString());
+											HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "jsonResponse=" + sb.toString());
 
 											JSONObject jsonObj = new JSONObject(sb.toString());
 											boolean result = jsonObj.getBoolean("result");
@@ -193,6 +194,8 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												String msg = jsonObj.getString("msg");
 												Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
 											}
+										} else {
+											isFailedToAuth = true;
 										}
 										// TODO Need to handle the situation that the number of backend account is not enough.
 										// else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
@@ -201,7 +204,6 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 										// }									
 									} catch (Exception e) {
 										isFailedToAuth = true;
-										isFailedToSetHCFSConf = true;
 										HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
 									} finally {
 										if (conn != null) {
@@ -211,6 +213,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 
 									final boolean mIsFailedToSetHCFSConf = isFailedToSetHCFSConf;
 									final boolean mIsFailedToAuth = isFailedToAuth;
+									final int mResponseCode = responseCode;
 									runOnUiThread(new Runnable() {
 										@Override
 										public void run() {
@@ -222,7 +225,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 													mHandler.post(new Runnable() {
 														@Override
 														public void run() {
-															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "");
+															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
 															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "");
 															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "");
 															HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "");
@@ -238,6 +241,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												}
 											} else {
 												String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
+												msg += ", responseCode=" + mResponseCode;
 												Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
 											}
 										}

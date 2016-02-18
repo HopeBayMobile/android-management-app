@@ -9,10 +9,12 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
 import com.hopebaytech.hcfsmgmt.fragment.HomepageFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Fragment;
@@ -71,9 +73,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		HandlerThread handlerThread = new HandlerThread(MainActivity.class.getSimpleName());
 		handlerThread.start();
 		mHandler = new Handler(handlerThread.getLooper());
-		
+
 		sdCardReceiver = new SDCardBroadcastReceiver();
-		
+
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
 		filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
@@ -85,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		toolbar.setTitle("");
 		setSupportActionBar(toolbar);
 
-		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);		
-		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);		
+		DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+		ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
 		drawer.setDrawerListener(toggle);
 		toggle.syncState();
 
@@ -136,6 +138,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				}
 			});
 		}
+		
+		/* Detect whether sdcard1 exists, if exists, add to left slide menu. */
 		mHandler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -171,38 +175,81 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				}
 			}
 		});
+		
+		/* Inert default value of image, video and audio type to "datatype" table in database */
+		mHandler.post(new Runnable() {
+			@Override
+			public void run() {
+				DataTypeDAO dataTypeDAO = new DataTypeDAO(MainActivity.this);
+				if (dataTypeDAO.getCount() == 0) {
+					DataTypeInfo dataTypeInfo = new DataTypeInfo(MainActivity.this);
+					dataTypeInfo.setPinned(HCFSMgmtUtils.DEFAULT_PINNED_STATUS);
+					
+					dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
+					dataTypeDAO.insert(dataTypeInfo);
+					
+					dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
+					dataTypeDAO.insert(dataTypeInfo);
+					
+					dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
+					dataTypeDAO.insert(dataTypeInfo);
+				}
+			}
+		});
 
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
 		ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
 		ft.commit();
 
-		Intent intent = new Intent(this, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-		boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
-				PendingIntent.FLAG_NO_CREATE) != null;
+		/* Start NotifyUploadCompletedAlarm if user enables this notification in settings. Others, stop it */
+//		Intent intent = new Intent(this, HCFSMgmtReceiver.class);
+//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+//		boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
+//				PendingIntent.FLAG_NO_CREATE) != null;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, false);
 		if (notifyUploadCompletedPref) {
-			if (!isNotifyUploadCompletedAlarmExist) {
+//			if (!isNotifyUploadCompletedAlarmExist) {
 				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(this);
-			}
+//			}
 		} else {
-			if (isNotifyUploadCompletedAlarmExist) {
+//			if (isNotifyUploadCompletedAlarmExist) {
 				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(this);
-			}
-		}
-		
-		intent = new Intent(this, HCFSMgmtReceiver.class);
-		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-		boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent,
-				PendingIntent.FLAG_NO_CREATE) != null;
-		if (!isResetXferAlarmExist) {
-			HCFSMgmtUtils.startResetXferAlarm(this);
-		} else {
-			HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "init", "ResetXferAlarm is already exist");
+//			}
 		}
 
+		/* Start ResetXferAlarm if it doesn't exist */
+//		intent = new Intent(this, HCFSMgmtReceiver.class);
+//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+//		boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent,
+//				PendingIntent.FLAG_NO_CREATE) != null;
+//		if (!isResetXferAlarmExist) {
+			HCFSMgmtUtils.startResetXferAlarm(this);
+//		}
+
+		/* Start PinDataTypeFileAlarm if it doesn't exist */
+//		intent = new Intent(this, HCFSMgmtReceiver.class);
+//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+//		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
+//		boolean isPinDataTypeAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_PIN_DATA_TYPE_FILE, intent,
+//				PendingIntent.FLAG_NO_CREATE) != null;
+//		if (!isPinDataTypeAlarmExist) {
+			HCFSMgmtUtils.startPinDataTypeFileAlarm(this);
+//		} else {
+//			HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "PinDataTypeFileAlarm already exists");
+//		}
+
+		/* Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist */
+//		intent = new Intent(this, HCFSMgmtReceiver.class);
+//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+//		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+//		boolean isNotifyLocalStorageUsedRatiolarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO,
+//				intent, PendingIntent.FLAG_NO_CREATE) != null;
+//		if (!isNotifyLocalStorageUsedRatiolarmExist) {
+			HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(this);
+//		}
+		
 	}
 
 	@Override
@@ -243,34 +290,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-//		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-//			Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
-//			if (fragment != null && fragment.isVisible()) {
-//				if (fragment instanceof FileManagementFragment) {
-//					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
-//					if (fileManagementFragment.onBackPressed()) 
-//						return true;
-//				} 
-////				else if (fragment instanceof InternalFileMgmtFragment) {
-////					InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
-////					if (internalFileMgmtFragment.onBackPressed()) 
-////						return true;
-////				}
-//			}
-//		}
+		// if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+		// Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
+		// if (fragment != null && fragment.isVisible()) {
+		// if (fragment instanceof FileManagementFragment) {
+		// FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
+		// if (fileManagementFragment.onBackPressed())
+		// return true;
+		// }
+		//// else if (fragment instanceof InternalFileMgmtFragment) {
+		//// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
+		//// if (internalFileMgmtFragment.onBackPressed())
+		//// return true;
+		//// }
+		// }
+		// }
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 			Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
 			if (fragment != null && fragment.isVisible()) {
 				if (fragment instanceof FileManagementFragment) {
 					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
-					if (fileManagementFragment.onBackPressed()) 
+					if (fileManagementFragment.onBackPressed())
 						return true;
-				} 
-//				else if (fragment instanceof InternalFileMgmtFragment) {
-//					InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
-//					if (internalFileMgmtFragment.onBackPressed()) 
-//						return true;
-//				}
+				}
+				// else if (fragment instanceof InternalFileMgmtFragment) {
+				// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
+				// if (internalFileMgmtFragment.onBackPressed())
+				// return true;
+				// }
 			}
 		}
 		return super.onKeyDown(keyCode, event);
@@ -312,12 +359,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		/**
-         * Must override this function and comment out "super.onSaveInstanceState(outState)"
-         * in order not to save fragment state. For issue that getActivity() will get null
-         * when backing to app from background (long time). In this situation, fragment
-         * is already detached from activity, so that getActivity() cannot get instance.
-         */
-//		super.onSaveInstanceState(outState);
+		 * Must override this function and comment out "super.onSaveInstanceState(outState)" in order not to save fragment state. For issue that
+		 * getActivity() will get null when backing to app from background (long time). In this situation, fragment is already detached from activity,
+		 * so that getActivity() cannot get instance.
+		 */
+		// super.onSaveInstanceState(outState);
 	}
 
 }
