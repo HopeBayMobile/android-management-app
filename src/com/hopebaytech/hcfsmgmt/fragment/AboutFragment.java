@@ -4,6 +4,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,5 +47,11 @@ public class AboutFragment extends Fragment {
 		system_version.setText(getString(R.string.version_system));
 	}
 
+	public void onBackPressed() {
+		FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+		ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
+		ft.commit();
+	}
 
 }

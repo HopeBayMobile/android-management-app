@@ -15,6 +15,7 @@ extern void HCFS_reboot(char **json_res);
 extern void HCFS_reload_config(char **json_res);
 extern void HCFS_reset_xfer(char **json_res);
 extern void HCFS_toggle_sync(char **json_res, int enabled);
+extern void HCFS_get_sync_status(char **json_res);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
@@ -100,6 +101,15 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHC
 	char *json_res;
 	int enabled = jInit;
 	HCFS_toggle_sync(&json_res, enabled);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free(json_res);
+	return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSSyncStatus(
+		JNIEnv *jEnv, jobject jObject, jint jInit) {
+	char *json_res;
+	HCFS_get_sync_status(&json_res);
 	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
 	free(json_res);
 	return result;

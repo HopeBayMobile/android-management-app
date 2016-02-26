@@ -241,7 +241,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 												}
 											} else {
 												String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
-												msg += ", responseCode=" + mResponseCode;
+												msg += "[responseCode=" + mResponseCode + "]";
 												Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
 											}
 										}

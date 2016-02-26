@@ -34,6 +34,7 @@ public class HCFSMgmtService extends Service {
 	private ServiceFileDirDAO serviceFileDirDAO;
 	private ServiceAppDAO serviceAppDAO;
 	private UidDAO uidDAO;
+	private Thread mOngoingThread;
 
 	@Override
 	public void onCreate() {
@@ -96,11 +97,9 @@ public class HCFSMgmtService extends Service {
 						PackageManager pm = getPackageManager();
 						List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 						for (ApplicationInfo packageInfo : packages) {
-							// if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
 							int uid = packageInfo.uid;
 							String packageName = packageInfo.packageName;
 							uidDAO.insert(new UidInfo(uid, packageName));
-							// }
 						}
 					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE)) {
 						int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
@@ -134,7 +133,50 @@ public class HCFSMgmtService extends Service {
 							int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 							String notify_title = getString(R.string.app_name);
 							String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storage_used_ratio);
-							HCFSMgmtUtils.notifyEvent(getApplicationContext(), notify_id, notify_title, notify_message);
+							HCFSMgmtUtils.notifyEvent(getApplicationContext(), notify_id, notify_title, notify_message, false);
+						}
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ONGOIN_NOTIFICATION)) {
+						boolean onGoing = intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, false);
+						if (onGoing) {
+							if (mOngoingThread == null) {
+								mOngoingThread = new Thread(new Runnable() {
+									@Override
+									public void run() {
+										final long FIVE_MINUTES_IN_MINISECONDS = 5 * 60 * 1000;
+//										final long FIVE_MINUTES_IN_MINISECONDS = 15 * 1000;
+										int count = 0;
+										while (true) {
+											try {
+												// TODO hcfs connection status is not ready
+												HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+//												String notifyTitle = "-";
+												boolean syncEnabled = HCFSMgmtUtils.getHCFSSyncStatus();
+												boolean cloudConnected = statInfo.isCloudConn();
+												if (syncEnabled && cloudConnected) {
+													
+												} else if (syncEnabled && !cloudConnected) {
+													
+												} else {
+													
+												}
+												String notifyTitle = String.valueOf(count++);
+												String notifyMsg = getString(R.string.home_page_used_space) + ": " + statInfo.getVolUsed() + " / " + statInfo.getCloudTotal();
+												HCFSMgmtUtils.notifyEvent(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, true);
+												Thread.sleep(FIVE_MINUTES_IN_MINISECONDS);
+											} catch (InterruptedException e) {
+												break;
+											}
+										}
+									}
+								});
+								mOngoingThread.start();
+							}
+						} else {
+							if (mOngoingThread != null) {
+								mOngoingThread.interrupt();
+								mOngoingThread = null;
+							}
+							HCFSMgmtUtils.cancelEvent(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 						}
 					}
 				}
@@ -182,7 +224,7 @@ public class HCFSMgmtService extends Service {
 				int id_notify = HCFSMgmtUtils.NOTIFY_ID_UPLOAD_COMPLETED;
 				String notify_title = getString(R.string.app_name);
 				String notify_content = getString(R.string.notify_upload_completed);
-				HCFSMgmtUtils.notifyEvent(this, id_notify, notify_title, notify_content);
+				HCFSMgmtUtils.notifyEvent(this, id_notify, notify_title, notify_content, false);
 			}
 		}
 	}
@@ -206,7 +248,7 @@ public class HCFSMgmtService extends Service {
 		int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 		String notify_title = getString(R.string.app_name);
 		String notify_message = notifyMsg + ": " + info.getAppName();
-		HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+		HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message, false);
 	}
 
 	private void pinOrUnpinDataTypeFile() {
@@ -339,7 +381,7 @@ public class HCFSMgmtService extends Service {
 				}
 			}
 			int notify_id = HCFSMgmtUtils.NOTIFY_ID_PIN_UNPIN_FAILURE;
-			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message.toString());
+			HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message.toString(), false);
 		}
 	}
 
@@ -354,7 +396,7 @@ public class HCFSMgmtService extends Service {
 				int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 				String notify_title = getString(R.string.app_name);
 				String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath;
-				HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+				HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message, false);
 			}
 		} else {
 			boolean isSuccess = HCFSMgmtUtils.unpinFileOrDirectory(filePath);
@@ -362,7 +404,7 @@ public class HCFSMgmtService extends Service {
 				int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 				String notify_title = getString(R.string.app_name);
 				String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-				HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message);
+				HCFSMgmtUtils.notifyEvent(this, notify_id, notify_title, notify_message, false);
 			}
 		}
 	}

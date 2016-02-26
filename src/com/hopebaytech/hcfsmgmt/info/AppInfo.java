@@ -1,7 +1,5 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import java.io.File;
-
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.content.Context;
@@ -9,7 +7,6 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Environment;
 import android.support.annotation.Nullable;
 
 public class AppInfo extends ItemInfo {
@@ -71,19 +68,23 @@ public class AppInfo extends ItemInfo {
 		return externalDir;
 	}
 
-	public void findToSetExternalDir() {
-		String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-		File externalAndroidFile = new File(externalPath);
-		for (File type : externalAndroidFile.listFiles()) {
-			File[] typeName = type.listFiles();
-			for (File fileName : typeName) {
-				if (fileName.getName().equals(getPackageName())) {
-//					this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
-					this.externalDir = fileName.getAbsolutePath();
-					break;
-				}
-			}
-		}
+//	public void findToSetExternalDir() {
+//		String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+//		File externalAndroidFile = new File(externalPath);
+//		for (File type : externalAndroidFile.listFiles()) {
+//			File[] typeName = type.listFiles();
+//			for (File fileName : typeName) {
+//				if (fileName.getName().equals(getPackageName())) {
+////					this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+//					this.externalDir = fileName.getAbsolutePath();
+//					break;
+//				}
+//			}
+//		}
+//	}
+
+	public void setExternalDir(String externalDir) {
+		this.externalDir = externalDir;
 	}
 
 	public String getDataDir() {
@@ -155,8 +156,9 @@ public class AppInfo extends ItemInfo {
 		return status;
 	}
 
-	public Drawable getPinImage() {
-		return super.getPinImage(getAppStatus());
+	@Override
+	public Drawable getPinUnpinImage() {
+		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getAppStatus());
 	}
 
 	@Override

@@ -16,8 +16,8 @@ import com.hopebaytech.hcfsmgmt.info.FileStatus;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
+import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
 
-import android.R.menu;
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -29,6 +29,7 @@ import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.SystemClock;
@@ -36,6 +37,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
@@ -46,7 +48,7 @@ public class HCFSMgmtUtils {
 	public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
 	public static final boolean ENABLE_AUTH = true;
-	public static final boolean DEFAULT_PINNED_STATUS = true;
+	public static final boolean DEFAULT_PINNED_STATUS = false;
 	public static final int LOGLEVEL = Log.DEBUG;
 
 	public static final int INTERVAL_TEN_SECONDS = 10 * 1000;
@@ -60,6 +62,7 @@ public class HCFSMgmtUtils {
 	public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
 	public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
 	public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 2;
+	public static final int NOTIFY_ID_ONGOING = 3;
 
 	public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
 	public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
@@ -83,6 +86,7 @@ public class HCFSMgmtUtils {
 	public static final String INTENT_KEY_SERVER_CLIENT_ID = "server_client_id";
 	public static final String INTENT_KEY_UID = "intent_key_uid";
 	public static final String INTENT_KEY_PACKAGE_NAME = "intent_key_package_name";
+	public static final String INTENT_KEY_ONGOING = "intent_key_ongoing";
 
 	// public static final int INTENT_VALUE_NONE = -1;
 	// public static final int INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED = 200;
@@ -97,7 +101,7 @@ public class HCFSMgmtUtils {
 
 	public static final String INTENT_VALUE_NONE = "intent_value_none";
 	public static final String INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED = "intent_value_notify_upload_complete";
-	public static final String INTENT_VALUE_PIN_DATA_TYPE_FILE = "intent_value_ping_data_type_file";
+	public static final String INTENT_VALUE_PIN_DATA_TYPE_FILE = "intent_value_pin_data_type_file";
 	public static final String INTENT_VALUE_PIN_APP = "intent_value_pin_app";
 	public static final String INTENT_VALUE_PIN_FILE_DIRECTORY = "intent_value_pin_file_directory";
 	public static final String INTENT_VALUE_LAUNCH_UID_DATABASE = "intent_value_launch_uid_database";
@@ -105,6 +109,7 @@ public class HCFSMgmtUtils {
 	public static final String INTENT_VALUE_REMOVE_UID_FROM_DATABASE = "intent_value_remove_uid_from_database";
 	public static final String INTENT_VALUE_RESET_XFER = "intent_value_reset_xfer";
 	public static final String INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO = "intent_value_notify_local_storage_used_ratio";
+	public static final String INTENT_VALUE_ONGOIN_NOTIFICATION = "intent_value_ongoing_notification";
 
 	public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
 	public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
@@ -166,9 +171,9 @@ public class HCFSMgmtUtils {
 
 	public static void startPinDataTypeFileAlarm(Context context) {
 		stopPinDataTypeFileAlarm(context);
-		
+
 		log(Log.DEBUG, CLASSNAME, "startPinDataTypeFileAlarm", null);
-		
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
@@ -185,7 +190,7 @@ public class HCFSMgmtUtils {
 
 	public static void startResetXferAlarm(Context context) {
 		stopResetXferAlarm(context);
-		
+
 		log(Log.DEBUG, CLASSNAME, "startResetXferAlarm", null);
 
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
@@ -206,26 +211,26 @@ public class HCFSMgmtUtils {
 		long intervalMillis = INTERVAL_RESET_XFER;
 		am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
 	}
-	
+
 	public static void stopResetXferAlarm(Context context) {
 		log(Log.DEBUG, CLASSNAME, "stopResetXferAlarm", null);
-		
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
-		
+
 		int requestCode = REQUEST_CODE_RESET_XFER;
 		int flags = PendingIntent.FLAG_UPDATE_CURRENT;
 		PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 		pi.cancel();
-		
+
 		AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 		am.cancel(pi);
 	}
 
 	public static void startNotifyUploadCompletedAlarm(Context context) {
 		stopNotifyUploadCompletedAlarm(context);
-		
+
 		log(Log.DEBUG, CLASSNAME, "startNotifyUploadCompletedAlarm", null);
 
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
@@ -392,20 +397,45 @@ public class HCFSMgmtUtils {
 		return imagePaths;
 	}
 
-	public static void notifyEvent(Context context, int notify_id, String notify_title, String notify_message) {
-		int defaults = 0;
-		defaults |= NotificationCompat.DEFAULT_VIBRATE;
-
+	public static void notifyEvent(Context context, int notify_id, String notify_title, String notify_message, boolean onGoing) {
 		NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
 		bigStyle.bigText(notify_message);
 
+		Intent intent = new Intent(context, LoadingActivity.class);
+		PendingIntent contentIntent = PendingIntent.getActivity(context, notify_id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+		
 		Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_terafonn_logo);
-		Notification notifcaition = new NotificationCompat.Builder(context).setWhen(System.currentTimeMillis()).setSmallIcon(R.drawable.ic_system_bar)
-				.setLargeIcon(largeIcon).setTicker(notify_title).setContentTitle(notify_title).setContentText(notify_message).setAutoCancel(true)
-				.setStyle(bigStyle).setDefaults(defaults).build();
-
+		NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+		builder = (NotificationCompat.Builder) builder
+				.setWhen(System.currentTimeMillis())
+				.setSmallIcon(R.drawable.ic_system_bar)
+				.setLargeIcon(largeIcon)
+				.setTicker(notify_title)
+				.setContentTitle(notify_title)
+				.setContentText(notify_message)
+				.setStyle(bigStyle)
+				.setContentIntent(contentIntent);
+		if (onGoing) {
+			builder = (NotificationCompat.Builder) builder
+					.setAutoCancel(false)
+					.setOngoing(true)
+					.setPriority(Notification.PRIORITY_MAX);
+		} else {
+			int defaults = 0;
+			defaults |= NotificationCompat.DEFAULT_VIBRATE;
+			builder = (NotificationCompat.Builder) builder
+					.setAutoCancel(true)
+					.setOngoing(false)
+					.setDefaults(defaults);
+		}
+		Notification notifcaition = builder.build();
 		NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
 		notificationManagerCompat.notify(notify_id, notifcaition);
+	}
+	
+	public static void cancelEvent(Context context, int notify_id) {
+		NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
+		notificationManagerCompat.cancel(notify_id);
 	}
 
 	public static void startSyncToCloud() {
@@ -416,6 +446,27 @@ public class HCFSMgmtUtils {
 	public static void stopSyncToCloud() {
 		String jsonResult = HCFSApiUtils.setHCFSSyncStatus(0);
 		log(Log.DEBUG, CLASSNAME, "stopSyncToCloud", jsonResult);
+	}
+	
+	public static boolean getHCFSSyncStatus() {
+		String jsonResult = HCFSApiUtils.getHCFSSyncStatus();
+		JSONObject jObject;
+		try {
+			jObject = new JSONObject(jsonResult);
+			JSONObject dataObj = jObject.getJSONObject("data");
+			boolean isSuccess = jObject.getBoolean("result");
+			if (isSuccess) {
+				log(Log.INFO, CLASSNAME, "getHCFSSyncStatus", "jsonResult=" + jsonResult);
+
+				boolean enabled = dataObj.getBoolean("enabled");
+				return enabled;
+			} else {
+				log(Log.ERROR, CLASSNAME, "getHCFSSyncStatus", "jsonResult=" + jsonResult);
+			}
+		} catch (JSONException e) {
+			log(Log.ERROR, CLASSNAME, "getHCFSSyncStatus", Log.getStackTraceString(e));
+		}
+		return false;
 	}
 
 	@Nullable
@@ -430,7 +481,8 @@ public class HCFSMgmtUtils {
 			JSONObject dataObj = jObject.getJSONObject("data");
 			boolean isSuccess = jObject.getBoolean("result");
 			if (isSuccess) {
-				Log.i(TAG, "getHCFSStatInfo: " + jsonResult);
+				log(Log.INFO, CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
+
 				hcfsStatInfo = new HCFSStatInfo();
 				// hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_TOTAL)); TODO API server is not ready
 				hcfsStatInfo.setCloudTotal(1099511627776L);
@@ -445,10 +497,10 @@ public class HCFSMgmtUtils {
 				hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
 				hcfsStatInfo.setCloudConn(dataObj.getBoolean(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
 			} else {
-				Log.e(TAG, "getHCFSStatInfo: " + jsonResult);
+				log(Log.ERROR, CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
 			}
 		} catch (JSONException e) {
-			Log.e(TAG, Log.getStackTraceString(e));
+			log(Log.ERROR, CLASSNAME, "getHCFSStatInfo", Log.getStackTraceString(e));
 		}
 		return hcfsStatInfo;
 	}
@@ -790,13 +842,13 @@ public class HCFSMgmtUtils {
 		String key = SettingsFragment.KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY;
 		boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(key, false);
 		if (notifyConnFailedRecoveryPref) {
-			notifyEvent(context, notify_id, notify_title, notify_content);
+			notifyEvent(context, notify_id, notify_title, notify_content, false);
 		}
 	}
 
 	public static void startNotifyLocalStorageUsedRatioAlarm(Context context) {
 		stopNotifyLocalStorageUsedRatioAlarm(context);
-		
+
 		log(Log.DEBUG, CLASSNAME, "startNotifyLocalStorageUsedRatioAlarm", null);
 
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
@@ -812,8 +864,10 @@ public class HCFSMgmtUtils {
 		long intervalMillis = INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO;
 		am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
 	}
-	
+
 	public static void stopNotifyLocalStorageUsedRatioAlarm(Context context) {
+		log(Log.DEBUG, CLASSNAME, "stopNotifyLocalStorageUsedRatioAlarm", null);
+
 		Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 		intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 		intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
@@ -859,6 +913,41 @@ public class HCFSMgmtUtils {
 				Log.e(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
 			}
 		}
+	}
+	
+	public static Drawable getPinUnpinImage(Context context, boolean isPinned, int status) {
+		Drawable pinDrawable = null;
+//		if (isPinned) {
+//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
+//		} else {
+//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned);
+//		}
+		if (isPinned) {
+			if (status == FileStatus.LOCAL) {
+				pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
+			} else if (status == FileStatus.HYBRID || status == FileStatus.CLOUD) {
+				pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
+			} else {
+				// TODO default image
+			}
+		} else {
+			switch (status) {
+			case FileStatus.LOCAL:
+				pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_local);
+				break;
+			case FileStatus.HYBRID:
+				pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);
+				break;
+			case FileStatus.CLOUD:
+				pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_cloud);
+				break;
+			default:
+				// TODO default image
+				break;
+			}
+//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned);
+		}
+		return pinDrawable;
 	}
 
 }

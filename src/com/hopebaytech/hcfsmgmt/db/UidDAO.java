@@ -16,8 +16,11 @@ public class UidDAO {
 	public static final String KEY_ID = "_id";
 	public static final String UID_COLUMN = "uid";
 	public static final String PACKAGE_NAME_COLUMN = "package_name";
-	public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + UID_COLUMN
-			+ " TEXT NOT NULL, " + PACKAGE_NAME_COLUMN + " TEXT NOT NULL)";
+	public static final String CREATE_TABLE = 
+					"CREATE TABLE " + TABLE_NAME + " (" + 
+					KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " + 
+					UID_COLUMN + " TEXT NOT NULL, " + 
+					PACKAGE_NAME_COLUMN + " TEXT NOT NULL)";
 
 	private SQLiteDatabase db;
 	private Context context;

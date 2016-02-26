@@ -50,6 +50,7 @@
     <string name="home_page_network_traffic_title">資料傳輸量</string>
     <string name="home_page_the_amount_of_network_traffic_today">本日資料傳輸</string>
     <string name="home_page_to_be_upladed_data">待上傳資料</string>
+    <string name="home_page_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
     
     <string name="action_settings">Settings</string>
     
@@ -74,9 +75,9 @@
     </string-array>
     <string name="file_management_menu_list">清單</string>
     <string name="file_management_menu_grid">圖示</string>
-    <string name="file_management_not_allowed_to_pin_image">圖片資料型態已釘選，無法取消釘選圖片檔案</string>
-    <string name="file_management_not_allowed_to_pin_video">視訊資料型態已釘選，無法取消釘選視訊檔案</string>
-    <string name="file_management_not_allowed_to_pin_audio">音樂資料型態已釘選，無法取消釘選音樂檔案</string>
+    <string name="file_management_whether_allowed_to_unpin_image">圖片資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_management_whether_allowed_to_unpin_video">視訊資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_management_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
     <string name="file_management_popup_menu_pin">釘選</string>
     <string name="file_management_popup_menu_unpin">取消釘選</string>
     <string name="file_management_internal_storatge_name">內部儲存空間</string>
@@ -85,8 +86,10 @@
     <string name="file_management_section_item_total_storage_space">總空間:&#160;</string>
     <string name="file_management_section_item_available_storage_space">可用空間:&#160;</string>
     <string name="file_management_section_item_internal_storage_space">本地空間:&#160;</string>
-    <string name="file_management_pin_datetype">現有的%1$s於一小時內陸續釘選且之後新增的%2$s預設為釘選狀態</string>
-    <string name="file_management_unpin_datetype">現有的%1$s於一小時內陸續解除釘選且之後新增的%2$s預設為非釘選狀態</string>
+    <string name="file_management_alert_dialog_title">提示</string>
+    <string name="file_management_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
+    <string name="file_management_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
+    <string name="file_management_date_since_pinned">自  %1$s 開始釘選</string>
     
     <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
     <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
@@ -96,7 +99,7 @@
     <string name="hcfs_management_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
     
     <string name="settings_section_sync">同步設定</string>
-    <string name="settings_section_sync_wifi_only">只有WIFI連線時才上傳</string>
+    <string name="settings_section_sync_wifi_only">只有連接WIFI時才存取雲端</string>
     <string name="settings_section_notify">通知設定</string>
     <string name="settings_section_notify_conn_failed_recovery">通知連線中斷/恢復</string>
     <string name="settings_section_notify_upload_completed">通知上傳資料完成</string>
@@ -126,6 +129,10 @@
     <string name="activate_cloud_storage_or">或</string>
     <string name="activate_cloud_storage_google_activate"><u>使用Google帳號啟用</u></string>
     
+    <string name="alert_dialog_yes">是</string>
+    <string name="alert_dialog_no">否</string>
+    <string name="alert_dialog_confirm">確定</string>
+    
     <string name="activate_cloud_activate_transition">ActivateTransition</string>
     
     <string name="server_client_id">584185841160-g8ane8qnaqiust9d2nu4299edkq5lt9t.apps.googleusercontent.com</string>
@@ -133,5 +140,7 @@
     <string name="version_system_title">System Version</string>
     <string name="version_app_title">App Version</string>
     <string name="version_system">-</string>
+    
+    
     
 </resources>

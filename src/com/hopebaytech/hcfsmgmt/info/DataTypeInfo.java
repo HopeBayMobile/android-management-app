@@ -2,7 +2,6 @@ package com.hopebaytech.hcfsmgmt.info;
 
 import java.util.ArrayList;
 
-import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.content.Context;
@@ -10,15 +9,15 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 public class DataTypeInfo extends ItemInfo {
 
-	private final String CLASS_NAME = getClass().getSimpleName();
+	private final String CLASSNAME = getClass().getSimpleName();
 	private String dataType;
 	private int icon_drawable_res_id;
 	private Context context;
 	private long date_updated;
+	private long date_pinned;
 
 	public DataTypeInfo(Context context) {
 		super(context);
@@ -97,13 +96,25 @@ public class DataTypeInfo extends ItemInfo {
 	public long getDateUpdated() {
 		return date_updated;
 	}
+	
+	public long getDatePinned() {
+		return date_pinned;
+	}
+	
+	public void setDatePinned(long date_pinned) {
+		this.date_pinned = date_pinned;
+	}
+
+	public void setDate_updated(long date_updated) {
+		this.date_updated = date_updated;
+	}
 
 	public void setDateUpdated(long date_updated) {
 		this.date_updated = date_updated;
 	}
 	
-	public Drawable getPinImage() {
-		return super.getPinImage(FileStatus.LOCAL);
+	public Drawable getPinUnpinImage() {
+		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), FileStatus.LOCAL);
 	}
 
 	@Override

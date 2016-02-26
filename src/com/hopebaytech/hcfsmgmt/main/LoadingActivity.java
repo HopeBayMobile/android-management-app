@@ -153,6 +153,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
 					finish();
 				}
 			});
+			builder.setCancelable(false);
 			builder.show();
 		}
 	}

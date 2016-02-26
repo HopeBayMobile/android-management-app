@@ -32,6 +32,7 @@
                 android:id="@+id/internal_storage_space_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:visibility="gone"
                 android:orientation="horizontal" >
 
                 <TextView

@@ -3,6 +3,8 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -79,6 +81,13 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 			storage_used_ratio.setSummary(summary);
 		}
 		
+	}
+	
+	public void onBackPressed() {
+		FragmentManager fm = getFragmentManager();
+		FragmentTransaction ft = fm.beginTransaction();
+		ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
+		ft.commit();
 	}
 
 }

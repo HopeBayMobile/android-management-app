@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -15,12 +17,12 @@ import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
 import com.hopebaytech.hcfsmgmt.fragment.HomepageFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +36,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 	private Handler mHandler;
 	private NavigationView mNavigationView;
 	private String sdcard1_path;
+	private boolean isExitApp = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -138,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				}
 			});
 		}
-		
+
 		/* Detect whether sdcard1 exists, if exists, add to left slide menu. */
 		mHandler.post(new Runnable() {
 			@Override
@@ -175,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				}
 			}
 		});
-		
+
 		/* Inert default value of image, video and audio type to "datatype" table in database */
 		mHandler.post(new Runnable() {
 			@Override
@@ -184,13 +188,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				if (dataTypeDAO.getCount() == 0) {
 					DataTypeInfo dataTypeInfo = new DataTypeInfo(MainActivity.this);
 					dataTypeInfo.setPinned(HCFSMgmtUtils.DEFAULT_PINNED_STATUS);
-					
+
 					dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
 					dataTypeDAO.insert(dataTypeInfo);
-					
+
 					dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
 					dataTypeDAO.insert(dataTypeInfo);
-					
+
 					dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
 					dataTypeDAO.insert(dataTypeInfo);
 				}
@@ -203,53 +207,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		ft.commit();
 
 		/* Start NotifyUploadCompletedAlarm if user enables this notification in settings. Others, stop it */
-//		Intent intent = new Intent(this, HCFSMgmtReceiver.class);
-//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-//		boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
-//				PendingIntent.FLAG_NO_CREATE) != null;
+		// Intent intent = new Intent(this, HCFSMgmtReceiver.class);
+		// intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+		// boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
+		// PendingIntent.FLAG_NO_CREATE) != null;
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, false);
 		if (notifyUploadCompletedPref) {
-//			if (!isNotifyUploadCompletedAlarmExist) {
-				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(this);
-//			}
+			// if (!isNotifyUploadCompletedAlarmExist) {
+			HCFSMgmtUtils.startNotifyUploadCompletedAlarm(this);
+			// }
 		} else {
-//			if (isNotifyUploadCompletedAlarmExist) {
-				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(this);
-//			}
+			// if (isNotifyUploadCompletedAlarmExist) {
+			HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(this);
+			// }
 		}
 
 		/* Start ResetXferAlarm if it doesn't exist */
-//		intent = new Intent(this, HCFSMgmtReceiver.class);
-//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-//		boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent,
-//				PendingIntent.FLAG_NO_CREATE) != null;
-//		if (!isResetXferAlarmExist) {
-			HCFSMgmtUtils.startResetXferAlarm(this);
-//		}
+		// intent = new Intent(this, HCFSMgmtReceiver.class);
+		// intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+		// boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent,
+		// PendingIntent.FLAG_NO_CREATE) != null;
+		// if (!isResetXferAlarmExist) {
+		HCFSMgmtUtils.startResetXferAlarm(this);
+		// }
 
 		/* Start PinDataTypeFileAlarm if it doesn't exist */
-//		intent = new Intent(this, HCFSMgmtReceiver.class);
-//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-//		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
-//		boolean isPinDataTypeAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_PIN_DATA_TYPE_FILE, intent,
-//				PendingIntent.FLAG_NO_CREATE) != null;
-//		if (!isPinDataTypeAlarmExist) {
-			HCFSMgmtUtils.startPinDataTypeFileAlarm(this);
-//		} else {
-//			HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "PinDataTypeFileAlarm already exists");
-//		}
+		// intent = new Intent(this, HCFSMgmtReceiver.class);
+		// intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+		// intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
+		// boolean isPinDataTypeAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_PIN_DATA_TYPE_FILE, intent,
+		// PendingIntent.FLAG_NO_CREATE) != null;
+		// if (!isPinDataTypeAlarmExist) {
+		HCFSMgmtUtils.startPinDataTypeFileAlarm(this);
+		// } else {
+		// HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "PinDataTypeFileAlarm already exists");
+		// }
 
 		/* Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist */
-//		intent = new Intent(this, HCFSMgmtReceiver.class);
-//		intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-//		intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-//		boolean isNotifyLocalStorageUsedRatiolarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO,
-//				intent, PendingIntent.FLAG_NO_CREATE) != null;
-//		if (!isNotifyLocalStorageUsedRatiolarmExist) {
-			HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(this);
-//		}
-		
+		// intent = new Intent(this, HCFSMgmtReceiver.class);
+		// intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+		// intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+		// boolean isNotifyLocalStorageUsedRatiolarmExist = PendingIntent.getBroadcast(this,
+		// HCFSMgmtUtils.REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO,
+		// intent, PendingIntent.FLAG_NO_CREATE) != null;
+		// if (!isNotifyLocalStorageUsedRatiolarmExist) {
+		HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(this);
+		// }
+
 	}
 
 	@Override
@@ -258,7 +263,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		if (drawer.isDrawerOpen(GravityCompat.START)) {
 			drawer.closeDrawer(GravityCompat.START);
 		} else {
-			super.onBackPressed();
+			FragmentManager fm = getFragmentManager();
+			HomepageFragment homepageFragment = (HomepageFragment) fm.findFragmentByTag(HomepageFragment.TAG);
+			FileManagementFragment fileManagementFragment = (FileManagementFragment) fm.findFragmentByTag(FileManagementFragment.TAG);
+			SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag(SettingsFragment.TAG);
+			AboutFragment aboutFragment = (AboutFragment) fm.findFragmentByTag(AboutFragment.TAG);
+			if (homepageFragment != null && homepageFragment.isVisible()) {
+				if (isExitApp) {
+					finish();
+				} else {
+					isExitApp = true;
+					String message = getString(R.string.home_page_snackbar_exit_app);
+					Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+					Timer exitTimer = new Timer();
+					exitTimer.schedule(new TimerTask() {
+						@Override
+						public void run() {
+							isExitApp = false;
+						}
+					}, 2000);
+				}
+			} else if (fileManagementFragment != null && fileManagementFragment.isVisible()) {
+				fileManagementFragment.onBackPressed();
+			} else if (settingsFragment != null && settingsFragment.isVisible()) {
+				settingsFragment.onBackPressed();
+			} else if (aboutFragment != null && aboutFragment.isVisible()) {
+				aboutFragment.onBackPressed();
+			} else {
+				super.onBackPressed();
+			}
 		}
 	}
 
@@ -288,40 +321,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 		return true;
 	}
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		// if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-		// Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
-		// if (fragment != null && fragment.isVisible()) {
-		// if (fragment instanceof FileManagementFragment) {
-		// FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
-		// if (fileManagementFragment.onBackPressed())
-		// return true;
-		// }
-		//// else if (fragment instanceof InternalFileMgmtFragment) {
-		//// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
-		//// if (internalFileMgmtFragment.onBackPressed())
-		//// return true;
-		//// }
-		// }
-		// }
-		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-			Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
-			if (fragment != null && fragment.isVisible()) {
-				if (fragment instanceof FileManagementFragment) {
-					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
-					if (fileManagementFragment.onBackPressed())
-						return true;
-				}
-				// else if (fragment instanceof InternalFileMgmtFragment) {
-				// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
-				// if (internalFileMgmtFragment.onBackPressed())
-				// return true;
-				// }
-			}
-		}
-		return super.onKeyDown(keyCode, event);
-	}
+//	@Override
+//	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		// if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+//		// Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
+//		// if (fragment != null && fragment.isVisible()) {
+//		// if (fragment instanceof FileManagementFragment) {
+//		// FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
+//		// if (fileManagementFragment.onBackPressed())
+//		// return true;
+//		// }
+//		//// else if (fragment instanceof InternalFileMgmtFragment) {
+//		//// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
+//		//// if (internalFileMgmtFragment.onBackPressed())
+//		//// return true;
+//		//// }
+//		// }
+//		// }
+//		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+//			Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
+//			if (fragment != null && fragment.isVisible()) {
+//				if (fragment instanceof FileManagementFragment) {
+//					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
+//					if (fileManagementFragment.onBackPressed())
+//						return true;
+//				}
+//				// else if (fragment instanceof InternalFileMgmtFragment) {
+//				// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
+//				// if (internalFileMgmtFragment.onBackPressed())
+//				// return true;
+//				// }
+//			}
+//		}
+//		return super.onKeyDown(keyCode, event);
+//	}
 
 	public class SDCardBroadcastReceiver extends BroadcastReceiver {
 		@Override
@@ -348,6 +381,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 				});
 			}
 		}
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Intent intentService = new Intent(this, HCFSMgmtService.class);
+		intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ONGOIN_NOTIFICATION);
+		intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, false);
+		startService(intentService);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Intent intentService = new Intent(this, HCFSMgmtService.class);
+		intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ONGOIN_NOTIFICATION);
+		intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, true);
+		startService(intentService);
 	}
 
 	@Override

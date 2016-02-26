@@ -2,6 +2,9 @@
 package com.hopebaytech.hcfsmgmt.customview;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
+
+import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
@@ -86,7 +89,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 	private Paint mWholeCirclePaint;
 	private Paint mInnerCirclePaint;
 	private Paint mCapacityTextPaint;
-	private Paint mPercentageTextPaint;
+	private Paint mPercentTextPaint;
 
 	private int mWidth = 130;
 	private int mHeight = 130;
@@ -129,11 +132,11 @@ public class CircleDisplay extends View implements OnGestureListener {
 		mCapacityTextPaint.setColor(Color.BLACK);
 		mCapacityTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 22f));
 
-		mPercentageTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		mPercentageTextPaint.setStyle(Style.STROKE);
-		mPercentageTextPaint.setTextAlign(Align.CENTER);
-		mPercentageTextPaint.setColor(Color.BLACK);
-		mPercentageTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 14f));
+		mPercentTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mPercentTextPaint.setStyle(Style.STROKE);
+		mPercentTextPaint.setTextAlign(Align.CENTER);
+		mPercentTextPaint.setColor(Color.BLACK);
+		mPercentTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 14f));
 
 		mDrawAnimator = ObjectAnimator.ofFloat(this, "phase", 0f, 1.0f).setDuration(3000);
 		mDrawAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -199,9 +202,20 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * @param c
 	 */
 	private void drawText(Canvas c) {
-		c.drawText(mFormatValue.format(mValue * mPhase) + "" + mUnit, getWidth() / 2, getHeight() / 5 * 2 + mCapacityTextPaint.descent(),
-				mCapacityTextPaint);
-		c.drawText(mCapacityValue, getWidth() / 2, getHeight() / 5 * 3 + mPercentageTextPaint.descent(), mPercentageTextPaint);
+		String formatValue;
+		float number = mValue * mPhase;
+		number = Float.parseFloat(String.format(Locale.getDefault(), "%.1f", number));
+		if ((long) number == number) {
+			formatValue = String.format(Locale.getDefault(), "%d", (long) number);
+		} else {
+			formatValue = String.format(Locale.getDefault(), "%.1f", number);
+		}
+		
+//		c.drawText(mFormatValue.format(mValue * mPhase) + "" + mUnit, getWidth() / 2, getHeight() / 5 * 2 + mCapacityTextPaint.descent(),
+//				mCapacityTextPaint);
+		c.drawText(formatValue + "" + mUnit, getWidth() / 2, getHeight() / 5 * 2 + mPercentTextPaint.descent(),
+				mPercentTextPaint);
+		c.drawText(mCapacityValue, getWidth() / 2, getHeight() / 5 * 3 + mCapacityTextPaint.descent(), mCapacityTextPaint);
 	}
 
 	/**
@@ -266,13 +280,14 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * 
 	 * @param toShow
 	 * @param total
+	 * @param capacity
 	 * @param animated
 	 */
-	public void showValue(float toShow, float total, String capacity, boolean animated) {
+	public void showValue(float toShow, float total, long capacity, boolean animated) {
 		mAngle = calcAngle(toShow / total * 100f);
 		mValue = toShow;
 		mMaxValue = total;
-		mCapacityValue = capacity;
+		mCapacityValue = UnitConverter.convertByteToProperUnit(capacity);
 
 		if (animated)
 			startAnim();
@@ -439,8 +454,8 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * 
 	 * @param color
 	 */
-	public void setPercentageTextColor(int color) {
-		mPercentageTextPaint.setColor(color);
+	public void setPercentTextColor(int color) {
+		mPercentTextPaint.setColor(color);
 	}
 
 	/**
@@ -863,6 +878,14 @@ public class CircleDisplay extends View implements OnGestureListener {
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 		return false;
+	}
+	
+	public void setPercentTextSize(float textSize) {
+		mPercentTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), textSize));
+	}
+	
+	public void setCapacityTextSize(float textSize) {
+		mCapacityTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), textSize));
 	}
 
 }

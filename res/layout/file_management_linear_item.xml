@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/selectableItemBackground"
-    android:orientation="horizontal"
     android:paddingBottom="@dimen/fragment_vertical_padding"
     android:paddingLeft="@dimen/fragment_horizontal_padding"
     android:paddingRight="@dimen/fragment_horizontal_padding"
@@ -26,14 +25,31 @@
             android:paddingEnd="@dimen/item_image_horizontal_padding"
             android:src="@android:drawable/sym_def_app_icon" />
 
-        <TextView
-            android:id="@+id/itemName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@android:color/black" />
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/itemName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/datePinned"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:text="Pinned since 2016/03/01 21:00:00"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:visibility="gone"
+                android:textColor="@android:color/darker_gray" />
+        </LinearLayout>
     </LinearLayout>
 
     <RelativeLayout

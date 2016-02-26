@@ -13,7 +13,7 @@
         android:id="@+id/iconView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingRight="@dimen/item_image_horizontal_padding"
+        android:paddingEnd="@dimen/item_image_horizontal_padding"
         android:src="@android:drawable/sym_def_app_icon" />
 
     <LinearLayout
@@ -43,7 +43,7 @@
             android:layout_marginBottom="@dimen/progressbar_home_page_vertical_margin"
             android:layout_marginTop="@dimen/progressbar_home_page_vertical_margin"
             android:progressDrawable="@drawable/storage_progressbar"
-            android:progress="66" />
+            android:progress="0" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -54,8 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:text="10.4 / 11.7GB" />
+                android:text="-" />
         </RelativeLayout>
     </LinearLayout>
 
