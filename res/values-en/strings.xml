@@ -92,7 +92,7 @@
     <string name="hcfs_management_service_audio_failed_to_unpin">Number of failed unpinned music</string>
     
     <string name="settings_section_sync">Sync settings</string>
-    <string name="settings_section_sync_wifi_only">Access cloud only when Wi-Fi is in use</string>
+    <string name="settings_section_sync_wifi_only">Access cloud only on Wi-Fi network</string>
     <string name="settings_section_notify">Notification setings</string>
     <string name="settings_section_notify_conn_failed_recovery">Failed/restored connection</string>
     <string name="settings_section_notify_upload_completed">Data upload completion</string>

@@ -917,35 +917,33 @@ public class HCFSMgmtUtils {
 	
 	public static Drawable getPinUnpinImage(Context context, boolean isPinned, int status) {
 		Drawable pinDrawable = null;
-//		if (isPinned) {
-//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
-//		} else {
-//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned);
-//		}
-		if (isPinned) {
-			if (status == FileStatus.LOCAL) {
-				pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
-			} else if (status == FileStatus.HYBRID || status == FileStatus.CLOUD) {
-				pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
+		try {
+			if (isPinned) {
+				if (status == FileStatus.LOCAL) {
+					pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
+				} else if (status == FileStatus.HYBRID || status == FileStatus.CLOUD) {
+					pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
+				} else {
+					// TODO default image
+				}
 			} else {
-				// TODO default image
+				switch (status) {
+				case FileStatus.LOCAL:
+					pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_local);
+					break;
+				case FileStatus.HYBRID:
+					pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);
+					break;
+				case FileStatus.CLOUD:
+					pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_cloud);
+					break;
+				default:
+					// TODO default image
+					break;
+				}
 			}
-		} else {
-			switch (status) {
-			case FileStatus.LOCAL:
-				pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_local);
-				break;
-			case FileStatus.HYBRID:
-				pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);
-				break;
-			case FileStatus.CLOUD:
-				pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_cloud);
-				break;
-			default:
-				// TODO default image
-				break;
-			}
-//			pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned);
+		} catch (Exception e) {
+			HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getPinUnpinImage", Log.getStackTraceString(e));
 		}
 		return pinDrawable;
 	}
