@@ -42,9 +42,6 @@ public class AboutFragment extends Fragment {
 		} catch (NameNotFoundException e) {
 			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
 		}
-		
-		TextView system_version = (TextView) view.findViewById(R.id.version_system);
-		system_version.setText(getString(R.string.version_system));
 	}
 
 	public void onBackPressed() {

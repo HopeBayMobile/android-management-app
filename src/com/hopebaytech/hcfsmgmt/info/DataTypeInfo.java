@@ -41,7 +41,7 @@ public class DataTypeInfo extends ItemInfo {
 	}
 
 	public int getDataTypeStatus() {
-		int status = FileStatus.LOCAL;
+		int status = LocationStatus.LOCAL;
 //		if (dataType.equals(DataTypeDAO.DATA_TYPE_IMAGE)) {
 //			ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(context);
 //			status = getStatus(imagePaths);
@@ -63,32 +63,32 @@ public class DataTypeInfo extends ItemInfo {
 	}
 
 	private int getStatus(ArrayList<String> pathList) {
-		int status = FileStatus.LOCAL;
+		int status = LocationStatus.LOCAL;
 		int num_local = 0;
 		int num_hybrid = 0;
 		int num_cloud = 0;
 		for (String path : pathList) {
 			if (!Thread.currentThread().isInterrupted()) {
-				if (HCFSMgmtUtils.getFileStatus(path) == FileStatus.HYBRID) {
-					status = FileStatus.HYBRID;
+				if (HCFSMgmtUtils.getFileStatus(path) == LocationStatus.HYBRID) {
+					status = LocationStatus.HYBRID;
 					num_hybrid++;
 					return status;
-				} else if (HCFSMgmtUtils.getFileStatus(path) == FileStatus.LOCAL) {
+				} else if (HCFSMgmtUtils.getFileStatus(path) == LocationStatus.LOCAL) {
 					num_local++;
-				} else if (HCFSMgmtUtils.getFileStatus(path) == FileStatus.HYBRID) {
+				} else if (HCFSMgmtUtils.getFileStatus(path) == LocationStatus.HYBRID) {
 					num_cloud++;
 				}
 			}
 		}
 
 		if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
-			status = FileStatus.LOCAL;
+			status = LocationStatus.LOCAL;
 		} else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
-			status = FileStatus.LOCAL;
+			status = LocationStatus.LOCAL;
 		} else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
-			status = FileStatus.CLOUD;
+			status = LocationStatus.CLOUD;
 		} else {
-			status = FileStatus.HYBRID;
+			status = LocationStatus.HYBRID;
 		}
 		return status;
 	}
@@ -114,7 +114,7 @@ public class DataTypeInfo extends ItemInfo {
 	}
 	
 	public Drawable getPinUnpinImage() {
-		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), FileStatus.LOCAL);
+		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), LocationStatus.LOCAL);
 	}
 
 	@Override

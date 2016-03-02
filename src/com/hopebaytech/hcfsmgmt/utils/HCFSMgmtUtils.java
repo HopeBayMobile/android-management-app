@@ -12,7 +12,7 @@ import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
-import com.hopebaytech.hcfsmgmt.info.FileStatus;
+import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
@@ -566,7 +566,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static int getDirStatus(String pathName) {
-		int status = FileStatus.LOCAL;
+		int status = LocationStatus.LOCAL;
 		try {
 			// String logMsg = "pathName=" + pathName + ", startTime=" + System.currentTimeMillis();
 			// HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
@@ -585,13 +585,13 @@ public class HCFSMgmtUtils {
 					int num_cloud = dataObj.getInt("num_cloud");
 
 					if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
-						status = FileStatus.LOCAL;
+						status = LocationStatus.LOCAL;
 					} else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
-						status = FileStatus.LOCAL;
+						status = LocationStatus.LOCAL;
 					} else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
-						status = FileStatus.CLOUD;
+						status = LocationStatus.CLOUD;
 					} else {
-						status = FileStatus.HYBRID;
+						status = LocationStatus.HYBRID;
 					}
 					HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getDirStatus", logMsg);
 					// Log.i(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
@@ -612,7 +612,7 @@ public class HCFSMgmtUtils {
 	}
 
 	public static int getFileStatus(String pathName) {
-		int status = FileStatus.LOCAL;
+		int status = LocationStatus.LOCAL;
 		try {
 			String jsonResult = HCFSApiUtils.getFileStatus(pathName);
 			String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
@@ -622,13 +622,13 @@ public class HCFSMgmtUtils {
 				int code = jObject.getInt("code");
 				switch (code) {
 				case 0:
-					status = FileStatus.LOCAL;
+					status = LocationStatus.LOCAL;
 					break;
 				case 1:
-					status = FileStatus.CLOUD;
+					status = LocationStatus.CLOUD;
 					break;
 				case 2:
-					status = FileStatus.HYBRID;
+					status = LocationStatus.HYBRID;
 					break;
 				}
 				HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getFileStatus", logMsg);
@@ -919,22 +919,22 @@ public class HCFSMgmtUtils {
 		Drawable pinDrawable = null;
 		try {
 			if (isPinned) {
-				if (status == FileStatus.LOCAL) {
+				if (status == LocationStatus.LOCAL) {
 					pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
-				} else if (status == FileStatus.HYBRID || status == FileStatus.CLOUD) {
+				} else if (status == LocationStatus.HYBRID || status == LocationStatus.CLOUD) {
 					pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
 				} else {
 					// TODO default image
 				}
 			} else {
 				switch (status) {
-				case FileStatus.LOCAL:
+				case LocationStatus.LOCAL:
 					pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_local);
 					break;
-				case FileStatus.HYBRID:
+				case LocationStatus.HYBRID:
 					pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);
 					break;
-				case FileStatus.CLOUD:
+				case LocationStatus.CLOUD:
 					pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_cloud);
 					break;
 				default:

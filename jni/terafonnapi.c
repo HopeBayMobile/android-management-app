@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <stdlib.h>
 #include <sys/system_properties.h>
 
 extern void HCFS_file_status(char **json_res, char *pathname);

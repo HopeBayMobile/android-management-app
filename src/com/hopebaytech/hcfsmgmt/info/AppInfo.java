@@ -137,20 +137,20 @@ public class AppInfo extends ItemInfo {
 		int dataStatus = HCFSMgmtUtils.getDirStatus(getDataDir());
 		if (getExternalDir() != null) {
 			int exeternalStatus = HCFSMgmtUtils.getDirStatus(getExternalDir());
-			if (srcStatus == FileStatus.LOCAL && dataStatus == FileStatus.LOCAL && exeternalStatus == FileStatus.LOCAL) {
-				status = FileStatus.LOCAL;
-			} else if (srcStatus == FileStatus.CLOUD && dataStatus == FileStatus.CLOUD && exeternalStatus == FileStatus.CLOUD) {
-				status = FileStatus.CLOUD;
+			if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL && exeternalStatus == LocationStatus.LOCAL) {
+				status = LocationStatus.LOCAL;
+			} else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD && exeternalStatus == LocationStatus.CLOUD) {
+				status = LocationStatus.CLOUD;
 			} else {
-				status = FileStatus.HYBRID;
+				status = LocationStatus.HYBRID;
 			}
 		} else {
-			if (srcStatus == FileStatus.LOCAL && dataStatus == FileStatus.LOCAL) {
-				status = FileStatus.LOCAL;
-			} else if (srcStatus == FileStatus.CLOUD && dataStatus == FileStatus.CLOUD) {
-				status = FileStatus.CLOUD;
+			if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL) {
+				status = LocationStatus.LOCAL;
+			} else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD) {
+				status = LocationStatus.CLOUD;
 			} else {
-				status = FileStatus.HYBRID;
+				status = LocationStatus.HYBRID;
 			}
 		}
 		return status;
