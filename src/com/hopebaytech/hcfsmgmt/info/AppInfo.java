@@ -7,6 +7,7 @@ import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.Nullable;
 
 public class AppInfo extends ItemInfo {
@@ -31,7 +32,11 @@ public class AppInfo extends ItemInfo {
 	}
 
 	public Bitmap getIconImage() {
-		return ((BitmapDrawable) context.getPackageManager().getApplicationIcon(appInfo)).getBitmap();
+		Drawable drawable = context.getPackageManager().getApplicationIcon(appInfo);
+		if (!(drawable instanceof VectorDrawable)) {
+			return ((BitmapDrawable) drawable).getBitmap();
+		}
+		return null;
 	}
 
 	public void setApplicationInfo(ApplicationInfo appInfo) {
@@ -68,20 +73,20 @@ public class AppInfo extends ItemInfo {
 		return externalDir;
 	}
 
-//	public void findToSetExternalDir() {
-//		String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-//		File externalAndroidFile = new File(externalPath);
-//		for (File type : externalAndroidFile.listFiles()) {
-//			File[] typeName = type.listFiles();
-//			for (File fileName : typeName) {
-//				if (fileName.getName().equals(getPackageName())) {
-////					this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
-//					this.externalDir = fileName.getAbsolutePath();
-//					break;
-//				}
-//			}
-//		}
-//	}
+	// public void findToSetExternalDir() {
+	// String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+	// File externalAndroidFile = new File(externalPath);
+	// for (File type : externalAndroidFile.listFiles()) {
+	// File[] typeName = type.listFiles();
+	// for (File fileName : typeName) {
+	// if (fileName.getName().equals(getPackageName())) {
+	//// this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
+	// this.externalDir = fileName.getAbsolutePath();
+	// break;
+	// }
+	// }
+	// }
+	// }
 
 	public void setExternalDir(String externalDir) {
 		this.externalDir = externalDir;
@@ -126,7 +131,7 @@ public class AppInfo extends ItemInfo {
 		}
 		return packageName;
 	}
-	
+
 	@Override
 	public int getLocationStatus() {
 		return getAppStatus();

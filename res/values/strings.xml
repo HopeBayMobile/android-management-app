@@ -90,6 +90,7 @@
     <string name="file_management_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
     <string name="file_management_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
     <string name="file_management_date_since_pinned">自  %1$s 開始釘選</string>
+    <string name="file_management_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
     
     <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
     <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
@@ -128,6 +129,7 @@
     <string name="activate_cloud_storage_forget_password"><u>忘記密碼</u></string>
     <string name="activate_cloud_storage_or">或</string>
     <string name="activate_cloud_storage_google_activate"><u>使用Google帳號啟用</u></string>
+    <string name="activate_cloud_failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
     
     <string name="alert_dialog_yes">是</string>
     <string name="alert_dialog_no">否</string>

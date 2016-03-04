@@ -1,9 +1,12 @@
 package com.hopebaytech.hcfsmgmt.info;
 
+import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment.LinearRecyclerViewAdapter.LinearRecyclerViewHolder;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.RecyclerView;
 
 public abstract class ItemInfo {
 
@@ -16,9 +19,19 @@ public abstract class ItemInfo {
 	private String infoName;
 	private boolean isProcessing;
 	private long lastProcessTime;
+	public Thread pinImageThread;
+	public RecyclerView.ViewHolder viewHolder;
 	
 	public ItemInfo(Context context) {
 		this.context = context;
+	}
+	
+	public RecyclerView.ViewHolder getViewHolder() {
+		return viewHolder;
+	}
+
+	public void setViewHolder(RecyclerView.ViewHolder viewHolder) {
+		this.viewHolder = viewHolder;
 	}
 
 	public String getItemName() {

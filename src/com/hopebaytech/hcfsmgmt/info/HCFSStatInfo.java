@@ -168,11 +168,11 @@ public class HCFSStatInfo {
 
 	public int getDirtyPercentage() {
 		int percentage;
-		float tmp = ((float) cacheDirtyUsed / cloudTotal * 100);
-		if (tmp > 0 && tmp < 1) {
+		float tmp = ((float) cacheDirtyUsed / cacheTotal * 100);
+		if (tmp > 0 && tmp < 1) { 
 			percentage = 1;
 		} else {
-			percentage = (int) ((float) cacheDirtyUsed / cloudTotal * 100);
+			percentage = (int) ((float) cacheDirtyUsed / cacheTotal * 100);
 		}
 		return percentage;
 	}

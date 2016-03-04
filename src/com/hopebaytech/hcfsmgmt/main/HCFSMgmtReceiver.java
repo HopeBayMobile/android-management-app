@@ -24,7 +24,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 		final String action = intent.getAction();
 		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "action=" + action);
 		if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-			/* Detect network status and determine whether sync data to cloud */
+			/** Detect network status and determine whether sync data to cloud */
 			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(context);
 
 			/* Start an alarm to notify user when data is completed uploaded */
@@ -33,22 +33,27 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(context);
 			}
 
-			/* Start an alarm to periodically pin/unpin data type file */
+			/** Start an alarm to periodically pin/unpin data type file */
 			DataTypeDAO dataTypeDAO = new DataTypeDAO(context);
 			if (dataTypeDAO.getCount() != 0) {
 				HCFSMgmtUtils.startPinDataTypeFileAlarm(context);
 			}
 
-			/* Start an alarm to reset xfer */
+			/** Start an alarm to reset xfer */
 			HCFSMgmtUtils.startResetXferAlarm(context);
 
-			/* Start an alarm to notify local storage used ratio */
+			/** Start an alarm to notify local storage used ratio */
 			HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(context);
 
-			/* Create uid database if it dosen't exist or update it exists */
-			Intent intentService = new Intent(context, HCFSMgmtService.class);
-			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE);
-			context.startService(intentService);
+			/** Create uid database if it dosen't exist or update it exists */
+			Intent launchUidDbIntent = new Intent(context, HCFSMgmtService.class);
+			launchUidDbIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE);
+			context.startService(launchUidDbIntent);
+			
+			/** Pin system app */                                                                                  
+			Intent pinSystemAppIntent = new Intent(context, HCFSMgmtService.class);
+			pinSystemAppIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_SYSTEM_APP);
+			context.startService(pinSystemAppIntent);
 		} else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(context);
 		} else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {

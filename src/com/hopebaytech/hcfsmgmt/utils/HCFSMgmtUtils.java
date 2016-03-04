@@ -110,6 +110,7 @@ public class HCFSMgmtUtils {
 	public static final String INTENT_VALUE_RESET_XFER = "intent_value_reset_xfer";
 	public static final String INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO = "intent_value_notify_local_storage_used_ratio";
 	public static final String INTENT_VALUE_ONGOIN_NOTIFICATION = "intent_value_ongoing_notification";
+	public static final String INTENT_VALUE_PIN_SYSTEM_APP = "intent_value_pin_system_app";
 
 	public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
 	public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
@@ -510,10 +511,33 @@ public class HCFSMgmtUtils {
 		String sourceDir = info.getSourceDir();
 		String dataDir = info.getDataDir();
 		String externalDir = info.getExternalDir();
-		if (externalDir == null) {
-			return pinFileOrDirectory(sourceDir) & pinFileOrDirectory(dataDir);
+		if (sourceDir == null) {
+			if (externalDir == null) {
+				if (dataDir.contains("/data/data") || dataDir.contains("/data/user")) {
+					return pinFileOrDirectory(dataDir);
+				} 
+				return true;
+			} else {
+				boolean isDataDirPinSuccess = true;
+				if (dataDir.contains("/data/data") || dataDir.contains("/data/user")) {
+					isDataDirPinSuccess = pinFileOrDirectory(dataDir);
+				} 
+				return isDataDirPinSuccess & pinFileOrDirectory(externalDir);
+			}
 		} else {
-			return pinFileOrDirectory(sourceDir) & pinFileOrDirectory(dataDir) & pinFileOrDirectory(externalDir);
+			if (externalDir == null) {
+				boolean isDataDirPinSuccess = true;
+				if (dataDir.contains("/data/data") || dataDir.contains("/data/user")) {
+					isDataDirPinSuccess = pinFileOrDirectory(dataDir);
+				}
+				return  pinFileOrDirectory(sourceDir) & isDataDirPinSuccess;
+			} else {
+				boolean isDataDirPinSuccess = true;
+				if (dataDir.contains("/data/data") || dataDir.contains("/data/user")) {
+					isDataDirPinSuccess = pinFileOrDirectory(dataDir);
+				}
+				return pinFileOrDirectory(sourceDir) & isDataDirPinSuccess & pinFileOrDirectory(externalDir);
+			}
 		}
 	}
 

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -22,12 +21,14 @@ import com.hopebaytech.hcfsmgmt.customview.CircleDisplay;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment.GridRecyclerViewAdapter.GridRecyclerViewHolder;
 import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment.LinearRecyclerViewAdapter.LinearRecyclerViewHolder;
+import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment.SectionedRecyclerViewAdapter.SectionedViewHolder;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
-import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
+import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.DisplayType;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
@@ -61,19 +62,16 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.PopupMenu.OnMenuItemClickListener;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -94,8 +92,9 @@ import android.widget.TextView;
 public class FileManagementFragment extends Fragment {
 
 	public static final String TAG = FileManagementFragment.class.getSimpleName();
+	private static final String KEY_ARGUMENT_IS_SDCARD1 = "key_argument_is_sdcard1";
+	private static final String KEY_ARGUMENT_SDCARD1_PATH = "key_argument_sdcard1_path";
 	public static final int PIN_IMAGE_REFRESH_PERIOD = HCFSMgmtUtils.INTERVAL_TEN_SECONDS;
-
 	private final String CLASSNAME = getClass().getSimpleName();
 	private final String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
 	private final int GRID_LAYOUT_SPAN_COUNT = 3;
@@ -112,9 +111,8 @@ public class FileManagementFragment extends Fragment {
 	private ProgressBar mProgressCircle;
 	private Spinner mSpinner;
 	private SparseArray<ItemInfo> waitToExecuteSparseArr;
-	private SparseArray<Integer> mCurrentLocationStatusSparseArr;
-	private SparseArray<Boolean> mCurrentPinStatusSparseArr;
-
+	private SparseArray<Integer> mPrevLocationStatusSparseArr;
+	private SparseArray<Boolean> mPrevPinStatusSparseArr;
 	/** Only used when user switch to "Display by file" */
 	private HorizontalScrollView mFilePathNavigationScrollView;
 	/** Only used when user switch to "Display by file" */
@@ -126,18 +124,14 @@ public class FileManagementFragment extends Fragment {
 		GRID, LINEAR
 	};
 
-	private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.LINEAR;
-	private static String KEY_ARGUMENT_IS_SDCARD1 = "key_argument_is_sdcard1";
-	private static String KEY_ARGUMENT_SDCARD1_PATH = "key_argument_sdcard1_path";
-	private boolean isSDCard1 = false;
 	private String mFileRootDirName;
 	private String FILE_ROOT_DIR_PATH;
+	private boolean isSDCard1 = false;
 	private boolean isFragmentFirstLoaded = true;
-	private Map<String, RecyclerView.ViewHolder> viewHolderMap = new HashMap<String, RecyclerView.ViewHolder>();
+	private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.LINEAR;
 	/** Only used when user switch to "Display by file" */
 	private Map<String, Boolean> mDataTypePinStatusMap = new HashMap<String, Boolean>();
 	private boolean isRecyclerViewScrollDown;
-	private boolean isRecyclerViewScrolling;
 
 	public static FileManagementFragment newInstance(boolean isSDCard1) {
 		FileManagementFragment fragment = new FileManagementFragment();
@@ -192,8 +186,8 @@ public class FileManagementFragment extends Fragment {
 		mWorkerHandler = new Handler(mHandlerThread.getLooper());
 
 		waitToExecuteSparseArr = new SparseArray<ItemInfo>();
-		mCurrentLocationStatusSparseArr = new SparseArray<Integer>();
-		mCurrentPinStatusSparseArr = new SparseArray<Boolean>();
+		mPrevLocationStatusSparseArr = new SparseArray<Integer>();
+		mPrevPinStatusSparseArr = new SparseArray<Boolean>();
 	}
 
 	@Override
@@ -250,80 +244,138 @@ public class FileManagementFragment extends Fragment {
 		});
 		mApiExecutorThread.start();
 
-//		if (mUiAutoRefreshThread == null) {
-//			mUiAutoRefreshThread = new Thread(new Runnable() {
-//				@Override
-//				public void run() {
-//					while (true) {
-//						try {
-//							Activity activity = getActivity();
-//							if (activity != null) {
-//								activity.runOnUiThread(new Runnable() {
-//									@Override
-//									public void run() {
-//										if (isRecyclerViewScrolling) {
-//											return;
-//										}
-//										if (mSectionedRecyclerViewAdapter != null) {
-//											try {
-//												int firstVisiblePosition = findRecyclerViewFirstVisibleItemPosisiton();
-//												int lastVisiblePosition = findRecyclerViewLastVisibleItemPosisiton();
-//												SectionedRecyclerViewAdapter adapter = (SectionedRecyclerViewAdapter) mRecyclerView.getAdapter();
-//												ArrayList<ItemInfo> itemInfoList = adapter.getSubAdapterItemInfoList();
-//												for (int i = firstVisiblePosition + 1; i < lastVisiblePosition - firstVisiblePosition + 1; i++) {
-//													if (isRecyclerViewScrolling) {
-//														return;
-//													}
-//													Integer currentLocation = mCurrentLocationStatusSparseArr.get(i);
-//													Boolean currentPinned = mCurrentPinStatusSparseArr.get(i);
-//													if (currentLocation != null && currentPinned != null) {
-//														Log.w(HCFSMgmtUtils.TAG, "realPos=" + i + ", currentLocation=" + currentLocation + ", currentPinned=" + currentPinned);
-//														if (!currentPinned.booleanValue() || currentLocation.intValue() != LocationStatus.LOCAL) {
-//															ItemInfo itemInfo = itemInfoList.get(i - 1);
-//															int location = itemInfo.getLocationStatus();
-//															boolean isPinned = false;
-//															if (itemInfo instanceof AppInfo) {
-//																AppInfo appInfo = (AppInfo) itemInfo;
-//																isPinned = HCFSMgmtUtils.isAppPinned(appInfo);
-//															} else if (itemInfo instanceof DataTypeInfo) {
-//																/** the pin status of DataTypeInfo has got in getListOfDataType() */
-//																isPinned = itemInfo.isPinned();
-//															} else if (itemInfo instanceof FileDirInfo) {
-//																FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
-//																isPinned = HCFSMgmtUtils.isPathPinned(fileDirInfo.getFilePath());
-//															}
-//
-//															if (isPinned != currentPinned.booleanValue()) {
-////																Log.w(HCFSMgmtUtils.TAG, "realPos=" + i);
-//																mSectionedRecyclerViewAdapter.notifyItemChanged(i);
-//															} else {
-//																if (currentLocation.intValue() != location) {
-////																	Log.w(HCFSMgmtUtils.TAG, "realPos=" + i);
-//																	mSectionedRecyclerViewAdapter.notifyItemChanged(i);
-//																}
-//															}
-//
-//														}
-//													}
-//
-//												}
-//											} catch (NullPointerException e) {
-//												HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onCreate", Log.getStackTraceString(e));
-//											}
-//										}
-//									}
-//								});
-//							}
-//							Thread.sleep(3000);
-//						} catch (InterruptedException e) {
-//							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", "mUiAutoRefreshThread is interrupted");
-//							break;
-//						}
-//					}
-//				}
-//			});
-//			mUiAutoRefreshThread.start();
-//		}
+		if (mUiAutoRefreshThread == null) {
+			mUiAutoRefreshThread = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						try {
+							final Activity activity = getActivity();
+							if (mSectionedRecyclerViewAdapter != null) {
+								try {
+									int firstVisiblePosition = findRecyclerViewFirstVisibleItemPosisiton();
+									int lastVisiblePosition = findRecyclerViewLastVisibleItemPosisiton();
+									final SectionedRecyclerViewAdapter adapter = (SectionedRecyclerViewAdapter) mRecyclerView.getAdapter();
+									ArrayList<ItemInfo> itemInfoList = adapter.getSubAdapterItemInfoList();
+									if (firstVisiblePosition == 0) {
+										final Section section = adapter.getSections().get(0);
+										if (section.viewHolder != null) {
+											StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
+											final long totalStorageSpace = statFs.getTotalBytes();
+											final long availableStorageSpace = statFs.getAvailableBytes();
+											activity.runOnUiThread(new Runnable() {
+												@Override
+												public void run() {
+													float toShowValue = ((totalStorageSpace - availableStorageSpace) * 1f / totalStorageSpace) * 100f;
+													CircleDisplay cd = section.viewHolder.circleDisplay;
+													cd.showValue(toShowValue, 100f, totalStorageSpace, false);
+
+													if (isSDCard1) {
+														section.viewHolder.totalStorageSpace
+																.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
+														section.viewHolder.availableStorageSpace
+																.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
+													} else {
+														section.viewHolder.totalStorageSpace
+																.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
+														section.viewHolder.availableStorageSpace
+																.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
+													}
+												}
+											});
+										}
+									}
+
+									for (int i = firstVisiblePosition + 1; i < lastVisiblePosition + 1; i++) {
+										Integer currentLocation = mPrevLocationStatusSparseArr.get(i);
+										Boolean currentPinned = mPrevPinStatusSparseArr.get(i);
+										
+										boolean isNeedToChangePinImage = false;
+										if (currentLocation != null && currentPinned != null) {
+											if (!currentPinned.booleanValue() || currentLocation.intValue() != LocationStatus.LOCAL) {
+												isNeedToChangePinImage = true;
+											}
+										} else {
+											isNeedToChangePinImage = true;
+										}
+
+										if (isNeedToChangePinImage) {
+											// Log.w(HCFSMgmtUtils.TAG, "realPos=" + i + ", currentLocation=" + currentLocation + ", currentPinned=" +
+											// currentPinned);
+											int index = i - 1;
+											if (index >= itemInfoList.size()) {
+												continue;
+											}
+											
+											final ItemInfo itemInfo = itemInfoList.get(index);
+											final int location = itemInfo.getLocationStatus();
+											boolean isPinned = false;
+											if (itemInfo instanceof AppInfo) {
+												AppInfo appInfo = (AppInfo) itemInfo;
+												isPinned = HCFSMgmtUtils.isAppPinned(appInfo);
+											} else if (itemInfo instanceof DataTypeInfo) {
+												/** the pin status of DataTypeInfo has got in getListOfDataType() */
+												isPinned = itemInfo.isPinned();
+											} else if (itemInfo instanceof FileDirInfo) {
+												FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
+												isPinned = HCFSMgmtUtils.isPathPinned(fileDirInfo.getFilePath());
+											}
+											itemInfo.setPinned(isPinned);
+											// Random random = new Random();
+											// final int location = random.nextInt(3) + 1;
+											// boolean isPinned = random.nextBoolean();
+											// itemInfo.setPinned(isPinned);
+
+											boolean changePinImage = false;
+											if (currentPinned != null && currentLocation != null) {
+												if (isPinned != currentPinned.booleanValue()) {
+													changePinImage = true;
+												} else {
+													if (currentLocation.intValue() != location) {
+														changePinImage = true;
+													}
+												}
+											}
+
+											if (changePinImage) {
+												RecyclerView.ViewHolder viewHolder = itemInfo.getViewHolder();
+												if (viewHolder != null) {
+													if (viewHolder instanceof LinearRecyclerViewHolder) {
+														final LinearRecyclerViewHolder holder = (LinearRecyclerViewHolder) viewHolder;
+														if (holder.getItemInfo().getItemName().equals(itemInfo.getItemName())) {
+															if (activity != null) {
+																activity.runOnUiThread(new Runnable() {
+																	@Override
+																	public void run() {
+																		Drawable pinViewDrawable = HCFSMgmtUtils.getPinUnpinImage(getActivity(),
+																				itemInfo.isPinned(), location);
+																		holder.pinView.setImageDrawable(pinViewDrawable);
+																	}
+																});
+															}
+														}
+													}
+												}
+											}
+
+											mPrevPinStatusSparseArr.put(i, isPinned);
+											mPrevLocationStatusSparseArr.put(i, location);
+										}
+									}
+								} catch (NullPointerException e) {
+									HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onCreate", Log.getStackTraceString(e));
+								}
+							}
+							Thread.sleep(3000);
+						} catch (InterruptedException e) {
+							HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", "mUiAutoRefreshThread is interrupted");
+							break;
+						}
+					}
+				}
+			});
+			mUiAutoRefreshThread.start();
+		}
 
 	}
 
@@ -353,7 +405,7 @@ public class FileManagementFragment extends Fragment {
 		mFilePathNavigationScrollView = (HorizontalScrollView) view.findViewById(R.id.file_path_navigation_scrollview);
 
 		mRecyclerView = (RecyclerView) view.findViewById(R.id.recyclerView);
-//		mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+		mRecyclerView.setItemAnimator(null);
 		mRecyclerView.setHasFixedSize(true);
 		mRecyclerView.addOnScrollListener(new OnScrollListener() {
 			@Override
@@ -365,17 +417,6 @@ public class FileManagementFragment extends Fragment {
 					isRecyclerViewScrollDown = false;
 				}
 			}
-
-			@Override
-			public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-				super.onScrollStateChanged(recyclerView, newState);
-				if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-					isRecyclerViewScrolling = false;
-				} else {
-					isRecyclerViewScrolling = true;
-				}
-			}
-			
 		});
 		switch (mDisplayType) {
 		case LINEAR:
@@ -404,8 +445,6 @@ public class FileManagementFragment extends Fragment {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				mSectionedRecyclerViewAdapter.init();
-				mCurrentLocationStatusSparseArr.clear();
-				mCurrentPinStatusSparseArr.clear();
 				String itemName = parent.getSelectedItem().toString();
 				if (itemName.equals(getString(R.string.file_management_spinner_apps))) {
 					mFilePathNavigationLayout.setVisibility(View.GONE);
@@ -454,8 +493,6 @@ public class FileManagementFragment extends Fragment {
 				long currentTime = System.currentTimeMillis();
 				if ((currentTime - lastClickTime) > 3000) {
 					mSectionedRecyclerViewAdapter.init();
-					mCurrentLocationStatusSparseArr.clear();
-					mCurrentPinStatusSparseArr.clear();
 					if (!isSDCard1) {
 						String itemName = mSpinner.getSelectedItem().toString();
 						if (itemName.equals(getString(R.string.file_management_spinner_apps))) {
@@ -519,53 +556,55 @@ public class FileManagementFragment extends Fragment {
 		});
 	}
 
-	private ArrayList<ItemInfo> getListOfDataType() {
-		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
-		String[] dataTypeArray = getResources().getStringArray(R.array.file_management_list_data_types);
-		for (int i = 0; i < dataTypeArray.length; i++) {
-			// DataTypeInfo dbDataTypeInfo = null;
-			// DataTypeInfo dataTypeInfo = new DataTypeInfo(getActivity());
-			DataTypeInfo dataTypeInfo = null;
-			if (dataTypeArray[i].equals(getString(R.string.file_management_list_data_type_image))) {
-				dataTypeInfo = mDataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
-				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
-				dataTypeInfo.setIconImage(R.drawable.ic_folder_photo);
-			} else if (dataTypeArray[i].equals(getString(R.string.file_management_list_data_type_video))) {
-				dataTypeInfo = mDataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
-				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
-				dataTypeInfo.setIconImage(R.drawable.ic_folder_video);
-			} else if (dataTypeArray[i].equals(getString(R.string.file_management_list_data_type_audio))) {
-				dataTypeInfo = mDataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);
-				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
-				dataTypeInfo.setIconImage(R.drawable.ic_folder_music);
-			}
+//	private ArrayList<ItemInfo> getListOfDataType() {
+//		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
+//		String[] dataTypeArray = getResources().getStringArray(R.array.file_management_list_data_types);
+//		for (int i = 0; i < dataTypeArray.length; i++) {
+//			// DataTypeInfo dbDataTypeInfo = null;
+//			// DataTypeInfo dataTypeInfo = new DataTypeInfo(getActivity());
+//			DataTypeInfo dataTypeInfo = null;
+//			if (dataTypeArray[i].equals(getString(R.string.file_management_list_data_type_image))) {
+//				dataTypeInfo = mDataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
+//				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
+//				dataTypeInfo.setIconImage(R.drawable.ic_folder_photo);
+//			} else if (dataTypeArray[i].equals(getString(R.string.file_management_list_data_type_video))) {
+//				dataTypeInfo = mDataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
+//				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
+//				dataTypeInfo.setIconImage(R.drawable.ic_folder_video);
+//			} else if (dataTypeArray[i].equals(getString(R.string.file_management_list_data_type_audio))) {
+//				dataTypeInfo = mDataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);
+//				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
+//				dataTypeInfo.setIconImage(R.drawable.ic_folder_music);
+//			}
+//
+//			if (dataTypeInfo != null) {
+//				dataTypeInfo.setItemName(dataTypeArray[i]);
+//				items.add(dataTypeInfo);
+//			}
+//		}
+//		return items;
+//	}
 
-			if (dataTypeInfo != null) {
-				dataTypeInfo.setItemName(dataTypeArray[i]);
-				items.add(dataTypeInfo);
-			}
-		}
-		return items;
-	}
-
-	private ArrayList<ItemInfo> getListOfFileDirs() {
-		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
-		if (isExternalStorageReadable()) {
-			File[] fileList = mCurrentFile.listFiles();
-			Arrays.sort(fileList);
-			for (int i = 0; i < fileList.length; i++) {
-				FileDirInfo fileDirInfo = new FileDirInfo(getActivity());
-				File file = fileList[i];
-				fileDirInfo.setItemName(file.getName());
-				fileDirInfo.setCurrentFile(file);
-				items.add(fileDirInfo);
-			}
-		}
-		return items;
-	}
+//	private ArrayList<ItemInfo> getListOfFileDirs() {
+//		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
+//		if (isExternalStorageReadable()) {
+//			File[] fileList = mCurrentFile.listFiles();
+//			Arrays.sort(fileList);
+//			for (int i = 0; i < fileList.length; i++) {
+//				FileDirInfo fileDirInfo = new FileDirInfo(getActivity());
+//				File file = fileList[i];
+//				fileDirInfo.setItemName(file.getName());
+//				fileDirInfo.setCurrentFile(file);
+//				items.add(fileDirInfo);
+//			}
+//		}
+//		return items;
+//	}
 
 	public void showTypeContent(final int resource_string_id) {
 		HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "showTypeContent", null);
+		mPrevLocationStatusSparseArr.clear();
+		mPrevPinStatusSparseArr.clear();
 		mSectionedRecyclerViewAdapter.clearSubAdpater();
 		mSectionedRecyclerViewAdapter.notifySubAdapterDataSetChanged();
 
@@ -573,16 +612,17 @@ public class FileManagementFragment extends Fragment {
 		mWorkerHandler.post(new Runnable() {
 			@Override
 			public void run() {
-				ArrayList<ItemInfo> itemInfoList = null;
+				ArrayList<ItemInfo> itemInfoList = null; 
 				switch (resource_string_id) {
 				case R.string.file_management_spinner_apps:
-					itemInfoList = getListOfInstalledApps();
+//					itemInfoList = getListOfInstalledApps();
+					itemInfoList = DisplayType.getListOfInstalledApps(getActivity(), DisplayType.APP_USER);
 					break;
 				case R.string.file_management_spinner_data_type:
-					itemInfoList = getListOfDataType();
+					itemInfoList = DisplayType.getListOfDataType(getActivity(), mDataTypeDAO);
 					break;
 				case R.string.file_management_spinner_files:
-					itemInfoList = getListOfFileDirs();
+					itemInfoList = DisplayType.getListOfFileDirs(getActivity(), mCurrentFile);
 					break;
 				}
 
@@ -611,44 +651,44 @@ public class FileManagementFragment extends Fragment {
 		});
 	}
 
-	private ArrayList<ItemInfo> getListOfInstalledApps() {
-		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
-		Activity activity = getActivity();
-		if (activity != null) {
-			Map<String, String> externalPkgNameMap = new HashMap<String, String>();
-			String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-			File externalAndroidFile = new File(externalPath);
-			for (File type : externalAndroidFile.listFiles()) {
-				File[] fileList = type.listFiles();
-				for (File file : fileList) {
-					String path = file.getAbsolutePath();
-					String[] splitPath = path.split("/");
-					String pkgName = splitPath[splitPath.length - 1];
-					externalPkgNameMap.put(pkgName, path);
-				}
-			}
-
-			PackageManager pm = activity.getPackageManager();
-			List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-			for (ApplicationInfo packageInfo : packages) {
-				if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
-					AppInfo appInfo = new AppInfo(activity);
-					appInfo.setUid(packageInfo.uid);
-					appInfo.setApplicationInfo(packageInfo);
-					appInfo.setItemName(packageInfo.loadLabel(pm).toString());
-					if (externalPkgNameMap.containsKey(packageInfo.packageName)) {
-						appInfo.setExternalDir(externalPkgNameMap.get(packageInfo.packageName));
-					}
-
-					boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo);
-					appInfo.setPinned(isAppPinned);
-					items.add(appInfo);
-					// getPackageSize(pm, packageInfo);
-				}
-			}
-		}
-		return items;
-	}
+//	private ArrayList<ItemInfo> getListOfInstalledApps() {
+//		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
+//		Activity activity = getActivity();
+//		if (activity != null) {
+//			Map<String, String> externalPkgNameMap = new HashMap<String, String>();
+//			String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+//			File externalAndroidFile = new File(externalPath);
+//			for (File type : externalAndroidFile.listFiles()) {
+//				File[] fileList = type.listFiles();
+//				for (File file : fileList) {
+//					String path = file.getAbsolutePath();
+//					String[] splitPath = path.split("/");
+//					String pkgName = splitPath[splitPath.length - 1];
+//					externalPkgNameMap.put(pkgName, path);
+//				}
+//			}
+//
+//			PackageManager pm = activity.getPackageManager();
+//			List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+//			for (ApplicationInfo packageInfo : packages) {
+//				if (!HCFSMgmtUtils.isSystemPackage(packageInfo)) {
+//					AppInfo appInfo = new AppInfo(activity);
+//					appInfo.setUid(packageInfo.uid);
+//					appInfo.setApplicationInfo(packageInfo);
+//					appInfo.setItemName(packageInfo.loadLabel(pm).toString());
+//					if (externalPkgNameMap.containsKey(packageInfo.packageName)) {
+//						appInfo.setExternalDir(externalPkgNameMap.get(packageInfo.packageName));
+//					}
+//
+//					boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo);
+//					appInfo.setPinned(isAppPinned);
+//					items.add(appInfo);
+//					// getPackageSize(pm, packageInfo);
+//				}
+//			}
+//		}
+//		return items;
+//	}
 
 	private void getAppPackageSize(PackageManager pm, ApplicationInfo packageInfo) {
 		try {
@@ -721,6 +761,11 @@ public class FileManagementFragment extends Fragment {
 
 		private void clear() {
 			if (mItems != null) {
+				for (ItemInfo itemInfo : mItems) {
+					if (itemInfo.pinImageThread != null && itemInfo.pinImageThread.isAlive()) {
+						itemInfo.pinImageThread.interrupt();
+					}
+				}
 				mItems.clear();
 			}
 
@@ -757,7 +802,7 @@ public class FileManagementFragment extends Fragment {
 				mExecutor.execute(new Runnable() {
 					@Override
 					public void run() {
-						if (isViewHolderThreadNeedToExecute(position)) {
+						if (isPositionVisible(position)) {
 							final Bitmap bitmap = itemInfo.getIconImage();
 							if (bitmap != null) {
 								mMemoryCache.put(position + "_cache", bitmap);
@@ -816,7 +861,7 @@ public class FileManagementFragment extends Fragment {
 					mExecutor.execute(new Runnable() {
 						@Override
 						public void run() {
-							if (isViewHolderThreadNeedToExecute(position)) {
+							if (isPositionVisible(position)) {
 								final int status = itemInfo.getLocationStatus();
 								if (itemInfo instanceof AppInfo) {
 									AppInfo appInfo = (AppInfo) itemInfo;
@@ -1064,11 +1109,8 @@ public class FileManagementFragment extends Fragment {
 
 		private ArrayList<ItemInfo> mItemInfoList;
 		private ThreadPoolExecutor mExecutor;
-		// private SparseIntArray mLocationStatusSparseArr;
-		// private SparseBooleanArray mPinStatusSparseArr;
 		private LruCache<String, Bitmap> mMemoryCache;
 		// private ExecutorService executor;
-		private Random random = new Random();
 
 		public LinearRecyclerViewAdapter() {
 			mItemInfoList = new ArrayList<ItemInfo>();
@@ -1086,9 +1128,6 @@ public class FileManagementFragment extends Fragment {
 			mExecutor = new ThreadPoolExecutor(N, N * 2, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 			mExecutor.allowCoreThreadTimeOut(true);
 			mExecutor.prestartCoreThread();
-
-			// mLocationStatusSparseArr = new SparseIntArray();
-			// mPinStatusSparseArr = new SparseBooleanArray();
 
 			int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 			int cacheSize = maxMemory / 8;
@@ -1119,11 +1158,11 @@ public class FileManagementFragment extends Fragment {
 
 		@Override
 		public void onBindViewHolder(final LinearRecyclerViewHolder holder, final int position) {
-
 			final ItemInfo itemInfo = mItemInfoList.get(position);
+			itemInfo.setViewHolder(holder);
 			holder.setItemInfo(itemInfo);
 			holder.itemName.setText(itemInfo.getItemName());
-			holder.imageView.setImageDrawable(null);
+			// holder.imageView.setImageDrawable(null);
 			if (itemInfo instanceof DataTypeInfo) {
 				final DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
 				if (dataTypeInfo.isPinned()) {
@@ -1147,7 +1186,7 @@ public class FileManagementFragment extends Fragment {
 				mExecutor.execute(new Runnable() {
 					@Override
 					public void run() {
-						if (isViewHolderThreadNeedToExecute(position)) {
+						if (isPositionVisible(position)) {
 							final Bitmap bitmap = itemInfo.getIconImage();
 							if (bitmap != null) {
 								mMemoryCache.put(position + "_cache", bitmap);
@@ -1169,20 +1208,16 @@ public class FileManagementFragment extends Fragment {
 			}
 
 			if (!isSDCard1) {
-				holder.pinView.setImageDrawable(null);
-				Integer status = mCurrentLocationStatusSparseArr.get(position + 1);
-				Boolean isPinned = mCurrentPinStatusSparseArr.get(position + 1);
-				Log.e(HCFSMgmtUtils.TAG, "subItemPos=" + position + ", status=" + status + ", isPinned=" + isPinned);
+				// holder.pinView.setImageDrawable(null);
+				Integer status = mPrevLocationStatusSparseArr.get(position + 1);
+				Boolean isPinned = mPrevPinStatusSparseArr.get(position + 1);
 				if (isPinned != null && isPinned.booleanValue() && status != null && status == LocationStatus.LOCAL) {
-					displayPinImage(getActivity(), holder, itemInfo, status);
+					holder.pinView.setImageDrawable(HCFSMgmtUtils.getPinUnpinImage(getActivity(), itemInfo.isPinned(), status));
 				} else {
 					mExecutor.execute(new Runnable() {
 						@Override
 						public void run() {
-							if (isViewHolderThreadNeedToExecute(position)) {
-								// final int status = random.nextInt(3) + 1;
-								// boolean isPinned = random.nextBoolean();
-								// itemInfo.setPinned(isPinned);
+							if (isPositionVisible(position)) {
 								final int status = itemInfo.getLocationStatus();
 								if (itemInfo instanceof AppInfo) {
 									AppInfo appInfo = (AppInfo) itemInfo;
@@ -1196,19 +1231,21 @@ public class FileManagementFragment extends Fragment {
 									itemInfo.setPinned(isPinned);
 								}
 
-								mCurrentPinStatusSparseArr.put(position + 1, itemInfo.isPinned());
-								mCurrentLocationStatusSparseArr.put(position + 1, status);
+								mPrevPinStatusSparseArr.put(position + 1, itemInfo.isPinned());
+								mPrevLocationStatusSparseArr.put(position + 1, status);
 								Activity activity = getActivity();
 								if (holder.getItemInfo().getItemName().equals(itemInfo.getItemName())) {
 									if (activity != null) {
 										activity.runOnUiThread(new Runnable() {
 											@Override
 											public void run() {
-												displayPinImage(getActivity(), holder, itemInfo, status);
+												Drawable pinDrawable = HCFSMgmtUtils.getPinUnpinImage(getActivity(), itemInfo.isPinned(), status);
+												holder.pinView.setImageDrawable(pinDrawable);
 											}
 										});
 									}
 								}
+
 							}
 						}
 					});
@@ -1218,19 +1255,12 @@ public class FileManagementFragment extends Fragment {
 			}
 		}
 
-		private void displayPinImage(Context context, LinearRecyclerViewHolder holder, ItemInfo itemInfo, int status) {
-			if (holder instanceof LinearRecyclerViewHolder) {
-				LinearRecyclerViewHolder linearHolder = (LinearRecyclerViewHolder) holder;
-				linearHolder.pinView.setImageDrawable(HCFSMgmtUtils.getPinUnpinImage(context, itemInfo.isPinned(), status));
-			}
-		}
-
 		@Nullable
 		@Override
 		public LinearRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 			View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_management_linear_item, parent, false);
 			LinearRecyclerViewHolder viewHolder = new LinearRecyclerViewHolder(getActivity(), view);
-			viewHolderMap.put(viewHolder.getId(), viewHolder);
+			// viewHolderMap.put(viewHolder.getId(), viewHolder);
 			return viewHolder;
 		}
 
@@ -1240,15 +1270,20 @@ public class FileManagementFragment extends Fragment {
 
 		private void clear() {
 			if (mItemInfoList != null) {
+				for (ItemInfo itemInfo : mItemInfoList) {
+					if (itemInfo.pinImageThread != null) {
+						itemInfo.pinImageThread.interrupt();
+					}
+				}
 				mItemInfoList.clear();
 			}
 
-			if (mCurrentLocationStatusSparseArr != null) {
-				mCurrentLocationStatusSparseArr.clear();
+			if (mPrevLocationStatusSparseArr != null) {
+				mPrevLocationStatusSparseArr.clear();
 			}
 
-			if (mCurrentPinStatusSparseArr != null) {
-				mCurrentPinStatusSparseArr.clear();
+			if (mPrevPinStatusSparseArr != null) {
+				mPrevPinStatusSparseArr.clear();
 			}
 
 			if (mMemoryCache != null) {
@@ -1266,36 +1301,6 @@ public class FileManagementFragment extends Fragment {
 			protected ImageView pinView;
 			protected TextView datePinnedTextView;
 			protected ItemInfo itemInfo;
-			private Thread pinViewThread;
-			private Runnable pinViewTask = new Runnable() {
-				@Override
-				public void run() {
-					// while (true) {
-					// try {
-					Drawable drawable = itemInfo.getPinUnpinImage();
-					HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "LinearRecyclerViewHolder", "run", "Update pin image");
-					// if (itemInfo instanceof AppInfo) {
-					// AppInfo appInfo = (AppInfo) itemInfo;
-					// drawable = appInfo.getPinImage();
-					// } else if (itemInfo instanceof FileDirInfo) {
-					// FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
-					// drawable = fileDirInfo.getPinImage();
-					// } else if (itemInfo instanceof DataTypeInfo) {
-					// DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
-					// drawable = dataTypeInfo.getPinImage();
-					// }
-
-					if (drawable != null) {
-						final Drawable pinDrawable = drawable;
-						mActivity.runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								pinView.setImageDrawable(pinDrawable);
-							}
-						});
-					}
-				}
-			};
 
 			public LinearRecyclerViewHolder(Activity activity, View itemView) {
 				super(itemView);
@@ -1305,31 +1310,10 @@ public class FileManagementFragment extends Fragment {
 				imageView = (ImageView) itemView.findViewById(R.id.iconView);
 				pinView = (ImageView) itemView.findViewById(R.id.pinView);
 				datePinnedTextView = (TextView) itemView.findViewById(R.id.datePinned);
-				pinViewThread = new Thread(pinViewTask);
 
 				pinView.setOnClickListener(this);
 				itemView.setOnClickListener(this);
 			}
-
-			// public void startPinViewThread() {
-			// HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "LinearRecyclerViewHolder", "startPinViewThread", null);
-			// if (pinViewThread == null) {
-			// pinViewThread = new Thread(pinViewTask);
-			// pinViewThread.start();
-			// } else {
-			// if (!pinViewThread.isAlive()) {
-			// pinViewThread = new Thread(pinViewTask);
-			// pinViewThread.start();
-			// }
-			// }
-			// }
-
-			// public void stopPinViewThread() {
-			// HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "LinearRecyclerViewHolder", "stopPinViewThread", null);
-			// if (pinViewThread.isAlive()) {
-			// pinViewThread.interrupt();
-			// }
-			// }
 
 			public void setItemInfo(ItemInfo itemInfo) {
 				this.itemInfo = itemInfo;
@@ -1339,19 +1323,11 @@ public class FileManagementFragment extends Fragment {
 				return itemInfo;
 			}
 
-			// private void setLinearItemPinUnpinIcon(boolean isPinned) {
-			// if (isPinned) {
-			// pinView.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.pinned));
-			// } else {
-			// pinView.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.unpinned_local));
-			// }
-			// }
-
 			public String getId() {
 				return id;
 			}
 
-			private void displayPinImage(final ItemInfo itemInfo) {
+			private void displayPinImageOnClick(final ItemInfo itemInfo) {
 				mExecutor.execute(new Runnable() {
 					@Override
 					public void run() {
@@ -1374,7 +1350,7 @@ public class FileManagementFragment extends Fragment {
 						appInfo.setPinned(isPinned);
 						appInfo.setLastProcessTime(System.currentTimeMillis());
 						waitToExecuteSparseArr.put(appInfo.hashCode(), appInfo);
-						displayPinImage(appInfo);
+						displayPinImageOnClick(appInfo);
 					} else if (itemInfo instanceof DataTypeInfo) {
 						final DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
 						final boolean isPinned = !dataTypeInfo.isPinned();
@@ -1461,7 +1437,7 @@ public class FileManagementFragment extends Fragment {
 							fileDirInfo.setPinned(isPinned);
 							fileDirInfo.setLastProcessTime(System.currentTimeMillis());
 							waitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-							displayPinImage(fileDirInfo);
+							displayPinImageOnClick(fileDirInfo);
 						} else {
 							if (fileDirInfo.getMimeType() != null) {
 								if (fileDirInfo.getMimeType().contains(DataTypeDAO.DATA_TYPE_IMAGE)) {
@@ -1475,7 +1451,7 @@ public class FileManagementFragment extends Fragment {
 												fileDirInfo.setPinned(isPinned);
 												fileDirInfo.setLastProcessTime(System.currentTimeMillis());
 												waitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-												displayPinImage(fileDirInfo);
+												displayPinImageOnClick(fileDirInfo);
 											}
 										});
 										builder.setNegativeButton(getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
@@ -1499,7 +1475,7 @@ public class FileManagementFragment extends Fragment {
 												fileDirInfo.setPinned(isPinned);
 												fileDirInfo.setLastProcessTime(System.currentTimeMillis());
 												waitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-												displayPinImage(fileDirInfo);
+												displayPinImageOnClick(fileDirInfo);
 											}
 										});
 										builder.setNegativeButton(getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
@@ -1523,7 +1499,7 @@ public class FileManagementFragment extends Fragment {
 												fileDirInfo.setPinned(isPinned);
 												fileDirInfo.setLastProcessTime(System.currentTimeMillis());
 												waitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-												displayPinImage(fileDirInfo);
+												displayPinImageOnClick(fileDirInfo);
 											}
 										});
 										builder.setNegativeButton(getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
@@ -1540,17 +1516,9 @@ public class FileManagementFragment extends Fragment {
 							}
 
 							if (fileDirInfo.getFilePath().contains(externalAndroidPath)) {
-								// for (ItemInfo itemInfo : mAppInfoList) {
-								// AppInfo appInfo = (AppInfo) itemInfo;
-								// if (fileDirInfo.getItemName().equals(appInfo.getPackageName())) {
-								// Log.e(HCFSMgmtUtils.TAG, "appInfo.isPinned()=" + appInfo.isPinned() + ", fileDirInfo.getItemName()=" +
-								// fileDirInfo.getItemName() + ", appInfo.getPackageName()=" + appInfo.getPackageName());
-								// Log.e(HCFSMgmtUtils.TAG, "fileDirInfo.getItemName()=" + fileDirInfo.getItemName() + ", appInfo.getPackageName()=" +
-								// appInfo.getPackageName());
-								// if (appInfo.isPinned()) {
 								AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 								builder.setTitle(fileDirInfo.getItemName());
-								builder.setMessage("Android目錄下的檔案不可取消釘選");
+								builder.setMessage(getString(R.string.file_management_cannot_unpin_files_in_android_folder));
 								builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
 									@Override
 									public void onClick(DialogInterface dialog, int which) {
@@ -1560,14 +1528,11 @@ public class FileManagementFragment extends Fragment {
 								builder.setCancelable(false);
 								builder.show();
 								return;
-								// }
-								// }
-								// }
 							}
 							fileDirInfo.setPinned(isPinned);
 							fileDirInfo.setLastProcessTime(System.currentTimeMillis());
 							waitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-							displayPinImage(fileDirInfo);
+							displayPinImageOnClick(fileDirInfo);
 						}
 					}
 				} else if (v.getId() == R.id.linearItemLayout) {
@@ -1769,6 +1734,7 @@ public class FileManagementFragment extends Fragment {
 
 				final SectionedViewHolder sectionViewHolder = (SectionedViewHolder) viewHolder;
 				final String calculatingText = getString(R.string.file_management_section_item_calculating);
+				mSections.get(position).viewHolder = sectionViewHolder;
 				mWorkerHandler.post(new Runnable() {
 					@Override
 					public void run() {
@@ -1782,7 +1748,6 @@ public class FileManagementFragment extends Fragment {
 									storageType = getString(R.string.file_management_internal_storatge_name);
 								}
 								sectionViewHolder.storageType.setText(storageType);
-								sectionViewHolder.localStorageSpace.setText(calculatingText);
 								sectionViewHolder.totalStorageSpace.setText(calculatingText);
 								sectionViewHolder.availableStorageSpace.setText(calculatingText);
 							}
@@ -1811,12 +1776,10 @@ public class FileManagementFragment extends Fragment {
 								cd.showValue(toShowValue, 100f, totalStorageSpace, isFirstCircleAnimated);
 
 								if (isSDCard1) {
-									sectionViewHolder.localStorageSpace.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
 									sectionViewHolder.totalStorageSpace.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
 									sectionViewHolder.availableStorageSpace.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
 									// .setText(UnitConverter.convertByteToProperUnit(availableStorageSpace, totalStorageSpace));
 								} else {
-									sectionViewHolder.localStorageSpace.setText(UnitConverter.convertByteToProperUnit(localStorageSpace));
 									sectionViewHolder.totalStorageSpace.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
 									sectionViewHolder.availableStorageSpace.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
 									// .setText(UnitConverter.convertByteToProperUnit(availableStorageSpace, totalStorageSpace));
@@ -1861,6 +1824,10 @@ public class FileManagementFragment extends Fragment {
 			registerAdapterDataObserver(mBaseAdapter);
 		}
 
+		public SparseArray<Section> getSections() {
+			return mSections;
+		}
+
 		public void setSections(Section[] sections) {
 			mSections.clear();
 
@@ -1871,7 +1838,7 @@ public class FileManagementFragment extends Fragment {
 				}
 			});
 
-			/* offset positions for the headers we're adding */
+			/** offset positions for the headers we're adding */
 			int offset = 0;
 			for (Section section : sections) {
 				section.sectionedPosition = section.firstPosition + offset;
@@ -1906,7 +1873,6 @@ public class FileManagementFragment extends Fragment {
 			public View rootView;
 			public CircleDisplay circleDisplay;
 			public TextView storageType;
-			public TextView localStorageSpace;
 			public TextView totalStorageSpace;
 			public TextView availableStorageSpace;
 
@@ -1915,7 +1881,6 @@ public class FileManagementFragment extends Fragment {
 				rootView = itemView;
 				circleDisplay = (CircleDisplay) itemView.findViewById(R.id.iconView);
 				storageType = (TextView) itemView.findViewById(R.id.storage_type);
-				localStorageSpace = (TextView) itemView.findViewById(R.id.local_storage_space);
 				totalStorageSpace = (TextView) itemView.findViewById(R.id.total_storage_space);
 				availableStorageSpace = (TextView) itemView.findViewById(R.id.available_storage_space);
 			}
@@ -1925,8 +1890,9 @@ public class FileManagementFragment extends Fragment {
 	}
 
 	public class Section {
-		int firstPosition;
-		int sectionedPosition;
+		public int firstPosition;
+		public int sectionedPosition;
+		public SectionedViewHolder viewHolder;
 
 		public Section(int firstPosition) {
 			this.firstPosition = firstPosition;
@@ -2005,23 +1971,23 @@ public class FileManagementFragment extends Fragment {
 		}
 	}
 
-	/* Checks if external storage is available for read and write */
-	public boolean isExternalStorageWritable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			return true;
-		}
-		return false;
-	}
-
-	/* Checks if external storage is available to at least read */
-	public boolean isExternalStorageReadable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			return true;
-		}
-		return false;
-	}
+//	/* Checks if external storage is available for read and write */
+//	public boolean isExternalStorageWritable() {
+//		String state = Environment.getExternalStorageState();
+//		if (Environment.MEDIA_MOUNTED.equals(state)) {
+//			return true;
+//		}
+//		return false;
+//	}
+//
+//	/* Checks if external storage is available to at least read */
+//	public boolean isExternalStorageReadable() {
+//		String state = Environment.getExternalStorageState();
+//		if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+//			return true;
+//		}
+//		return false;
+//	}
 
 	@Override
 	public void onDestroy() {
@@ -2143,20 +2109,12 @@ public class FileManagementFragment extends Fragment {
 		this.isSDCard1 = isSDCard1;
 	}
 
-	private boolean isViewHolderThreadNeedToExecute(int position) {
+	private boolean isPositionVisible(int position) {
 		int firstVisibleItemPosition = 0;
 		int lastVisibleItemPosition = 0;
 		try {
 			firstVisibleItemPosition = findRecyclerViewFirstVisibleItemPosisiton();
 			lastVisibleItemPosition = findRecyclerViewLastVisibleItemPosisiton();
-			// LayoutManager layoutManager = mRecyclerView.getLayoutManager();
-			// if (layoutManager instanceof GridLayoutManager) {
-			// firstVisibleItemPosition = ((GridLayoutManager) layoutManager).findFirstVisibleItemPosition();
-			// lastVisibleItemPosition = ((GridLayoutManager) layoutManager).findLastVisibleItemPosition();
-			// } else {
-			// firstVisibleItemPosition = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
-			// lastVisibleItemPosition = ((LinearLayoutManager) layoutManager).findLastVisibleItemPosition();
-			// }
 		} catch (NullPointerException e) {
 			firstVisibleItemPosition = lastVisibleItemPosition = position;
 			HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "isViewHolderThreadNeedToExecute", Log.getStackTraceString(e));

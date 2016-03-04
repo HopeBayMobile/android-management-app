@@ -29,6 +29,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +38,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -60,7 +60,7 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);		
 		setContentView(R.layout.activate_cloud_storage_activity);
 		init();
 	}
@@ -295,7 +295,8 @@ public class ActivateCloludStorageActivity extends AppCompatActivity implements 
 					startActivityForResult(signInIntent, HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN);
 					setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
 				} else {
-					Snackbar.make(findViewById(android.R.id.content), "暫時無法使用", Snackbar.LENGTH_LONG).show();
+					String message = getString(R.string.activate_cloud_failed_to_get_server_client_id);
+					Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
 				}
 			}
 		});

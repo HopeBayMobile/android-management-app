@@ -11,14 +11,18 @@ import com.hopebaytech.hcfsmgmt.db.ServiceAppDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.DisplayType;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -54,6 +58,7 @@ public class HCFSMgmtService extends Service {
 	public int onStartCommand(final Intent intent, int flags, int startId) {
 		if (intent != null) {
 			final String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
+			final Context context = getApplicationContext();
 			HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", "operation=" + operation);
 			cacheExecutor.execute(new Runnable() {
 				public void run() {
@@ -120,7 +125,7 @@ public class HCFSMgmtService extends Service {
 					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_RESET_XFER)) {
 						HCFSMgmtUtils.resetXfer();
 					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
-						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+						SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 						String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
 						String key_pref = SettingsFragment.KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO;
 						String storage_used_ratio = sharedPreferences.getString(key_pref, defaultValue);
@@ -133,23 +138,20 @@ public class HCFSMgmtService extends Service {
 							int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
 							String notify_title = getString(R.string.app_name);
 							String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storage_used_ratio);
-							HCFSMgmtUtils.notifyEvent(getApplicationContext(), notify_id, notify_title, notify_message, false);
+							HCFSMgmtUtils.notifyEvent(context, notify_id, notify_title, notify_message, false);
 						}
 					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ONGOIN_NOTIFICATION)) {
-						boolean onGoing = intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, false);
-						if (onGoing) {
+						boolean isOnGoing = intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, false);
+						if (isOnGoing) {
 							if (mOngoingThread == null) {
 								mOngoingThread = new Thread(new Runnable() {
 									@Override
 									public void run() {
 										final long FIVE_MINUTES_IN_MINISECONDS = 5 * 60 * 1000;
-//										final long FIVE_MINUTES_IN_MINISECONDS = 15 * 1000;
-										int count = 0;
 										while (true) {
 											try {
 												// TODO hcfs connection status is not ready
 												HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-//												String notifyTitle = "-";
 												boolean syncEnabled = HCFSMgmtUtils.getHCFSSyncStatus();
 												boolean cloudConnected = statInfo.isCloudConn();
 												if (syncEnabled && cloudConnected) {
@@ -159,7 +161,7 @@ public class HCFSMgmtService extends Service {
 												} else {
 													
 												}
-												String notifyTitle = String.valueOf(count++);
+												String notifyTitle = getString(R.string.home_page_network_status_connected);
 												String notifyMsg = getString(R.string.home_page_used_space) + ": " + statInfo.getVolUsed() + " / " + statInfo.getCloudTotal();
 												HCFSMgmtUtils.notifyEvent(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, true);
 												Thread.sleep(FIVE_MINUTES_IN_MINISECONDS);
@@ -177,6 +179,19 @@ public class HCFSMgmtService extends Service {
 								mOngoingThread = null;
 							}
 							HCFSMgmtUtils.cancelEvent(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+						}
+					} else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_SYSTEM_APP)) {
+						ArrayList<ItemInfo> itemInfoList = DisplayType.getListOfInstalledApps(context, DisplayType.APP_SYSTEM);
+						for (ItemInfo itemInfo : itemInfoList) {
+							AppInfo appInfo = (AppInfo) itemInfo;
+							ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
+							serviceAppInfo.setPinned(true);
+							serviceAppInfo.setAppName(appInfo.getItemName());
+							serviceAppInfo.setPackageName(appInfo.getPackageName());
+							serviceAppInfo.setDataDir(appInfo.getDataDir());
+							serviceAppInfo.setSourceDir(null);
+							serviceAppInfo.setExternalDir(appInfo.getExternalDir());
+							pinOrUnpinApp(serviceAppInfo);
 						}
 					}
 				}

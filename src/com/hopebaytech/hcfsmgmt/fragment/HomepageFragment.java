@@ -3,9 +3,7 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import java.util.List;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.app.Activity;
@@ -19,7 +17,6 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -87,7 +84,7 @@ public class HomepageFragment extends Fragment {
 		cloudStorageImageview.setImageResource(R.drawable.cloudspace_128x128);
 		// cloudStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
 		// cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
-
+		
 		LinearLayout localStorage = (LinearLayout) view.findViewById(R.id.local_storage);
 		localStorage.setVisibility(View.GONE);
 		// TextView localStorageTitle = (TextView) localStorage.findViewById(R.id.textViewTitle);
@@ -144,21 +141,6 @@ public class HomepageFragment extends Fragment {
 		// }
 		// }
 
-		FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.add_new_mount_point);
-		fab.setVisibility(View.GONE);
-		// TypedValue typedValue = new TypedValue();
-		// getActivity().getTheme().resolveAttribute(android.R.attr.actionBarSize, typedValue, true);
-		// int baseBottom = getResources().getDimensionPixelSize(typedValue.resourceId);
-		// fab.setOnClickListener(new View.OnClickListener() {
-		// @Override
-		// public void onClick(View view) {
-		// Intent intent = new Intent(getActivity(), AddMountPointActivity.class);
-		// startActivity(intent);
-		// }
-		// });
-		// fab.setTranslationY(baseBottom + getResources().getDimension(R.dimen.fab_bottom_margin));
-		// fab.animate().translationY(0).setDuration(100).setStartDelay(400);
-
 		uiRefreshThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -172,7 +154,7 @@ public class HomepageFragment extends Fragment {
 								public void run() {
 									if (statInfo != null) {
 										cloudStorageUsage.setText(statInfo.getVolUsed() + " / " + statInfo.getCloudTotal());
-										cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
+										cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());										
 
 										pinnedStorageUsage.setText(statInfo.getPinTotal());
 										pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
@@ -217,7 +199,7 @@ public class HomepageFragment extends Fragment {
 			}
 		});
 		uiRefreshThread.start();
-
+		
 	}
 
 	public class NetworkBroadcastReceiver extends BroadcastReceiver {
