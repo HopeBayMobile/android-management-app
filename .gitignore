@@ -1,2 +1,9 @@
-/gen
-/bin/
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+*.apk
+/app/src/main/libs/

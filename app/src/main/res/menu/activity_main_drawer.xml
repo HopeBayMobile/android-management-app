@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <group android:id="@+id/group_homepage" >
+        <item
+            android:id="@+id/nav_homepage"
+            android:icon="@drawable/ic_home_white"
+            android:orderInCategory="0"
+            android:title="@string/nav_homepage">
+        </item>
+    </group>
+    <group android:id="@+id/group_mountpoint" >
+        <item
+            android:id="@+id/nav_default_mountpoint"
+            android:icon="@drawable/ic_cloud_upload_white"
+            android:orderInCategory="1"
+            android:title="@string/nav_default_mountpoint"/>
+    </group>
+    <group android:id="@+id/group_setting_about" >
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings_white"
+            android:orderInCategory="101"
+            android:title="@string/nav_settings"/>
+        <item
+            android:id="@+id/nav_about"
+            android:icon="@drawable/ic_info_white"
+            android:orderInCategory="102"
+            android:title="@string/nav_about"/>
+    </group>
+
+</menu>

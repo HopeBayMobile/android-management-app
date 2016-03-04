@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#4D4D4D</color>
+    <color name="colorAccent">#8CC63F</color>
+    <color name="colorDivider">#90AAAAAA</color>
+                                   
+    <color name="colorActionBarNavMenu">#656565</color>
+    
+    <color name="colorHomePageMountPointText">#333333</color>
+    <color name="colorHomePageStorageProgressBarBackgound">#F4F4F4</color>
+    <color name="colorHomePageStorageProgressBar">#BDBF62</color>
+    <color name="colorHomePageXferProgressBarPrimary">#8CC63F</color>
+    <color name="colorHomePageXferProgressBarSecondary">#0071BC</color>
+    <color name="colorHomePageProgressBarText">#4D4D4D</color>
+    
+    <color name="colorFileManagementSpinnerBar">#8CC63F</color>
+    <color name="colorFileManagementStorageTypeTitle">#0071BC</color>
+    <color name="colorFileManagementLocalStorageText">#4D4D4D</color>
+    <color name="colorFileManagementTotalStorageText">#4D4D4D</color>
+    <color name="colorFileManagementAvailStorageText">#8CC63F</color>
+    <color name="colorFileManagementCircleArc">#0071BC</color>
+    <color name="colorFileManagementCircleWhole">#E6E6E6</color>
+    <color name="colorFileManagementCircleText">#29ABE2</color>
+    
+</resources>

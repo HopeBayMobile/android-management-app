@@ -1,0 +1,148 @@
+<resources>
+
+    <string name="app_name">TeraFonn</string>
+    
+    <string name="loading_alert_dialog_title">提示</string>
+    <string name="loading_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
+    <string name="loading_alert_dialog_exit">離開</string>
+    
+    <string name="activate_cloud_storage_processing_msg">處理中，請稍後&#8230;</string>
+    <string name="activate_cloud_storage_snackbar_require_username_password">請輸入帳號密碼</string>
+    <string name="activate_cloud_storage_alert_dialog_title">提示</string>
+    <string name="activate_cloud_storage_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
+    <string name="activate_cloud_storage_alert_dialog_exit">確定</string>
+    <string name="activate_cloud_storage_failed_to_activate">啟用失敗</string>
+    <string name="activate_cloud_storage_failed_to_signin_google_acount">Google帳號認證失敗</string>
+    
+    <string name="nav_drawer_open">Open navigation drawer</string>
+    <string name="nav_drawer_close">Close navigation drawer</string>
+    <string name="nav_homepage">首頁</string>
+    <string name="nav_default_mountpoint">系統</string>
+    <string name="nav_sdcard1">SD卡</string>
+    <string name="nav_add_mountpoint">新增共用空間</string>
+    <string name="nav_settings">設定</string>
+    <string name="nav_about">關於</string>
+    
+    <string name="notify_network_connected">偵測網路連線已恢復</string>
+    <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線</string>
+    <string name="notify_upload_completed">本地端資料已上傳至雲端空間</string>
+    <string name="notify_pin_app_failure">釘選應用程式失敗</string>
+    <string name="notify_pin_file_dir_failure">釘選檔案失敗</string>
+    <string name="notify_pin_image_failure">釘選圖片失敗</string>
+    <string name="notify_pin_video_failure">釘選視訊失敗</string>
+    <string name="notify_pin_audio_failure">釘選音樂失敗</string>
+    <string name="notify_unpin_app_failure">取消釘選應用程式失敗</string>
+    <string name="notify_unpin_file_dir_failure">取消釘選檔案失敗</string>
+    <string name="notify_unpin_image_failure">取消釘選圖片失敗</string>
+    <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
+    <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
+    <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達  %s</string>
+
+    <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
+    
+    <string name="home_page_network_status_connected">連線正常</string>
+    <string name="home_page_network_status_connecting">嘗試連線</string>
+    <string name="home_page_network_status_disconnected">連線中斷</string>
+    <string name="home_page_space_usage_title">空間使用量</string>
+    <string name="home_page_used_space">已使用空間</string>
+    <string name="home_page_local_storage">快取空間</string>
+    <string name="home_page_pinned_storage">釘選空間</string>
+    <string name="home_page_network_traffic_title">資料傳輸量</string>
+    <string name="home_page_the_amount_of_network_traffic_today">本日資料傳輸</string>
+    <string name="home_page_to_be_upladed_data">待上傳資料</string>
+    <string name="home_page_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
+    
+    <string name="action_settings">Settings</string>
+    
+    <string name="file_management_hint_no_file">這個資料夾是空的</string>
+    <string name="file_management_snackbar_refresh">重新整理</string>
+    <string name="file_management_snackbar_unkown_type_file">無可開啟此類型檔案的應用程式</string>
+    <string name="file_management_spinner_apps">依應用程式顯示</string>
+    <string name="file_management_spinner_data_type">依資料型態顯示</string>
+    <string name="file_management_spinner_files">依檔案顯示</string>
+    <string-array name="file_management_spinner">
+        <item>@string/file_management_spinner_apps</item>
+        <item>@string/file_management_spinner_data_type</item>
+        <item>@string/file_management_spinner_files</item>
+    </string-array>
+    <string name="file_management_list_data_type_image">圖片</string>
+    <string name="file_management_list_data_type_video">視訊</string>
+    <string name="file_management_list_data_type_audio">音樂</string>
+    <string-array name="file_management_list_data_types">
+        <item>@string/file_management_list_data_type_image</item>
+        <item>@string/file_management_list_data_type_video</item>
+        <item>@string/file_management_list_data_type_audio</item>
+    </string-array>
+    <string name="file_management_menu_list">清單</string>
+    <string name="file_management_menu_grid">圖示</string>
+    <string name="file_management_whether_allowed_to_unpin_image">圖片資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_management_whether_allowed_to_unpin_video">視訊資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_management_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_management_popup_menu_pin">釘選</string>
+    <string name="file_management_popup_menu_unpin">取消釘選</string>
+    <string name="file_management_internal_storatge_name">內部儲存空間</string>
+    <string name="file_management_sdcard1_storatge_name">SD卡儲存空間</string>
+    <string name="file_management_section_item_calculating">計算中&#8230;</string>
+    <string name="file_management_section_item_total_storage_space">總空間:&#160;</string>
+    <string name="file_management_section_item_available_storage_space">可用空間:&#160;</string>
+    <string name="file_management_section_item_internal_storage_space">本地空間:&#160;</string>
+    <string name="file_management_alert_dialog_title">提示</string>
+    <string name="file_management_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
+    <string name="file_management_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
+    <string name="file_management_date_since_pinned">自  %1$s 開始釘選</string>
+    <string name="file_management_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
+    
+    <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
+    <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
+    <string name="hcfs_management_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>
+    <string name="hcfs_management_service_image_failed_to_unpin">圖片類型取消釘選失敗數量</string>
+    <string name="hcfs_management_service_video_failed_to_unpin">視訊類型取消釘選失敗數量</string>
+    <string name="hcfs_management_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
+    
+    <string name="settings_section_sync">同步設定</string>
+    <string name="settings_section_sync_wifi_only">只有連接WIFI時才存取雲端</string>
+    <string name="settings_section_notify">通知設定</string>
+    <string name="settings_section_notify_conn_failed_recovery">通知連線中斷/恢復</string>
+    <string name="settings_section_notify_upload_completed">通知上傳資料完成</string>
+    <string name="settings_section_notify_local_storage_used_ratio_dialog_title">請選擇通知的比例</string>
+    <string name="settings_section_notify_local_storage_used_ratio_summary">請選擇通知的比例</string>
+    <string name="settings_section_notify_local_storage_used_ratio_title">通知本地空間使用率</string>
+    <string name="settings_local_storage_used_ratio">本地空間使用率達  %s 時進行通知"</string>
+    <string-array name="pref_notify_local_storage_used_ratio_name">
+        <item>90%</item>
+        <item>80%</item>
+        <item>70%</item>
+        <item>60%</item>
+        <item>50%</item>
+    </string-array>
+    <string-array name="pref_notify_local_storage_used_ratio_value">
+        <item>90</item>
+        <item>80</item>
+        <item>70</item>
+        <item>60</item>
+        <item>50</item>
+    </string-array>
+    
+    <string name="activate_cloud_storage_username">帳號</string>
+    <string name="activate_cloud_storage_password">密碼</string>
+    <string name="activate_cloud_storage_activate">啟用</string>
+    <string name="activate_cloud_storage_forget_password"><u>忘記密碼</u></string>
+    <string name="activate_cloud_storage_or">或</string>
+    <string name="activate_cloud_storage_google_activate"><u>使用Google帳號啟用</u></string>
+    <string name="activate_cloud_failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
+    
+    <string name="alert_dialog_yes">是</string>
+    <string name="alert_dialog_no">否</string>
+    <string name="alert_dialog_confirm">確定</string>
+    
+    <string name="activate_cloud_activate_transition">ActivateTransition</string>
+    
+    <string name="server_client_id">584185841160-g8ane8qnaqiust9d2nu4299edkq5lt9t.apps.googleusercontent.com</string>
+    
+    <string name="version_system_title">System Version</string>
+    <string name="version_app_title">App Version</string>
+    <string name="version_system">-</string>
+    
+    
+    
+</resources>
