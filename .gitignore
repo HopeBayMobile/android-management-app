@@ -6,4 +6,6 @@
 /build
 /captures
 *.apk
-/app/src/main/libs/
+/app/src/main/libs
+/app/src/main/obj
+*~
