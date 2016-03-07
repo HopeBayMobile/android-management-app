@@ -14,11 +14,28 @@ android {
         versionCode 1
         versionName "1.0.0026"
     }
+
+    signingConfigs {
+        ci_release {
+            storeFile file("../terafonn.jks")
+            storePassword System.getenv("KEYSTORE_PASSWORD")
+            keyAlias System.getenv("KEY_ALIAS")
+            keyPassword System.getenv("KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if(System.getenv("KEYSTORE_PASSWORD")) {
+                signingConfig signingConfigs.ci_release
+            }
         }
+    }
+
+    lintOptions {
+        abortOnError false
     }
 
     sourceSets.main.jni.srcDirs = []
