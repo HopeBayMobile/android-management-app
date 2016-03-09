@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.hopebaytech.hcfsmgmt.main.ActivateCloludStorageActivity"
+            android:name=".main.ActivateCloudStorageActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
@@ -53,6 +53,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
 
                 <data android:scheme="package" />
             </intent-filter>

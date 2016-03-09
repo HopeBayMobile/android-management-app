@@ -45,33 +45,43 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 			/** Start an alarm to notify local storage used ratio */
 			HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(context);
 
-			/** Create uid database if it dosen't exist or update it exists */
-			Intent launchUidDbIntent = new Intent(context, HCFSMgmtService.class);
-			launchUidDbIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_LAUNCH_UID_DATABASE);
-			context.startService(launchUidDbIntent);
-			
-			/** Pin system app */                                                                                  
-			Intent pinSystemAppIntent = new Intent(context, HCFSMgmtService.class);
-			pinSystemAppIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_SYSTEM_APP);
-			context.startService(pinSystemAppIntent);
+			/** Add uid and pin system app */
+			Intent addUidAndPinSystemAppIntent = new Intent(context, HCFSMgmtService.class);
+			addUidAndPinSystemAppIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP);
+			context.startService(addUidAndPinSystemAppIntent);
 		} else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
 			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(context);
 		} else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
-			Intent intentService = new Intent(context, HCFSMgmtService.class);
-			int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-			String packageName = intent.getData().getSchemeSpecificPart();
-			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE);
-			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
-			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
-			context.startService(intentService);
-		} else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
-			Intent intentService = new Intent(context, HCFSMgmtService.class);
-			int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-			String packageName = intent.getData().getSchemeSpecificPart();
-			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE);
-			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
-			intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
-			context.startService(intentService);
+            boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+            if (!isReplacing) {
+                Intent intentService = new Intent(context, HCFSMgmtService.class);
+                int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                String packageName = intent.getData().getSchemeSpecificPart();
+                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP);
+                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
+                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
+                context.startService(intentService);
+            }
+		} else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
+            String packageName = intent.getData().getSchemeSpecificPart();
+            Intent intentService = new Intent(context, HCFSMgmtService.class);
+            int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+            intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_UNPIN_UDPATE_APP);
+            intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
+            intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
+            context.startService(intentService);
+        } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
+            boolean isDataRemoved = intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false);
+            boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+            if (isDataRemoved && !isReplacing) {
+                Intent intentService = new Intent(context, HCFSMgmtService.class);
+                int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                String packageName = intent.getData().getSchemeSpecificPart();
+                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE);
+                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
+                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
+                context.startService(intentService);
+            }
 		} else if (action.equals(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM)) {
 			String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
 			HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "operation=" + operation);

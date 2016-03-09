@@ -2,8 +2,8 @@
 
     <string name="app_name">TeraFonn</string>
     
-    <string name="loading_alert_dialog_title">Alert</string>
-    <string name="loading_alert_dialog_message">Network connection failed. Please try again later</string>
+    <string name="activate_cloud_alert_dialog_title">Alert</string>
+    <string name="activate_cloud_alert_dialog_message">Network connection failed. Please try again later</string>
     <string name="loading_alert_dialog_exit">Exit</string>
     
     <string name="activate_cloud_storage_processing_msg">Processing&#8230; Please wait</string>

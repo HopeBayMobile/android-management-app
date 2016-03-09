@@ -9,6 +9,7 @@ import java.util.Map;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
@@ -44,9 +45,9 @@ public class DisplayType {
 			}
 
 			PackageManager pm = context.getPackageManager();
-			List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-			for (ApplicationInfo packageInfo : packages) {
-				boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(packageInfo);
+			List<ApplicationInfo> applicationInfoList = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+			for (ApplicationInfo applicationInfo : applicationInfoList) {
+				boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
 				if (flags == APP_SYSTEM) {
 					if (!isSystemApp) {
 						continue;
@@ -58,19 +59,20 @@ public class DisplayType {
 				}
 
 				AppInfo appInfo = new AppInfo(context);
-				appInfo.setUid(packageInfo.uid);
-				appInfo.setApplicationInfo(packageInfo);
-				appInfo.setItemName(packageInfo.loadLabel(pm).toString());
-				if (externalPkgNameMap.containsKey(packageInfo.packageName)) {
-					appInfo.setExternalDir(externalPkgNameMap.get(packageInfo.packageName));
+				appInfo.setUid(applicationInfo.uid);
+				appInfo.setApplicationInfo(applicationInfo);
+				appInfo.setItemName(applicationInfo.loadLabel(pm).toString());
+				if (externalPkgNameMap.containsKey(applicationInfo.packageName)) {
+					appInfo.setExternalDir(externalPkgNameMap.get(applicationInfo.packageName));
 				}
 
-				boolean isAppPinned;
-				if (isSystemApp) {
-					isAppPinned = false;
-				} else {
-					isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo);
-				}
+                UidDAO uidDAO = new UidDAO(context);
+                boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
+//				if (isSystemApp) {
+//					isAppPinned = true;
+//				} else {
+//					isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
+//				}
 				appInfo.setPinned(isAppPinned);
 				items.add(appInfo);
 			}

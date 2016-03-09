@@ -11,7 +11,12 @@ LOCAL_SRC_FILES := mylibs/$(TARGET_ARCH_ABI)/libjansson.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE    := libcrypto
+LOCAL_SRC_FILES := mylibs/$(TARGET_ARCH_ABI)/libcrypto.so
+include $(PREBUILT_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE    := terafonnapi
-LOCAL_SRC_FILES := terafonnapi.c 
-LOCAL_SHARED_LIBRARIES := libhcfsapi libjansson
+LOCAL_SRC_FILES := terafonnapi.c uniqueCode.c
+LOCAL_SHARED_LIBRARIES := libhcfsapi libjansson libcrypto
 include $(BUILD_SHARED_LIBRARY)

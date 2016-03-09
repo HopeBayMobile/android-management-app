@@ -48,11 +48,11 @@ public class AppInfo extends ItemInfo {
 	}
 
 	public String getSourceDir() {
-		/* Default sourceDir = /data/app/<package-name>-1/base.apk */
+		/** Default sourceDir = /data/app/<package-name>-1/base.apk */
 		String sourceDir = appInfo.sourceDir;
 		int lastIndex = sourceDir.lastIndexOf("/");
-		String sourceDirWithoutApkEnd = sourceDir.substring(0, lastIndex);
-		return sourceDirWithoutApkEnd;
+		String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
+		return sourceDirWithoutApkSuffix;
 	}
 
 	@Nullable
@@ -141,10 +141,10 @@ public class AppInfo extends ItemInfo {
 		int srcStatus = HCFSMgmtUtils.getDirStatus(getSourceDir());
 		int dataStatus = HCFSMgmtUtils.getDirStatus(getDataDir());
 		if (getExternalDir() != null) {
-			int exeternalStatus = HCFSMgmtUtils.getDirStatus(getExternalDir());
-			if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL && exeternalStatus == LocationStatus.LOCAL) {
+			int externalStatus = HCFSMgmtUtils.getDirStatus(getExternalDir());
+			if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL && externalStatus == LocationStatus.LOCAL) {
 				status = LocationStatus.LOCAL;
-			} else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD && exeternalStatus == LocationStatus.CLOUD) {
+			} else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD && externalStatus == LocationStatus.CLOUD) {
 				status = LocationStatus.CLOUD;
 			} else {
 				status = LocationStatus.HYBRID;

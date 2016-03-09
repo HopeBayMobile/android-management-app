@@ -2,10 +2,9 @@
 
     <string name="app_name">TeraFonn</string>
     
-    <string name="loading_alert_dialog_title">提示</string>
-    <string name="loading_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
-    <string name="loading_alert_dialog_exit">離開</string>
-    
+    <string name="activate_cloud_alert_dialog_title">提示</string>
+    <string name="activate_cloud_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
+
     <string name="activate_cloud_storage_processing_msg">處理中，請稍後&#8230;</string>
     <string name="activate_cloud_storage_snackbar_require_username_password">請輸入帳號密碼</string>
     <string name="activate_cloud_storage_alert_dialog_title">提示</string>

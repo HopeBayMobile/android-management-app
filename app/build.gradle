@@ -4,7 +4,7 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion "23.0.2"
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
@@ -12,7 +12,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 22
         versionCode 1
-        versionName "1.0.0024"
+        versionName "1.0.0025"
     }
     buildTypes {
         release {

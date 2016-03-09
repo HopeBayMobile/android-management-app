@@ -21,5 +21,6 @@ public class HCFSApiUtils {
 	public static native String resetXfer();
 	public static native String setHCFSSyncStatus(int enabled);
 	public static native String getHCFSSyncStatus();
-	
+	public static native String getEncryptedIMEI();
+
 }

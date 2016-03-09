@@ -1,6 +1,7 @@
 #include <jni.h>
 #include <stdlib.h>
 #include <sys/system_properties.h>
+#include "uniqueCode.h"
 
 extern void HCFS_file_status(char **json_res, char *pathname);
 extern void HCFS_dir_status(char **json_res, char *pathname);
@@ -152,6 +153,20 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_reset
 	return result;
 }
 
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getEncryptedIMEI(
+		JNIEnv *jEnv, jobject jObject) {
+	unsigned char encrypt_code[256] = {};
+	int ret = getEncryptCode(&encrypt_code);
+    jstring result;
+    if (ret != 0) {
+        result = (*jEnv)->NewStringUTF(jEnv, NULL);
+    } else {
+        result = (*jEnv)->NewStringUTF(jEnv, encrypt_code);
+    }
+	free(encrypt_code);
+	return result;
+}
+
 //JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHCFSProperty(
 //		JNIEnv *jEnv, jobject jObject, jstring jKey, jstring jValue) {
 //	char *json_res;
@@ -174,20 +189,3 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_reset
 //	return result;
 //}
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_helloJNI(
-//		JNIEnv *jEnv, jobject jObject, jstring jString) {
-//	const char *nativeString = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
-//	return (*jEnv)->NewStringUTF(jEnv, helloC(nativeString));
-//	return (*jEnv)->NewStringUTF(jEnv, nativeString);
-//
-//	char g_imei[32];
-//	char imei_start[PROP_VALUE_MAX];
-//	int ir = __system_property_get("ro.product.model", imei_start);
-//	if (ir > 0) {
-//		imei_start[15] = 0; //strz end
-//		printf("method1 got imei %s len %d\r\n", imei_start,
-//				strlen(imei_start));
-//		strcpy(g_imei, imei_start);
-//	}
-//	return (*jEnv)->NewStringUTF(jEnv, g_imei);
-//}

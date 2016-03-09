@@ -103,7 +103,7 @@ public class ServiceAppDAO {
     	if (externalDir != null) {
     		result.setExternalDir(externalDir);
     	}
-    	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 0 ? false : true);
+    	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
     	return result;
     }
     
