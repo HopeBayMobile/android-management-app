@@ -69,6 +69,7 @@ function publish_apk() {
 function mount_nas() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
 	service rpcbind start || :
+	mkdir -p /mnt/nas
 	if ! mount  | grep 'nas:/ubuntu on /mnt/nas'; then
 		umount /mnt/nas || :
 		mount nas:/ubuntu /mnt/nas
