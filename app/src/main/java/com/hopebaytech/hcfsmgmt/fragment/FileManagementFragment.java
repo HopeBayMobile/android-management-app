@@ -264,26 +264,28 @@ public class FileManagementFragment extends Fragment {
 											StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
 											final long totalStorageSpace = statFs.getTotalBytes();
 											final long availableStorageSpace = statFs.getAvailableBytes();
-											activity.runOnUiThread(new Runnable() {
-												@Override
-												public void run() {
-													float toShowValue = ((totalStorageSpace - availableStorageSpace) * 1f / totalStorageSpace) * 100f;
-													CircleDisplay cd = section.viewHolder.circleDisplay;
-													cd.showValue(toShowValue, 100f, totalStorageSpace, false);
+											if (activity != null) {
+												activity.runOnUiThread(new Runnable() {
+													@Override
+													public void run() {
+														float toShowValue = ((totalStorageSpace - availableStorageSpace) * 1f / totalStorageSpace) * 100f;
+														CircleDisplay cd = section.viewHolder.circleDisplay;
+														cd.showValue(toShowValue, 100f, totalStorageSpace, false);
 
-													if (isSDCard1) {
-														section.viewHolder.totalStorageSpace
-																.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
-														section.viewHolder.availableStorageSpace
-																.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
-													} else {
-														section.viewHolder.totalStorageSpace
-																.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
-														section.viewHolder.availableStorageSpace
-																.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
+														if (isSDCard1) {
+															section.viewHolder.totalStorageSpace
+																	.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
+															section.viewHolder.availableStorageSpace
+																	.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
+														} else {
+															section.viewHolder.totalStorageSpace
+																	.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
+															section.viewHolder.availableStorageSpace
+																	.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
+														}
 													}
-												}
-											});
+												});
+											}
 										}
 									}
 

@@ -41,43 +41,6 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
 
-        try {
-            PackageManager pm = getPackageManager();
-            ApplicationInfo applicationInfo = pm.getApplicationInfo("com.google.android.youtube", PackageManager.GET_META_DATA);;
-            String sourceDir = applicationInfo.sourceDir;
-            int lastIndex = sourceDir.lastIndexOf("/");
-            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
-            boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
-
-            Log.w(HCFSMgmtUtils.TAG, "appName=" + applicationInfo.loadLabel(pm).toString() + ", sourceDir=" + sourceDirWithoutApkSuffix + ", dataDir=" + applicationInfo.dataDir + ", isSystemApp=" + isSystemApp);
-
-
-            applicationInfo = pm.getApplicationInfo("com.google.android.calendar", PackageManager.GET_META_DATA);;
-            sourceDir = applicationInfo.sourceDir;
-            lastIndex = sourceDir.lastIndexOf("/");
-            sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
-            isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
-
-            Log.w(HCFSMgmtUtils.TAG, "appName=" + applicationInfo.loadLabel(pm).toString() + ", sourceDir=" + sourceDirWithoutApkSuffix + ", dataDir=" + applicationInfo.dataDir + ", isSystemApp=" + isSystemApp);
-
-            applicationInfo = pm.getApplicationInfo("com.acer.muse", PackageManager.GET_META_DATA);;
-            sourceDir = applicationInfo.sourceDir;
-            lastIndex = sourceDir.lastIndexOf("/");
-            sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
-            isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
-
-            Log.w(HCFSMgmtUtils.TAG, "appName=" + applicationInfo.loadLabel(pm).toString() + ", sourceDir=" + sourceDirWithoutApkSuffix + ", dataDir=" + applicationInfo.dataDir + ", isSystemApp=" + isSystemApp);
-
-            applicationInfo = pm.getApplicationInfo("com.google.android.videos", PackageManager.GET_META_DATA);;
-            sourceDir = applicationInfo.sourceDir;
-            lastIndex = sourceDir.lastIndexOf("/");
-            sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
-            isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
-
-            Log.w(HCFSMgmtUtils.TAG, "appName=" + applicationInfo.loadLabel(pm).toString() + ", sourceDir=" + sourceDirWithoutApkSuffix + ", dataDir=" + applicationInfo.dataDir + ", isSystemApp=" + isSystemApp);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
         init();
     }
 

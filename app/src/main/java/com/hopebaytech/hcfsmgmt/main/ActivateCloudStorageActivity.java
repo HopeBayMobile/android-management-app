@@ -62,7 +62,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
     private GoogleApiClient mGoogleApiClient;
     private Handler mHandler;
     private ProgressDialog mProgressDialog;
-    private String mServerClientId;
+//    private String mServerClientId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,24 +94,39 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         activate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                View view = ActivateCloudStorageActivity.this.getCurrentFocus();
+                if (view != null) {
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                }
+
                 final String username = ((EditText) findViewById(R.id.username)).getText().toString();
                 final String password = ((EditText) findViewById(R.id.password)).getText().toString();
                 if (username.isEmpty() || password.isEmpty()) {
-                    String message = getString(R.string.activate_cloud_storage_snackbar_require_username_password);
-                    Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+//                    String message = getString(R.string.activate_cloud_storage_snackbar_require_username_password);
+//                    Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
+                    builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
+                    builder.setMessage(getString(R.string.activate_cloud_storage_snackbar_require_username_password));
+                    builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    });
+                    builder.show();
                 } else {
                     if (HCFSMgmtUtils.ENABLE_AUTH) {
-                        View view = ActivateCloudStorageActivity.this.getCurrentFocus();
-                        if (view != null) {
-                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                        }
-
                         mHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 if (NetworkUtils.isNetworkConnected(ActivateCloudStorageActivity.this)) {
-                                    showProgressDialog();
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            showProgressDialog();
+                                        }
+                                    });
+//                                    showProgressDialog();
                                     AuthResultInfo authResultInfo = authWithMgmtServer(AUTH_TYPE_NORMAL, null);
                                     if (authResultInfo != null) {
                                         boolean isFailed = initializeHCFSConfig(authResultInfo);
@@ -133,12 +148,22 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
-                                                Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
+//                                                String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
+//                                                Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
+                                                AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
+                                                builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
+                                                builder.setMessage(getString(R.string.activate_cloud_storage_failed_to_activate));
+                                                builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                    }
+                                                });
+                                                builder.show();
                                             }
                                         });
                                     }
 
+//                                    hideProgressDialog();
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -317,7 +342,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                         finish();
                     }
                 }
-
             }
         });
 
@@ -341,10 +365,10 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (mServerClientId == null) {
-                                mServerClientId = getServerClientIdFromMgmtServer();
-                            }
-                            String serverClientId = mServerClientId;
+//                            if (mServerClientId == null) {
+//                                mServerClientId = getServerClientIdFromMgmtServer();
+//                            }
+                            String serverClientId = getServerClientIdFromMgmtServer();
                             if (serverClientId != null) {
                                 final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                         .requestIdToken(serverClientId)
@@ -371,11 +395,11 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        String message = getString(R.string.activate_cloud_failed_to_get_server_client_id);
+//                                        String message = getString(R.string.activate_cloud_failed_to_get_server_client_id);
 //                                        Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
                                         AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
                                         builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
-                                        builder.setMessage(message);
+                                        builder.setMessage(getString(R.string.activate_cloud_failed_to_get_server_client_id));
                                         builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
@@ -791,7 +815,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
             }
         } catch (Exception e) {
             authResultInfo = null;
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtServer", "-" + Log.getStackTraceString(e));
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtServer", Log.getStackTraceString(e));
         } finally {
             if (conn != null) {
                 conn.disconnect();
