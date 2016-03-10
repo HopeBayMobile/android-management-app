@@ -105,7 +105,7 @@ eval '[ -n "$UPSTREAM_LIB_DIR" ]' || { echo Assign these for local build; exit 1
 # PUBLISH_DIR=${PUBLISH_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/android-dev/2.0.4.ci.test}
 eval '[ -n "$PUBLISH_DIR" ]' || { echo Assign these for local build; exit 1; }
 
-copy_lib_to_source_tree
-#build_system
 mount_nas
+copy_lib_to_source_tree
+build_system
 publish_apk
