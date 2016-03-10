@@ -45,6 +45,8 @@ function _hdr_inc() {
 function build_system() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
 	docker pull $DOCKER_IMAGE
+    echo sdk.dir=/opt/android-sdk-linux > local.properties
+    echo ndk.dir=/opt/android-ndk-r10e >> local.properties
     docker run --rm --volume=$(pwd):/opt/workspace \
         -e KEYSTORE_PASSWORD -e KEY_ALIAS -e KEY_PASSWORD \
         $DOCKER_IMAGE /bin/sh -c "./gradlew clean assembleRelease"
