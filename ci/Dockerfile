@@ -27,6 +27,7 @@ ENV PATH ${PATH}:${SDK_HOME}/tools:${SDK_HOME}/platform-tools:${NDK_HOME}
 
 # Install sdk elements
 RUN ( while true; do sleep 3; echo y; done ) | android update sdk --all --force --no-ui --filter android-23,build-tools-23.0.1,extra-android-m2repository,extra-android-support,extra-google-google_play_services,extra-google-m2repository,platform-tools
+RUN ( while true; do sleep 3; echo y; done ) | android update sdk --all --force --no-ui --filter build-tools-23.0.2
 
 RUN which adb && which android && which ndk-build
 
