@@ -18,7 +18,7 @@ android {
         ci_release {
             storeFile file("../terafonn.jks")
             storePassword System.getenv("KEYSTORE_PASSWORD")
-            keyAlias System.getenv("KEY_ALIAS")
+            keyAlias System.getenv("terafonn")
             keyPassword System.getenv("KEY_PASSWORD")
         }
     }
