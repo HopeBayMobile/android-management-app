@@ -45,7 +45,7 @@ function _hdr_inc() {
 function build_system() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
 	docker pull $DOCKER_IMAGE
-    docker run --tty --interactive --rm --volume=$(pwd):/opt/workspace \
+    docker run --rm --volume=$(pwd):/opt/workspace \
         -e KEYSTORE_PASSWORD -e KEY_ALIAS -e KEY_PASSWORD \
         $DOCKER_IMAGE /bin/sh -c "./gradlew clean assembleRelease"
 }
