@@ -11,7 +11,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 22
         versionCode 1
-        versionName "1.0.0026"
+        versionName "1.0.0027"
     }
 
     signingConfigs {
@@ -35,6 +35,7 @@ android {
 
     lintOptions {
         abortOnError false
+        disable 'MissingTranslation'
     }
 
     sourceSets.main.jni.srcDirs = []

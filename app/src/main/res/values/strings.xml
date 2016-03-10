@@ -141,7 +141,5 @@
     <string name="version_system_title">System Version</string>
     <string name="version_app_title">App Version</string>
     <string name="version_system">-</string>
-    
-    
-    
+
 </resources>

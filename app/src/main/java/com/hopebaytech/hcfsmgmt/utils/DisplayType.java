@@ -68,11 +68,6 @@ public class DisplayType {
 
                 UidDAO uidDAO = new UidDAO(context);
                 boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
-//				if (isSystemApp) {
-//					isAppPinned = true;
-//				} else {
-//					isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
-//				}
 				appInfo.setPinned(isAppPinned);
 				items.add(appInfo);
 			}
@@ -123,7 +118,7 @@ public class DisplayType {
 		return items;
 	}
 	
-	/* Checks if external storage is available for read and write */
+	/** Checks if external storage is available for read and write */
 	public static boolean isExternalStorageWritable() {
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state)) {
@@ -132,7 +127,7 @@ public class DisplayType {
 		return false;
 	}
 
-	/* Checks if external storage is available to at least read */
+	/** Checks if external storage is available to at least read */
 	public static boolean isExternalStorageReadable() {
 		String state = Environment.getExternalStorageState();
 		if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {

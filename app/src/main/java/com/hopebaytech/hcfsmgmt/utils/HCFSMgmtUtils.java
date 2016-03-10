@@ -21,10 +21,12 @@ import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -698,10 +700,11 @@ public class HCFSMgmtUtils {
             String jsonResult = HCFSApiUtils.setHCFSConfig(key, value);
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
+            String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;;
             if (isSuccess) {
-                Log.i(TAG, "setHCFSConfig: " + jsonResult);
+                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "setHCFSConfig", logMsg);
             } else {
-                Log.e(TAG, "setHCFSConfig: " + jsonResult);
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "setHCFSConfig", logMsg);
             }
         } catch (JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -954,6 +957,19 @@ public class HCFSMgmtUtils {
         String imei = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceIMEI", "imei=" + imei);
         return imei == null ? "" : imei;
+    }
+
+    public static void showAlertDialog(Context context, String title, String message, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        if (positiveListener != null) {
+            builder.setPositiveButton(positiveListener.toString(), positiveListener);
+        }
+        if (negativeListener != null) {
+            builder.setNegativeButton(negativeListener.toString(), negativeListener);
+        }
+        builder.show();
     }
 
 }

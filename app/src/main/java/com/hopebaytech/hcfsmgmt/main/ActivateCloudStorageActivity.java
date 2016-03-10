@@ -62,7 +62,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
     private GoogleApiClient mGoogleApiClient;
     private Handler mHandler;
     private ProgressDialog mProgressDialog;
-//    private String mServerClientId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +75,12 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         HandlerThread handlerThread = new HandlerThread(LoadingActivity.class.getSimpleName());
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
+//        mHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mServerClientId = getServerClientIdFromMgmtServer();
+//            }
+//        });
 
 //        String server_client_id = getIntent().getStringExtra(HCFSMgmtUtils.INTENT_KEY_SERVER_CLIENT_ID);
 //        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "server_client_id=" + server_client_id);
@@ -105,15 +110,29 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 if (username.isEmpty() || password.isEmpty()) {
 //                    String message = getString(R.string.activate_cloud_storage_snackbar_require_username_password);
 //                    Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
-                    builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
-                    builder.setMessage(getString(R.string.activate_cloud_storage_snackbar_require_username_password));
-                    builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                        }
-                    });
-                    builder.show();
+                    String title = getString(R.string.activate_cloud_alert_dialog_title);
+                    String message = getString(R.string.activate_cloud_storage_snackbar_require_username_password);
+                    HCFSMgmtUtils.showAlertDialog(ActivateCloudStorageActivity.this, title, message,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+
+                                @Override
+                                public String toString() {
+                                    String positiveText = getString(R.string.alert_dialog_confirm);
+                                    return positiveText;
+                                }
+                            }, null);
+//                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
+//                    builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
+//                    builder.setMessage(getString(R.string.activate_cloud_storage_snackbar_require_username_password));
+//                    builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialog, int which) {
+//                        }
+//                    });
+//                    builder.show();
                 } else {
                     if (HCFSMgmtUtils.ENABLE_AUTH) {
                         mHandler.post(new Runnable() {
@@ -126,10 +145,9 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                             showProgressDialog();
                                         }
                                     });
-//                                    showProgressDialog();
                                     AuthResultInfo authResultInfo = authWithMgmtServer(AUTH_TYPE_NORMAL, null);
                                     if (authResultInfo != null) {
-                                        boolean isFailed = initializeHCFSConfig(authResultInfo);
+                                        boolean isFailed = initHCFSConfig(authResultInfo);
                                         if (isFailed) {
                                             resetHCFSConfig();
                                             runOnUiThread(new Runnable() {
@@ -163,157 +181,12 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         });
                                     }
 
-//                                    hideProgressDialog();
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             hideProgressDialog();
                                         }
                                     });
-
-
-//                                    boolean isFailedToSetHCFSConf = false;
-//                                    boolean isFailedToAuth = false;
-//                                    HttpsURLConnection conn = null;
-//                                    int responseCode = 0;
-//                                    try {
-//                                        URL url = new URL(LOGIN_URL);
-//                                        conn = (HttpsURLConnection) url.openConnection();
-//                                        conn.setDoOutput(true);
-//                                        conn.setDoInput(true);
-//                                        conn.connect();
-//
-//                                        List<NameValuePair> params = new ArrayList<>();
-//                                        params.add(new BasicNameValuePair("username", username));
-//                                        params.add(new BasicNameValuePair("password", password));
-//                                        params.add(new BasicNameValuePair("imei_code", HCFSMgmtUtils.getEncryptedDeviceIMEI(ActivateCloudStorageActivity.this)));
-//
-//                                        OutputStream outputStream = conn.getOutputStream();
-//                                        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-//                                        bufferedWriter.write(getQuery(params));
-//                                        bufferedWriter.flush();
-//                                        bufferedWriter.close();
-//                                        outputStream.close();
-//
-//                                        responseCode = conn.getResponseCode();
-//                                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "responseCode=" + responseCode);
-//                                        if (responseCode == HttpsURLConnection.HTTP_OK) {
-//                                            // Retrieve response content
-//                                            InputStream inputStream = conn.getInputStream();
-//                                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-//                                            String line;
-//                                            StringBuilder sb = new StringBuilder();
-//                                            while ((line = bufferedReader.readLine()) != null) {
-//                                                sb.append(line);
-//                                            }
-//                                            inputStream.close();
-//                                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "jsonResponse=" + sb.toString());
-//
-//                                            JSONObject jsonObj = new JSONObject(sb.toString());
-//                                            boolean result = jsonObj.getBoolean("result");
-//                                            if (result) {
-//                                                isFailedToAuth = false;
-//
-//                                                JSONObject data = jsonObj.getJSONObject("data");
-//                                                String backend_type = data.getString("backend_type");
-//                                                String account = data.getString("account").split(":")[0];
-//                                                String user = data.getString("account").split(":")[1];
-//                                                String password = data.getString("password");
-//                                                String backend_url = data.getString("domain") + ":" + data.getInt("port");
-//                                                String bucket = data.getString("bucket");
-//                                                boolean isTLS = data.getBoolean("TLS");
-//                                                String protocol = isTLS ? "https" : "http";
-//
-//                                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "backend_type=" + backend_type);
-//                                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "account=" + account);
-//                                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "user=" + user);
-//                                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "password=" + password);
-//                                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "backend_url=" + backend_url);
-//                                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "bucket=" + bucket);
-//                                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "protocol=" + protocol);
-//
-//                                                if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type)) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                                if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, account)) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                                if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, user)) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                                if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, password)) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                                if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, backend_url)) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                                if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, bucket)) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                                if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, protocol)) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                                if (!HCFSMgmtUtils.reloadConfig()) {
-//                                                    isFailedToSetHCFSConf = true;
-//                                                }
-//                                            } else {
-//                                                isFailedToAuth = true;
-//
-//                                                String msg = jsonObj.getString("msg");
-//                                                Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
-//                                            }
-//                                        } else {
-//                                            isFailedToAuth = true;
-//                                        }
-//                                        // TODO Need to handle the situation that the number of backend account is not enough.
-//                                        // else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
-//                                        // Snackbar.make(findViewById(android.R.id.content), getString(R.string.active_cloud_storage_auth_fail),
-//                                        // Snackbar.LENGTH_LONG).show();
-//                                        // }
-//                                    } catch (Exception e) {
-//                                        isFailedToAuth = true;
-//                                        HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
-//                                    } finally {
-//                                        if (conn != null) {
-//                                            conn.disconnect();
-//                                        }
-//                                    }
-//
-//                                    final boolean mIsFailedToSetHCFSConf = isFailedToSetHCFSConf;
-//                                    final boolean mIsFailedToAuth = isFailedToAuth;
-//                                    final int mResponseCode = responseCode;
-//                                    runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//                                            hideProgressDialog();
-//                                            if (!mIsFailedToAuth) {
-//                                                if (mIsFailedToSetHCFSConf) {
-//                                                    String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
-//                                                    Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
-//                                                    mHandler.post(new Runnable() {
-//                                                        @Override
-//                                                        public void run() {
-//                                                            HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
-//                                                            HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "");
-//                                                            HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "");
-//                                                            HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "");
-//                                                            HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "");
-//                                                            HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "");
-//                                                            HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "");
-//                                                        }
-//                                                    });
-//                                                } else {
-//                                                    Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
-//                                                    startActivity(intent);
-//                                                    finish();
-//                                                }
-//                                            } else {
-//                                                String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
-//                                                msg += "[responseCode=" + mResponseCode + "]";
-//                                                Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
-//                                            }
-//                                        }
-//                                    });
                                 } else {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
                                     builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
@@ -354,9 +227,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         });
 
         final SignInButton googleActivate = (SignInButton) findViewById(R.id.google_activate);
-//        if (gso != null) {
-//            googleActivate.setScopes(gso.getScopeArray());
-//        }
         googleActivate.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -365,9 +235,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-//                            if (mServerClientId == null) {
-//                                mServerClientId = getServerClientIdFromMgmtServer();
-//                            }
                             String serverClientId = getServerClientIdFromMgmtServer();
                             if (serverClientId != null) {
                                 final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -429,21 +296,13 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                     });
                     builder.show();
                 }
-//                if (mGoogleApiClient != null) {
-//                    Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-//                    startActivityForResult(signInIntent, HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN);
-//                    setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
-//                } else {
-//                    String message = getString(R.string.activate_cloud_failed_to_get_server_client_id);
-//                    Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_LONG).show();
-//                }
             }
         });
         setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
     }
 
     private void setGoogleSignInButtonText(SignInButton signInButton, String buttonText) {
-        // Find the TextView that is inside of the SignInButton and set its text
+        /** Find the TextView that is inside of the SignInButton and set its text */
         for (int i = 0; i < signInButton.getChildCount(); i++) {
             View v = signInButton.getChildAt(i);
             if (v instanceof TextView) {
@@ -479,7 +338,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                         public void run() {
                             AuthResultInfo authResultInfo = authWithMgmtServer(AUTH_TYPE_GOOGLE, idToken);
                             if (authResultInfo != null) {
-                                boolean isFailed = initializeHCFSConfig(authResultInfo);
+                                boolean isFailed = initHCFSConfig(authResultInfo);
                                 if (isFailed) {
                                     Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                                     String failureMessage = getString(R.string.activate_cloud_storage_failed_to_activate);
@@ -518,122 +377,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                 });
                             }
 
-//                            HttpsURLConnection conn = null;
-//                            boolean isFailedToSetHCFSConf = false;
-//                            try {
-//                                URL url = new URL("https://terafonnreg.hopebaytech.com/api/register/login/");
-//                                conn = (HttpsURLConnection) url.openConnection();
-//                                conn.setDoOutput(true);
-//                                conn.setDoInput(true);
-//                                conn.connect();
-//
-//                                // Send token and imei to server and validate server-side
-//                                List<NameValuePair> params = new ArrayList<>();
-//                                params.add(new BasicNameValuePair("provider", "google-oauth2"));
-//                                params.add(new BasicNameValuePair("token", idToken));
-//                                params.add(new BasicNameValuePair("imei_code", HCFSMgmtUtils.getEncryptedDeviceIMEI(ActivateCloudStorageActivity.this)));
-//                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "IMEI=" + HCFSMgmtUtils.getEncryptedDeviceIMEI(ActivateCloudStorageActivity.this));
-//                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "idToken=" + idToken);
-//
-//                                OutputStream outputStream = conn.getOutputStream();
-//                                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-//                                bufferedWriter.write(getQuery(params));
-//                                bufferedWriter.flush();
-//                                bufferedWriter.close();
-//                                outputStream.close();
-//
-//                                int responseCode = conn.getResponseCode();
-//                                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "responseCode=" + responseCode);
-//                                if (responseCode == HttpsURLConnection.HTTP_OK) {
-//                                    // Retrieve response content
-//                                    InputStream inputStream = conn.getInputStream();
-//                                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-//                                    String line;
-//                                    StringBuilder sb = new StringBuilder();
-//                                    while ((line = bufferedReader.readLine()) != null) {
-//                                        sb.append(line);
-//                                    }
-//                                    inputStream.close();
-//                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "response=" + sb.toString());
-//
-//                                    JSONObject jsonObj = new JSONObject(sb.toString());
-//                                    JSONObject data = jsonObj.getJSONObject("data");
-//                                    String backend_type = data.getString("backend_type");
-//                                    String account = data.getString("account").split(":")[0];
-//                                    String user = data.getString("account").split(":")[1];
-//                                    String password = data.getString("password");
-//                                    String backend_url = data.getString("domain") + ":" + data.getInt("port");
-//                                    String bucket = data.getString("bucket");
-//                                    boolean isTLS = data.getBoolean("TLS");
-//                                    String protocol = "http";
-//                                    if (isTLS) {
-//                                        protocol = "https";
-//                                    }
-//
-//                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "backend_type=" + backend_type);
-//                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "account=" + account);
-//                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "user=" + user);
-//                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "password=" + password);
-//                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "backend_url=" + backend_url);
-//                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "protocol=" + protocol);
-//
-//                                    if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, backend_type)) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//                                    if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, account)) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//                                    if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, user)) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//                                    if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, password)) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//                                    if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, backend_url)) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//                                    if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, bucket)) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//                                    if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, protocol)) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//                                    if (!HCFSMgmtUtils.reloadConfig()) {
-//                                        isFailedToSetHCFSConf = true;
-//                                    }
-//
-//                                }
-//                                // TODO Need to handle the situation that the number of backend account is not enough.
-//                                // else if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
-//                                // Snackbar.make(findViewById(android.R.id.content), getString(R.string.active_cloud_storage_auth_fail),
-//                                // Snackbar.LENGTH_LONG).show();
-//                                // }
-//                            } catch (Exception e) {
-//                                Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-//                            } finally {
-//                                if (conn != null) {
-//                                    conn.disconnect();
-//                                }
-//                            }
-//                            final boolean mIsFailedToSetHCFSConf = isFailedToSetHCFSConf;
-//                            runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    hideProgressDialog();
-//                                    if (mIsFailedToSetHCFSConf) {
-//                                        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-//                                        String failureMessage = getString(R.string.activate_cloud_storage_failed_to_activate);
-//                                        Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
-//                                    } else {
-//                                        Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
-//                                        intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, acct.getDisplayName());
-//                                        intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, acct.getEmail());
-//                                        intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, acct.getPhotoUrl());
-//                                        startActivity(intent);
-//                                        finish();
-//                                    }
-//                                }
-//                            });
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -755,7 +498,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
             List<NameValuePair> params = new ArrayList<>();
             if (authType.equals(AUTH_TYPE_GOOGLE)) {
-                // Send token and imei to server and validate server-side
+                /** Send token and IMEI to server and validate server-side */
                 params.add(new BasicNameValuePair("provider", "google-oauth2"));
                 params.add(new BasicNameValuePair("token", idToken));
                 params.add(new BasicNameValuePair("imei_code", HCFSMgmtUtils.getEncryptedDeviceIMEI(ActivateCloudStorageActivity.this)));
@@ -778,7 +521,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
             int responseCode = conn.getResponseCode();
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                // Retrieve response content
                 InputStream inputStream = conn.getInputStream();
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
                 String line;
@@ -824,7 +566,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         return authResultInfo;
     }
 
-    private boolean initializeHCFSConfig(AuthResultInfo authResultInfo) {
+    private boolean initHCFSConfig(AuthResultInfo authResultInfo) {
         boolean isFailed = false;
         if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, authResultInfo.getBackendType())) {
             isFailed = true;

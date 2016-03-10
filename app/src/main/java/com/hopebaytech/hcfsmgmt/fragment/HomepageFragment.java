@@ -26,228 +26,203 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 public class HomepageFragment extends Fragment {
 
-	public static String TAG = HomepageFragment.class.getSimpleName();
-	private final String CLASSNAME = getClass().getSimpleName();
-	private NetworkBroadcastReceiver networkStatusRecevier;
-	// private HCFSStatInfo statInfo;
-	private Thread uiRefreshThread;
+    public static String TAG = HomepageFragment.class.getSimpleName();
+    private final String CLASSNAME = getClass().getSimpleName();
+    private NetworkBroadcastReceiver networkStatusReceiver;
+    private Thread uiRefreshThread;
+    private TextView cloudStorageUsage;
+    private ProgressBar cloudStorageProgressBar;
+    private TextView pinnedStorageUsage;
+    private ProgressBar pinnedStorageProgressBar;
+    private TextView waitToUploadDataUsage;
+    private ProgressBar waitToUploadDataUsageProgressBar;
+    private TextView network_xfer_up;
+    private TextView network_xfer_down;
+    private ProgressBar xferProgressBar;
 
-	public static HomepageFragment newInstance() {
-		HomepageFragment fragment = new HomepageFragment();
-		return fragment;
-	}
+    public static HomepageFragment newInstance() {
+        return new HomepageFragment();
+    }
 
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		networkStatusRecevier = new NetworkBroadcastReceiver();
-	}
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        networkStatusReceiver = new NetworkBroadcastReceiver();
+    }
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.home_page_fragment, container, false);
-		return view;
-	}
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.home_page_fragment, container, false);
+        return view;
+    }
 
-	@Override
-	public void onActivityCreated(Bundle savedInstanceState) {
-		super.onActivityCreated(savedInstanceState);
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-		View view = getView();
+        View view = getView();
+        Activity activity = getActivity();
+        if (activity == null || view == null) {
+            return;
+        }
 
-		// TextView system = (TextView) view.findViewById(R.id.system);
-		// system.setOnClickListener(new OnClickListener() {
-		// @Override
-		// public void onClick(View v) {
-		// FragmentManager fm = getFragmentManager();
-		// FragmentTransaction ft = fm.beginTransaction();
-		// boolean isSDCard1 = false;
-		// ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1), FileManagementFragment.TAG);
-		// ft.commit();
-		// }
-		// });
-		HorizontalScrollView horizontalScrollViewView = (HorizontalScrollView) view.findViewById(R.id.mount_point_scrollview);
-		horizontalScrollViewView.setVisibility(View.GONE);
+        LinearLayout cloudStorage = (LinearLayout) view.findViewById(R.id.cloud_storage);
+        cloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
+        cloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
+        TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
+        cloudStorageTitle.setText(getString(R.string.home_page_used_space));
+        ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.iconView);
+        cloudStorageImageView.setImageResource(R.drawable.cloudspace_128x128);
 
-		// if (statInfo != null) {
-		LinearLayout cloudStorage = (LinearLayout) view.findViewById(R.id.cloud_storage);
-		final TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
-		final TextView cloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
-		final ImageView cloudStorageImageview = (ImageView) cloudStorage.findViewById(R.id.iconView);
-		final ProgressBar cloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
-		cloudStorageTitle.setText(getString(R.string.home_page_used_space));
-		// cloudStorageUsage.setText(statInfo.getVolUsed() + " / " + statInfo.getCloudTotal());
-		cloudStorageImageview.setImageResource(R.drawable.cloudspace_128x128);
-		// cloudStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
-		// cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
-		
-		LinearLayout localStorage = (LinearLayout) view.findViewById(R.id.local_storage);
-		localStorage.setVisibility(View.GONE);
-		// TextView localStorageTitle = (TextView) localStorage.findViewById(R.id.textViewTitle);
-		// TextView localStorageUsage = (TextView) localStorage.findViewById(R.id.textViewUsage);
-		// ImageView localStorageImageview = (ImageView) localStorage.findViewById(R.id.iconView);
-		// ProgressBar localStorageProgressBar = (ProgressBar) localStorage.findViewById(R.id.progressBar);
-		// localStorageTitle.setText(getString(R.string.home_page_local_storage));
-		// localStorageUsage.setText(statInfo.getCacheUsed() + " / " + statInfo.getCacheTotal());
-		// localStorageImageview.setImageResource(R.drawable.localspace_128x128);
-		// localStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
-		// localStorageProgressBar.setProgress(statInfo.getCacheUsedPercentage());
+        LinearLayout pinnedStorage = (LinearLayout) view.findViewById(R.id.pinned_storage);
+        pinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
+        pinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
+        pinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.storage_progressbar));
+        TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
+        pinnedStorageTitle.setText(getString(R.string.home_page_pinned_storage));
+        ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.iconView);
+        pinnedStorageImageView.setImageResource(R.drawable.pinspace_128x128);
 
-		LinearLayout pinnedStorage = (LinearLayout) view.findViewById(R.id.pinned_storage);
-		final TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
-		final TextView pinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
-		final ImageView pinnedStorageImageview = (ImageView) pinnedStorage.findViewById(R.id.iconView);
-		final ProgressBar pinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
-		pinnedStorageTitle.setText(getString(R.string.home_page_pinned_storage));
-		// pinnedStorageUsage.setText(statInfo.getPinTotal());
-		pinnedStorageImageview.setImageResource(R.drawable.pinspace_128x128);
-		pinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
-		// pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
+        LinearLayout waitToUploadData = (LinearLayout) view.findViewById(R.id.to_be_upload_data);
+        waitToUploadDataUsage = (TextView) waitToUploadData.findViewById(R.id.textViewUsage);
+        waitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
+        waitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.storage_progressbar));
+        TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
+        waitToUploadDataTitle.setText(getString(R.string.home_page_to_be_upladed_data));
+        ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.iconView);
+        waitToUploadDataUsageImageView.setImageResource(R.drawable.uploading_128x128);
 
-		LinearLayout waitToUploadData = (LinearLayout) view.findViewById(R.id.to_be_upload_data);
-		final TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
-		final TextView waitToUploadDataUsage = (TextView) waitToUploadData.findViewById(R.id.textViewUsage);
-		final ImageView waitToUploadDataUsageImageview = (ImageView) waitToUploadData.findViewById(R.id.iconView);
-		final ProgressBar waitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
-		waitToUploadDataTitle.setText(getString(R.string.home_page_to_be_upladed_data));
-		// waitToUploadDataUsage.setText(statInfo.getCacheDirtyUsed());
-		waitToUploadDataUsageImageview.setImageResource(R.drawable.uploading_128x128);
-		waitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.storage_progressbar));
-		// waitToUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
+        LinearLayout network_xfer_today = (LinearLayout) view.findViewById(R.id.network_xfer_today);
+        network_xfer_up = (TextView) network_xfer_today.findViewById(R.id.xfer_up);
+        network_xfer_down = (TextView) network_xfer_today.findViewById(R.id.xfer_down);
+        xferProgressBar = (ProgressBar) network_xfer_today.findViewById(R.id.progressBar);
+        xferProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.xfer_progressbar));
+        TextView network_xfer_today_title = (TextView) network_xfer_today.findViewById(R.id.textViewTitle);
+        network_xfer_today_title.setText(getString(R.string.home_page_the_amount_of_network_traffic_today));
+        ImageView networkXferImageView = (ImageView) network_xfer_today.findViewById(R.id.iconView);
+        networkXferImageView.setImageResource(R.drawable.load_128x128);
 
-		LinearLayout network_xfer_today = (LinearLayout) view.findViewById(R.id.network_xfer_today);
-		final TextView network_xfer_today_title = (TextView) network_xfer_today.findViewById(R.id.textViewTitle);
-		final TextView network_xfer_up = (TextView) network_xfer_today.findViewById(R.id.xfer_up);
-		final TextView network_xfer_down = (TextView) network_xfer_today.findViewById(R.id.xfer_down);
-		final ImageView networkXferImageview = (ImageView) network_xfer_today.findViewById(R.id.iconView);
-		final ProgressBar xferProgressBar = (ProgressBar) network_xfer_today.findViewById(R.id.progressBar);
-		// String xferDownload = statInfo.getXferDownload();
-		// String xferUpload = statInfo.getXferUpload();
-		network_xfer_today_title.setText(getString(R.string.home_page_the_amount_of_network_traffic_today));
-		// network_xfer_up.setText(xferUpload);
-		// network_xfer_down.setText(xferDownload);
-		networkXferImageview.setImageResource(R.drawable.load_128x128);
-		xferProgressBar.setProgressDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.xfer_progressbar));
-		// if (xferDownload.equals("0B") && xferUpload.equals("0B")) {
-		// xferProgressBar.setProgress(0);
-		// xferProgressBar.setSecondaryProgress(0);
-		// } else {
-		// xferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
-		// xferProgressBar.setSecondaryProgress(100);
-		// }
-		// }
 
-		uiRefreshThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						final HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-						Activity activity = getActivity();
-						if (activity != null) {
-							activity.runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									if (statInfo != null) {
-										cloudStorageUsage.setText(statInfo.getVolUsed() + " / " + statInfo.getCloudTotal());
-										cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());										
+    }
 
-										pinnedStorageUsage.setText(statInfo.getPinTotal());
-										pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
+    public class NetworkBroadcastReceiver extends BroadcastReceiver {
 
-										waitToUploadDataUsage.setText(statInfo.getCacheDirtyUsed());
-										waitToUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                View view = getView();
+                if (view != null) {
+                    ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
+                    ImageView networkConnStatusImage = (ImageView) view.findViewById(R.id.network_conn_status_icon);
+                    TextView networkConnStatusText = (TextView) view.findViewById(R.id.network_conn_status);
+                    if (netInfo != null) {
+                        if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
+                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connected");
+                            networkConnStatusImage.setImageResource(R.drawable.connect_96x96);
+                            networkConnStatusText.setText(getString(R.string.home_page_network_status_connected));
+                        } else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
+                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connecting");
+                            networkConnStatusImage.setImageResource(R.drawable.connect_connecting_96x96);
+                            networkConnStatusText.setText(getString(R.string.home_page_network_status_connecting));
+                        } else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
+                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is disconnected");
+                            networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
+                            networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
+                        }
+                    } else {
+                        networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
+                        networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
+                    }
+                }
+            }
+        }
 
-										String xferDownload = statInfo.getXferDownload();
-										String xferUpload = statInfo.getXferUpload();
-										network_xfer_up.setText(xferUpload);
-										network_xfer_down.setText(xferDownload);
-										if (xferDownload.equals("0B") && xferUpload.equals("0B")) {
-											xferProgressBar.setProgress(0);
-											xferProgressBar.setSecondaryProgress(0);
-										} else {
-											xferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
-											xferProgressBar.setSecondaryProgress(100);
-										}
-									} else {
-										cloudStorageUsage.setText("-");
-										cloudStorageProgressBar.setProgress(0);
+    }
 
-										pinnedStorageUsage.setText("-");
-										pinnedStorageProgressBar.setProgress(0);
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.registerReceiver(networkStatusReceiver, filter);
+        }
 
-										waitToUploadDataUsage.setText("-");
-										waitToUploadDataUsageProgressBar.setProgress(0);
+        uiRefreshThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        final HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                        Activity activity = getActivity();
+                        if (activity != null) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (statInfo != null) {
+                                        cloudStorageUsage.setText(statInfo.getVolUsed() + " / " + statInfo.getCloudTotal());
+                                        cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
 
-										network_xfer_up.setText("-");
-										network_xfer_down.setText("-");
-										xferProgressBar.setProgress(0);
-										xferProgressBar.setSecondaryProgress(0);
-									}
-								}
-							});
-						}
-						Thread.sleep(3000);
-					} catch (InterruptedException e) {
-						break;
-					}
-				}
-			}
-		});
-		uiRefreshThread.start();
-		
-	}
+                                        pinnedStorageUsage.setText(statInfo.getPinTotal());
+                                        pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
 
-	public class NetworkBroadcastReceiver extends BroadcastReceiver {
+                                        waitToUploadDataUsage.setText(statInfo.getCacheDirtyUsed());
+                                        waitToUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
 
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			final String action = intent.getAction();
-			if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-				ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-				NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-				ImageView networkConnStatusImage = (ImageView) getView().findViewById(R.id.network_conn_status_icon);
-				TextView networkConnStatusText = (TextView) getView().findViewById(R.id.network_conn_status);
-				if (netInfo != null) {
-					if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
-						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connected");
-						networkConnStatusImage.setImageResource(R.drawable.connect_96x96);
-						networkConnStatusText.setText(getString(R.string.home_page_network_status_connected));
-					} else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
-						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connecting");
-						networkConnStatusImage.setImageResource(R.drawable.connect_connecting_96x96);
-						networkConnStatusText.setText(getString(R.string.home_page_network_status_connecting));
-					} else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
-						HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is disconnected");
-						networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
-						networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
-					}
-				} else {
-					networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
-					networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
-				}
-			}
-		}
+                                        String xferDownload = statInfo.getXferDownload();
+                                        String xferUpload = statInfo.getXferUpload();
+                                        network_xfer_up.setText(xferUpload);
+                                        network_xfer_down.setText(xferDownload);
+                                        if (xferDownload.equals("0B") && xferUpload.equals("0B")) {
+                                            xferProgressBar.setProgress(0);
+                                            xferProgressBar.setSecondaryProgress(0);
+                                        } else {
+                                            xferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
+                                            xferProgressBar.setSecondaryProgress(100);
+                                        }
+                                    } else {
+                                        cloudStorageUsage.setText("-");
+                                        cloudStorageProgressBar.setProgress(0);
 
-	}
+                                        pinnedStorageUsage.setText("-");
+                                        pinnedStorageProgressBar.setProgress(0);
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-		getActivity().registerReceiver(networkStatusRecevier, filter);
-	}
+                                        waitToUploadDataUsage.setText("-");
+                                        waitToUploadDataUsageProgressBar.setProgress(0);
 
-	@Override
-	public void onPause() {
-		getActivity().unregisterReceiver(networkStatusRecevier);
-		super.onPause();
-	}
+                                        network_xfer_up.setText("-");
+                                        network_xfer_down.setText("-");
+                                        xferProgressBar.setProgress(0);
+                                        xferProgressBar.setSecondaryProgress(0);
+                                    }
+                                }
+                            });
+                        }
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }
+        });
+        uiRefreshThread.start();
+    }
 
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		uiRefreshThread.interrupt();
-	}
+    @Override
+    public void onPause() {
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.unregisterReceiver(networkStatusReceiver);
+        }
+        uiRefreshThread.interrupt();
+        super.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
 }

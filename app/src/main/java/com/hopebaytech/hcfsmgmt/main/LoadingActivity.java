@@ -1,8 +1,6 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,10 +17,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-
-import java.util.List;
 
 public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
