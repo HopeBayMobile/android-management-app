@@ -51,14 +51,20 @@ function build_system() {
 }
 function copy_lib_to_source_tree() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
-	rsync -arcv --no-owner --no-group --no-times \
+	rsync -arcv --no-owner --no-group --no-times --no-perms \
 		$UPSTREAM_LIB_DIR/acer-s58a-hcfs/system/lib64/{libHCFS_api.so,libjansson.so} app/src/main/jni/mylibs/arm64-v8a/
 }
 function publish_apk() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
-	rsync -v \
-		app/build/outputs/apk/app-release.apk app/src/main/libs/arm64-v8a \
-		${PUBLISH_DIR}/${JOB_NAME}/
+	APP_NAME=terafonn_$(sed -n -e '/versionName/p' app/build.gradle | cut -d'"' -f 2)
+	APP_DIR=${PUBLISH_DIR}/${JOB_NAME}
+	echo APP_NAME=${APP_NAME} >> export_props.properties
+	echo APP_DIR=${APP_DIR} >> export_props.properties
+	mkdir -p ${PUBLISH_DIR}/${JOB_NAME}
+	rsync -arcv --no-owner --no-group --no-times \
+		app/build/outputs/apk/app-release.apk ${PUBLISH_DIR}/${JOB_NAME}/${APP_NAME}.apk
+	rsync -arcv --no-owner --no-group --no-times \
+		app/src/main/libs/arm64-v8a/libterafonnapi.so ${PUBLISH_DIR}/${JOB_NAME}/arm64-v8a/
 }
 function mount_nas() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
@@ -87,18 +93,17 @@ echo "Environment variables (with defaults):"
 TRACE="set -x"; UNTRACE="set +x"
 $TRACE
 
-APK_NAME=terafonn_1.0.0024
-DOCKERNAME=s58a-image-build-`date +%m%d-%H%M%S`
+DOCKERNAME=android-app-build-`date +%m%d-%H%M%S`
 DOCKER_IMAGE=docker:5000/android-app-buildbox
+JOB_NAME=${JOB_NAME:-HCFS-android-apk}
 
 ### Upstream hcfs lib
-# UPSTREAM_LIB_DIR=${UPSTREAM_LIB_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/device/s58a_ci/2.0.3.0261/HCFS-android-binary}
+# UPSTREAM_LIB_DIR=${UPSTREAM_LIB_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/feature/terafonn_1.0.0025/2.0.4.0305/HCFS-android-binary}
 eval '[ -n "$UPSTREAM_LIB_DIR" ]' || { echo Assign these for local build; exit 1; }
 
 ### Publish dir
-# PUBLISH_DIR=${PUBLISH_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/android-dev/2.0.3.ci.test}
+# PUBLISH_DIR=${PUBLISH_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/android-dev/2.0.4.ci.test}
 eval '[ -n "$PUBLISH_DIR" ]' || { echo Assign these for local build; exit 1; }
-JOB_NAME=${JOB_NAME:-HCFS-android-apk}
 
 copy_lib_to_source_tree
 #build_system
