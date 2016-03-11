@@ -153,10 +153,6 @@ public class FileManagementFragment extends Fragment {
         return fragment;
     }
 
-//    public void setCurrentFile(File mCurrentFile) {
-//        this.mCurrentFile = mCurrentFile;
-//    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

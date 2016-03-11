@@ -120,8 +120,8 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
                                 @Override
                                 public String toString() {
-                                    String positiveText = getString(R.string.alert_dialog_confirm);
-                                    return positiveText;
+                                    /** Return the text of positive button */
+                                    return getString(R.string.alert_dialog_confirm);
                                 }
                             }, null);
 //                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
@@ -168,6 +168,10 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                             public void run() {
 //                                                String msg = getString(R.string.activate_cloud_storage_failed_to_activate);
 //                                                Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_SHORT).show();
+                                                String title = getString(R.string.activate_cloud_alert_dialog_title);
+                                                String message = getString(R.string.activate_cloud_storage_failed_to_activate);
+                                                HCFSMgmtUtils.showAlertDialog(ActivateCloudStorageActivity.this, title, message, null, null);
+                                                // TODO
                                                 AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
                                                 builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
                                                 builder.setMessage(getString(R.string.activate_cloud_storage_failed_to_activate));
@@ -520,17 +524,16 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
             outputStream.close();
 
             int responseCode = conn.getResponseCode();
+            InputStream inputStream = conn.getInputStream();
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            String line;
+            StringBuilder sb = new StringBuilder();
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
+            }
+            inputStream.close();
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                InputStream inputStream = conn.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-                String line;
-                StringBuilder sb = new StringBuilder();
-                while ((line = bufferedReader.readLine()) != null) {
-                    sb.append(line);
-                }
-                inputStream.close();
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "response=" + sb.toString());
-
+                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "responseContent=" + sb.toString());
                 authResultInfo = new AuthResultInfo();
                 JSONObject jsonObj = new JSONObject(sb.toString());
                 boolean result = jsonObj.getBoolean("result");
@@ -553,7 +556,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 }
             } else {
                 authResultInfo = null;
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtServer", "responseCode=" + responseCode);
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtServer", "responseCode=" + responseCode + ", responseContent=" + sb.toString());
             }
         } catch (Exception e) {
             authResultInfo = null;

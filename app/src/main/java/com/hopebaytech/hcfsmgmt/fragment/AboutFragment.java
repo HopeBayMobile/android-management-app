@@ -20,14 +20,11 @@ public class AboutFragment extends Fragment {
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
-		View view = inflater.inflate(R.layout.about_fragment, container, false);
-		return view;
+		return inflater.inflate(R.layout.about_fragment, container, false);
 	}
 	
 	public static AboutFragment newInstance() {
-		AboutFragment aboutFragment = new AboutFragment();
-		return aboutFragment;
+		return new AboutFragment();
 	}
 	
 	@Override
@@ -35,12 +32,14 @@ public class AboutFragment extends Fragment {
 		super.onActivityCreated(savedInstanceState);
 		
 		View view = getView();
-		TextView system_app = (TextView) view.findViewById(R.id.version_app);
-		try {
-			String versionName = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0).versionName;
-			system_app.setText(versionName);
-		} catch (NameNotFoundException e) {
-			Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+		if (view != null) {
+			TextView system_app = (TextView) view.findViewById(R.id.version_app);
+			try {
+				String versionName = getActivity().getPackageManager().getPackageInfo(getActivity().getPackageName(), 0).versionName;
+				system_app.setText(versionName);
+			} catch (NameNotFoundException e) {
+				Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
+			}
 		}
 	}
 
