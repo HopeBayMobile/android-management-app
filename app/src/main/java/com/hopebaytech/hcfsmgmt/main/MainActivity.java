@@ -5,8 +5,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -14,14 +12,13 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
-import com.hopebaytech.hcfsmgmt.fragment.HomepageFragment;
+import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -36,13 +33,18 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.PagerTabStrip;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     TextView email = (TextView) mNavigationView.findViewById(R.id.email);
                     email.setText(getIntent().getStringExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL));
 
-                    final Uri photoUri = (Uri) getIntent().getParcelableExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI);
+                    final Uri photoUri = getIntent().getParcelableExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI);
                     if (photoUri != null) {
                         final ImageView photo = (ImageView) mNavigationView.findViewById(R.id.photo);
                         mHandler.post(new Runnable() {
@@ -158,8 +160,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     public void run() {
                                         Menu menu = mNavigationView.getMenu();
                                         for (int i = 0; i < menu.size(); i++) {
-                                            if (menu.getItem(i).getTitle().equals(getString(R.string.nav_default_mountpoint))) {
-                                                MenuItem menuItem = menu.add(R.id.group_mountpoint, NAV_MENU_SDCARD1_ID, i + 1,
+                                            if (menu.getItem(i).getTitle().equals(getString(R.string.nav_system))) {
+                                                MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, i + 1,
                                                         getString(R.string.nav_sdcard1));
                                                 menuItem.setIcon(R.drawable.ic_sd_storage_black);
                                                 break;
@@ -200,18 +202,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
-        ft.commit();
-
         /** Start NotifyUploadCompletedAlarm if user enables this notification in settings. Others, stop it */
         Intent intent = new Intent(this, HCFSMgmtReceiver.class);
         intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
         boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
                 PendingIntent.FLAG_NO_CREATE) != null;
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, false);
+        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, false);
         if (notifyUploadCompletedPref) {
             if (!isNotifyUploadCompletedAlarmExist) {
                 HCFSMgmtUtils.startNotifyUploadCompletedAlarm(this);
@@ -247,113 +244,126 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         intent = new Intent(this, HCFSMgmtReceiver.class);
         intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-        boolean isNotifyLocalStorageUsedRatiolarmExist = PendingIntent.getBroadcast(this,
+        boolean isNotifyLocalStorageUsedRatioAlarmExist = PendingIntent.getBroadcast(this,
                 HCFSMgmtUtils.REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
-        if (!isNotifyLocalStorageUsedRatiolarmExist) {
+        if (!isNotifyLocalStorageUsedRatioAlarmExist) {
             HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(this);
         }
 
+        /** Initialize ViewPager with PagerTabStrip */
+        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
+        PagerTabStrip pagerTabStrip = (PagerTabStrip) viewPager.findViewById(R.id.pager_tab_strip);
+        pagerTabStrip.setTextColor(ContextCompat.getColor(this, R.color.colorWhite));
+        pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.colorPagerTabStrip));
+        pagerTabStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        viewPager.setAdapter(pagerAdapter);
+
+    }
+
+    public class PagerAdapter extends FragmentStatePagerAdapter {
+
+        private String[] titleArray;
+
+        public PagerAdapter(FragmentManager fm) {
+            super(fm);
+            titleArray = getResources().getStringArray(R.array.nav_title);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            Fragment fragment = null;
+            String title = titleArray[i];
+            if (title.equals(getString(R.string.nav_home))) {
+                fragment = DashboardFragment.newInstance();
+            } else if (title.equals(getString(R.string.nav_system))) {
+                fragment = FileManagementFragment.newInstance(false);
+            } else if (title.equals(getString(R.string.nav_settings))) {
+                fragment = SettingsFragment.newInstance();
+            } else if (title.equals(getString(R.string.nav_about))) {
+                fragment = AboutFragment.newInstance();
+            } else {
+                fragment = new Fragment();
+            }
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return titleArray.length;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return titleArray[position];
+        }
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            FragmentManager fm = getFragmentManager();
-            HomepageFragment homepageFragment = (HomepageFragment) fm.findFragmentByTag(HomepageFragment.TAG);
-            FileManagementFragment fileManagementFragment = (FileManagementFragment) fm.findFragmentByTag(FileManagementFragment.TAG);
-            SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag(SettingsFragment.TAG);
-            AboutFragment aboutFragment = (AboutFragment) fm.findFragmentByTag(AboutFragment.TAG);
-            if (homepageFragment != null && homepageFragment.isVisible()) {
-                if (isExitApp) {
-                    finish();
-                } else {
-                    isExitApp = true;
-                    String message = getString(R.string.home_page_snackbar_exit_app);
-                    Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
-                    Timer exitTimer = new Timer();
-                    exitTimer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            isExitApp = false;
-                        }
-                    }, 2000);
-                }
-            } else if (fileManagementFragment != null && fileManagementFragment.isVisible()) {
-                fileManagementFragment.onBackPressed();
-            } else if (settingsFragment != null && settingsFragment.isVisible()) {
-                settingsFragment.onBackPressed();
-            } else if (aboutFragment != null && aboutFragment.isVisible()) {
-                aboutFragment.onBackPressed();
-            } else {
-                super.onBackPressed();
-            }
-        }
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        if (drawer.isDrawerOpen(GravityCompat.START)) {
+//            drawer.closeDrawer(GravityCompat.START);
+//        } else {
+////            FragmentManager fm = getFragmentManager();
+//            FragmentManager fm = getFragmentManager();
+//            HomepageFragment homepageFragment = (HomepageFragment) fm.findFragmentByTag(HomepageFragment.TAG);
+//            FileManagementFragment fileManagementFragment = (FileManagementFragment) fm.findFragmentByTag(FileManagementFragment.TAG);
+//            SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag(SettingsFragment.TAG);
+//            AboutFragment aboutFragment = (AboutFragment) fm.findFragmentByTag(AboutFragment.TAG);
+//            if (homepageFragment != null && homepageFragment.isVisible()) {
+//                if (isExitApp) {
+//                    finish();
+//                } else {
+//                    isExitApp = true;
+//                    String message = getString(R.string.home_page_snackbar_exit_app);
+//                    Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+//                    Timer exitTimer = new Timer();
+//                    exitTimer.schedule(new TimerTask() {
+//                        @Override
+//                        public void run() {
+//                            isExitApp = false;
+//                        }
+//                    }, 2000);
+//                }
+//            } else if (fileManagementFragment != null && fileManagementFragment.isVisible()) {
+//                fileManagementFragment.onBackPressed();
+//            } else if (settingsFragment != null && settingsFragment.isVisible()) {
+//                settingsFragment.onBackPressed();
+//            } else if (aboutFragment != null && aboutFragment.isVisible()) {
+//                aboutFragment.onBackPressed();
+//            } else {
+//                super.onBackPressed();
+//            }
+//        }
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        if (id == R.id.nav_homepage) {
-            ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
-        } else if (id == R.id.nav_default_mountpoint) {
-            boolean isSDCard1 = false;
-            ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1), FileManagementFragment.TAG);
-        } else if (id == R.id.nav_settings) {
-            ft.replace(R.id.fragment_container, SettingsFragment.newInstance(), SettingsFragment.TAG);
-        } else if (id == R.id.nav_about) {
-            ft.replace(R.id.fragment_container, AboutFragment.newInstance(), AboutFragment.TAG);
-        } else if (id == NAV_MENU_SDCARD1_ID) {
-            boolean isSDCard1 = true;
-            ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1, sdcard1_path), FileManagementFragment.TAG);
-        }
-        ft.commit();
+//        int id = item.getItemId();
+//        FragmentManager fm = getFragmentManager();
+//        FragmentTransaction ft = fm.beginTransaction();
+//        if (id == R.id.nav_homepage) {
+//            ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
+//        } else if (id == R.id.nav_default_mountpoint) {
+//            boolean isSDCard1 = false;
+//            ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1), FileManagementFragment.TAG);
+//        } else if (id == R.id.nav_settings) {
+//            ft.replace(R.id.fragment_container, SettingsFragment.newInstance(), SettingsFragment.TAG);
+//        } else if (id == R.id.nav_about) {
+//            ft.replace(R.id.fragment_container, AboutFragment.newInstance(), AboutFragment.TAG);
+//        } else if (id == NAV_MENU_SDCARD1_ID) {
+//            boolean isSDCard1 = true;
+//            ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1, sdcard1_path), FileManagementFragment.TAG);
+//        }
+//        ft.commit();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-//	@Override
-//	public boolean onKeyDown(int keyCode, KeyEvent event) {
-//		// if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-//		// Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
-//		// if (fragment != null && fragment.isVisible()) {
-//		// if (fragment instanceof FileManagementFragment) {
-//		// FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
-//		// if (fileManagementFragment.onBackPressed())
-//		// return true;
-//		// }
-//		//// else if (fragment instanceof InternalFileMgmtFragment) {
-//		//// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
-//		//// if (internalFileMgmtFragment.onBackPressed())
-//		//// return true;
-//		//// }
-//		// }
-//		// }
-//		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-//			Fragment fragment = getFragmentManager().findFragmentByTag(FileManagementFragment.TAG);
-//			if (fragment != null && fragment.isVisible()) {
-//				if (fragment instanceof FileManagementFragment) {
-//					FileManagementFragment fileManagementFragment = (FileManagementFragment) fragment;
-//					if (fileManagementFragment.onBackPressed())
-//						return true;
-//				}
-//				// else if (fragment instanceof InternalFileMgmtFragment) {
-//				// InternalFileMgmtFragment internalFileMgmtFragment = (InternalFileMgmtFragment) fragment;
-//				// if (internalFileMgmtFragment.onBackPressed())
-//				// return true;
-//				// }
-//			}
-//		}
-//		return super.onKeyDown(keyCode, event);
-//	}
 
     public class SDCardBroadcastReceiver extends BroadcastReceiver {
         @Override
@@ -366,7 +376,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void run() {
                         Menu menu = mNavigationView.getMenu();
-                        MenuItem menuItem = menu.add(R.id.group_mountpoint, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
+                        MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
                         menuItem.setIcon(R.drawable.ic_sd_storage_black);
                     }
                 });

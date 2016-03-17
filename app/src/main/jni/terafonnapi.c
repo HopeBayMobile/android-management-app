@@ -1,16 +1,15 @@
 #include <jni.h>
 #include <stdlib.h>
 #include <sys/system_properties.h>
+#include <android/log.h>
 #include "uniqueCode.h"
 
 extern void HCFS_file_status(char **json_res, char *pathname);
 extern void HCFS_dir_status(char **json_res, char *pathname);
 extern void HCFS_get_config(char **json_res, char *key);
-extern void HCFS_get_property(char **json_res, char *key);
 extern void HCFS_pin_path(char **json_res, char *pin_path);
 extern void HCFS_pin_status(char **json_res, char *pathname);
 extern void HCFS_set_config(char **json_res, char *key, char *value);
-extern void HCFS_set_property(char **json_res, char *key, char *value);
 extern void HCFS_stat(char **json_res);
 extern void HCFS_unpin_path(char **json_res, char *unpin_path);
 extern void HCFS_reboot(char **json_res);
@@ -18,6 +17,8 @@ extern void HCFS_reload_config(char **json_res);
 extern void HCFS_reset_xfer(char **json_res);
 extern void HCFS_toggle_sync(char **json_res, int enabled);
 extern void HCFS_get_sync_status(char **json_res);
+extern void HCFS_get_property(char **json_res, char *key);
+extern void HCFS_set_property(char **json_res, char *key, char *value);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
@@ -153,17 +154,14 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_reset
 	return result;
 }
 
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getEncryptedIMEI(
+JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getEncryptedIMEI(
 		JNIEnv *jEnv, jobject jObject) {
-	unsigned char encrypt_code[256] = {};
+	int len = 256;
+	unsigned char encrypt_code[len];
 	int ret = getEncryptCode(&encrypt_code);
-    jstring result;
-    if (ret != 0) {
-        result = (*jEnv)->NewStringUTF(jEnv, NULL);
-    } else {
-        result = (*jEnv)->NewStringUTF(jEnv, encrypt_code);
-    }
-	free(encrypt_code);
+    jbyteArray result = (*jEnv)->NewByteArray(jEnv, len);
+    (*jEnv)->SetByteArrayRegion(jEnv, result, 0, len, encrypt_code);
+    __android_log_print(ANDROID_LOG_ERROR, "HopeBay", "JNI: encrypt_code=%s", (unsigned char*) encrypt_code);
 	return result;
 }
 

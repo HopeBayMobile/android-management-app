@@ -1,12 +1,12 @@
 package com.hopebaytech.hcfsmgmt.customview;
 
 import android.content.Context;
-import android.preference.SwitchPreference;
+import android.support.v7.preference.SwitchPreferenceCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.TextView;
 
-public class MultiLineSwitchPreference extends SwitchPreference {
+public class MultiLineSwitchPreference extends SwitchPreferenceCompat {
 
 	public MultiLineSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
@@ -20,13 +20,12 @@ public class MultiLineSwitchPreference extends SwitchPreference {
 		super(context);
 	}
 
-	@Override
-	protected void onBindView(View view) {
-		super.onBindView(view);
-		
-		TextView title = (TextView) view.findViewById(android.R.id.title);
-		title.setSingleLine(false);
-	}
+//	@Override
+//	protected void onBindView(View view) {
+//
+//		TextView title = (TextView) view.findViewById(android.R.id.title);
+//		title.setSingleLine(false);
+//	}
 
 }
  

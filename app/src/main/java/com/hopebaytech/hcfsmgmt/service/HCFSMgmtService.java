@@ -218,22 +218,35 @@ public class HCFSMgmtService extends Service {
                         HCFSMgmtUtils.resetXfer();
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
                         /** Send a notification to user when storage used ratio is above the value set by user */
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                        String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-                        String key_pref = SettingsFragment.KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO;
-                        String storage_used_ratio = sharedPreferences.getString(key_pref, defaultValue);
                         HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
                         if (statInfo != null) {
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+                            String key_pref = SettingsFragment.KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+                            String storage_used_ratio = sharedPreferences.getString(key_pref, defaultValue);
+
+                            // TODO The value of unpinned but dirty is not implemented by hcfs
                             long rawCacheDirtyUsed = statInfo.getRawCacheDirtyUsed();
                             long rawPinTotal = statInfo.getRawPinTotal();
                             long rawCacheTotal = statInfo.getRawCacheTotal();
-                            long max = Math.max(rawCacheDirtyUsed, rawPinTotal);
-                            if ((max / rawCacheTotal) > Integer.valueOf(storage_used_ratio)) {
-                                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                                String notify_title = getString(R.string.app_name);
-                                String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storage_used_ratio);
-                                HCFSMgmtUtils.notifyEvent(context, notify_id, notify_title, notify_message, false);
+                            double max = Math.max(rawCacheDirtyUsed, rawPinTotal);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED, false);
+                            double pinPlusUnpinButDirty = max / rawCacheTotal;
+                            if (pinPlusUnpinButDirty >= Double.valueOf(storage_used_ratio)) {
+                                if (!isNotified) {
+                                    int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;
+                                    String notify_title = getString(R.string.app_name);
+                                    String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storage_used_ratio);
+                                    HCFSMgmtUtils.notifyEvent(context, notify_id, notify_title, notify_message, false);
+                                    editor.putBoolean(SettingsFragment.KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED, true);
+                                }
+                            } else {
+                                if (isNotified) {
+                                    editor.putBoolean(SettingsFragment.KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED, false);
+                                }
                             }
+                            editor.apply();
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ONGOING_NOTIFICATION)) {
                         /** Send an ongoing notification to show hcfs network status and storage usage */
@@ -246,7 +259,7 @@ public class HCFSMgmtService extends Service {
                                         final long FIVE_MINUTES_IN_MILLISECONDS = 5 * 60 * 1000;
                                         while (true) {
                                             try {
-                                                // TODO hcfs connection status is not ready
+                                                // TODO hcfs connection status is not implemented
                                                 HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
                                                 if (statInfo != null) {
                                                     boolean syncEnabled = HCFSMgmtUtils.getHCFSSyncStatus();
@@ -317,7 +330,7 @@ public class HCFSMgmtService extends Service {
     private void notifyUploadCompleted() {
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "notifyUploadCompleted", null);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
+        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, true);
         if (notifyUploadCompletedPref) {
             boolean isUploadCompleted = HCFSMgmtUtils.isDataUploadCompleted();
             if (isUploadCompleted) {

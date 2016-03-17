@@ -1,38 +1,37 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.PreferenceFragmentCompat;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
-public class SettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+
+public class SettingsFragment extends PreferenceFragmentCompat implements OnSharedPreferenceChangeListener {
 
 	public static final String TAG = SettingsFragment.class.getSimpleName();
 	public static final String CLASSNAME = SettingsFragment.class.getSimpleName();
 	public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
 	public static final String KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY = "pref_notify_conn_failed_recovery";
-	public static final String KEY_PREF_NOTIFY_UPLAOD_COMPLETED = "pref_notify_upload_completed";
+	public static final String KEY_PREF_NOTIFY_UPLOAD_COMPLETED = "pref_notify_upload_completed";
 	public static final String KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO = "pref_notify_local_storage_used_ratio";
+	public static final String KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED = "pref_notify_is_local_storage_used_ratio_already_notified";
 	public static final String KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED = "pref_is_first_network_connected_received";
 	public static final String KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED = "pref_is_first_network_disconnected_received";
 
 	public static SettingsFragment newInstance() {
-		SettingsFragment settingsFragment = new SettingsFragment();
-		return settingsFragment;
+		return new SettingsFragment();
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		addPreferencesFromResource(R.xml.settings_preferences);
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		ListPreference storage_used_ratio = (ListPreference) findPreference(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO);
@@ -42,7 +41,12 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 		storage_used_ratio.setSummary(summary);
 	}
 
-	@Override
+    @Override
+    public void onCreatePreferences(Bundle bundle, String s) {
+        addPreferencesFromResource(R.xml.settings_preferences);
+    }
+
+    @Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 	}
@@ -67,7 +71,7 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(getActivity());
 		} else if (key.equals(KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY)) {
 			
-		} else if (key.equals(KEY_PREF_NOTIFY_UPLAOD_COMPLETED)) {
+		} else if (key.equals(KEY_PREF_NOTIFY_UPLOAD_COMPLETED)) {
 			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(key, false);
 			if (notifyUploadCompletedPref) {
 				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(getActivity());
@@ -86,7 +90,7 @@ public class SettingsFragment extends PreferenceFragment implements OnSharedPref
 	public void onBackPressed() {
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
-		ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
+		ft.replace(R.id.fragment_container, DashboardFragment.newInstance(), DashboardFragment.TAG);
 		ft.commit();
 	}
 

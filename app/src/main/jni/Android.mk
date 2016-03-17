@@ -19,4 +19,5 @@ include $(CLEAR_VARS)
 LOCAL_MODULE    := terafonnapi
 LOCAL_SRC_FILES := terafonnapi.c uniqueCode.c
 LOCAL_SHARED_LIBRARIES := libhcfsapi libjansson libcrypto
+LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_LIBRARY)

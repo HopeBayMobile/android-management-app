@@ -28,7 +28,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(context);
 
 			/* Start an alarm to notify user when data is completed uploaded */
-			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLAOD_COMPLETED, true);
+			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, true);
 			if (notifyUploadCompletedPref) {
 				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(context);
 			}

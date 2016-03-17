@@ -1,5 +1,7 @@
 package com.hopebaytech.hcfsmgmt.info;
 
+import android.support.annotation.Nullable;
+
 /**
  * Created by Aaron on 2016/3/8.
  */
@@ -12,6 +14,25 @@ public class AuthResultInfo {
     private String backend_url;
     private String bucket;
     private String protocol;
+    private String message;
+    private int responseCode;
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    @Nullable
+    public void setMessage(@Nullable String message) {
+        this.message = message;
+    }
 
     public String getBackendType() {
         return backend_type;

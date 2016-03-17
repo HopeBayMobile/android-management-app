@@ -1,9 +1,9 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -108,17 +108,11 @@ public class FileManagementFragment extends Fragment {
     private SparseArray<ItemInfo> mWaitToExecuteSparseArr;
     private SparseArray<Integer> mPrevLocationStatusSparseArr;
     private SparseArray<Boolean> mPrevPinStatusSparseArr;
-    /**
-     * Only used when user switch to "Display by file"
-     */
+    /** Only used when user switch to "Display by file" */
     private HorizontalScrollView mFilePathNavigationScrollView;
-    /**
-     * Only used when user switch to "Display by file"
-     */
+    /** Only used when user switch to "Display by file" */
     private LinearLayout mFilePathNavigationLayout;
-    /**
-     * Only used when user switch to "Display by file"
-     */
+    /** Only used when user switch to "Display by file" */
     private File mCurrentFile;
 
     private enum DISPLAY_TYPE {
@@ -131,9 +125,7 @@ public class FileManagementFragment extends Fragment {
     private boolean isFragmentFirstLoaded = true;
     private boolean isRecyclerViewScrollDown;
     private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.LINEAR;
-    /**
-     * Only used when user switch to "Display by file"
-     */
+    /** Only used when user switch to "Display by file" */
     private Map<String, Boolean> mDataTypePinStatusMap = new HashMap<>();
 
     public static FileManagementFragment newInstance(boolean isSDCard1) {
@@ -546,7 +538,6 @@ public class FileManagementFragment extends Fragment {
                             }
                             mDisplayType = DISPLAY_TYPE.LINEAR;
 
-                            // mSectionedRecyclerViewAdapter.shutdownSubAdapterExecutor();
                             mSectionedRecyclerViewAdapter.init();
                             ArrayList<ItemInfo> itemInfoList = mSectionedRecyclerViewAdapter.getSubAdapterItemInfoList();
                             mSectionedRecyclerViewAdapter.setBaseAdapter(new LinearRecyclerViewAdapter(itemInfoList));
@@ -647,10 +638,6 @@ public class FileManagementFragment extends Fragment {
 //			HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getAppPackageSize", Log.getStackTraceString(e));
 //		}
 //	}
-
-    // private boolean isSystemPackage(ApplicationInfo packageInfo) {
-    // return ((packageInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) ? true : false;
-    // }
 
     private boolean isInstalledOnExternalStorage(ApplicationInfo packageInfo) {
         return (packageInfo.flags & ApplicationInfo.FLAG_EXTERNAL_STORAGE) != 0;
@@ -901,7 +888,7 @@ public class FileManagementFragment extends Fragment {
                                 } else {
                                     View view = getView();
                                     if (view != null) {
-                                        Snackbar.make(view, getString(R.string.file_management_snackbar_unkown_type_file), Snackbar.LENGTH_SHORT).show();
+                                        Snackbar.make(view, getString(R.string.file_management_snackbar_unknown_type_file), Snackbar.LENGTH_SHORT).show();
                                     }
                                 }
                             }
@@ -1468,7 +1455,7 @@ public class FileManagementFragment extends Fragment {
                                 }
                             });
 
-							/* Show the file list of the entered directory */
+							/** Show the file list of the entered directory */
                             showTypeContent(R.string.file_management_spinner_files);
                         } else {
                             Activity activity = getActivity();
@@ -1493,7 +1480,7 @@ public class FileManagementFragment extends Fragment {
                                 } else {
                                     View view = getView();
                                     if (view != null) {
-                                        Snackbar.make(view, getString(R.string.file_management_snackbar_unkown_type_file), Snackbar.LENGTH_SHORT).show();
+                                        Snackbar.make(view, getString(R.string.file_management_snackbar_unknown_type_file), Snackbar.LENGTH_SHORT).show();
                                     }
                                 }
                             }
@@ -1692,11 +1679,9 @@ public class FileManagementFragment extends Fragment {
                                 if (isSDCard1) {
                                     sectionViewHolder.totalStorageSpace.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
                                     sectionViewHolder.availableStorageSpace.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
-                                    // .setText(UnitConverter.convertByteToProperUnit(availableStorageSpace, totalStorageSpace));
                                 } else {
                                     sectionViewHolder.totalStorageSpace.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
                                     sectionViewHolder.availableStorageSpace.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
-                                    // .setText(UnitConverter.convertByteToProperUnit(availableStorageSpace, totalStorageSpace));
                                 }
 
                                 if (isFirstCircleAnimated) {
@@ -1890,37 +1875,19 @@ public class FileManagementFragment extends Fragment {
         }
     }
 
-//	/* Checks if external storage is available for read and write */
-//	public boolean isExternalStorageWritable() {
-//		String state = Environment.getExternalStorageState();
-//		if (Environment.MEDIA_MOUNTED.equals(state)) {
-//			return true;
-//		}
-//		return false;
-//	}
-//
-//	/* Checks if external storage is available to at least read */
-//	public boolean isExternalStorageReadable() {
-//		String state = Environment.getExternalStorageState();
-//		if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-//			return true;
-//		}
-//		return false;
-//	}
-
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-		/* Close database */
+		/** Close database */
         if (mDataTypeDAO != null) {
             mDataTypeDAO.close();
         }
 
-		/* Stop the threads in the threading pool of executor */
+		/** Stop the threads in the threading pool of executor */
         mSectionedRecyclerViewAdapter.shutdownSubAdapterExecutor();
 
-		/* Stop handlerThread */
+		/** Stop handlerThread */
         mHandlerThread.quit();
         mHandlerThread.interrupt();
     }
@@ -2012,13 +1979,13 @@ public class FileManagementFragment extends Fragment {
             } else {
                 FragmentManager fm = getFragmentManager();
                 FragmentTransaction ft = fm.beginTransaction();
-                ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
+                ft.replace(R.id.fragment_container, DashboardFragment.newInstance(), DashboardFragment.TAG);
                 ft.commit();
             }
         } else {
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
-            ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
+            ft.replace(R.id.fragment_container, DashboardFragment.newInstance(), DashboardFragment.TAG);
             ft.commit();
         }
         return true;

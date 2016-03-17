@@ -11,12 +11,12 @@
     <string name="activate_cloud_storage_alert_dialog_message">Network connection failed. Please try again later</string>
     <string name="activate_cloud_storage_alert_dialog_exit">OK</string>
     <string name="activate_cloud_storage_failed_to_activate">Activation failed</string>
-    <string name="activate_cloud_storage_failed_to_signin_google_acount">Google account authentication failed</string>
+    <string name="activate_cloud_storage_failed_to_signin_google_account">Google account authentication failed</string>
     
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
-    <string name="nav_homepage">Home</string>
-    <string name="nav_default_mountpoint">System</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_system">System</string>
     <string name="nav_sdcard1">SD card</string>
     <string name="nav_add_mountpoint">Add Shared Space</string>
     <string name="nav_settings">Settings</string>
@@ -35,7 +35,7 @@
     <string name="notify_unpin_image_failure">Canceling image pinning failed</string>
     <string name="notify_unpin_video_failure">Canceling video pinning failed</string>
     <string name="notify_unpin_audio_failure">Canceling music pinning failed</string>
-    <string name="notify_exceed_local_storage_used_ratio">Local storage usage reaches %s</string>
+    <string name="notify_exceed_local_storage_used_ratio">Local storage usage reaches %s%%</string>
 
     <string name="active_cloud_storage_auth_fail">Account authentication failed</string>
     
@@ -48,13 +48,14 @@
     <string name="home_page_pinned_storage">Pinned space</string>
     <string name="home_page_network_traffic_title">Data transmission</string>
     <string name="home_page_the_amount_of_network_traffic_today">Data transmission today</string>
-    <string name="home_page_to_be_upladed_data">Data to be uploaded</string>
+    <string name="home_page_to_be_uploaded_data">Data to be uploaded</string>
+    <string name="home_page_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
     
     <string name="action_settings">Settings</string>
     
     <string name="file_management_hint_no_file">This folder is empty</string>
     <string name="file_management_snackbar_refresh">Refresh</string>
-    <string name="file_management_snackbar_unkown_type_file">No associated app to open this file type</string>
+    <string name="file_management_snackbar_unknown_type_file">No associated app to open this file type</string>
     <string name="file_management_spinner_apps">Display by installed app</string>
     <string name="file_management_spinner_data_type">Display by data type</string>
     <string name="file_management_spinner_files">Display by file</string>
@@ -73,6 +74,9 @@
     </string-array>
     <string name="file_management_menu_list">List</string>
     <string name="file_management_menu_grid">Grid</string>
+    <string name="file_management_whether_allowed_to_unpin_image">圖片資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_management_whether_allowed_to_unpin_video">視訊資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_management_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
     <string name="file_management_popup_menu_pin">Pin</string>
     <string name="file_management_popup_menu_unpin">Cancel pin</string>
     <string name="file_management_internal_storatge_name">Device storage</string>
@@ -81,8 +85,12 @@
     <string name="file_management_section_item_total_storage_space">Total space:&#160;</string>
     <string name="file_management_section_item_available_storage_space">Available space:&#160;</string>
     <string name="file_management_section_item_internal_storage_space">Local space:&#160;</string>
+    <string name="file_management_alert_dialog_title">提示</string>
+    <string name="file_management_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
+    <string name="file_management_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
     <string name="file_management_date_since_pinned">Pinned since %1$s</string>
-    
+    <string name="file_management_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
+
     <string name="hcfs_management_service_image_failed_to_pin">Number of failed pinned image</string>
     <string name="hcfs_management_service_video_failed_to_pin">Number of failed pinned video</string>
     <string name="hcfs_management_service_audio_failed_to_pin">Number of failed pinned music</string>
@@ -98,7 +106,7 @@
     <string name="settings_section_notify_local_storage_used_ratio_dialog_title">Select usage ratio to send notification</string>
     <string name="settings_section_notify_local_storage_used_ratio_summary">Select ratio to send notification</string>
     <string name="settings_section_notify_local_storage_used_ratio_title">Local space usage</string>
-    <string name="settings_local_storage_used_ratio">Send notification when local space usage reaches %s"</string>
+    <string name="settings_local_storage_used_ratio">Send notification when local space usage reaches %s</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
         <item>80%</item>
@@ -120,13 +128,12 @@
     <string name="activate_cloud_storage_forget_password"><u>Forgot password</u></string>
     <string name="activate_cloud_storage_or">or</string>
     <string name="activate_cloud_storage_google_activate"><u>Use Google account for activation</u></string>
-    
-    <string name="activate_cloud_activate_transition">ActivateTransition</string>
-    
-    <string name="server_client_id">584185841160-g8ane8qnaqiust9d2nu4299edkq5lt9t.apps.googleusercontent.com</string>
-    
-    <string name="version_system_title">System Version</string>
+    <string name="failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
+
+    <string name="alert_dialog_yes">是</string>
+    <string name="alert_dialog_no">否</string>
+    <string name="alert_dialog_confirm">確定</string>
+
     <string name="version_app_title">App Version</string>
-    <string name="version_system">2.0.2.0018</string>
-    
+
 </resources>

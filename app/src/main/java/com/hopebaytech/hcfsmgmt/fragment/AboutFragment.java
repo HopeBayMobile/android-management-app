@@ -3,9 +3,9 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.util.Log;
@@ -43,10 +43,20 @@ public class AboutFragment extends Fragment {
 		}
 	}
 
+	@Override
+	public void setMenuVisibility(boolean menuVisible) {
+		super.setMenuVisibility(menuVisible);
+		if (menuVisible) {
+			Log.w(HCFSMgmtUtils.TAG, "visible");
+		} else {
+			Log.w(HCFSMgmtUtils.TAG, "invisible");
+		}
+	}
+
 	public void onBackPressed() {
 		FragmentManager fm = getFragmentManager();
 		FragmentTransaction ft = fm.beginTransaction();
-		ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
+		ft.replace(R.id.fragment_container, DashboardFragment.newInstance(), DashboardFragment.TAG);
 		ft.commit();
 	}
 

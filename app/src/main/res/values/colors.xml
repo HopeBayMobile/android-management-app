@@ -22,5 +22,8 @@
     <color name="colorFileManagementCircleArc">#0071BC</color>
     <color name="colorFileManagementCircleWhole">#E6E6E6</color>
     <color name="colorFileManagementCircleText">#29ABE2</color>
-    
+
+    <color name="colorWhite">@android:color/white</color>
+    <color name="colorPagerTabStrip">#4E8D1F</color>
+
 </resources>

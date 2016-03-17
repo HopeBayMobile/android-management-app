@@ -11,16 +11,22 @@
     <string name="activate_cloud_storage_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
     <string name="activate_cloud_storage_alert_dialog_exit">確定</string>
     <string name="activate_cloud_storage_failed_to_activate">啟用失敗</string>
-    <string name="activate_cloud_storage_failed_to_signin_google_acount">Google帳號認證失敗</string>
+    <string name="activate_cloud_storage_failed_to_signin_google_account">Google帳號認證失敗</string>
     
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
-    <string name="nav_homepage">首頁</string>
-    <string name="nav_default_mountpoint">系統</string>
+    <string name="nav_home">首頁</string>
+    <string name="nav_system">系統</string>
     <string name="nav_sdcard1">SD卡</string>
     <string name="nav_add_mountpoint">新增共用空間</string>
     <string name="nav_settings">設定</string>
     <string name="nav_about">關於</string>
+    <string-array name="nav_title">
+        <item>@string/nav_home</item>
+        <item>@string/nav_system</item>
+        <item>@string/nav_settings</item>
+        <item>@string/nav_about</item>
+    </string-array>
     
     <string name="notify_network_connected">偵測網路連線已恢復</string>
     <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線</string>
@@ -35,7 +41,7 @@
     <string name="notify_unpin_image_failure">取消釘選圖片失敗</string>
     <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
     <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
-    <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達  %s</string>
+    <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達 %s%%</string>
 
     <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
     
@@ -48,14 +54,14 @@
     <string name="home_page_pinned_storage">釘選空間</string>
     <string name="home_page_network_traffic_title">資料傳輸量</string>
     <string name="home_page_the_amount_of_network_traffic_today">本日資料傳輸</string>
-    <string name="home_page_to_be_upladed_data">待上傳資料</string>
+    <string name="home_page_to_be_uploaded_data">待上傳資料</string>
     <string name="home_page_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
     
     <string name="action_settings">Settings</string>
     
     <string name="file_management_hint_no_file">這個資料夾是空的</string>
     <string name="file_management_snackbar_refresh">重新整理</string>
-    <string name="file_management_snackbar_unkown_type_file">無可開啟此類型檔案的應用程式</string>
+    <string name="file_management_snackbar_unknown_type_file">無可開啟此類型檔案的應用程式</string>
     <string name="file_management_spinner_apps">依應用程式顯示</string>
     <string name="file_management_spinner_data_type">依資料型態顯示</string>
     <string name="file_management_spinner_files">依檔案顯示</string>
@@ -88,7 +94,7 @@
     <string name="file_management_alert_dialog_title">提示</string>
     <string name="file_management_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
     <string name="file_management_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
-    <string name="file_management_date_since_pinned">自  %1$s 開始釘選</string>
+    <string name="file_management_date_since_pinned">自 %1$s 開始釘選</string>
     <string name="file_management_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
     
     <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
@@ -106,7 +112,7 @@
     <string name="settings_section_notify_local_storage_used_ratio_dialog_title">請選擇通知的比例</string>
     <string name="settings_section_notify_local_storage_used_ratio_summary">請選擇通知的比例</string>
     <string name="settings_section_notify_local_storage_used_ratio_title">通知本地空間使用率</string>
-    <string name="settings_local_storage_used_ratio">本地空間使用率達  %s 時進行通知"</string>
+    <string name="settings_local_storage_used_ratio">本地空間使用率達  %s 時進行通知</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
         <item>80%</item>
@@ -128,18 +134,12 @@
     <string name="activate_cloud_storage_forget_password"><u>忘記密碼</u></string>
     <string name="activate_cloud_storage_or">或</string>
     <string name="activate_cloud_storage_google_activate"><u>使用Google帳號啟用</u></string>
-    <string name="activate_cloud_failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
+    <string name="failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
     
     <string name="alert_dialog_yes">是</string>
     <string name="alert_dialog_no">否</string>
     <string name="alert_dialog_confirm">確定</string>
     
-    <string name="activate_cloud_activate_transition">ActivateTransition</string>
-    
-    <string name="server_client_id">584185841160-g8ane8qnaqiust9d2nu4299edkq5lt9t.apps.googleusercontent.com</string>
-    
-    <string name="version_system_title">System Version</string>
     <string name="version_app_title">App Version</string>
-    <string name="version_system">-</string>
 
 </resources>

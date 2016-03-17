@@ -29,9 +29,9 @@ public class DisplayType {
 	public static final int APP_ALL = 2;
 
 	public static ArrayList<ItemInfo> getListOfInstalledApps(Context context, int flags) {
-		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
+		ArrayList<ItemInfo> items = new ArrayList<>();
 		if (context != null) {
-			Map<String, String> externalPkgNameMap = new HashMap<String, String>();
+			Map<String, String> externalPkgNameMap = new HashMap<>();
 			String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
 			File externalAndroidFile = new File(externalPath);
 			for (File type : externalAndroidFile.listFiles()) {

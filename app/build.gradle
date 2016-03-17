@@ -35,7 +35,7 @@ android {
 
     lintOptions {
         abortOnError false
-        disable 'MissingTranslation'
+//        disable 'MissingTranslation'
     }
 
     sourceSets.main.jni.srcDirs = []
@@ -74,7 +74,8 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.android.support:recyclerview-v7:23.2.0'
     compile 'com.android.support:design:23.2.0'
-    compile "com.google.android.gms:play-services:8.4.0"
+    compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.android.support:preference-v14:23.2.0'
 }
 
 def getNdkDir() {

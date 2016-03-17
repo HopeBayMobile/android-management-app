@@ -1,6 +1,9 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -21,12 +24,10 @@ import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
 
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -46,20 +47,23 @@ import android.support.v7.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class HCFSMgmtUtils {
 
     public static final String TAG = "HopeBay";
     public static final String CLASSNAME = "HCFSMgmtUtils";
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
+    public static  final String MANAGEMENT_SERVER_AUTH_URL = "https://terafonnreg.hopebaytech.com/api/register/auth";
 
-    public static final boolean ENABLE_AUTH = true;
+    public static final boolean ENABLE_AUTH = false;
     public static final boolean DEFAULT_PINNED_STATUS = false;
     public static final int LOGLEVEL = Log.DEBUG;
 
     public static final int INTERVAL_TEN_SECONDS = 10 * 1000;
     public static final int INTERVAL_ONE_MINUTE = 6 * INTERVAL_TEN_SECONDS;
     public static final int INTERVAL_ONE_HOUR = 60 * INTERVAL_ONE_MINUTE;
-    public static final int INTERVAL_NOTIFY_UPLAOD_COMPLETED = INTERVAL_ONE_HOUR;
+    public static final int INTERVAL_NOTIFY_UPLOAD_COMPLETED = INTERVAL_ONE_HOUR;
     public static final int INTERVAL_PIN_DATA_TYPE_FILE = INTERVAL_ONE_HOUR;
     public static final int INTERVAL_RESET_XFER = 24 * INTERVAL_ONE_HOUR;
     public static final int INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO = INTERVAL_ONE_HOUR;
@@ -68,6 +72,7 @@ public class HCFSMgmtUtils {
     public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
     public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 2;
     public static final int NOTIFY_ID_ONGOING = 3;
+    public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 4;
 
     public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
     public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
@@ -235,7 +240,7 @@ public class HCFSMgmtUtils {
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = INTERVAL_NOTIFY_UPLAOD_COMPLETED;
+        long intervalMillis = INTERVAL_NOTIFY_UPLOAD_COMPLETED;
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
     }
 
@@ -288,7 +293,7 @@ public class HCFSMgmtUtils {
         ArrayList<String> videoPaths = null;
         ContentResolver resolver = context.getContentResolver();
         String[] projection = {MediaStore.Video.Media._ID, MediaStore.Video.Media.DATA, MediaStore.Audio.Media.DATE_ADDED};
-		/* External storage */
+        /* External storage */
         String selection = MediaStore.Audio.Media.DATE_ADDED + " > " + dateUpdated;
         Cursor cursor = resolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Video.Media._ID);
         if (cursor != null) {
@@ -420,9 +425,9 @@ public class HCFSMgmtUtils {
                     .setOngoing(false)
                     .setDefaults(defaults);
         }
-        Notification notifcaition = builder.build();
+        Notification notification = builder.build();
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
-        notificationManagerCompat.notify(notify_id, notifcaition);
+        notificationManagerCompat.notify(notify_id, notification);
     }
 
     public static void cancelEvent(Context context, int notify_id) {
@@ -723,7 +728,8 @@ public class HCFSMgmtUtils {
             String jsonResult = HCFSApiUtils.setHCFSConfig(key, value);
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
-            String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;;
+            String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;
+            ;
             if (isSuccess) {
                 HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "setHCFSConfig", logMsg);
             } else {
@@ -883,7 +889,8 @@ public class HCFSMgmtUtils {
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+//        long intervalMillis = INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+        long intervalMillis = 60 * 1000;
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
     }
 
@@ -972,8 +979,8 @@ public class HCFSMgmtUtils {
 
     @Nullable
     public static String getEncryptedDeviceIMEI(Context context) {
-//        return HCFSApiUtils.getEncryptedIMEI();
-        return getDeviceIMEI(context);
+        return new String(HCFSApiUtils.getEncryptedIMEI());
+//        return getDeviceIMEI(context);
     }
 
     public static String getDeviceIMEI(Context context) {
@@ -982,17 +989,41 @@ public class HCFSMgmtUtils {
         return imei == null ? "" : imei;
     }
 
-    public static void showAlertDialog(Context context, String title, String message, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(title);
-        builder.setMessage(message);
-        if (positiveListener != null) {
-            builder.setPositiveButton(positiveListener.toString(), positiveListener);
+    public static String getServerClientIdFromMgmtServer() {
+        String serverClientId = null;
+        HttpsURLConnection conn = null;
+        try {
+            URL url = new URL(MANAGEMENT_SERVER_AUTH_URL);
+            conn = (HttpsURLConnection) url.openConnection();
+            conn.setDoInput(true);
+            int responseCode = conn.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+
+                String jsonResponse = sb.toString();
+                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "jsonResponse=" + jsonResponse);
+                if (!jsonResponse.isEmpty()) {
+                    JSONObject jObj = new JSONObject(jsonResponse);
+                    JSONObject dataObj = jObj.getJSONObject("data");
+                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
+                    serverClientId = authObj.getString("client_id");
+                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getServerClientIdFromMgmtServer", "server_client_id=" + serverClientId);
+                    bufferedReader.close();
+                }
+            }
+        } catch (Exception e) {
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getServerClientIdFromMgmtServer", Log.getStackTraceString(e));
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
-        if (negativeListener != null) {
-            builder.setNegativeButton(negativeListener.toString(), negativeListener);
-        }
-        builder.show();
+        return serverClientId;
     }
 
 }

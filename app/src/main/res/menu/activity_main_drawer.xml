@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:id="@+id/group_homepage" >
+    <group android:id="@+id/group_homepage">
         <item
             android:id="@+id/nav_homepage"
             android:icon="@drawable/ic_home_white"
             android:orderInCategory="0"
-            android:title="@string/nav_homepage">
-        </item>
+            android:title="@string/nav_home" />
     </group>
-    <group android:id="@+id/group_mountpoint" >
+    <group android:id="@+id/group_system">
         <item
-            android:id="@+id/nav_default_mountpoint"
+            android:id="@+id/nav_system"
             android:icon="@drawable/ic_cloud_upload_white"
             android:orderInCategory="1"
-            android:title="@string/nav_default_mountpoint"/>
+            android:title="@string/nav_system" />
     </group>
-    <group android:id="@+id/group_setting_about" >
+    <group android:id="@+id/group_setting">
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_white"
             android:orderInCategory="101"
-            android:title="@string/nav_settings"/>
+            android:title="@string/nav_settings" />
+    </group>
+    <group android:id="@+id/group_about">
         <item
             android:id="@+id/nav_about"
             android:icon="@drawable/ic_info_white"
             android:orderInCategory="102"
-            android:title="@string/nav_about"/>
+            android:title="@string/nav_about" />
     </group>
 
 </menu>
