@@ -172,15 +172,15 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                                 String message = getString(R.string.activate_cloud_storage_failed_to_activate);
                                                 HCFSMgmtUtils.showAlertDialog(ActivateCloudStorageActivity.this, title, message, null, null);
                                                 // TODO
-                                                AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
-                                                builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
-                                                builder.setMessage(getString(R.string.activate_cloud_storage_failed_to_activate));
-                                                builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                    }
-                                                });
-                                                builder.show();
+//                                                AlertDialog.Builder builder = new AlertDialog.Builder(ActivateCloudStorageActivity.this);
+//                                                builder.setTitle(getString(R.string.activate_cloud_alert_dialog_title));
+//                                                builder.setMessage(getString(R.string.activate_cloud_storage_failed_to_activate));
+//                                                builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+//                                                    @Override
+//                                                    public void onClick(DialogInterface dialog, int which) {
+//                                                    }
+//                                                });
+//                                                builder.show();
                                             }
                                         });
                                     }

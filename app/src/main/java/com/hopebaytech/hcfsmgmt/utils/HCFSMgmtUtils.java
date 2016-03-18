@@ -503,18 +503,22 @@ public class HCFSMgmtUtils {
         String dataDir = info.getDataDir();
         String externalDir = info.getExternalDir();
         boolean isSourceDirSuccess = true;
-        if (sourceDir.startsWith("/data/app")) {
-            isSourceDirSuccess = pinFileOrDirectory(sourceDir);
+        if (sourceDir != null) {
+            if (sourceDir.startsWith("/data/app")) {
+                isSourceDirSuccess = pinFileOrDirectory(sourceDir);
+            }
         }
-        boolean isDataDirPinSuccess = true;
-        if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
-            isDataDirPinSuccess = pinFileOrDirectory(dataDir);
+        boolean isDataDirSuccess = true;
+        if (dataDir != null) {
+            if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
+                isDataDirSuccess = pinFileOrDirectory(dataDir);
+            }
         }
         boolean isExternalDirSuccess = true;
         if (externalDir != null) {
             isExternalDirSuccess = pinFileOrDirectory(externalDir);
         }
-        return isSourceDirSuccess & isDataDirPinSuccess & isExternalDirSuccess;
+        return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
     public static boolean unpinApp(ServiceAppInfo info) {
@@ -522,11 +526,30 @@ public class HCFSMgmtUtils {
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
         String externalDir = info.getExternalDir();
-        if (externalDir == null) {
-            return unpinFileOrDirectory(sourceDir) & unpinFileOrDirectory(dataDir);
-        } else {
-            return unpinFileOrDirectory(sourceDir) & unpinFileOrDirectory(dataDir) & unpinFileOrDirectory(externalDir);
+
+        boolean isSourceDirSuccess = true;
+        if (sourceDir != null) {
+            if (sourceDir.startsWith("/data/app")) {
+                isSourceDirSuccess = unpinFileOrDirectory(sourceDir);
+            }
         }
+        boolean isDataDirSuccess = true;
+        if (dataDir != null) {
+            if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
+                isDataDirSuccess = unpinFileOrDirectory(dataDir);
+            }
+        }
+        boolean isExternalDirSuccess = true;
+        if (externalDir != null) {
+            isExternalDirSuccess = unpinFileOrDirectory(externalDir);
+        }
+        return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
+
+//        if (externalDir == null) {
+//            return unpinFileOrDirectory(sourceDir) & unpinFileOrDirectory(dataDir);
+//        } else {
+//            return unpinFileOrDirectory(sourceDir) & unpinFileOrDirectory(dataDir) & unpinFileOrDirectory(externalDir);
+//        }
     }
 
     public static boolean pinFileOrDirectory(String filePath) {

@@ -84,8 +84,9 @@ public class HCFSMgmtService extends Service {
                         serviceAppInfo.setPinned(isAppPinned);
                         serviceAppInfo.setAppName(appName);
                         serviceAppInfo.setPackageName(packageName);
+//                        serviceAppInfo.setSourceDir(sourceDir); // TODO
+                        serviceAppInfo.setSourceDir(null);
                         serviceAppInfo.setDataDir(dataDir);
-                        serviceAppInfo.setSourceDir(sourceDir);
                         serviceAppInfo.setExternalDir(externalDir);
                         mServiceAppDAO.insert(serviceAppInfo);
                         pinOrUnpinApp(serviceAppInfo);
@@ -103,6 +104,8 @@ public class HCFSMgmtService extends Service {
                         pinOrUnpinFileOrDirectory(serviceFileDirInfo);
                         mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
+                        /** From HCFSMgmtReceiver's ACTION_BOOT_COMPLETED */
+
                         /** Add NEW uid info to database when system boot up */
                         List<UidInfo> uidInfoList = mUidDAO.getAll();
                         Set<String> packageNameSet = new HashSet<>();
@@ -139,6 +142,8 @@ public class HCFSMgmtService extends Service {
                             pinOrUnpinApp(serviceAppInfo);
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
+                        /** From HCFSMgmtReceiver's ACTION_PACKAGE_ADDED */
+
                         /** Add uid info of new installed app to database */
                         int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
                         String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
@@ -161,7 +166,8 @@ public class HCFSMgmtService extends Service {
                                 serviceAppInfo.setPinned(false);
                                 serviceAppInfo.setAppName(applicationInfo.loadLabel(pm).toString());
                                 serviceAppInfo.setPackageName(packageName);
-                                serviceAppInfo.setSourceDir(sourceDirWithoutApkSuffix);
+//                                serviceAppInfo.setSourceDir(sourceDirWithoutApkSuffix); // TODO
+                                serviceAppInfo.setSourceDir(null);
                                 serviceAppInfo.setDataDir(applicationInfo.dataDir);
                                 serviceAppInfo.setExternalDir(null);
                                 pinOrUnpinApp(serviceAppInfo);
@@ -170,6 +176,8 @@ public class HCFSMgmtService extends Service {
                             HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_UNPIN_UDPATE_APP)) {
+                        /** From HCFSMgmtReceiver's ACTION_PACKAGE_REPLACED */
+
                         /** Pin or unpin an update app according to pin_status field in uid.db */
                         String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
                         try {
@@ -185,7 +193,8 @@ public class HCFSMgmtService extends Service {
                                 serviceAppInfo.setPinned(isPinned);
                                 serviceAppInfo.setAppName(applicationInfo.loadLabel(pm).toString());
                                 serviceAppInfo.setPackageName(packageName);
-                                serviceAppInfo.setSourceDir(sourceDirWithoutApkSuffix);
+//                                serviceAppInfo.setSourceDir(sourceDirWithoutApkSuffix); // TODO
+                                serviceAppInfo.setSourceDir(null);
                                 serviceAppInfo.setDataDir(applicationInfo.dataDir);
                                 serviceAppInfo.setExternalDir(null);
                                 pinOrUnpinApp(serviceAppInfo);
@@ -194,6 +203,8 @@ public class HCFSMgmtService extends Service {
                             HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE)) {
+                        /** From HCFSMgmtReceiver's ACTION_PACKAGE_REMOVED */
+
                         /** Remove uid info of uninstalled app from database */
                         int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
                         String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
