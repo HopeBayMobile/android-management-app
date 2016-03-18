@@ -70,7 +70,7 @@ public class DashboardFragment extends Fragment {
         cloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
         cloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
         TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
-        cloudStorageTitle.setText(getString(R.string.home_page_used_space));
+        cloudStorageTitle.setText(getString(R.string.dashboard_used_space));
         ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.iconView);
         cloudStorageImageView.setImageResource(R.drawable.cloudspace_128x128);
 
@@ -79,7 +79,7 @@ public class DashboardFragment extends Fragment {
         pinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
         pinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.storage_progressbar));
         TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
-        pinnedStorageTitle.setText(getString(R.string.home_page_pinned_storage));
+        pinnedStorageTitle.setText(getString(R.string.dashboard_pinned_storage));
         ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.iconView);
         pinnedStorageImageView.setImageResource(R.drawable.pinspace_128x128);
 
@@ -88,25 +88,24 @@ public class DashboardFragment extends Fragment {
         waitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
         waitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.storage_progressbar));
         TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
-        waitToUploadDataTitle.setText(getString(R.string.home_page_to_be_uploaded_data));
+        waitToUploadDataTitle.setText(getString(R.string.dashboard_data_to_be_uploaded));
         ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.iconView);
         waitToUploadDataUsageImageView.setImageResource(R.drawable.uploading_128x128);
 
-        LinearLayout network_xfer_today = (LinearLayout) view.findViewById(R.id.network_xfer_today);
-        network_xfer_up = (TextView) network_xfer_today.findViewById(R.id.xfer_up);
-        network_xfer_down = (TextView) network_xfer_today.findViewById(R.id.xfer_down);
-        xferProgressBar = (ProgressBar) network_xfer_today.findViewById(R.id.progressBar);
+        LinearLayout data_transmission_today = (LinearLayout) view.findViewById(R.id.network_xfer_today);
+        network_xfer_up = (TextView) data_transmission_today.findViewById(R.id.xfer_up);
+        network_xfer_down = (TextView) data_transmission_today.findViewById(R.id.xfer_down);
+        xferProgressBar = (ProgressBar) data_transmission_today.findViewById(R.id.progressBar);
         xferProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.xfer_progressbar));
-        TextView network_xfer_today_title = (TextView) network_xfer_today.findViewById(R.id.textViewTitle);
-        network_xfer_today_title.setText(getString(R.string.home_page_the_amount_of_network_traffic_today));
-        ImageView networkXferImageView = (ImageView) network_xfer_today.findViewById(R.id.iconView);
+        TextView network_xfer_today_title = (TextView) data_transmission_today.findViewById(R.id.textViewTitle);
+        network_xfer_today_title.setText(getString(R.string.dashboard_data_transmission_today));
+        ImageView networkXferImageView = (ImageView) data_transmission_today.findViewById(R.id.iconView);
         networkXferImageView.setImageResource(R.drawable.load_128x128);
 
         uiRefreshRunnable = new Runnable() {
             @Override
             public void run() {
                 while (true) {
-                    Log.w(HCFSMgmtUtils.TAG, "uiRefreshRunnable");
                     try {
                         final HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
                         Activity activity = getActivity();
@@ -117,12 +116,15 @@ public class DashboardFragment extends Fragment {
                                     if (statInfo != null) {
                                         cloudStorageUsage.setText(statInfo.getVolUsed() + " / " + statInfo.getCloudTotal());
                                         cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
+                                        cloudStorageProgressBar.setSecondaryProgress(0);
 
                                         pinnedStorageUsage.setText(statInfo.getPinTotal());
                                         pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
+                                        pinnedStorageProgressBar.setSecondaryProgress(0);
 
                                         waitToUploadDataUsage.setText(statInfo.getCacheDirtyUsed());
                                         waitToUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
+                                        waitToUploadDataUsageProgressBar.setSecondaryProgress(0);
 
                                         String xferDownload = statInfo.getXferDownload();
                                         String xferUpload = statInfo.getXferUpload();
@@ -181,19 +183,19 @@ public class DashboardFragment extends Fragment {
                         if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connected");
                             networkConnStatusImage.setImageResource(R.drawable.connect_96x96);
-                            networkConnStatusText.setText(getString(R.string.home_page_network_status_connected));
+                            networkConnStatusText.setText(getString(R.string.dashboard_network_status_connected));
                         } else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connecting");
                             networkConnStatusImage.setImageResource(R.drawable.connect_connecting_96x96);
-                            networkConnStatusText.setText(getString(R.string.home_page_network_status_connecting));
+                            networkConnStatusText.setText(getString(R.string.dashboard_network_status_connecting));
                         } else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is disconnected");
                             networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
-                            networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
+                            networkConnStatusText.setText(getString(R.string.dashboard_network_status_disconnected));
                         }
                     } else {
                         networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
-                        networkConnStatusText.setText(getString(R.string.home_page_network_status_disconnected));
+                        networkConnStatusText.setText(getString(R.string.dashboard_network_status_disconnected));
                     }
                 }
             }

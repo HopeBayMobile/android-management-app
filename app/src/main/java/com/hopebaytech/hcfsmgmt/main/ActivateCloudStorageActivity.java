@@ -430,15 +430,15 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 params.add(new BasicNameValuePair("provider", "google-oauth2"));
                 params.add(new BasicNameValuePair("token", idToken));
                 params.add(new BasicNameValuePair("imei_code", encryptedIMEI));
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "IMEI=" + encryptedIMEI);
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "idToken=" + idToken);
+                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtServer", "IMEI=" + encryptedIMEI);
+                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtServer", "idToken=" + idToken);
             } else {
                 final String username = ((EditText) findViewById(R.id.username)).getText().toString();
                 final String password = ((EditText) findViewById(R.id.password)).getText().toString();
                 params.add(new BasicNameValuePair("username", username));
                 params.add(new BasicNameValuePair("password", password));
                 params.add(new BasicNameValuePair("imei_code", encryptedIMEI));
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "IMEI=" + encryptedIMEI);
+                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtServer", "IMEI=" + encryptedIMEI);
             }
 
             OutputStream outputStream = conn.getOutputStream();

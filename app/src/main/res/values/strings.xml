@@ -45,17 +45,17 @@
 
     <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
     
-    <string name="home_page_network_status_connected">連線正常</string>
-    <string name="home_page_network_status_connecting">嘗試連線</string>
-    <string name="home_page_network_status_disconnected">連線中斷</string>
-    <string name="home_page_space_usage_title">空間使用量</string>
-    <string name="home_page_used_space">已使用空間</string>
-    <string name="home_page_local_storage">快取空間</string>
-    <string name="home_page_pinned_storage">釘選空間</string>
-    <string name="home_page_network_traffic_title">資料傳輸量</string>
-    <string name="home_page_the_amount_of_network_traffic_today">本日資料傳輸</string>
-    <string name="home_page_to_be_uploaded_data">待上傳資料</string>
-    <string name="home_page_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
+    <string name="dashboard_network_status_connected">連線正常</string>
+    <string name="dashboard_network_status_connecting">嘗試連線</string>
+    <string name="dashboard_network_status_disconnected">連線中斷</string>
+    <string name="dashboard_space_usage_title">空間使用量</string>
+    <string name="dashboard_used_space">已使用空間</string>
+    <string name="dashboard_local_storage">快取空間</string>
+    <string name="dashboard_pinned_storage">釘選空間</string>
+    <string name="dashboard_network_traffic_title">資料傳輸量</string>
+    <string name="dashboard_data_transmission_today">本日資料傳輸</string>
+    <string name="dashboard_data_to_be_uploaded">待上傳資料</string>
+    <string name="dashboard_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
     
     <string name="action_settings">Settings</string>
     
@@ -85,8 +85,8 @@
     <string name="file_management_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
     <string name="file_management_popup_menu_pin">釘選</string>
     <string name="file_management_popup_menu_unpin">取消釘選</string>
-    <string name="file_management_internal_storatge_name">內部儲存空間</string>
-    <string name="file_management_sdcard1_storatge_name">SD卡儲存空間</string>
+    <string name="file_management_internal_storage_name">內部儲存空間</string>
+    <string name="file_management_sdcard1_storage_name">SD卡儲存空間</string>
     <string name="file_management_section_item_calculating">計算中&#8230;</string>
     <string name="file_management_section_item_total_storage_space">總空間:&#160;</string>
     <string name="file_management_section_item_available_storage_space">可用空間:&#160;</string>

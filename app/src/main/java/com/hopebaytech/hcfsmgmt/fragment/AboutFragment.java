@@ -46,11 +46,11 @@ public class AboutFragment extends Fragment {
 	@Override
 	public void setMenuVisibility(boolean menuVisible) {
 		super.setMenuVisibility(menuVisible);
-		if (menuVisible) {
-			Log.w(HCFSMgmtUtils.TAG, "visible");
-		} else {
-			Log.w(HCFSMgmtUtils.TAG, "invisible");
-		}
+//		if (menuVisible) {
+//			Log.w(HCFSMgmtUtils.TAG, "visible");
+//		} else {
+//			Log.w(HCFSMgmtUtils.TAG, "invisible");
+//		}
 	}
 
 	public void onBackPressed() {

@@ -271,8 +271,8 @@ public class HCFSMgmtService extends Service {
                                                     } else {
 
                                                     }
-                                                    String notifyTitle = getString(R.string.home_page_network_status_connected);
-                                                    String notifyMsg = getString(R.string.home_page_used_space) + ": " + statInfo.getVolUsed() + " / " + statInfo.getCloudTotal();
+                                                    String notifyTitle = getString(R.string.dashboard_network_status_connected);
+                                                    String notifyMsg = getString(R.string.dashboard_used_space) + ": " + statInfo.getVolUsed() + " / " + statInfo.getCloudTotal();
                                                     HCFSMgmtUtils.notifyEvent(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, true);
                                                 }
                                                 Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);

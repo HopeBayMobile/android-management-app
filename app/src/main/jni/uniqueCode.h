@@ -1,7 +1,3 @@
-//
-// Created by Aaron on 2016/3/8.
-//
-
 #include <openssl/pem.h>
 #include <openssl/ssl.h>
 #include <openssl/rsa.h>
@@ -12,3 +8,4 @@
 
 int getUniqueCode(unsigned char*);
 int getEncryptCode(unsigned char* encrypt_code);
+int decryptCode(unsigned char* decrypt_code, unsigned char* encrypt_code);

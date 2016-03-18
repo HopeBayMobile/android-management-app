@@ -58,25 +58,25 @@
                         android:layout_marginBottom="5dp"
                         android:layout_marginLeft="@dimen/fragment_horizontal_margin"
                         android:layout_marginRight="@dimen/fragment_horizontal_margin"
-                        android:text="@string/home_page_space_usage_title"
+                        android:text="@string/dashboard_space_usage_title"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textColor="@color/colorAccent" />
 
                     <include
                         android:id="@+id/cloud_storage"
-                        layout="@layout/home_page_usage_item" />
+                        layout="@layout/dashboard_usage_item" />
 
                     <View style="@style/Divider" />
 
                     <include
                         android:id="@+id/pinned_storage"
-                        layout="@layout/home_page_usage_item" />
+                        layout="@layout/dashboard_usage_item" />
 
                     <View style="@style/Divider" />
 
                     <include
                         android:id="@+id/to_be_upload_data"
-                        layout="@layout/home_page_usage_item" />
+                        layout="@layout/dashboard_usage_item" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -91,13 +91,13 @@
                         android:layout_marginBottom="5dp"
                         android:layout_marginLeft="@dimen/fragment_horizontal_margin"
                         android:layout_marginRight="@dimen/fragment_horizontal_margin"
-                        android:text="@string/home_page_network_traffic_title"
+                        android:text="@string/dashboard_network_traffic_title"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textColor="@color/colorAccent" />
 
                     <include
                         android:id="@+id/network_xfer_today"
-                        layout="@layout/home_page_xfer_item" />
+                        layout="@layout/dashboard_xfer_item" />
                 </LinearLayout>
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>

@@ -1,24 +1,5 @@
 package com.hopebaytech.hcfsmgmt.main;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
-import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
-import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
-import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
-import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
-import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
-import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-
-import android.support.v4.app.FragmentManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,9 +12,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
@@ -42,6 +23,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
@@ -51,6 +33,24 @@ import android.view.View;
 import android.view.View.OnLayoutChangeListener;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
+import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
+import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
+import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -298,6 +298,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public CharSequence getPageTitle(int position) {
             return titleArray[position];
         }
+
     }
 
     @Override

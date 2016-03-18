@@ -148,6 +148,7 @@ public class FileManagementFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onCreate", "");
 
         Activity activity = getActivity();
         if (activity != null) {
@@ -166,10 +167,10 @@ public class FileManagementFragment extends Fragment {
 
             String[] spinner_array;
             if (isSDCard1) {
-                mFileRootDirName = getString(R.string.file_management_sdcard1_storatge_name) + "/";
+                mFileRootDirName = getString(R.string.file_management_sdcard1_storage_name) + "/";
                 spinner_array = new String[]{getString(R.string.file_management_spinner_files)};
             } else {
-                mFileRootDirName = getString(R.string.file_management_internal_storatge_name) + "/";
+                mFileRootDirName = getString(R.string.file_management_internal_storage_name) + "/";
                 spinner_array = getResources().getStringArray(R.array.file_management_spinner);
             }
             mSpinnerAdapter = new ArrayAdapter<>(activity, R.layout.file_management_spinner, spinner_array);
@@ -188,12 +189,14 @@ public class FileManagementFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onCreateView", "");
         return inflater.inflate(R.layout.file_management_fragment, container, false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onResume", "");
         mApiExecutorThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -390,13 +393,15 @@ public class FileManagementFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        /* Interrupt mApiExecutorThread */
+        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onPause", "");
+
+        /** Interrupt mApiExecutorThread */
         if (mApiExecutorThread != null) {
             mApiExecutorThread.interrupt();
             mApiExecutorThread = null;
         }
 
-		/* Interrupt mUiAutoRefreshThread */
+		/** Interrupt mUiAutoRefreshThread */
         if (mUiAutoRefreshThread != null) {
             mUiAutoRefreshThread.interrupt();
             mUiAutoRefreshThread = null;
@@ -406,6 +411,7 @@ public class FileManagementFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onActivityCreated", "");
 
         View view = getView();
         if (view == null) {
@@ -1544,13 +1550,13 @@ public class FileManagementFragment extends Fragment {
         }
 
         private ArrayList<ItemInfo> getSubAdapterItemInfoList() {
-            ArrayList<ItemInfo> itemInfos;
+            ArrayList<ItemInfo> itemInfoList;
             if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
-                itemInfos = ((GridRecyclerViewAdapter) mBaseAdapter).getItemInfoList();
+                itemInfoList = ((GridRecyclerViewAdapter) mBaseAdapter).getItemInfoList();
             } else {
-                itemInfos = ((LinearRecyclerViewAdapter) mBaseAdapter).getItemInfoList();
+                itemInfoList = ((LinearRecyclerViewAdapter) mBaseAdapter).getItemInfoList();
             }
-            return itemInfos;
+            return itemInfoList;
         }
 
         private void setSubAdapterItems(ArrayList<ItemInfo> itemInfos) {
@@ -1643,9 +1649,9 @@ public class FileManagementFragment extends Fragment {
                             public void run() {
                                 String storageType;
                                 if (isSDCard1) {
-                                    storageType = getString(R.string.file_management_sdcard1_storatge_name);
+                                    storageType = getString(R.string.file_management_sdcard1_storage_name);
                                 } else {
-                                    storageType = getString(R.string.file_management_internal_storatge_name);
+                                    storageType = getString(R.string.file_management_internal_storage_name);
                                 }
                                 sectionViewHolder.storageType.setText(storageType);
                                 sectionViewHolder.totalStorageSpace.setText(calculatingText);
@@ -1659,21 +1665,21 @@ public class FileManagementFragment extends Fragment {
                             availableStorageSpace = statFs.getAvailableBytes();
                         }
 
-
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 float toShowValue = ((totalStorageSpace - availableStorageSpace) * 1f / totalStorageSpace) * 100f;
                                 CircleDisplay cd = sectionViewHolder.circleDisplay;
-                                int width, height;
-                                width = height = (int) (sectionViewHolder.rootView.getHeight() * 0.9);
-                                cd.resize(width, height);
-                                cd.setValueWidthPercent(25f);
-                                cd.setPercentTextSize(16f);
-                                cd.setCapacityTextSize(12f);
-                                cd.setArcColor(ContextCompat.getColor(activity, R.color.colorFileManagementCircleArc));
-                                cd.setWholeCircleColor(ContextCompat.getColor(activity, R.color.colorFileManagementCircleWhole));
-                                cd.setPercentTextColor(ContextCompat.getColor(activity, R.color.colorFileManagementCircleText));
+//                                int width, height;/
+//                                width = height = (int) (sectionViewHolder.rootView.getHeight() * 0.9);
+//                                width = height = sectionViewHolder.rootView.getHeight();
+//                                cd.resize(width, height);
+//                                cd.setValueWidthPercent(25f);
+//                                cd.setPercentTextSize(16f);
+//                                cd.setCapacityTextSize(12f);
+//                                cd.setArcColor(ContextCompat.getColor(activity, R.color.colorFileManagementCircleArc));
+//                                cd.setWholeCircleColor(ContextCompat.getColor(activity, R.color.colorFileManagementCircleWhole));
+//                                cd.setPercentTextColor(ContextCompat.getColor(activity, R.color.colorFileManagementCircleText));
                                 cd.showValue(toShowValue, 100f, totalStorageSpace, isFirstCircleAnimated);
 
                                 if (isSDCard1) {
@@ -1701,7 +1707,7 @@ public class FileManagementFragment extends Fragment {
             if (typeView == SECTION_TYPE) {
                 Activity activity = getActivity();
                 if (activity != null) {
-                    View view = LayoutInflater.from(activity).inflate(R.layout.file_management_sction_item, parent, false);
+                    View view = LayoutInflater.from(activity).inflate(R.layout.file_management_section_item, parent, false);
                     return new SectionedViewHolder(view);
                 } else {
                     return null;
@@ -1878,7 +1884,7 @@ public class FileManagementFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onDestroy", "");
 		/** Close database */
         if (mDataTypeDAO != null) {
             mDataTypeDAO.close();
@@ -2064,4 +2070,14 @@ public class FileManagementFragment extends Fragment {
         return contentDescription;
     }
 
+    @Override
+    public void setMenuVisibility(boolean menuVisible) {
+        super.setMenuVisibility(menuVisible);
+        if (menuVisible) {
+            mSectionedRecyclerViewAdapter.notifyItemChanged(0);
+            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "setMenuVisibility", "visible");
+        } else {
+            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "setMenuVisibility", "invisible");
+        }
+    }
 }

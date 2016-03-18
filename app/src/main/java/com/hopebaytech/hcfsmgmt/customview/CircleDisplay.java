@@ -4,6 +4,8 @@ package com.hopebaytech.hcfsmgmt.customview;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import android.animation.ObjectAnimator;
@@ -16,6 +18,7 @@ import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.Style;
 import android.graphics.PointF;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -24,6 +27,7 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.RelativeLayout;
 
 /**
  * Simple custom-view for displaying values (with and without animation) and selecting values onTouch().
@@ -59,7 +63,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 	private float mMaxValue = 0f;
 
 	/** percent of the maximum width the arc takes */
-	private float mValueWidthPercent = 20f;
+	private float mValueWidthPercent = 25f;
 
 	/** if enabled, the whole circle is drawn */
 	private boolean mDrawWhole = true;
@@ -91,8 +95,8 @@ public class CircleDisplay extends View implements OnGestureListener {
 	private Paint mCapacityTextPaint;
 	private Paint mPercentTextPaint;
 
-	private int mWidth = 130;
-	private int mHeight = 130;
+	private int mWidth = 100;
+	private int mHeight = 100;
 
 	/** object animator for doing the drawing animations */
 	private ObjectAnimator mDrawAnimator;
@@ -116,11 +120,11 @@ public class CircleDisplay extends View implements OnGestureListener {
 
 		mArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mArcPaint.setStyle(Style.FILL);
-		mArcPaint.setColor(Color.rgb(0, 113, 188));
+        mArcPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorFileManagementCircleArc));
 
 		mWholeCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mWholeCirclePaint.setStyle(Style.FILL);
-		mWholeCirclePaint.setColor(Color.rgb(230, 230, 230));
+        mWholeCirclePaint.setColor(ContextCompat.getColor(getContext(), R.color.colorFileManagementCircleWhole));
 
 		mInnerCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mInnerCirclePaint.setStyle(Style.FILL);
@@ -130,13 +134,13 @@ public class CircleDisplay extends View implements OnGestureListener {
 		mCapacityTextPaint.setStyle(Style.STROKE);
 		mCapacityTextPaint.setTextAlign(Align.CENTER);
 		mCapacityTextPaint.setColor(Color.BLACK);
-		mCapacityTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 22f));
+		mCapacityTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 12f));
 
 		mPercentTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mPercentTextPaint.setStyle(Style.STROKE);
 		mPercentTextPaint.setTextAlign(Align.CENTER);
-		mPercentTextPaint.setColor(Color.BLACK);
-		mPercentTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 14f));
+		mPercentTextPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorFileManagementCircleText));
+		mPercentTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 16f));
 
 		mDrawAnimator = ObjectAnimator.ofFloat(this, "phase", 0f, 1.0f).setDuration(3000);
 		mDrawAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
@@ -151,10 +155,9 @@ public class CircleDisplay extends View implements OnGestureListener {
 		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-		int width, height;
-
-		// Measure Width
-		if (widthMode == MeasureSpec.EXACTLY) {
+		/** Measure Width */
+        int width;
+        if (widthMode == MeasureSpec.EXACTLY) {
 			width = widthSize;
 		} else if (widthMode == MeasureSpec.AT_MOST) {
 			width = Math.min(mWidth, widthSize);
@@ -162,7 +165,8 @@ public class CircleDisplay extends View implements OnGestureListener {
 			width = mWidth;
 		}
 
-		// Measure Height
+		/** Measure Height */
+        int height;
 		if (heightMode == MeasureSpec.EXACTLY) {
 			height = heightSize;
 		} else if (heightMode == MeasureSpec.AT_MOST) {
@@ -853,6 +857,8 @@ public class CircleDisplay extends View implements OnGestureListener {
 
 		getLayoutParams().width = mWidth;
 		getLayoutParams().height = mHeight;
+
+        Log.w(HCFSMgmtUtils.TAG, "resize: getHeight()=" + getHeight() + ", getWidth()=" + getWidth());
 	}
 
 	@Override

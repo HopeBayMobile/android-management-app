@@ -7,7 +7,7 @@
     android:paddingBottom="@dimen/fragment_vertical_padding"
     android:paddingLeft="@dimen/fragment_horizontal_padding"
     android:paddingRight="@dimen/fragment_horizontal_padding"
-    android:paddingTop="@dimen/fragment_vertical_padding" >
+    android:paddingTop="@dimen/fragment_vertical_padding">
 
     <ImageView
         android:id="@+id/iconView"
@@ -19,18 +19,18 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/textViewTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:text="@string/home_page_used_space"
+                android:text="@string/dashboard_used_space"
                 android:textColor="@android:color/black" />
         </RelativeLayout>
 
@@ -41,23 +41,24 @@
             android:layout_height="@dimen/progressbar_home_page_height"
             android:layout_marginBottom="@dimen/progressbar_home_page_vertical_margin"
             android:layout_marginTop="@dimen/progressbar_home_page_vertical_margin"
-            android:progress="0" />
+            android:progress="0"
+            android:secondaryProgress="0" />
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:gravity="center"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_file_download" />
+                    android:src="@drawable/icon_arrow_down" />
 
                 <TextView
                     android:id="@+id/xfer_down"

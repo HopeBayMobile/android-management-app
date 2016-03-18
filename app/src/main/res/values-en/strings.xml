@@ -39,17 +39,17 @@
 
     <string name="active_cloud_storage_auth_fail">Account authentication failed</string>
     
-    <string name="home_page_network_status_connected">Connection is OK</string>
-    <string name="home_page_network_status_connecting">Connecting&#8230;</string>
-    <string name="home_page_network_status_disconnected">Connection failed</string>
-    <string name="home_page_space_usage_title">Space usage</string>
-    <string name="home_page_used_space">Used space</string>
-    <string name="home_page_local_storage">Local space</string>
-    <string name="home_page_pinned_storage">Pinned space</string>
-    <string name="home_page_network_traffic_title">Data transmission</string>
-    <string name="home_page_the_amount_of_network_traffic_today">Data transmission today</string>
-    <string name="home_page_to_be_uploaded_data">Data to be uploaded</string>
-    <string name="home_page_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
+    <string name="dashboard_network_status_connected">Connection is OK</string>
+    <string name="dashboard_network_status_connecting">Connecting&#8230;</string>
+    <string name="dashboard_network_status_disconnected">Connection failed</string>
+    <string name="dashboard_space_usage_title">Space usage</string>
+    <string name="dashboard_used_space">Used space</string>
+    <string name="dashboard_local_storage">Local space</string>
+    <string name="dashboard_pinned_storage">Pinned space</string>
+    <string name="dashboard_network_traffic_title">Data transmission</string>
+    <string name="dashboard_data_transmission_today">Data transmission today</string>
+    <string name="dashboard_data_to_be_uploaded">Data to be uploaded</string>
+    <string name="dashboard_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
     
     <string name="action_settings">Settings</string>
     
@@ -79,8 +79,8 @@
     <string name="file_management_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
     <string name="file_management_popup_menu_pin">Pin</string>
     <string name="file_management_popup_menu_unpin">Cancel pin</string>
-    <string name="file_management_internal_storatge_name">Device storage</string>
-    <string name="file_management_sdcard1_storatge_name">SD card storage</string>
+    <string name="file_management_internal_storage_name">Device storage</string>
+    <string name="file_management_sdcard1_storage_name">SD card storage</string>
     <string name="file_management_section_item_calculating">Calculating&#8230;</string>
     <string name="file_management_section_item_total_storage_space">Total space:&#160;</string>
     <string name="file_management_section_item_available_storage_space">Available space:&#160;</string>

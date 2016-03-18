@@ -2,17 +2,17 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory android:title="@string/settings_section_sync" >
-        <com.hopebaytech.hcfsmgmt.customview.MultiLineSwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_sync_wifi_only"
             android:title="@string/settings_section_sync_wifi_only" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/settings_section_notify" >
-        <com.hopebaytech.hcfsmgmt.customview.MultiLineSwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_notify_conn_failed_recovery"
             android:title="@string/settings_section_notify_conn_failed_recovery" />
-        <com.hopebaytech.hcfsmgmt.customview.MultiLineSwitchPreference
+        <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_notify_upload_completed"
             android:title="@string/settings_section_notify_upload_completed" />

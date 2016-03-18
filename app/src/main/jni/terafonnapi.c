@@ -162,7 +162,11 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
     jbyteArray result = (*jEnv)->NewByteArray(jEnv, len);
     (*jEnv)->SetByteArrayRegion(jEnv, result, 0, len, encrypt_code);
     __android_log_print(ANDROID_LOG_ERROR, "HopeBay", "JNI: encrypt_code=%s", (unsigned char*) encrypt_code);
-	return result;
+
+    unsigned char decrypt_code[len];
+    decryptCode(&decrypt_code, &encrypt_code);
+    __android_log_print(ANDROID_LOG_ERROR, "HopeBay", "JNI: decrypt_code=%s", (unsigned char*) decrypt_code);
+    return result;
 }
 
 //JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHCFSProperty(
