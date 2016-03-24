@@ -4,17 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 /**
  * Store uncompleted pin/unpin operations when user manually close app.
  */
 public class ServiceFileDirDAO {
-	
+
+	private final String CLASSNAME = getClass().getSimpleName();
 	public static final String TABLE_NAME = "service_file_dir";
 	public static final String KEY_ID = "_id";
 	public static final String FILE_PATH_COLUMN = "file_path";
@@ -25,40 +28,40 @@ public class ServiceFileDirDAO {
     		FILE_PATH_COLUMN + " TEXT NOT NULL, " +
     		PIN_STATUS_COLUMN + " INTEGER NOT NULL)";
     
-    private SQLiteDatabase db;
+//    private SQLiteDatabase db;
     private Context context;
     
     public ServiceFileDirDAO(Context context) {
     	this.context = context;
-    	db = HCFSDBHelper.getDataBase(context);
+//    	db = HCFSDBHelper.getDataBase(context);
     }
     
     public void close() {
-    	db.close();
+        getDataBase().close();
     }
     
-    public void openDbIfClosed() {
-    	db = HCFSDBHelper.getDataBase(context);
-    }
+//    public void openDbIfClosed() {
+//    	db = HCFSDBHelper.getDataBase(context);
+//    }
     
     public long insert(ServiceFileDirInfo info) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(FILE_PATH_COLUMN, info.getFilePath());
     	contentValues.put(PIN_STATUS_COLUMN, info.isPinned());
-    	return db.insert(TABLE_NAME, null, contentValues);
+    	return getDataBase().insert(TABLE_NAME, null, contentValues);
     }
     
     public boolean delete(String filePath) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	String where = FILE_PATH_COLUMN + "='" + filePath + "'";
-    	return db.delete(TABLE_NAME, where, null) > 0;
+    	return getDataBase().delete(TABLE_NAME, where, null) > 0;
     }
     
     public List<ServiceFileDirInfo> getAll() {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	List<ServiceFileDirInfo> result = new ArrayList<ServiceFileDirInfo>();
-    	Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null, null);
+    	Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
     	while (cursor.moveToNext()) {
 			result.add(getRecord(cursor));
 		}
@@ -67,10 +70,10 @@ public class ServiceFileDirDAO {
     }
     
     public ServiceFileDirInfo get(String filePath) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ServiceFileDirInfo fileDirInfo = null;
     	String where = FILE_PATH_COLUMN + "='" + filePath + "'";
-    	Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null, null);
+    	Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
     	if (cursor.moveToFirst()) {
     		fileDirInfo = getRecord(cursor);
     	}
@@ -79,17 +82,21 @@ public class ServiceFileDirDAO {
     }
     
     public ServiceFileDirInfo getRecord(Cursor cursor) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ServiceFileDirInfo result = new ServiceFileDirInfo();
     	result.setFilePath(cursor.getString(cursor.getColumnIndex(FILE_PATH_COLUMN)));
-    	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 0 ? false : true);
+    	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
     	return result;
     }
     
     public long getCount() {
-    	openDbIfClosed();
-    	Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+//    	openDbIfClosed();
+    	Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     	return cursor.getCount();
+    }
+
+    private SQLiteDatabase getDataBase() {
+        return HCFSDBHelper.getDataBase(context);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.db.HCFSDBHelper;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;

@@ -46,7 +46,7 @@ public class FileDirInfo extends ItemInfo {
 
 	public Bitmap getIconImage() {
 		if (currentFile.isDirectory()) {
-			Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_folder_black);
+			Drawable drawable = ContextCompat.getDrawable(context, R.drawable.icon_folder_default);
 			return ((BitmapDrawable) drawable).getBitmap();
 		} else {
 			String filePath = currentFile.getAbsolutePath();

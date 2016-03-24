@@ -16,7 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:src="@drawable/ic_terafonn_logo" />
+        android:src="@drawable/icon_terafonn_logo_default" />
 
     <TextView
         android:id="@+id/display_name"

@@ -135,11 +135,11 @@ public class HCFSStatInfo {
                                                                                                                                                                       
 	public int getCloudUsedPercentage() {
 		int percentage;
-		float tmp = ((float) cloudUsed / cloudTotal * 100);
+		float tmp = ((float) volUsed / cloudTotal * 100);
 		if (tmp > 0 && tmp < 1) {
 			percentage = 1;
 		} else {
-			percentage = (int) ((float) cloudUsed / cloudTotal * 100);
+			percentage = (int) ((float) volUsed / cloudTotal * 100);
 		}
 		return percentage;
 	}

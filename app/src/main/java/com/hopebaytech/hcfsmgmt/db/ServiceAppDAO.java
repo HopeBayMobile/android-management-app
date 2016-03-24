@@ -4,17 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 /**
  * Store uncompleted pin/unpin operations when user manually close app.
  */
 public class ServiceAppDAO {
-	
+
+	private final String CLASSNAME = getClass().getSimpleName();
 	public static final String TABLE_NAME = "service_app";
 	public static final String KEY_ID = "_id";
 	public static final String APP_NAME_COLUMN = "app_name";
@@ -33,24 +36,24 @@ public class ServiceAppDAO {
     		SOURCE_DIR_COLUMN + " TEXT NOT NULL, " +
     		EXTERNAL_DIR_COLUMN + " TEXT)";
     
-    private SQLiteDatabase db;
+//    private SQLiteDatabase db;
     private Context context;
     
     public ServiceAppDAO(Context context) {
     	this.context = context;
-    	openDbIfClosed();
+//    	openDbIfClosed();
     }
     
-    public void openDbIfClosed() {
-    	db = HCFSDBHelper.getDataBase(context);
-    }
+//    public void openDbIfClosed() {
+//    	db = HCFSDBHelper.getDataBase(context);
+//    }
     
     public void close() {
-    	db.close();
+		getDataBase().close();
     }
     
     public long insert(ServiceAppInfo appInfo) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(APP_NAME_COLUMN, appInfo.getAppName());
     	contentValues.put(PACKAGE_NAME_COLUMN, appInfo.getPackageName());
@@ -60,19 +63,19 @@ public class ServiceAppDAO {
     	if (appInfo.getExternalDir() != null) {
     		contentValues.put(EXTERNAL_DIR_COLUMN, appInfo.getExternalDir());
     	}
-    	return db.insert(TABLE_NAME, null, contentValues);
+    	return getDataBase().insert(TABLE_NAME, null, contentValues);
     }
     
     public boolean delete(ServiceAppInfo appInfo) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	String where = APP_NAME_COLUMN + "='" + appInfo.getAppName() + "'";
-    	return db.delete(TABLE_NAME, where, null) > 0;
+    	return getDataBase().delete(TABLE_NAME, where, null) > 0;
     }
     
     public List<ServiceAppInfo> getAll() {
-    	openDbIfClosed();
-    	List<ServiceAppInfo> result = new ArrayList<ServiceAppInfo>();
-    	Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null, null);
+//    	openDbIfClosed();
+    	List<ServiceAppInfo> result = new ArrayList<>();
+    	Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
     	while (cursor.moveToNext()) {
 			result.add(getRecord(cursor));
 		}
@@ -81,10 +84,10 @@ public class ServiceAppDAO {
     }
     
     public ServiceAppInfo get(String appName) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ServiceAppInfo appInfo = null;
     	String where = DATA_DIR_COLUMN + "='" + appName + "'";
-    	Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null, null);
+    	Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
     	if (cursor.moveToFirst()) {
     		appInfo = getRecord(cursor);
     	}
@@ -93,7 +96,7 @@ public class ServiceAppDAO {
     }
     
     public ServiceAppInfo getRecord(Cursor cursor) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ServiceAppInfo result = new ServiceAppInfo();
     	result.setAppName(cursor.getString(cursor.getColumnIndex(APP_NAME_COLUMN)));
     	result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
@@ -108,9 +111,13 @@ public class ServiceAppDAO {
     }
     
     public long getCount() {
-    	openDbIfClosed();
-    	Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+//    	openDbIfClosed();
+    	Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     	return cursor.getCount();
     }
+
+	private SQLiteDatabase getDataBase() {
+		return HCFSDBHelper.getDataBase(context);
+	}
 
 }

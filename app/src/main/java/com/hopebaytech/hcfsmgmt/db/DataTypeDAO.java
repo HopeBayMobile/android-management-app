@@ -34,45 +34,45 @@ public class DataTypeDAO {
 	public static final String DATA_TYPE_VIDEO = "video";
 	public static final String DATA_TYPE_AUDIO = "audio";
     
-    private SQLiteDatabase db;
+//    private SQLiteDatabase db;
     private Context context;
     
     public DataTypeDAO(Context context) {
     	this.context = context;
-    	openDbIfClosed();
+//    	openDbIfClosed();
     }
     
     public void close() {
-    	db.close();
+    	getDataBase().close();
     }
     
-    public void openDbIfClosed() {
-    	db = HCFSDBHelper.getDataBase(context);
-    }
+//    public void openDbIfClosed() {
+//    	db = HCFSDBHelper.getDataBase(context);
+//    }
     
     public long insert(DataTypeInfo dataTypeInfo) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(TYPE_COLUMN, dataTypeInfo.getDataType());
     	contentValues.put(PIN_STATUS_COLUMN, dataTypeInfo.isPinned());
     	contentValues.put(DATE_UPDATED_COLUMN, dataTypeInfo.getDateUpdated());
     	contentValues.put(DATE_PINNED_COLUMN, dataTypeInfo.getDatePinned());
-    	return db.insert(TABLE_NAME, null, contentValues);
+    	return getDataBase().insert(TABLE_NAME, null, contentValues);
     }
     
     public boolean update(DataTypeInfo dataTypeInfo) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(PIN_STATUS_COLUMN, dataTypeInfo.isPinned());
     	contentValues.put(DATE_UPDATED_COLUMN, dataTypeInfo.getDateUpdated());
     	contentValues.put(DATE_PINNED_COLUMN, dataTypeInfo.getDatePinned());
     	
     	String where = TYPE_COLUMN + "='" + dataTypeInfo.getDataType() + "'";
-    	return db.update(TABLE_NAME, contentValues, where, null) > 0;
+    	return getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
     }
     
     public boolean update(String dataType, DataTypeInfo dataTypeInfo, String column) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	if (column.equals(TYPE_COLUMN)) {
     		contentValues.put(column, dataTypeInfo.getDataType());
@@ -86,7 +86,7 @@ public class DataTypeDAO {
 			return false;
 		}
     	String where = TYPE_COLUMN + "='" + dataType + "'";
-    	boolean isSuccess = db.update(TABLE_NAME, contentValues, where, null) > 0;
+    	boolean isSuccess = getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
     	if (!isSuccess) {
     		HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "update", "isSuccess=" + isSuccess);
     	}
@@ -94,24 +94,24 @@ public class DataTypeDAO {
     }
     
     public boolean updateDateUpdated(String dataType, long dateUpdated) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(DATE_UPDATED_COLUMN, dateUpdated);
     	
     	String where = TYPE_COLUMN + "='" + dataType + "'";
-    	return db.update(TABLE_NAME, contentValues, where, null) > 0;
+    	return getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
     }
     
     public boolean delete(long id) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	String where = KEY_ID + "=" + id;
-    	return db.delete(TABLE_NAME, where, null) > 0;
+    	return getDataBase().delete(TABLE_NAME, where, null) > 0;
     }
     
     public List<DataTypeInfo> getAll() {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	List<DataTypeInfo> result = new ArrayList<DataTypeInfo>();
-    	Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null, null);
+    	Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
     	while (cursor.moveToNext()) {
 			result.add(getRecord(cursor));
 		}
@@ -120,10 +120,10 @@ public class DataTypeDAO {
     }
     
     public DataTypeInfo get(String dataType) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	DataTypeInfo dataTypeInfo = null;
     	String where = TYPE_COLUMN + "='" + dataType + "'";
-    	Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null, null);
+    	Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
     	if (cursor.moveToFirst()) {
     		dataTypeInfo = getRecord(cursor);
     	}
@@ -132,7 +132,7 @@ public class DataTypeDAO {
     }
     
     public DataTypeInfo getRecord(Cursor cursor) {
-    	openDbIfClosed();
+//    	openDbIfClosed();
     	DataTypeInfo result = new DataTypeInfo(context);
     	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 0 ? false : true);
     	result.setDataType(cursor.getString(cursor.getColumnIndex(TYPE_COLUMN)));
@@ -142,9 +142,13 @@ public class DataTypeDAO {
     }
     
     public int getCount() {
-    	openDbIfClosed();
-    	Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+//    	openDbIfClosed();
+    	Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     	return cursor.getCount();
     }
+
+	private SQLiteDatabase getDataBase() {
+		return HCFSDBHelper.getDataBase(context);
+	}
 
 }

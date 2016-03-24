@@ -27,28 +27,35 @@ public class DashboardFragment extends Fragment {
 
     public static String TAG = DashboardFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
-    private NetworkBroadcastReceiver networkStatusReceiver;
-    private Thread uiRefreshThread;
-    private TextView cloudStorageUsage;
-    private ProgressBar cloudStorageProgressBar;
-    private TextView pinnedStorageUsage;
-    private ProgressBar pinnedStorageProgressBar;
-    private TextView waitToUploadDataUsage;
-    private ProgressBar waitToUploadDataUsageProgressBar;
-    private TextView network_xfer_up;
-    private TextView network_xfer_down;
-    private ProgressBar xferProgressBar;
-    private Runnable uiRefreshRunnable;
-    private boolean isCurrentVisible;
+    private NetworkBroadcastReceiver mNetworkStatusReceiver;
+    private Thread mUiRefreshThread;
+    private TextView mCloudStorageUsage;
+    private ProgressBar mCloudStorageProgressBar;
+    private TextView mPinnedStorageUsage;
+    private ProgressBar mPinnedStorageProgressBar;
+    private TextView mWaitToUploadDataUsage;
+    private ProgressBar mWaitToUploadDataUsageProgressBar;
+    private TextView mNetworkXferUp;
+    private TextView mNetworkXferDown;
+    private ProgressBar mXferProgressBar;
+    private Runnable mUiRefreshRunnable;
+    private boolean mIsCurrentVisible;
+    private Context mContext;
 
     public static DashboardFragment newInstance() {
         return new DashboardFragment();
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        networkStatusReceiver = new NetworkBroadcastReceiver();
+        mNetworkStatusReceiver = new NetworkBroadcastReceiver();
     }
 
     @Override
@@ -61,100 +68,96 @@ public class DashboardFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         View view = getView();
-        Activity activity = getActivity();
-        if (activity == null || view == null) {
+        if (view == null) {
             return;
         }
 
         LinearLayout cloudStorage = (LinearLayout) view.findViewById(R.id.cloud_storage);
-        cloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
-        cloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
+        mCloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
+        mCloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
         TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
         cloudStorageTitle.setText(getString(R.string.dashboard_used_space));
         ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.iconView);
-        cloudStorageImageView.setImageResource(R.drawable.cloudspace_128x128);
+        cloudStorageImageView.setImageResource(R.drawable.icon_system_used_space);
 
         LinearLayout pinnedStorage = (LinearLayout) view.findViewById(R.id.pinned_storage);
-        pinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
-        pinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
-        pinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.storage_progressbar));
+        mPinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
+        mPinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
+        mPinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
         pinnedStorageTitle.setText(getString(R.string.dashboard_pinned_storage));
         ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.iconView);
-        pinnedStorageImageView.setImageResource(R.drawable.pinspace_128x128);
+        pinnedStorageImageView.setImageResource(R.drawable.icon_system_pinned_space);
 
         LinearLayout waitToUploadData = (LinearLayout) view.findViewById(R.id.to_be_upload_data);
-        waitToUploadDataUsage = (TextView) waitToUploadData.findViewById(R.id.textViewUsage);
-        waitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
-        waitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.storage_progressbar));
+        mWaitToUploadDataUsage = (TextView) waitToUploadData.findViewById(R.id.textViewUsage);
+        mWaitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
+        mWaitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
         waitToUploadDataTitle.setText(getString(R.string.dashboard_data_to_be_uploaded));
         ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.iconView);
-        waitToUploadDataUsageImageView.setImageResource(R.drawable.uploading_128x128);
+        waitToUploadDataUsageImageView.setImageResource(R.drawable.icon_system_upload_data);
 
         LinearLayout data_transmission_today = (LinearLayout) view.findViewById(R.id.network_xfer_today);
-        network_xfer_up = (TextView) data_transmission_today.findViewById(R.id.xfer_up);
-        network_xfer_down = (TextView) data_transmission_today.findViewById(R.id.xfer_down);
-        xferProgressBar = (ProgressBar) data_transmission_today.findViewById(R.id.progressBar);
-        xferProgressBar.setProgressDrawable(ContextCompat.getDrawable(activity, R.drawable.xfer_progressbar));
+        mNetworkXferUp = (TextView) data_transmission_today.findViewById(R.id.xfer_up);
+        mNetworkXferDown = (TextView) data_transmission_today.findViewById(R.id.xfer_down);
+        mXferProgressBar = (ProgressBar) data_transmission_today.findViewById(R.id.progressBar);
+        mXferProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.xfer_progressbar));
         TextView network_xfer_today_title = (TextView) data_transmission_today.findViewById(R.id.textViewTitle);
         network_xfer_today_title.setText(getString(R.string.dashboard_data_transmission_today));
         ImageView networkXferImageView = (ImageView) data_transmission_today.findViewById(R.id.iconView);
-        networkXferImageView.setImageResource(R.drawable.load_128x128);
+        networkXferImageView.setImageResource(R.drawable.icon_system_transmitting);
 
-        uiRefreshRunnable = new Runnable() {
+        mUiRefreshRunnable = new Runnable() {
             @Override
             public void run() {
                 while (true) {
                     try {
                         final HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-                        Activity activity = getActivity();
-                        if (activity != null) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (statInfo != null) {
-                                        cloudStorageUsage.setText(statInfo.getVolUsed() + " / " + statInfo.getCloudTotal());
-                                        cloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
-                                        cloudStorageProgressBar.setSecondaryProgress(0);
+                        ((Activity) mContext).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (statInfo != null) {
+                                    mCloudStorageUsage.setText(statInfo.getVolUsed() + " / " + statInfo.getCloudTotal());
+                                    mCloudStorageProgressBar.setProgress(statInfo.getCloudUsedPercentage());
+                                    mCloudStorageProgressBar.setSecondaryProgress(0);
 
-                                        pinnedStorageUsage.setText(statInfo.getPinTotal());
-                                        pinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
-                                        pinnedStorageProgressBar.setSecondaryProgress(0);
+                                    mPinnedStorageUsage.setText(statInfo.getPinTotal());
+                                    mPinnedStorageProgressBar.setProgress(statInfo.getPinnedUsedPercentage());
+                                    mPinnedStorageProgressBar.setSecondaryProgress(0);
 
-                                        waitToUploadDataUsage.setText(statInfo.getCacheDirtyUsed());
-                                        waitToUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
-                                        waitToUploadDataUsageProgressBar.setSecondaryProgress(0);
+                                    mWaitToUploadDataUsage.setText(statInfo.getCacheDirtyUsed());
+                                    mWaitToUploadDataUsageProgressBar.setProgress(statInfo.getDirtyPercentage());
+                                    mWaitToUploadDataUsageProgressBar.setSecondaryProgress(0);
 
-                                        String xferDownload = statInfo.getXferDownload();
-                                        String xferUpload = statInfo.getXferUpload();
-                                        network_xfer_up.setText(xferUpload);
-                                        network_xfer_down.setText(xferDownload);
-                                        if (xferDownload.equals("0B") && xferUpload.equals("0B")) {
-                                            xferProgressBar.setProgress(0);
-                                            xferProgressBar.setSecondaryProgress(0);
-                                        } else {
-                                            xferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
-                                            xferProgressBar.setSecondaryProgress(100);
-                                        }
+                                    String xferDownload = statInfo.getXferDownload();
+                                    String xferUpload = statInfo.getXferUpload();
+                                    mNetworkXferUp.setText(xferUpload);
+                                    mNetworkXferDown.setText(xferDownload);
+                                    if (xferDownload.equals("0B") && xferUpload.equals("0B")) {
+                                        mXferProgressBar.setProgress(0);
+                                        mXferProgressBar.setSecondaryProgress(0);
                                     } else {
-                                        cloudStorageUsage.setText("-");
-                                        cloudStorageProgressBar.setProgress(0);
-
-                                        pinnedStorageUsage.setText("-");
-                                        pinnedStorageProgressBar.setProgress(0);
-
-                                        waitToUploadDataUsage.setText("-");
-                                        waitToUploadDataUsageProgressBar.setProgress(0);
-
-                                        network_xfer_up.setText("-");
-                                        network_xfer_down.setText("-");
-                                        xferProgressBar.setProgress(0);
-                                        xferProgressBar.setSecondaryProgress(0);
+                                        mXferProgressBar.setProgress(statInfo.getXterDownloadPercentage());
+                                        mXferProgressBar.setSecondaryProgress(100);
                                     }
+                                } else {
+                                    mCloudStorageUsage.setText("-");
+                                    mCloudStorageProgressBar.setProgress(0);
+
+                                    mPinnedStorageUsage.setText("-");
+                                    mPinnedStorageProgressBar.setProgress(0);
+
+                                    mWaitToUploadDataUsage.setText("-");
+                                    mWaitToUploadDataUsageProgressBar.setProgress(0);
+
+                                    mNetworkXferUp.setText("-");
+                                    mNetworkXferDown.setText("-");
+                                    mXferProgressBar.setProgress(0);
+                                    mXferProgressBar.setSecondaryProgress(0);
                                 }
-                            });
-                        }
+                            }
+                        });
                         Thread.sleep(3000);
                     } catch (InterruptedException e) {
                         break;
@@ -182,19 +185,19 @@ public class DashboardFragment extends Fragment {
                     if (netInfo != null) {
                         if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connected");
-                            networkConnStatusImage.setImageResource(R.drawable.connect_96x96);
+                            networkConnStatusImage.setImageResource(R.drawable.icon_transmission_normal);
                             networkConnStatusText.setText(getString(R.string.dashboard_network_status_connected));
                         } else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connecting");
-                            networkConnStatusImage.setImageResource(R.drawable.connect_connecting_96x96);
+                            networkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
                             networkConnStatusText.setText(getString(R.string.dashboard_network_status_connecting));
                         } else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is disconnected");
-                            networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
+                            networkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
                             networkConnStatusText.setText(getString(R.string.dashboard_network_status_disconnected));
                         }
                     } else {
-                        networkConnStatusImage.setImageResource(R.drawable.connect_stop_96x96);
+                        networkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
                         networkConnStatusText.setText(getString(R.string.dashboard_network_status_disconnected));
                     }
                 }
@@ -224,17 +227,17 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (networkStatusReceiver != null) {
-            if (isCurrentVisible) {
+        if (mNetworkStatusReceiver != null) {
+            if (mIsCurrentVisible) {
                 IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-                networkStatusReceiver.registerReceiver(getActivity(), filter);
+                mNetworkStatusReceiver.registerReceiver(mContext, filter);
             }
         }
-        if (uiRefreshThread == null) {
-            if (uiRefreshRunnable != null) {
-                if (isCurrentVisible) {
-                    uiRefreshThread = new Thread(uiRefreshRunnable);
-                    uiRefreshThread.start();
+        if (mUiRefreshThread == null) {
+            if (mUiRefreshRunnable != null) {
+                if (mIsCurrentVisible) {
+                    mUiRefreshThread = new Thread(mUiRefreshRunnable);
+                    mUiRefreshThread.start();
                 }
             }
         }
@@ -242,12 +245,12 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public void onPause() {
-        if (networkStatusReceiver != null) {
-            networkStatusReceiver.unregisterReceiver(getActivity());
+        if (mNetworkStatusReceiver != null) {
+            mNetworkStatusReceiver.unregisterReceiver(mContext);
         }
-        if (uiRefreshThread != null && !uiRefreshThread.isInterrupted()) {
-            uiRefreshThread.interrupt();
-            uiRefreshThread = null;
+        if (mUiRefreshThread != null && !mUiRefreshThread.isInterrupted()) {
+            mUiRefreshThread.interrupt();
+            mUiRefreshThread = null;
         }
         super.onPause();
     }
@@ -261,25 +264,25 @@ public class DashboardFragment extends Fragment {
     public void setMenuVisibility(boolean menuVisible) {
         super.setMenuVisibility(menuVisible);
         if (menuVisible) {
-            isCurrentVisible = true;
-            if (networkStatusReceiver != null) {
+            mIsCurrentVisible = true;
+            if (mNetworkStatusReceiver != null) {
                 IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-                networkStatusReceiver.registerReceiver(getActivity(), filter);
+                mNetworkStatusReceiver.registerReceiver(mContext, filter);
             }
-            if (uiRefreshThread == null) {
-                if (uiRefreshRunnable != null) {
-                    uiRefreshThread = new Thread(uiRefreshRunnable);
-                    uiRefreshThread.start();
+            if (mUiRefreshThread == null) {
+                if (mUiRefreshRunnable != null) {
+                    mUiRefreshThread = new Thread(mUiRefreshRunnable);
+                    mUiRefreshThread.start();
                 }
             }
         } else {
-            isCurrentVisible = false;
-            if (networkStatusReceiver != null) {
-                networkStatusReceiver.unregisterReceiver(getActivity());
+            mIsCurrentVisible = false;
+            if (mNetworkStatusReceiver != null) {
+                mNetworkStatusReceiver.unregisterReceiver(mContext);
             }
-            if (uiRefreshThread != null && !uiRefreshThread.isInterrupted()) {
-                uiRefreshThread.interrupt();
-                uiRefreshThread = null;
+            if (mUiRefreshThread != null && !mUiRefreshThread.isInterrupted()) {
+                mUiRefreshThread.interrupt();
+                mUiRefreshThread = null;
             }
         }
     }

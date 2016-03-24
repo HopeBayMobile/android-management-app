@@ -24,7 +24,7 @@
                 android:id="@+id/network_conn_status_icon"
                 android:layout_width="@dimen/item_image_height_width"
                 android:layout_height="@dimen/item_image_height_width"
-                android:src="@drawable/connect_96x96" />
+                android:src="@drawable/icon_transmission_normal" />
 
             <TextView
                 android:id="@+id/network_conn_status"

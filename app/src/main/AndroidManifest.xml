@@ -16,7 +16,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_terafonn_logo"
+        android:icon="@drawable/icon_terafonn_logo_default"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 

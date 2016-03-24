@@ -15,9 +15,7 @@ import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 
-import android.Manifest.permission;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Environment;
@@ -83,15 +81,15 @@ public class DisplayType {
 			if (dataTypeArray[i].equals(context.getString(R.string.file_management_list_data_type_image))) {
 				dataTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
 				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
-				dataTypeInfo.setIconImage(R.drawable.ic_folder_photo);
+				dataTypeInfo.setIconImage(R.drawable.icon_folder_picture);
 			} else if (dataTypeArray[i].equals(context.getString(R.string.file_management_list_data_type_video))) {
 				dataTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
 				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
-				dataTypeInfo.setIconImage(R.drawable.ic_folder_video);
+				dataTypeInfo.setIconImage(R.drawable.icon_folder_video);
 			} else if (dataTypeArray[i].equals(context.getString(R.string.file_management_list_data_type_audio))) {
 				dataTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);
 				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
-				dataTypeInfo.setIconImage(R.drawable.ic_folder_music);
+				dataTypeInfo.setIconImage(R.drawable.icon_folder_music);
 			}
 
 			if (dataTypeInfo != null) {

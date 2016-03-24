@@ -401,11 +401,11 @@ public class HCFSMgmtUtils {
         Intent intent = new Intent(context, LoadingActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notify_id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_terafonn_logo);
+        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_terafonn_logo_default);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder = (NotificationCompat.Builder) builder
                 .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.ic_system_bar)
+                .setSmallIcon(R.drawable.icon_terafonn_logo_status_bar)
                 .setLargeIcon(largeIcon)
                 .setTicker(notify_title)
                 .setContentTitle(notify_title)
@@ -949,7 +949,7 @@ public class HCFSMgmtUtils {
         try {
             if (isPinned) {
                 if (status == LocationStatus.LOCAL) {
-                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinned);
+                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_pin);
                 } else if (status == LocationStatus.HYBRID || status == LocationStatus.CLOUD) {
                     pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
                 } else {
@@ -958,7 +958,7 @@ public class HCFSMgmtUtils {
             } else {
                 switch (status) {
                     case LocationStatus.LOCAL:
-                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_local);
+                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_unpin);
                         break;
                     case LocationStatus.HYBRID:
                         pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);

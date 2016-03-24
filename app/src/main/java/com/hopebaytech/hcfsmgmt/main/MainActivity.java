@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -26,11 +27,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -49,6 +52,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -57,10 +62,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final String CLASSNAME = getClass().getSimpleName();
     private final int NAV_MENU_SDCARD1_ID = (int) (Math.random() * Integer.MAX_VALUE);
     private SDCardBroadcastReceiver sdCardReceiver;
-    private Toolbar toolbar;
+    //    private Toolbar toolbar;
     private Handler mHandler;
     private NavigationView mNavigationView;
+    private ViewPager mViewPager;
+    private PagerAdapter mPagerAdapter;
     private String sdcard1_path;
+    private boolean isSDCard1;
     private boolean isExitApp = false;
 
     @Override
@@ -87,14 +95,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         filter.addDataScheme("file");
         registerReceiver(sdCardReceiver, filter);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setLogo(R.drawable.terafonn_logo);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setLogo(R.drawable.icon_terafonn_logo_l_login);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
-        drawer.setDrawerListener(toggle);
+//        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -236,8 +245,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 PendingIntent.FLAG_NO_CREATE) != null;
         if (!isPinDataTypeAlarmExist) {
             HCFSMgmtUtils.startPinDataTypeFileAlarm(this);
-        } else {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "PinDataTypeFileAlarm already exists");
         }
 
         /** Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist */
@@ -252,28 +259,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         /** Initialize ViewPager with PagerTabStrip */
-        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager());
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        PagerTabStrip pagerTabStrip = (PagerTabStrip) viewPager.findViewById(R.id.pager_tab_strip);
+        mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
+        mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
         pagerTabStrip.setTextColor(ContextCompat.getColor(this, R.color.colorWhite));
         pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.colorPagerTabStrip));
         pagerTabStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        viewPager.setAdapter(pagerAdapter);
+        mViewPager.setAdapter(mPagerAdapter);
 
     }
 
     public class PagerAdapter extends FragmentStatePagerAdapter {
 
         private String[] titleArray;
+        private SparseArray<Fragment> pageReference;
 
         public PagerAdapter(FragmentManager fm) {
             super(fm);
             titleArray = getResources().getStringArray(R.array.nav_title);
+            pageReference = new SparseArray<>();
         }
 
         @Override
         public Fragment getItem(int i) {
-            Fragment fragment = null;
+            Fragment fragment;
             String title = titleArray[i];
             if (title.equals(getString(R.string.nav_home))) {
                 fragment = DashboardFragment.newInstance();
@@ -286,7 +295,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 fragment = new Fragment();
             }
+            pageReference.put(i, fragment);
             return fragment;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            super.destroyItem(container, position, object);
+            pageReference.remove(position);
         }
 
         @Override
@@ -299,67 +315,64 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return titleArray[position];
         }
 
+        public Fragment getFragment(int position) {
+            return pageReference.get(position);
+        }
+
     }
 
     @Override
     public void onBackPressed() {
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        if (drawer.isDrawerOpen(GravityCompat.START)) {
-//            drawer.closeDrawer(GravityCompat.START);
-//        } else {
-////            FragmentManager fm = getFragmentManager();
-//            FragmentManager fm = getFragmentManager();
-//            HomepageFragment homepageFragment = (HomepageFragment) fm.findFragmentByTag(HomepageFragment.TAG);
-//            FileManagementFragment fileManagementFragment = (FileManagementFragment) fm.findFragmentByTag(FileManagementFragment.TAG);
-//            SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag(SettingsFragment.TAG);
-//            AboutFragment aboutFragment = (AboutFragment) fm.findFragmentByTag(AboutFragment.TAG);
-//            if (homepageFragment != null && homepageFragment.isVisible()) {
-//                if (isExitApp) {
-//                    finish();
-//                } else {
-//                    isExitApp = true;
-//                    String message = getString(R.string.home_page_snackbar_exit_app);
-//                    Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
-//                    Timer exitTimer = new Timer();
-//                    exitTimer.schedule(new TimerTask() {
-//                        @Override
-//                        public void run() {
-//                            isExitApp = false;
-//                        }
-//                    }, 2000);
-//                }
-//            } else if (fileManagementFragment != null && fileManagementFragment.isVisible()) {
-//                fileManagementFragment.onBackPressed();
-//            } else if (settingsFragment != null && settingsFragment.isVisible()) {
-//                settingsFragment.onBackPressed();
-//            } else if (aboutFragment != null && aboutFragment.isVisible()) {
-//                aboutFragment.onBackPressed();
-//            } else {
-//                super.onBackPressed();
-//            }
-//        }
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            int position = mViewPager.getCurrentItem();
+            Fragment fragment = mPagerAdapter.getFragment(position);
+            if (fragment instanceof FileManagementFragment) {
+                boolean isProcessed = ((FileManagementFragment) fragment).onBackPressed();
+                if (!isProcessed) {
+                    exitApp();
+                }
+            } else {
+                exitApp();
+            }
+        }
+    }
+
+    private void exitApp() {
+        if (isExitApp) {
+            finish();
+        } else {
+            isExitApp = true;
+            String message = getString(R.string.dashboard_snackbar_exit_app);
+            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+            Timer exitTimer = new Timer();
+            exitTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    isExitApp = false;
+                }
+            }, 2000);
+        }
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-//        int id = item.getItemId();
-//        FragmentManager fm = getFragmentManager();
-//        FragmentTransaction ft = fm.beginTransaction();
-//        if (id == R.id.nav_homepage) {
-//            ft.replace(R.id.fragment_container, HomepageFragment.newInstance(), HomepageFragment.TAG);
-//        } else if (id == R.id.nav_default_mountpoint) {
-//            boolean isSDCard1 = false;
-//            ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1), FileManagementFragment.TAG);
-//        } else if (id == R.id.nav_settings) {
-//            ft.replace(R.id.fragment_container, SettingsFragment.newInstance(), SettingsFragment.TAG);
-//        } else if (id == R.id.nav_about) {
-//            ft.replace(R.id.fragment_container, AboutFragment.newInstance(), AboutFragment.TAG);
-//        } else if (id == NAV_MENU_SDCARD1_ID) {
-//            boolean isSDCard1 = true;
-//            ft.replace(R.id.fragment_container, FileManagementFragment.newInstance(isSDCard1, sdcard1_path), FileManagementFragment.TAG);
-//        }
-//        ft.commit();
+        /** Handle navigation view item clicks here. */
+        int id = item.getItemId();
+        if (id == R.id.nav_dashboard) {
+            mViewPager.setCurrentItem(0, true);
+        } else if (id == R.id.nav_system) {
+            isSDCard1 = false;
+            mViewPager.setCurrentItem(1, true);
+        } else if (id == R.id.nav_settings) {
+            mViewPager.setCurrentItem(2, true);
+        } else if (id == R.id.nav_about) {
+            mViewPager.setCurrentItem(3, true);
+        } else if (id == NAV_MENU_SDCARD1_ID) {
+            isSDCard1 = true;
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
