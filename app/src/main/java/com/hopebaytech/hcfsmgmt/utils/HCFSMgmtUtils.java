@@ -57,7 +57,7 @@ public class HCFSMgmtUtils {
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
     public static  final String MANAGEMENT_SERVER_AUTH_URL = "https://terafonnreg.hopebaytech.com/api/register/auth";
 
-    public static final boolean ENABLE_AUTH = false;
+    public static final boolean ENABLE_AUTH = true;
     public static final boolean DEFAULT_PINNED_STATUS = false;
     public static final int LOGLEVEL = Log.DEBUG;
 
