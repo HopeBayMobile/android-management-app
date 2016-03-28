@@ -23,7 +23,7 @@
             android:layout_width="@dimen/item_image_height_width"
             android:layout_height="@dimen/item_image_height_width"
             android:paddingEnd="@dimen/item_image_horizontal_padding"
-            android:src="@android:drawable/sym_def_app_icon" />
+            android:src="@drawable/icon_doc_default_gray" />
 
         <LinearLayout
             android:layout_width="match_parent"

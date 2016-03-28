@@ -16,9 +16,11 @@
             android:id="@+id/pager_tab_strip"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
+            android:background="@color/colorPagerTabStrip"
             android:paddingBottom="10dp"
-            android:background="@color/colorPagerTabStrip" />
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            android:paddingTop="10dp" />
     </android.support.v4.view.ViewPager>
 
 </RelativeLayout>

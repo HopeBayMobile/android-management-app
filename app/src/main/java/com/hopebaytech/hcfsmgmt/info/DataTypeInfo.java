@@ -115,6 +115,7 @@ public class DataTypeInfo extends ItemInfo {
 	
 	public Drawable getPinUnpinImage() {
 		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), LocationStatus.LOCAL);
+//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
 	}
 
 	@Override

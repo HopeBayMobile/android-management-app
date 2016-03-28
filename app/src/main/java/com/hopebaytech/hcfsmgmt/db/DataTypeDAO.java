@@ -34,24 +34,17 @@ public class DataTypeDAO {
 	public static final String DATA_TYPE_VIDEO = "video";
 	public static final String DATA_TYPE_AUDIO = "audio";
     
-//    private SQLiteDatabase db;
     private Context context;
     
     public DataTypeDAO(Context context) {
     	this.context = context;
-//    	openDbIfClosed();
     }
     
     public void close() {
     	getDataBase().close();
     }
     
-//    public void openDbIfClosed() {
-//    	db = HCFSDBHelper.getDataBase(context);
-//    }
-    
     public long insert(DataTypeInfo dataTypeInfo) {
-//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(TYPE_COLUMN, dataTypeInfo.getDataType());
     	contentValues.put(PIN_STATUS_COLUMN, dataTypeInfo.isPinned());
@@ -61,7 +54,6 @@ public class DataTypeDAO {
     }
     
     public boolean update(DataTypeInfo dataTypeInfo) {
-//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(PIN_STATUS_COLUMN, dataTypeInfo.isPinned());
     	contentValues.put(DATE_UPDATED_COLUMN, dataTypeInfo.getDateUpdated());
@@ -72,7 +64,6 @@ public class DataTypeDAO {
     }
     
     public boolean update(String dataType, DataTypeInfo dataTypeInfo, String column) {
-//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	if (column.equals(TYPE_COLUMN)) {
     		contentValues.put(column, dataTypeInfo.getDataType());
@@ -94,7 +85,6 @@ public class DataTypeDAO {
     }
     
     public boolean updateDateUpdated(String dataType, long dateUpdated) {
-//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(DATE_UPDATED_COLUMN, dateUpdated);
     	
@@ -103,13 +93,11 @@ public class DataTypeDAO {
     }
     
     public boolean delete(long id) {
-//    	openDbIfClosed();
     	String where = KEY_ID + "=" + id;
     	return getDataBase().delete(TABLE_NAME, where, null) > 0;
     }
     
     public List<DataTypeInfo> getAll() {
-//    	openDbIfClosed();
     	List<DataTypeInfo> result = new ArrayList<DataTypeInfo>();
     	Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
     	while (cursor.moveToNext()) {
@@ -120,7 +108,6 @@ public class DataTypeDAO {
     }
     
     public DataTypeInfo get(String dataType) {
-//    	openDbIfClosed();
     	DataTypeInfo dataTypeInfo = null;
     	String where = TYPE_COLUMN + "='" + dataType + "'";
     	Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
@@ -132,7 +119,6 @@ public class DataTypeDAO {
     }
     
     public DataTypeInfo getRecord(Cursor cursor) {
-//    	openDbIfClosed();
     	DataTypeInfo result = new DataTypeInfo(context);
     	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 0 ? false : true);
     	result.setDataType(cursor.getString(cursor.getColumnIndex(TYPE_COLUMN)));
@@ -142,7 +128,6 @@ public class DataTypeDAO {
     }
     
     public int getCount() {
-//    	openDbIfClosed();
     	Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     	return cursor.getCount();
     }

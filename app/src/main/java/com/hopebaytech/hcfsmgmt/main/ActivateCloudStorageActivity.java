@@ -60,7 +60,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class ActivateCloudStorageActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private final String CLASSNAME = this.getClass().getSimpleName();
-    private final String LOGIN_URL = "https://terafonnreg.hopebaytech.com:8443/api/register/login/";
+    private final String LOGIN_URL = "https://terafonnreg.hopebaytech.com/api/register/login/";
     private final String AUTH_TYPE_GOOGLE = "auth_type_google";
     private final String AUTH_TYPE_NORMAL = "auth_type_normal";
     private GoogleApiClient mGoogleApiClient;
@@ -119,7 +119,11 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                                 public void run() {
 //                                                    String failureMessage = getString(R.string.activate_cloud_storage_failed_to_activate);
                                                     String failureMessage = authResultInfo.getMessage();
-                                                    Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_SHORT).show();
+//                                                    Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_SHORT).show();
+                                                    showAlertDialog(ActivateCloudStorageActivity.this,
+                                                            getString(R.string.activate_cloud_alert_dialog_title),
+                                                            failureMessage,
+                                                            getString(R.string.alert_dialog_confirm));
                                                 }
                                             });
                                             resetHCFSConfig();
@@ -311,7 +315,11 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         @Override
                                         public void run() {
                                             String failureMessage = authResultInfo.getMessage();
-                                            Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
+//                                            Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
+                                            showAlertDialog(ActivateCloudStorageActivity.this,
+                                                    getString(R.string.activate_cloud_alert_dialog_title),
+                                                    failureMessage,
+                                                    getString(R.string.alert_dialog_confirm));
                                         }
                                     });
                                     resetHCFSConfig();
@@ -454,14 +462,22 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
             outputStream.close();
 
             int responseCode = conn.getResponseCode();
-            InputStream inputStream = conn.getInputStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            String line;
+            InputStream inputStream = null;
             StringBuilder sb = new StringBuilder();
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
+            try {
+                inputStream = conn.getInputStream();
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    sb.append(line);
+                }
+            } catch (Exception e) {
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtServer", Log.getStackTraceString(e));
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
             }
-            inputStream.close();
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtServer", "responseCode=" + responseCode + ", responseContent=" + sb.toString());
 
             authResultInfo.setResponseCode(responseCode);

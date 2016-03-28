@@ -4,7 +4,8 @@
     <item android:id="@android:id/background">
         <shape>
             <corners android:radius="5dip" />
-            <solid android:color="@color/colorHomePageStorageProgressBarBackgound" />
+
+            <solid android:color="@color/colorHomePageStorageProgressBarBackground" />
         </shape>
     </item>
     <item android:id="@android:id/secondaryProgress">

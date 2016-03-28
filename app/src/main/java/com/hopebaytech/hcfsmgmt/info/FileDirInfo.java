@@ -99,18 +99,18 @@ public class FileDirInfo extends ItemInfo {
 						return ((BitmapDrawable) drawable).getBitmap();
 						// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
 					}
-					Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+					Drawable drawable = ContextCompat.getDrawable(context, R.drawable.icon_doc_default);
 					return ((BitmapDrawable) drawable).getBitmap();
 					// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 				} catch (Exception e) {
 					/** Incorrect file type */
-					Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+					Drawable drawable = ContextCompat.getDrawable(context, R.drawable.icon_doc_default);
 					return ((BitmapDrawable) drawable).getBitmap();
 					// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 				}
 			} else {
 				/** Unknown file type */
-				Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_file_black);
+				Drawable drawable = ContextCompat.getDrawable(context, R.drawable.icon_doc_default);
 				return ((BitmapDrawable) drawable).getBitmap();
 				// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
 			}
@@ -197,7 +197,7 @@ public class FileDirInfo extends ItemInfo {
 	}
 
 	public int getFileDirStatus() {
-		int status = 0;
+		int status;
 		if (currentFile.isDirectory()) {
 			status = HCFSMgmtUtils.getDirStatus(getFilePath());
 		} else {
@@ -209,6 +209,7 @@ public class FileDirInfo extends ItemInfo {
 	@Override
 	public Drawable getPinUnpinImage() {
 		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getFileDirStatus());
+//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
 	}
 
 	@Override

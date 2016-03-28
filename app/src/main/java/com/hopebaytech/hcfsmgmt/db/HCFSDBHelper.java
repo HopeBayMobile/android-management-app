@@ -22,7 +22,6 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-//		db.execSQL(AppDAO.CREATE_TABLE); TODO
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", "");
         db.execSQL(DataTypeDAO.CREATE_TABLE);
         db.execSQL(ServiceFileDirDAO.CREATE_TABLE);
@@ -31,8 +30,7 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//		db.execSQL("DROP TABLE IF EXISTS " + AppDAO.TABLE_NAME);
-//		onCreate(db);
+
     }
 
     public static SQLiteDatabase getDataBase(Context context) {

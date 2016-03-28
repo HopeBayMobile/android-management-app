@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         registerReceiver(sdCardReceiver, filter);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setLogo(R.drawable.icon_terafonn_logo_l_login);
+        toolbar.setLogo(R.drawable.icon_terafonn_logo_m_tab);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
 

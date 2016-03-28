@@ -8,7 +8,7 @@
     <color name="colorActionBarNavMenu">#656565</color>
     
     <color name="colorHomePageMountPointText">#333333</color>
-    <color name="colorHomePageStorageProgressBarBackgound">#F4F4F4</color>
+    <color name="colorHomePageStorageProgressBarBackground">#F4F4F4</color>
     <color name="colorHomePageStorageProgressBar">#BDBF62</color>
     <color name="colorHomePageXferProgressBarPrimary">#8CC63F</color>
     <color name="colorHomePageXferProgressBarSecondary">#0071BC</color>

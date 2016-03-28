@@ -30,30 +30,24 @@ public class UidDAO {
                     UID_COLUMN + " TEXT NOT NULL, " +
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL)";
 
-    private SQLiteDatabase db;
+//    private SQLiteDatabase db;
     private Context context;
 
     public UidDAO(Context context) {
         this.context = context;
-        openDbIfClosed();
-    }
-
-    public void openDbIfClosed() {
-        db = Uid2PkgDBHelper.getDataBase(context);
     }
 
     public void close() {
-        db.close();
+        getDataBase().close();
     }
 
     public boolean insert(UidInfo uidInfo) {
-        openDbIfClosed();
         ContentValues contentValues = new ContentValues();
         contentValues.put(PIN_STATUS_COLUMN, uidInfo.isPinned() ? 1 : 0);
         contentValues.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
         contentValues.put(UID_COLUMN, uidInfo.getUid());
         contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
-        boolean isInserted = db.insert(TABLE_NAME, null, contentValues) > -1;
+        boolean isInserted = getDataBase().insert(TABLE_NAME, null, contentValues) > -1;
         String logMsg = "isPinned=" + uidInfo.isPinned() + ", isSystemApp=" + uidInfo.isSystemApp() + ", uid=" + uidInfo.getUid() + ", packageName=" + uidInfo.getPackageName();
         if (isInserted) {
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "insert", logMsg);
@@ -71,7 +65,6 @@ public class UidDAO {
             HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "update", "msg=package name cannot be null");
             return false;
         } else {
-            openDbIfClosed();
             ContentValues contentValues = new ContentValues();
             if (column.equals(PIN_STATUS_COLUMN)) {
                 contentValues.put(PIN_STATUS_COLUMN, uidInfo.isPinned() ? 1 : 0);
@@ -83,7 +76,7 @@ public class UidDAO {
                 contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
             }
             String where = PACKAGE_NAME_COLUMN + "='" + uidInfo.getPackageName() + "'";
-            boolean isSuccess = db.update(TABLE_NAME, contentValues, where, null) > 0;
+            boolean isSuccess = getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
             if (!isSuccess) {
                 HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
             }
@@ -92,9 +85,8 @@ public class UidDAO {
     }
 
     public boolean delete(String packageName) {
-        openDbIfClosed();
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
-        boolean isDeleted = db.delete(TABLE_NAME, where, null) > 0;
+        boolean isDeleted = getDataBase().delete(TABLE_NAME, where, null) > 0;
         if (isDeleted) {
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "delete", "packageName=" + packageName);
         } else {
@@ -104,14 +96,12 @@ public class UidDAO {
     }
 
     public boolean deleteAll() {
-        openDbIfClosed();
-        return db.delete(TABLE_NAME, null, null) > 0;
+        return getDataBase().delete(TABLE_NAME, null, null) > 0;
     }
 
     public List<UidInfo> getAll() {
-        openDbIfClosed();
         List<UidInfo> result = new ArrayList<UidInfo>();
-        Cursor cursor = db.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             result.add(getRecord(cursor));
         }
@@ -121,10 +111,9 @@ public class UidDAO {
 
     @Nullable
     public UidInfo get(String packageName) {
-        openDbIfClosed();
         UidInfo uidInfo = null;
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
-        Cursor cursor = db.query(TABLE_NAME, null, where, null, null, null, null, null);
+        Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             uidInfo = getRecord(cursor);
         }
@@ -133,7 +122,6 @@ public class UidDAO {
     }
 
     public UidInfo getRecord(Cursor cursor) {
-        openDbIfClosed();
         UidInfo result = new UidInfo();
         result.setIsPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 1);
         result.setIsSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
@@ -143,9 +131,14 @@ public class UidDAO {
     }
 
     public long getCount() {
-        openDbIfClosed();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME, null);
-        return cursor.getCount();
+        Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
+    }
+
+    private SQLiteDatabase getDataBase() {
+        return Uid2PkgDBHelper.getDataBase(context);
     }
 
 }

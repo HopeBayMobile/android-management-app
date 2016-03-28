@@ -28,24 +28,17 @@ public class ServiceFileDirDAO {
     		FILE_PATH_COLUMN + " TEXT NOT NULL, " +
     		PIN_STATUS_COLUMN + " INTEGER NOT NULL)";
     
-//    private SQLiteDatabase db;
     private Context context;
     
     public ServiceFileDirDAO(Context context) {
     	this.context = context;
-//    	db = HCFSDBHelper.getDataBase(context);
     }
     
     public void close() {
         getDataBase().close();
     }
     
-//    public void openDbIfClosed() {
-//    	db = HCFSDBHelper.getDataBase(context);
-//    }
-    
     public long insert(ServiceFileDirInfo info) {
-//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(FILE_PATH_COLUMN, info.getFilePath());
     	contentValues.put(PIN_STATUS_COLUMN, info.isPinned());
@@ -53,13 +46,11 @@ public class ServiceFileDirDAO {
     }
     
     public boolean delete(String filePath) {
-//    	openDbIfClosed();
     	String where = FILE_PATH_COLUMN + "='" + filePath + "'";
     	return getDataBase().delete(TABLE_NAME, where, null) > 0;
     }
     
     public List<ServiceFileDirInfo> getAll() {
-//    	openDbIfClosed();
     	List<ServiceFileDirInfo> result = new ArrayList<ServiceFileDirInfo>();
     	Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
     	while (cursor.moveToNext()) {
@@ -70,7 +61,6 @@ public class ServiceFileDirDAO {
     }
     
     public ServiceFileDirInfo get(String filePath) {
-//    	openDbIfClosed();
     	ServiceFileDirInfo fileDirInfo = null;
     	String where = FILE_PATH_COLUMN + "='" + filePath + "'";
     	Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
@@ -82,7 +72,6 @@ public class ServiceFileDirDAO {
     }
     
     public ServiceFileDirInfo getRecord(Cursor cursor) {
-//    	openDbIfClosed();
     	ServiceFileDirInfo result = new ServiceFileDirInfo();
     	result.setFilePath(cursor.getString(cursor.getColumnIndex(FILE_PATH_COLUMN)));
     	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
@@ -90,7 +79,6 @@ public class ServiceFileDirDAO {
     }
     
     public long getCount() {
-//    	openDbIfClosed();
     	Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     	return cursor.getCount();
     }

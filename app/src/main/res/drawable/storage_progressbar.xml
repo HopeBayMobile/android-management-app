@@ -5,7 +5,7 @@
         <shape>
             <corners android:radius="5dip" />
 
-            <solid android:color="@color/colorHomePageStorageProgressBarBackgound" />
+            <solid android:color="@color/colorHomePageStorageProgressBarBackground" />
         </shape>
     </item>
     <item android:id="@android:id/secondaryProgress">
@@ -13,7 +13,7 @@
             <shape>
                 <corners android:radius="5dip" />
 
-                <solid android:color="@color/colorHomePageStorageProgressBar" />
+                <solid android:color="@color/colorAccent" />
             </shape>
         </clip>
     </item>
@@ -22,7 +22,7 @@
             <shape>
                 <corners android:radius="5dip" />
 
-                <solid android:color="@color/colorHomePageStorageProgressBar" />
+                <solid android:color="@color/colorAccent" />
             </shape>
         </clip>
     </item>

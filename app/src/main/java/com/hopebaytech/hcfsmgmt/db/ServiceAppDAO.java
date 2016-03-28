@@ -36,24 +36,17 @@ public class ServiceAppDAO {
     		SOURCE_DIR_COLUMN + " TEXT NOT NULL, " +
     		EXTERNAL_DIR_COLUMN + " TEXT)";
     
-//    private SQLiteDatabase db;
     private Context context;
     
     public ServiceAppDAO(Context context) {
     	this.context = context;
-//    	openDbIfClosed();
     }
-    
-//    public void openDbIfClosed() {
-//    	db = HCFSDBHelper.getDataBase(context);
-//    }
     
     public void close() {
 		getDataBase().close();
     }
     
     public long insert(ServiceAppInfo appInfo) {
-//    	openDbIfClosed();
     	ContentValues contentValues = new ContentValues();
     	contentValues.put(APP_NAME_COLUMN, appInfo.getAppName());
     	contentValues.put(PACKAGE_NAME_COLUMN, appInfo.getPackageName());
@@ -67,13 +60,11 @@ public class ServiceAppDAO {
     }
     
     public boolean delete(ServiceAppInfo appInfo) {
-//    	openDbIfClosed();
     	String where = APP_NAME_COLUMN + "='" + appInfo.getAppName() + "'";
     	return getDataBase().delete(TABLE_NAME, where, null) > 0;
     }
     
     public List<ServiceAppInfo> getAll() {
-//    	openDbIfClosed();
     	List<ServiceAppInfo> result = new ArrayList<>();
     	Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
     	while (cursor.moveToNext()) {
@@ -84,7 +75,6 @@ public class ServiceAppDAO {
     }
     
     public ServiceAppInfo get(String appName) {
-//    	openDbIfClosed();
     	ServiceAppInfo appInfo = null;
     	String where = DATA_DIR_COLUMN + "='" + appName + "'";
     	Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
@@ -96,7 +86,6 @@ public class ServiceAppDAO {
     }
     
     public ServiceAppInfo getRecord(Cursor cursor) {
-//    	openDbIfClosed();
     	ServiceAppInfo result = new ServiceAppInfo();
     	result.setAppName(cursor.getString(cursor.getColumnIndex(APP_NAME_COLUMN)));
     	result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
@@ -111,7 +100,6 @@ public class ServiceAppDAO {
     }
     
     public long getCount() {
-//    	openDbIfClosed();
     	Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
     	return cursor.getCount();
     }

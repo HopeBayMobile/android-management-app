@@ -76,7 +76,7 @@ public class DashboardFragment extends Fragment {
         mCloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
         mCloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
         TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
-        cloudStorageTitle.setText(getString(R.string.dashboard_used_space));
+        cloudStorageTitle.setText(mContext.getString(R.string.dashboard_used_space));
         ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.iconView);
         cloudStorageImageView.setImageResource(R.drawable.icon_system_used_space);
 
@@ -85,7 +85,7 @@ public class DashboardFragment extends Fragment {
         mPinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
         mPinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
-        pinnedStorageTitle.setText(getString(R.string.dashboard_pinned_storage));
+        pinnedStorageTitle.setText(mContext.getString(R.string.dashboard_pinned_storage));
         ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.iconView);
         pinnedStorageImageView.setImageResource(R.drawable.icon_system_pinned_space);
 
@@ -94,7 +94,7 @@ public class DashboardFragment extends Fragment {
         mWaitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
         mWaitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
-        waitToUploadDataTitle.setText(getString(R.string.dashboard_data_to_be_uploaded));
+        waitToUploadDataTitle.setText(mContext.getString(R.string.dashboard_data_to_be_uploaded));
         ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.iconView);
         waitToUploadDataUsageImageView.setImageResource(R.drawable.icon_system_upload_data);
 
@@ -104,7 +104,7 @@ public class DashboardFragment extends Fragment {
         mXferProgressBar = (ProgressBar) data_transmission_today.findViewById(R.id.progressBar);
         mXferProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.xfer_progressbar));
         TextView network_xfer_today_title = (TextView) data_transmission_today.findViewById(R.id.textViewTitle);
-        network_xfer_today_title.setText(getString(R.string.dashboard_data_transmission_today));
+        network_xfer_today_title.setText(mContext.getString(R.string.dashboard_data_transmission_today));
         ImageView networkXferImageView = (ImageView) data_transmission_today.findViewById(R.id.iconView);
         networkXferImageView.setImageResource(R.drawable.icon_system_transmitting);
 
@@ -186,19 +186,19 @@ public class DashboardFragment extends Fragment {
                         if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connected");
                             networkConnStatusImage.setImageResource(R.drawable.icon_transmission_normal);
-                            networkConnStatusText.setText(getString(R.string.dashboard_network_status_connected));
+                            networkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_connected));
                         } else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connecting");
                             networkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
-                            networkConnStatusText.setText(getString(R.string.dashboard_network_status_connecting));
+                            networkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_connecting));
                         } else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is disconnected");
                             networkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
-                            networkConnStatusText.setText(getString(R.string.dashboard_network_status_disconnected));
+                            networkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_disconnected));
                         }
                     } else {
                         networkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
-                        networkConnStatusText.setText(getString(R.string.dashboard_network_status_disconnected));
+                        networkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_disconnected));
                     }
                 }
             }

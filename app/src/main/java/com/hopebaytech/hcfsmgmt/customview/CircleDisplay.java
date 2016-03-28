@@ -142,7 +142,7 @@ public class CircleDisplay extends View implements OnGestureListener {
 		mPercentTextPaint.setColor(ContextCompat.getColor(getContext(), R.color.colorFileManagementCircleText));
 		mPercentTextPaint.setTextSize(Utils.convertDpToPixel(getResources(), 16f));
 
-		mDrawAnimator = ObjectAnimator.ofFloat(this, "phase", 0f, 1.0f).setDuration(3000);
+		mDrawAnimator = ObjectAnimator.ofFloat(this, "phase", 0f, 1.0f).setDuration(1000);
 		mDrawAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
 
 		mGestureDetector = new GestureDetector(getContext(), this);

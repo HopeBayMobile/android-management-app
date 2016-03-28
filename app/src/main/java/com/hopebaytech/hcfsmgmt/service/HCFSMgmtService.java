@@ -229,10 +229,12 @@ public class HCFSMgmtService extends Service {
                             long rawCacheDirtyUsed = statInfo.getRawCacheDirtyUsed();
                             long rawPinTotal = statInfo.getRawPinTotal();
                             long rawCacheTotal = statInfo.getRawCacheTotal();
-                            double max = Math.max(rawCacheDirtyUsed, rawPinTotal);
+//                            double max = Math.max(rawCacheDirtyUsed, rawPinTotal);
+                            double max = rawPinTotal;
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED, false);
-                            double pinPlusUnpinButDirty = max / rawCacheTotal;
+                            double pinPlusUnpinButDirty = (max / rawCacheTotal) * 100;
+                            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onStartCommand", "pinPlusUnpinButDirty=" + pinPlusUnpinButDirty);
                             if (pinPlusUnpinButDirty >= Double.valueOf(storage_used_ratio)) {
                                 if (!isNotified) {
                                     int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;

@@ -16,6 +16,7 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.info.DrawableInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
@@ -56,7 +57,7 @@ public class HCFSMgmtUtils {
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
     public static  final String MANAGEMENT_SERVER_AUTH_URL = "https://terafonnreg.hopebaytech.com/api/register/auth";
 
-    public static final boolean ENABLE_AUTH = true;
+    public static final boolean ENABLE_AUTH = false;
     public static final boolean DEFAULT_PINNED_STATUS = false;
     public static final int LOGLEVEL = Log.DEBUG;
 
@@ -405,25 +406,28 @@ public class HCFSMgmtUtils {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder = (NotificationCompat.Builder) builder
                 .setWhen(System.currentTimeMillis())
-                .setSmallIcon(R.drawable.icon_terafonn_logo_status_bar)
+//                .setSmallIcon(R.drawable.icon_terafonn_logo_status_bar) TODO
+                .setSmallIcon(R.drawable.test_02)
                 .setLargeIcon(largeIcon)
                 .setTicker(notify_title)
                 .setContentTitle(notify_title)
                 .setContentText(notify_message)
-                .setStyle(bigStyle)
-                .setContentIntent(contentIntent);
+                .setStyle(bigStyle);
+//                .setContentIntent(contentIntent);
         if (onGoing) {
             builder = (NotificationCompat.Builder) builder
                     .setAutoCancel(false)
                     .setOngoing(true)
-                    .setPriority(Notification.PRIORITY_MAX);
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setContentIntent(contentIntent);
         } else {
             int defaults = 0;
             defaults |= NotificationCompat.DEFAULT_VIBRATE;
             builder = (NotificationCompat.Builder) builder
                     .setAutoCancel(true)
                     .setOngoing(false)
-                    .setDefaults(defaults);
+                    .setDefaults(defaults)
+                    .setFullScreenIntent(contentIntent, true);
         }
         Notification notification = builder.build();
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
@@ -481,8 +485,7 @@ public class HCFSMgmtUtils {
                 log(Log.INFO, CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
 
                 hcfsStatInfo = new HCFSStatInfo();
-                // hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_TOTAL)); TODO API server is not ready
-                hcfsStatInfo.setCloudTotal(1099511627776L);
+                hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
                 hcfsStatInfo.setVolUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_VOL_USED));
                 hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
@@ -741,23 +744,6 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static boolean reboot() {
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.reboot();
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                log(Log.INFO, CLASSNAME, "reboot", "jsonResult=" + jsonResult);
-            } else {
-                log(Log.ERROR, CLASSNAME, "reboot", "jsonResult=" + jsonResult);
-            }
-        } catch (JSONException e) {
-            log(Log.ERROR, CLASSNAME, "reboot", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
-
     public static boolean reloadConfig() {
         boolean isSuccess = false;
         try {
@@ -889,8 +875,7 @@ public class HCFSMgmtUtils {
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long triggerAtMillis = SystemClock.elapsedRealtime();
-//        long intervalMillis = INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO;
-        long intervalMillis = 60 * 1000;
+        long intervalMillis = INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO;
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
     }
 
@@ -970,6 +955,20 @@ public class HCFSMgmtUtils {
                         // TODO default image
                         break;
                 }
+            }
+        } catch (Exception e) {
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getPinUnpinImage", Log.getStackTraceString(e));
+        }
+        return pinDrawable;
+    }
+
+    public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
+        Drawable pinDrawable = null;
+        try {
+            if (isPinned) {
+                pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_pin);
+            } else {
+                pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_unpin);
             }
         } catch (Exception e) {
             HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getPinUnpinImage", Log.getStackTraceString(e));

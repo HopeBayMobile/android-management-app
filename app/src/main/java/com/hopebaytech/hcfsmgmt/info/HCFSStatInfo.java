@@ -5,7 +5,7 @@ import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 public class HCFSStatInfo {
 
 	public static final String STAT_DATA = "data";
-	public static final String STAT_DATA_CLOUD_TOTAL = "cloud_total";
+	public static final String STAT_DATA_QUOTA = "quota";
 	public static final String STAT_DATA_CLOUD_USED = "cloud_used";
 	public static final String STAT_DATA_VOL_USED = "vol_used";
 	public static final String STAT_DATA_CACHE_TOTAL = "cache_total";

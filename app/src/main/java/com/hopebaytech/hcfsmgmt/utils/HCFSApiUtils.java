@@ -16,7 +16,6 @@ public class HCFSApiUtils {
 	public static native String setHCFSConfig(String key, String value);
 	public static native String getHCFSStat();
 	public static native String unpin(String unpinPath);
-	public static native String reboot();
 	public static native String reloadConfig();
 	public static native String resetXfer();
 	public static native String setHCFSSyncStatus(int enabled);
