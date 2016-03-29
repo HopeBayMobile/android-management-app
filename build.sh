@@ -54,7 +54,7 @@ function build_system() {
 function copy_lib_to_source_tree() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
 	rsync -arcv --no-owner --no-group --no-times --no-perms \
-		$UPSTREAM_LIB_DIR/acer-s58a-hcfs/system/lib64/{libHCFS_api.so,libjansson.so} app/src/main/jni/mylibs/arm64-v8a/
+		$LIB_DIR/acer-s58a-hcfs/system/lib64/{libHCFS_api.so,libjansson.so} app/src/main/jni/mylibs/arm64-v8a/
 }
 function publish_apk() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
@@ -89,7 +89,7 @@ set -e -o errtrace -o functrace
 echo ========================================
 echo Jenkins pass-through variables:
 echo PUBLISH_DIR: ${PUBLISH_DIR}
-echo UPSTREAM_LIB_DIR: ${UPSTREAM_LIB_DIR}
+echo LIB_DIR: ${LIB_DIR}
 echo JOB_NAME: ${JOB_NAME}
 echo ========================================
 echo "Environment variables (with defaults):"
@@ -101,8 +101,8 @@ DOCKER_IMAGE=docker:5000/android-app-buildbox
 JOB_NAME=${JOB_NAME:-HCFS-android-apk}
 
 ### Upstream hcfs lib
-# UPSTREAM_LIB_DIR=${UPSTREAM_LIB_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/feature/terafonn_1.0.0025/2.0.4.0305/HCFS-android-binary}
-eval '[ -n "$UPSTREAM_LIB_DIR" ]' || { echo Assign these for local build; exit 1; }
+# LIB_DIR=${LIB_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/feature/terafonn_1.0.0025/2.0.4.0305/HCFS-android-binary}
+eval '[ -n "$LIB_DIR" ]' || { echo Assign these for local build; exit 1; }
 
 ### Publish dir
 # PUBLISH_DIR=${PUBLISH_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/android-dev/2.0.4.ci.test}
