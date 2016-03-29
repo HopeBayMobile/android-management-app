@@ -47,7 +47,7 @@ function build_system() {
 	docker pull $DOCKER_IMAGE
     echo sdk.dir=/opt/android-sdk-linux > local.properties
     echo ndk.dir=/opt/android-ndk-r10e >> local.properties
-    docker run --rm --volume=$(pwd):/opt/workspace \
+    docker run --rm --volume=$(pwd):/opt/workspace --volume=$(pwd)/.root.gradle:/root/.gradle \
         -e KEYSTORE_PASSWORD -e KEY_ALIAS -e KEY_PASSWORD \
         $DOCKER_IMAGE /bin/sh -c "./gradlew assembleRelease"
 }
@@ -108,7 +108,6 @@ eval '[ -n "$LIB_DIR" ]' || { echo Assign these for local build; exit 1; }
 # PUBLISH_DIR=${PUBLISH_DIR:-/mnt/nas/CloudDataSolution/TeraFonn_CI_build/android-dev/2.0.4.ci.test}
 eval '[ -n "$PUBLISH_DIR" ]' || { echo Assign these for local build; exit 1; }
 
-git clean -dXf -e \!.gradle
 mount_nas
 copy_lib_to_source_tree
 build_system
