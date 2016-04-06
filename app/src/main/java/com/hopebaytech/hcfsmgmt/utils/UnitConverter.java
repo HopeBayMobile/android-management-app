@@ -4,6 +4,17 @@ import java.util.Locale;
 
 public class UnitConverter {
 
+	public static String formatPercentage(float number) {
+		String formatValue;
+		number = Float.parseFloat(String.format(Locale.getDefault(), "%.1f", number));
+		if ((long) number == number) {
+			formatValue = String.format(Locale.getDefault(), "%d", (long) number);
+		} else {
+			formatValue = String.format(Locale.getDefault(), "%.1f", number);
+		}
+		return formatValue;
+	}
+
 	public static String convertByteToProperUnit(long amount) {
 		float result = amount;
 		String[] unit = new String[] { "Byte", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
@@ -31,12 +42,12 @@ public class UnitConverter {
 			if ((long) number > 1) {
 				mUnit = "Bytes";
 			}
-		} 
-		if ((long) number == number) {
-			return String.format(Locale.getDefault(), "%d " + mUnit, (long) number);
-		} else {
-			return String.format(Locale.getDefault(), "%.1f " + mUnit, number);
 		}
+        if ((long) number == number) {
+            return String.format(Locale.getDefault(), "%d " + mUnit, (long) number);
+        } else {
+            return String.format(Locale.getDefault(), "%.1f " + mUnit, number);
+        }
 	}
 	// public static String convertByteToProperUnit(long amount) {
 	// float result = amount;

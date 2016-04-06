@@ -33,7 +33,7 @@ public class ServiceAppDAO {
     		PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
     		PIN_STATUS_COLUMN + " INTEGER NOT NULL, " + 
     		DATA_DIR_COLUMN + " TEXT NOT NULL, " +
-    		SOURCE_DIR_COLUMN + " TEXT NOT NULL, " +
+    		SOURCE_DIR_COLUMN + " TEXT, " +
     		EXTERNAL_DIR_COLUMN + " TEXT)";
     
     private Context context;
@@ -52,7 +52,9 @@ public class ServiceAppDAO {
     	contentValues.put(PACKAGE_NAME_COLUMN, appInfo.getPackageName());
     	contentValues.put(PIN_STATUS_COLUMN, appInfo.isPinned());
     	contentValues.put(DATA_DIR_COLUMN, appInfo.getDataDir());
-    	contentValues.put(SOURCE_DIR_COLUMN, appInfo.getSourceDir());
+		if (appInfo.getSourceDir() != null) {
+			contentValues.put(SOURCE_DIR_COLUMN, appInfo.getSourceDir());
+		}
     	if (appInfo.getExternalDir() != null) {
     		contentValues.put(EXTERNAL_DIR_COLUMN, appInfo.getExternalDir());
     	}

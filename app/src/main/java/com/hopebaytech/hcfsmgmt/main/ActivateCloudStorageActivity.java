@@ -2,15 +2,12 @@ package com.hopebaytech.hcfsmgmt.main;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -20,7 +17,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +30,7 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
@@ -44,6 +41,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -117,9 +115,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {
-//                                                    String failureMessage = getString(R.string.activate_cloud_storage_failed_to_activate);
                                                     String failureMessage = authResultInfo.getMessage();
-//                                                    Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_SHORT).show();
                                                     showAlertDialog(ActivateCloudStorageActivity.this,
                                                             getString(R.string.activate_cloud_alert_dialog_title),
                                                             failureMessage,
@@ -149,15 +145,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                             }
                                         });
 
-//                                        runOnUiThread(new Runnable() {
-//                                            @Override
-//                                            public void run() {
-//                                                showAlertDialog(ActivateCloudStorageActivity.this,
-//                                                        getString(R.string.activate_cloud_alert_dialog_title),
-//                                                        getString(R.string.activate_cloud_storage_failed_to_activate),
-//                                                        getString(R.string.alert_dialog_confirm));
-//                                            }
-//                                        });
                                     }
 
 
@@ -176,14 +163,14 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                             }
                         });
                     } else {
-                        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "swift");
-                        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "test");
-                        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "tester");
-                        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "testing");
-                        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "10.0.6.1:8080");
-                        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "qa_terafonn_2");
-                        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "http");
-                        HCFSMgmtUtils.reloadConfig();
+                        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "swift");
+                        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "test");
+                        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "tester");
+                        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "testing");
+                        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "10.0.6.1:8080");
+                        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "qa_terafonn_2");
+                        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "http");
+                        HCFSConfig.reloadConfig();
 
                         Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
                         startActivity(intent);
@@ -310,12 +297,10 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                 boolean isFailed = initHCFSConfig(authResultInfo);
                                 if (isFailed) {
                                     Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-//                                    String failureMessage = getString(R.string.activate_cloud_storage_failed_to_activate);
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
                                             String failureMessage = authResultInfo.getMessage();
-//                                            Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
                                             showAlertDialog(ActivateCloudStorageActivity.this,
                                                     getString(R.string.activate_cloud_alert_dialog_title),
                                                     failureMessage,
@@ -323,12 +308,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         }
                                     });
                                     resetHCFSConfig();
-//                                    mHandler.post(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//                                            resetHCFSConfig();
-//                                        }
-//                                    });
                                 } else {
                                     Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
                                     intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, acct.getDisplayName());
@@ -462,27 +441,10 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
             outputStream.close();
 
             int responseCode = conn.getResponseCode();
-            InputStream inputStream = null;
-            StringBuilder sb = new StringBuilder();
-            try {
-                inputStream = conn.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    sb.append(line);
-                }
-            } catch (Exception e) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtServer", Log.getStackTraceString(e));
-            } finally {
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            }
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtServer", "responseCode=" + responseCode + ", responseContent=" + sb.toString());
-
             authResultInfo.setResponseCode(responseCode);
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                JSONObject jsonObj = new JSONObject(sb.toString());
+                String responseContent = getResponseContent(conn, responseCode);
+                JSONObject jsonObj = new JSONObject(responseContent);
                 boolean result = jsonObj.getBoolean("result");
                 String message = jsonObj.getString("msg");
                 authResultInfo.setMessage(message);
@@ -505,7 +467,8 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 }
             } else {
                 try {
-                    JSONObject jsonObj = new JSONObject(sb.toString());
+                    String responseContent = getResponseContent(conn, responseCode);
+                    JSONObject jsonObj = new JSONObject(responseContent);
                     String message = jsonObj.getString("msg");
                     authResultInfo.setMessage(message);
                 } catch (JSONException e) {
@@ -523,43 +486,75 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         return authResultInfo;
     }
 
+    private String getResponseContent(HttpsURLConnection conn, int responseCode) throws IOException {
+        InputStream inputStream = null;
+        StringBuilder sb = new StringBuilder();
+        try {
+            if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
+                inputStream = conn.getErrorStream();
+            } else {
+                inputStream = conn.getInputStream();
+            }
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                sb.append(line);
+            }
+        } catch (Exception e) {
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtServer", Log.getStackTraceString(e));
+        } finally {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        }
+        return sb.toString();
+    }
+
     private boolean initHCFSConfig(AuthResultInfo authResultInfo) {
         boolean isFailed = false;
-        if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, authResultInfo.getBackendType())) {
+        if (!HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, authResultInfo.getBackendType())) {
             isFailed = true;
         }
-        if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, authResultInfo.getAccount())) {
+        if (!HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, authResultInfo.getAccount())) {
             isFailed = true;
         }
-        if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, authResultInfo.getUser())) {
+        if (!HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, authResultInfo.getUser())) {
             isFailed = true;
         }
-        if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, authResultInfo.getPassword())) {
+        if (!HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, authResultInfo.getPassword())) {
             isFailed = true;
         }
-        if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, authResultInfo.getBackendUrl())) {
+        if (!HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, authResultInfo.getBackendUrl())) {
             isFailed = true;
         }
-        if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, authResultInfo.getBucket())) {
+        if (!HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, authResultInfo.getBucket())) {
             isFailed = true;
         }
-        if (!HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, authResultInfo.getProtocol())) {
+        if (!HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, authResultInfo.getProtocol())) {
             isFailed = true;
         }
-        if (!HCFSMgmtUtils.reloadConfig()) {
+        if (!HCFSConfig.reloadConfig()) {
             isFailed = true;
         }
         return isFailed;
     }
 
     private void resetHCFSConfig() {
-        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
-        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "");
-        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "");
-        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "");
-        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "");
-        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "");
-        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "");
+        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
+        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "");
+        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "");
+        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "");
+        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "");
+        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "");
+        HCFSConfig.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "");
+
+//        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
+//        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT, "");
+//        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_USER, "");
+//        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PASS, "");
+//        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_URL, "");
+//        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_CONTAINER, "");
+//        HCFSMgmtUtils.setHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_PROTOCOL, "");
     }
 
     public static void showAlertDialog(Context context, String title, String message, String positiveText) {

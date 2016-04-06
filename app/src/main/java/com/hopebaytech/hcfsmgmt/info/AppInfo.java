@@ -10,11 +10,11 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.Nullable;
 
-public class AppInfo extends ItemInfo {
+public class AppInfo extends ItemInfo implements Cloneable {
 
 	private long dbId;
 	private int uid;
-	private ApplicationInfo appInfo;
+	private ApplicationInfo applicationInfo;
 	private String packageName;
 	private String externalDir;
 	private String[] sharedLibraryFiles;
@@ -27,12 +27,25 @@ public class AppInfo extends ItemInfo {
 		this.context = context;
 	}
 
+	public AppInfo(AppInfo applicationInfo) {
+		super(applicationInfo.context);
+		this.dbId = applicationInfo.dbId;
+		this.uid = applicationInfo.uid;
+		this.applicationInfo = applicationInfo.applicationInfo;
+		this.packageName = applicationInfo.packageName;
+		this.externalDir = applicationInfo.externalDir;
+		this.sharedLibraryFiles = applicationInfo.sharedLibraryFiles;
+		this.appSize = applicationInfo.appSize;
+		this.context = applicationInfo.context;
+		this.status = applicationInfo.status;
+	}
+
 	public int getUid() {
 		return uid;
 	}
 
 	public Bitmap getIconImage() {
-		Drawable drawable = context.getPackageManager().getApplicationIcon(appInfo);
+		Drawable drawable = context.getPackageManager().getApplicationIcon(applicationInfo);
 		if (!(drawable instanceof VectorDrawable)) {
 			return ((BitmapDrawable) drawable).getBitmap();
 		}
@@ -40,7 +53,7 @@ public class AppInfo extends ItemInfo {
 	}
 
 	public void setApplicationInfo(ApplicationInfo appInfo) {
-		this.appInfo = appInfo;
+		this.applicationInfo = appInfo;
 	}
 
 	public void setUid(int uid) {
@@ -49,7 +62,7 @@ public class AppInfo extends ItemInfo {
 
 	public String getSourceDir() {
 		/** Default sourceDir = /data/app/<package-name>-1/base.apk */
-		String sourceDir = appInfo.sourceDir;
+		String sourceDir = applicationInfo.sourceDir;
 		int lastIndex = sourceDir.lastIndexOf("/");
 		String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
 		return sourceDirWithoutApkSuffix;
@@ -93,11 +106,11 @@ public class AppInfo extends ItemInfo {
 	}
 
 	public String getDataDir() {
-		return appInfo.dataDir;
+		return applicationInfo.dataDir;
 	}
 
 	public String getNativeLibraryDir() {
-		return appInfo.nativeLibraryDir;
+		return applicationInfo.nativeLibraryDir;
 	}
 
 	@Nullable
@@ -127,7 +140,7 @@ public class AppInfo extends ItemInfo {
 
 	public String getPackageName() {
 		if (packageName == null) {
-			packageName = appInfo.packageName;
+			packageName = applicationInfo.packageName;
 		}
 		return packageName;
 	}
@@ -163,8 +176,8 @@ public class AppInfo extends ItemInfo {
 
 	@Override
 	public Drawable getPinUnpinImage() {
-		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getAppStatus());
-//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
+//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getAppStatus());
+		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
 	}
 
 	@Override
@@ -172,4 +185,7 @@ public class AppInfo extends ItemInfo {
 		return getSourceDir().hashCode();
 	}
 
+    public ApplicationInfo getApplicationInfo() {
+        return applicationInfo;
+    }
 }

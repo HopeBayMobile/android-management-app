@@ -11,7 +11,7 @@
     <group android:id="@+id/group_system">
         <item
             android:id="@+id/nav_system"
-            android:icon="@drawable/ic_cloud_upload_white"
+            android:icon="@drawable/icon_btn_side_system"
             android:orderInCategory="1"
             android:title="@string/nav_system" />
     </group>

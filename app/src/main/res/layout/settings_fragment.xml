@@ -8,7 +8,6 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/fragment_title_bar_height"
         android:background="@color/colorAccent"
-        android:orientation="horizontal"
         android:paddingBottom="@dimen/fragment_title_bar_padding_bottom"
         android:paddingLeft="@dimen/fragment_title_bar_padding_left"
         android:paddingRight="@dimen/fragment_title_bar_padding_right"
@@ -19,22 +18,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="About"
+            android:text="@string/settings_title_bar"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/colorWhite" />
 
     </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/version_app_title"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:id="@+id/version_app"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </LinearLayout>

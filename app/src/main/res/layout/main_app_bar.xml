@@ -21,7 +21,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <!--<include layout="@layout/content_main" />-->
+    <!--<include layout="@layout/main_content" />-->
     <include layout="@layout/viewpager_content_main" />
 
 </android.support.design.widget.CoordinatorLayout>

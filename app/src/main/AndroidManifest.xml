@@ -40,9 +40,6 @@
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
-        <activity
-            android:name="com.hopebaytech.hcfsmgmt.main.AddMountPointActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" />
 
         <receiver

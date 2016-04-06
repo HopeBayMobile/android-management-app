@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/popupmenu">
+
+        <item
+            android:id="@+id/more_info"
+            android:title="@string/file_mgmt_popup_menu_app_type_more_info" />
+    </group>
+</menu>

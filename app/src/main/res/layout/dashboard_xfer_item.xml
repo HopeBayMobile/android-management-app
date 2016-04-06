@@ -64,7 +64,7 @@
                     android:id="@+id/xfer_down"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0B"
+                    android:text="-"
                     android:textColor="@color/colorHomePageXferProgressBarPrimary" />
 
                 <TextView
@@ -83,7 +83,7 @@
                     android:id="@+id/xfer_up"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0B"
+                    android:text="-"
                     android:textColor="@color/colorHomePageXferProgressBarSecondary" />
             </LinearLayout>
         </RelativeLayout>

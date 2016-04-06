@@ -75,18 +75,18 @@ public class DisplayType {
 	
 	public static ArrayList<ItemInfo> getListOfDataType(Context context, DataTypeDAO dataTypeDAO) {
 		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
-		String[] dataTypeArray = context.getResources().getStringArray(R.array.file_management_list_data_types);
+		String[] dataTypeArray = context.getResources().getStringArray(R.array.file_mgmt_list_data_types);
 		for (int i = 0; i < dataTypeArray.length; i++) {
 			DataTypeInfo dataTypeInfo = null;
-			if (dataTypeArray[i].equals(context.getString(R.string.file_management_list_data_type_image))) {
+			if (dataTypeArray[i].equals(context.getString(R.string.file_mgmt_list_data_type_image))) {
 				dataTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
 				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
 				dataTypeInfo.setIconImage(R.drawable.icon_folder_picture);
-			} else if (dataTypeArray[i].equals(context.getString(R.string.file_management_list_data_type_video))) {
+			} else if (dataTypeArray[i].equals(context.getString(R.string.file_mgmt_list_data_type_video))) {
 				dataTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
 				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
 				dataTypeInfo.setIconImage(R.drawable.icon_folder_video);
-			} else if (dataTypeArray[i].equals(context.getString(R.string.file_management_list_data_type_audio))) {
+			} else if (dataTypeArray[i].equals(context.getString(R.string.file_mgmt_list_data_type_audio))) {
 				dataTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);
 				dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
 				dataTypeInfo.setIconImage(R.drawable.icon_folder_music);
@@ -101,7 +101,7 @@ public class DisplayType {
 	}
 	
 	public static ArrayList<ItemInfo> getListOfFileDirs(Context context, File currentFile) {
-		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
+		ArrayList<ItemInfo> items = new ArrayList<>();
 		if (isExternalStorageReadable()) {
 			File[] fileList = currentFile.listFiles();
 			Arrays.sort(fileList);

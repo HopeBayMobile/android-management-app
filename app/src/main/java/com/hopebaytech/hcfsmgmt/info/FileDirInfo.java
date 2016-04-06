@@ -89,16 +89,18 @@ public class FileDirInfo extends ItemInfo {
 							appInfo.sourceDir = archiveFilePath;
 							appInfo.publicSourceDir = archiveFilePath;
 							return ((BitmapDrawable) appInfo.loadIcon(pm)).getBitmap();
-						} else if (mimeType.contains(MIME_SUBTYPE_OGG)) {
-							Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
-							return ((BitmapDrawable) drawable).getBitmap();
-							// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
 						}
-					} else if (mimeType.contains(MIME_TYPE_AUDIO)) {
-						Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
-						return ((BitmapDrawable) drawable).getBitmap();
-						// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+//						else if (mimeType.contains(MIME_SUBTYPE_OGG)) {
+//							Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+//							return ((BitmapDrawable) drawable).getBitmap();
+//							// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+//						}
 					}
+//					else if (mimeType.contains(MIME_TYPE_AUDIO)) {
+//						Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+//						return ((BitmapDrawable) drawable).getBitmap();
+//						// return ContextCompat.getDrawable(context, R.drawable.ic_audio_white);
+//					}
 					Drawable drawable = ContextCompat.getDrawable(context, R.drawable.icon_doc_default);
 					return ((BitmapDrawable) drawable).getBitmap();
 					// return ContextCompat.getDrawable(context, R.drawable.ic_file_black);
@@ -208,8 +210,8 @@ public class FileDirInfo extends ItemInfo {
 
 	@Override
 	public Drawable getPinUnpinImage() {
-		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getFileDirStatus());
-//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
+//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getFileDirStatus());
+		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
 	}
 
 	@Override

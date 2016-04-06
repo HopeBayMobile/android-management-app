@@ -1,13 +1,9 @@
 package com.hopebaytech.hcfsmgmt.main;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,13 +18,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
-import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -54,7 +45,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (isActivated()) {
+                if (HCFSConfig.isActivated()) {
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "Activated");
                     final String serverClientId = HCFSMgmtUtils.getServerClientIdFromMgmtServer();
                     if (serverClientId != null) {
@@ -103,10 +94,6 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
                 }
             }
         });
-    }
-
-    private boolean isActivated() {
-        return !HCFSMgmtUtils.getHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty();
     }
 
     private void handleSignInResult(@Nullable GoogleSignInResult result) {

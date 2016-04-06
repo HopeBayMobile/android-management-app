@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/colorFileManagementStorageTypeTitle"
-            tools:text="@string/file_management_internal_storage_name" />
+            tools:text="@string/file_mgmt_internal_storage_name" />
 
     </LinearLayout>
 
@@ -43,7 +43,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/file_management_section_item_total_storage_space"
+                android:text="@string/file_mgmt_section_item_total_storage_space"
                 android:textColor="@color/colorFileManagementTotalStorageText" />
 
             <TextView
@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorFileManagementTotalStorageText"
-                tools:text="@string/file_management_section_item_calculating" />
+                tools:text="@string/file_mgmt_section_item_calculating" />
         </LinearLayout>
 
         <LinearLayout
@@ -63,7 +63,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/file_management_section_item_available_storage_space"
+                android:text="@string/file_mgmt_section_item_available_storage_space"
                 android:textColor="@color/colorFileManagementAvailStorageText" />
 
             <TextView
@@ -71,7 +71,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorFileManagementAvailStorageText"
-                tools:text="@string/file_management_section_item_calculating" />
+                tools:text="@string/file_mgmt_section_item_calculating" />
         </LinearLayout>
     </LinearLayout>
 

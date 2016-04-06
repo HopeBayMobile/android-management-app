@@ -16,7 +16,6 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
-import com.hopebaytech.hcfsmgmt.info.DrawableInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
@@ -57,7 +56,7 @@ public class HCFSMgmtUtils {
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
     public static  final String MANAGEMENT_SERVER_AUTH_URL = "https://terafonnreg.hopebaytech.com/api/register/auth";
 
-    public static final boolean ENABLE_AUTH = true;
+    public static final boolean ENABLE_AUTH = false;
     public static final boolean DEFAULT_PINNED_STATUS = false;
     public static final int LOGLEVEL = Log.DEBUG;
 
@@ -530,7 +529,7 @@ public class HCFSMgmtUtils {
     }
 
     public static boolean unpinApp(ServiceAppInfo info) {
-        Log.i(TAG, "Unpin App: " + info.getAppName());
+        HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "unpinApp", "appName=" + info.getAppName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
         String externalDir = info.getExternalDir();
@@ -637,6 +636,45 @@ public class HCFSMgmtUtils {
         } catch (Exception e) {
             HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", Log.getStackTraceString(e));
             // Log.e(TAG, Log.getStackTraceString(e));
+        } try {
+            // String logMsg = "pathName=" + pathName + ", startTime=" + System.currentTimeMillis();
+            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
+            String jsonResult = HCFSApiUtils.getDirStatus(pathName);
+            // logMsg = "pathName=" + pathName + ", endTime=" + System.currentTimeMillis();
+            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
+            String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                int code = jObject.getInt("code");
+                if (code == 0) {
+                    JSONObject dataObj = jObject.getJSONObject("data");
+                    int num_local = dataObj.getInt("num_local");
+                    int num_hybrid = dataObj.getInt("num_hybrid");
+                    int num_cloud = dataObj.getInt("num_cloud");
+
+                    if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
+                        status = LocationStatus.LOCAL;
+                    } else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
+                        status = LocationStatus.LOCAL;
+                    } else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
+                        status = LocationStatus.CLOUD;
+                    } else {
+                        status = LocationStatus.HYBRID;
+                    }
+                    HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getDirStatus", logMsg);
+                    // Log.i(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+                } else {
+                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", logMsg);
+                    // Log.e(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+                }
+            } else {
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", logMsg);
+                // Log.e(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+            }
+        } catch (Exception e) {
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", Log.getStackTraceString(e));
+            // Log.e(TAG, Log.getStackTraceString(e));
         }
 
         return status;
@@ -702,64 +740,64 @@ public class HCFSMgmtUtils {
         return isPinned;
     }
 
-    public static String getHCFSConfig(String key) {
-        String resultStr = "";
-        try {
-            String jsonResult = HCFSApiUtils.getHCFSConfig(key);
-            String logMsg = "jsonResult=" + jsonResult;
-            JSONObject jObject = new JSONObject(jsonResult);
-            boolean isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                JSONObject dataObj = jObject.getJSONObject("data");
-                resultStr = dataObj.getString(key);
-                // Log.i(TAG, "getHCFSConfig: " + jsonResult);
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getHCFSConfig", logMsg);
-            } else {
-                // Log.e(TAG, "getHCFSConfig: " + jsonResult);
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", logMsg);
-            }
-        } catch (JSONException e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", Log.getStackTraceString(e));
-            // Log.e(TAG, Log.getStackTraceString(e));
-        }
-        return resultStr;
-    }
+//    public static String getHCFSConfig(String key) {
+//        String resultStr = "";
+//        try {
+//            String jsonResult = HCFSApiUtils.getHCFSConfig(key);
+//            String logMsg = "jsonResult=" + jsonResult;
+//            JSONObject jObject = new JSONObject(jsonResult);
+//            boolean isSuccess = jObject.getBoolean("result");
+//            if (isSuccess) {
+//                JSONObject dataObj = jObject.getJSONObject("data");
+//                resultStr = dataObj.getString(key);
+//                // Log.i(TAG, "getHCFSConfig: " + jsonResult);
+//                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getHCFSConfig", logMsg);
+//            } else {
+//                // Log.e(TAG, "getHCFSConfig: " + jsonResult);
+//                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", logMsg);
+//            }
+//        } catch (JSONException e) {
+//            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", Log.getStackTraceString(e));
+//            // Log.e(TAG, Log.getStackTraceString(e));
+//        }
+//        return resultStr;
+//    }
 
-    public static boolean setHCFSConfig(String key, String value) {
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.setHCFSConfig(key, value);
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;
-            ;
-            if (isSuccess) {
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "setHCFSConfig", logMsg);
-            } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "setHCFSConfig", logMsg);
-            }
-        } catch (JSONException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
+//    public static boolean setHCFSConfig(String key, String value) {
+//        boolean isSuccess = false;
+//        try {
+//            String jsonResult = HCFSApiUtils.setHCFSConfig(key, value);
+//            JSONObject jObject = new JSONObject(jsonResult);
+//            isSuccess = jObject.getBoolean("result");
+//            String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;
+//            ;
+//            if (isSuccess) {
+//                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "setHCFSConfig", logMsg);
+//            } else {
+//                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "setHCFSConfig", logMsg);
+//            }
+//        } catch (JSONException e) {
+//            Log.e(TAG, Log.getStackTraceString(e));
+//        }
+//        return isSuccess;
+//    }
 
-    public static boolean reloadConfig() {
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.reloadConfig();
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                log(Log.INFO, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
-            } else {
-                log(Log.ERROR, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
-            }
-        } catch (JSONException e) {
-            log(Log.ERROR, CLASSNAME, "reloadConfig", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
+//    public static boolean reloadConfig() {
+//        boolean isSuccess = false;
+//        try {
+//            String jsonResult = HCFSApiUtils.reloadConfig();
+//            JSONObject jObject = new JSONObject(jsonResult);
+//            isSuccess = jObject.getBoolean("result");
+//            if (isSuccess) {
+//                log(Log.INFO, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
+//            } else {
+//                log(Log.ERROR, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
+//            }
+//        } catch (JSONException e) {
+//            log(Log.ERROR, CLASSNAME, "reloadConfig", Log.getStackTraceString(e));
+//        }
+//        return isSuccess;
+//    }
 
     public static boolean isDataUploadCompleted() {
         HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
@@ -929,38 +967,38 @@ public class HCFSMgmtUtils {
         }
     }
 
-    public static Drawable getPinUnpinImage(Context context, boolean isPinned, int status) {
-        Drawable pinDrawable = null;
-        try {
-            if (isPinned) {
-                if (status == LocationStatus.LOCAL) {
-                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_pin);
-                } else if (status == LocationStatus.HYBRID || status == LocationStatus.CLOUD) {
-                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
-                } else {
-                    // TODO default image
-                }
-            } else {
-                switch (status) {
-                    case LocationStatus.LOCAL:
-                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_unpin);
-                        break;
-                    case LocationStatus.HYBRID:
-                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);
-                        break;
-                    case LocationStatus.CLOUD:
-                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_cloud);
-                        break;
-                    default:
-                        // TODO default image
-                        break;
-                }
-            }
-        } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getPinUnpinImage", Log.getStackTraceString(e));
-        }
-        return pinDrawable;
-    }
+//    public static Drawable getPinUnpinImage(Context context, boolean isPinned, int status) {
+//        Drawable pinDrawable = null;
+//        try {
+//            if (isPinned) {
+//                if (status == LocationStatus.LOCAL) {
+//                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_pin);
+//                } else if (status == LocationStatus.HYBRID || status == LocationStatus.CLOUD) {
+//                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
+//                } else {
+//                    // TODO default image
+//                }
+//            } else {
+//                switch (status) {
+//                    case LocationStatus.LOCAL:
+//                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_unpin);
+//                        break;
+//                    case LocationStatus.HYBRID:
+//                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);
+//                        break;
+//                    case LocationStatus.CLOUD:
+//                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_cloud);
+//                        break;
+//                    default:
+//                        // TODO default image
+//                        break;
+//                }
+//            }
+//        } catch (Exception e) {
+//            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getPinUnpinImage", Log.getStackTraceString(e));
+//        }
+//        return pinDrawable;
+//    }
 
     public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
         Drawable pinDrawable = null;
@@ -1024,5 +1062,9 @@ public class HCFSMgmtUtils {
         }
         return serverClientId;
     }
+
+//    public static boolean isActivated() {
+//        return !HCFSMgmtUtils.getHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty();
+//    }
 
 }

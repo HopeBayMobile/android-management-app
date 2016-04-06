@@ -22,5 +22,11 @@
     <dimen name="activate_cloud_storage_logo_horizontal_margin">45dp</dimen>
     <dimen name="activate_cloud_storage_activate_textview_padding">5dp</dimen>
     <dimen name="activate_cloud_storage_activate_linearlayout_vertical_margin">15dp</dimen>
-    
+
+    <dimen name="fragment_title_bar_height">60dp</dimen>
+    <dimen name="fragment_title_bar_padding_left">16dp</dimen>
+    <dimen name="fragment_title_bar_padding_right">16dp</dimen>
+    <dimen name="fragment_title_bar_padding_top">5dp</dimen>
+    <dimen name="fragment_title_bar_padding_bottom">5dp</dimen>
+
 </resources>

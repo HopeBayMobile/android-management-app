@@ -206,14 +206,14 @@ public class CircleDisplay extends View implements OnGestureListener {
 	 * @param c
 	 */
 	private void drawText(Canvas c) {
-		String formatValue;
 		float number = mValue * mPhase;
-		number = Float.parseFloat(String.format(Locale.getDefault(), "%.1f", number));
-		if ((long) number == number) {
-			formatValue = String.format(Locale.getDefault(), "%d", (long) number);
-		} else {
-			formatValue = String.format(Locale.getDefault(), "%.1f", number);
-		}
+		String formatValue =UnitConverter.formatPercentage(number);
+//		number = Float.parseFloat(String.format(Locale.getDefault(), "%.1f", number));
+//		if ((long) number == number) {
+//			formatValue = String.format(Locale.getDefault(), "%d", (long) number);
+//		} else {
+//			formatValue = String.format(Locale.getDefault(), "%.1f", number);
+//		}
 		
 //		c.drawText(mFormatValue.format(mValue * mPhase) + "" + mUnit, getWidth() / 2, getHeight() / 5 * 2 + mCapacityTextPaint.descent(),
 //				mCapacityTextPaint);

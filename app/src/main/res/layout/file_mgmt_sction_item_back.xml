@@ -24,7 +24,7 @@
                 android:id="@+id/storage_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/file_management_internal_storage_name"
+                android:text="@string/file_mgmt_internal_storage_name"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <LinearLayout
@@ -36,13 +36,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_internal_storage_space" />
+                    android:text="@string/file_mgmt_section_item_internal_storage_space" />
 
                 <TextView
                     android:id="@+id/local_storage_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_calculating" />
+                    android:text="@string/file_mgmt_section_item_calculating" />
             </LinearLayout>
         </LinearLayout>
 
@@ -60,13 +60,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_total_storage_space" />
+                    android:text="@string/file_mgmt_section_item_total_storage_space" />
 
                 <TextView
                 	android:id="@+id/total_storage_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_calculating" />
+                    android:text="@string/file_mgmt_section_item_calculating" />
             </LinearLayout>
 
             <LinearLayout
@@ -78,13 +78,13 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_available_storage_space" />
+                    android:text="@string/file_mgmt_section_item_available_storage_space" />
 
                 <TextView
                     android:id="@+id/available_storage_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/file_management_section_item_calculating" />
+                    android:text="@string/file_mgmt_section_item_calculating" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -59,51 +59,61 @@
     
     <string name="action_settings">Settings</string>
     
-    <string name="file_management_hint_no_file">這個資料夾是空的</string>
-    <string name="file_management_snackbar_refresh">重新整理</string>
-    <string name="file_management_snackbar_unknown_type_file">無可開啟此類型檔案的應用程式</string>
-    <string name="file_management_spinner_apps">依應用程式顯示</string>
-    <string name="file_management_spinner_data_type">依資料型態顯示</string>
-    <string name="file_management_spinner_files">依檔案顯示</string>
-    <string-array name="file_management_spinner">
-        <item>@string/file_management_spinner_apps</item>
-        <item>@string/file_management_spinner_data_type</item>
-        <item>@string/file_management_spinner_files</item>
+    <string name="file_mgmt_hint_no_file">這個資料夾是空的</string>
+    <string name="file_mgmt_snackbar_refresh">重新整理</string>
+    <string name="file_mgmt_snackbar_unknown_type_file">無可開啟此類型檔案的應用程式</string>
+    <string name="file_mgmt_spinner_apps">依應用程式顯示</string>
+    <string name="file_mgmt_spinner_data_type">依資料型態顯示</string>
+    <string name="file_mgmt_spinner_files">依檔案顯示</string>
+    <string-array name="file_mgmt_spinner">
+        <item>@string/file_mgmt_spinner_apps</item>
+        <item>@string/file_mgmt_spinner_data_type</item>
+        <item>@string/file_mgmt_spinner_files</item>
     </string-array>
-    <string name="file_management_list_data_type_image">圖片</string>
-    <string name="file_management_list_data_type_video">視訊</string>
-    <string name="file_management_list_data_type_audio">音樂</string>
-    <string-array name="file_management_list_data_types">
-        <item>@string/file_management_list_data_type_image</item>
-        <item>@string/file_management_list_data_type_video</item>
-        <item>@string/file_management_list_data_type_audio</item>
+    <string name="file_mgmt_list_data_type_image">圖片</string>
+    <string name="file_mgmt_list_data_type_video">視訊</string>
+    <string name="file_mgmt_list_data_type_audio">音樂</string>
+    <string-array name="file_mgmt_list_data_types">
+        <item>@string/file_mgmt_list_data_type_image</item>
+        <item>@string/file_mgmt_list_data_type_video</item>
+        <item>@string/file_mgmt_list_data_type_audio</item>
     </string-array>
-    <string name="file_management_menu_list">清單</string>
-    <string name="file_management_menu_grid">圖示</string>
-    <string name="file_management_whether_allowed_to_unpin_image">圖片資料型態已釘選，是否仍要取消釘選？</string>
-    <string name="file_management_whether_allowed_to_unpin_video">視訊資料型態已釘選，是否仍要取消釘選？</string>
-    <string name="file_management_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
-    <string name="file_management_popup_menu_pin">釘選</string>
-    <string name="file_management_popup_menu_unpin">取消釘選</string>
-    <string name="file_management_internal_storage_name">內部儲存空間</string>
-    <string name="file_management_sdcard1_storage_name">SD卡儲存空間</string>
-    <string name="file_management_section_item_calculating">計算中&#8230;</string>
-    <string name="file_management_section_item_total_storage_space">總空間:&#160;</string>
-    <string name="file_management_section_item_available_storage_space">可用空間:&#160;</string>
-    <string name="file_management_section_item_internal_storage_space">本地空間:&#160;</string>
-    <string name="file_management_alert_dialog_title">提示</string>
-    <string name="file_management_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
-    <string name="file_management_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
-    <string name="file_management_date_since_pinned">自 %1$s 開始釘選</string>
-    <string name="file_management_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
-    
-    <string name="hcfs_management_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
-    <string name="hcfs_management_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
-    <string name="hcfs_management_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>
-    <string name="hcfs_management_service_image_failed_to_unpin">圖片類型取消釘選失敗數量</string>
-    <string name="hcfs_management_service_video_failed_to_unpin">視訊類型取消釘選失敗數量</string>
-    <string name="hcfs_management_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
-    
+    <string name="file_mgmt_menu_list">清單</string>
+    <string name="file_mgmt_menu_grid">圖示</string>
+    <string name="file_mgmt_whether_allowed_to_unpin_image">圖片資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_mgmt_whether_allowed_to_unpin_video">視訊資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_mgmt_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
+    <string name="file_mgmt_internal_storage_name">內部儲存空間</string>
+    <string name="file_mgmt_sdcard1_storage_name">SD卡儲存空間</string>
+    <string name="file_mgmt_section_item_calculating">計算中&#8230;</string>
+    <string name="file_mgmt_section_item_total_storage_space">總空間:&#160;</string>
+    <string name="file_mgmt_section_item_available_storage_space">可用空間:&#160;</string>
+    <string name="file_mgmt_section_item_internal_storage_space">本地空間:&#160;</string>
+    <string name="file_mgmt_alert_dialog_title">提示</string>
+    <string name="file_mgmt_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
+    <string name="file_mgmt_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
+    <string name="file_mgmt_date_since_pinned">自 %1$s 開始釘選</string>
+    <string name="file_mgmt_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
+    <string name="file_mgmt_popup_menu_pin">釘選</string>
+    <string name="file_mgmt_popup_menu_unpin">取消釘選</string>
+    <string name="file_mgmt_popup_menu_app_type_more_info">更多資訊</string>
+    <string name="file_mgmt_dialog_app_version">版本:&#160;%s</string>
+    <string name="file_mgmt_dialog_app_size">大小:&#160;%s</string>
+    <string name="file_mgmt_dialog_app_package_name">套件名稱:&#160;%s</string>
+    <string name="file_mgmt_dialog_app_percentage">資料已在手機上的比例:&#160;%s</string>
+    <string name="file_mgmt_dialog_app_open">開啟</string>
+    <string name="file_mgmt_dialog_app_remove">解除安裝</string>
+    <string name="file_mgmt_dialog_app_cancel">取消</string>
+    <string name="file_mgmt_dialog_calculating">計算中&#8230;</string>
+
+    <string name="hcfs_mgmt_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
+    <string name="hcfs_mgmt_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
+    <string name="hcfs_mgmt_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>
+    <string name="hcfs_mgmt_service_image_failed_to_unpin">圖片類型取消釘選失敗數量</string>
+    <string name="hcfs_mgmt_service_video_failed_to_unpin">視訊類型取消釘選失敗數量</string>
+    <string name="hcfs_mgmt_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
+
+    <string name="settings_title_bar">一般設定</string>
     <string name="settings_section_sync">同步設定</string>
     <string name="settings_section_sync_wifi_only">只有連接WIFI時才存取雲端</string>
     <string name="settings_section_notify">通知設定</string>
@@ -123,7 +133,7 @@
     <string-array name="pref_notify_local_storage_used_ratio_value">
         <item>90</item>
         <item>80</item>
-        <item>70</item>`
+        <item>70</item>
         <item>60</item>
         <item>50</item>
     </string-array>

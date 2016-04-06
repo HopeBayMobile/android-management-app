@@ -1,7 +1,5 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment.LinearRecyclerViewAdapter.LinearRecyclerViewHolder;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -19,7 +17,7 @@ public abstract class ItemInfo {
 	private String infoName;
 	private boolean isProcessing;
 	private long lastProcessTime;
-	public Thread pinImageThread;
+//	public Thread pinImageThread;
 	public RecyclerView.ViewHolder viewHolder;
 	
 	public ItemInfo(Context context) {

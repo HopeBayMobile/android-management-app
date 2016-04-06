@@ -128,6 +128,11 @@ public class HCFSMgmtService extends Service {
                             }
                         }
 
+                        /** Pin /storage/emulated/0/Android folder */
+                        if (!HCFSMgmtUtils.isPathPinned("/storage/emulated/0/Android")) {
+                            HCFSMgmtUtils.pinFileOrDirectory("/storage/emulated/0/Android");
+                        }
+
                         /** Pin system app when system boot up */
                         ArrayList<ItemInfo> itemInfoList = DisplayType.getListOfInstalledApps(context, DisplayType.APP_SYSTEM);
                         for (ItemInfo itemInfo : itemInfoList) {
@@ -394,7 +399,7 @@ public class HCFSMgmtService extends Service {
                         }
                     }
                     if (imgFailedToPinCount != 0) {
-                        notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_pin) + ": " + imgFailedToPinCount);
+                        notifyMessageList.add(getString(R.string.hcfs_mgmt_service_image_failed_to_pin) + ": " + imgFailedToPinCount);
                     }
                 } else {
                     int imgFailedToUnpinCount = 0;
@@ -404,7 +409,7 @@ public class HCFSMgmtService extends Service {
                         }
                     }
                     if (imgFailedToUnpinCount != 0) {
-                        notifyMessageList.add(getString(R.string.hcfs_management_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount);
+                        notifyMessageList.add(getString(R.string.hcfs_mgmt_service_image_failed_to_unpin) + ": " + imgFailedToUnpinCount);
                     }
                 }
                 imageTypeInfo.setDateUpdated(processTimeSeconds);
@@ -432,7 +437,7 @@ public class HCFSMgmtService extends Service {
                         }
                     }
                     if (videoFailedToPinCount != 0) {
-                        notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_pin) + ": " + videoFailedToPinCount);
+                        notifyMessageList.add(getString(R.string.hcfs_mgmt_service_video_failed_to_pin) + ": " + videoFailedToPinCount);
                     }
                 } else {
                     int videoFailedToUnpinCount = 0;
@@ -442,7 +447,7 @@ public class HCFSMgmtService extends Service {
                         }
                     }
                     if (videoFailedToUnpinCount != 0) {
-                        notifyMessageList.add(getString(R.string.hcfs_management_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount);
+                        notifyMessageList.add(getString(R.string.hcfs_mgmt_service_video_failed_to_unpin) + ": " + videoFailedToUnpinCount);
                     }
                 }
                 videoTypeInfo.setDateUpdated(processTimeSeconds);
@@ -470,7 +475,7 @@ public class HCFSMgmtService extends Service {
                         }
                     }
                     if (audioFailedToPinCount != 0) {
-                        notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_pin) + ": " + audioFailedToPinCount);
+                        notifyMessageList.add(getString(R.string.hcfs_mgmt_service_audio_failed_to_pin) + ": " + audioFailedToPinCount);
                     }
                 } else {
                     int audioFailedToUnpinCount = 0;
@@ -480,7 +485,7 @@ public class HCFSMgmtService extends Service {
                         }
                     }
                     if (audioFailedToUnpinCount != 0) {
-                        notifyMessageList.add(getString(R.string.hcfs_management_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount);
+                        notifyMessageList.add(getString(R.string.hcfs_mgmt_service_audio_failed_to_unpin) + ": " + audioFailedToUnpinCount);
                     }
                 }
                 audioTypeInfo.setDateUpdated(processTimeSeconds);

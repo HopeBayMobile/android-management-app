@@ -1,9 +1,8 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 public class TODO {
-	// TODO Automatically refresh dashboard page	
-	// TODO [BEBUG] Change from app to datatype instantly when the app page is not loaded completed  
-	// TODO Pin/Unpin priority between DateType and FileType 
-	// TODO Number format
-	// TODO DateType pin/unping presentation
+	// TODO Use bindService to connect with Service for pin failed callback function
+	// TODO "Display by app" display wrong icon when installing apps
+	// TODO
+
 }

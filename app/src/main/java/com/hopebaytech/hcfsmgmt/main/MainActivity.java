@@ -41,7 +41,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
 import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
-import com.hopebaytech.hcfsmgmt.fragment.FileManagementFragment;
+import com.hopebaytech.hcfsmgmt.fragment.FileMgmtDialogFragment;
+import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main_activity);
         init();
     }
 
@@ -261,6 +262,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /** Initialize ViewPager with PagerTabStrip */
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        mViewPager.setOffscreenPageLimit(3);
         PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
         pagerTabStrip.setTextColor(ContextCompat.getColor(this, R.color.colorWhite));
         pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.colorPagerTabStrip));
@@ -287,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (title.equals(getString(R.string.nav_home))) {
                 fragment = DashboardFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_system))) {
-                fragment = FileManagementFragment.newInstance(false);
+                fragment = FileMgmtFragment.newInstance(false);
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_about))) {
@@ -329,8 +331,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             int position = mViewPager.getCurrentItem();
             Fragment fragment = mPagerAdapter.getFragment(position);
-            if (fragment instanceof FileManagementFragment) {
-                boolean isProcessed = ((FileManagementFragment) fragment).onBackPressed();
+            if (fragment instanceof FileMgmtFragment) {
+                boolean isProcessed = ((FileMgmtFragment) fragment).onBackPressed();
                 if (!isProcessed) {
                     exitApp();
                 }
