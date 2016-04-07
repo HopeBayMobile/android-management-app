@@ -41,7 +41,7 @@ public class FileMgmtDialogFragment extends DialogFragment {
 
     public static final String TAG = FileMgmtDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
-    public static final int UNINSTALL_REQUEST_CODE = 100;
+//    public static final int UNINSTALL_REQUEST_CODE = 100;
     private ItemInfo mItemInfo;
     private Thread mCalculateAppDataLocalPercentageThread;
 
@@ -150,7 +150,7 @@ public class FileMgmtDialogFragment extends DialogFragment {
                             Intent intent = new Intent(Intent.ACTION_DELETE);
                             intent.setData(Uri.parse("package:" + appInfo.getPackageName()));
                             intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
-                            startActivityForResult(intent, UNINSTALL_REQUEST_CODE);
+                            startActivity(intent);
                         }
                     })
                     .setNeutralButton(R.string.file_mgmt_dialog_app_cancel, null);
@@ -161,21 +161,6 @@ public class FileMgmtDialogFragment extends DialogFragment {
             return super.onCreateDialog(savedInstanceState);
         } else {
             return super.onCreateDialog(savedInstanceState);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(HCFSMgmtUtils.TAG, CLASSNAME + ": onActivityResult");
-        if (requestCode == UNINSTALL_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Log.d("TAG", "onActivityResult: user accepted the (un)install");
-            } else if (resultCode == Activity.RESULT_CANCELED) {
-                Log.d("TAG", "onActivityResult: user canceled the (un)install");
-            } else {
-                Log.d("TAG", "onActivityResult: failed to (un)install");
-            }
         }
     }
 

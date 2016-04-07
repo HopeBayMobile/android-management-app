@@ -75,7 +75,7 @@
                         android:src="@drawable/icon_btn_tab_refresh_light" />
 
                     <ImageView
-                        android:id="@+id/display_type"
+                        android:id="@+id/layout_type"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingLeft="5dp"

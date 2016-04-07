@@ -20,8 +20,8 @@
 
         <ImageView
             android:id="@+id/iconView"
-            android:layout_width="@dimen/item_image_height_width"
-            android:layout_height="@dimen/item_image_height_width"
+            android:layout_width="@dimen/icon_image_width"
+            android:layout_height="@dimen/icon_image_height"
             android:paddingEnd="@dimen/item_image_horizontal_padding"
             android:src="@drawable/icon_doc_default_gray" />
 
@@ -54,8 +54,8 @@
 
     <RelativeLayout
         android:id="@+id/pinLayout"
-        android:layout_width="@dimen/item_image_height_width"
-        android:layout_height="@dimen/item_image_height_width"
+        android:layout_width="@dimen/icon_image_width"
+        android:layout_height="@dimen/icon_image_width"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:paddingEnd="@dimen/item_image_horizontal_padding" >

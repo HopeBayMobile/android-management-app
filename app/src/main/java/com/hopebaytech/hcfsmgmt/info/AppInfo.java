@@ -176,7 +176,6 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
 	@Override
 	public Drawable getPinUnpinImage() {
-//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getAppStatus());
 		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
 	}
 

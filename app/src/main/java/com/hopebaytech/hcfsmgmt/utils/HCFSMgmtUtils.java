@@ -133,14 +133,6 @@ public class HCFSMgmtUtils {
 
         UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
         return uidInfo != null && uidInfo.isPinned();
-//		String sourceDir = appInfo.getSourceDir();
-//		String dataDir = appInfo.getDataDir();
-//		String externalDir = appInfo.getExternalDir();
-//		if (externalDir == null) {
-//			return isPathPinned(sourceDir) & isPathPinned(dataDir);
-//		} else {
-//			return isPathPinned(sourceDir) & isPathPinned(dataDir) & isPathPinned(externalDir);
-//		}
     }
 
     public static boolean isDataTypePinned(DataTypeDAO dataTypeDAO, String dataType) {

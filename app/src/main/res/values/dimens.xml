@@ -13,8 +13,9 @@
     <dimen name="item_vertical_padding">5dp</dimen>
     <dimen name="item_horizontal_padding">10dp</dimen>
     <dimen name="item_image_horizontal_padding">10dp</dimen>
-    <dimen name="item_image_height_width">48dp</dimen>
-    
+    <dimen name="icon_image_height">48dp</dimen>
+    <dimen name="icon_image_width">48dp</dimen>
+
     <dimen name="progressbar_home_page_height">5dp</dimen>
     <dimen name="progressbar_home_page_vertical_margin">10dp</dimen>
     

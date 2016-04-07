@@ -55,7 +55,7 @@ public class FileDirInfo extends ItemInfo {
 			HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getIconImage", logMsg);
 			if (mimeType != null) {
 				int width, height;
-				width = height = (int) context.getResources().getDimension(R.dimen.item_image_height_width);
+				width = height = (int) context.getResources().getDimension(R.dimen.icon_image_width);
 				try {
 					if (mimeType.contains(MIME_TYPE_IMAGE)) {
 						if (mimeType.contains(MIME_SUBTYPE_PNG)) {
@@ -210,7 +210,6 @@ public class FileDirInfo extends ItemInfo {
 
 	@Override
 	public Drawable getPinUnpinImage() {
-//		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned(), getFileDirStatus());
 		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
 	}
 

@@ -27,7 +27,7 @@ public class DisplayType {
 	public static final int APP_ALL = 2;
 
 	public static ArrayList<ItemInfo> getListOfInstalledApps(Context context, int flags) {
-		ArrayList<ItemInfo> items = new ArrayList<>();
+		ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
 		if (context != null) {
 			Map<String, String> externalPkgNameMap = new HashMap<>();
 			String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
@@ -64,17 +64,17 @@ public class DisplayType {
 					appInfo.setExternalDir(externalPkgNameMap.get(applicationInfo.packageName));
 				}
 
-                UidDAO uidDAO = new UidDAO(context);
-                boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
-				appInfo.setPinned(isAppPinned);
-				items.add(appInfo);
+//                UidDAO uidDAO = new UidDAO(context);
+//                boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
+//				appInfo.setPinned(isAppPinned);
+				itemInfoList.add(appInfo);
 			}
 		}
-		return items;
+		return itemInfoList;
 	}
 	
 	public static ArrayList<ItemInfo> getListOfDataType(Context context, DataTypeDAO dataTypeDAO) {
-		ArrayList<ItemInfo> items = new ArrayList<ItemInfo>();
+		ArrayList<ItemInfo> itemInfoList = new ArrayList<ItemInfo>();
 		String[] dataTypeArray = context.getResources().getStringArray(R.array.file_mgmt_list_data_types);
 		for (int i = 0; i < dataTypeArray.length; i++) {
 			DataTypeInfo dataTypeInfo = null;
@@ -94,14 +94,14 @@ public class DisplayType {
 
 			if (dataTypeInfo != null) {
 				dataTypeInfo.setItemName(dataTypeArray[i]);
-				items.add(dataTypeInfo);
+				itemInfoList.add(dataTypeInfo);
 			}
 		}
-		return items;
+		return itemInfoList;
 	}
 	
 	public static ArrayList<ItemInfo> getListOfFileDirs(Context context, File currentFile) {
-		ArrayList<ItemInfo> items = new ArrayList<>();
+		ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
 		if (isExternalStorageReadable()) {
 			File[] fileList = currentFile.listFiles();
 			Arrays.sort(fileList);
@@ -110,10 +110,10 @@ public class DisplayType {
 				File file = fileList[i];
 				fileDirInfo.setItemName(file.getName());
 				fileDirInfo.setCurrentFile(file);
-				items.add(fileDirInfo);
+				itemInfoList.add(fileDirInfo);
 			}
 		}
-		return items;
+		return itemInfoList;
 	}
 	
 	/** Checks if external storage is available for read and write */
