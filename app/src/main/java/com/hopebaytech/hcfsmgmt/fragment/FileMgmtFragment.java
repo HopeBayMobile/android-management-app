@@ -290,7 +290,9 @@ public class FileMgmtFragment extends Fragment {
                                                         } else {
                                                             bitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
                                                         }
-                                                        holder.setIconBitmap(bitmap);
+                                                        if (bitmap != null) {
+                                                            holder.setIconBitmap(bitmap);
+                                                        }
                                                         holder.setIconAlpha(alpha);
 
                                                         holder.pinView.setImageDrawable(HCFSMgmtUtils.getPinUnpinImage(mContext, isItemExpectedPinned));
@@ -312,8 +314,10 @@ public class FileMgmtFragment extends Fragment {
                                                         } else {
                                                             bitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
                                                         }
-                                                        holder.setIconBitmap(bitmap);
-                                                        holder.setIconAlpha(alpha);
+                                                        if (bitmap != null) {
+                                                            holder.setIconBitmap(bitmap);
+                                                            holder.setIconAlpha(alpha);
+                                                        }
                                                     }
                                                 });
                                             }
@@ -1872,6 +1876,7 @@ public class FileMgmtFragment extends Fragment {
                 @Override
                 public void run() {
                     holder.setIconDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));
+                    holder.setIconAlpha(alpha);
                 }
             });
             final Bitmap iconBitmap = itemInfo.getIconImage();
@@ -1884,9 +1889,11 @@ public class FileMgmtFragment extends Fragment {
                     } else {
                         bitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
                     }
-                    holder.setIconBitmap(bitmap);
-                    holder.setIconAlpha(alpha);
-                    mMemoryCache.put(itemInfo.hashCode() + "_cache", bitmap);
+//                    holder.setIconAlpha(alpha);
+                    if (bitmap != null) {
+                        holder.setIconBitmap(bitmap);
+                        mMemoryCache.put(itemInfo.hashCode() + "_cache", bitmap);
+                    }
                 }
             });
         }

@@ -1,18 +1,18 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 public class AboutFragment extends Fragment {
 
