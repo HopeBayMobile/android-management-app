@@ -61,7 +61,7 @@
     <string name="file_mgmt_spinner_files">Display by file</string>
     <string-array name="file_mgmt_spinner">
         <item>@string/file_mgmt_spinner_apps</item>
-        <item>@string/file_mgmt_spinner_data_type</item>
+        <!--<item>@string/file_mgmt_spinner_data_type</item>-->
         <item>@string/file_mgmt_spinner_files</item>
     </string-array>
     <string name="file_mgmt_list_data_type_image">Image</string>

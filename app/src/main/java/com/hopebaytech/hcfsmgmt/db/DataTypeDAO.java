@@ -35,10 +35,22 @@ public class DataTypeDAO {
 	public static final String DATA_TYPE_AUDIO = "audio";
     
     private Context context;
+	private static DataTypeDAO mDataTypeDAO;
     
-    public DataTypeDAO(Context context) {
+    private DataTypeDAO(Context context) {
     	this.context = context;
     }
+
+	public static DataTypeDAO getInstance(Context context) {
+		if (mDataTypeDAO == null) {
+			synchronized (DataTypeDAO.class) {
+				if (mDataTypeDAO == null) {
+					mDataTypeDAO = new DataTypeDAO(context);
+				}
+			}
+		}
+		return mDataTypeDAO;
+	}
     
     public void close() {
     	getDataBase().close();

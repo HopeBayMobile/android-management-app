@@ -13,10 +13,10 @@
             android:defaultValue="false"
             android:key="pref_notify_conn_failed_recovery"
             android:title="@string/settings_section_notify_conn_failed_recovery" />
-        <SwitchPreferenceCompat
-            android:defaultValue="true"
-            android:key="pref_notify_upload_completed"
-            android:title="@string/settings_section_notify_upload_completed" />
+        <!--<SwitchPreferenceCompat-->
+            <!--android:defaultValue="true"-->
+            <!--android:key="pref_notify_upload_completed"-->
+            <!--android:title="@string/settings_section_notify_upload_completed" />-->
 
         <ListPreference
             android:defaultValue="90"

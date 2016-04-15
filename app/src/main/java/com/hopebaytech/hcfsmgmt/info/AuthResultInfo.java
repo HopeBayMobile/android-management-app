@@ -1,6 +1,10 @@
 package com.hopebaytech.hcfsmgmt.info;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by Aaron on 2016/3/8.
@@ -15,6 +19,7 @@ public class AuthResultInfo {
     private String bucket;
     private String protocol;
     private String message;
+    private String token;
     private int responseCode;
 
     public int getResponseCode() {
@@ -88,5 +93,33 @@ public class AuthResultInfo {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    @Override
+    public String toString() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("backendType", backend_type);
+            jsonObject.put("account", account);
+            jsonObject.put("user", user);
+            jsonObject.put("password", password);
+            jsonObject.put("backendUrl", backend_url);
+            jsonObject.put("bucket", bucket);
+            jsonObject.put("protocol", protocol);
+            jsonObject.put("message", message);
+            jsonObject.put("token", token);
+            jsonObject.put("responseCode", responseCode);
+        } catch (JSONException e) {
+            return Log.getStackTraceString(e);
+        }
+        return jsonObject.toString();
     }
 }

@@ -53,11 +53,4 @@ public class AboutFragment extends Fragment {
 //		}
 	}
 
-	public void onBackPressed() {
-		FragmentManager fm = getFragmentManager();
-		FragmentTransaction ft = fm.beginTransaction();
-		ft.replace(R.id.fragment_container, DashboardFragment.newInstance(), DashboardFragment.TAG);
-		ft.commit();
-	}
-
 }

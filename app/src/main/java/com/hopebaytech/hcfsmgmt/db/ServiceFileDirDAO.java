@@ -29,10 +29,22 @@ public class ServiceFileDirDAO {
     		PIN_STATUS_COLUMN + " INTEGER NOT NULL)";
     
     private Context context;
+	private static ServiceFileDirDAO mServiceFileDirDAO;
     
-    public ServiceFileDirDAO(Context context) {
+    private ServiceFileDirDAO(Context context) {
     	this.context = context;
     }
+
+	public static ServiceFileDirDAO getInstance(Context context) {
+		if (mServiceFileDirDAO == null) {
+			synchronized (ServiceFileDirDAO.class) {
+				if (mServiceFileDirDAO == null) {
+					mServiceFileDirDAO = new ServiceFileDirDAO(context);
+				}
+			}
+		}
+		return mServiceFileDirDAO;
+	}
     
     public void close() {
         getDataBase().close();

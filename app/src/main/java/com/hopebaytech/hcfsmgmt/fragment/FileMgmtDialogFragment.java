@@ -1,6 +1,5 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -144,7 +143,8 @@ public class FileMgmtDialogFragment extends DialogFragment {
                             startActivity(launchIntent);
                         }
                     })
-                    .setNegativeButton(R.string.file_mgmt_dialog_app_remove, new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.file_mgmt_dialog_app_cancel, null)
+                    .setNeutralButton(R.string.file_mgmt_dialog_app_remove, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Intent intent = new Intent(Intent.ACTION_DELETE);
@@ -152,8 +152,7 @@ public class FileMgmtDialogFragment extends DialogFragment {
                             intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
                             startActivity(intent);
                         }
-                    })
-                    .setNeutralButton(R.string.file_mgmt_dialog_app_cancel, null);
+                    });
             return builder.create();
         } else if (mItemInfo instanceof DataTypeInfo) {
             return super.onCreateDialog(savedInstanceState);
@@ -183,9 +182,9 @@ public class FileMgmtDialogFragment extends DialogFragment {
         DirStatusInfo dataDirInfo = getDirStatusInfo(appInfo.getDataDir());
         DirStatusInfo externalDirInfo = getDirStatusInfo(appInfo.getExternalDir());
 
-        int numLocal = 0;
-        int numHybrid = 0;
-        int numCloud = 0;
+        float numLocal = 0;
+        float numHybrid = 0;
+        float numCloud = 0;
         if (sourceDirInfo != null) {
             numLocal += sourceDirInfo.getNumLocal();
             numHybrid += sourceDirInfo.getNumHybrid();

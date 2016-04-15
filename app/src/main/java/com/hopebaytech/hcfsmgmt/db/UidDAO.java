@@ -32,10 +32,23 @@ public class UidDAO {
 
 //    private SQLiteDatabase db;
     private Context context;
+    private static UidDAO mUidDAO;
 
-    public UidDAO(Context context) {
+    private UidDAO(Context context) {
         this.context = context;
     }
+
+    public static UidDAO getInstance(Context context) {
+        if (mUidDAO == null) {
+            synchronized (UidDAO.class) {
+                if (mUidDAO == null) {
+                    mUidDAO = new UidDAO(context);
+                }
+            }
+        }
+        return mUidDAO;
+    }
+
 
     public void close() {
         getDataBase().close();

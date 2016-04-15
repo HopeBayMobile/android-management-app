@@ -84,14 +84,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(mContext);
 		} else if (key.equals(KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY)) {
 			
-		} else if (key.equals(KEY_PREF_NOTIFY_UPLOAD_COMPLETED)) {
-			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(key, false);
-			if (notifyUploadCompletedPref) {
-				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(mContext);
-			} else {
-				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(mContext);
-			}
-		} else if (key.equals(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+		}
+//		else if (key.equals(KEY_PREF_NOTIFY_UPLOAD_COMPLETED)) {
+//			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(key, false);
+//			if (notifyUploadCompletedPref) {
+//				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(mContext);
+//			} else {
+//				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(mContext);
+//			}
+//		}
+		else if (key.equals(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
 			HCFSMgmtUtils.stopNotifyLocalStorageUsedRatioAlarm(mContext);
 			HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
 

@@ -41,7 +41,6 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
 import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
-import com.hopebaytech.hcfsmgmt.fragment.FileMgmtDialogFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
@@ -195,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                DataTypeDAO dataTypeDAO = new DataTypeDAO(MainActivity.this);
+                DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(MainActivity.this);
                 if (dataTypeDAO.getCount() == 0) {
                     DataTypeInfo dataTypeInfo = new DataTypeInfo(MainActivity.this);
                     dataTypeInfo.setPinned(HCFSMgmtUtils.DEFAULT_PINNED_STATUS);

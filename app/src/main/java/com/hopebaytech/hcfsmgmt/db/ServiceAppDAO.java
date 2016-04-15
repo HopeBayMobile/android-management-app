@@ -37,7 +37,19 @@ public class ServiceAppDAO {
     		EXTERNAL_DIR_COLUMN + " TEXT)";
     
     private Context context;
-    
+	private static ServiceAppDAO mServiceAppDAO;
+
+	public static ServiceAppDAO getInstance(Context context) {
+		if (mServiceAppDAO == null) {
+			synchronized (ServiceAppDAO.class) {
+				if (mServiceAppDAO == null) {
+					mServiceAppDAO = new ServiceAppDAO(context);
+				}
+			}
+		}
+		return mServiceAppDAO;
+	}
+
     public ServiceAppDAO(Context context) {
     	this.context = context;
     }

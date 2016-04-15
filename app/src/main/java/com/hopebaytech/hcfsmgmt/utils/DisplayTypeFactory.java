@@ -20,7 +20,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 
-public class DisplayType {
+public class DisplayTypeFactory {
 
 	public static final int APP_SYSTEM = 0;
 	public static final int APP_USER = 1;
@@ -73,7 +73,8 @@ public class DisplayType {
 		return itemInfoList;
 	}
 	
-	public static ArrayList<ItemInfo> getListOfDataType(Context context, DataTypeDAO dataTypeDAO) {
+	public static ArrayList<ItemInfo> getListOfDataType(Context context) {
+		DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(context);
 		ArrayList<ItemInfo> itemInfoList = new ArrayList<ItemInfo>();
 		String[] dataTypeArray = context.getResources().getStringArray(R.array.file_mgmt_list_data_types);
 		for (int i = 0; i < dataTypeArray.length; i++) {

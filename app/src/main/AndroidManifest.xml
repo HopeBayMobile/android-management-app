@@ -59,6 +59,9 @@
 
                 <data android:scheme="package" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
         </receiver>
 
         <service android:name="com.hopebaytech.hcfsmgmt.service.HCFSMgmtService" />

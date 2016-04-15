@@ -20,6 +20,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -47,7 +48,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
             public void run() {
                 if (HCFSConfig.isActivated()) {
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "Activated");
-                    final String serverClientId = HCFSMgmtUtils.getServerClientIdFromMgmtServer();
+                    final String serverClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
                     if (serverClientId != null) {
                         Thread getGoogleAccountInfoThread = new Thread(new Runnable() {
                             @Override
@@ -114,7 +115,7 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
-        HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onConnectionFailed", "" + connectionResult);
+        HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onConnectionFailed", connectionResult.toString());
 //        Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
 //        startActivity(intent);
         finish();

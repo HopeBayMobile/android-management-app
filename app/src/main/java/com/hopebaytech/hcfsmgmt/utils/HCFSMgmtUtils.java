@@ -1,28 +1,5 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
-import com.hopebaytech.hcfsmgmt.db.UidDAO;
-import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
-import com.hopebaytech.hcfsmgmt.info.AppInfo;
-import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
-import com.hopebaytech.hcfsmgmt.info.LocationStatus;
-import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
-import com.hopebaytech.hcfsmgmt.info.UidInfo;
-import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
-import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
-
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -47,14 +24,31 @@ import android.support.v7.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import javax.net.ssl.HttpsURLConnection;
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.AppInfo;
+import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.info.LocationStatus;
+import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
+import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 public class HCFSMgmtUtils {
 
     public static final String TAG = "HopeBay";
     public static final String CLASSNAME = "HCFSMgmtUtils";
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
-    public static  final String MANAGEMENT_SERVER_AUTH_URL = "https://terafonnreg.hopebaytech.com/api/register/auth";
 
     public static final boolean ENABLE_AUTH = false;
     public static final boolean DEFAULT_PINNED_STATUS = false;
@@ -73,6 +67,7 @@ public class HCFSMgmtUtils {
     public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 2;
     public static final int NOTIFY_ID_ONGOING = 3;
     public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 4;
+    public static final int NOTIFY_ID_FAILED_SILENT_SIGN_IN = 5;
 
     public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
     public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
@@ -97,9 +92,10 @@ public class HCFSMgmtUtils {
     public static final String INTENT_KEY_UID = "intent_key_uid";
     public static final String INTENT_KEY_PACKAGE_NAME = "intent_key_package_name";
     public static final String INTENT_KEY_ONGOING = "intent_key_ongoing";
+    public static final String INTENT_KEY_SILENT_SIGN_IN = "intent_key_silent_sign_in";
 
     public static final String INTENT_VALUE_NONE = "intent_value_none";
-    public static final String INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED = "intent_value_notify_upload_complete";
+    public static final String INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED = "intent_value_notify_upload_complete";
     public static final String INTENT_VALUE_PIN_DATA_TYPE_FILE = "intent_value_pin_data_type_file";
     public static final String INTENT_VALUE_PIN_APP = "intent_value_pin_app";
     public static final String INTENT_VALUE_PIN_FILE_DIRECTORY = "intent_value_pin_file_directory";
@@ -110,14 +106,16 @@ public class HCFSMgmtUtils {
     public static final String INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO = "intent_value_notify_local_storage_used_ratio";
     public static final String INTENT_VALUE_ONGOING_NOTIFICATION = "intent_value_ongoing_notification";
     public static final String INTENT_VALUE_PIN_UNPIN_UDPATE_APP = "intent_value_pin_unpin_update_app";
+    public static final String INTENT_VALUE_SILENT_SIGN_IN = "intent_value_silent_sign_in";
+    public static final String PREF_IS_SILENT_SIGN_IN = "pref_is_silent_sign_in";
 
-    public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
-    public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
-    public static final String HCFS_CONFIG_SWIFT_USER = "swift_user";
-    public static final String HCFS_CONFIG_SWIFT_PASS = "swift_pass";
-    public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
-    public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
-    public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
+//    public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
+//    public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
+//    public static final String HCFS_CONFIG_SWIFT_USER = "swift_user";
+//    public static final String HCFS_CONFIG_SWIFT_PASS = "swift_pass";
+//    public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
+//    public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
+//    public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
 
     public static final String ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
     public static final String ITENT_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
@@ -128,9 +126,9 @@ public class HCFSMgmtUtils {
 
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
-    public static boolean isAppPinned(AppInfo appInfo, UidDAO uidDAO) {
+    public static boolean isAppPinned(Context context, AppInfo appInfo) {
         log(Log.DEBUG, CLASSNAME, "isAppPinned", appInfo.getItemName());
-
+        UidDAO uidDAO = UidDAO.getInstance(context);
         UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
         return uidInfo != null && uidInfo.isPinned();
     }
@@ -224,7 +222,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
+        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
 
         int requestCode = REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -241,7 +239,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLAOD_COMPLETED);
+        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
 
         int requestCode = REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED;
         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
@@ -384,50 +382,6 @@ public class HCFSMgmtUtils {
         // }
         // cursor.close();
         return imagePaths;
-    }
-
-    public static void notifyEvent(Context context, int notify_id, String notify_title, String notify_message, boolean onGoing) {
-        NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
-        bigStyle.bigText(notify_message);
-
-        Intent intent = new Intent(context, LoadingActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(context, notify_id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_terafonn_logo_default);
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-        builder = (NotificationCompat.Builder) builder
-                .setWhen(System.currentTimeMillis())
-//                .setSmallIcon(R.drawable.icon_terafonn_logo_status_bar) TODO
-                .setSmallIcon(R.drawable.test_02)
-                .setLargeIcon(largeIcon)
-                .setTicker(notify_title)
-                .setContentTitle(notify_title)
-                .setContentText(notify_message)
-                .setStyle(bigStyle);
-//                .setContentIntent(contentIntent);
-        if (onGoing) {
-            builder = (NotificationCompat.Builder) builder
-                    .setAutoCancel(false)
-                    .setOngoing(true)
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setContentIntent(contentIntent);
-        } else {
-            int defaults = 0;
-            defaults |= NotificationCompat.DEFAULT_VIBRATE;
-            builder = (NotificationCompat.Builder) builder
-                    .setAutoCancel(true)
-                    .setOngoing(false)
-                    .setDefaults(defaults)
-                    .setFullScreenIntent(contentIntent, true);
-        }
-        Notification notification = builder.build();
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
-        notificationManagerCompat.notify(notify_id, notification);
-    }
-
-    public static void cancelEvent(Context context, int notify_id) {
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
-        notificationManagerCompat.cancel(notify_id);
     }
 
     public static void startSyncToCloud() {
@@ -888,7 +842,7 @@ public class HCFSMgmtUtils {
         String key = SettingsFragment.KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY;
         boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(key, false);
         if (notifyConnFailedRecoveryPref) {
-            notifyEvent(context, notify_id, notify_title, notify_content, false);
+            NotificationEvent.notify(context, notify_id, notify_title, notify_content, false);
         }
     }
 
@@ -959,39 +913,6 @@ public class HCFSMgmtUtils {
         }
     }
 
-//    public static Drawable getPinUnpinImage(Context context, boolean isPinned, int status) {
-//        Drawable pinDrawable = null;
-//        try {
-//            if (isPinned) {
-//                if (status == LocationStatus.LOCAL) {
-//                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_pin);
-//                } else if (status == LocationStatus.HYBRID || status == LocationStatus.CLOUD) {
-//                    pinDrawable = ContextCompat.getDrawable(context, R.drawable.pinning);
-//                } else {
-//                    // TODO default image
-//                }
-//            } else {
-//                switch (status) {
-//                    case LocationStatus.LOCAL:
-//                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_unpin);
-//                        break;
-//                    case LocationStatus.HYBRID:
-//                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_hybrid);
-//                        break;
-//                    case LocationStatus.CLOUD:
-//                        pinDrawable = ContextCompat.getDrawable(context, R.drawable.unpinned_cloud);
-//                        break;
-//                    default:
-//                        // TODO default image
-//                        break;
-//                }
-//            }
-//        } catch (Exception e) {
-//            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getPinUnpinImage", Log.getStackTraceString(e));
-//        }
-//        return pinDrawable;
-//    }
-
     public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
         Drawable pinDrawable = null;
         try {
@@ -1007,9 +928,8 @@ public class HCFSMgmtUtils {
     }
 
     @Nullable
-    public static String getEncryptedDeviceIMEI(Context context) {
+    public static String getEncryptedDeviceIMEI() {
         return new String(HCFSApiUtils.getEncryptedIMEI());
-//        return getDeviceIMEI(context);
     }
 
     public static String getDeviceIMEI(Context context) {
@@ -1017,46 +937,5 @@ public class HCFSMgmtUtils {
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceIMEI", "imei=" + imei);
         return imei == null ? "" : imei;
     }
-
-    public static String getServerClientIdFromMgmtServer() {
-        String serverClientId = null;
-        HttpsURLConnection conn = null;
-        try {
-            URL url = new URL(MANAGEMENT_SERVER_AUTH_URL);
-            conn = (HttpsURLConnection) url.openConnection();
-            conn.setDoInput(true);
-            int responseCode = conn.getResponseCode();
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    sb.append(line);
-                }
-
-                String jsonResponse = sb.toString();
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "jsonResponse=" + jsonResponse);
-                if (!jsonResponse.isEmpty()) {
-                    JSONObject jObj = new JSONObject(jsonResponse);
-                    JSONObject dataObj = jObj.getJSONObject("data");
-                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
-                    serverClientId = authObj.getString("client_id");
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getServerClientIdFromMgmtServer", "server_client_id=" + serverClientId);
-                    bufferedReader.close();
-                }
-            }
-        } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getServerClientIdFromMgmtServer", Log.getStackTraceString(e));
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-        return serverClientId;
-    }
-
-//    public static boolean isActivated() {
-//        return !HCFSMgmtUtils.getHCFSConfig(HCFSMgmtUtils.HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty();
-//    }
 
 }
