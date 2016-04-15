@@ -8,12 +8,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceAppDAO;
@@ -29,10 +31,8 @@ import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 
 import android.app.Service;
@@ -42,6 +42,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -397,11 +398,12 @@ public class HCFSMgmtService extends Service {
 
     private void storeAuthResult(final Context context, GoogleSignInResult result) {
         MgmtCluster.plusRestryCount();
-        MgmtCluster.StoreAuthResultHandler resultHandler = new MgmtCluster.StoreAuthResultHandler(result);
-        resultHandler.setStoreAuthResultListener(new MgmtCluster.StoreAuthResultListener() {
+        MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(Looper.getMainLooper(), result);
+        mgmtAuth.setOnAuthListener(new MgmtCluster.AuthListener() {
             @Override
-            public void onStoreAuthResultSuccessful(AuthResultInfo authResultInfo) {
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, this.getClass().getSimpleName(), "onStoreAuthResultSuccessful", null);
+            public void onAuthSuccessful(GoogleSignInAccount acct, AuthResultInfo authResultInfo) {
+                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "storeAuthResult", "onAuthSuccessful", null);
+
                 mGoogleApiClient.disconnect();
                 MgmtCluster.resetRestryCount();
 
@@ -425,25 +427,55 @@ public class HCFSMgmtService extends Service {
             }
 
             @Override
-            public void onStoreAuthResultFailed() {
+            public void onGoogleAuthFailed() {
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "storeAuthResult", "onGoogleAuthFailed", null);
+
+                int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
+                String notify_title = getString(R.string.app_name);
+                String notify_content = "Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。";
+                NotificationEvent.notify(context, id_notify, notify_title, notify_content, false);
+
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                        .setResultCallback(new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(Status status) {
+                                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, this.getClass().getName(), "onGoogleAuthFailed", "status=" + status);
+                            }
+                        });
                 mGoogleApiClient.disconnect();
+            }
+
+            @Override
+            public void onMmgtAuthFailed(AuthResultInfo authResultInfo) {
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "storeAuthResult", "onMmgtAuthFailed", null);
+
                 if (MgmtCluster.isNeedToRetryAgain()) {
                     Intent intentService = new Intent(context, HCFSMgmtService.class);
                     intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_SILENT_SIGN_IN);
                     context.startService(intentService);
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, this.getClass().getSimpleName(), "onStoreAuthResultFailed", "Authentication failed, retry again");
+                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, this.getClass().getName(), "onGoogleAuthFailed", "Authentication failed, retry again");
                 } else {
 //                    HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_TOKEN, ""); TODO swift_token field is not added to hcfs.conf
 //                    HCFSConfig.reloadConfig();
 
                     int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
                     String notify_title = getString(R.string.app_name);
-                    String notify_content = "TeraFonn 認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。";
+                    String notify_content = "TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。";
                     NotificationEvent.notify(context, id_notify, notify_title, notify_content, false);
+
+                    Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                            .setResultCallback(new ResultCallback<Status>() {
+                                @Override
+                                public void onResult(Status status) {
+                                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, this.getClass().getName(), "onMmgtAuthFailed", "status=" + status);
+                                }
+                            });
                 }
+                mGoogleApiClient.disconnect();
             }
+
         });
-        resultHandler.storeAuthResult();
+        mgmtAuth.authenticate();
     }
 
     private void notifyUploadCompleted() {

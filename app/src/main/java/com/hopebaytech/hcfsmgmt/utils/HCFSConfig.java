@@ -24,6 +24,7 @@ public class HCFSConfig {
 
     public static boolean isActivated() {
         return !getHCFSConfig(HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty();
+//        return !getHCFSConfig(HCFS_CONFIG_SWIFT_TOKEN).isEmpty(); TODO
     }
 
     public static boolean setHCFSConfig(String key, String value) {

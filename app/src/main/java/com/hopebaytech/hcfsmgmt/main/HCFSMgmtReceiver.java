@@ -61,7 +61,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 /** Execute silent Google sign-in */
                 boolean isSilentSignIn = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_IS_SILENT_SIGN_IN, false);
                 if (!isSilentSignIn) {
-                    if (!NetworkUtils.isNetworkConnected(context)) {
+                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isSilentSignIn=" + isSilentSignIn);
+                    if (NetworkUtils.isNetworkConnected(context)) {
+                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "-----");
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putBoolean(HCFSMgmtUtils.PREF_IS_SILENT_SIGN_IN, true);
                         editor.apply();

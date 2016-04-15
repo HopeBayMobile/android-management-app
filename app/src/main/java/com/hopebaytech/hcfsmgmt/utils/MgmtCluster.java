@@ -1,5 +1,7 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -263,57 +265,73 @@ public class MgmtCluster {
         return sb.toString();
     }
 
-    public interface StoreAuthResultListener {
+    public interface AuthListener {
 
-        void onStoreAuthResultSuccessful(AuthResultInfo authResultInfo);
+        void onAuthSuccessful(GoogleSignInAccount acct, AuthResultInfo authResultInfo);
 
-        void onStoreAuthResultFailed();
+        void onGoogleAuthFailed();
+
+        void onMmgtAuthFailed(AuthResultInfo authResultInfo);
 
     }
 
-    public static class StoreAuthResultHandler {
+    public static class MgmtAuth {
 
         private GoogleSignInResult googleSignInResult;
-        private StoreAuthResultListener storeAuthResultListener;
+        private AuthListener authListener;
+        private Looper looper;
 
-        public StoreAuthResultHandler(GoogleSignInResult googleSignInResult) {
+        public MgmtAuth(Looper looper, GoogleSignInResult googleSignInResult) {
+            this.looper = looper;
             this.googleSignInResult = googleSignInResult;
         }
 
-        public void storeAuthResult() {
+        public void authenticate() {
             if (googleSignInResult != null && googleSignInResult.isSuccess()) {
-                GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
+                final GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
                 if (acct != null) {
                     final String idToken = acct.getIdToken();
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "storeAuthResult", "idToken=" + acct.getIdToken());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "storeAuthResult", "displayName=" + acct.getDisplayName());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "storeAuthResult", "email=" + acct.getEmail());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "storeAuthResult", "photoUrl=" + acct.getPhotoUrl());
+//                    final String serverAuthCode = acct.getServerAuthCode();
+                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "idToken=" + acct.getIdToken());
+                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "displayName=" + acct.getDisplayName());
+                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "email=" + acct.getEmail());
+                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "photoUrl=" + acct.getPhotoUrl());
 
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
                             MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
-                            AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
-                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "storeAuthResult", "authResultInfo=" + authResultInfo);
+                            final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
+                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);
                             // TODO Store backend information and auth token to hcfs.conf, then call HCFS to reload the hcfs.conf
-                            if (authResultInfo.getResponseCode() == 200) {
-                                storeAuthResultListener.onStoreAuthResultSuccessful(authResultInfo);
+                            Handler handler = new Handler(looper);
+                            if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        authListener.onAuthSuccessful(acct, authResultInfo);
+                                    }
+                                });
                             } else {
-                                storeAuthResultListener.onStoreAuthResultFailed();
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        authListener.onMmgtAuthFailed(authResultInfo);
+                                    }
+                                });
                             }
                         }
                     }).start();
                 } else {
-                    storeAuthResultListener.onStoreAuthResultFailed();
+                    authListener.onGoogleAuthFailed();
                 }
             } else {
-                storeAuthResultListener.onStoreAuthResultFailed();
+                authListener.onGoogleAuthFailed();
             }
         }
 
-        public void setStoreAuthResultListener(StoreAuthResultListener listener) {
-            this.storeAuthResultListener = listener;
+        public void setOnAuthListener(AuthListener listener) {
+            this.authListener = listener;
         }
 
     }

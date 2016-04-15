@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.support.v7.preference.ListPreference;
+import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -40,6 +42,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 		mContext = context;
 	}
 
+    @Override
+    public void onCreatePreferences(Bundle bundle, String s) {
+        addPreferencesFromResource(R.xml.settings_preferences);
+    }
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,6 +57,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 		String ratio = sharedPreferences.getString(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO, defaultValue) + "%%";
 		String summary = getString(R.string.settings_local_storage_used_ratio, ratio);
 		storage_used_ratio.setSummary(summary);
+
+		Preference button = findPreference(getString(R.string.settings_section_change_account_key));
+		button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+                ChangeAccountDialogFragment dialogFragment = ChangeAccountDialogFragment.newInstance();
+                dialogFragment.show(getFragmentManager(), ChangeAccountDialogFragment.TAG);
+				return true;
+			}
+		});
 	}
 
     @Override
@@ -59,10 +76,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         return settingsLayout;
     }
 
-    @Override
-    public void onCreatePreferences(Bundle bundle, String s) {
-        addPreferencesFromResource(R.xml.settings_preferences);
-    }
 
 	@Override
 	public void onResume() {
@@ -84,16 +97,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 			HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(mContext);
 		} else if (key.equals(KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY)) {
 			
-		}
-//		else if (key.equals(KEY_PREF_NOTIFY_UPLOAD_COMPLETED)) {
-//			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(key, false);
-//			if (notifyUploadCompletedPref) {
-//				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(mContext);
-//			} else {
-//				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(mContext);
-//			}
-//		}
-		else if (key.equals(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+		} else if (key.equals(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
 			HCFSMgmtUtils.stopNotifyLocalStorageUsedRatioAlarm(mContext);
 			HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
 
@@ -102,7 +106,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 			String summary = getString(R.string.settings_local_storage_used_ratio, ratio);
 			storage_used_ratio.setSummary(summary);
 		}
-		
+//      else if (key.equals(KEY_PREF_NOTIFY_UPLOAD_COMPLETED)) {
+//			boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(key, false);
+//			if (notifyUploadCompletedPref) {
+//				HCFSMgmtUtils.startNotifyUploadCompletedAlarm(mContext);
+//			} else {
+//				HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(mContext);
+//			}
+//		}
 	}
 
 }

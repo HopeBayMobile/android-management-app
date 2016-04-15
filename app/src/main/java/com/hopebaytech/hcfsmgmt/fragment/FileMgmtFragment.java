@@ -658,7 +658,7 @@ public class FileMgmtFragment extends Fragment {
         });
 
 //        final ImageView displayType = (ImageView) view.findViewById(R.id.display_type);
-        mLayoutType.setOnClickListener(new OnClickListener() {
+        mLayoutType.setOnClickListener (new OnClickListener() {
             @Override
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(mContext, mLayoutType);
@@ -804,8 +804,6 @@ public class FileMgmtFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(final GridRecyclerViewHolder holder, final int position) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GridRecyclerViewAdapter", "onBindViewHolder");
-
             final ItemInfo itemInfo = itemInfoList.get(position);
             itemInfo.setViewHolder(holder);
             holder.setItemInfo(itemInfo);

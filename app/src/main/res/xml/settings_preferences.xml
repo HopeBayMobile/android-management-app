@@ -2,21 +2,21 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/settings_section_sync" >
+    <PreferenceCategory android:title="@string/settings_section_sync">
         <SwitchPreferenceCompat
             android:defaultValue="true"
             android:key="pref_sync_wifi_only"
             android:title="@string/settings_section_sync_wifi_only" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/settings_section_notify" >
+    <PreferenceCategory android:title="@string/settings_section_notify">
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="pref_notify_conn_failed_recovery"
             android:title="@string/settings_section_notify_conn_failed_recovery" />
         <!--<SwitchPreferenceCompat-->
-            <!--android:defaultValue="true"-->
-            <!--android:key="pref_notify_upload_completed"-->
-            <!--android:title="@string/settings_section_notify_upload_completed" />-->
+        <!--android:defaultValue="true"-->
+        <!--android:key="pref_notify_upload_completed"-->
+        <!--android:title="@string/settings_section_notify_upload_completed" />-->
 
         <ListPreference
             android:defaultValue="90"
@@ -26,6 +26,11 @@
             android:key="pref_notify_local_storage_used_ratio"
             android:summary="@string/settings_section_notify_local_storage_used_ratio_summary"
             android:title="@string/settings_section_notify_local_storage_used_ratio_title" />
+
+        <Preference
+            android:key="@string/settings_section_change_account_key"
+            android:summary="@string/settings_section_change_account_summary"
+            android:title="@string/settings_section_change_account_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>

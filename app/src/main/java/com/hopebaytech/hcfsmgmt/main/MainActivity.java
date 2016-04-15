@@ -190,46 +190,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        /** Inert default value of image, video and audio type to "datatype" table in database */
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(MainActivity.this);
-                if (dataTypeDAO.getCount() == 0) {
-                    DataTypeInfo dataTypeInfo = new DataTypeInfo(MainActivity.this);
-                    dataTypeInfo.setPinned(HCFSMgmtUtils.DEFAULT_PINNED_STATUS);
-
-                    dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
-                    dataTypeDAO.insert(dataTypeInfo);
-
-                    dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
-                    dataTypeDAO.insert(dataTypeInfo);
-
-                    dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
-                    dataTypeDAO.insert(dataTypeInfo);
-                }
-            }
-        });
+        /** Inert default value of image, video and audio type to "dataFtype" table in database */
+//        mHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(MainActivity.this);
+//                if (dataTypeDAO.getCount() == 0) {
+//                    DataTypeInfo dataTypeInfo = new DataTypeInfo(MainActivity.this);
+//                    dataTypeInfo.setPinned(HCFSMgmtUtils.DEFAULT_PINNED_STATUS);
+//
+//                    dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_IMAGE);
+//                    dataTypeDAO.insert(dataTypeInfo);
+//
+//                    dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_VIDEO);
+//                    dataTypeDAO.insert(dataTypeInfo);
+//
+//                    dataTypeInfo.setDataType(DataTypeDAO.DATA_TYPE_AUDIO);
+//                    dataTypeDAO.insert(dataTypeInfo);
+//                }
+//            }
+//        });
 
         /** Start NotifyUploadCompletedAlarm if user enables this notification in settings. Others, stop it */
-        Intent intent = new Intent(this, HCFSMgmtReceiver.class);
-        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
-                PendingIntent.FLAG_NO_CREATE) != null;
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, false);
-        if (notifyUploadCompletedPref) {
-            if (!isNotifyUploadCompletedAlarmExist) {
-                HCFSMgmtUtils.startNotifyUploadCompletedAlarm(this);
-            }
-        } else {
-            if (isNotifyUploadCompletedAlarmExist) {
-                HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(this);
-            }
-        }
+//        Intent intent = new Intent(this, HCFSMgmtReceiver.class);
+//        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+//        boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
+//                PendingIntent.FLAG_NO_CREATE) != null;
+//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+//        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, false);
+//        if (notifyUploadCompletedPref) {
+//            if (!isNotifyUploadCompletedAlarmExist) {
+//                HCFSMgmtUtils.startNotifyUploadCompletedAlarm(this);
+//            }
+//        } else {
+//            if (isNotifyUploadCompletedAlarmExist) {
+//                HCFSMgmtUtils.stopNotifyUploadCompletedAlarm(this);
+//            }
+//        }
 
         /** Start ResetXferAlarm if it doesn't exist */
-        intent = new Intent(this, HCFSMgmtReceiver.class);
+        Intent intent = new Intent(this, HCFSMgmtReceiver.class);
         intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
         boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent,
                 PendingIntent.FLAG_NO_CREATE) != null;
@@ -238,14 +238,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         /** Start PinDataTypeFileAlarm if it doesn't exist */
-        intent = new Intent(this, HCFSMgmtReceiver.class);
-        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
-        boolean isPinDataTypeAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_PIN_DATA_TYPE_FILE, intent,
-                PendingIntent.FLAG_NO_CREATE) != null;
-        if (!isPinDataTypeAlarmExist) {
-            HCFSMgmtUtils.startPinDataTypeFileAlarm(this);
-        }
+//        intent = new Intent(this, HCFSMgmtReceiver.class);
+//        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
+//        boolean isPinDataTypeAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_PIN_DATA_TYPE_FILE, intent,
+//                PendingIntent.FLAG_NO_CREATE) != null;
+//        if (!isPinDataTypeAlarmExist) {
+//            HCFSMgmtUtils.startPinDataTypeFileAlarm(this);
+//        }
 
         /** Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist */
         intent = new Intent(this, HCFSMgmtReceiver.class);
