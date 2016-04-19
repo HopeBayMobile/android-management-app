@@ -29,6 +29,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.AccountDAO;
+import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -297,10 +299,27 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                     }
                                 });
                             } else {
+                                String name = acct.getDisplayName();
+                                String email = acct.getEmail();
+                                String photoUrl = null;
+                                if (acct.getPhotoUrl() != null) {
+                                    photoUrl= acct.getPhotoUrl().toString();
+                                }
+
+                                AccountInfo accountInfo = new AccountInfo();
+                                accountInfo.setName(name);
+                                accountInfo.setEmail(email);
+                                accountInfo.setImgUrl(photoUrl);
+
+                                AccountDAO accountDAO = AccountDAO.getInstance(ActivateCloudStorageActivity.this);
+                                accountDAO.clear();
+                                accountDAO.insert(accountInfo);
+                                accountDAO.close();
+
                                 Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
-                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, acct.getDisplayName());
-                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, acct.getEmail());
-                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, acct.getPhotoUrl());
+                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, email);
+                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
                                 startActivity(intent);
                                 finish();
                             }

@@ -11,10 +11,9 @@ import java.util.List;
 public interface IGenericDAO<T> {
 
     T getRecord(Cursor cursor);
-    SQLiteDatabase getDataBase();
     int getCount();
     List<T> getAll();
-    boolean insert();
+    boolean insert(T info);
     void close();
     void clear();
     void delete(String key);

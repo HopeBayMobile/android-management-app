@@ -24,7 +24,8 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", "");
-        db.execSQL(DataTypeDAO.CREATE_TABLE);
+//        db.execSQL(DataTypeDAO.CREATE_TABLE);
+        db.execSQL(AccountDAO.CREATE_TABLE);
         db.execSQL(ServiceFileDirDAO.CREATE_TABLE);
         db.execSQL(ServiceAppDAO.CREATE_TABLE);
     }

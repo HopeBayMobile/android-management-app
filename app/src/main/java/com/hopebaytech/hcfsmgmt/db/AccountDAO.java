@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -28,11 +29,12 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     NAME_COLUMN + " TEXT NOT NULL, " +
                     EMAIL_COLUMN + " TEXT NOT NULL, " +
-                    IMG_URL_COLUMN + " TEXT NOT NULL, " +
+                    IMG_URL_COLUMN + " TEXT, " +
                     IMG_BASE64_COLUMN + " TEXT)";
 
     private Context context;
     private static AccountDAO mAccountDAO;
+    private static SQLiteDatabase mDataBase;
 
     private AccountDAO(Context context) {
         this.context = context;
@@ -46,6 +48,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
                 }
             }
         }
+        mDataBase = HCFSDBHelper.getDataBase(context);
         return mAccountDAO;
     }
 
@@ -60,13 +63,8 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
     }
 
     @Override
-    public SQLiteDatabase getDataBase() {
-        return HCFSDBHelper.getDataBase(context);
-    }
-
-    @Override
     public int getCount() {
-        Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = mDataBase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
         int count = cursor.getCount();
         cursor.close();
         return count;
@@ -75,7 +73,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
     @Override
     public List<AccountInfo> getAll() {
         List<AccountInfo> accountInfoList = new ArrayList<>();
-        Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             accountInfoList.add(getRecord(cursor));
         }
@@ -84,8 +82,13 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
     }
 
     @Override
-    public boolean insert() {
-        return false;
+    public boolean insert(AccountInfo info) {
+        ContentValues cv = new ContentValues();
+        cv.put(NAME_COLUMN, info.getName());
+        cv.put(NAME_COLUMN, info.getEmail());
+        cv.put(NAME_COLUMN, info.getImgUrl());
+        cv.put(NAME_COLUMN, info.getImgBase64());
+        return mDataBase.insert(TABLE_NAME, null, cv) != -1;
     }
 
     @Override
@@ -95,6 +98,11 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
 
     @Override
     public void clear() {
+        mDataBase.delete(TABLE_NAME, null, null);
+    }
+
+    @Override
+    public void delete(String key) {
 
     }
 
