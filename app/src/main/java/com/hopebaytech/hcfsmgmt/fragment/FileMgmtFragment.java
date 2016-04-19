@@ -143,7 +143,7 @@ public class FileMgmtFragment extends Fragment {
     private boolean isCurrentVisible;
     private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.GRID;
 
-    private Map<String, Boolean> mDataTypePinStatusMap = new HashMap<>();
+//    private Map<String, Boolean> mDataTypePinStatusMap = new HashMap<>();
 
     private Runnable mAutoUiRefreshRunnable = new Runnable() {
         @Override
@@ -600,17 +600,17 @@ public class FileMgmtFragment extends Fragment {
                 } else if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_files))) {
                     String logMsg = "FILE_ROOT_DIR_PATH=" + FILE_ROOT_DIR_PATH;
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityCreated", logMsg);
-                    mWorkerHandler.post(new Runnable() {
-                        public void run() {
-                            DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(mContext);
-                            DataTypeInfo imageTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
-                            DataTypeInfo videoTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
-                            DataTypeInfo audioTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);
-                            mDataTypePinStatusMap.put(imageTypeInfo.getDataType(), imageTypeInfo.isPinned());
-                            mDataTypePinStatusMap.put(videoTypeInfo.getDataType(), videoTypeInfo.isPinned());
-                            mDataTypePinStatusMap.put(audioTypeInfo.getDataType(), audioTypeInfo.isPinned());
-                        }
-                    });
+//                    mWorkerHandler.post(new Runnable() {
+//                        public void run() {
+//                            DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(mContext);
+//                            DataTypeInfo imageTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
+//                            DataTypeInfo videoTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
+//                            DataTypeInfo audioTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);
+//                            mDataTypePinStatusMap.put(imageTypeInfo.getDataType(), imageTypeInfo.isPinned());
+//                            mDataTypePinStatusMap.put(videoTypeInfo.getDataType(), videoTypeInfo.isPinned());
+//                            mDataTypePinStatusMap.put(audioTypeInfo.getDataType(), audioTypeInfo.isPinned());
+//                        }
+//                    });
 
                     mCurrentFile = new File(FILE_ROOT_DIR_PATH);
                     mFilePathNavigationLayout.removeAllViews();
@@ -2096,81 +2096,81 @@ public class FileMgmtFragment extends Fragment {
             boolean isNeedToProcess = true;
 
             if (!isPinned) {
-                if (fileDirInfo.getMimeType() != null) {
-                    if (fileDirInfo.getMimeType().contains(DataTypeDAO.DATA_TYPE_IMAGE)) {
-                        if (mDataTypePinStatusMap.get(DataTypeDAO.DATA_TYPE_IMAGE)) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setTitle(fileDirInfo.getItemName());
-                            builder.setMessage(mContext.getString(R.string.file_mgmt_whether_allowed_to_unpin_image));
-                            builder.setPositiveButton(mContext.getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    fileDirInfo.setPinned(isPinned);
-                                    fileDirInfo.setLastProcessTime(System.currentTimeMillis());
-                                    mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-                                    holder.changePinImage(fileDirInfo);
-                                }
-                            });
-                            builder.setNegativeButton(mContext.getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            });
-                            builder.setCancelable(false);
-                            builder.show();
-                            return;
-                        }
-                    } else if (fileDirInfo.getMimeType().contains(DataTypeDAO.DATA_TYPE_VIDEO)) {
-                        if (mDataTypePinStatusMap.get(DataTypeDAO.DATA_TYPE_VIDEO)) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setTitle(fileDirInfo.getItemName());
-                            builder.setMessage(mContext.getString(R.string.file_mgmt_whether_allowed_to_unpin_video));
-                            builder.setPositiveButton(mContext.getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    fileDirInfo.setPinned(isPinned);
-                                    fileDirInfo.setLastProcessTime(System.currentTimeMillis());
-                                    holder.changePinImage(fileDirInfo);
-                                    mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-                                }
-                            });
-                            builder.setNegativeButton(mContext.getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            });
-                            builder.setCancelable(false);
-                            builder.show();
-                            return;
-                        }
-                    } else if (fileDirInfo.getMimeType().contains(DataTypeDAO.DATA_TYPE_AUDIO)) {
-                        if (mDataTypePinStatusMap.get(DataTypeDAO.DATA_TYPE_AUDIO)) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                            builder.setTitle(fileDirInfo.getItemName());
-                            builder.setMessage(mContext.getString(R.string.file_mgmt_whether_allowed_to_unpin_audio));
-                            builder.setPositiveButton(mContext.getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    fileDirInfo.setPinned(isPinned);
-                                    fileDirInfo.setLastProcessTime(System.currentTimeMillis());
-                                    holder.changePinImage(fileDirInfo);
-                                    mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
-                                }
-                            });
-                            builder.setNegativeButton(mContext.getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            });
-                            builder.setCancelable(false);
-                            builder.show();
-                            return;
-                        }
-                    }
-                }
+//                if (fileDirInfo.getMimeType() != null) {
+//                    if (fileDirInfo.getMimeType().contains(DataTypeDAO.DATA_TYPE_IMAGE)) {
+//                        if (mDataTypePinStatusMap.get(DataTypeDAO.DATA_TYPE_IMAGE)) {
+//                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                            builder.setTitle(fileDirInfo.getItemName());
+//                            builder.setMessage(mContext.getString(R.string.file_mgmt_whether_allowed_to_unpin_image));
+//                            builder.setPositiveButton(mContext.getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    fileDirInfo.setPinned(isPinned);
+//                                    fileDirInfo.setLastProcessTime(System.currentTimeMillis());
+//                                    mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
+//                                    holder.changePinImage(fileDirInfo);
+//                                }
+//                            });
+//                            builder.setNegativeButton(mContext.getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//
+//                                }
+//                            });
+//                            builder.setCancelable(false);
+//                            builder.show();
+//                            return;
+//                        }
+//                    } else if (fileDirInfo.getMimeType().contains(DataTypeDAO.DATA_TYPE_VIDEO)) {
+//                        if (mDataTypePinStatusMap.get(DataTypeDAO.DATA_TYPE_VIDEO)) {
+//                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                            builder.setTitle(fileDirInfo.getItemName());
+//                            builder.setMessage(mContext.getString(R.string.file_mgmt_whether_allowed_to_unpin_video));
+//                            builder.setPositiveButton(mContext.getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    fileDirInfo.setPinned(isPinned);
+//                                    fileDirInfo.setLastProcessTime(System.currentTimeMillis());
+//                                    holder.changePinImage(fileDirInfo);
+//                                    mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
+//                                }
+//                            });
+//                            builder.setNegativeButton(mContext.getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//
+//                                }
+//                            });
+//                            builder.setCancelable(false);
+//                            builder.show();
+//                            return;
+//                        }
+//                    } else if (fileDirInfo.getMimeType().contains(DataTypeDAO.DATA_TYPE_AUDIO)) {
+//                        if (mDataTypePinStatusMap.get(DataTypeDAO.DATA_TYPE_AUDIO)) {
+//                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                            builder.setTitle(fileDirInfo.getItemName());
+//                            builder.setMessage(mContext.getString(R.string.file_mgmt_whether_allowed_to_unpin_audio));
+//                            builder.setPositiveButton(mContext.getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    fileDirInfo.setPinned(isPinned);
+//                                    fileDirInfo.setLastProcessTime(System.currentTimeMillis());
+//                                    holder.changePinImage(fileDirInfo);
+//                                    mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
+//                                }
+//                            });
+//                            builder.setNegativeButton(mContext.getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//
+//                                }
+//                            });
+//                            builder.setCancelable(false);
+//                            builder.show();
+//                            return;
+//                        }
+//                    }
+//                }
 
                 if (fileDirInfo.getFilePath().contains(EXTERNAL_ANDROID_PATH)) {
                     isNeedToProcess = false;

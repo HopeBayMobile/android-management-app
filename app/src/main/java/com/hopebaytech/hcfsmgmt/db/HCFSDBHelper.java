@@ -13,8 +13,9 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "hopebay.db";
     public static final int VERSION = 1;
     private final String CLASSNAME = getClass().getSimpleName();
-    private static SQLiteDatabase database;
+    private static SQLiteDatabase mDatabase;
     private static HCFSDBHelper mHCFSDBHelper;
+    private static int mOpenCounter;
 
     public HCFSDBHelper(Context context, String name, CursorFactory factory, int version) {
         super(context, name, factory, version);
@@ -33,14 +34,22 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
 
     }
 
-    public static SQLiteDatabase getDataBase(Context context) {
+    public static synchronized SQLiteDatabase getDataBase(Context context) {
+        mOpenCounter++;
         if (mHCFSDBHelper == null) {
             mHCFSDBHelper = new HCFSDBHelper(context, DATABASE_NAME, null, VERSION);
         }
-        if (database == null || !database.isOpen()) {
-            database = mHCFSDBHelper.getWritableDatabase();
+        if (mDatabase == null || !mDatabase.isOpen()) {
+            mDatabase = mHCFSDBHelper.getWritableDatabase();
         }
-        return database;
+        return mDatabase;
+    }
+
+    public static synchronized void closeDataBase() {
+        mOpenCounter--;
+        if (mOpenCounter == 0) {
+            mDatabase.close();
+        }
     }
 
 }
