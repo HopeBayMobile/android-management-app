@@ -269,7 +269,7 @@ public class MgmtCluster {
 
         void onAuthSuccessful(GoogleSignInAccount acct, AuthResultInfo authResultInfo);
 
-        void onGoogleAuthFailed();
+        void onGoogleAuthFailed(String failedMsg);
 
         void onMmgtAuthFailed(AuthResultInfo authResultInfo);
 
@@ -323,10 +323,17 @@ public class MgmtCluster {
                         }
                     }).start();
                 } else {
-                    authListener.onGoogleAuthFailed();
+                    String failedMsg = "acct is null";
+                    authListener.onGoogleAuthFailed(failedMsg);
                 }
             } else {
-                authListener.onGoogleAuthFailed();
+                String failedMsg = null;
+                if (googleSignInResult == null) {
+                    failedMsg = "googleSignInResult == null";
+                } else {
+                    failedMsg = "googleSignInResult.isSuccess()=" + googleSignInResult.isSuccess();
+                }
+                authListener.onGoogleAuthFailed(failedMsg);
             }
         }
 

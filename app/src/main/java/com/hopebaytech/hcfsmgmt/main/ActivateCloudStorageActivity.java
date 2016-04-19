@@ -221,6 +221,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
+                                            hideProgressDialog();
                                             showAlertDialog(ActivateCloudStorageActivity.this,
                                                     getString(R.string.alert_dialog_title_warning),
                                                     getString(R.string.failed_to_get_server_client_id),
@@ -228,13 +229,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         }
                                     });
                                 }
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        hideProgressDialog();
-                                    }
-                                });
                             }
                         });
                     } else {
@@ -273,7 +267,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN) {
-            showProgressDialog();
+            hideProgressDialog();
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(Looper.getMainLooper(), result);
             mgmtAuth.setOnAuthListener(new MgmtCluster.AuthListener() {
@@ -329,9 +323,9 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 }
 
                 @Override
-                public void onGoogleAuthFailed() {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onGoogleAuthFailed", null);
-                    hideProgressDialog();
+                public void onGoogleAuthFailed(String failedMsg) {
+                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onGoogleAuthFailed", "failedMsg=" + failedMsg);
+//                    hideProgressDialog();
 
                     showAlertDialog(ActivateCloudStorageActivity.this,
                             getString(R.string.alert_dialog_title_warning),
@@ -342,7 +336,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 @Override
                 public void onMmgtAuthFailed(AuthResultInfo authResultInfo) {
                     HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onMmgtAuthFailed", "authResultInfo=" + authResultInfo.toString());
-                    hideProgressDialog();
+//                    hideProgressDialog();
 
                     String message = authResultInfo.getMessage();
                     String dialogMessage = "responseCode=" + authResultInfo.getResponseCode();
