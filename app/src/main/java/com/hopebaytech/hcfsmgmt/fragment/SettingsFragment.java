@@ -21,13 +21,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
 
     public static final String TAG = SettingsFragment.class.getSimpleName();
     public static final String CLASSNAME = SettingsFragment.class.getSimpleName();
-    public static final String KEY_PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
-    public static final String KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY = "pref_notify_conn_failed_recovery";
-    public static final String KEY_PREF_NOTIFY_UPLOAD_COMPLETED = "pref_notify_upload_completed";
-    public static final String KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO = "pref_notify_local_storage_used_ratio";
-    public static final String KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED = "pref_notify_is_local_storage_used_ratio_already_notified";
-    public static final String KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED = "pref_is_first_network_connected_received";
-    public static final String KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED = "pref_is_first_network_disconnected_received";
 
     private Context mContext;
 
@@ -51,13 +44,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         super.onCreate(savedInstanceState);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        ListPreference storage_used_ratio = (ListPreference) findPreference(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+        ListPreference storage_used_ratio = (ListPreference) findPreference(getString(R.string.pref_notify_local_storage_used_ratio));
         String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-        String ratio = sharedPreferences.getString(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO, defaultValue) + "%%";
+        String ratio = sharedPreferences.getString(getString(R.string.pref_notify_local_storage_used_ratio), defaultValue) + "%%";
         String summary = getString(R.string.settings_local_storage_used_ratio, ratio);
         storage_used_ratio.setSummary(summary);
 
-        Preference changeGoogleAccount = findPreference(getString(R.string.settings_section_change_account_key));
+        Preference changeGoogleAccount = findPreference(getString(R.string.pref_change_account));
         changeGoogleAccount.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
@@ -79,7 +72,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
         return settingsLayout;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -96,11 +88,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements OnShar
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onSharedPreferenceChanged", "key=" + key);
-        if (key.equals(KEY_PREF_SYNC_WIFI_ONLY)) {
-            HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(mContext);
-        } else if (key.equals(KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY)) {
+        if (key.equals(getString(R.string.pref_sync_wifi_only))) {
+            HCFSMgmtUtils.changeCloudSyncStatus(mContext);
+        } else if (key.equals(getString(R.string.pref_notify_conn_failed_recovery))) {
 
-        } else if (key.equals(KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+        } else if (key.equals(getString(R.string.pref_notify_local_storage_used_ratio))) {
             HCFSMgmtUtils.stopNotifyLocalStorageUsedRatioAlarm(mContext);
             HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
 

@@ -10,13 +10,17 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AppInfo extends ItemInfo implements Cloneable {
 
 	private long dbId;
 	private int uid;
 	private ApplicationInfo applicationInfo;
 	private String packageName;
-	private String externalDir;
+//	private String externalDir;
+	private ArrayList<String> externalDirList;
 	private String[] sharedLibraryFiles;
 	private int appSize;
 	private Context context;
@@ -27,18 +31,18 @@ public class AppInfo extends ItemInfo implements Cloneable {
 		this.context = context;
 	}
 
-	public AppInfo(AppInfo applicationInfo) {
-		super(applicationInfo.context);
-		this.dbId = applicationInfo.dbId;
-		this.uid = applicationInfo.uid;
-		this.applicationInfo = applicationInfo.applicationInfo;
-		this.packageName = applicationInfo.packageName;
-		this.externalDir = applicationInfo.externalDir;
-		this.sharedLibraryFiles = applicationInfo.sharedLibraryFiles;
-		this.appSize = applicationInfo.appSize;
-		this.context = applicationInfo.context;
-		this.status = applicationInfo.status;
-	}
+//	public AppInfo(AppInfo applicationInfo) {
+//		super(applicationInfo.context);
+//		this.dbId = applicationInfo.dbId;
+//		this.uid = applicationInfo.uid;
+//		this.applicationInfo = applicationInfo.applicationInfo;
+//		this.packageName = applicationInfo.packageName;
+//		this.externalDir = applicationInfo.externalDir;
+//		this.sharedLibraryFiles = applicationInfo.sharedLibraryFiles;
+//		this.appSize = applicationInfo.appSize;
+//		this.context = applicationInfo.context;
+//		this.status = applicationInfo.status;
+//	}
 
 	public int getUid() {
 		return uid;
@@ -69,8 +73,8 @@ public class AppInfo extends ItemInfo implements Cloneable {
 	}
 
 	@Nullable
-	public String getExternalDir() {
-		// Log.w(HCFSMgmtUtils.TAG, "getExternalDir");
+	public ArrayList<String> getExternalDirList() {
+		// Log.w(HCFSMgmtUtils.TAG, "getExternalDirList");
 		// String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
 		// File externalAndroidFile = new File(externalPath);
 		// for (File type : externalAndroidFile.listFiles()) {
@@ -83,7 +87,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
 		// }
 		// }
 		// return null;
-		return externalDir;
+		return externalDirList;
 	}
 
 	// public void findToSetExternalDir() {
@@ -101,8 +105,12 @@ public class AppInfo extends ItemInfo implements Cloneable {
 	// }
 	// }
 
-	public void setExternalDir(String externalDir) {
-		this.externalDir = externalDir;
+//	public void setExternalDir(String externalDir) {
+//		this.externalDir = externalDir;
+//	}
+
+	public void setExternalDirList(ArrayList<String> externalDirList) {
+		this.externalDirList = externalDirList;
 	}
 
 	public String getDataDir() {
@@ -153,8 +161,32 @@ public class AppInfo extends ItemInfo implements Cloneable {
 	public int getAppStatus() {
 		int srcStatus = HCFSMgmtUtils.getDirStatus(getSourceDir());
 		int dataStatus = HCFSMgmtUtils.getDirStatus(getDataDir());
-		if (getExternalDir() != null) {
-			int externalStatus = HCFSMgmtUtils.getDirStatus(getExternalDir());
+		if (getExternalDirList() != null) {
+
+//			int externalStatus = HCFSMgmtUtils.getDirStatus(getExternalDirList());
+			int externalLocalCounter = 0;
+			int externalHybridCounter = 0;
+			int externalCloudCounter = 0;
+			ArrayList<String> externalDirList = getExternalDirList();
+			for (String externalDir: externalDirList) {
+				if (HCFSMgmtUtils.getDirStatus(externalDir) == LocationStatus.LOCAL) {
+					externalLocalCounter++;
+				} else if (HCFSMgmtUtils.getDirStatus(externalDir) == LocationStatus.HYBRID) {
+					externalHybridCounter++;
+				} else if (HCFSMgmtUtils.getDirStatus(externalDir) == LocationStatus.CLOUD) {
+					externalCloudCounter++;
+				}
+			}
+
+			int externalStatus;
+			if (externalHybridCounter == 0 && externalCloudCounter == 0) {
+				externalStatus = LocationStatus.LOCAL;
+			} else if (externalHybridCounter == 0 && externalLocalCounter == 0) {
+				externalStatus = LocationStatus.CLOUD;
+			} else {
+				externalStatus = LocationStatus.HYBRID;
+			}
+
 			if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL && externalStatus == LocationStatus.LOCAL) {
 				status = LocationStatus.LOCAL;
 			} else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD && externalStatus == LocationStatus.CLOUD) {

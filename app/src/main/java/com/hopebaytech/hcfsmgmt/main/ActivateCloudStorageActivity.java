@@ -5,10 +5,13 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,8 +29,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.plus.Plus;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
@@ -197,18 +205,20 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                      */
                                     final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                             .requestIdToken(serverClientId)
-//                                        .requestServerAuthCode(serverClientId)
+                                            .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+//                                            .requestServerAuthCode(serverClientId, false) TODO
                                             .requestEmail()
                                             .build();
 
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            googleActivate.setScopes(gso.getScopeArray());
+//                                            googleActivate.setScopes(gso.getScopeArray());
                                             if (mGoogleApiClient == null) {
                                                 mGoogleApiClient = new GoogleApiClient.Builder(ActivateCloudStorageActivity.this)
                                                         .enableAutoManage(ActivateCloudStorageActivity.this, ActivateCloudStorageActivity.this)
                                                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                                                        .addApi(Plus.API)
                                                         .build();
                                             }
 
@@ -267,13 +277,11 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN) {
-            hideProgressDialog();
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(Looper.getMainLooper(), result);
             mgmtAuth.setOnAuthListener(new MgmtCluster.AuthListener() {
                 @Override
                 public void onAuthSuccessful(final GoogleSignInAccount acct, final AuthResultInfo authResultInfo) {
-                    hideProgressDialog();
                     mWorkHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -286,12 +294,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         failureMessage,
                                         getString(R.string.alert_dialog_confirm));
 
-                                mWorkHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        resetHCFSConfig();
-                                    }
-                                });
+                                resetHCFSConfig();
                             } else {
                                 String name = acct.getDisplayName();
                                 String email = acct.getEmail();
@@ -310,12 +313,24 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                 accountDAO.insert(accountInfo);
                                 accountDAO.close();
 
+                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ActivateCloudStorageActivity.this);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, true);
+                                editor.apply();
+
                                 Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
                                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
                                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, email);
                                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
                                 startActivity(intent);
                                 finish();
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        hideProgressDialog();
+                                    }
+                                });
                             }
                         }
                     });
@@ -324,19 +339,27 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
                 @Override
                 public void onGoogleAuthFailed(String failedMsg) {
+                    hideProgressDialog();
                     HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onGoogleAuthFailed", "failedMsg=" + failedMsg);
-//                    hideProgressDialog();
 
                     showAlertDialog(ActivateCloudStorageActivity.this,
                             getString(R.string.alert_dialog_title_warning),
                             getString(R.string.activate_cloud_storage_failed_to_signin_google_account),
                             getString(R.string.alert_dialog_confirm));
+
+                    Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                            .setResultCallback(new ResultCallback<Status>() {
+                                @Override
+                                public void onResult(@NonNull Status status) {
+                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onGoogleAuthFailed", "status=" + status);
+                                }
+                            });
                 }
 
                 @Override
                 public void onMmgtAuthFailed(AuthResultInfo authResultInfo) {
+                    hideProgressDialog();
                     HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onMmgtAuthFailed", "authResultInfo=" + authResultInfo.toString());
-//                    hideProgressDialog();
 
                     String message = authResultInfo.getMessage();
                     String dialogMessage = "responseCode=" + authResultInfo.getResponseCode();
@@ -347,116 +370,21 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                             getString(R.string.alert_dialog_title_warning),
                             dialogMessage,
                             getString(R.string.alert_dialog_confirm));
+
+                    Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                            .setResultCallback(new ResultCallback<Status>() {
+                                @Override
+                                public void onResult(@NonNull Status status) {
+                                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onMmgtAuthFailed", "status=" + status);
+                                }
+                            });
                 }
             });
             mgmtAuth.authenticate();
 
-//            if (result.isSuccess()) {
-//                final GoogleSignInAccount acct = result.getSignInAccount();
-//                if (acct != null) {
-//                    showProgressDialog();
-//                    final String idToken = acct.getIdToken();
-////                    final String serverAuthCode = acct.getServerAuthCode();
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityResult", "serverAuthCode=" + idToken);
-//
-//                    mWorkHandler.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
-//                            final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
-//                            if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-//                                boolean isFailed = initHCFSConfig(authResultInfo);
-//                                if (isFailed) {
-//                                    Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-//                                    runOnUiThread(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//                                            String failureMessage = authResultInfo.getMessage();
-//                                            showAlertDialog(ActivateCloudStorageActivity.this,
-//                                                    getString(R.string.activate_cloud_alert_dialog_title),
-//                                                    failureMessage,
-//                                                    getString(R.string.alert_dialog_confirm));
-//                                        }
-//                                    });
-//                                    resetHCFSConfig();
-//                                } else {
-//                                    Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
-//                                    intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, acct.getDisplayName());
-//                                    intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, acct.getEmail());
-//                                    intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, acct.getPhotoUrl());
-//                                    startActivity(intent);
-//                                    finish();
-//                                }
-//                            } else {
-//                                String message = authResultInfo.getMessage();
-//                                String dialogMessage = "responseCode=" + authResultInfo.getResponseCode();
-//                                if (message != null) {
-//                                    dialogMessage += ", message=" + message;
-//                                }
-//                                final String finalDialogMessage = dialogMessage;
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        showAlertDialog(ActivateCloudStorageActivity.this,
-//                                                getString(R.string.activate_cloud_alert_dialog_title),
-//                                                finalDialogMessage,
-//                                                getString(R.string.alert_dialog_confirm));
-//                                    }
-//                                });
-//                            }
-//
-//                            runOnUiThread(new Runnable() {
-//                                @Override
-//                                public void run() {
-//                                    hideProgressDialog();
-//                                }
-//                            });
-//                        }
-//                    });
-//                } else {
-//                    String failureMessage = getString(R.string.activate_cloud_storage_failed_to_signin_google_account);
-//                    Snackbar.make(findViewById(android.R.id.content), failureMessage, Snackbar.LENGTH_LONG).show();
-//                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onActivityResult", "GoogleSignInAccount is null.");
-//                }
-//            } else {
-//                showAlertDialog(ActivateCloudStorageActivity.this,
-//                        getString(R.string.activate_cloud_alert_dialog_title),
-//                        getString(R.string.activate_cloud_storage_failed_to_signin_google_account),
-//                        getString(R.string.alert_dialog_confirm));
-//                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onActivityResult", "Failed to sign in Google account.");
-//            }
         }
 
     }
-
-//    private String getQuery(List<NameValuePair> params) {
-//        StringBuilder result = new StringBuilder();
-//        boolean first = true;
-//        for (NameValuePair pair : params) {
-//            if (first) {
-//                first = false;
-//            } else {
-//                result.append("&");
-//            }
-//
-//            try {
-//                if (pair.getName().equals("imei_code")) {
-//                    result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
-//                    result.append("=");
-//                    result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
-//                    Log.w(HCFSMgmtUtils.TAG, URLEncoder.encode(pair.getValue(), "UTF-8"));
-//                } else {
-//                    result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
-//                    result.append("=");
-//                    result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
-//                }
-//            } catch (UnsupportedEncodingException e) {
-//                Log.e(HCFSMgmtUtils.TAG, Log.getStackTraceString(e));
-//            }
-//        }
-//        return result.toString();
-//    }
-
 
     private void showProgressDialog() {
         if (mProgressDialog == null) {

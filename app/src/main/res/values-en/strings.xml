@@ -56,6 +56,16 @@
     <string name="file_mgmt_spinner_apps">Display by app</string>
     <string name="file_mgmt_spinner_data_type">Display by type</string>
     <string name="file_mgmt_spinner_files">Display by file</string>
+    <string name="file_mgmt_popup_menu_app_type_more_info">More info</string>
+    <string name="file_mgmt_dialog_app_cancel">Cancel</string>
+    <string name="file_mgmt_dialog_app_open">Open</string>
+    <string name="file_mgmt_dialog_app_package_name">Package name: %s</string>
+    <string name="file_mgmt_dialog_app_percentage">Phone data ratio: %s</string>
+    <string name="file_mgmt_dialog_app_remove">Uninstall</string>
+    <string name="file_mgmt_dialog_app_size">Size: %s</string>
+    <string name="file_mgmt_dialog_app_version">Version: %s</string>
+    <string name="file_mgmt_dialog_calculating">Calculating&#8230;</string>
+
     <string-array name="file_mgmt_spinner">
         <item>@string/file_mgmt_spinner_apps</item>
         <!--<item>@string/file_mgmt_spinner_data_type</item>-->
@@ -104,8 +114,10 @@
     <string name="settings_section_notify_local_storage_used_ratio_dialog_title">Select usage ratio to send notification.</string>
     <string name="settings_section_notify_local_storage_used_ratio_summary">Select ratio to send notification.</string>
     <string name="settings_section_notify_local_storage_used_ratio_title">Local space usage</string>
-    <string name="settings_section_change_account_key">change_account_key</string>
-    <string name="settings_section_change_account_title">Change account</string>
+    <string name="settings_section_execute">Execute</string>
+    <string name="settings_section_execute_title">Download to run</string>
+    <string name="settings_section_change_account">Account</string>
+    <string name="settings_section_change_account_title">Switch account</string>
     <string name="settings_section_change_account_summary">轉換您目前使用的帳號至另一個帳號</string>
     <string name="settings_section_change_account_warning_msg">帳號轉換會將您目前啟用的帳號登出，是否繼續進行帳號轉換？</string>
     <string name="settings_local_storage_used_ratio">Send notification when local space usage reaches %s.</string>
@@ -132,21 +144,27 @@
     <string name="activate_cloud_storage_google_activate"><u>Google account for activation</u></string>
     <string name="failed_to_get_server_client_id">Getting info about Google authentication from admin server failed. Please restart app and try again.</string>
 
+    <string name="change_account_choose_an_account">請選擇一個欲轉換的帳號</string>
+    <string name="change_account_require_new_account">選擇的帳號不可與原本帳號相同</string>
+    <string name="change_account_start_to_change">轉換</string>
+    <string name="change_account_failed_to_change">轉換失敗，請再嘗試一次。</string>
+    <string name="change_account_another_account"><u>請選擇另外一個帳號</u></string>
+
+    <string name="auth_at_bootup_auth_google_failed">Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
+    <string name="auth_at_bootup_auth_mgmt_failed">TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
+
     <string name="alert_dialog_title_warning">Alert</string>
     <string name="alert_dialog_yes">Yes</string>
     <string name="alert_dialog_no">No</string>
     <string name="alert_dialog_confirm">Confirm</string>
 
-    <string name="version_app_title">App Version</string>
-    <string name="file_mgmt_popup_menu_app_type_more_info">More info</string>
-    <string name="file_mgmt_dialog_app_cancel">Cancel</string>
-    <string name="file_mgmt_dialog_app_open">Open</string>
-    <string name="file_mgmt_dialog_app_package_name">Package name: %s</string>
-    <string name="file_mgmt_dialog_app_percentage">Phone data ratio: %s</string>
-    <string name="file_mgmt_dialog_app_remove">Uninstall</string>
-    <string name="file_mgmt_dialog_app_size">Size: %s</string>
-    <string name="file_mgmt_dialog_app_version">Version: %s</string>
-    <string name="file_mgmt_dialog_calculating">Calculating&#8230;</string>
+    <string name="pref_download_to_run">pref_download_to_run</string>
+    <string name="pref_change_account">pref_change_account</string>
+    <string name="pref_sync_wifi_only">pref_sync_wifi_only</string>
+    <string name="pref_notify_conn_failed_recovery">pref_notify_conn_failed_recovery</string>
+    <string name="pref_notify_local_storage_used_ratio">pref_notify_local_storage_used_ratio</string>
+    <string name="pref_notify_is_local_storage_used_ratio_already_notified">pref_notify_is_local_storage_used_ratio_already_notified</string>
 
+    <string name="version_app_title">App Version</string>
 
 </resources>

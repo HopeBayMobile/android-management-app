@@ -1,10 +1,10 @@
 package com.hopebaytech.hcfsmgmt.main;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -19,11 +19,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.AccountDAO;
+import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
-public class LoadingActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class LoadingActivity extends AppCompatActivity {
 
     private final String CLASSNAME = getClass().getSimpleName();
     private Handler mHandler;
@@ -47,21 +49,28 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (HCFSConfig.isActivated()) {
+                if (HCFSConfig.isActivated(LoadingActivity.this)) {
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "Activated");
                     final String serverClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
                     if (serverClientId != null) {
                         Thread getGoogleAccountInfoThread = new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                /** GoogleApiClient should be called from main thread of process */
                                 final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                        .requestIdToken(serverClientId)
+//                                        .requestIdToken(serverClientId)
+//                                        .requestServerAuthCode(serverClientId, false)
                                         .requestEmail()
                                         .build();
 
+                                /** GoogleApiClient should be called from main thread of process */
                                 mGoogleApiClient = new GoogleApiClient.Builder(LoadingActivity.this)
-                                        .enableAutoManage(LoadingActivity.this, LoadingActivity.this)
+                                        .enableAutoManage(LoadingActivity.this, new GoogleApiClient.OnConnectionFailedListener() {
+                                            @Override
+                                            public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                                                /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
+                                                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onConnectionFailed", connectionResult.toString());
+                                            }
+                                        })
                                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                                         .build();
 
@@ -104,21 +113,38 @@ public class LoadingActivity extends AppCompatActivity implements GoogleApiClien
         if (result != null && result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
             if (acct != null) {
+                String name = acct.getDisplayName();
+                String email = acct.getEmail();
+                String photoUrl = null;
+                if (acct.getPhotoUrl() != null) {
+                    photoUrl= acct.getPhotoUrl().toString();
+                }
+
+
+                AccountDAO accountDAO = AccountDAO.getInstance(LoadingActivity.this);
+                if (accountDAO.getCount() == 0)  {
+                    AccountInfo accountInfo = new AccountInfo();
+                    accountInfo.setName(name);
+                    accountInfo.setEmail(email);
+                    accountInfo.setImgUrl(photoUrl);
+                    accountDAO.insert(accountInfo);
+                } else {
+                    AccountInfo accountInfo = accountDAO.getAll().get(0);
+                    if (accountInfo.getImgExpringTime() > System.currentTimeMillis()) {
+                        accountInfo.setImgUrl(photoUrl);
+                        accountInfo.setImgBase64(null);
+                        accountInfo.setImgExpringTime(System.currentTimeMillis() + HCFSMgmtUtils.INTERVAL_DAY);
+                        accountDAO.update(accountInfo);
+                    }
+                }
+                accountDAO.close();
+
                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, acct.getDisplayName());
                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, acct.getEmail());
                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, acct.getPhotoUrl());
             }
         }
         startActivity(intent);
-        finish();
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
-        HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onConnectionFailed", connectionResult.toString());
-//        Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
-//        startActivity(intent);
         finish();
     }
 

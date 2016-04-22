@@ -8,8 +8,6 @@ import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
-import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -18,7 +16,6 @@ import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 public class HCFSMgmtReceiver extends BroadcastReceiver {
 
     private final String CLASSNAME = getClass().getSimpleName();
-    private boolean isHCFSActivated = HCFSConfig.isActivated();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -26,11 +23,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String action = intent.getAction();
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "action=" + action);
+        boolean isHCFSActivated = HCFSConfig.isActivated(context);
         if (isHCFSActivated) {
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 /** Detect network status and determine whether sync data to cloud */
-                HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(context);
+                HCFSMgmtUtils.changeCloudSyncStatus(context);
 
                 /** Start an alarm to notify user when data is completed uploaded */
 //                boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, true);
@@ -56,7 +54,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 editor.apply();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 /** Detect network status changed and enable/disable data sync to cloud */
-                HCFSMgmtUtils.detectNetworkAndSyncDataToCloud(context);
+                HCFSMgmtUtils.changeCloudSyncStatus(context);
 
                 /** Execute silent Google sign-in */
                 boolean isSilentSignIn = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_IS_SILENT_SIGN_IN, false);

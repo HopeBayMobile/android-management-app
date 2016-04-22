@@ -38,13 +38,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
 import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import java.io.BufferedInputStream;
@@ -52,6 +55,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -96,61 +100,82 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         registerReceiver(sdCardReceiver, filter);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setLogo(R.drawable.icon_terafonn_logo_m_tab);
-        toolbar.setTitle("");
-        setSupportActionBar(toolbar);
+        if (toolbar != null) {
+            toolbar.setLogo(R.drawable.icon_terafonn_logo_m_tab);
+            toolbar.setTitle("");
+            setSupportActionBar(toolbar);
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
+        if (drawer != null) {
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
 //        drawer.setDrawerListener(toggle);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+            drawer.addDrawerListener(toggle);
+            toggle.syncState();
+        }
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
-        mNavigationView.setNavigationItemSelectedListener(this);
-        if (getIntent().getExtras() != null) {
-            mNavigationView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    mNavigationView.removeOnLayoutChangeListener(this);
+        if (mNavigationView != null) {
+            mNavigationView.setNavigationItemSelectedListener(this);
+            final AccountDAO accountDAO = AccountDAO.getInstance(MainActivity.this);
+            final List<AccountInfo> accountInfoList = accountDAO.getAll();
+            if (accountInfoList.size() != 0) {
+                mNavigationView.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                    @Override
+                    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                        mNavigationView.removeOnLayoutChangeListener(this);
 
-                    TextView displayName = (TextView) mNavigationView.findViewById(R.id.display_name);
-                    displayName.setText(getIntent().getStringExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME));
+                        final AccountInfo accountInfo = accountInfoList.get(0);
 
-                    TextView email = (TextView) mNavigationView.findViewById(R.id.email);
-                    email.setText(getIntent().getStringExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL));
+                        TextView displayName = (TextView) mNavigationView.findViewById(R.id.display_name);
+                        displayName.setText(accountInfo.getName());
 
-                    final Uri photoUri = getIntent().getParcelableExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI);
-                    if (photoUri != null) {
-                        final ImageView photo = (ImageView) mNavigationView.findViewById(R.id.photo);
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bitmap bitmap = null;
-                                try {
-                                    URL urlConnection = new URL(photoUri.toString());
-                                    HttpsURLConnection conn = (HttpsURLConnection) urlConnection.openConnection();
-                                    conn.setRequestMethod("GET");
-                                    conn.connect();
-                                    BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
-                                    bitmap = BitmapFactory.decodeStream(bInputStream);
-                                } catch (Exception e) {
-                                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
-                                }
-                                final Bitmap photoBmp = bitmap;
-                                if (photoBmp != null) {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            photo.setImageBitmap(photoBmp);
+                        TextView email = (TextView) mNavigationView.findViewById(R.id.email);
+                        email.setText(accountInfo.getEmail());
+
+                        final String photoUrl = accountInfo.getImgUrl();
+                        if (photoUrl != null) {
+                            final ImageView photo = (ImageView) mNavigationView.findViewById(R.id.photo);
+                            String imgBase64 = accountInfo.getImgBase64();
+                            if (imgBase64 != null) {
+                                photo.setImageBitmap(BitmapBase64Factory.decodeBase64(imgBase64));
+                            } else {
+                                mHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Bitmap bitmap = null;
+                                        try {
+                                            URL urlConnection = new URL(photoUrl);
+                                            HttpsURLConnection conn = (HttpsURLConnection) urlConnection.openConnection();
+                                            conn.setRequestMethod("GET");
+                                            conn.connect();
+
+                                            BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
+                                            bitmap = BitmapFactory.decodeStream(bInputStream);
+
+                                            String imgBase64 = BitmapBase64Factory.encodeToBase64(bitmap, Bitmap.CompressFormat.JPEG, 100);
+                                            accountInfo.setImgBase64(imgBase64);
+                                            accountDAO.update(accountInfo);
+                                        } catch (Exception e) {
+                                            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
                                         }
-                                    });
-                                }
+                                        final Bitmap photoBmp = bitmap;
+                                        if (photoBmp != null) {
+                                            runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    photo.setImageBitmap(photoBmp);
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
                             }
-                        });
+                        }
                     }
-                }
-            });
+                });
+            }
+
         }
 
         /** Detect whether sdcard1 exists, if exists, add to left slide menu. */

@@ -31,6 +31,7 @@ import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
@@ -95,7 +96,8 @@ public class HCFSMgmtService extends Service {
                         String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_PACKAGE_NAME);
                         String dataDir = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_DATA_DIR);
                         String sourceDir = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_SOURCE_DIR);
-                        String externalDir = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_EXTERNAL_DIR);
+//                        String externalDir = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_EXTERNAL_DIR);
+                        ArrayList<String> externalDirList = intent.getStringArrayListExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_EXTERNAL_DIR);
 
                         ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
                         serviceAppInfo.setPinned(isAppPinned);
@@ -104,7 +106,8 @@ public class HCFSMgmtService extends Service {
 //                        serviceAppInfo.setSourceDir(sourceDir); // TODO
                         serviceAppInfo.setSourceDir(null);
                         serviceAppInfo.setDataDir(dataDir);
-                        serviceAppInfo.setExternalDir(externalDir);
+//                        serviceAppInfo.setExternalDir(externalDir);
+                        serviceAppInfo.setExternalDirList(externalDirList);
                         mServiceAppDAO.insert(serviceAppInfo);
                         pinOrUnpinApp(serviceAppInfo);
                         mServiceAppDAO.delete(serviceAppInfo);
@@ -160,7 +163,7 @@ public class HCFSMgmtService extends Service {
                             serviceAppInfo.setPackageName(appInfo.getPackageName());
                             serviceAppInfo.setSourceDir(appInfo.getSourceDir());
                             serviceAppInfo.setDataDir(appInfo.getDataDir());
-                            serviceAppInfo.setExternalDir(appInfo.getExternalDir());
+                            serviceAppInfo.setExternalDirList(appInfo.getExternalDirList());
                             pinOrUnpinApp(serviceAppInfo);
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
@@ -191,7 +194,7 @@ public class HCFSMgmtService extends Service {
 //                                serviceAppInfo.setSourceDir(sourceDirWithoutApkSuffix); // TODO
                                 serviceAppInfo.setSourceDir(null);
                                 serviceAppInfo.setDataDir(applicationInfo.dataDir);
-                                serviceAppInfo.setExternalDir(null);
+                                serviceAppInfo.setExternalDirList(null);
                                 pinOrUnpinApp(serviceAppInfo);
                             }
                         } catch (PackageManager.NameNotFoundException e) {
@@ -218,7 +221,7 @@ public class HCFSMgmtService extends Service {
 //                                serviceAppInfo.setSourceDir(sourceDirWithoutApkSuffix); // TODO
                                 serviceAppInfo.setSourceDir(null);
                                 serviceAppInfo.setDataDir(applicationInfo.dataDir);
-                                serviceAppInfo.setExternalDir(null);
+                                serviceAppInfo.setExternalDirList(null);
                                 pinOrUnpinApp(serviceAppInfo);
                             }
                         } catch (PackageManager.NameNotFoundException e) {
@@ -244,7 +247,7 @@ public class HCFSMgmtService extends Service {
                         if (statInfo != null) {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                             String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-                            String key_pref = SettingsFragment.KEY_PREF_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+                            String key_pref = getString(R.string.pref_notify_local_storage_used_ratio);
                             String storage_used_ratio = sharedPreferences.getString(key_pref, defaultValue);
 
                             // TODO The value of unpinned but dirty is not implemented by HCFS
@@ -254,7 +257,7 @@ public class HCFSMgmtService extends Service {
 //                            double max = Math.max(rawCacheDirtyUsed, rawPinTotal);
                             double max = rawPinTotal;
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED, false);
+                            boolean isNotified = sharedPreferences.getBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), false);
                             double pinPlusUnpinButDirty = (max / rawCacheTotal) * 100;
                             HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onStartCommand", "pinPlusUnpinButDirty=" + pinPlusUnpinButDirty);
                             if (pinPlusUnpinButDirty >= Double.valueOf(storage_used_ratio)) {
@@ -263,11 +266,11 @@ public class HCFSMgmtService extends Service {
                                     String notify_title = getString(R.string.app_name);
                                     String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storage_used_ratio);
                                     NotificationEvent.notify(context, notify_id, notify_title, notify_message, false);
-                                    editor.putBoolean(SettingsFragment.KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED, true);
+                                    editor.putBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), true);
                                 }
                             } else {
                                 if (isNotified) {
-                                    editor.putBoolean(SettingsFragment.KEY_PREF_NOTIFY_IS_LOCAL_STORAGE_USED_RATIO_ALREADY_NOTIFIED, false);
+                                    editor.putBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), false);
                                 }
                             }
                             editor.apply();
@@ -397,52 +400,45 @@ public class HCFSMgmtService extends Service {
     }
 
     private void storeAuthResult(final Context context, GoogleSignInResult result) {
-        MgmtCluster.plusRestryCount();
+        MgmtCluster.plusRetryCount();
         MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(Looper.getMainLooper(), result);
         mgmtAuth.setOnAuthListener(new MgmtCluster.AuthListener() {
             @Override
             public void onAuthSuccessful(GoogleSignInAccount acct, AuthResultInfo authResultInfo) {
                 HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "storeAuthResult", "onAuthSuccessful", null);
-
                 mGoogleApiClient.disconnect();
-                MgmtCluster.resetRestryCount();
+                MgmtCluster.resetRetryCount();
+                HCFSConfig.startSyncToCloud();
 
-//                boolean isFailed = false; TODO swift_token field is not added to hcfs.conf
-//                String failedMsg = null;
-//                if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_TOKEN, authResultInfo.getBackendType())) {
-//                    isFailed = true;
-//                    failedMsg = "Set swift token failed";
-//                }
-//                if (!HCFSConfig.reloadConfig()) {
-//                    failedMsg = "HCFS reload config failed";
-//                    isFailed = true;
-//                }
-//
-//                if (isFailed) {
-//                    int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
-//                    String notify_title = getString(R.string.app_name);
-//                    String notify_content = failedMsg;
-//                    NotificationEvent.notify(context, id_notify, notify_title, notify_content, false);
-//                }
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, true);
+                editor.apply();
             }
 
             @Override
-            public void onGoogleAuthFailed() {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "storeAuthResult", "onGoogleAuthFailed", null);
+            public void onGoogleAuthFailed(String failedMsg) {
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "storeAuthResult", "onGoogleAuthFailed", failedMsg);
 
                 int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
                 String notify_title = getString(R.string.app_name);
-                String notify_content = "Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。";
+                String notify_content = getString(R.string.auth_at_bootup_auth_google_failed);
                 NotificationEvent.notify(context, id_notify, notify_title, notify_content, false);
 
                 Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                         .setResultCallback(new ResultCallback<Status>() {
                             @Override
                             public void onResult(Status status) {
-                                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, this.getClass().getName(), "onGoogleAuthFailed", "status=" + status);
+                                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onGoogleAuthFailed", "status=" + status);
                             }
                         });
                 mGoogleApiClient.disconnect();
+                HCFSConfig.stopSyncToCloud();
+
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
+                editor.apply();
             }
 
             @Override
@@ -455,42 +451,30 @@ public class HCFSMgmtService extends Service {
                     context.startService(intentService);
                     HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, this.getClass().getName(), "onGoogleAuthFailed", "Authentication failed, retry again");
                 } else {
-//                    HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_TOKEN, ""); TODO swift_token field is not added to hcfs.conf
-//                    HCFSConfig.reloadConfig();
-
                     int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
                     String notify_title = getString(R.string.app_name);
-                    String notify_content = "TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。";
+                    String notify_content = getString(R.string.auth_at_bootup_auth_mgmt_failed);
                     NotificationEvent.notify(context, id_notify, notify_title, notify_content, false);
 
                     Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                             .setResultCallback(new ResultCallback<Status>() {
                                 @Override
                                 public void onResult(Status status) {
-                                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, this.getClass().getName(), "onMmgtAuthFailed", "status=" + status);
+                                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onMmgtAuthFailed", "status=" + status);
                                 }
                             });
+
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
+                    editor.apply();
                 }
                 mGoogleApiClient.disconnect();
+                HCFSConfig.stopSyncToCloud();
             }
 
         });
         mgmtAuth.authenticate();
-    }
-
-    private void notifyUploadCompleted() {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "notifyUploadCompleted", null);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, true);
-        if (notifyUploadCompletedPref) {
-            boolean isUploadCompleted = HCFSMgmtUtils.isDataUploadCompleted();
-            if (isUploadCompleted) {
-                int id_notify = HCFSMgmtUtils.NOTIFY_ID_UPLOAD_COMPLETED;
-                String notify_title = getString(R.string.app_name);
-                String notify_content = getString(R.string.notify_upload_completed);
-                NotificationEvent.notify(this, id_notify, notify_title, notify_content, false);
-            }
-        }
     }
 
     private void pinOrUnpinApp(ServiceAppInfo info) {

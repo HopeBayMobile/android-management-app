@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.app.AlarmManager;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -9,8 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -18,9 +15,7 @@ import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.NotificationCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -35,7 +30,6 @@ import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
-import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,12 +49,13 @@ public class HCFSMgmtUtils {
     public static final int LOGLEVEL = Log.DEBUG;
 
     public static final int INTERVAL_TEN_SECONDS = 10 * 1000;
-    public static final int INTERVAL_ONE_MINUTE = 6 * INTERVAL_TEN_SECONDS;
-    public static final int INTERVAL_ONE_HOUR = 60 * INTERVAL_ONE_MINUTE;
-    public static final int INTERVAL_NOTIFY_UPLOAD_COMPLETED = INTERVAL_ONE_HOUR;
-    public static final int INTERVAL_PIN_DATA_TYPE_FILE = INTERVAL_ONE_HOUR;
-    public static final int INTERVAL_RESET_XFER = 24 * INTERVAL_ONE_HOUR;
-    public static final int INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO = INTERVAL_ONE_HOUR;
+    public static final int INTERVAL_MINUTE = 6 * INTERVAL_TEN_SECONDS;
+    public static final int INTERVAL_HOUR = 60 * INTERVAL_MINUTE;
+    public static final int INTERVAL_DAY = 24 * INTERVAL_HOUR;
+    public static final int INTERVAL_NOTIFY_UPLOAD_COMPLETED = INTERVAL_HOUR;
+    public static final int INTERVAL_PIN_DATA_TYPE_FILE = INTERVAL_HOUR;
+    public static final int INTERVAL_RESET_XFER = 24 * INTERVAL_HOUR;
+    public static final int INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO = INTERVAL_HOUR;
 
     public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
     public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
@@ -107,7 +102,9 @@ public class HCFSMgmtUtils {
     public static final String INTENT_VALUE_ONGOING_NOTIFICATION = "intent_value_ongoing_notification";
     public static final String INTENT_VALUE_PIN_UNPIN_UDPATE_APP = "intent_value_pin_unpin_update_app";
     public static final String INTENT_VALUE_SILENT_SIGN_IN = "intent_value_silent_sign_in";
+
     public static final String PREF_IS_SILENT_SIGN_IN = "pref_is_silent_sign_in";
+    public static final String PREF_IS_HCFS_ACTIVATED = "pref_is_hcfs_activated";
 
 //    public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
 //    public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
@@ -384,16 +381,6 @@ public class HCFSMgmtUtils {
         return imagePaths;
     }
 
-    public static void startSyncToCloud() {
-        String jsonResult = HCFSApiUtils.setHCFSSyncStatus(1);
-        log(Log.DEBUG, CLASSNAME, "startSyncToCloud", jsonResult);
-    }
-
-    public static void stopSyncToCloud() {
-        String jsonResult = HCFSApiUtils.setHCFSSyncStatus(0);
-        log(Log.DEBUG, CLASSNAME, "stopSyncToCloud", jsonResult);
-    }
-
     public static boolean getHCFSSyncStatus() {
         String jsonResult = HCFSApiUtils.getHCFSSyncStatus();
         JSONObject jObject;
@@ -454,7 +441,8 @@ public class HCFSMgmtUtils {
         HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "pinApp", "AppName=" + info.getAppName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
-        String externalDir = info.getExternalDir();
+//        String externalDir = info.getExternalDir();
+        ArrayList<String> externalDirList = info.getExternalDirList();
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             if (sourceDir.startsWith("/data/app")) {
@@ -468,8 +456,13 @@ public class HCFSMgmtUtils {
             }
         }
         boolean isExternalDirSuccess = true;
-        if (externalDir != null) {
-            isExternalDirSuccess = pinFileOrDirectory(externalDir);
+//        if (externalDir != null) {
+//            isExternalDirSuccess = pinFileOrDirectory(externalDir);
+//        }
+        if (externalDirList != null) {
+            for (String externalDir: externalDirList) {
+                isExternalDirSuccess &= pinFileOrDirectory(externalDir);
+            }
         }
         return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
@@ -478,7 +471,8 @@ public class HCFSMgmtUtils {
         HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "unpinApp", "appName=" + info.getAppName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
-        String externalDir = info.getExternalDir();
+//        String externalDir = info.getExternalDir();
+        ArrayList<String> externalDirList = info.getExternalDirList();
 
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
@@ -493,16 +487,16 @@ public class HCFSMgmtUtils {
             }
         }
         boolean isExternalDirSuccess = true;
-        if (externalDir != null) {
-            isExternalDirSuccess = unpinFileOrDirectory(externalDir);
-        }
-        return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
-
-//        if (externalDir == null) {
-//            return unpinFileOrDirectory(sourceDir) & unpinFileOrDirectory(dataDir);
-//        } else {
-//            return unpinFileOrDirectory(sourceDir) & unpinFileOrDirectory(dataDir) & unpinFileOrDirectory(externalDir);
+//        if (externalDir != null) {
+//            isExternalDirSuccess = unpinFileOrDirectory(externalDir);
 //        }
+        if (externalDirList != null) {
+            for (String externalDir: externalDirList) {
+                isExternalDirSuccess &= unpinFileOrDirectory(externalDir);
+            }
+        }
+
+        return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
     public static boolean pinFileOrDirectory(String filePath) {
@@ -774,72 +768,34 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static void detectNetworkAndSyncDataToCloud(Context context) {
-        log(Log.DEBUG, CLASSNAME, "detectNetworkStatusAndSyncToCloud", null);
+    public static void changeCloudSyncStatus(Context context) {
+        log(Log.DEBUG, CLASSNAME, "changeCloudSyncStatus", null);
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_SYNC_WIFI_ONLY, true);
+        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
         if (syncWifiOnlyPref) {
             if (netInfo != null && netInfo.isConnected() && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 String logMsg = "Wifi is connected";
-                startSyncToCloud(context, logMsg);
+                HCFSConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi is not connected";
-                stopSyncToCloud(context, logMsg);
+                HCFSConfig.stopSyncToCloud(context, logMsg);
             }
         } else {
             if (netInfo != null && netInfo.isConnected()) {
                 String logMsg = "Wifi or Mobile network is connected";
-                startSyncToCloud(context, logMsg);
+                HCFSConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi or Mobile network is not connected";
-                stopSyncToCloud(context, logMsg);
+                HCFSConfig.stopSyncToCloud(context, logMsg);
             }
         }
     }
 
-    public static void startSyncToCloud(Context context, String logMsg) {
-        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        // Editor editor = sharedPreferences.edit();
-        // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
-        // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
-        // boolean is_first_network_connected_received = sharedPreferences.getBoolean(key_connected, true);
-        // if (is_first_network_connected_received) {
-        log(Log.DEBUG, CLASSNAME, "startSyncToCloud", logMsg);
-        int notify_id = NOTIFY_ID_NETWORK_STATUS_CHANGED;
-        String notify_title = context.getString(R.string.app_name);
-        String notify_content = context.getString(R.string.notify_network_connected);
-        notify_network_status(context, notify_id, notify_title, notify_content);
-        startSyncToCloud();
-        // editor.putBoolean(key_connected, false);
-        // }
-        // editor.putBoolean(key_disconnected, true);
-        // editor.commit();
-    }
-
-    public static void stopSyncToCloud(Context context, String logMsg) {
-        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        // Editor editor = sharedPreferences.edit();
-        // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
-        // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
-        // boolean is_first_network_disconnected_received = sharedPreferences.getBoolean(key_disconnected, true);
-        // if (is_first_network_disconnected_received) {
-        log(Log.DEBUG, CLASSNAME, "startSyncToCloud", logMsg);
-        int notify_id = NOTIFY_ID_NETWORK_STATUS_CHANGED;
-        String notify_title = context.getString(R.string.app_name);
-        String notify_content = context.getString(R.string.notify_network_disconnected);
-        notify_network_status(context, notify_id, notify_title, notify_content);
-        stopSyncToCloud();
-        // editor.putBoolean(key_disconnected, false);
-        // }
-        // editor.putBoolean(key_connected, true);
-        // editor.commit();
-    }
-
     public static void notify_network_status(Context context, int notify_id, String notify_title, String notify_content) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String key = SettingsFragment.KEY_PREF_NOTIFY_CONN_FAILED_RECOVERY;
+        String key = context.getString(R.string.pref_notify_conn_failed_recovery);
         boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(key, false);
         if (notifyConnFailedRecoveryPref) {
             NotificationEvent.notify(context, notify_id, notify_title, notify_content, false);
@@ -929,13 +885,15 @@ public class HCFSMgmtUtils {
 
     @Nullable
     public static String getEncryptedDeviceIMEI() {
-        return new String(HCFSApiUtils.getEncryptedIMEI());
+        String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI());
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getEncryptedDeviceIMEI", "encryptedIMEI=" + encryptedIMEI);
+        return encryptedIMEI;
     }
 
     public static String getDeviceIMEI(Context context) {
-        String imei = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceIMEI", "imei=" + imei);
-        return imei == null ? "" : imei;
+        String IMEI = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceIMEI", "IMEI=" + IMEI);
+        return IMEI == null ? "" : IMEI;
     }
 
 }

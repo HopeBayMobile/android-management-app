@@ -1,6 +1,11 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,9 +27,9 @@ public class HCFSConfig {
     public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
     public static final String HCFS_CONFIG_SWIFT_TOKEN = "swift_token";
 
-    public static boolean isActivated() {
-        return !getHCFSConfig(HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty();
-//        return !getHCFSConfig(HCFS_CONFIG_SWIFT_TOKEN).isEmpty(); TODO
+    public static boolean isActivated(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
     }
 
     public static boolean setHCFSConfig(String key, String value) {
@@ -81,6 +86,54 @@ public class HCFSConfig {
             HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "reloadConfig", Log.getStackTraceString(e));
         }
         return isSuccess;
+    }
+
+    public static void startSyncToCloud() {
+        String jsonResult = HCFSApiUtils.setHCFSSyncStatus(1);
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "startSyncToCloud", jsonResult);
+    }
+
+    public static void startSyncToCloud(Context context, String logMsg) {
+        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        // Editor editor = sharedPreferences.edit();
+        // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
+        // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
+        // boolean is_first_network_connected_received = sharedPreferences.getBoolean(key_connected, true);
+        // if (is_first_network_connected_received) {
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "startSyncToCloud", logMsg);
+        int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
+        String notify_title = context.getString(R.string.app_name);
+        String notify_content = context.getString(R.string.notify_network_connected);
+        HCFSMgmtUtils.notify_network_status(context, notify_id, notify_title, notify_content);
+        startSyncToCloud();
+        // editor.putBoolean(key_connected, false);
+        // }
+        // editor.putBoolean(key_disconnected, true);
+        // editor.commit();
+    }
+
+    public static void stopSyncToCloud() {
+        String jsonResult = HCFSApiUtils.setHCFSSyncStatus(0);
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "stopSyncToCloud", jsonResult);
+    }
+
+    public static void stopSyncToCloud(Context context, String logMsg) {
+        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        // Editor editor = sharedPreferences.edit();
+        // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
+        // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
+        // boolean is_first_network_disconnected_received = sharedPreferences.getBoolean(key_disconnected, true);
+        // if (is_first_network_disconnected_received) {
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "startSyncToCloud", logMsg);
+        int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
+        String notify_title = context.getString(R.string.app_name);
+        String notify_content = context.getString(R.string.notify_network_disconnected);
+        HCFSMgmtUtils.notify_network_status(context, notify_id, notify_title, notify_content);
+        stopSyncToCloud();
+        // editor.putBoolean(key_disconnected, false);
+        // }
+        // editor.putBoolean(key_connected, true);
+        // editor.commit();
     }
 
 }

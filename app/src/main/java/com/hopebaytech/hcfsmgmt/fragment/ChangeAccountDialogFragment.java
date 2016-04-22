@@ -6,10 +6,12 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +56,11 @@ public class ChangeAccountDialogFragment extends DialogFragment {
         builder.setPositiveButton(getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
+                editor.apply();
+
                 Intent intent = new Intent(mActivity, ChangeAccountActivity.class);
                 mActivity.startActivity(intent);
                 mActivity.finish();

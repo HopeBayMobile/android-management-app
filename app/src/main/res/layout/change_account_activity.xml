@@ -1,56 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="60dp">
 
-    <LinearLayout
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:src="@drawable/icon_terafonn_logo_l_login" />
+
+    <TextView
+        android:id="@+id/current_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center">
-
-        <TextView
-            android:id="@+id/current_account"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="目前使用帳號：123@xxx.com" />
-    </LinearLayout>
+        android:background="@color/colorSwitchAccountTextBackground"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:textColor="@android:color/darker_gray"
+        tools:text="old@xxx.com" />
 
     <LinearLayout
+        android:id="@+id/target_account_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_gravity="center"
         android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/icon_arrow_down" />
 
         <TextView
             android:id="@+id/target_account"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="欲轉換的帳號：5566@xxx.com" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:background="@color/colorSwitchAccountTextBackground"
             android:gravity="center"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:text="Choose with:"
-                android:layout_height="wrap_content" />
-            <com.google.android.gms.common.SignInButton
-                android:id="@+id/choose_account"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+            android:paddingBottom="10dp"
+            android:paddingTop="10dp"
+            android:textColor="@android:color/black"
+            tools:text="new@xxx.com" />
     </LinearLayout>
 
-    <Button
-        android:id="@+id/change_account"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/switch_account_layout_icon"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="轉換" />
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="Choose with:"
+            android:textColor="@android:color/black" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/choose_account_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_border"
+                android:padding="10dp"
+                android:src="@drawable/icon_btn_google_account" />
+
+        </FrameLayout>
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/switch_account_layout_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/choose_account_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/change_account_another_account"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/switch_account"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@android:color/darker_gray"
+                android:gravity="center"
+                android:padding="10dp"
+                android:text="@string/change_account_start_to_change"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/white" />
+
+        </FrameLayout>
+
+
+    </LinearLayout>
 
 </LinearLayout>

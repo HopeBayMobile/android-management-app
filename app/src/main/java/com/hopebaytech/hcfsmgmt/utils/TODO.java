@@ -9,5 +9,7 @@ public class TODO {
      * 1. Default display layout is changed to Grid layout
      * 2. Remove "Display by data type"
      * 3. Tap App icon to pop up detail information dialog both in ListView and GridView
+     * 4. Fix incorrect app data ratio
+     * 5. Build database even TeraFonn is not activated
      */
 }

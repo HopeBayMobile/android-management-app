@@ -26,4 +26,6 @@
     <color name="colorWhite">@android:color/white</color>
     <color name="colorPagerTabStrip">#4E8D1F</color>
 
+    <color name="colorSwitchAccountTextBackground">#F2F8EA</color>
+
 </resources>

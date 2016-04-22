@@ -29,7 +29,8 @@ public class DisplayTypeFactory {
 	public static ArrayList<ItemInfo> getListOfInstalledApps(Context context, int flags) {
 		ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
 		if (context != null) {
-			Map<String, String> externalPkgNameMap = new HashMap<>();
+//			Map<String, String> externalPkgNameMap = new HashMap<>();
+			Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
 			String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
 			File externalAndroidFile = new File(externalPath);
 			for (File type : externalAndroidFile.listFiles()) {
@@ -38,7 +39,14 @@ public class DisplayTypeFactory {
 					String path = file.getAbsolutePath();
 					String[] splitPath = path.split("/");
 					String pkgName = splitPath[splitPath.length - 1];
-					externalPkgNameMap.put(pkgName, path);
+
+					ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+					if (externalPathList == null) {
+						externalPathList = new ArrayList<>();
+					}
+					externalPathList.add(path);
+					externalPkgNameMap.put(pkgName, externalPathList);
+//					externalPkgNameMap.put(pkgName, path);
 				}
 			}
 
@@ -61,7 +69,8 @@ public class DisplayTypeFactory {
 				appInfo.setApplicationInfo(applicationInfo);
 				appInfo.setItemName(applicationInfo.loadLabel(pm).toString());
 				if (externalPkgNameMap.containsKey(applicationInfo.packageName)) {
-					appInfo.setExternalDir(externalPkgNameMap.get(applicationInfo.packageName));
+//					appInfo.setExternalDir(externalPkgNameMap.get(applicationInfo.packageName));
+					appInfo.setExternalDirList(externalPkgNameMap.get(applicationInfo.packageName));
 				}
 
 //                UidDAO uidDAO = new UidDAO(context);
@@ -72,10 +81,10 @@ public class DisplayTypeFactory {
 		}
 		return itemInfoList;
 	}
-	
+
 	public static ArrayList<ItemInfo> getListOfDataType(Context context) {
 		DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(context);
-		ArrayList<ItemInfo> itemInfoList = new ArrayList<ItemInfo>();
+		ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
 		String[] dataTypeArray = context.getResources().getStringArray(R.array.file_mgmt_list_data_types);
 		for (int i = 0; i < dataTypeArray.length; i++) {
 			DataTypeInfo dataTypeInfo = null;

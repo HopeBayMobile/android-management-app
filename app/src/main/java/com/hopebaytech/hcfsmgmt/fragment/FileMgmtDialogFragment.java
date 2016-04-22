@@ -31,6 +31,7 @@ import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 
 /**
@@ -178,28 +179,41 @@ public class FileMgmtDialogFragment extends DialogFragment {
     }
 
     private String getAppDataInLocalPercentage(AppInfo appInfo) {
-        DirStatusInfo sourceDirInfo = getDirStatusInfo(appInfo.getSourceDir());
-        DirStatusInfo dataDirInfo = getDirStatusInfo(appInfo.getDataDir());
-        DirStatusInfo externalDirInfo = getDirStatusInfo(appInfo.getExternalDir());
 
         float numLocal = 0;
         float numHybrid = 0;
         float numCloud = 0;
+
+        DirStatusInfo sourceDirInfo = getDirStatusInfo(appInfo.getSourceDir());
         if (sourceDirInfo != null) {
             numLocal += sourceDirInfo.getNumLocal();
             numHybrid += sourceDirInfo.getNumHybrid();
             numCloud += sourceDirInfo.getNumCloud();
         }
+
+        DirStatusInfo dataDirInfo = getDirStatusInfo(appInfo.getDataDir());
         if (dataDirInfo != null) {
             numLocal += dataDirInfo.getNumLocal();
             numHybrid += dataDirInfo.getNumHybrid();
             numCloud += dataDirInfo.getNumCloud();
         }
-        if (externalDirInfo != null) {
-            numLocal += externalDirInfo.getNumLocal();
-            numHybrid += externalDirInfo.getNumHybrid();
-            numCloud += externalDirInfo.getNumCloud();
+
+        List<String> externalDirList = appInfo.getExternalDirList();
+        if (externalDirList != null) {
+            for (String dirPath: externalDirList) {
+                DirStatusInfo externalDirInfo = getDirStatusInfo(dirPath);
+                numLocal += externalDirInfo.getNumLocal();
+                numHybrid += externalDirInfo.getNumHybrid();
+                numCloud += externalDirInfo.getNumCloud();
+            }
         }
+
+//        DirStatusInfo externalDirInfo = getDirStatusInfo(appInfo.getExternalDirList());
+//        if (externalDirInfo != null) {
+//            numLocal += externalDirInfo.getNumLocal();
+//            numHybrid += externalDirInfo.getNumHybrid();
+//            numCloud += externalDirInfo.getNumCloud();
+//        }
 
         float percentage = (numLocal / (numLocal + numHybrid + numCloud)) * 100;
         return UnitConverter.formatPercentage(percentage) + "%";

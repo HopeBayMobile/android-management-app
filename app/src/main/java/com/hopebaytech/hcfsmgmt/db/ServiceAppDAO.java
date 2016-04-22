@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
@@ -10,6 +11,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -67,9 +69,12 @@ public class ServiceAppDAO {
 		if (appInfo.getSourceDir() != null) {
 			contentValues.put(SOURCE_DIR_COLUMN, appInfo.getSourceDir());
 		}
-    	if (appInfo.getExternalDir() != null) {
-    		contentValues.put(EXTERNAL_DIR_COLUMN, appInfo.getExternalDir());
-    	}
+//    	if (appInfo.getExternalDir() != null) {
+//    		contentValues.put(EXTERNAL_DIR_COLUMN, appInfo.getExternalDir());
+//    	}
+		if (appInfo.getExternalDirList() != null) {
+			contentValues.put(EXTERNAL_DIR_COLUMN, TextUtils.join(",", appInfo.getExternalDirList()));
+		}
     	return getDataBase().insert(TABLE_NAME, null, contentValues);
     }
     
@@ -105,10 +110,14 @@ public class ServiceAppDAO {
     	result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
     	result.setDataDir(cursor.getString(cursor.getColumnIndex(DATA_DIR_COLUMN)));
     	result.setSourceDir(cursor.getString(cursor.getColumnIndex(SOURCE_DIR_COLUMN)));
+//    	String externalDir = cursor.getString(cursor.getColumnIndex(EXTERNAL_DIR_COLUMN));
     	String externalDir = cursor.getString(cursor.getColumnIndex(EXTERNAL_DIR_COLUMN));
-    	if (externalDir != null) {
-    		result.setExternalDir(externalDir);
-    	}
+//    	if (externalDir != null) {
+//    		result.setExternalDir(externalDir);
+//    	}
+        if (externalDir != null) {
+            result.setExternalDirList((ArrayList<String>) Arrays.asList(externalDir.split(",")));
+        }
     	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
     	return result;
     }

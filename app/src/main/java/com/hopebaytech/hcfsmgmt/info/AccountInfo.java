@@ -5,10 +5,20 @@ package com.hopebaytech.hcfsmgmt.info;
  */
 public class AccountInfo {
 
+    private int id;
     private String name;
     private String email;
     private String imgUrl;
     private String imgBase64;
+    private long imgExpringTime;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;
@@ -42,4 +52,11 @@ public class AccountInfo {
         this.imgBase64 = imgBase64;
     }
 
+    public long getImgExpringTime() {
+        return imgExpringTime;
+    }
+
+    public void setImgExpringTime(long imgExpringTime) {
+        this.imgExpringTime = imgExpringTime;
+    }
 }

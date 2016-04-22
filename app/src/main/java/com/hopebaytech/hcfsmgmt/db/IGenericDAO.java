@@ -17,5 +17,6 @@ public interface IGenericDAO<T> {
     void close();
     void clear();
     void delete(String key);
+    boolean update(T info);
 
 }

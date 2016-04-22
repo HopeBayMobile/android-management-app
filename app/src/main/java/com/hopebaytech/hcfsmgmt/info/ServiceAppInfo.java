@@ -1,5 +1,7 @@
 package com.hopebaytech.hcfsmgmt.info;
 
+import java.util.ArrayList;
+
 public class ServiceAppInfo {
 
 	private boolean isPinned;
@@ -7,7 +9,8 @@ public class ServiceAppInfo {
 	private String packageName;
 	private String sourceDir;
 	private String dataDir;
-	private String externalDir;
+//	private String externalDir;
+	private ArrayList<String> externalDirList;
 
 	public String getAppName() {
 		return appName;
@@ -41,13 +44,13 @@ public class ServiceAppInfo {
 		this.dataDir = dataDir;
 	}
 
-	public String getExternalDir() {
-		return externalDir;
-	}
-
-	public void setExternalDir(String externalDir) {
-		this.externalDir = externalDir;
-	}
+//	public String getExternalDir() {
+//		return externalDir;
+//	}
+//
+//	public void setExternalDir(String externalDir) {
+//		this.externalDir = externalDir;
+//	}
 
 	public String getPackageName() {
 		return packageName;
@@ -57,4 +60,11 @@ public class ServiceAppInfo {
 		this.packageName = packageName;
 	}
 
+	public ArrayList<String> getExternalDirList() {
+		return externalDirList;
+	}
+
+	public void setExternalDirList(ArrayList<String> externalDirList) {
+		this.externalDirList = externalDirList;
+	}
 }
