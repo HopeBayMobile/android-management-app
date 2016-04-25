@@ -68,14 +68,14 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onAttach", null);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onAttach", null);
         super.onAttach(context);
         mContext = context;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", null);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", null);
         super.onCreate(savedInstanceState);
         mNetworkStatusReceiver = new NetworkBroadcastReceiver();
     }
@@ -83,12 +83,12 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewStateRestored", null);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewStateRestored", null);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onSaveInstanceState", null);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onSaveInstanceState", null);
         super.onSaveInstanceState(outState);
 
         if (mStatInfo != null) {
@@ -115,14 +115,14 @@ public class DashboardFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateView", null);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateView", null);
         return inflater.inflate(R.layout.dashboard_fragment, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", null);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", null);
 
         mNetworkConnStatusImage = (ImageView) view.findViewById(R.id.network_conn_status_icon);
         mNetworkConnStatusText = (TextView) view.findViewById(R.id.network_conn_status);
@@ -195,7 +195,7 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityCreated", null);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityCreated", null);
 
         mUiRefreshRunnable = new Runnable() {
             @Override
@@ -224,13 +224,6 @@ public class DashboardFragment extends Fragment {
                                     String xferUpload = mStatInfo.getXferUpload();
                                     mNetworkXferUp.setText(xferUpload);
                                     mNetworkXferDown.setText(xferDownload);
-//                                    if (xferDownload.equals("0Byte") && xferUpload.equals("0Byte")) {
-//                                        mXferProgressBar.setProgress(0);
-//                                        mXferProgressBar.setSecondaryProgress(0);
-//                                    } else {
-//                                        mXferProgressBar.setProgress(mStatInfo.getXterDownloadPercentage());
-//                                        mXferProgressBar.setSecondaryProgress(100);
-//                                    }
                                     mXferProgressBar.setProgress(mStatInfo.getXterDownloadPercentage());
                                     mXferProgressBar.setSecondaryProgress(100);
                                 } else {
@@ -326,24 +319,6 @@ public class DashboardFragment extends Fragment {
             mUiRefreshThread = null;
         }
         super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStop", null);
-    }
-
-    @Override
-        public void onDestroyView() {
-        super.onDestroyView();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onDestroyView", null);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onDestroyView", null);
     }
 
     @Override

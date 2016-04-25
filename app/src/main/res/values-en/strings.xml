@@ -2,6 +2,9 @@
 
     <string name="app_name">TeraFonn</string>
 
+    <string name="main_activity_require_permission">需要讀取外部儲存空間的權限，否則無法瀏覽外部儲存空間的檔案。</string>
+    <string name="main_activity_no_permission">沒有權限以至於無法瀏覽外部儲存空間的檔案。</string>
+
     <string name="activate_cloud_alert_dialog_message">Network connection failed. Please try again later.</string>
     <string name="activate_cloud_storage_processing_msg">Processing&#8230; Please wait.</string>
     <string name="activate_cloud_storage_snackbar_require_username_password">Please enter username &#38; password.</string>
@@ -141,14 +144,14 @@
     <string name="activate_cloud_storage_activate">Activate</string>
     <string name="activate_cloud_storage_forget_password"><u>Forgot password</u></string>
     <string name="activate_cloud_storage_or">or</string>
-    <string name="activate_cloud_storage_google_activate"><u>Google account for activation</u></string>
+    <string name="activate_cloud_storage_google_activate">Use Google account for activation</string>
     <string name="failed_to_get_server_client_id">Getting info about Google authentication from admin server failed. Please restart app and try again.</string>
 
     <string name="change_account_choose_an_account">請選擇一個欲轉換的帳號</string>
     <string name="change_account_require_new_account">選擇的帳號不可與原本帳號相同</string>
     <string name="change_account_start_to_change">轉換</string>
     <string name="change_account_failed_to_change">轉換失敗，請再嘗試一次。</string>
-    <string name="change_account_another_account"><u>請選擇另外一個帳號</u></string>
+    <string name="change_account_another_account"><u>選擇另外一個帳號</u></string>
 
     <string name="auth_at_bootup_auth_google_failed">Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
     <string name="auth_at_bootup_auth_mgmt_failed">TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>

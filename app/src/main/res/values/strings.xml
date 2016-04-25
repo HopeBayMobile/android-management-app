@@ -1,7 +1,9 @@
 <resources>
 
     <string name="app_name">TeraFonn</string>
-    
+
+    <string name="main_activity_require_permission">需要讀取外部儲存空間的權限，否則無法瀏覽外部儲存空間的檔案。</string>
+    <string name="main_activity_no_permission">沒有權限以至於無法瀏覽外部儲存空間的檔案。</string>
 
     <string name="activate_cloud_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
     <string name="activate_cloud_storage_processing_msg">處理中，請稍後&#8230;</string>
@@ -147,7 +149,7 @@
     <string name="activate_cloud_storage_activate">啟用</string>
     <string name="activate_cloud_storage_forget_password"><u>忘記密碼</u></string>
     <string name="activate_cloud_storage_or">或</string>
-    <string name="activate_cloud_storage_google_activate"><u>Google帳號啟用</u></string>
+    <string name="activate_cloud_storage_google_activate">使用Google帳號啟用</string>
     <string name="failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
 
     <string name="change_account_choose_an_account">請選擇一個欲轉換的帳號</string>

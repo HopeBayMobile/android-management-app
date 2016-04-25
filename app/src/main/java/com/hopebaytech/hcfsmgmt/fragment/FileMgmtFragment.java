@@ -863,26 +863,17 @@ public class FileMgmtFragment extends Fragment {
                     } else {
                         popupMenu.getMenu().add(mContext.getString(R.string.file_mgmt_popup_menu_unpin));
                     }
-                    if (itemInfo instanceof AppInfo) {
-                        popupMenu.getMenu().add(mContext.getString(R.string.file_mgmt_popup_menu_app_type_more_info));
-                    }
                 }
                 popupMenu.setOnMenuItemClickListener(new OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         String itemTitle = item.getTitle().toString();
-                        if (itemTitle.equals(mContext.getString(R.string.file_mgmt_popup_menu_app_type_more_info))) {
-                            if (itemInfo instanceof AppInfo) {
-                                FileMgmtDialogFragment dialogFragment = FileMgmtDialogFragment.newInstance();
-                                dialogFragment.setItemInfo(itemInfo);
-                                dialogFragment.show(getFragmentManager(), FileMgmtDialogFragment.TAG);
-                                return true;
+                        if (itemTitle.equals(mContext.getString(R.string.file_mgmt_popup_menu_pin)) ||
+                                itemTitle.equals(mContext.getString(R.string.file_mgmt_popup_menu_unpin))) {
+                            if (!isSDCard1) {
+                                /** Pin/Unpin the selected item */
+                                pinUnpinItem(itemInfo, GridRecyclerViewHolder.this, mExecutor);
                             }
-                        }
-
-                        if (!isSDCard1) {
-                            /** Pin/Unpin the selected item */
-                            pinUnpinItem(itemInfo, GridRecyclerViewHolder.this, mExecutor);
                         }
                         return true;
                     }

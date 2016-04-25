@@ -120,7 +120,6 @@ public class LoadingActivity extends AppCompatActivity {
                     photoUrl= acct.getPhotoUrl().toString();
                 }
 
-
                 AccountDAO accountDAO = AccountDAO.getInstance(LoadingActivity.this);
                 if (accountDAO.getCount() == 0)  {
                     AccountInfo accountInfo = new AccountInfo();
@@ -130,7 +129,7 @@ public class LoadingActivity extends AppCompatActivity {
                     accountDAO.insert(accountInfo);
                 } else {
                     AccountInfo accountInfo = accountDAO.getAll().get(0);
-                    if (accountInfo.getImgExpringTime() > System.currentTimeMillis()) {
+                    if (System.currentTimeMillis() > accountInfo.getImgExpringTime()) {
                         accountInfo.setImgUrl(photoUrl);
                         accountInfo.setImgBase64(null);
                         accountInfo.setImgExpringTime(System.currentTimeMillis() + HCFSMgmtUtils.INTERVAL_DAY);

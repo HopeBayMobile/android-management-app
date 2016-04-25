@@ -14,6 +14,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -77,6 +79,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_account_activity);
 
@@ -94,7 +97,6 @@ public class ChangeAccountActivity extends AppCompatActivity {
         if (mSwitchAccountLayoutIcon != null) {
             mSwitchAccountLayoutIcon.setVisibility(View.VISIBLE);
         }
-
 
         mResolvingError = savedInstanceState != null && savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
 
@@ -180,13 +182,11 @@ public class ChangeAccountActivity extends AppCompatActivity {
                                         public void onConnected(@Nullable Bundle bundle) {
                                             OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
                                             if (opr.isDone()) {
-                                                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onCreate", "opr.isDone()");
                                                 GoogleSignInResult result = opr.get();
                                                 mServerAuthCode = getServerAuthCode(result);
                                                 HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onCreate", "serverAuthCode=" + mServerAuthCode);
                                                 hideProgressDialog();
                                             } else {
-                                                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onCreate", "!opr.isDone()");
                                                 opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                                                     @Override
                                                     public void onResult(@NonNull GoogleSignInResult result) {
@@ -357,12 +357,14 @@ public class ChangeAccountActivity extends AppCompatActivity {
                     String targetAccount = acct.getEmail();
                     mTargetAccount.setText(targetAccount);
                     if (currentAccount.equals(targetAccount)) {
-                        mSwitchAccount.setBackgroundColor(ContextCompat.getColor(ChangeAccountActivity.this, android.R.color.darker_gray));
+//                        mSwitchAccount.setBackgroundColor(ContextCompat.getColor(ChangeAccountActivity.this, android.R.color.darker_gray));
+                        ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(ContextCompat.getColor(ChangeAccountActivity.this, android.R.color.darker_gray));
                         mSwitchAccount.setEnabled(false);
 
                         showAlertConfirmDialog(getString(R.string.change_account_require_new_account));
                     } else {
-                        mSwitchAccount.setBackgroundColor(ContextCompat.getColor(ChangeAccountActivity.this, R.color.colorAccent));
+//                        mSwitchAccount.setBackgroundColor(ContextCompat.getColor(ChangeAccountActivity.this, R.color.colorAccent));
+                        ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(ContextCompat.getColor(ChangeAccountActivity.this, R.color.colorAccent));
                         mSwitchAccount.setEnabled(true);
                     }
                 } else {

@@ -444,11 +444,11 @@ public class HCFSMgmtUtils {
 //        String externalDir = info.getExternalDir();
         ArrayList<String> externalDirList = info.getExternalDirList();
         boolean isSourceDirSuccess = true;
-        if (sourceDir != null) {
-            if (sourceDir.startsWith("/data/app")) {
-                isSourceDirSuccess = pinFileOrDirectory(sourceDir);
-            }
-        }
+//        if (sourceDir != null) {
+//            if (sourceDir.startsWith("/data/app")) {
+//                isSourceDirSuccess = pinFileOrDirectory(sourceDir);
+//            }
+//        }
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
@@ -475,11 +475,11 @@ public class HCFSMgmtUtils {
         ArrayList<String> externalDirList = info.getExternalDirList();
 
         boolean isSourceDirSuccess = true;
-        if (sourceDir != null) {
-            if (sourceDir.startsWith("/data/app")) {
-                isSourceDirSuccess = unpinFileOrDirectory(sourceDir);
-            }
-        }
+//        if (sourceDir != null) {
+//            if (sourceDir.startsWith("/data/app")) {
+//                isSourceDirSuccess = unpinFileOrDirectory(sourceDir);
+//            }
+//        }
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {

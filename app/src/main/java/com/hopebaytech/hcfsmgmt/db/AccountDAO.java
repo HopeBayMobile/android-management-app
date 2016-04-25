@@ -64,10 +64,6 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         accountInfo.setImgUrl(cursor.getString(cursor.getColumnIndex(IMG_URL_COLUMN)));
         accountInfo.setImgBase64(cursor.getString(cursor.getColumnIndex(IMG_BASE64_COLUMN)));
         accountInfo.setImgExpringTime(Long.parseLong(cursor.getString(cursor.getColumnIndex(IMG_EXPIRING_TIME_COLUMN))));
-
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getRecord", "imgBase64=" + accountInfo.getImgBase64());
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getRecord", "imgExpiringTime=" + accountInfo.getImgExpringTime());
-
         return accountInfo;
     }
 
@@ -138,7 +134,17 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         cv.put(IMG_EXPIRING_TIME_COLUMN, info.getImgExpringTime());
 
         String where = KEY_ID + "=" + info.getId();
-        return mDataBase.update(TABLE_NAME, cv, where, null) > 0;
+        boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "update",
+                "id=" + info.getId() +
+                        "name=" + info.getName() +
+                        ", email=" + info.getEmail() +
+                        ", imgUrl=" + info.getImgUrl() +
+                        ", imgBase64=" + info.getImgBase64() +
+                        ", imgExpiringTime=" + info.getImgExpringTime() +
+                        ", isSuccess=" + isSuccess);
+
+        return isSuccess;
     }
 
 }

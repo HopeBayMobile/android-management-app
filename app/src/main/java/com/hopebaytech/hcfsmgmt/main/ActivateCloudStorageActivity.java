@@ -185,7 +185,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
             });
         }
 
-        final SignInButton googleActivate = (SignInButton) findViewById(R.id.google_activate);
+        final TextView googleActivate = (TextView) findViewById(R.id.google_activate);
         if (googleActivate != null) {
             googleActivate.setOnClickListener(new OnClickListener() {
                 @Override
@@ -224,7 +224,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
                                             Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                                             startActivityForResult(signInIntent, HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN);
-                                            setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
+//                                            setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
                                         }
                                     });
                                 } else {
@@ -250,7 +250,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 }
             });
         }
-        setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
+//        setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
     }
 
     private void setGoogleSignInButtonText(SignInButton signInButton, String buttonText) {
@@ -285,6 +285,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                     mWorkHandler.post(new Runnable() {
                         @Override
                         public void run() {
+
                             boolean isFailed = initHCFSConfig(authResultInfo);
                             if (isFailed) {
                                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
@@ -324,14 +325,14 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
                                 startActivity(intent);
                                 finish();
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        hideProgressDialog();
-                                    }
-                                });
                             }
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    hideProgressDialog();
+                                }
+                            });
                         }
                     });
 

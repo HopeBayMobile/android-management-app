@@ -11,5 +11,6 @@ public class TODO {
      * 3. Tap App icon to pop up detail information dialog both in ListView and GridView
      * 4. Fix incorrect app data ratio
      * 5. Build database even TeraFonn is not activated
+     * 6. Change targetSdkVersion to 23 and add READ_EXTERNAL_STORAGE runtime permission
      */
 }

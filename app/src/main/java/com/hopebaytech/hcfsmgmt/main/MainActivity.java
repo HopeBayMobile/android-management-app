@@ -1,19 +1,22 @@
 package com.hopebaytech.hcfsmgmt.main;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -23,6 +26,7 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
@@ -39,13 +43,11 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
-import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
 import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -65,8 +67,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private final String CLASSNAME = getClass().getSimpleName();
     private final int NAV_MENU_SDCARD1_ID = (int) (Math.random() * Integer.MAX_VALUE);
-    private SDCardBroadcastReceiver sdCardReceiver;
-    //    private Toolbar toolbar;
+    private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 0;
+//    private SDCardBroadcastReceiver sdCardReceiver;
     private Handler mHandler;
     private NavigationView mNavigationView;
     private ViewPager mViewPager;
@@ -74,12 +76,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private String sdcard1_path;
     private boolean isSDCard1;
     private boolean isExitApp = false;
+    private DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
         init();
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(getString(R.string.alert_dialog_title_warning));
+                builder.setMessage(getString(R.string.main_activity_require_permission));
+                builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                    }
+                });
+                builder.setCancelable(false);
+                builder.show();
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+            }
+        }
     }
 
     private void init() {
@@ -91,13 +113,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
 
-        sdCardReceiver = new SDCardBroadcastReceiver();
+//        sdCardReceiver = new SDCardBroadcastReceiver();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-        filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-        filter.addDataScheme("file");
-        registerReceiver(sdCardReceiver, filter);
+//        IntentFilter filter = new IntentFilter();
+//        filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+//        filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+//        filter.addDataScheme("file");
+//        registerReceiver(sdCardReceiver, filter);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
@@ -106,11 +128,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setSupportActionBar(toolbar);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer != null) {
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (mDrawerLayout != null) {
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
 //        drawer.setDrawerListener(toggle);
-            drawer.addDrawerListener(toggle);
+            mDrawerLayout.addDrawerListener(toggle);
             toggle.syncState();
         }
 
@@ -179,41 +201,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         /** Detect whether sdcard1 exists, if exists, add to left slide menu. */
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    BufferedReader br = new BufferedReader(new FileReader(new File("/proc/mounts")));
-                    try {
-                        String line;
-                        while ((line = br.readLine()) != null) {
-                            if (line.contains("sdcard1") && line.contains("fuse")) {
-                                sdcard1_path = line.split("\\s")[1];
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Menu menu = mNavigationView.getMenu();
-                                        for (int i = 0; i < menu.size(); i++) {
-                                            if (menu.getItem(i).getTitle().equals(getString(R.string.nav_system))) {
-                                                MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, i + 1,
-                                                        getString(R.string.nav_sdcard1));
-                                                menuItem.setIcon(R.drawable.ic_sd_storage_black);
-                                                break;
-                                            }
-                                        }
-                                    }
-                                });
-                                break;
-                            }
-                        }
-                    } finally {
-                        br.close();
-                    }
-                } catch (Exception e) {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
-                }
-            }
-        });
+//        mHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    BufferedReader br = new BufferedReader(new FileReader(new File("/proc/mounts")));
+//                    try {
+//                        String line;
+//                        while ((line = br.readLine()) != null) {
+//                            if (line.contains("sdcard1") && line.contains("fuse")) {
+//                                sdcard1_path = line.split("\\s")[1];
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        Menu menu = mNavigationView.getMenu();
+//                                        for (int i = 0; i < menu.size(); i++) {
+//                                            if (menu.getItem(i).getTitle().equals(getString(R.string.nav_system))) {
+//                                                MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, i + 1,
+//                                                        getString(R.string.nav_sdcard1));
+//                                                menuItem.setIcon(R.drawable.ic_sd_storage_black);
+//                                                break;
+//                                            }
+//                                        }
+//                                    }
+//                                });
+//                                break;
+//                            }
+//                        }
+//                    } finally {
+//                        br.close();
+//                    }
+//                } catch (Exception e) {
+//                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
+//                }
+//            }
+//        });
 
         /** Inert default value of image, video and audio type to "dataFtype" table in database */
 //        mHandler.post(new Runnable() {
@@ -286,12 +308,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         /** Initialize ViewPager with PagerTabStrip */
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        mViewPager.setOffscreenPageLimit(3);
-        PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
-        pagerTabStrip.setTextColor(ContextCompat.getColor(this, R.color.colorWhite));
-        pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.colorPagerTabStrip));
-        pagerTabStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
-        mViewPager.setAdapter(mPagerAdapter);
+        if (mViewPager != null) {
+            mViewPager.setOffscreenPageLimit(3);
+            PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
+            pagerTabStrip.setTextColor(ContextCompat.getColor(this, R.color.colorWhite));
+            pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.colorPagerTabStrip));
+            pagerTabStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            mViewPager.setAdapter(mPagerAdapter);
+        }
 
     }
 
@@ -349,9 +373,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             int position = mViewPager.getCurrentItem();
             Fragment fragment = mPagerAdapter.getFragment(position);
@@ -372,7 +395,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             isExitApp = true;
             String message = getString(R.string.dashboard_snackbar_exit_app);
-            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show();
+            View contentView = findViewById(android.R.id.content);
+            if (contentView != null) {
+                Snackbar.make(contentView, message, Snackbar.LENGTH_SHORT).show();
+            }
             Timer exitTimer = new Timer();
             exitTimer.schedule(new TimerTask() {
                 @Override
@@ -400,8 +426,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             isSDCard1 = true;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
@@ -452,7 +477,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(sdCardReceiver);
+//        unregisterReceiver(sdCardReceiver);
         super.onDestroy();
     }
 
@@ -464,6 +489,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
          * so that getActivity() cannot get instance.
          */
         // super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                /** If request is cancelled, the result arrays are empty. */
+                if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    View contentView = findViewById(android.R.id.content);
+                    if (contentView != null) {
+                        Snackbar.make(contentView, getString(R.string.main_activity_no_permission), Snackbar.LENGTH_LONG).show();
+                    }
+                }
+                break;
+        }
     }
 
 }

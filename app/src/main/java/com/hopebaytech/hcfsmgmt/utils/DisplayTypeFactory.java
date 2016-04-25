@@ -15,10 +15,12 @@ import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 
 public class DisplayTypeFactory {
 
@@ -31,22 +33,24 @@ public class DisplayTypeFactory {
 		if (context != null) {
 //			Map<String, String> externalPkgNameMap = new HashMap<>();
 			Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
-			String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-			File externalAndroidFile = new File(externalPath);
-			for (File type : externalAndroidFile.listFiles()) {
-				File[] fileList = type.listFiles();
-				for (File file : fileList) {
-					String path = file.getAbsolutePath();
-					String[] splitPath = path.split("/");
-					String pkgName = splitPath[splitPath.length - 1];
+			if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+				String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+				File externalAndroidFile = new File(externalPath);
+				for (File type : externalAndroidFile.listFiles()) {
+					File[] fileList = type.listFiles();
+					for (File file : fileList) {
+						String path = file.getAbsolutePath();
+						String[] splitPath = path.split("/");
+						String pkgName = splitPath[splitPath.length - 1];
 
-					ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
-					if (externalPathList == null) {
-						externalPathList = new ArrayList<>();
-					}
-					externalPathList.add(path);
-					externalPkgNameMap.put(pkgName, externalPathList);
+						ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+						if (externalPathList == null) {
+							externalPathList = new ArrayList<>();
+						}
+						externalPathList.add(path);
+						externalPkgNameMap.put(pkgName, externalPathList);
 //					externalPkgNameMap.put(pkgName, path);
+					}
 				}
 			}
 
@@ -112,7 +116,7 @@ public class DisplayTypeFactory {
 	
 	public static ArrayList<ItemInfo> getListOfFileDirs(Context context, File currentFile) {
 		ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
-		if (isExternalStorageReadable()) {
+		if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 			File[] fileList = currentFile.listFiles();
 			Arrays.sort(fileList);
 			for (int i = 0; i < fileList.length; i++) {
