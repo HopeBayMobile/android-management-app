@@ -68,5 +68,12 @@
         </receiver>
 
         <service android:name="com.hopebaytech.hcfsmgmt.service.HCFSMgmtService" />
+
+        <service
+            android:name="com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=":remote" />
+
     </application>
 </manifest>
