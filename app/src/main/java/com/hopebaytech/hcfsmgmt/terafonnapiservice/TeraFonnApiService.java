@@ -224,12 +224,16 @@ public class TeraFonnApiService extends Service {
         switch (logLevel) {
             case Log.DEBUG:
                 Log.d(TAG, className + "(" + funcName + "): " + logMsg);
+                break;
             case Log.INFO :
                 Log.i(TAG, className + "(" + funcName + "): " + logMsg);
+                break;
             case Log.WARN:
                 Log.w(TAG, className + "(" + funcName + "): " + logMsg);
+                break;
             case Log.ERROR:
                 Log.e(TAG, className + "(" + funcName + "): " + logMsg);
+                break;
         }
     }
 
