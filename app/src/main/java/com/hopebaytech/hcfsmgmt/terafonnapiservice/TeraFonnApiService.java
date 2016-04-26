@@ -277,7 +277,7 @@ public class TeraFonnApiService extends Service {
                 return AppStatus.STATUS_AVAILABLE;
             }
         } else {
-            if (getDefaultLocation(packageName) == AppStatus.LOCATION_LOCAL) {
+            if (getDefaultLocation(packageName) == LocationStatus.LOCAL) {
                 return AppStatus.STATUS_AVAILABLE;
             } else {
                 return AppStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
@@ -290,8 +290,7 @@ public class TeraFonnApiService extends Service {
     }
 
     private int getDefaultLocation(String packageName) {
-        int location = AppStatus.LOCATION_LOCAL;
-
+        int location = LocationStatus.LOCAL;
         try {
             String dataDir = getDataDir(packageName);
             List<String> appPath = getExternalDir(packageName);
@@ -305,17 +304,18 @@ public class TeraFonnApiService extends Service {
             }
 
             if (appLocation.contains(LocationStatus.HYBRID)) {
-                location = AppStatus.LOCATION_HYBRID;
+                location = LocationStatus.HYBRID;
             } else if (appLocation.contains(LocationStatus.CLOUD)) {
-                location = AppStatus.LOCATION_CLOUD;
+                location = LocationStatus.CLOUD;
             } else {
-                location = AppStatus.LOCATION_LOCAL;
+                location =LocationStatus.LOCAL;
             }
 
             log(Log.DEBUG, CLASSNAME, "getDefaultLocation", "APP Location: " + String.valueOf(location));
         } catch (Exception e) {
             log(Log.ERROR, CLASSNAME, "getDefaultLocation", "Error: " + e.toString());
         }
+
         return location;
     }
 
