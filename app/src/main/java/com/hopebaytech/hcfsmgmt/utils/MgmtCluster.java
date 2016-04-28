@@ -389,9 +389,9 @@ public class MgmtCluster {
                 final GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
                 if (acct != null) {
                     final String idToken = acct.getIdToken();
-//                    final String serverAuthCode = acct.getServerAuthCode();
+                    final String serverAuthCode = acct.getServerAuthCode();
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "idToken=" + idToken);
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "serverAuthCode=" + serverAuthCode);
+                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "serverAuthCode=" + serverAuthCode);
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "displayName=" + acct.getDisplayName());
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "email=" + acct.getEmail());
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "photoUrl=" + acct.getPhotoUrl());

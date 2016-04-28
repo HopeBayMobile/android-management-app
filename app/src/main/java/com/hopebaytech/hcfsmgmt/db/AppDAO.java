@@ -23,15 +23,15 @@ package com.hopebaytech.hcfsmgmt.db;//package com.hopebaytech.hcfsmgmt.db;
 //			+ PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " + PIN_STATUS_COLUMN + " INTEGER NOT NULL, " + DATA_STATUS_COLUMN + " INTEGER NOT NULL)";
 //
 //	private SQLiteDatabase db;
-//	private Context context;
+//	private Context mContext;
 //
-//	public AppDAO(Context context) {
-//		this.context = context;
+//	public AppDAO(Context mContext) {
+//		this.mContext = mContext;
 //		openDbIfClosed();
 //	}
 //
 //	public void openDbIfClosed() {
-//		db = HCFSDBHelper.getDataBase(context);
+//		db = HCFSDBHelper.getDataBase(mContext);
 //	}
 //
 //	public void close() {
@@ -93,7 +93,7 @@ package com.hopebaytech.hcfsmgmt.db;//package com.hopebaytech.hcfsmgmt.db;
 //
 //	public AppInfo getRecord(Cursor cursor) {
 //		openDbIfClosed();
-//		AppInfo result = new AppInfo(context);
+//		AppInfo result = new AppInfo(mContext);
 //		result.setDbId(cursor.getLong(cursor.getColumnIndex(KEY_ID)));
 //		result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
 //		result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 0 ? false : true);

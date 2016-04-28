@@ -94,7 +94,7 @@ public class HCFSConfig {
     }
 
     public static void startSyncToCloud(Context context, String logMsg) {
-        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         // Editor editor = sharedPreferences.edit();
         // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
         // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
@@ -118,7 +118,7 @@ public class HCFSConfig {
     }
 
     public static void stopSyncToCloud(Context context, String logMsg) {
-        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         // Editor editor = sharedPreferences.edit();
         // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
         // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;

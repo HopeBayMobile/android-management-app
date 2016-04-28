@@ -1,38 +1,42 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.preference.PreferenceManager;
+
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class AppInfo extends ItemInfo implements Cloneable {
+public class AppInfo extends ItemInfo {
 
-	private long dbId;
-	private int uid;
-	private ApplicationInfo applicationInfo;
-	private String packageName;
-//	private String externalDir;
-	private ArrayList<String> externalDirList;
-	private String[] sharedLibraryFiles;
-	private int appSize;
-	private Context context;
-	private int status = -1;
+    private long dbId;
+    private int uid;
+    private ApplicationInfo applicationInfo;
+    private String packageName;
+    //	private String externalDir;
+    private ArrayList<String> externalDirList;
+    private String[] sharedLibraryFiles;
+    private int appSize;
+    private Context context;
+//	private int status = -1;
 
-	public AppInfo(Context context) {
-		super(context);
-		this.context = context;
-	}
+    public AppInfo(Context context) {
+        super(context);
+        this.context = context;
+    }
 
 //	public AppInfo(AppInfo applicationInfo) {
-//		super(applicationInfo.context);
+//		super(applicationInfo.mContext);
 //		this.dbId = applicationInfo.dbId;
 //		this.uid = applicationInfo.uid;
 //		this.applicationInfo = applicationInfo.applicationInfo;
@@ -40,181 +44,191 @@ public class AppInfo extends ItemInfo implements Cloneable {
 //		this.externalDir = applicationInfo.externalDir;
 //		this.sharedLibraryFiles = applicationInfo.sharedLibraryFiles;
 //		this.appSize = applicationInfo.appSize;
-//		this.context = applicationInfo.context;
+//		this.mContext = applicationInfo.mContext;
 //		this.status = applicationInfo.status;
 //	}
 
-	public int getUid() {
-		return uid;
-	}
+    public int getUid() {
+        return uid;
+    }
 
-	public Bitmap getIconImage() {
-		Drawable drawable = context.getPackageManager().getApplicationIcon(applicationInfo);
-		if (!(drawable instanceof VectorDrawable)) {
-			return ((BitmapDrawable) drawable).getBitmap();
-		}
-		return null;
-	}
+    @Nullable
+    public Bitmap getIconImage() {
+        Bitmap iconImage = null;
+        Drawable drawable = context.getPackageManager().getApplicationIcon(applicationInfo);
+        if (!(drawable instanceof VectorDrawable)) {
+            iconImage = ((BitmapDrawable) drawable).getBitmap();
+        }
 
-	public void setApplicationInfo(ApplicationInfo appInfo) {
-		this.applicationInfo = appInfo;
-	}
+        if (iconImage == null) {
+            drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+            iconImage = ((BitmapDrawable) drawable).getBitmap();
+        }
+        return iconImage;
+    }
 
-	public void setUid(int uid) {
-		this.uid = uid;
-	}
+    public void setApplicationInfo(ApplicationInfo appInfo) {
+        this.applicationInfo = appInfo;
+    }
 
-	public String getSourceDir() {
-		/** Default sourceDir = /data/app/<package-name>-1/base.apk */
-		String sourceDir = applicationInfo.sourceDir;
-		int lastIndex = sourceDir.lastIndexOf("/");
-		String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
-		return sourceDirWithoutApkSuffix;
-	}
+    public void setUid(int uid) {
+        this.uid = uid;
+    }
 
-	@Nullable
-	public ArrayList<String> getExternalDirList() {
-		// Log.w(HCFSMgmtUtils.TAG, "getExternalDirList");
-		// String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-		// File externalAndroidFile = new File(externalPath);
-		// for (File type : externalAndroidFile.listFiles()) {
-		// File[] typeName = type.listFiles();
-		// for (File fileName : typeName) {
-		// Log.w(HCFSMgmtUtils.TAG, "fileName.getName(): " + fileName.getName());
-		// if (fileName.getName().equals(getPackageName())) {
-		// return fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
-		// }
-		// }
-		// }
-		// return null;
-		return externalDirList;
-	}
+    public String getSourceDir() {
+        /** Default sourceDir = /data/app/<package-name>-1/base.apk */
+        String sourceDir = applicationInfo.sourceDir;
+        int lastIndex = sourceDir.lastIndexOf("/");
+        String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
+        return sourceDirWithoutApkSuffix;
+    }
 
-	// public void findToSetExternalDir() {
-	// String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-	// File externalAndroidFile = new File(externalPath);
-	// for (File type : externalAndroidFile.listFiles()) {
-	// File[] typeName = type.listFiles();
-	// for (File fileName : typeName) {
-	// if (fileName.getName().equals(getPackageName())) {
-	//// this.externalDir = fileName.getAbsolutePath().replace(HCFSMgmtUtils.REPLACE_FILE_PATH_OLD, HCFSMgmtUtils.REPLACE_FILE_PATH_NEW);
-	// this.externalDir = fileName.getAbsolutePath();
-	// break;
-	// }
-	// }
-	// }
-	// }
+    @Nullable
+    public ArrayList<String> getExternalDirList() {
+        return externalDirList;
+    }
 
 //	public void setExternalDir(String externalDir) {
 //		this.externalDir = externalDir;
 //	}
 
-	public void setExternalDirList(ArrayList<String> externalDirList) {
-		this.externalDirList = externalDirList;
-	}
+    public void setExternalDirList(ArrayList<String> externalDirList) {
+        this.externalDirList = externalDirList;
+    }
 
-	public String getDataDir() {
-		return applicationInfo.dataDir;
-	}
+    public String getDataDir() {
+        return applicationInfo.dataDir;
+    }
 
-	public String getNativeLibraryDir() {
-		return applicationInfo.nativeLibraryDir;
-	}
+    public String getNativeLibraryDir() {
+        return applicationInfo.nativeLibraryDir;
+    }
 
-	@Nullable
-	public String[] getSharedLibraryFiles() {
-		return sharedLibraryFiles;
-	}
+    @Nullable
+    public String[] getSharedLibraryFiles() {
+        return sharedLibraryFiles;
+    }
 
-	public int getAppSize() {
-		return appSize;
-	}
+    public int getAppSize() {
+        return appSize;
+    }
 
-	public void setAppSize(int appSize) {
-		this.appSize = appSize;
-	}
+    public void setAppSize(int appSize) {
+        this.appSize = appSize;
+    }
 
-	public long getDbId() {
-		return dbId;
-	}
+    public long getDbId() {
+        return dbId;
+    }
 
-	public void setDbId(long dbId) {
-		this.dbId = dbId;
-	}
+    public void setDbId(long dbId) {
+        this.dbId = dbId;
+    }
 
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
-	}
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
 
-	public String getPackageName() {
-		if (packageName == null) {
-			packageName = applicationInfo.packageName;
-		}
-		return packageName;
-	}
+    public String getPackageName() {
+        if (packageName == null) {
+            packageName = applicationInfo.packageName;
+        }
+        return packageName;
+    }
 
-	@Override
-	public int getLocationStatus() {
-		return getAppStatus();
-	}
+    public int getAppStatus() {
+        if (NetworkUtils.isNetworkConnected(mContext)) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            boolean downloadToRun = sharedPreferences.getBoolean(mContext.getString(R.string.pref_download_to_run), false);
+            if (downloadToRun) {
+                if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
+                        HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL) {
+                    return ItemStatus.STATUS_AVAILABLE;
+                } else {
+                    return ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
+                }
+            } else {
+                return ItemStatus.STATUS_AVAILABLE;
+            }
+        } else {
+            int externalLocationStatus = getExternalLocationStatus();
+            if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
+                    HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
+                    externalLocationStatus == LocationStatus.LOCAL) {
+                return ItemStatus.STATUS_AVAILABLE;
+            } else {
+                return ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
+            }
+        }
+    }
 
-	public int getAppStatus() {
-		int srcStatus = HCFSMgmtUtils.getDirStatus(getSourceDir());
-		int dataStatus = HCFSMgmtUtils.getDirStatus(getDataDir());
-		if (getExternalDirList() != null) {
+    private int getExternalLocationStatus() {
+        int externalStatus = -1;
 
-//			int externalStatus = HCFSMgmtUtils.getDirStatus(getExternalDirList());
-			int externalLocalCounter = 0;
-			int externalHybridCounter = 0;
-			int externalCloudCounter = 0;
-			ArrayList<String> externalDirList = getExternalDirList();
-			for (String externalDir: externalDirList) {
-				if (HCFSMgmtUtils.getDirStatus(externalDir) == LocationStatus.LOCAL) {
-					externalLocalCounter++;
-				} else if (HCFSMgmtUtils.getDirStatus(externalDir) == LocationStatus.HYBRID) {
-					externalHybridCounter++;
-				} else if (HCFSMgmtUtils.getDirStatus(externalDir) == LocationStatus.CLOUD) {
-					externalCloudCounter++;
-				}
-			}
+        int externalLocalCounter = 0;
+        int externalHybridCounter = 0;
+        int externalCloudCounter = 0;
+        if (externalDirList != null) {
+            for (String externalDir : externalDirList) {
+                if (HCFSMgmtUtils.getDirLocationStatus(externalDir) == LocationStatus.LOCAL) {
+                    externalLocalCounter++;
+                } else if (HCFSMgmtUtils.getDirLocationStatus(externalDir) == LocationStatus.HYBRID) {
+                    externalHybridCounter++;
+                } else if (HCFSMgmtUtils.getDirLocationStatus(externalDir) == LocationStatus.CLOUD) {
+                    externalCloudCounter++;
+                }
+            }
 
-			int externalStatus;
-			if (externalHybridCounter == 0 && externalCloudCounter == 0) {
-				externalStatus = LocationStatus.LOCAL;
-			} else if (externalHybridCounter == 0 && externalLocalCounter == 0) {
-				externalStatus = LocationStatus.CLOUD;
-			} else {
-				externalStatus = LocationStatus.HYBRID;
-			}
+            if (externalHybridCounter == 0 && externalCloudCounter == 0) {
+                externalStatus = LocationStatus.LOCAL;
+            } else if (externalHybridCounter == 0 && externalLocalCounter == 0) {
+                externalStatus = LocationStatus.CLOUD;
+            } else {
+                externalStatus = LocationStatus.HYBRID;
+            }
+        }
+        return externalStatus;
+    }
 
-			if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL && externalStatus == LocationStatus.LOCAL) {
-				status = LocationStatus.LOCAL;
-			} else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD && externalStatus == LocationStatus.CLOUD) {
-				status = LocationStatus.CLOUD;
-			} else {
-				status = LocationStatus.HYBRID;
-			}
-		} else {
-			if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL) {
-				status = LocationStatus.LOCAL;
-			} else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD) {
-				status = LocationStatus.CLOUD;
-			} else {
-				status = LocationStatus.HYBRID;
-			}
-		}
-		return status;
-	}
+    public int getAppLocationStatus() {
+        int locationStatus;
+        int srcStatus = HCFSMgmtUtils.getDirLocationStatus(getSourceDir());
+        int dataStatus = HCFSMgmtUtils.getDirLocationStatus(getDataDir());
+        if (externalDirList != null) {
+            int externalStatus = getExternalLocationStatus();
+            if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL && externalStatus == LocationStatus.LOCAL) {
+                locationStatus = LocationStatus.LOCAL;
+            } else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD && externalStatus == LocationStatus.CLOUD) {
+                locationStatus = LocationStatus.CLOUD;
+            } else {
+                locationStatus = LocationStatus.HYBRID;
+            }
+        } else {
+            if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL) {
+                locationStatus = LocationStatus.LOCAL;
+            } else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD) {
+                locationStatus = LocationStatus.CLOUD;
+            } else {
+                locationStatus = LocationStatus.HYBRID;
+            }
+        }
+        return locationStatus;
+    }
 
-	@Override
-	public Drawable getPinUnpinImage() {
-		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
-	}
+    @Override
+    public Drawable getPinUnpinImage() {
+        return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
+    }
 
-	@Override
-	public int hashCode() {
-		return getSourceDir().hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return getSourceDir().hashCode();
+    }
+
+    @Override
+    public int getIconAlpha() {
+        return getAppStatus() == ItemStatus.STATUS_AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
+    }
 
     public ApplicationInfo getApplicationInfo() {
         return applicationInfo;

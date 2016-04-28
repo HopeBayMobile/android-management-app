@@ -43,23 +43,18 @@ public class DataTypeInfo extends ItemInfo {
 	public int getDataTypeStatus() {
 		int status = LocationStatus.LOCAL;
 //		if (dataType.equals(DataTypeDAO.DATA_TYPE_IMAGE)) {
-//			ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(context);
+//			ArrayList<String> imagePaths = HCFSMgmtUtils.getAvailableImagePaths(mContext);
 //			status = getStatus(imagePaths);
 //		} else if (dataType.equals(DataTypeDAO.DATA_TYPE_VIDEO)) {
-//			ArrayList<String> videoPaths = HCFSMgmtUtils.getAvailableVideoPaths(context);
+//			ArrayList<String> videoPaths = HCFSMgmtUtils.getAvailableVideoPaths(mContext);
 //			status = getStatus(videoPaths);
 //		} else if (dataType.equals(DataTypeDAO.DATA_TYPE_AUDIO)) {
-//			ArrayList<String> audioPaths = HCFSMgmtUtils.getAvailableAudioPaths(context);
+//			ArrayList<String> audioPaths = HCFSMgmtUtils.getAvailableAudioPaths(mContext);
 //			status = getStatus(audioPaths);
 //		} else {
 //			status = -1;
 //		}
 		return status;
-	}
-
-	@Override
-	public int getLocationStatus() {
-		return getDataTypeStatus();
 	}
 
 	private int getStatus(ArrayList<String> pathList) {
@@ -69,13 +64,13 @@ public class DataTypeInfo extends ItemInfo {
 		int num_cloud = 0;
 		for (String path : pathList) {
 			if (!Thread.currentThread().isInterrupted()) {
-				if (HCFSMgmtUtils.getFileStatus(path) == LocationStatus.HYBRID) {
+				if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.HYBRID) {
 					status = LocationStatus.HYBRID;
 					num_hybrid++;
 					return status;
-				} else if (HCFSMgmtUtils.getFileStatus(path) == LocationStatus.LOCAL) {
+				} else if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.LOCAL) {
 					num_local++;
-				} else if (HCFSMgmtUtils.getFileStatus(path) == LocationStatus.HYBRID) {
+				} else if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.HYBRID) {
 					num_cloud++;
 				}
 			}
@@ -120,6 +115,11 @@ public class DataTypeInfo extends ItemInfo {
 	@Override
 	public int hashCode() {
 		return getDataType().hashCode();
+	}
+
+	@Override
+	public int getIconAlpha() {
+		return 0;
 	}
 
 }

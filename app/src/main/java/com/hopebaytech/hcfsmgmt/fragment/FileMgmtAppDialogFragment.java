@@ -21,8 +21,6 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
-import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
-import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -37,16 +35,15 @@ import java.util.List;
 /**
  * Created by Aaron on 2016/3/30.
  */
-public class FileMgmtDialogFragment extends DialogFragment {
+public class FileMgmtAppDialogFragment extends DialogFragment {
 
-    public static final String TAG = FileMgmtDialogFragment.class.getSimpleName();
+    public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
-//    public static final int UNINSTALL_REQUEST_CODE = 100;
     private ItemInfo mItemInfo;
-    private Thread mCalculateAppDataLocalPercentageThread;
+    private Thread mCalculateAppDataRatioThread;
 
-    public static FileMgmtDialogFragment newInstance() {
-        return new FileMgmtDialogFragment();
+    public static FileMgmtAppDialogFragment newInstance() {
+        return new FileMgmtAppDialogFragment();
     }
 
     @NonNull
@@ -74,7 +71,7 @@ public class FileMgmtDialogFragment extends DialogFragment {
             }
 
             final TextView appSize = (TextView) view.findViewById(R.id.app_size);
-            String size = String.format(getString(R.string.file_mgmt_dialog_app_size), getString(R.string.file_mgmt_dialog_calculating));
+            String size = String.format(getString(R.string.file_mgmt_dialog_data_size), getString(R.string.file_mgmt_dialog_calculating));
             appSize.setText(size);
             try {
                 PackageManager pm = getActivity().getPackageManager();
@@ -104,7 +101,7 @@ public class FileMgmtDialogFragment extends DialogFragment {
                             @Override
                             public void run() {
                                 String formatSize = UnitConverter.convertByteToProperUnit(totalSize);
-                                appSize.setText(String.format(getString(R.string.file_mgmt_dialog_app_size), formatSize));
+                                appSize.setText(String.format(getString(R.string.file_mgmt_dialog_data_size), formatSize));
                             }
                         });
 
@@ -118,22 +115,22 @@ public class FileMgmtDialogFragment extends DialogFragment {
             String pkgName = String.format(getString(R.string.file_mgmt_dialog_app_package_name), appInfo.getPackageName());
             appPkgName.setText(pkgName);
 
-            final TextView appLocalPercentage = (TextView) view.findViewById(R.id.app_local_percentage);
-            String percentage = String.format(getString(R.string.file_mgmt_dialog_app_percentage), getString(R.string.file_mgmt_dialog_calculating));
-            appLocalPercentage.setText(percentage);
-            mCalculateAppDataLocalPercentageThread = new Thread(new Runnable() {
+            final TextView appDataRatio = (TextView) view.findViewById(R.id.app_local_percentage);
+            String ratio = String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), getString(R.string.file_mgmt_dialog_calculating));
+            appDataRatio.setText(ratio);
+            mCalculateAppDataRatioThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            String percentage = String.format(getString(R.string.file_mgmt_dialog_app_percentage), getAppDataInLocalPercentage(appInfo));
-                            appLocalPercentage.setText(percentage);
+                            String ratio = getAppDataRatio(appInfo);
+                            appDataRatio.setText(ratio);
                         }
                     });
                 }
             });
-            mCalculateAppDataLocalPercentageThread.start();
+            mCalculateAppDataRatioThread.start();
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setView(view)
@@ -155,21 +152,16 @@ public class FileMgmtDialogFragment extends DialogFragment {
                         }
                     });
             return builder.create();
-        } else if (mItemInfo instanceof DataTypeInfo) {
-            return super.onCreateDialog(savedInstanceState);
-        } else if (mItemInfo instanceof FileDirInfo) {
-            return super.onCreateDialog(savedInstanceState);
-        } else {
-            return super.onCreateDialog(savedInstanceState);
         }
+        return super.onCreateDialog(savedInstanceState);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
 
-        if (mCalculateAppDataLocalPercentageThread != null) {
-            mCalculateAppDataLocalPercentageThread.interrupt();
+        if (mCalculateAppDataRatioThread != null) {
+            mCalculateAppDataRatioThread.interrupt();
         }
 
     }
@@ -178,11 +170,11 @@ public class FileMgmtDialogFragment extends DialogFragment {
         this.mItemInfo = mItemInfo;
     }
 
-    private String getAppDataInLocalPercentage(AppInfo appInfo) {
+    private String getAppDataRatio(AppInfo appInfo) {
 
-        float numLocal = 0;
-        float numHybrid = 0;
-        float numCloud = 0;
+        int numLocal = 0;
+        int numHybrid = 0;
+        int numCloud = 0;
 
         DirStatusInfo sourceDirInfo = getDirStatusInfo(appInfo.getSourceDir());
         if (sourceDirInfo != null) {
@@ -200,7 +192,7 @@ public class FileMgmtDialogFragment extends DialogFragment {
 
         List<String> externalDirList = appInfo.getExternalDirList();
         if (externalDirList != null) {
-            for (String dirPath: externalDirList) {
+            for (String dirPath : externalDirList) {
                 DirStatusInfo externalDirInfo = getDirStatusInfo(dirPath);
                 numLocal += externalDirInfo.getNumLocal();
                 numHybrid += externalDirInfo.getNumHybrid();
@@ -208,15 +200,16 @@ public class FileMgmtDialogFragment extends DialogFragment {
             }
         }
 
-//        DirStatusInfo externalDirInfo = getDirStatusInfo(appInfo.getExternalDirList());
+//        FileDirStatusInfo externalDirInfo = getDirStatusInfo(appInfo.getExternalDirList());
 //        if (externalDirInfo != null) {
 //            numLocal += externalDirInfo.getNumLocal();
 //            numHybrid += externalDirInfo.getNumHybrid();
 //            numCloud += externalDirInfo.getNumCloud();
 //        }
 
-        float percentage = (numLocal / (numLocal + numHybrid + numCloud)) * 100;
-        return UnitConverter.formatPercentage(percentage) + "%";
+        int numTotal = numLocal + numHybrid + numCloud;
+        String ratio = numLocal + "/" + numTotal + " (local/total)";
+        return String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), ratio);
     }
 
     private DirStatusInfo getDirStatusInfo(String dirPath) {

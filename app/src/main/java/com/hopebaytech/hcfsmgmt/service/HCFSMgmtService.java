@@ -42,6 +42,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
@@ -149,8 +150,9 @@ public class HCFSMgmtService extends Service {
                         }
 
                         /** Pin /storage/emulated/0/Android folder */
-                        if (!HCFSMgmtUtils.isPathPinned("/storage/emulated/0/Android")) {
-                            HCFSMgmtUtils.pinFileOrDirectory("/storage/emulated/0/Android");
+                        String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+                        if (!HCFSMgmtUtils.isPathPinned(externalAndroidPath)) {
+                            HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
                         }
 
                         /** Pin system app when system boot up */
@@ -259,7 +261,7 @@ public class HCFSMgmtService extends Service {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             boolean isNotified = sharedPreferences.getBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), false);
                             double pinPlusUnpinButDirty = (max / rawCacheTotal) * 100;
-                            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onStartCommand", "pinPlusUnpinButDirty=" + pinPlusUnpinButDirty);
+                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", "pinPlusUnpinButDirty=" + pinPlusUnpinButDirty);
                             if (pinPlusUnpinButDirty >= Double.valueOf(storage_used_ratio)) {
                                 if (!isNotified) {
                                     int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;

@@ -62,10 +62,10 @@
     <string name="file_mgmt_popup_menu_app_type_more_info">More info</string>
     <string name="file_mgmt_dialog_app_cancel">Cancel</string>
     <string name="file_mgmt_dialog_app_open">Open</string>
-    <string name="file_mgmt_dialog_app_package_name">Package name: %s</string>
-    <string name="file_mgmt_dialog_app_percentage">Phone data ratio: %s</string>
+    <string name="file_mgmt_dialog_app_package_name">Package name:%s</string>
+    <string name="file_mgmt_dialog_local_data_ratio">Local data ratio: %s</string>
     <string name="file_mgmt_dialog_app_remove">Uninstall</string>
-    <string name="file_mgmt_dialog_app_size">Size: %s</string>
+    <string name="file_mgmt_dialog_data_size">Size: %s</string>
     <string name="file_mgmt_dialog_app_version">Version: %s</string>
     <string name="file_mgmt_dialog_calculating">Calculating&#8230;</string>
 

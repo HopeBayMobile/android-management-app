@@ -315,7 +315,7 @@ public class HCFSMgmtUtils {
         ArrayList<String> audioPaths = null;
         ContentResolver resolver = context.getContentResolver();
         String[] projection = {MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.DATE_ADDED};
-		/* External storage */
+        /* External storage */
         String selection = MediaStore.Audio.Media.DATE_ADDED + " > " + dateUpdated;
         Cursor cursor = resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Audio.Media._ID);
         if (cursor != null) {
@@ -347,7 +347,7 @@ public class HCFSMgmtUtils {
 
     @Nullable
     public static ArrayList<String> getAvailableImagePaths(Context context, long dateUpdated) {
-		/* External storage */
+        /* External storage */
         ArrayList<String> imagePaths = null;
         ContentResolver resolver = context.getContentResolver();
         String[] projection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA, MediaStore.Audio.Media.DATE_ADDED};
@@ -460,7 +460,7 @@ public class HCFSMgmtUtils {
 //            isExternalDirSuccess = pinFileOrDirectory(externalDir);
 //        }
         if (externalDirList != null) {
-            for (String externalDir: externalDirList) {
+            for (String externalDir : externalDirList) {
                 isExternalDirSuccess &= pinFileOrDirectory(externalDir);
             }
         }
@@ -491,7 +491,7 @@ public class HCFSMgmtUtils {
 //            isExternalDirSuccess = unpinFileOrDirectory(externalDir);
 //        }
         if (externalDirList != null) {
-            for (String externalDir: externalDirList) {
+            for (String externalDir : externalDirList) {
                 isExternalDirSuccess &= unpinFileOrDirectory(externalDir);
             }
         }
@@ -535,14 +535,14 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static int getDirStatus(String pathName) {
-        int status = LocationStatus.LOCAL;
+    public static int getDirLocationStatus(String pathName) {
+        int locationStatus = LocationStatus.LOCAL;
         try {
             // String logMsg = "pathName=" + pathName + ", startTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
+            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirLocationStatus", logMsg);
             String jsonResult = HCFSApiUtils.getDirStatus(pathName);
             // logMsg = "pathName=" + pathName + ", endTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
+            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirLocationStatus", logMsg);
             String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
@@ -555,72 +555,32 @@ public class HCFSMgmtUtils {
                     int num_cloud = dataObj.getInt("num_cloud");
 
                     if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
-                        status = LocationStatus.LOCAL;
+                        locationStatus = LocationStatus.LOCAL;
                     } else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
-                        status = LocationStatus.LOCAL;
+                        locationStatus = LocationStatus.LOCAL;
                     } else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
-                        status = LocationStatus.CLOUD;
+                        locationStatus = LocationStatus.CLOUD;
                     } else {
-                        status = LocationStatus.HYBRID;
+                        locationStatus = LocationStatus.HYBRID;
                     }
-                    HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getDirStatus", logMsg);
-                    // Log.i(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+                    HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getDirLocationStatus", logMsg);
+                    // Log.i(TAG, "getDirLocationStatus[" + pathName + "]: " + jsonResult);
                 } else {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", logMsg);
-                    // Log.e(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirLocationStatus", logMsg);
+                    // Log.e(TAG, "getDirLocationStatus[" + pathName + "]: " + jsonResult);
                 }
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", logMsg);
-                // Log.e(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirLocationStatus", logMsg);
+                // Log.e(TAG, "getDirLocationStatus[" + pathName + "]: " + jsonResult);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", Log.getStackTraceString(e));
-            // Log.e(TAG, Log.getStackTraceString(e));
-        } try {
-            // String logMsg = "pathName=" + pathName + ", startTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
-            String jsonResult = HCFSApiUtils.getDirStatus(pathName);
-            // logMsg = "pathName=" + pathName + ", endTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirStatus", logMsg);
-            String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
-            JSONObject jObject = new JSONObject(jsonResult);
-            boolean isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                int code = jObject.getInt("code");
-                if (code == 0) {
-                    JSONObject dataObj = jObject.getJSONObject("data");
-                    int num_local = dataObj.getInt("num_local");
-                    int num_hybrid = dataObj.getInt("num_hybrid");
-                    int num_cloud = dataObj.getInt("num_cloud");
-
-                    if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
-                        status = LocationStatus.LOCAL;
-                    } else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
-                        status = LocationStatus.LOCAL;
-                    } else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
-                        status = LocationStatus.CLOUD;
-                    } else {
-                        status = LocationStatus.HYBRID;
-                    }
-                    HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getDirStatus", logMsg);
-                    // Log.i(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
-                } else {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", logMsg);
-                    // Log.e(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
-                }
-            } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", logMsg);
-                // Log.e(TAG, "getDirStatus[" + pathName + "]: " + jsonResult);
-            }
-        } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatus", Log.getStackTraceString(e));
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirLocationStatus", Log.getStackTraceString(e));
             // Log.e(TAG, Log.getStackTraceString(e));
         }
-
-        return status;
+        return locationStatus;
     }
 
-    public static int getFileStatus(String pathName) {
+    public static int getFileLocationStatus(String pathName) {
         int status = LocationStatus.LOCAL;
         try {
             String jsonResult = HCFSApiUtils.getFileStatus(pathName);
@@ -640,14 +600,14 @@ public class HCFSMgmtUtils {
                         status = LocationStatus.HYBRID;
                         break;
                 }
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getFileStatus", logMsg);
-                // Log.i(TAG, "getFileStatus[" + pathName + "]: " + jsonResult);
+                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getFileLocationStatus", logMsg);
+                // Log.i(TAG, "getFileLocationStatus[" + pathName + "]: " + jsonResult);
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileStatus", logMsg);
-                // Log.e(TAG, "getFileStatus: " + jsonResult);
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileLocationStatus", logMsg);
+                // Log.e(TAG, "getFileLocationStatus: " + jsonResult);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileStatus", Log.getStackTraceString(e));
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileLocationStatus", Log.getStackTraceString(e));
             // Log.e(TAG, Log.getStackTraceString(e));
         }
         return status;
@@ -870,17 +830,7 @@ public class HCFSMgmtUtils {
     }
 
     public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
-        Drawable pinDrawable = null;
-        try {
-            if (isPinned) {
-                pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_pin);
-            } else {
-                pinDrawable = ContextCompat.getDrawable(context, R.drawable.icon_btn_app_unpin);
-            }
-        } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getPinUnpinImage", Log.getStackTraceString(e));
-        }
-        return pinDrawable;
+        return ContextCompat.getDrawable(context, isPinned ? R.drawable.icon_btn_app_pin : R.drawable.icon_btn_app_unpin);
     }
 
     @Nullable

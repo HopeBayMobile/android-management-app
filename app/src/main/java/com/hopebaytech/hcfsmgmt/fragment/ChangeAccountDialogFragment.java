@@ -3,37 +3,24 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.main.ChangeAccountActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 
 /**
  * Created by Aaron on 2016/4/15.
  */
 public class ChangeAccountDialogFragment extends DialogFragment {
 
-    public static final String TAG = FileMgmtDialogFragment.class.getSimpleName();
+    public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private Activity mActivity;
 

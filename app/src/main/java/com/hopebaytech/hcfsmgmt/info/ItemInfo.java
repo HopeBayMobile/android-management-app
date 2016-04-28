@@ -8,20 +8,19 @@ import android.support.v7.widget.RecyclerView;
 
 public abstract class ItemInfo {
 
-	public static final int DATA_STATUS_CLOUD = 0;
-	public static final int DATA_STATUS_HYBRID = 1;
-	public static final int DATA_STATUS_LOCAL = 2;
+	protected Context mContext;
+    protected final int ICON_COLORFUL = 255;
+    protected final int ICON_TRANSPARENT = 50;
 
-	protected Context context;
-	private boolean isPinned;
-	private String infoName;
-	private boolean isProcessing;
-	private long lastProcessTime;
-//	public Thread pinImageThread;
+    private boolean isPinned;
+    private String infoName;
+    private boolean isProcessing;
+    private long lastProcessTime;
+
 	public RecyclerView.ViewHolder viewHolder;
 	
 	public ItemInfo(Context context) {
-		this.context = context;
+		this.mContext = context;
 	}
 	
 	public RecyclerView.ViewHolder getViewHolder() {
@@ -70,8 +69,8 @@ public abstract class ItemInfo {
 	@Nullable
 	public abstract Drawable getPinUnpinImage();
 	
-	public abstract int getLocationStatus();
-	
 	public abstract int hashCode();
+
+	public abstract int getIconAlpha();
 
 }

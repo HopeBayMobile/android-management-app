@@ -77,7 +77,7 @@ public class DisplayTypeFactory {
 					appInfo.setExternalDirList(externalPkgNameMap.get(applicationInfo.packageName));
 				}
 
-//                UidDAO uidDAO = new UidDAO(context);
+//                UidDAO uidDAO = new UidDAO(mContext);
 //                boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
 //				appInfo.setPinned(isAppPinned);
 				itemInfoList.add(appInfo);

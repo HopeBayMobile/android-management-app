@@ -9,12 +9,12 @@
     android:paddingLeft="@dimen/fragment_horizontal_padding"
     android:paddingRight="@dimen/fragment_horizontal_padding"
     android:paddingTop="@dimen/fragment_vertical_padding"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark" >
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView
         android:id="@+id/photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/icon_image_width"
+        android:layout_height="@dimen/icon_image_width"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
         android:src="@drawable/icon_terafonn_logo_default" />
 

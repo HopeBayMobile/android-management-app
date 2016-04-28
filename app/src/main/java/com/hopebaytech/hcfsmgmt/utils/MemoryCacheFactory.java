@@ -8,19 +8,17 @@ import android.util.LruCache;
  */
 public class MemoryCacheFactory {
 
-    public static LruCache<String, Bitmap> createMemoryCache() {
+    public static LruCache<Integer, Bitmap> createMemoryCache() {
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         int cacheSize = maxMemory / 8;
-        LruCache<String, Bitmap> memoryCache= new LruCache<String, Bitmap>(cacheSize) {
-
+        return new LruCache<Integer, Bitmap>(cacheSize) {
             @Override
-            protected int sizeOf(String key, Bitmap bitmap) {
+            protected int sizeOf(Integer key, Bitmap bitmap) {
                 /** The cache size will be measured in kilobytes rather than number of items. */
                 return bitmap.getByteCount() / 1024;
             }
 
         };
-        return memoryCache;
     }
 
 }

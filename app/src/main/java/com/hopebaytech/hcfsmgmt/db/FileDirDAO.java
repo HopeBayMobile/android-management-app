@@ -24,10 +24,10 @@ package com.hopebaytech.hcfsmgmt.db;//package com.hopebaytech.hcfsmgmt.db;
 //    		PIN_STATUS_COLUMN + " INTEGER NOT NULL)";
 //    
 //    private SQLiteDatabase db;
-//    private Context context;
+//    private Context mContext;
 //    
-//    public FileDirDAO(Context context) {
-//    	this.context = context;
+//    public FileDirDAO(Context mContext) {
+//    	this.mContext = mContext;
 //    	openDbIfClosed();
 //    }
 //    
@@ -36,7 +36,7 @@ package com.hopebaytech.hcfsmgmt.db;//package com.hopebaytech.hcfsmgmt.db;
 //    }
 //    
 //    public void openDbIfClosed() {
-//    	db = HCFSDBHelper.getDataBase(context);
+//    	db = HCFSDBHelper.getDataBase(mContext);
 //    }
 //    
 //    public long insert(FileDirInfo fileDirInfo) {
@@ -88,7 +88,7 @@ package com.hopebaytech.hcfsmgmt.db;//package com.hopebaytech.hcfsmgmt.db;
 //    
 //    public FileDirInfo getRecord(Cursor cursor) {
 //    	openDbIfClosed();
-//    	FileDirInfo result = new FileDirInfo(context);
+//    	FileDirInfo result = new FileDirInfo(mContext);
 //    	result.setCurrentFile(new File(cursor.getString(cursor.getColumnIndex(FILE_PATH_COLUMN))));
 //    	result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 0 ? false : true);
 //    	return result;

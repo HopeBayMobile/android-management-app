@@ -98,7 +98,7 @@ public class LoadingActivity extends AppCompatActivity {
                         handleSignInResult(null);
                     }
                 } else {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", "NOT Activated");
+                    HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "init", "NOT Activated");
                     Intent intent = new Intent(LoadingActivity.this, ActivateCloudStorageActivity.class);
                     startActivity(intent);
                     finish();

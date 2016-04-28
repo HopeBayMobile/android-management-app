@@ -97,10 +97,10 @@
     <string name="file_mgmt_popup_menu_pin">釘選</string>
     <string name="file_mgmt_popup_menu_unpin">取消釘選</string>
     <string name="file_mgmt_popup_menu_app_type_more_info">更多資訊</string>
-    <string name="file_mgmt_dialog_app_version">版本:&#160;%s</string>
-    <string name="file_mgmt_dialog_app_size">大小:&#160;%s</string>
-    <string name="file_mgmt_dialog_app_package_name">套件名稱:&#160;%s</string>
-    <string name="file_mgmt_dialog_app_percentage">資料已在手機上的比例:&#160;%s</string>
+    <string name="file_mgmt_dialog_app_version">版本: %s</string>
+    <string name="file_mgmt_dialog_data_size">大小: %s</string>
+    <string name="file_mgmt_dialog_app_package_name">套件名稱: %s</string>
+    <string name="file_mgmt_dialog_local_data_ratio">本地資料比例: %s</string>
     <string name="file_mgmt_dialog_app_open">開啟</string>
     <string name="file_mgmt_dialog_app_remove">解除安裝</string>
     <string name="file_mgmt_dialog_app_cancel">取消</string>
