@@ -6,6 +6,8 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 
+import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
+
 public abstract class ItemInfo {
 
 	protected Context mContext;
@@ -17,17 +19,17 @@ public abstract class ItemInfo {
     private boolean isProcessing;
     private long lastProcessTime;
 
-	public RecyclerView.ViewHolder viewHolder;
+	public FileMgmtFragment.RecyclerViewHolder viewHolder;
 	
 	public ItemInfo(Context context) {
 		this.mContext = context;
 	}
 	
-	public RecyclerView.ViewHolder getViewHolder() {
+	public FileMgmtFragment.RecyclerViewHolder getViewHolder() {
 		return viewHolder;
 	}
 
-	public void setViewHolder(RecyclerView.ViewHolder viewHolder) {
+	public void setViewHolder(FileMgmtFragment.RecyclerViewHolder viewHolder) {
 		this.viewHolder = viewHolder;
 	}
 
@@ -67,7 +69,7 @@ public abstract class ItemInfo {
 	public abstract Bitmap getIconImage();
 	
 	@Nullable
-	public abstract Drawable getPinUnpinImage();
+	public abstract Drawable getPinUnpinImage(boolean isPinned);
 	
 	public abstract int hashCode();
 

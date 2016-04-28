@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 public class DataTypeInfo extends ItemInfo {
@@ -26,6 +27,12 @@ public class DataTypeInfo extends ItemInfo {
 
 	public Bitmap getIconImage() {
 		return ((BitmapDrawable) ContextCompat.getDrawable(context, icon_drawable_res_id)).getBitmap();
+	}
+
+	@Nullable
+	@Override
+	public Drawable getPinUnpinImage(boolean isPinned) {
+		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned);
 	}
 
 	public void setIconImage(int icon_drawable_res_id) {
@@ -106,10 +113,6 @@ public class DataTypeInfo extends ItemInfo {
 
 	public void setDateUpdated(long date_updated) {
 		this.date_updated = date_updated;
-	}
-	
-	public Drawable getPinUnpinImage() {
-		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
 	}
 
 	@Override

@@ -54,7 +54,7 @@ public class TeraFonnApiService extends Service {
                     public void run() {
                         try {
                             mFetchAppDataListener.onPreFetch(packageName);
-                            int progress = 0;
+                            int progress;
                             while (true) {
                                 progress = getAppProgress(packageName);
                                 if (progress >= 100 || progress < 0) {
@@ -248,7 +248,7 @@ public class TeraFonnApiService extends Service {
 
         appPath.add(dataDir);
 
-        List<Boolean> pinStatus = new ArrayList<Boolean>();
+        List<Boolean> pinStatus = new ArrayList<>();
         for (String path : appPath) {
             pinStatus.add(HCFSMgmtUtils.isPathPinned(path));
         }
@@ -268,7 +268,7 @@ public class TeraFonnApiService extends Service {
         String dataDir = getDataDir(packageName);
         if (NetworkUtils.isNetworkConnected(TeraFonnApiService.this)) {
             if (downloadToRun()) {
-                if (HCFSMgmtUtils.getDirStatus(dataDir) == LocationStatus.LOCAL) {
+                if (HCFSMgmtUtils.getDirLocationStatus(dataDir) == LocationStatus.LOCAL) {
                     return AppStatus.STATUS_AVAILABLE;
                 } else {
                     return AppStatus.STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD;
@@ -297,10 +297,10 @@ public class TeraFonnApiService extends Service {
 
             appPath.add(dataDir);
 
-            List<Integer> appLocation = new ArrayList<Integer>();
+            List<Integer> appLocation = new ArrayList<>();
 
             for (String path : appPath) {
-                appLocation.add(HCFSMgmtUtils.getDirStatus(path));
+                appLocation.add(HCFSMgmtUtils.getDirLocationStatus(path));
             }
 
             if (appLocation.contains(LocationStatus.HYBRID)) {
@@ -332,7 +332,7 @@ public class TeraFonnApiService extends Service {
         String OP = pinOP ? "Pin" : "Unpin";
         String dataDir = getDataDir(packageName);
 
-        if (dataDir != "") {
+        if (!dataDir.equals("")) {
             try {
                 String jsonResult = pinOP ? HCFSApiUtils.pin(dataDir) : HCFSApiUtils.unpin(dataDir);
                 JSONObject jObject = new JSONObject(jsonResult);
@@ -400,15 +400,15 @@ public class TeraFonnApiService extends Service {
         return dataDir;
     }
 
-    private List getExternalDir(String packageName) {
-        List<String> externalDir = new ArrayList<String>();
+    private List<String> getExternalDir(String packageName) {
+        List<String> externalDir = new ArrayList<>();
         String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
         File externalAndroidFile = new File(externalPath);
         for (File type : externalAndroidFile.listFiles()) {
             File[] fileList = type.listFiles();
             for (File file : fileList) {
                 String path = file.getAbsolutePath();
-                if (path.indexOf(packageName) != -1) {
+                if (path.contains(packageName)) {
                     log(Log.INFO, CLASSNAME, "getExternalDir", path);
                     externalDir.add(path);
                     break;

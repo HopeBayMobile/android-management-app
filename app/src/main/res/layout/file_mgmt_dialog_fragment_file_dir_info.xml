@@ -1,61 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="10dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/file_dir_icon"
             android:layout_width="@dimen/icon_image_width"
             android:layout_height="@dimen/icon_image_width"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/icon_terafonn_logo_default" />
+            tools:src="@drawable/icon_terafonn_logo_default" />
 
         <TextView
             android:id="@+id/file_dir_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
+            android:layout_toStartOf="@+id/file_dir_pin_icon"
+            android:layout_toEndOf="@+id/file_dir_icon"
+            android:paddingStart="10dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:paddingLeft="10dp"
-            android:text="TeraFonn" />
+            tools:text="TeraFonn" />
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/file_dir_pin_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:scaleType="centerInside"
+            tools:src="@drawable/icon_btn_app_pin" />
+
+    </RelativeLayout>
 
     <View
         style="@style/Divider"
-        android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp" />
+        android:layout_marginRight="0dp"
+        android:layout_marginTop="10dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/file_dir_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
             android:paddingBottom="10dp"
+            android:paddingTop="10dp"
             tools:text="大小: 13MB" />
 
         <TextView
             android:id="@+id/file_dir_data_ratio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
             android:paddingBottom="10dp"
-            tools:text="資料已在手機上的比率: 80%" />
+            android:paddingTop="10dp"
+            tools:text="本地資料比例: 80%" />
 
     </LinearLayout>
 

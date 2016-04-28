@@ -39,7 +39,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
 
     public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
-    private ItemInfo mItemInfo;
+    private FileMgmtFragment.RecyclerViewHolder mViewHolder;
     private Thread mCalculateAppDataRatioThread;
 
     public static FileMgmtAppDialogFragment newInstance() {
@@ -49,8 +49,9 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        if (mItemInfo instanceof AppInfo) {
-            final AppInfo appInfo = (AppInfo) mItemInfo;
+        final ItemInfo itemInfo = mViewHolder.getItemInfo();
+        if (itemInfo instanceof AppInfo) {
+            final AppInfo appInfo = (AppInfo) itemInfo;
 
             LayoutInflater inflater = getActivity().getLayoutInflater();
             final View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_app_info, null);
@@ -60,6 +61,17 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
 
             TextView appName = (TextView) view.findViewById(R.id.app_name);
             appName.setText(appInfo.getItemName());
+
+            final ImageView fileDirPinIcon = (ImageView) view.findViewById(R.id.app_pin_icon);
+            fileDirPinIcon.setImageDrawable(appInfo.getPinUnpinImage(itemInfo.isPinned()));
+            fileDirPinIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean isPinned = !itemInfo.isPinned();
+                    fileDirPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
+                    mViewHolder.pinUnpinItem(isPinned);
+                }
+            });
 
             try {
                 PackageInfo packageInfo = getActivity().getPackageManager().getPackageInfo(appInfo.getPackageName(), 0);
@@ -166,10 +178,6 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
 
     }
 
-    public void setItemInfo(ItemInfo mItemInfo) {
-        this.mItemInfo = mItemInfo;
-    }
-
     private String getAppDataRatio(AppInfo appInfo) {
 
         int numLocal = 0;
@@ -266,6 +274,10 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
             return numCloud;
         }
 
+    }
+
+    public void setViewHolder(FileMgmtFragment.RecyclerViewHolder viewHolder) {
+        this.mViewHolder = viewHolder;
     }
 
 }

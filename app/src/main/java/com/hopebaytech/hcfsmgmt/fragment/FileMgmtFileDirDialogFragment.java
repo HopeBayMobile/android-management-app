@@ -22,6 +22,7 @@ import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 /**
@@ -31,7 +32,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
 
     public static final String TAG = FileMgmtFileDirDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
-    private ItemInfo mItemInfo;
+    private FileMgmtFragment.RecyclerViewHolder mViewHolder;
     private Thread mCalculateFileDirDataRatioThread;
     private Thread mCalculateFileDirSizeThread;
 
@@ -42,63 +43,70 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        if (mItemInfo instanceof FileDirInfo) {
-            final FileDirInfo fileDirInfo = (FileDirInfo) mItemInfo;
+        final ItemInfo itemInfo = mViewHolder.getItemInfo();
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_file_dir_info, null);
 
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-            final View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_file_dir_info, null);
+        ImageView fileDirIcon = (ImageView) view.findViewById(R.id.file_dir_icon);
+        fileDirIcon.setImageBitmap(itemInfo.getIconImage());
 
-            ImageView fileDirIcon = (ImageView) view.findViewById(R.id.file_dir_icon);
-            fileDirIcon.setImageBitmap(fileDirInfo.getIconImage());
+        TextView fileDirName = (TextView) view.findViewById(R.id.file_dir_name);
+        fileDirName.setText(itemInfo.getItemName());
 
-            TextView fileDirName = (TextView) view.findViewById(R.id.file_dir_name);
-            fileDirName.setText(fileDirInfo.getItemName());
+        final ImageView fileDirPinIcon = (ImageView) view.findViewById(R.id.file_dir_pin_icon);
+        fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
+        fileDirPinIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isPinned = !itemInfo.isPinned();
+                fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                mViewHolder.pinUnpinItem(isPinned);
+            }
+        });
 
-            final TextView fileDirSize = (TextView) view.findViewById(R.id.file_dir_size);
-            String size = String.format(getString(R.string.file_mgmt_dialog_data_size), getString(R.string.file_mgmt_dialog_calculating));
-            fileDirSize.setText(size);
-            mCalculateFileDirSizeThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    FileDirInfo fileDirInfo = ((FileDirInfo) mItemInfo);
-                    long dirSize = getDirectorySize(fileDirInfo.getCurrentFile());
-                    final String formatSize = UnitConverter.convertByteToProperUnit(dirSize);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            fileDirSize.setText(String.format(getString(R.string.file_mgmt_dialog_data_size), formatSize));
-                        }
-                    });
-                }
-            });
-            mCalculateFileDirSizeThread.start();
+        final TextView fileDirSize = (TextView) view.findViewById(R.id.file_dir_size);
+        String size = String.format(getString(R.string.file_mgmt_dialog_data_size), getString(R.string.file_mgmt_dialog_calculating));
+        fileDirSize.setText(size);
+        mCalculateFileDirSizeThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                FileDirInfo fileDirInfo = ((FileDirInfo) itemInfo);
+                long dirSize = getDirectorySize(fileDirInfo.getCurrentFile());
+                final String formatSize = UnitConverter.convertByteToProperUnit(dirSize);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDirSize.setText(String.format(getString(R.string.file_mgmt_dialog_data_size), formatSize));
+                    }
+                });
+            }
+        });
+        mCalculateFileDirSizeThread.start();
 
-            final TextView fileDirDataRatio = (TextView) view.findViewById(R.id.file_dir_data_ratio);
-            String ratio = String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), getString(R.string.file_mgmt_dialog_calculating));
-            fileDirDataRatio.setText(ratio);
-            mCalculateFileDirDataRatioThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    final String dataRatio = getFileDirDataRatio(fileDirInfo);
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            fileDirDataRatio.setText(dataRatio);
-                        }
-                    });
-                }
-            });
-            mCalculateFileDirDataRatioThread.start();
+        final TextView fileDirDataRatio = (TextView) view.findViewById(R.id.file_dir_data_ratio);
+        String ratio = String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), getString(R.string.file_mgmt_dialog_calculating));
+        fileDirDataRatio.setText(ratio);
+        mCalculateFileDirDataRatioThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String dataRatio = getFileDirDataRatio((FileDirInfo) itemInfo);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDirDataRatio.setText(dataRatio);
+                    }
+                });
+            }
+        });
+        mCalculateFileDirDataRatioThread.start();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setView(view).setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                }
-            });
-            return builder.create();
-        }
-        return super.onCreateDialog(savedInstanceState);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(view).setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        return builder.create();
     }
 
     @Override
@@ -113,10 +121,6 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
             mCalculateFileDirDataRatioThread.interrupt();
         }
 
-    }
-
-    public void setItemInfo(ItemInfo mItemInfo) {
-        this.mItemInfo = mItemInfo;
     }
 
     private String getFileDirDataRatio(FileDirInfo fileDirInfo) {
@@ -240,6 +244,10 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
             dirSize += directory.length();
         }
         return dirSize;
+    }
+
+    public void setViewHolder(FileMgmtFragment.RecyclerViewHolder viewHolder) {
+        this.mViewHolder = viewHolder;
     }
 
 }

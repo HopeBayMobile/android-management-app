@@ -229,8 +229,8 @@ public class FileDirInfo extends ItemInfo {
     }
 
 	@Override
-	public Drawable getPinUnpinImage() {
-		return HCFSMgmtUtils.getPinUnpinImage(mContext, isPinned());
+	public Drawable getPinUnpinImage(boolean isPinned) {
+		return HCFSMgmtUtils.getPinUnpinImage(mContext, isPinned);
 	}
 
 	@Override

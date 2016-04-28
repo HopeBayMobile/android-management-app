@@ -2,23 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:clickable="true"
     android:gravity="center_vertical"
     android:paddingBottom="@dimen/fragment_vertical_padding"
-    android:paddingLeft="@dimen/fragment_horizontal_padding"
-    android:paddingRight="@dimen/fragment_horizontal_padding"
     android:paddingTop="@dimen/fragment_vertical_padding">
 
     <ImageView
         android:id="@+id/iconView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingEnd="@dimen/item_image_horizontal_padding"
         android:src="@android:drawable/sym_def_app_icon" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingStart="@dimen/item_image_horizontal_padding"
         android:orientation="vertical">
 
         <RelativeLayout
@@ -31,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:text="@string/dashboard_used_space"
+                tools:text="@string/dashboard_used_space"
                 android:textColor="@color/colorHomePageProgressBarText" />
         </RelativeLayout>
 

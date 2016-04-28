@@ -216,8 +216,8 @@ public class AppInfo extends ItemInfo {
     }
 
     @Override
-    public Drawable getPinUnpinImage() {
-        return HCFSMgmtUtils.getPinUnpinImage(context, isPinned());
+    public Drawable getPinUnpinImage(boolean isPinned) {
+        return HCFSMgmtUtils.getPinUnpinImage(context, isPinned);
     }
 
     @Override

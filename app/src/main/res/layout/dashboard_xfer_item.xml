@@ -5,8 +5,6 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:paddingBottom="@dimen/fragment_vertical_padding"
-    android:paddingLeft="@dimen/fragment_horizontal_padding"
-    android:paddingRight="@dimen/fragment_horizontal_padding"
     android:paddingTop="@dimen/fragment_vertical_padding">
 
     <ImageView

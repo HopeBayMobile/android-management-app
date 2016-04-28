@@ -168,6 +168,9 @@
     <string name="pref_notify_local_storage_used_ratio">pref_notify_local_storage_used_ratio</string>
     <string name="pref_notify_is_local_storage_used_ratio_already_notified">pref_notify_is_local_storage_used_ratio_already_notified</string>
 
-    <string name="version_app_title">App Version</string>
+    <string name="terafonn_version_title">TeraFonn Version</string>
+    <string name="terafonn_version">-</string>
+    <string name="terafonn_imei_1">IMEI 1</string>
+    <string name="terafonn_imei_2">IMEI 2</string>
 
 </resources>
