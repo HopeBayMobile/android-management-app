@@ -16,19 +16,47 @@ public class HCFSStatInfo {
 	public static final String STAT_DATA_XFER_UP = "xfer_up";
 	public static final String STAT_DATA_XFER_DOWN = "xfer_down";
 	public static final String STAT_DATA_CLOUD_CONN = "cloud_conn";
+	public static final String STAT_DATA_DATA_TRANSFER = "data_transfer";
 
-	private long cloudTotal; /* in bytes */
-	private long cloudUsed; /* in bytes */
-	private long volUsed; /* in bytes */
-	private long cacheTotal; /* in bytes */
-	private long cacheDirtyUsed; /* in bytes */
-	private long cacheUsed; /* in bytes */
-	private long pinMax; /* in bytes */
-	private long pinTotal; /* in bytes */
-	private long xferUpload; /* in bytes */
-	private long xferDownload; /* in bytes */
+    /** unit: bytes */
+	private long cloudTotal;
+
+    /** unit: bytes */
+	private long cloudUsed;
+
+    /** unit: bytes */
+	private long volUsed;
+
+    /** unit: bytes */
+	private long cacheTotal;
+
+    /** unit: bytes */
+	private long cacheDirtyUsed;
+
+    /** unit: bytes */
+	private long cacheUsed;
+
+    /** unit: bytes */
+	private long pinMax;
+
+    /** unit: bytes */
+	private long pinTotal;
+
+    /** unit: bytes */
+	private long xferUpload;
+
+    /** unit: bytes */
+	private long xferDownload;
+
+    /** unit: boolean */
 	private boolean cloudConn;
-	
+
+    /** unit: int
+     * 0 means no data transfer,
+     * 1 means data transfer in progress,
+     * 2 means data transfer in progress but slow */
+	private int dataTransfer;
+
 	public String getVolUsed() {
 		return UnitConverter.convertByteToProperUnit(volUsed);
 	}
@@ -188,4 +216,11 @@ public class HCFSStatInfo {
 		return percentage;
 	}
 
+    public int getDataTransfer() {
+        return dataTransfer;
+    }
+
+    public void setDataTransfer(int dataTransfer) {
+        this.dataTransfer = dataTransfer;
+    }
 }

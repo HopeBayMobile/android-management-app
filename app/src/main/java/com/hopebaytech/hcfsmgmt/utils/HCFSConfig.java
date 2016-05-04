@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -134,6 +135,45 @@ public class HCFSConfig {
         // }
         // editor.putBoolean(key_connected, true);
         // editor.commit();
+    }
+
+    public static boolean storeHCFSConfig(AuthResultInfo authResultInfo) {
+        boolean isFailed = false;
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, authResultInfo.getBackendType())) {
+            isFailed = true;
+        }
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT, authResultInfo.getAccount())) {
+            isFailed = true;
+        }
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, authResultInfo.getUser())) {
+            isFailed = true;
+        }
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, authResultInfo.getPassword())) {
+            isFailed = true;
+        }
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, authResultInfo.getBackendUrl())) {
+            isFailed = true;
+        }
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, authResultInfo.getBucket())) {
+            isFailed = true;
+        }
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, authResultInfo.getProtocol())) {
+            isFailed = true;
+        }
+        if (!reloadConfig()) {
+            isFailed = true;
+        }
+        return isFailed;
+    }
+
+    public static void resetHCFSConfig() {
+        setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
+        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT, "");
+        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, "");
+        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, "");
+        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, "");
+        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, "");
+        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, "");
     }
 
 }

@@ -163,13 +163,13 @@ public class MgmtCluster {
     public static class GoogleAuthParam implements IAuthParam {
 
         private String idToken;
-//        private String authCode; TODO
+//        private String authCode;
 
         public GoogleAuthParam(String idToken) {
             this.idToken = idToken;
         }
 
-//        public GoogleAuthParam(String authCode) { TODO
+//        public GoogleAuthParam(String authCode) {
 //            this.authCode = authCode;
 //        }
 
@@ -181,6 +181,7 @@ public class MgmtCluster {
             ContentValues cv = new ContentValues();
             cv.put("provider", "google-oauth2");
             cv.put("token", idToken);
+//            cv.put("auth", authCode);
             cv.put("imei_code", encryptedIMEI);
 
 //            params.add(new BasicNameValuePair("provider", "google-oauth2"));
@@ -189,6 +190,7 @@ public class MgmtCluster {
 //            params.add(new BasicNameValuePair("imei_code", encryptedIMEI));
 
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "idToken=" + idToken + ", encryptedIMEI=" + encryptedIMEI);
+//            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
 
 //            return getQuery(params);
             return getQuery(cv);
@@ -400,9 +402,11 @@ public class MgmtCluster {
                         @Override
                         public void run() {
                             MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
+//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
                             final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);
-                            // TODO Store backend information and auth token
+                            HCFSConfig.storeHCFSConfig(authResultInfo);
+                            // TODO Set auth token to HCFS
                             Handler handler = new Handler(looper);
                             if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                                 handler.post(new Runnable() {
@@ -426,7 +430,7 @@ public class MgmtCluster {
                     authListener.onGoogleAuthFailed(failedMsg);
                 }
             } else {
-                String failedMsg = null;
+                String failedMsg;
                 if (googleSignInResult == null) {
                     failedMsg = "googleSignInResult == null";
                 } else {

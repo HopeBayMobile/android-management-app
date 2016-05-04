@@ -23,6 +23,7 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 public class LoadingActivity extends AppCompatActivity {
@@ -132,7 +133,7 @@ public class LoadingActivity extends AppCompatActivity {
                     if (System.currentTimeMillis() > accountInfo.getImgExpringTime()) {
                         accountInfo.setImgUrl(photoUrl);
                         accountInfo.setImgBase64(null);
-                        accountInfo.setImgExpringTime(System.currentTimeMillis() + HCFSMgmtUtils.INTERVAL_DAY);
+                        accountInfo.setImgExpringTime(System.currentTimeMillis() + Interval.DAY);
                         accountDAO.update(accountInfo);
                     }
                 }

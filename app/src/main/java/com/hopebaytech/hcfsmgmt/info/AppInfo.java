@@ -10,6 +10,7 @@ import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 
 public class AppInfo extends ItemInfo {
 
+    private final String CLASSNAME = AppInfo.class.getSimpleName();
     private long dbId;
     private int uid;
     private ApplicationInfo applicationInfo;
@@ -145,7 +147,7 @@ public class AppInfo extends ItemInfo {
                         HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL) {
                     return ItemStatus.STATUS_AVAILABLE;
                 } else {
-                    return ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
+                    return ItemStatus.STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD;
                 }
             } else {
                 return ItemStatus.STATUS_AVAILABLE;
@@ -163,7 +165,7 @@ public class AppInfo extends ItemInfo {
     }
 
     private int getExternalLocationStatus() {
-        int externalStatus = -1;
+        int externalStatus = LocationStatus.LOCAL;
 
         int externalLocalCounter = 0;
         int externalHybridCounter = 0;
@@ -227,6 +229,7 @@ public class AppInfo extends ItemInfo {
 
     @Override
     public int getIconAlpha() {
+        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getIconAlpha", "appStatus=" + getAppStatus());
         return getAppStatus() == ItemStatus.STATUS_AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 

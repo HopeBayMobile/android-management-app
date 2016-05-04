@@ -13,7 +13,6 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,7 +29,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
@@ -50,9 +48,6 @@ import java.net.HttpURLConnection;
 public class ActivateCloudStorageActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private final String CLASSNAME = this.getClass().getSimpleName();
-    //    private final String LOGIN_URL = "https://terafonnreg.hopebaytech.com/api/register/login/";
-//    private final String AUTH_TYPE_GOOGLE = "auth_type_google";
-//    private final String AUTH_TYPE_NORMAL = "auth_type_normal";
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
     private Handler mWorkHandler;
@@ -105,7 +100,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         MgmtCluster.IAuthParam authParam = new MgmtCluster.NativeAuthParam(username, password);
                                         final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
                                         if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                                            boolean isFailed = initHCFSConfig(authResultInfo);
+                                            boolean isFailed = HCFSConfig.storeHCFSConfig(authResultInfo);
                                             if (isFailed) {
                                                 runOnUiThread(new Runnable() {
                                                     @Override
@@ -117,7 +112,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                                                 getString(R.string.alert_dialog_confirm));
                                                     }
                                                 });
-                                                resetHCFSConfig();
+                                                HCFSConfig.resetHCFSConfig();
                                             } else {
                                                 Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
                                                 startActivity(intent);
@@ -206,14 +201,13 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                     final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                             .requestIdToken(serverClientId)
                                             .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-//                                            .requestServerAuthCode(serverClientId, false) TODO
+//                                            .requestServerAuthCode(serverClientId, false)
                                             .requestEmail()
                                             .build();
 
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-//                                            googleActivate.setScopes(gso.getScopeArray());
                                             if (mGoogleApiClient == null) {
                                                 mGoogleApiClient = new GoogleApiClient.Builder(ActivateCloudStorageActivity.this)
                                                         .enableAutoManage(ActivateCloudStorageActivity.this, ActivateCloudStorageActivity.this)
@@ -224,7 +218,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
                                             Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
                                             startActivityForResult(signInIntent, HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN);
-//                                            setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
                                         }
                                     });
                                 } else {
@@ -250,20 +243,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                 }
             });
         }
-//        setGoogleSignInButtonText(googleActivate, getString(R.string.activate_cloud_storage_google_activate));
-    }
-
-    private void setGoogleSignInButtonText(SignInButton signInButton, String buttonText) {
-        /** Find the TextView that is inside of the SignInButton and set its text */
-        for (int i = 0; i < signInButton.getChildCount(); i++) {
-            View v = signInButton.getChildAt(i);
-            if (v instanceof TextView) {
-                TextView tv = (TextView) v;
-                tv.setText(buttonText);
-                tv.setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-                return;
-            }
-        }
     }
 
     @Override
@@ -286,7 +265,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                         @Override
                         public void run() {
 
-                            boolean isFailed = initHCFSConfig(authResultInfo);
+                            boolean isFailed = HCFSConfig.storeHCFSConfig(authResultInfo);
                             if (isFailed) {
                                 Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                                 String failureMessage = authResultInfo.getMessage();
@@ -295,7 +274,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         failureMessage,
                                         getString(R.string.alert_dialog_confirm));
 
-                                resetHCFSConfig();
+                                HCFSConfig.resetHCFSConfig();
                             } else {
                                 String name = acct.getDisplayName();
                                 String email = acct.getEmail();
@@ -401,49 +380,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }
-    }
-
-    private boolean initHCFSConfig(AuthResultInfo authResultInfo) {
-        boolean isFailed = false;
-        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, authResultInfo.getBackendType())) {
-            isFailed = true;
-        }
-        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT, authResultInfo.getAccount())) {
-            isFailed = true;
-        }
-        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, authResultInfo.getUser())) {
-            isFailed = true;
-        }
-        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, authResultInfo.getPassword())) {
-            isFailed = true;
-        }
-        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, authResultInfo.getBackendUrl())) {
-            isFailed = true;
-        }
-        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, authResultInfo.getBucket())) {
-            isFailed = true;
-        }
-        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, authResultInfo.getProtocol())) {
-            isFailed = true;
-        }
-//        if (!HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_TOKEN, authResultInfo.getToken())) { TODO
-//            isFailed = true;
-//        }
-        if (!HCFSConfig.reloadConfig()) {
-            isFailed = true;
-        }
-        return isFailed;
-    }
-
-    private void resetHCFSConfig() {
-        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
-        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT, "");
-        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, "");
-        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, "");
-        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, "");
-        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, "");
-        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, "");
-//        HCFSConfig.setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_TOKEN, ""); TODO
     }
 
     public static void showAlertDialog(Context context, String title, String message, String positiveText) {

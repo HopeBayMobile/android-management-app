@@ -1,12 +1,7 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -21,8 +16,8 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import java.util.Locale;
 
@@ -44,7 +39,6 @@ public class DashboardFragment extends Fragment {
     private final String KEY_NETWORK_XFER_PROGRESS = "network_xfer_progress";
     private final String KEY_NETWORK_XFER_SECONDARY_PROGRESS = "network_xfer_secondary_progress";
 
-    private NetworkBroadcastReceiver mNetworkStatusReceiver;
     private Thread mUiRefreshThread;
     private Runnable mUiRefreshRunnable;
     private ImageView mNetworkConnStatusImage;
@@ -77,7 +71,6 @@ public class DashboardFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
 //        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", null);
         super.onCreate(savedInstanceState);
-        mNetworkStatusReceiver = new NetworkBroadcastReceiver();
     }
 
     @Override
@@ -207,6 +200,8 @@ public class DashboardFragment extends Fragment {
                             @Override
                             public void run() {
                                 if (mStatInfo != null) {
+                                    displayNetworkStatus(HCFSConnStatus.getConnStatus(mContext, mStatInfo));
+
                                     String storageUsageText = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getVolUsed(), mStatInfo.getCloudTotal());
                                     mCloudStorageUsage.setText(storageUsageText);
                                     mCloudStorageProgressBar.setProgress(mStatInfo.getCloudUsedPercentage());
@@ -251,52 +246,12 @@ public class DashboardFragment extends Fragment {
                 }
             }
         };
-
-        displayNetworkStatus();
-    }
-
-    public class NetworkBroadcastReceiver extends BroadcastReceiver {
-
-        private boolean isRegister = false;
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                displayNetworkStatus();
-            }
-        }
-
-        public void registerReceiver(Context context, IntentFilter intentFilter) {
-            if (!isRegister) {
-                if (context != null) {
-                    context.registerReceiver(this, intentFilter);
-                }
-                isRegister = true;
-            }
-        }
-
-        public void unregisterReceiver(Context context) {
-            if (isRegister) {
-                if (context != null) {
-                    context.unregisterReceiver(this);
-                    isRegister = false;
-                }
-            }
-        }
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onResume", null);
-        if (mNetworkStatusReceiver != null) {
-            if (mIsCurrentVisible) {
-                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-                mNetworkStatusReceiver.registerReceiver(mContext, filter);
-            }
-        }
         if (mUiRefreshThread == null) {
             if (mUiRefreshRunnable != null) {
                 if (mIsCurrentVisible) {
@@ -311,9 +266,6 @@ public class DashboardFragment extends Fragment {
     @Override
     public void onPause() {
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onPause", null);
-        if (mNetworkStatusReceiver != null) {
-            mNetworkStatusReceiver.unregisterReceiver(mContext);
-        }
         if (mUiRefreshThread != null && !mUiRefreshThread.isInterrupted()) {
             mUiRefreshThread.interrupt();
             mUiRefreshThread = null;
@@ -327,10 +279,6 @@ public class DashboardFragment extends Fragment {
         super.setMenuVisibility(menuVisible);
         if (menuVisible) {
             mIsCurrentVisible = true;
-            if (mNetworkStatusReceiver != null) {
-                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-                mNetworkStatusReceiver.registerReceiver(mContext, filter);
-            }
             if (mUiRefreshThread == null) {
                 if (mUiRefreshRunnable != null) {
                     mUiRefreshThread = new Thread(mUiRefreshRunnable);
@@ -340,9 +288,6 @@ public class DashboardFragment extends Fragment {
             }
         } else {
             mIsCurrentVisible = false;
-            if (mNetworkStatusReceiver != null) {
-                mNetworkStatusReceiver.unregisterReceiver(mContext);
-            }
             if (mUiRefreshThread != null && !mUiRefreshThread.isInterrupted()) {
                 mUiRefreshThread.interrupt();
                 mUiRefreshThread = null;
@@ -350,31 +295,28 @@ public class DashboardFragment extends Fragment {
         }
     }
 
-    private void displayNetworkStatus() {
-        View view = getView();
-        if (view != null) {
-            ConnectivityManager connMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-            mNetworkConnStatusImage = (ImageView) view.findViewById(R.id.network_conn_status_icon);
-            mNetworkConnStatusText = (TextView) view.findViewById(R.id.network_conn_status);
-            if (netInfo != null) {
-                if (netInfo.getState() == NetworkInfo.State.CONNECTED) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connected");
-                    mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_normal);
-                    mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_connected));
-                } else if (netInfo.getState() == NetworkInfo.State.CONNECTING) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is connecting");
-                    mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
-                    mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_connecting));
-                } else if (netInfo.getState() == NetworkInfo.State.DISCONNECTED) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "Network is disconnected");
-                    mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
-                    mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_disconnected));
-                }
-            } else {
+    private void displayNetworkStatus(int connStatus) {
+        switch (connStatus) {
+            case HCFSConnStatus.TRANS_FAILED:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
-                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_network_status_disconnected));
-            }
+                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_failed));
+                break;
+            case HCFSConnStatus.TRANS_NOT_ALLOWED:
+                mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
+                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_not_allowed));
+                break;
+            case HCFSConnStatus.TRANS_NORMAL:
+                mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_normal);
+                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_normal));
+                break;
+            case HCFSConnStatus.TRANS_IN_PROGRESS:
+                mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_transmitting);
+                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_in_progress));
+                break;
+            case HCFSConnStatus.TRANS_SLOW:
+                mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_slow);
+                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_slow));
+                break;
         }
     }
 

@@ -21,7 +21,6 @@ import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceAppDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
-import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
@@ -32,7 +31,9 @@ import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 
@@ -83,10 +84,7 @@ public class HCFSMgmtService extends Service {
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", "operation=" + operation);
             mCacheExecutor.execute(new Runnable() {
                 public void run() {
-                    if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED)) {
-                        /** Send a notification to users when upload completed */
-//                        notifyUploadCompleted();
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE)) {
+                    if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE)) {
                         /** Pin data type files */
 //                        pinOrUnpinDataTypeFile();
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_APP)) {
@@ -155,7 +153,7 @@ public class HCFSMgmtService extends Service {
                             HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
                         }
 
-                        /** Pin system app when system boot up */
+                        /** Pin system app on system start  up */
                         ArrayList<ItemInfo> itemInfoList = DisplayTypeFactory.getListOfInstalledApps(context, DisplayTypeFactory.APP_SYSTEM);
                         for (ItemInfo itemInfo : itemInfoList) {
                             AppInfo appInfo = (AppInfo) itemInfo;
@@ -250,23 +248,22 @@ public class HCFSMgmtService extends Service {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                             String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
                             String key_pref = getString(R.string.pref_notify_local_storage_used_ratio);
-                            String storage_used_ratio = sharedPreferences.getString(key_pref, defaultValue);
+                            String storageUsedRatio = sharedPreferences.getString(key_pref, defaultValue);
 
-                            // TODO The value of unpinned but dirty is not implemented by HCFS
-                            long rawCacheDirtyUsed = statInfo.getRawCacheDirtyUsed();
-                            long rawPinTotal = statInfo.getRawPinTotal();
+                            long occupiedSize = HCFSMgmtUtils.getOccupiedSize();
                             long rawCacheTotal = statInfo.getRawCacheTotal();
-//                            double max = Math.max(rawCacheDirtyUsed, rawPinTotal);
-                            double max = rawPinTotal;
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             boolean isNotified = sharedPreferences.getBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), false);
-                            double pinPlusUnpinButDirty = (max / rawCacheTotal) * 100;
-                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onStartCommand", "pinPlusUnpinButDirty=" + pinPlusUnpinButDirty);
-                            if (pinPlusUnpinButDirty >= Double.valueOf(storage_used_ratio)) {
+                            double pinPlusUnpinButDirtyRatio = ((double) occupiedSize / rawCacheTotal) * 100;
+                            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onStartCommand",
+                                    "occupiedSize=" + occupiedSize +
+                                            ", rawCacheTotal=" + rawCacheTotal +
+                                            ", pinPlusUnpinButDirty=" + pinPlusUnpinButDirtyRatio);
+                            if (pinPlusUnpinButDirtyRatio >= Double.valueOf(storageUsedRatio)) {
                                 if (!isNotified) {
                                     int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;
                                     String notify_title = getString(R.string.app_name);
-                                    String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storage_used_ratio);
+                                    String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storageUsedRatio);
                                     NotificationEvent.notify(context, notify_id, notify_title, notify_message, false);
                                     editor.putBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), true);
                                 }
@@ -285,22 +282,32 @@ public class HCFSMgmtService extends Service {
                                 mOngoingThread = new Thread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        final long FIVE_MINUTES_IN_MILLISECONDS = 5 * 60 * 1000;
+                                        final long FIVE_MINUTES_IN_MILLISECONDS = Interval.MINUTE * 5;
                                         while (true) {
                                             try {
-                                                // TODO HCFS connection status is not implemented
                                                 HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
                                                 if (statInfo != null) {
-                                                    boolean syncEnabled = HCFSMgmtUtils.getHCFSSyncStatus();
-                                                    boolean cloudConnected = statInfo.isCloudConn();
-                                                    if (syncEnabled && cloudConnected) {
-
-                                                    } else if (syncEnabled && !cloudConnected) {
-
-                                                    } else {
-
+                                                    int connStatus = HCFSConnStatus.getConnStatus(context, statInfo);
+                                                    String notifyTitle;
+                                                    switch (connStatus) {
+                                                        case HCFSConnStatus.TRANS_FAILED:
+                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_failed);
+                                                            break;
+                                                        case HCFSConnStatus.TRANS_NOT_ALLOWED:
+                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_not_allowed);
+                                                            break;
+                                                        case HCFSConnStatus.TRANS_NORMAL:
+                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
+                                                            break;
+                                                        case HCFSConnStatus.TRANS_IN_PROGRESS:
+                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_in_progress);
+                                                            break;
+                                                        case HCFSConnStatus.TRANS_SLOW:
+                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_slow);
+                                                            break;
+                                                        default:
+                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
                                                     }
-                                                    String notifyTitle = getString(R.string.dashboard_network_status_connected);
                                                     String notifyMsg = getString(R.string.dashboard_used_space) + ": " + statInfo.getVolUsed() + " / " + statInfo.getCloudTotal();
                                                     NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, true);
                                                 }

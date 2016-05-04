@@ -2,8 +2,10 @@
 
     <string name="app_name">TeraFonn</string>
 
-    <string name="main_activity_require_permission">需要讀取外部儲存空間的權限，否則無法瀏覽外部儲存空間的檔案。</string>
-    <string name="main_activity_no_permission">沒有權限以至於無法瀏覽外部儲存空間的檔案。</string>
+    <string name="main_activity_require_read_external_storage_permission">需要讀取外部儲存空間的權限，否則無法瀏覽外部儲存空間的檔案。</string>
+    <string name="main_activity_require_read_phone_state_permission">需要讀取手機狀態的權限，否則無法取得手機IMEI值。</string>
+    <string name="main_activity_no_read_external_storage_permission">沒有權限以至於無法瀏覽外部儲存空間的檔案。</string>
+    <string name="main_activity_no_read_phone_state_permission">沒有權限以至於取得手機IMEI值。</string>
 
     <string name="activate_cloud_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
     <string name="activate_cloud_storage_processing_msg">處理中，請稍後&#8230;</string>
@@ -45,9 +47,11 @@
 
     <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
     
-    <string name="dashboard_network_status_connected">連線正常</string>
-    <string name="dashboard_network_status_connecting">嘗試連線</string>
-    <string name="dashboard_network_status_disconnected">連線中斷</string>
+    <string name="dashboard_hcfs_conn_status_normal">連線正常</string>
+    <string name="dashboard_hcfs_conn_status_not_allowed">不允許傳輸</string>
+    <string name="dashboard_hcfs_conn_status_failed">連線中斷</string>
+    <string name="dashboard_hcfs_conn_status_slow">連線緩慢</string>
+    <string name="dashboard_hcfs_conn_status_in_progress">傳輸中</string>
     <string name="dashboard_space_usage_title">空間使用量</string>
     <string name="dashboard_used_space">已使用空間</string>
     <string name="dashboard_local_storage">快取空間</string>

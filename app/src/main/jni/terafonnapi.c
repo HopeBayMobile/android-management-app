@@ -18,6 +18,7 @@ extern void HCFS_toggle_sync(const char **json_res, int enabled);
 extern void HCFS_get_sync_status(const char **json_res);
 extern void HCFS_get_property(const char **json_res, const char *key);
 extern void HCFS_set_property(const char **json_res, const char *key, const char *value);
+extern void HCFS_get_occupied_size(const char **json_res);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
@@ -160,6 +161,15 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
 
     free(output_length);
     return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getOccupiedSize(
+		JNIEnv *jEnv, jobject jObject, jint jInit) {
+	const char *json_res;
+	HCFS_get_occupied_size(&json_res);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free((char *)json_res);
+	return result;
 }
 
 //JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHCFSProperty(

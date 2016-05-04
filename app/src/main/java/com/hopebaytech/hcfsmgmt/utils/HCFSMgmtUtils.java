@@ -22,7 +22,6 @@ import android.util.Log;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
-import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
@@ -47,15 +46,6 @@ public class HCFSMgmtUtils {
     public static final boolean ENABLE_AUTH = false;
     public static final boolean DEFAULT_PINNED_STATUS = false;
     public static final int LOGLEVEL = Log.DEBUG;
-
-    public static final int INTERVAL_TEN_SECONDS = 10 * 1000;
-    public static final int INTERVAL_MINUTE = 6 * INTERVAL_TEN_SECONDS;
-    public static final int INTERVAL_HOUR = 60 * INTERVAL_MINUTE;
-    public static final int INTERVAL_DAY = 24 * INTERVAL_HOUR;
-    public static final int INTERVAL_NOTIFY_UPLOAD_COMPLETED = INTERVAL_HOUR;
-    public static final int INTERVAL_PIN_DATA_TYPE_FILE = INTERVAL_HOUR;
-    public static final int INTERVAL_RESET_XFER = 24 * INTERVAL_HOUR;
-    public static final int INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO = INTERVAL_HOUR;
 
     public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
     public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
@@ -172,7 +162,7 @@ public class HCFSMgmtUtils {
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = INTERVAL_PIN_DATA_TYPE_FILE;
+        long intervalMillis = Interval.PIN_DATA_TYPE_FILE;
         am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, intervalMillis, pi);
     }
 
@@ -194,7 +184,7 @@ public class HCFSMgmtUtils {
         calendar.set(Calendar.SECOND, 59);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long intervalMillis = INTERVAL_RESET_XFER;
+        long intervalMillis = Interval.RESET_XFER;
         am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
     }
 
@@ -227,7 +217,7 @@ public class HCFSMgmtUtils {
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = INTERVAL_NOTIFY_UPLOAD_COMPLETED;
+        long intervalMillis = Interval.NOTIFY_UPLOAD_COMPLETED;
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
     }
 
@@ -284,7 +274,7 @@ public class HCFSMgmtUtils {
         String selection = MediaStore.Audio.Media.DATE_ADDED + " > " + dateUpdated;
         Cursor cursor = resolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, selection, null, MediaStore.Video.Media._ID);
         if (cursor != null) {
-            videoPaths = new ArrayList<String>();
+            videoPaths = new ArrayList<>();
             cursor.moveToFirst();
             final int index = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
             for (int i = 0; i < cursor.getCount(); i++) {
@@ -407,9 +397,6 @@ public class HCFSMgmtUtils {
         HCFSStatInfo hcfsStatInfo = null;
         try {
             String jsonResult = HCFSApiUtils.getHCFSStat();
-            // String jsonResult = "{ \"data\": { \"cloud_total\": 107374182400, \"cloud_used\": 35433480192, \"cache_total\": 85899345920,
-            // \"cache_dirty\": 382730240, \"cache_clean\": 12884901888, \"pin_max\": 68719476736, \"pin_total\": 14431090114, \"xfer_up\": 104857600,
-            // \"xfer_down\": 31457280, \"cloud_conn\": true} }";
             JSONObject jObject = new JSONObject(jsonResult);
             JSONObject dataObj = jObject.getJSONObject("data");
             boolean isSuccess = jObject.getBoolean("result");
@@ -428,6 +415,7 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setXferUpload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_UP));
                 hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
                 hcfsStatInfo.setCloudConn(dataObj.getBoolean(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
+                hcfsStatInfo.setDataTransfer(dataObj.getInt(HCFSStatInfo.STAT_DATA_DATA_TRANSFER));
             } else {
                 log(Log.ERROR, CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
             }
@@ -775,7 +763,7 @@ public class HCFSMgmtUtils {
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = INTERVAL_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+        long intervalMillis = Interval.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
     }
 
@@ -844,6 +832,22 @@ public class HCFSMgmtUtils {
         String IMEI = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceIMEI", "IMEI=" + IMEI);
         return IMEI == null ? "" : IMEI;
+    }
+
+    public static long getOccupiedSize() {
+        /** Unpin-but-dirty size + pin size */
+        long occupiedSize = 0;
+        try {
+            String jsonResult = HCFSApiUtils.getOccupiedSize();
+            String logMsg = "jsonResult=" + jsonResult;
+            JSONObject jObject = new JSONObject(jsonResult);
+            JSONObject dataObj = jObject.getJSONObject("data");
+            occupiedSize = dataObj.getLong("occupied");
+            HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getOccupiedSize", logMsg);
+        } catch (JSONException e) {
+            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getOccupiedSize", Log.getStackTraceString(e));
+        }
+        return occupiedSize;
     }
 
 }

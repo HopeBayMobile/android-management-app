@@ -26,8 +26,8 @@
 
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.LoadingActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,10 +36,10 @@
         </activity>
         <activity
             android:name=".main.ActivateCloudStorageActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden" />
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden" />
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.ChangeAccountActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />

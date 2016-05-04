@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -51,11 +51,9 @@ import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.net.URL;
 import java.util.List;
 import java.util.Timer;
@@ -67,8 +65,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private final String CLASSNAME = getClass().getSimpleName();
     private final int NAV_MENU_SDCARD1_ID = (int) (Math.random() * Integer.MAX_VALUE);
-    private final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 0;
-//    private SDCardBroadcastReceiver sdCardReceiver;
+    //    private SDCardBroadcastReceiver sdCardReceiver;
     private Handler mHandler;
     private NavigationView mNavigationView;
     private ViewPager mViewPager;
@@ -83,25 +80,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
         init();
-
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                builder.setMessage(getString(R.string.main_activity_require_permission));
-                builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-                    }
-                });
-                builder.setCancelable(false);
-                builder.show();
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-            }
-        }
     }
 
     private void init() {
@@ -365,6 +343,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return titleArray[position];
         }
 
+        @Nullable
         public Fragment getFragment(int position) {
             return pageReference.get(position);
         }
@@ -496,12 +475,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
-            case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+            case RequestCode.PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
                 /** If request is cancelled, the result arrays are empty. */
                 if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     View contentView = findViewById(android.R.id.content);
                     if (contentView != null) {
-                        Snackbar.make(contentView, getString(R.string.main_activity_no_permission), Snackbar.LENGTH_LONG).show();
+                        Snackbar.make(contentView, getString(R.string.main_activity_no_read_external_storage_permission), Snackbar.LENGTH_LONG).show();
+                    }
+                }
+                break;
+            case RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE:
+                /** If request is cancelled, the result arrays are empty. */
+                if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    View contentView = findViewById(android.R.id.content);
+                    if (contentView != null) {
+                        Snackbar.make(contentView, getString(R.string.main_activity_no_read_phone_state_permission), Snackbar.LENGTH_LONG).show();
+                    }
+                } else {
+                    int position = mViewPager.getCurrentItem();
+                    Fragment fragment = mPagerAdapter.getFragment(position);
+                    if (fragment != null) {
+                        if (fragment instanceof AboutFragment) {
+                            ((AboutFragment) fragment).showImei();
+                        }
                     }
                 }
                 break;

@@ -21,5 +21,6 @@ public class HCFSApiUtils {
 	public static native String setHCFSSyncStatus(int enabled);
 	public static native String getHCFSSyncStatus();
 	public static native byte[] getEncryptedIMEI();
+	public static native String getOccupiedSize();
 
 }
