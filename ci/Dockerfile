@@ -15,10 +15,10 @@ RUN dpkg --add-architecture i386 && apt-get update && \
 	apt-get install -y --force-yes expect git wget libc6-i386 lib32stdc++6 lib32gcc1 lib32ncurses5 lib32z1 python curl make
 
 # Install Android SDK
-RUN cd /opt && wget ftp://nas/ubuntu/CloudDataSolution/HCFS_android/android-sdk_r24.4.1-linux.tgz -O - | tar zxv
+RUN cd /opt && wget ftp://nas/ubuntu/CloudDataSolution/HCFS_android/resources/android-sdk_r24.4.1-linux.tgz -O - | tar zxv
 
 # Install Android NDK
-RUN cd /opt && wget ftp://nas/ubuntu/CloudDataSolution/HCFS_android/android-ndk-r10e-linux-x86_64.bin && chmod u+x android-ndk-r10e-linux-x86_64.bin && ./android-ndk-r10e-linux-x86_64.bin && rm -f android-ndk-r10e-linux-x86_64.bin && ls -l
+RUN cd /opt && wget ftp://nas/ubuntu/CloudDataSolution/HCFS_android/resources/android-ndk-r10e-linux-x86_64.bin && chmod u+x android-ndk-r10e-linux-x86_64.bin && ./android-ndk-r10e-linux-x86_64.bin && rm -f android-ndk-r10e-linux-x86_64.bin && ls -l
 
 # Setup environment
 ENV SDK_HOME /opt/android-sdk-linux
@@ -26,8 +26,7 @@ ENV NDK_HOME /opt/android-ndk-r10e
 ENV PATH ${PATH}:${SDK_HOME}/tools:${SDK_HOME}/platform-tools:${NDK_HOME}
 
 # Install sdk elements
-RUN ( while true; do sleep 3; echo y; done ) | android update sdk --all --force --no-ui --filter android-23,build-tools-23.0.1,extra-android-m2repository,extra-android-support,extra-google-google_play_services,extra-google-m2repository,platform-tools
-RUN ( while true; do sleep 3; echo y; done ) | android update sdk --all --force --no-ui --filter build-tools-23.0.2
+RUN ( while true; do sleep 3; echo y; done ) | android update sdk --all --force --no-ui --filter android-23,build-tools-23.0.3,extra-android-m2repository,extra-android-support,extra-google-google_play_services,extra-google-m2repository,platform-tools
 
 RUN which adb && which android && which ndk-build
 
