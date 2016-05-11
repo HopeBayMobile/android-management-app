@@ -25,12 +25,11 @@ public class AppInfo extends ItemInfo {
     private int uid;
     private ApplicationInfo applicationInfo;
     private String packageName;
-    //	private String externalDir;
     private ArrayList<String> externalDirList;
     private String[] sharedLibraryFiles;
     private int appSize;
+    private boolean isSystemApp;
     private Context context;
-//	private int status = -1;
 
     public AppInfo(Context context) {
         super(context);
@@ -125,10 +124,6 @@ public class AppInfo extends ItemInfo {
 
     public void setDbId(long dbId) {
         this.dbId = dbId;
-    }
-
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
     }
 
     public String getPackageName() {
@@ -229,11 +224,18 @@ public class AppInfo extends ItemInfo {
 
     @Override
     public int getIconAlpha() {
-        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getIconAlpha", "appStatus=" + getAppStatus());
         return getAppStatus() == ItemStatus.STATUS_AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
     public ApplicationInfo getApplicationInfo() {
         return applicationInfo;
+    }
+
+    public boolean isSystemApp() {
+        return isSystemApp;
+    }
+
+    public void setSystemApp(boolean systemApp) {
+        isSystemApp = systemApp;
     }
 }

@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/home_page_content_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,32 +15,32 @@
             android:layout_height="@dimen/fragment_title_bar_height"
             android:background="@color/colorAccent"
             android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/fragment_title_bar_padding_bottom"
-            android:paddingLeft="@dimen/fragment_title_bar_padding_left"
-            android:paddingRight="@dimen/fragment_title_bar_padding_right"
-            android:paddingTop="@dimen/fragment_title_bar_padding_top">
+            android:orientation="horizontal">
 
             <ImageView
                 android:id="@+id/network_conn_status_icon"
-                android:layout_width="@dimen/icon_image_width"
-                android:layout_height="@dimen/icon_image_width"
-                android:src="@drawable/icon_transmission_normal" />
-
-            <TextView
-                android:id="@+id/network_conn_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
-                tools:text="連線正常"
-                android:textColor="@android:color/white" />
+                android:layout_marginEnd="@dimen/M5"
+                android:layout_marginStart="@dimen/M2"
+                android:src="@drawable/icon_transmission_normal" />
+
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+                android:id="@+id/network_conn_status"
+                style="@style/F2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                tools:text="Transmission normal" />
         </LinearLayout>
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/M2"
+            android:layout_marginStart="@dimen/M2"
+            android:layout_marginTop="@dimen/M5">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -51,18 +50,15 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingStart="@dimen/fragment_title_bar_padding_left"
-                    android:paddingEnd="@dimen/fragment_title_bar_padding_right"
-                    android:orientation="vertical"
-                    android:paddingTop="10dp">
+                    android:orientation="vertical">
 
-                    <TextView
+                    <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+                        style="@style/F4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/dashboard_space_usage_title"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textColor="@color/colorAccent" />
+                        android:layout_marginBottom="@dimen/M5"
+                        android:includeFontPadding="false"
+                        android:text="@string/dashboard_space_usage_title" />
 
                     <include
                         android:id="@+id/cloud_storage"
@@ -79,31 +75,34 @@
                     <include
                         android:id="@+id/to_be_upload_data"
                         layout="@layout/dashboard_usage_item" />
+
+                    <View style="@style/Divider" />
+
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:paddingStart="@dimen/fragment_title_bar_padding_left"
-                    android:paddingEnd="@dimen/fragment_title_bar_padding_right"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/M5"
                     android:orientation="vertical">
 
-                    <TextView
+                    <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                         android:id="@+id/networkTrafficTitle"
+                        style="@style/F4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="5dp"
-                        android:text="@string/dashboard_network_traffic_title"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textColor="@color/colorAccent" />
+                        android:layout_marginBottom="@dimen/M5"
+                        android:includeFontPadding="false"
+                        android:text="@string/dashboard_network_traffic_title" />
 
                     <include
                         android:id="@+id/network_xfer_today"
                         layout="@layout/dashboard_xfer_item" />
+
+                    <View style="@style/Divider" />
                 </LinearLayout>
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
     </LinearLayout>
-
 
 </android.support.design.widget.CoordinatorLayout>

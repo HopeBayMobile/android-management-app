@@ -9,7 +9,6 @@ import java.util.Map;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
-import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
@@ -31,7 +30,6 @@ public class DisplayTypeFactory {
 	public static ArrayList<ItemInfo> getListOfInstalledApps(Context context, int flags) {
 		ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
 		if (context != null) {
-//			Map<String, String> externalPkgNameMap = new HashMap<>();
 			Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
 			if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 				String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
@@ -70,8 +68,9 @@ public class DisplayTypeFactory {
 
 				AppInfo appInfo = new AppInfo(context);
 				appInfo.setUid(applicationInfo.uid);
+				appInfo.setSystemApp(isSystemApp);
 				appInfo.setApplicationInfo(applicationInfo);
-				appInfo.setItemName(applicationInfo.loadLabel(pm).toString());
+				appInfo.setName(applicationInfo.loadLabel(pm).toString());
 				if (externalPkgNameMap.containsKey(applicationInfo.packageName)) {
 //					appInfo.setExternalDir(externalPkgNameMap.get(applicationInfo.packageName));
 					appInfo.setExternalDirList(externalPkgNameMap.get(applicationInfo.packageName));
@@ -107,7 +106,7 @@ public class DisplayTypeFactory {
 			}
 
 			if (dataTypeInfo != null) {
-				dataTypeInfo.setItemName(dataTypeArray[i]);
+				dataTypeInfo.setName(dataTypeArray[i]);
 				itemInfoList.add(dataTypeInfo);
 			}
 		}
@@ -122,7 +121,7 @@ public class DisplayTypeFactory {
 			for (int i = 0; i < fileList.length; i++) {
 				FileDirInfo fileDirInfo = new FileDirInfo(context);
 				File file = fileList[i];
-				fileDirInfo.setItemName(file.getName());
+				fileDirInfo.setName(file.getName());
 				fileDirInfo.setCurrentFile(file);
 				itemInfoList.add(fileDirInfo);
 			}

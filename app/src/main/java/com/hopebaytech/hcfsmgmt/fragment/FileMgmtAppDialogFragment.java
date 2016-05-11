@@ -60,7 +60,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
             appIcon.setImageBitmap(appInfo.getIconImage());
 
             TextView appName = (TextView) view.findViewById(R.id.app_name);
-            appName.setText(appInfo.getItemName());
+            appName.setText(appInfo.getName());
 
             final ImageView fileDirPinIcon = (ImageView) view.findViewById(R.id.app_pin_icon);
             fileDirPinIcon.setImageDrawable(appInfo.getPinUnpinImage(itemInfo.isPinned()));
@@ -68,8 +68,10 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                 @Override
                 public void onClick(View v) {
                     boolean isPinned = !itemInfo.isPinned();
-                    fileDirPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
-                    mViewHolder.pinUnpinItem(isPinned);
+                    boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
+                    if (allowPinUnpin) {
+                        fileDirPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
+                    }
                 }
             });
 

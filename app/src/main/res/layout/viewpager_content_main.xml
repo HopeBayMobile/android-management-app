@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".MainActivity"
     tools:showIn="@layout/main_app_bar">
 
     <android.support.v4.view.ViewPager
@@ -12,15 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v4.view.PagerTabStrip
+        <com.hopebaytech.hcfsmgmt.customview.CustomPagerTabStrip
             android:id="@+id/pager_tab_strip"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/colorPagerTabStrip"
-            android:paddingBottom="10dp"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            android:paddingTop="10dp" />
+            android:layout_height="@dimen/pager_tab_strip_height"
+            android:background="@color/C2"
+            android:paddingEnd="@dimen/M7"
+            android:paddingStart="@dimen/M7"
+            android:textAppearance="@style/F1"
+            app:customFont="open_sans_bold" />
     </android.support.v4.view.ViewPager>
 
 </RelativeLayout>

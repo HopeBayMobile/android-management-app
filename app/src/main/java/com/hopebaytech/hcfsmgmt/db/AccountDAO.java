@@ -2,12 +2,12 @@ package com.hopebaytech.hcfsmgmt.db;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.interfaces.IGenericDAO;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import java.util.ArrayList;

@@ -3,26 +3,22 @@
 
     <item android:id="@android:id/background">
         <shape>
-            <corners android:radius="5dip" />
-
-            <solid android:color="@color/colorHomePageStorageProgressBarBackground" />
+            <solid android:color="@color/C6" />
         </shape>
     </item>
-    <item android:id="@android:id/secondaryProgress">
-        <clip>
-            <shape>
-                <corners android:radius="5dip" />
+    <!--<item android:id="@android:id/secondaryProgress">-->
+        <!--<clip>-->
+            <!--<shape>-->
+                <!--<corners android:radius="5dp" />-->
 
-                <solid android:color="@color/colorAccent" />
-            </shape>
-        </clip>
-    </item>
+                <!--<solid android:color="@color/C6" />-->
+            <!--</shape>-->
+        <!--</clip>-->
+    <!--</item>-->
     <item android:id="@android:id/progress">
         <clip>
             <shape>
-                <corners android:radius="5dip" />
-
-                <solid android:color="@color/colorAccent" />
+                <solid android:color="@color/C1" />
             </shape>
         </clip>
     </item>

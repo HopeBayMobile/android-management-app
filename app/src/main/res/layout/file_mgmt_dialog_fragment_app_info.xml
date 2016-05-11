@@ -16,7 +16,7 @@
             android:layout_height="@dimen/icon_image_width"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/icon_terafonn_logo_default" />
+            android:src="@drawable/icon_tera_app_default" />
 
         <TextView
             android:id="@+id/app_name"

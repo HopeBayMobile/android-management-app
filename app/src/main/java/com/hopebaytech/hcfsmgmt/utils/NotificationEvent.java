@@ -28,8 +28,7 @@ public class NotificationEvent {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder = (NotificationCompat.Builder) builder
                 .setWhen(System.currentTimeMillis())
-//                .setSmallIcon(R.drawable.icon_terafonn_logo_status_bar) TODO
-                .setSmallIcon(R.drawable.test_02)
+                .setSmallIcon(R.drawable.icon_tera_logo_status_bar)
                 .setLargeIcon(largeIcon)
                 .setTicker(notify_title)
                 .setContentTitle(notify_title)

@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
@@ -120,7 +121,7 @@ public class DashboardFragment extends Fragment {
         mNetworkConnStatusImage = (ImageView) view.findViewById(R.id.network_conn_status_icon);
         mNetworkConnStatusText = (TextView) view.findViewById(R.id.network_conn_status);
 
-        LinearLayout cloudStorage = (LinearLayout) view.findViewById(R.id.cloud_storage);
+        RelativeLayout cloudStorage = (RelativeLayout) view.findViewById(R.id.cloud_storage);
         mCloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
         mCloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
         TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
@@ -128,7 +129,7 @@ public class DashboardFragment extends Fragment {
         ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.iconView);
         cloudStorageImageView.setImageResource(R.drawable.icon_system_used_space);
 
-        LinearLayout pinnedStorage = (LinearLayout) view.findViewById(R.id.pinned_storage);
+        RelativeLayout pinnedStorage = (RelativeLayout) view.findViewById(R.id.pinned_storage);
         mPinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
         mPinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
         mPinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
@@ -137,7 +138,7 @@ public class DashboardFragment extends Fragment {
         ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.iconView);
         pinnedStorageImageView.setImageResource(R.drawable.icon_system_pinned_space);
 
-        LinearLayout waitToUploadData = (LinearLayout) view.findViewById(R.id.to_be_upload_data);
+        RelativeLayout waitToUploadData = (RelativeLayout) view.findViewById(R.id.to_be_upload_data);
         mWaitToUploadDataUsage = (TextView) waitToUploadData.findViewById(R.id.textViewUsage);
         mWaitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
         mWaitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
@@ -146,7 +147,7 @@ public class DashboardFragment extends Fragment {
         ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.iconView);
         waitToUploadDataUsageImageView.setImageResource(R.drawable.icon_system_upload_data);
 
-        LinearLayout data_transmission_today = (LinearLayout) view.findViewById(R.id.network_xfer_today);
+        RelativeLayout data_transmission_today = (RelativeLayout) view.findViewById(R.id.network_xfer_today);
         mNetworkXferUp = (TextView) data_transmission_today.findViewById(R.id.xfer_up);
         mNetworkXferDown = (TextView) data_transmission_today.findViewById(R.id.xfer_down);
         mXferProgressBar = (ProgressBar) data_transmission_today.findViewById(R.id.progressBar);

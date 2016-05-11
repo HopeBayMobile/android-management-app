@@ -15,7 +15,7 @@
         android:paddingStart="@dimen/fragment_title_bar_padding_left"
         android:paddingTop="@dimen/fragment_title_bar_padding_top">
 
-        <TextView
+        <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/terafonn_version_title"
@@ -45,7 +45,7 @@
                 android:textColor="@color/colorAboutTitle"
                 android:textStyle="bold" />
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                 android:id="@+id/terafonn_version"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/terafonn_imei_1"
@@ -72,7 +72,7 @@
                 android:textColor="@color/colorAboutTitle"
                 android:textStyle="bold" />
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                 android:id="@+id/device_imei_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -91,7 +91,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/terafonn_imei_2"
@@ -99,7 +99,7 @@
                 android:textColor="@color/colorAboutTitle"
                 android:textStyle="bold" />
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                 android:id="@+id/device_imei_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

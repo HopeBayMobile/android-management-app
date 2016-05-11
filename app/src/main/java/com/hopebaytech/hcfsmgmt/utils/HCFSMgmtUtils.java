@@ -114,7 +114,7 @@ public class HCFSMgmtUtils {
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
-        log(Log.DEBUG, CLASSNAME, "isAppPinned", appInfo.getItemName());
+        log(Log.DEBUG, CLASSNAME, "isAppPinned", appInfo.getName());
         UidDAO uidDAO = UidDAO.getInstance(context);
         UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
         return uidInfo != null && uidInfo.isPinned();
@@ -425,11 +425,11 @@ public class HCFSMgmtUtils {
         return hcfsStatInfo;
     }
 
-    public static boolean pinApp(ServiceAppInfo info) {
-        HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "pinApp", "AppName=" + info.getAppName());
+//    public static boolean pinApp(ServiceAppInfo info) {
+    public static boolean pinApp(AppInfo info) {
+        HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "pinApp", "AppName=" + info.getName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
-//        String externalDir = info.getExternalDir();
         ArrayList<String> externalDirList = info.getExternalDirList();
         boolean isSourceDirSuccess = true;
 //        if (sourceDir != null) {
@@ -440,23 +440,21 @@ public class HCFSMgmtUtils {
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
-                isDataDirSuccess = pinFileOrDirectory(dataDir);
+                isDataDirSuccess = (pinFileOrDirectory(dataDir) == 0);
             }
         }
         boolean isExternalDirSuccess = true;
-//        if (externalDir != null) {
-//            isExternalDirSuccess = pinFileOrDirectory(externalDir);
-//        }
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
-                isExternalDirSuccess &= pinFileOrDirectory(externalDir);
+                isExternalDirSuccess &= (pinFileOrDirectory(externalDir) == 0);
             }
         }
         return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
-    public static boolean unpinApp(ServiceAppInfo info) {
-        HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "unpinApp", "appName=" + info.getAppName());
+//    public static boolean unpinApp(ServiceAppInfo info) {
+    public static boolean unpinApp(AppInfo info) {
+        HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "unpinApp", "appName=" + info.getName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
 //        String externalDir = info.getExternalDir();
@@ -471,56 +469,67 @@ public class HCFSMgmtUtils {
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
-                isDataDirSuccess = unpinFileOrDirectory(dataDir);
+                isDataDirSuccess = (unpinFileOrDirectory(dataDir) == 0);
             }
         }
         boolean isExternalDirSuccess = true;
-//        if (externalDir != null) {
-//            isExternalDirSuccess = unpinFileOrDirectory(externalDir);
-//        }
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
-                isExternalDirSuccess &= unpinFileOrDirectory(externalDir);
+                isExternalDirSuccess &= (unpinFileOrDirectory(externalDir) == 0);
             }
         }
 
         return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
-    public static boolean pinFileOrDirectory(String filePath) {
-        boolean isSuccess = DEFAULT_PINNED_STATUS;
+    /**
+     * @return 0 if pin file or directory is successful, error otherwise.
+     * */
+    public static int pinFileOrDirectory(String filePath) {
+        int code = DEFAULT_PINNED_STATUS ? 0 : -1;
         try {
             String jsonResult = HCFSApiUtils.pin(filePath);
             JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
+            boolean isSuccess = jObject.getBoolean("result");
             String logMsg = "operation=Pin, filePath=" + filePath + ", jsonResult=" + jsonResult;
             if (isSuccess) {
+                code = 0;
+                logMsg += ", code=" + code;
                 log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
             } else {
+                code = jObject.getInt("code");
+                logMsg += ", code=" + code;
                 log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", logMsg);
             }
         } catch (JSONException e) {
             log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
         }
-        return isSuccess;
+        return code;
     }
 
-    public static boolean unpinFileOrDirectory(String filePath) {
-        boolean isSuccess = DEFAULT_PINNED_STATUS;
+    /**
+     * @return 0 if unpin file or directory is successful, error otherwise.
+     * */
+    public static int unpinFileOrDirectory(String filePath) {
+        int code = DEFAULT_PINNED_STATUS ? 0 : -1;
         try {
             String jsonResult = HCFSApiUtils.unpin(filePath);
             JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
+            boolean isSuccess = jObject.getBoolean("result");
             String logMsg = "operation=Unpin, filePath=" + filePath + ", jsonResult=" + jsonResult;
             if (isSuccess) {
+                code = 0;
+                logMsg += ", code=" + code;
                 log(Log.INFO, CLASSNAME, "unpinFileOrDirectory", logMsg);
             } else {
+                code = jObject.getInt("code");
+                logMsg += ", code=" + code;
                 log(Log.ERROR, CLASSNAME, "unpinFileOrDirectory", logMsg);
             }
         } catch (JSONException e) {
             log(Log.ERROR, CLASSNAME, "unpinFileOrDirectory", Log.getStackTraceString(e));
         }
-        return isSuccess;
+        return code;
     }
 
     public static int getDirLocationStatus(String pathName) {

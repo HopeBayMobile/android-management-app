@@ -22,7 +22,6 @@ import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.util.concurrent.ThreadPoolExecutor;
 
 
 /**
@@ -51,7 +50,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         fileDirIcon.setImageBitmap(itemInfo.getIconImage());
 
         TextView fileDirName = (TextView) view.findViewById(R.id.file_dir_name);
-        fileDirName.setText(itemInfo.getItemName());
+        fileDirName.setText(itemInfo.getName());
 
         final ImageView fileDirPinIcon = (ImageView) view.findViewById(R.id.file_dir_pin_icon);
         fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
@@ -59,8 +58,10 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
                 boolean isPinned = !itemInfo.isPinned();
-                fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
-                mViewHolder.pinUnpinItem(isPinned);
+                boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
+                if (allowPinUnpin) {
+                    fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                }
             }
         });
 

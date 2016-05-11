@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="CustomFont">
+        <attr name="customFont" format="enum">
+            <enum name="open_sans_light" value="0"/>
+            <enum name="open_sans_regular" value="1"/>
+            <enum name="open_sans_semibold" value="2"/>
+            <enum name="open_sans_bold" value="3"/>
+            <enum name="noto_sans_tc_light" value="4"/>
+            <enum name="noto_sans_tc_regular" value="5"/>
+            <enum name="noto_sans_tc_medium" value="6"/>
+            <enum name="noto_sans_tc_bold" value="7"/>
+            <enum name="noto_sans_kr_light" value="8"/>
+            <enum name="noto_sans_kr_regular" value="9"/>
+            <enum name="noto_sans_kr_medium" value="10"/>
+            <enum name="noto_sans_kr_bold" value="11"/>
+        </attr>
+    </declare-styleable>
+</resources>

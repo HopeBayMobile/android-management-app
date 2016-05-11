@@ -200,7 +200,7 @@ public class FileDirInfo extends ItemInfo {
 
 	public int getFileDirStatus() {
 		int locationStatus = getFileDirLocationStatus();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getFileDirStatus", "itemName=" + getItemName() + ", locationStatus=" + locationStatus);
+        HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
         if (locationStatus == LocationStatus.LOCAL) {
             return ItemStatus.STATUS_AVAILABLE;
         } else {

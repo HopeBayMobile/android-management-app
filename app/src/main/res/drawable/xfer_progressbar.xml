@@ -3,26 +3,20 @@
 
     <item android:id="@android:id/background">
         <shape>
-            <corners android:radius="5dip" />
-
-            <solid android:color="@color/colorHomePageStorageProgressBarBackground" />
+            <solid android:color="@color/C6" />
         </shape>
     </item>
     <item android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
-                <corners android:radius="5dip" />
-
-                <solid android:color="@color/colorHomePageXferProgressBarSecondary" />
+                <solid android:color="@color/C3" />
             </shape>
         </clip>
     </item>
     <item android:id="@android:id/progress">
         <clip>
             <shape>
-                <corners android:radius="5dip" />
-
-                <solid android:color="@color/colorHomePageXferProgressBarPrimary" />
+                <solid android:color="@color/C1" />
             </shape>
         </clip>
     </item>

@@ -9,116 +9,123 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/login_bkg" />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:paddingLeft="@dimen/activate_cloud_storage_horizontal_margin"
-        android:paddingRight="@dimen/activate_cloud_storage_horizontal_margin">
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="30dp"
-            android:layout_marginLeft="@dimen/activate_cloud_storage_logo_horizontal_margin"
-            android:layout_marginRight="@dimen/activate_cloud_storage_logo_horizontal_margin"
-            android:src="@drawable/icon_terafonn_logo_l_login" />
+            android:layout_marginBottom="26dp"
+            android:layout_marginTop="132dp"
+            android:src="@drawable/icon_tera_logo_l_login"/>
 
-        <EditText
-            android:id="@+id/username"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/white_background_gray_border"
-            android:hint="@string/activate_cloud_storage_username"
-            android:padding="10dp"
-            android:singleLine="true" />
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/white_background_gray_border"
-            android:hint="@string/activate_cloud_storage_password"
-            android:inputType="textPassword"
-            android:padding="10dp"
-            android:singleLine="true" />
+            <com.hopebaytech.hcfsmgmt.customview.CustomEditText
+                android:id="@+id/username"
+                style="@style/F12"
+                android:layout_width="244dp"
+                android:layout_height="36dp"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:hint="@string/activate_cloud_storage_username"
+                android:padding="10dp"
+                android:singleLine="true" />
+
+            <View
+                style="@style/Divider"
+                android:layout_width="match_parent" />
+
+            <com.hopebaytech.hcfsmgmt.customview.CustomEditText
+                android:id="@+id/password"
+                style="@style/F6"
+                android:layout_width="244dp"
+                android:layout_height="36dp"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:hint="@string/activate_cloud_storage_password"
+                android:inputType="textPassword"
+                android:padding="10dp"
+                android:singleLine="true" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/activate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="20dp"
+            android:layout_width="244dp"
+            android:layout_height="36dp"
+            android:layout_marginBottom="@dimen/M1"
+            android:layout_marginTop="@dimen/M1"
             android:background="@color/colorAccent"
             android:clickable="true"
             android:gravity="center">
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+                style="@style/F2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackground"
                 android:gravity="center"
-                android:padding="@dimen/activate_cloud_storage_activate_textview_padding"
-                android:text="@string/activate_cloud_storage_activate"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@android:color/white" />
+                android:text="@string/activate_cloud_storage_activate" />
         </LinearLayout>
 
-        <TextView
+        <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
             android:id="@+id/forget_password"
+            style="@style/F11"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/fragment_vertical_margin"
-            android:layout_marginTop="@dimen/fragment_vertical_margin"
             android:text="@string/activate_cloud_storage_forget_password" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
-            android:gravity="center"
-            android:orientation="horizontal">
+        <RelativeLayout
+            android:layout_width="244dp"
+            android:layout_height="wrap_content">
 
             <View
                 style="@style/Divider"
-                android:layout_width="0dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_weight="0.45" />
+                android:layout_width="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_toStartOf="@+id/or" />
 
-            <TextView
-                android:layout_width="0dp"
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+                android:id="@+id/or"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.1"
+                android:layout_centerInParent="true"
+                android:layout_marginBottom="@dimen/M2"
+                android:layout_marginLeft="@dimen/M7"
+                android:layout_marginRight="@dimen/M7"
+                android:layout_marginTop="@dimen/M2"
                 android:gravity="center"
                 android:text="@string/activate_cloud_storage_or" />
 
             <View
                 style="@style/Divider"
-                android:layout_width="0dp"
-                android:layout_marginLeft="0dp"
-                android:layout_marginRight="0dp"
-                android:layout_weight="0.45" />
-        </LinearLayout>
+                android:layout_width="match_parent"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/or" />
+        </RelativeLayout>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/white_background_gray_border"
             android:clickable="true">
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
                 android:id="@+id/google_activate"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                style="@style/F9"
+                android:layout_width="244dp"
+                android:layout_height="36dp"
                 android:background="?android:attr/selectableItemBackground"
                 android:gravity="center"
-                android:textStyle="bold"
-                android:padding="10dp"
                 android:text="@string/activate_cloud_storage_google_activate"
-                android:textColor="@color/colorAccent"                 />
+                android:textColor="@color/colorAccent" />
         </LinearLayout>
 
     </LinearLayout>

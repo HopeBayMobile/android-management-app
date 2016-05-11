@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.RecyclerView;
 
 import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
 
@@ -15,7 +14,7 @@ public abstract class ItemInfo {
     protected final int ICON_TRANSPARENT = 50;
 
     private boolean isPinned;
-    private String infoName;
+    private String name;
     private boolean isProcessing;
     private long lastProcessTime;
 
@@ -33,8 +32,8 @@ public abstract class ItemInfo {
 		this.viewHolder = viewHolder;
 	}
 
-	public String getItemName() {
-		return infoName;
+	public String getName() {
+		return name;
 	}
 
 	public long getLastProcessTime() {
@@ -53,8 +52,8 @@ public abstract class ItemInfo {
 		this.isProcessing = isProcessing;
 	}
 
-	public void setItemName(String infoName) {
-		this.infoName = infoName;
+	public void setName(String infoName) {
+		this.name = infoName;
 	}
 	
 	public boolean isPinned() {

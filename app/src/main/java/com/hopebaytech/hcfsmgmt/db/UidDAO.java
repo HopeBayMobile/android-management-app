@@ -71,6 +71,7 @@ public class UidDAO {
         }
     }
 
+    /** Update specific column */
     public boolean update(UidInfo uidInfo, String column) {
         String logMsg = "uidInfo=" + uidInfo + ", column=" + column;
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "update", logMsg);
@@ -89,9 +90,14 @@ public class UidDAO {
                 contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
             }
             String where = PACKAGE_NAME_COLUMN + "='" + uidInfo.getPackageName() + "'";
-            boolean isSuccess = getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
-            if (!isSuccess) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
+            boolean isSuccess;
+            if (get(uidInfo.getPackageName()) != null) {
+                isSuccess = getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
+                if (!isSuccess) {
+                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
+                }
+            } else {
+                isSuccess = insert(uidInfo);
             }
             return isSuccess;
         }
@@ -136,8 +142,8 @@ public class UidDAO {
 
     public UidInfo getRecord(Cursor cursor) {
         UidInfo result = new UidInfo();
-        result.setIsPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 1);
-        result.setIsSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
+        result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 1);
+        result.setSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
         result.setUid(cursor.getInt(cursor.getColumnIndex(UID_COLUMN)));
         result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
         return result;

@@ -38,7 +38,7 @@ public class UidInfo {
         return isSystemApp;
     }
 
-    public void setIsSystemApp(boolean isSystemApp) {
+    public void setSystemApp(boolean isSystemApp) {
         this.isSystemApp = isSystemApp;
     }
 
@@ -46,7 +46,7 @@ public class UidInfo {
         return isPinned;
     }
 
-    public void setIsPinned(boolean isPinned) {
+    public void setPinned(boolean isPinned) {
         this.isPinned = isPinned;
     }
 

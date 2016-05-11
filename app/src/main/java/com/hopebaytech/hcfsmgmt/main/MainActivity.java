@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (toolbar != null) {
-            toolbar.setLogo(R.drawable.icon_terafonn_logo_m_tab);
+            toolbar.setLogo(R.drawable.icon_tera_logo_m_tab);
             toolbar.setTitle("");
             setSupportActionBar(toolbar);
         }
@@ -289,9 +289,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (mViewPager != null) {
             mViewPager.setOffscreenPageLimit(3);
             PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
-            pagerTabStrip.setTextColor(ContextCompat.getColor(this, R.color.colorWhite));
-            pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.colorPagerTabStrip));
-            pagerTabStrip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.C2));
             mViewPager.setAdapter(mPagerAdapter);
         }
 
