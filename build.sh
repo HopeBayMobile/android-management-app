@@ -45,11 +45,11 @@ function _hdr_inc() {
 function build_system() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
 	docker pull $DOCKER_IMAGE
-    echo sdk.dir=/opt/android-sdk-linux > local.properties
-    echo ndk.dir=/opt/android-ndk-r10e >> local.properties
-    docker run --rm --volume=$(pwd):/opt/workspace --volume=$(pwd)/.root.gradle:/root/.gradle \
-        -e KEYSTORE_PASSWORD -e KEY_ALIAS -e KEY_PASSWORD \
-        $DOCKER_IMAGE /bin/sh -c "./gradlew assembleRelease"
+	echo sdk.dir=/opt/android-sdk-linux > local.properties
+	echo ndk.dir=/opt/android-ndk-r10e >> local.properties
+	docker run --rm --volume=$(pwd):/opt/workspace --volume=$(pwd)/.root.gradle:/root/.gradle \
+		-e KEYSTORE_PASSWORD -e KEY_ALIAS -e KEY_PASSWORD \
+		$DOCKER_IMAGE /bin/sh -c "./gradlew assembleRelease"
 }
 function copy_lib_to_source_tree() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
@@ -63,8 +63,14 @@ function publish_apk() {
 	echo APP_NAME=${APP_NAME} >> export_props.properties
 	echo APP_DIR=${APP_DIR} >> export_props.properties
 	mkdir -p ${PUBLISH_DIR}/${JOB_NAME}
-	rsync -arcv --no-owner --no-group --no-times \
-		app/build/outputs/apk/app-release.apk ${PUBLISH_DIR}/${JOB_NAME}/${APP_NAME}.apk
+	if [ -f app/build/outputs/apk/app-release.apk ]; then
+		rsync -arcv --no-owner --no-group --no-times \
+			app/build/outputs/apk/app-release.apk ${PUBLISH_DIR}/${JOB_NAME}/${APP_NAME}.apk
+	fi
+	if [ -f app/build/outputs/apk/app-release-unsigned.apk ]; then
+		rsync -arcv --no-owner --no-group --no-times \
+			app/build/outputs/apk/app-release-unsigned.apk ${PUBLISH_DIR}/${JOB_NAME}/${APP_NAME}.apk
+	fi
 	rsync -arcv --no-owner --no-group --no-times \
 		app/src/main/libs/arm64-v8a/libterafonnapi.so ${PUBLISH_DIR}/${JOB_NAME}/arm64-v8a/
 }
@@ -80,6 +86,15 @@ function mount_nas() {
 function unmount_nas() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
 	umount /mnt/nas
+}
+
+function update_version_num() {
+	if [ -z $VERSION_NUM ]; then
+		export VERSION_NUM = Manual build $(shell date +%Y%m%d-%H%M%S)
+	fi
+	sed -i"" -e 's#\(<string name="terafonn_version">\).*\(</string>\)#\1'$VERSION_NUM'\2#' \
+		app/src/main/res/values/strings.xml \
+		app/src/main/res/values-en/strings.xml
 }
 
 # Enable error trace
@@ -110,5 +125,6 @@ eval '[ -n "$PUBLISH_DIR" ]' || { echo Assign these for local build; exit 1; }
 
 mount_nas
 copy_lib_to_source_tree
+update_version_num
 build_system
 publish_apk
