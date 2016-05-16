@@ -1,31 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:paddingBottom="@dimen/fragment_vertical_padding"
-    android:paddingLeft="@dimen/fragment_horizontal_padding"
-    android:paddingRight="@dimen/fragment_horizontal_padding"
-    android:paddingTop="@dimen/fragment_vertical_padding">
+    android:layout_height="92dp"
+    android:orientation="horizontal">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/storage_type"
+        style="@style/F4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:orientation="vertical"
-        android:paddingBottom="10dp">
-
-        <TextView
-            android:id="@+id/storage_type"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="@color/colorFileManagementStorageTypeTitle"
-            tools:text="@string/file_mgmt_internal_storage_name" />
-
-    </LinearLayout>
+        android:layout_marginTop="@dimen/M3"
+        tools:text="@string/file_mgmt_internal_storage_name" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -41,16 +30,16 @@
             android:orientation="horizontal">
 
             <TextView
+                style="@style/F8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/file_mgmt_section_item_total_storage_space"
-                android:textColor="@color/colorFileManagementTotalStorageText" />
+                android:text="@string/file_mgmt_section_item_total_storage_space" />
 
             <TextView
                 android:id="@+id/total_storage_space"
+                style="@style/F8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorFileManagementTotalStorageText"
                 tools:text="@string/file_mgmt_section_item_calculating" />
         </LinearLayout>
 
@@ -58,28 +47,36 @@
             android:id="@+id/available_storage_space_field"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/M7"
+            android:layout_marginTop="@dimen/M7"
             android:orientation="horizontal">
 
             <TextView
+                style="@style/F7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/file_mgmt_section_item_available_storage_space"
-                android:textColor="@color/colorFileManagementAvailStorageText" />
+                android:text="@string/file_mgmt_section_item_available_storage_space" />
 
             <TextView
                 android:id="@+id/available_storage_space"
+                style="@style/F7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/colorFileManagementAvailStorageText"
                 tools:text="@string/file_mgmt_section_item_calculating" />
         </LinearLayout>
     </LinearLayout>
 
     <com.hopebaytech.hcfsmgmt.customview.CircleDisplay
-        android:id="@+id/iconView"
+        android:id="@+id/circle_display_view"
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        app:capacityColor="@color/C4"
+        app:capacityTextSize="10sp"
+        app:circleBackground="@color/C6"
+        app:ratioColor="@color/C3"
+        app:ratioTextSize="16sp"
+        app:valueColor="@color/C3" />
 
 </RelativeLayout>

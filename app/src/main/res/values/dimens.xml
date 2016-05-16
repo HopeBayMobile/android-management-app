@@ -34,6 +34,8 @@
     <dimen name="navigation_view_width">267dp</dimen>
     <dimen name="pager_tab_strip_height">32dp</dimen>
     <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="nav_drawer_menu_item_height">56dp</dimen>
+    <dimen name="nav_drawer_menu_item_img_end_margin">32dp</dimen>
 
     <dimen name="M1">20dp</dimen>
     <dimen name="M2">16dp</dimen>

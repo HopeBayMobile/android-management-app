@@ -880,7 +880,7 @@ public class FileMgmtFragment extends Fragment {
 
     public void showTypeContent(final int resourceStringId) {
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "showTypeContent", null);
-        mSectionedRecyclerViewAdapter.clearSubAdpater();
+        mSectionedRecyclerViewAdapter.clearSubAdapter();
         mSectionedRecyclerViewAdapter.notifySubAdapterDataSetChanged();
 
         mWorkerHandler.post(new Runnable() {
@@ -1324,7 +1324,7 @@ public class FileMgmtFragment extends Fragment {
             }
         }
 
-        private void clearSubAdpater() {
+        private void clearSubAdapter() {
             if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
                 ((GridRecyclerViewAdapter) mBaseAdapter).clear();
             } else {
@@ -1516,7 +1516,7 @@ public class FileMgmtFragment extends Fragment {
             public SectionedViewHolder(View itemView) {
                 super(itemView);
                 rootView = itemView;
-                circleDisplay = (CircleDisplay) itemView.findViewById(R.id.iconView);
+                circleDisplay = (CircleDisplay) itemView.findViewById(R.id.circle_display_view);
                 storageType = (TextView) itemView.findViewById(R.id.storage_type);
                 totalStorageSpace = (TextView) itemView.findViewById(R.id.total_storage_space);
                 availableStorageSpace = (TextView) itemView.findViewById(R.id.available_storage_space);
@@ -1560,7 +1560,7 @@ public class FileMgmtFragment extends Fragment {
         }
 
         @Override
-        public void onDraw(Canvas c, RecyclerView parent) {
+        public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
             if (mOrientation == VERTICAL_LIST) {
                 drawVertical(c, parent);
             } else {
@@ -1599,13 +1599,14 @@ public class FileMgmtFragment extends Fragment {
         }
 
         @Override
-        public void getItemOffsets(Rect outRect, int itemPosition, RecyclerView parent) {
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
             if (mOrientation == VERTICAL_LIST) {
                 outRect.set(0, 0, 0, mDivider.getIntrinsicHeight());
             } else {
                 outRect.set(0, 0, mDivider.getIntrinsicWidth(), 0);
             }
         }
+
     }
 
     @Override

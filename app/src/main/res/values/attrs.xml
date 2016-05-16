@@ -16,4 +16,13 @@
             <enum name="noto_sans_kr_bold" value="11"/>
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="CircleDisplay">
+        <attr name="circleBackground" format="color"/>
+        <attr name="valueColor" format="color"/>
+        <attr name="ratioColor" format="color"/>
+        <attr name="ratioTextSize" format="dimension"/>
+        <attr name="capacityColor" format="color"/>
+        <attr name="capacityTextSize" format="dimension"/>
+    </declare-styleable>
 </resources>

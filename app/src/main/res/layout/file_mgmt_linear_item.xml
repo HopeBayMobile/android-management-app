@@ -3,12 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearItemLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="?attr/selectableItemBackground"
-    android:paddingBottom="@dimen/fragment_vertical_padding"
-    android:paddingLeft="@dimen/fragment_horizontal_padding"
-    android:paddingRight="@dimen/fragment_horizontal_padding"
-    android:paddingTop="@dimen/fragment_vertical_padding" >
+    android:layout_height="56dp"
+    android:background="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,28 +12,27 @@
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
         android:layout_toStartOf="@+id/pinLayout"
-        android:gravity="center" >
+        android:gravity="center">
 
         <ImageView
             android:id="@+id/iconView"
             android:layout_width="@dimen/icon_image_width"
             android:layout_height="@dimen/icon_image_height"
-            android:paddingEnd="@dimen/item_image_horizontal_padding"
+            android:layout_marginEnd="@dimen/M2"
             android:src="@drawable/icon_doc_default_gray" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" >
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/itemName"
+                style="@style/F6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@android:color/black" />
+                android:singleLine="true" />
 
             <TextView
                 android:id="@+id/datePinned"
@@ -45,10 +40,10 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:text="Pinned since 2016/03/01 21:00:00"
                 android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/darker_gray"
                 android:visibility="gone"
-                android:textColor="@android:color/darker_gray" />
+                tools:text="Pinned since 2016/03/01 21:00:00" />
         </LinearLayout>
     </LinearLayout>
 
@@ -57,8 +52,7 @@
         android:layout_width="@dimen/icon_image_width"
         android:layout_height="@dimen/icon_image_width"
         android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:paddingEnd="@dimen/item_image_horizontal_padding" >
+        android:layout_centerVertical="true">
 
         <ProgressBar
             android:id="@+id/processView"

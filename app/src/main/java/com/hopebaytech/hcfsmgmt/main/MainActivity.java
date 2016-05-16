@@ -1,10 +1,8 @@
 package com.hopebaytech.hcfsmgmt.main;
 
-import android.Manifest;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -16,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -26,13 +23,11 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -61,7 +56,7 @@ import java.util.TimerTask;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private final String CLASSNAME = getClass().getSimpleName();
     private final int NAV_MENU_SDCARD1_ID = (int) (Math.random() * Integer.MAX_VALUE);
@@ -116,7 +111,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         if (mNavigationView != null) {
-            mNavigationView.setNavigationItemSelectedListener(this);
+//            mNavigationView.setNavigationItemSelectedListener(this);
+            mNavigationView.findViewById(R.id.nav_dashboard).setOnClickListener(this);
+            mNavigationView.findViewById(R.id.nav_system).setOnClickListener(this);
+            mNavigationView.findViewById(R.id.nav_settings).setOnClickListener(this);
+            mNavigationView.findViewById(R.id.nav_about).setOnClickListener(this);
             final AccountDAO accountDAO = AccountDAO.getInstance(MainActivity.this);
             final List<AccountInfo> accountInfoList = accountDAO.getAll();
             if (accountInfoList.size() != 0) {
@@ -295,6 +294,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    @Override
+    public void onClick(View v) {
+        /** Handle navigation view item clicks here. */
+        int id = v.getId();
+        if (id == R.id.nav_dashboard) {
+            mViewPager.setCurrentItem(0, true);
+        } else if (id == R.id.nav_system) {
+            isSDCard1 = false;
+            mViewPager.setCurrentItem(1, true);
+        } else if (id == R.id.nav_settings) {
+            mViewPager.setCurrentItem(2, true);
+        } else if (id == R.id.nav_about) {
+            mViewPager.setCurrentItem(3, true);
+        } else if (id == NAV_MENU_SDCARD1_ID) {
+            isSDCard1 = true;
+        }
+        mDrawerLayout.closeDrawer(GravityCompat.START);
+    }
+
     public class PagerAdapter extends FragmentStatePagerAdapter {
 
         private String[] titleArray;
@@ -386,26 +404,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        /** Handle navigation view item clicks here. */
-        int id = item.getItemId();
-        if (id == R.id.nav_dashboard) {
-            mViewPager.setCurrentItem(0, true);
-        } else if (id == R.id.nav_system) {
-            isSDCard1 = false;
-            mViewPager.setCurrentItem(1, true);
-        } else if (id == R.id.nav_settings) {
-            mViewPager.setCurrentItem(2, true);
-        } else if (id == R.id.nav_about) {
-            mViewPager.setCurrentItem(3, true);
-        } else if (id == NAV_MENU_SDCARD1_ID) {
-            isSDCard1 = true;
-        }
-
-        mDrawerLayout.closeDrawer(GravityCompat.START);
-        return true;
-    }
+//    @Override
+//    public boolean onNavigationItemSelected(MenuItem item) {
+//        /** Handle navigation view item clicks here. */
+//        int id = item.getItemId();
+//        if (id == R.id.nav_dashboard) {
+//            mViewPager.setCurrentItem(0, true);
+//        } else if (id == R.id.nav_system) {
+//            isSDCard1 = false;
+//            mViewPager.setCurrentItem(1, true);
+//        } else if (id == R.id.nav_settings) {
+//            mViewPager.setCurrentItem(2, true);
+//        } else if (id == R.id.nav_about) {
+//            mViewPager.setCurrentItem(3, true);
+//        } else if (id == NAV_MENU_SDCARD1_ID) {
+//            isSDCard1 = true;
+//        }
+//
+//        mDrawerLayout.closeDrawer(GravityCompat.START);
+//        return true;
+//    }
 
     public class SDCardBroadcastReceiver extends BroadcastReceiver {
         @Override
@@ -417,9 +435,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Menu menu = mNavigationView.getMenu();
-                        MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
-                        menuItem.setIcon(R.drawable.ic_sd_storage_black);
+//                        Menu menu = mNavigationView.getMenu();
+//                        MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
+//                        menuItem.setIcon(R.drawable.ic_sd_storage_black);
                     }
                 });
             } else if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
