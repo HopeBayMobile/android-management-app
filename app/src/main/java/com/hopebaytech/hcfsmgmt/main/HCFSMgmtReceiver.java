@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -28,7 +29,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 /** Detect network status and determine whether sync data to cloud */
-                HCFSMgmtUtils.changeCloudSyncStatus(context);
+//                boolean syncWifiOnly = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
+                boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
+                HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
                 /** Start an alarm to notify user when data is completed uploaded */
 //                boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, true);
@@ -50,19 +53,21 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 
                 /** Set silent Google sign-in to false */
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(HCFSMgmtUtils.PREF_IS_SILENT_SIGN_IN, false);
+                editor.putBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, false);
                 editor.apply();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 /** Detect network status changed and enable/disable data sync to cloud */
-                HCFSMgmtUtils.changeCloudSyncStatus(context);
+//                boolean syncWifiOnly = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
+                boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
+                HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
                 /** Execute silent Google sign-in */
-                boolean isSilentSignIn = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_IS_SILENT_SIGN_IN, false);
+                boolean isSilentSignIn = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, false);
                 if (!isSilentSignIn) {
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isSilentSignIn=" + isSilentSignIn);
                     if (NetworkUtils.isNetworkConnected(context)) {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(HCFSMgmtUtils.PREF_IS_SILENT_SIGN_IN, true);
+                        editor.putBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, true);
                         editor.apply();
 
                         Intent intentService = new Intent(context, HCFSMgmtService.class);

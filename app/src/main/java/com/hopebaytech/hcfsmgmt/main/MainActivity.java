@@ -24,12 +24,10 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnLayoutChangeListener;
 import android.view.ViewGroup;
@@ -79,8 +77,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void init() {
 
-        /** Initialize default value set in xml/settings_preferences.xml file */
-        PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false);
+//        /** Initialize default value set in xml/settings_preferences.xml file */
+//        PreferenceManager.setDefaultValues(this, R.xml.settings_preferences, false);
 
         HandlerThread handlerThread = new HandlerThread(MainActivity.class.getSimpleName());
         handlerThread.start();
@@ -152,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
                                             bitmap = BitmapFactory.decodeStream(bInputStream);
 
-                                            String imgBase64 = BitmapBase64Factory.encodeToBase64(bitmap, Bitmap.CompressFormat.JPEG, 100);
+                                            String imgBase64 = BitmapBase64Factory.encodeToBase64(bitmap, Bitmap.CompressFormat.PNG, 100);
                                             accountInfo.setImgBase64(imgBase64);
                                             accountDAO.update(accountInfo);
                                         } catch (Exception e) {
@@ -282,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(this);
         }
 
-        /** Initialize ViewPager with PagerTabStrip */
+        /** Initialize ViewPager with CustomPagerTabStrip */
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
         if (mViewPager != null) {
@@ -328,9 +326,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public Fragment getItem(int i) {
             Fragment fragment;
             String title = titleArray[i];
-            if (title.equals(getString(R.string.nav_home))) {
+            if (title.equals(getString(R.string.nav_overview))) {
                 fragment = DashboardFragment.newInstance();
-            } else if (title.equals(getString(R.string.nav_system))) {
+            } else if (title.equals(getString(R.string.nav_app_file))) {
                 fragment = FileMgmtFragment.newInstance(false);
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
@@ -490,33 +488,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        switch (requestCode) {
-            case RequestCode.PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
-                /** If request is cancelled, the result arrays are empty. */
-                if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    View contentView = findViewById(android.R.id.content);
-                    if (contentView != null) {
-                        Snackbar.make(contentView, getString(R.string.main_activity_no_read_external_storage_permission), Snackbar.LENGTH_LONG).show();
-                    }
-                }
-                break;
-            case RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE:
-                /** If request is cancelled, the result arrays are empty. */
-                if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    View contentView = findViewById(android.R.id.content);
-                    if (contentView != null) {
-                        Snackbar.make(contentView, getString(R.string.main_activity_no_read_phone_state_permission), Snackbar.LENGTH_LONG).show();
-                    }
-                } else {
-                    int position = mViewPager.getCurrentItem();
-                    Fragment fragment = mPagerAdapter.getFragment(position);
-                    if (fragment != null) {
-                        if (fragment instanceof AboutFragment) {
-                            ((AboutFragment) fragment).showImei();
-                        }
-                    }
-                }
-                break;
+        int position = mViewPager.getCurrentItem();
+        Fragment fragment = mPagerAdapter.getFragment(position);
+        if (fragment != null) {
+            fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

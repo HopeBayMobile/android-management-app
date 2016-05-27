@@ -12,20 +12,20 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.preference.PreferenceManager;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.main.ChangeAccountActivity;
+import com.hopebaytech.hcfsmgmt.main.SwitchAccountActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 /**
  * Created by Aaron on 2016/4/15.
  */
-public class ChangeAccountDialogFragment extends DialogFragment {
+public class SwitchAccountDialogFragment extends DialogFragment {
 
     public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private Activity mActivity;
 
-    public static ChangeAccountDialogFragment newInstance() {
-        return new ChangeAccountDialogFragment();
+    public static SwitchAccountDialogFragment newInstance() {
+        return new SwitchAccountDialogFragment();
     }
 
     @Override
@@ -45,10 +45,10 @@ public class ChangeAccountDialogFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
+                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
                 editor.apply();
 
-                Intent intent = new Intent(mActivity, ChangeAccountActivity.class);
+                Intent intent = new Intent(mActivity, SwitchAccountActivity.class);
                 mActivity.startActivity(intent);
                 mActivity.finish();
             }

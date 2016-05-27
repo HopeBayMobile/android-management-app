@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -110,7 +109,7 @@ public class DashboardFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 //        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateView", null);
-        return inflater.inflate(R.layout.dashboard_fragment, container, false);
+        return inflater.inflate(R.layout.overview_fragment, container, false);
     }
 
     @Override

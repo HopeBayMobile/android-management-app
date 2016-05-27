@@ -15,7 +15,7 @@
         android:paddingStart="@dimen/fragment_title_bar_padding_left"
         android:paddingTop="@dimen/fragment_title_bar_padding_top">
 
-        <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -27,29 +27,30 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="10dp">
+        android:paddingEnd="@dimen/M2"
+        android:paddingStart="@dimen/M2"
+        android:paddingTop="@dimen/M3"
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                style="@style/F4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/terafonn_version_title"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/colorAboutTitle"
-                android:textStyle="bold" />
+                android:text="@string/tera_version_title" />
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/terafonn_version"
+                style="@style/F6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
                 tools:text="2.0.6.0513" />
 
         </LinearLayout>
@@ -64,19 +65,17 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                style="@style/F4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/terafonn_imei_1"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/colorAboutTitle"
-                android:textStyle="bold" />
+                android:text="@string/tera_imei_1" />
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/device_imei_1"
+                style="@style/F6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
                 tools:text="7947584920752" />
 
         </LinearLayout>
@@ -91,19 +90,17 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                style="@style/F4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/terafonn_imei_2"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/colorAboutTitle"
-                android:textStyle="bold" />
+                android:text="@string/tera_imei_2" />
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/device_imei_2"
+                style="@style/F6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
                 tools:text="7947584920753" />
 
         </LinearLayout>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="26dp"
+        android:layout_marginTop="132dp"
+        android:src="@drawable/icon_tera_logo_l_login" />
+
+    <LinearLayout
+        android:id="@+id/current_account_layout"
+        android:layout_width="244dp"
+        android:layout_height="36dp"
+        android:layout_below="@+id/logo"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/white_background_gray_border"
+        android:gravity="center">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/current_account"
+            style="@style/F6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@android:color/darker_gray"
+            tools:text="old@xxx.com" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/target_account_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/current_account_layout"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/icon_arrow_switch" />
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/target_account"
+            style="@style/F6"
+            android:layout_width="244dp"
+            android:layout_height="36dp"
+            android:background="@color/colorSwitchAccountTextBackground"
+            android:gravity="center"
+            tools:text="new@xxx.com" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/switch_account_layout_icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/current_account_layout"
+        android:layout_gravity="center"
+        android:layout_marginTop="36dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="7dp"
+            android:text="Choose with:" />
+
+        <FrameLayout
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            android:background="@drawable/white_background_gray_border"
+            android:clickable="true">
+
+            <ImageView
+                android:id="@+id/choose_account_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="?attr/selectableItemBackground"
+                android:src="@drawable/icon_btn_google_account" />
+
+        </FrameLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/login_bkg" />
+
+    <LinearLayout
+        android:id="@+id/switch_account_layout_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/target_account_layout"
+        android:layout_marginTop="40dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/error_msg"
+                style="@style/F6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="30dp"
+                android:layout_marginStart="30dp"
+                android:gravity="center"
+                tools:text="error message" />
+
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/choose_account_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="35dp"
+                android:gravity="center"
+                android:text="@string/switch_account_another_account"
+                android:textColor="@color/colorAccent"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="244dp"
+            android:layout_height="36dp"
+            android:layout_gravity="center"
+            android:background="@android:color/darker_gray"
+            android:clickable="true">
+
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/switch_account"
+                style="@style/F2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="?attr/selectableItemBackground"
+                android:gravity="center"
+                android:text="@string/switch_account_start_to_change" />
+
+        </FrameLayout>
+
+
+    </LinearLayout>
+</RelativeLayout>

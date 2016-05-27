@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Aaron on 2016/4/19.
+ * @author Aaron
+ *         Created by Aaron on 2016/4/19.
  */
 public class AccountDAO implements IGenericDAO<AccountInfo> {
 
@@ -26,7 +27,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
     public static final String EMAIL_COLUMN = "email";
     public static final String IMG_URL_COLUMN = "img_url";
     public static final String IMG_BASE64_COLUMN = "img_base64";
-    public static final String IMG_EXPIRING_TIME_COLUMN = "img_expiring_time";
+    public static final String IMG_EXPIRED_TIME_COLUMN = "img_expired_time";
     public static final String CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -34,7 +35,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
                     EMAIL_COLUMN + " TEXT NOT NULL, " +
                     IMG_URL_COLUMN + " TEXT, " +
                     IMG_BASE64_COLUMN + " TEXT, " +
-                    IMG_EXPIRING_TIME_COLUMN + " TEXT)";
+                    IMG_EXPIRED_TIME_COLUMN + " TEXT)";
 
     private Context context;
     private static AccountDAO mAccountDAO;
@@ -64,7 +65,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         accountInfo.setEmail(cursor.getString(cursor.getColumnIndex(EMAIL_COLUMN)));
         accountInfo.setImgUrl(cursor.getString(cursor.getColumnIndex(IMG_URL_COLUMN)));
         accountInfo.setImgBase64(cursor.getString(cursor.getColumnIndex(IMG_BASE64_COLUMN)));
-        accountInfo.setImgExpringTime(Long.parseLong(cursor.getString(cursor.getColumnIndex(IMG_EXPIRING_TIME_COLUMN))));
+        accountInfo.setImgExpringTime(Long.parseLong(cursor.getString(cursor.getColumnIndex(IMG_EXPIRED_TIME_COLUMN))));
         return accountInfo;
     }
 
@@ -94,7 +95,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         cv.put(EMAIL_COLUMN, info.getEmail());
         cv.put(IMG_URL_COLUMN, info.getImgUrl());
         cv.put(IMG_BASE64_COLUMN, info.getImgBase64());
-        cv.put(IMG_EXPIRING_TIME_COLUMN, info.getImgExpringTime());
+        cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpringTime());
 
         boolean isSuccess = mDataBase.insert(TABLE_NAME, null, cv) != -1;
         if (isSuccess) {
@@ -132,7 +133,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         cv.put(EMAIL_COLUMN, info.getEmail());
         cv.put(IMG_URL_COLUMN, info.getImgUrl());
         cv.put(IMG_BASE64_COLUMN, info.getImgBase64());
-        cv.put(IMG_EXPIRING_TIME_COLUMN, info.getImgExpringTime());
+        cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpringTime());
 
         String where = KEY_ID + "=" + info.getId();
         boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;

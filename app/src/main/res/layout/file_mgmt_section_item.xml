@@ -6,7 +6,7 @@
     android:layout_height="92dp"
     android:orientation="horizontal">
 
-    <TextView
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/storage_type"
         style="@style/F4"
         android:layout_width="wrap_content"
@@ -29,13 +29,13 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 style="@style/F8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/file_mgmt_section_item_total_storage_space" />
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/total_storage_space"
                 style="@style/F8"
                 android:layout_width="wrap_content"
@@ -51,13 +51,13 @@
             android:layout_marginTop="@dimen/M7"
             android:orientation="horizontal">
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 style="@style/F7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/file_mgmt_section_item_available_storage_space" />
 
-            <TextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/available_storage_space"
                 style="@style/F7"
                 android:layout_width="wrap_content"

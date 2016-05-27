@@ -29,6 +29,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.StatFs;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -124,6 +126,7 @@ public class FileMgmtFragment extends Fragment {
     private Spinner mSpinner;
     private ImageView mRefresh;
     private ImageView mLayoutType;
+    private Snackbar mSnackbar;
     private SparseArray<ItemInfo> mWaitToExecuteSparseArr;
     private Map<String, Boolean> mPinUnpinFileMap;
     private Map<String, AppInfo> mPinUnpinAppMap;
@@ -134,6 +137,7 @@ public class FileMgmtFragment extends Fragment {
     private boolean mRecyclerViewScrollDown;
     private boolean mCurrentVisible;
     private boolean mServiceBound;
+    private int mLanguage;
     private HCFSMgmtService mMgmtService;
     private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.GRID;
     //    private ExternalStorageObserver mExternalStorageObserver;
@@ -154,6 +158,17 @@ public class FileMgmtFragment extends Fragment {
     private enum DISPLAY_TYPE {
         GRID, LINEAR
     }
+
+    private View.OnClickListener mPermissionListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            String packageName = getContext().getPackageName();
+            Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
+            teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
+            teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(teraPermissionSettings);
+        }
+    };
 //    private Map<String, Boolean> mDataTypePinStatusMap = new HashMap<>();
 
     private Runnable mAutoUiRefreshRunnable = new Runnable() {
@@ -610,7 +625,59 @@ public class FileMgmtFragment extends Fragment {
             mFileRootDirName = mContext.getString(R.string.file_mgmt_internal_storage_name) + "/";
             spinner_array = mContext.getResources().getStringArray(R.array.file_mgmt_spinner);
         }
-        mSpinnerAdapter = new ArrayAdapter<>(mContext, R.layout.file_mgmt_spinner, spinner_array);
+        mSpinnerAdapter = new ArrayAdapter<String>(mContext, R.layout.file_mgmt_spinner, spinner_array) {
+
+//            private int[] attrs = {
+//                    android.R.attr.textColor,
+//                    android.R.attr.textSize,
+//                    R.attr.customFont};
+
+//            @Override
+//            public View getView(int position, View convertView, ViewGroup parent) {
+//                TypedArray typedArray = mContext.obtainStyledAttributes(R.style.F2, attrs);
+//
+//                int textColor = typedArray.getColor(0, Color.BLACK);
+//                @SuppressWarnings("ResourceType")
+//                float textSize = typedArray.getDimension(1, 0);
+//                @SuppressWarnings("ResourceType")
+//                int fontCode = typedArray.getInteger(2, 0);
+//
+//                Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), Font.getFontAssetPath(fontCode));
+//
+//                TextView textView = (TextView) super.getView(position, convertView, parent);
+//                textView.setTextColor(textColor);
+//                textView.setTextSize(textSize);
+//                textView.setTypeface(typeface);
+//
+//                typedArray.recycle();
+//
+//                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getView", "textColor=" + textColor + ", textSize=" + textSize + ", fontCode=" + fontCode);
+//                return textView;
+//            }
+//
+//            @Override
+//            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+//                TypedArray typedArray = mContext.obtainStyledAttributes(R.style.F6, attrs);
+//
+//                int textColor = typedArray.getColor(0, Color.BLACK);
+//                @SuppressWarnings("ResourceType")
+//                float textSize = typedArray.getDimension(1, 0);
+//                @SuppressWarnings("ResourceType")
+//                int fontCode = typedArray.getInteger(2, 0);
+//
+//                Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), Font.getFontAssetPath(fontCode));
+//
+//                TextView textView = (TextView) super.getView(position, convertView, parent);
+//                textView.setTextColor(textColor);
+//                textView.setTextSize(textSize);
+//                textView.setTypeface(typeface);
+//
+//                typedArray.recycle();
+//
+//                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDropDownView", "textColor=" + textColor + ", textSize=" + textSize + ", typeface=" + typeface.toString());
+//                return textView;
+//            }
+        };
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mHandlerThread = new HandlerThread(FileMgmtFragment.class.getSimpleName());
@@ -658,6 +725,12 @@ public class FileMgmtFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            if (mSnackbar != null) {
+                mSnackbar.dismiss();
+            }
+        }
 
         /** Start mAutoUiRefreshThread */
         if (mAutoUiRefreshThread == null) {
@@ -719,6 +792,7 @@ public class FileMgmtFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        mSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_INDEFINITE);
         mEmptyFolder = (LinearLayout) view.findViewById(R.id.no_file_layout);
         mProgressCircle = (ProgressBar) view.findViewById(R.id.progress_circle);
         mFilePathNavigationLayout = (LinearLayout) view.findViewById(R.id.file_path_layout);
@@ -1012,6 +1086,8 @@ public class FileMgmtFragment extends Fragment {
                 itemName = (TextView) itemView.findViewById(R.id.itemName);
                 itemView.setOnClickListener(this);
                 itemView.setOnLongClickListener(this);
+
+
             }
 
             @Override
@@ -1827,7 +1903,7 @@ public class FileMgmtFragment extends Fragment {
                 if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                    builder.setMessage(getString(R.string.main_activity_require_read_external_storage_permission));
+                    builder.setMessage(getString(R.string.require_read_external_storage_permission));
                     builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -1837,7 +1913,10 @@ public class FileMgmtFragment extends Fragment {
                     builder.setCancelable(false);
                     builder.show();
                 } else {
-                    ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                    mSnackbar.setText(R.string.require_read_external_storage_permission);
+                    mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
+                    mSnackbar.setAction(R.string.enable_permission, mPermissionListener);
+                    mSnackbar.show();
                 }
             }
         } else {
@@ -1856,6 +1935,11 @@ public class FileMgmtFragment extends Fragment {
                 mProcessPinThread.interrupt();
                 mProcessPinThread = null;
             }
+
+            if (mSnackbar != null) {
+                mSnackbar.dismiss();
+            }
+
         }
 
     }
@@ -2288,7 +2372,31 @@ public class FileMgmtFragment extends Fragment {
         });
     }
 
-//    public class ExternalStorageObserver extends FileObserver {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case RequestCode.PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE:
+                /** If request is cancelled, the result arrays are empty. */
+                if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                        mSnackbar.setText(R.string.require_read_external_storage_permission);
+                        mSnackbar.setDuration(Snackbar.LENGTH_LONG);
+                        mSnackbar.setAction(null, null);
+                    } else {
+                        mSnackbar.setText(R.string.require_read_external_storage_permission);
+                        mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
+                        mSnackbar.setAction(R.string.enable_permission, mPermissionListener);
+                    }
+                    mSnackbar.show();
+                }
+                break;
+        }
+
+    }
+
+    //    public class ExternalStorageObserver extends FileObserver {
 //
 //        public ExternalStorageObserver(String path) {
 //            super(path, FileObserver.ALL_EVENTS);

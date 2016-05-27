@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:paddingBottom="@dimen/M1"
+    android:gravity="center_vertical">
+
+    <TextView
+        style="@style/F6"
+        android:id="@+id/radio_name"
+        android:layout_width="wrap_content"
+        android:layout_marginEnd="@dimen/M7"
+        android:layout_height="wrap_content"
+        tools:text="90%" />
+
+    <ImageView
+        android:id="@+id/radio_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/icon_btn_unselected" />
+
+</LinearLayout>

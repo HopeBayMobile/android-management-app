@@ -30,7 +30,7 @@ public class HCFSConfig {
 
     public static boolean isActivated(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
+        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
     }
 
     public static boolean setHCFSConfig(String key, String value) {
@@ -125,7 +125,7 @@ public class HCFSConfig {
         // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
         // boolean is_first_network_disconnected_received = sharedPreferences.getBoolean(key_disconnected, true);
         // if (is_first_network_disconnected_received) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "startSyncToCloud", logMsg);
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "stopSyncToCloud", logMsg);
         int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
         String notify_title = context.getString(R.string.app_name);
         String notify_content = context.getString(R.string.notify_network_disconnected);
@@ -139,6 +139,12 @@ public class HCFSConfig {
 
     public static boolean storeHCFSConfig(AuthResultInfo authResultInfo) {
         boolean isFailed = false;
+
+        boolean reloadConfig = true;
+        if (!getHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND).isEmpty()) {
+            reloadConfig = false;
+        }
+
         if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, authResultInfo.getBackendType())) {
             isFailed = true;
         }
@@ -160,8 +166,10 @@ public class HCFSConfig {
         if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, authResultInfo.getProtocol())) {
             isFailed = true;
         }
-        if (!reloadConfig()) {
-            isFailed = true;
+        if (reloadConfig) {
+            if (!reloadConfig()) {
+                isFailed = true;
+            }
         }
         return isFailed;
     }

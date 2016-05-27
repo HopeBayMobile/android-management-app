@@ -15,20 +15,20 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
  * @author Aaron
  *         Created by Aaron on 2016/5/10.
  */
-public class CustomEditText extends EditText {
+public class FontEditText extends EditText {
 
     private final String CLASSNAME = getClass().getSimpleName();
 
-    public CustomEditText(Context context) {
+    public FontEditText(Context context) {
         super(context);
     }
 
-    public CustomEditText(Context context, AttributeSet attrs) {
+    public FontEditText(Context context, AttributeSet attrs) {
         super(context, attrs);
         setCustomFont(context, attrs);
     }
 
-    public CustomEditText(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FontEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setCustomFont(context, attrs);
     }

@@ -6,18 +6,18 @@ package com.hopebaytech.hcfsmgmt.utils;
  */
 public class Font {
 
-    private static final int OPEN_SANS_LIGHT = 0;
-    private static final int OPEN_SANS_REGULAR = 1;
-    private static final int OPEN_SANS_SEMIBOLD = 2;
-    private static final int OPEN_SANS_BOLD = 3;
-    private static final int NOTO_SANS_TC_LIGHT = 4;
-    private static final int NOTO_SANS_TC_REGULAR = 5;
-    private static final int NOTO_SANS_TC_MEDIUM = 6;
-    private static final int NOTO_SANS_TC_BOLD = 7;
-    private static final int NOTO_SANS_KR_LIGHT = 8;
-    private static final int NOTO_SANS_KR_REGULAR = 9;
-    private static final int NOTO_SANS_KR_MEDIUM = 10;
-    private static final int NOTO_SANS_KR_BOLD = 11;
+    public static final int OPEN_SANS_LIGHT = 0;
+    public static final int OPEN_SANS_REGULAR = 1;
+    public static final int OPEN_SANS_SEMIBOLD = 2;
+    public static final int OPEN_SANS_BOLD = 3;
+    public static final int NOTO_SANS_TC_LIGHT = 4;
+    public static final int NOTO_SANS_TC_REGULAR = 5;
+    public static final int NOTO_SANS_TC_MEDIUM = 6;
+    public static final int NOTO_SANS_TC_BOLD = 7;
+    public static final int NOTO_SANS_KR_LIGHT = 8;
+    public static final int NOTO_SANS_KR_REGULAR = 9;
+    public static final int NOTO_SANS_KR_MEDIUM = 10;
+    public static final int NOTO_SANS_KR_BOLD = 11;
 
     public static String getFontAssetPath(int fontCode) {
         String fontPath;
