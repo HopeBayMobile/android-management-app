@@ -140,7 +140,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                                         getString(R.string.alert_dialog_confirm));
                                             }
                                         });
-                                    }
 
                                     runOnUiThread(new Runnable() {
                                         @Override
@@ -154,9 +153,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                             getString(R.string.activate_cloud_alert_dialog_message),
                                             getString(R.string.alert_dialog_confirm));
                                 }
-
                             }
-
                         });
                     }
                 }

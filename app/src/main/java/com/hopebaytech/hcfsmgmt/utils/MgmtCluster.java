@@ -14,6 +14,9 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -188,7 +191,6 @@ public class MgmtCluster {
 
         @Override
         public ContentValues createAuthParam() {
-
             String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
             ContentValues cv = new ContentValues();
             cv.put("username", username);
