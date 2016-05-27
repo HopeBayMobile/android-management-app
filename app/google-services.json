@@ -1,15 +1,12 @@
 {
   "project_info": {
-    "project_id": "terafonn-bff21",
     "project_number": "795577377875",
-    "name": "TeraFonn"
+    "project_id": "terafonn-bff21"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:795577377875:android:f280ccec6996c726",
-        "client_id": "android:com.hopebaytech.hcfsmgmt",
-        "client_type": 1,
         "android_client_info": {
           "package_name": "com.hopebaytech.hcfsmgmt"
         }
@@ -22,6 +19,49 @@
             "package_name": "com.hopebaytech.hcfsmgmt",
             "certificate_hash": "C9454BE2C576943AA0F60E6E8CDD5CB31442A3E4"
           }
+        },
+        {
+          "client_id": "795577377875-38laaagu45r7r227agauk5216urkb0qh.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMjG8ctJlwuEZKcNu-H3DsITe4j9M2RYo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795577377875:android:1adfc2049f9363b1",
+        "android_client_info": {
+          "package_name": "COM.DFS.FD"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795577377875-38laaagu45r7r227agauk5216urkb0qh.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [],
@@ -29,16 +69,9 @@
         "analytics_service": {
           "status": 1
         },
-        "cloud_messaging_service": {
-          "status": 1,
-          "apns_config": []
-        },
         "appinvite_service": {
           "status": 1,
           "other_platform_oauth_client": []
-        },
-        "google_signin_service": {
-          "status": 2
         },
         "ads_service": {
           "status": 1
@@ -46,6 +79,5 @@
       }
     }
   ],
-  "client_info": [],
-  "ARTIFACT_VERSION": "1"
+  "configuration_version": "1"
 }

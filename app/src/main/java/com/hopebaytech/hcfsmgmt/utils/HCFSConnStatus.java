@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 
 /**
@@ -27,7 +28,8 @@ public class HCFSConnStatus {
 
     public static int getConnStatus(Context context, HCFSStatInfo statInfo) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
+//        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
+        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (netInfo == null) {

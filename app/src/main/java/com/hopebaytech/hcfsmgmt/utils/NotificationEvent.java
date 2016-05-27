@@ -24,7 +24,7 @@ public class NotificationEvent {
         Intent intent = new Intent(context, LoadingActivity.class);
         PendingIntent contentIntent = PendingIntent.getActivity(context, notify_id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_terafonn_logo_default);
+        Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_tera_app_default);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
         builder = (NotificationCompat.Builder) builder
                 .setWhen(System.currentTimeMillis())

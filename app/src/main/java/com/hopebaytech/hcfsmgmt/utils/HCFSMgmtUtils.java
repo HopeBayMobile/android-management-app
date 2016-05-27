@@ -22,11 +22,11 @@ import android.util.Log;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
-import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 
@@ -43,9 +43,8 @@ public class HCFSMgmtUtils {
     public static final String CLASSNAME = "HCFSMgmtUtils";
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
-    public static final boolean ENABLE_AUTH = false;
     public static final boolean DEFAULT_PINNED_STATUS = false;
-    public static final int LOGLEVEL = Log.DEBUG;
+    public static final int LOG_LEVEL = Log.DEBUG;
 
     public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
     public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
@@ -93,8 +92,9 @@ public class HCFSMgmtUtils {
     public static final String INTENT_VALUE_PIN_UNPIN_UDPATE_APP = "intent_value_pin_unpin_update_app";
     public static final String INTENT_VALUE_SILENT_SIGN_IN = "intent_value_silent_sign_in";
 
-    public static final String PREF_IS_SILENT_SIGN_IN = "pref_is_silent_sign_in";
-    public static final String PREF_IS_HCFS_ACTIVATED = "pref_is_hcfs_activated";
+    public static final String PREF_SILENT_SIGN_IN = "pref_silent_sign_in";
+    public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
+    public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
 
 //    public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
 //    public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
@@ -725,13 +725,11 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static void changeCloudSyncStatus(Context context) {
+    public static void changeCloudSyncStatus(Context context, boolean syncWifiOnly) {
         log(Log.DEBUG, CLASSNAME, "changeCloudSyncStatus", null);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
-        if (syncWifiOnlyPref) {
+        if (syncWifiOnly) {
             if (netInfo != null && netInfo.isConnected() && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 String logMsg = "Wifi is connected";
                 HCFSConfig.startSyncToCloud(context, logMsg);
@@ -752,7 +750,7 @@ public class HCFSMgmtUtils {
 
     public static void notify_network_status(Context context, int notify_id, String notify_title, String notify_content) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String key = context.getString(R.string.pref_notify_conn_failed_recovery);
+        String key = SettingsFragment.PREF_NOTIFY_CONN_FAILED_RECOVERY;
         boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(key, false);
         if (notifyConnFailedRecoveryPref) {
             NotificationEvent.notify(context, notify_id, notify_title, notify_content, false);
@@ -793,7 +791,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void log(int logLevel, String className, String funcName, String logMsg) {
-        if (logLevel >= LOGLEVEL) {
+        if (logLevel >= LOG_LEVEL) {
             if (logMsg == null) {
                 logMsg = "";
             }
@@ -810,7 +808,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void log(int logLevel, String className, String innerClassName, String funcName, String logMsg) {
-        if (logLevel >= LOGLEVEL) {
+        if (logLevel >= LOG_LEVEL) {
             if (logMsg == null) {
                 logMsg = "";
             }

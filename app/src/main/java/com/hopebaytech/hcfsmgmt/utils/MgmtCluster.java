@@ -9,8 +9,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,13 +19,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -39,82 +32,84 @@ public class MgmtCluster {
     private static final String CLASSNAME = MgmtCluster.class.getSimpleName();
     private static final String MGMT_CLUSTER_LOGIN_URL = "https://terafonnreg.hopebaytech.com/api/register/login/";
     public static final String MGMT_CLUSTER_AUTH_URL = "https://terafonnreg.hopebaytech.com/api/register/auth";
-    public static final String MGMT_CLUSTER_CHANGE_ACCOUNT_URL = "https://terafonnreg.hopebaytech.com/api/user/devices/";
+    public static final String MGMT_CLUSTER_EXCHANGE_TOKEN = "https://terafonnreg.hopebaytech.com/api/social-auth/";
+    public static final String MGMT_CLUSTER_DEVICE_API = "https://terafonnreg.hopebaytech.com/api/user/devices/";
     private static int retryCount = 0;
 
     /**
      * @param oldServerAuthCode the server auth code of old account used to change account
      * @return true if the account is changed successfully; false otherwise.
-     * */
-    // TODO Not implemented completely
-    public static boolean changeAccount(String oldServerAuthCode) {
+     */
+    public static boolean switchAccount(String oldServerAuthCode, String newServerAuthCode, String imei) {
 
-        boolean isChangedSuccess = true;
-        HttpsURLConnection conn = null;
-//        AuthResultInfo authResultInfo = new AuthResultInfo();
+        boolean isSwitchSuccess = true;
+        String jwtToken = null;
+        HttpProxy httpProxy = null;
         try {
-            URL url = new URL(MGMT_CLUSTER_CHANGE_ACCOUNT_URL);
-            conn = (HttpsURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.connect();
+            httpProxy = new HttpProxy(MGMT_CLUSTER_EXCHANGE_TOKEN, true);
+            httpProxy.connect();
 
-            ContentValues cv = new ContentValues();
-            cv.put("new_token", oldServerAuthCode);
+            ContentValues data = new ContentValues();
+            data.put("backend", "google-oauth2");
+            data.put("access_token", "");
+            data.put("code", oldServerAuthCode);
 
-            OutputStream outputStream = conn.getOutputStream();
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-            bufferedWriter.write(getQuery(cv));
-            bufferedWriter.flush();
-            bufferedWriter.close();
-            outputStream.close();
-
-            int responseCode = conn.getResponseCode();
-//            authResultInfo.setResponseCode(responseCode);
+            int responseCode = httpProxy.post(data);
+            Logs.w(CLASSNAME, "switchAccount", "responseCode=" + responseCode);
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String responseContent = getResponseContent(conn, responseCode);
+                String responseContent = httpProxy.getResponseContent();
                 JSONObject jsonObj = new JSONObject(responseContent);
-                boolean result = jsonObj.getBoolean("result");
-                String message = jsonObj.getString("msg");
-//                authResultInfo.setMessage(message);
-                if (result) {
-                    JSONObject data = jsonObj.getJSONObject("data");
-//                    authResultInfo.setBackendType(data.getString("backend_type"));
-//                    authResultInfo.setAccount(data.getString("account").split(":")[0]);
-//                    authResultInfo.setUser(data.getString("account").split(":")[1]);
-//                    authResultInfo.setPassword(data.getString("password"));
-//                    authResultInfo.setBackendUrl(data.getString("domain") + ":" + data.getInt("port"));
-//                    authResultInfo.setBucket(data.getString("bucket"));
-//                    authResultInfo.setProtocol(data.getBoolean("TLS") ? "https" : "http");
+                String userId = jsonObj.getString("user_id");
+                String userName = jsonObj.getString("username");
+                jwtToken = jsonObj.getString("token");
 
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "backend_type=" + authResultInfo.getBackendType());
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "account=" + authResultInfo.getAccount());
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "user=" + authResultInfo.getUser());
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "password=" + authResultInfo.getPassword());
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "backend_url=" + authResultInfo.getBackendUrl());
-//                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "protocol=" + authResultInfo.getProtocol());
-                }
+                Logs.w(CLASSNAME, "switchAccount", "userId=" + userId + ", userName=" + userName + ", jwtToken=" + jwtToken);
             } else {
-                isChangedSuccess = false;
-                try {
-                    String responseContent = getResponseContent(conn, responseCode);
-                    JSONObject jsonObj = new JSONObject(responseContent);
-                    String message = jsonObj.getString("msg");
-//                    authResultInfo.setMessage(message);
-                } catch (JSONException e) {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "changeAccount", Log.getStackTraceString(e));
-                }
+                isSwitchSuccess = false;
+                String responseContent = httpProxy.getResponseContent();
+                Logs.e(CLASSNAME, "switchAccount", responseContent);
             }
         } catch (Exception e) {
-            isChangedSuccess = false;
-//            authResultInfo.setMessage(Log.getStackTraceString(e));
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtCluster", Log.getStackTraceString(e));
+            isSwitchSuccess = false;
+            Logs.e(CLASSNAME, "switchAccount", Log.getStackTraceString(e));
         } finally {
-            if (conn != null) {
-                conn.disconnect();
+            if (httpProxy != null) {
+                httpProxy.disconnect();
             }
         }
 
-        return isChangedSuccess;
+        if (jwtToken != null) {
+            httpProxy = null;
+            try {
+                String url = MGMT_CLUSTER_DEVICE_API + imei + "/change_device_user/";
+                httpProxy = new HttpProxy(url, true);
+
+                ContentValues header = new ContentValues();
+                header.put("Authorization", "JWT " + jwtToken);
+                httpProxy.setHeaders(header);
+                httpProxy.connect();
+
+                ContentValues data = new ContentValues();
+                data.put("new_auth_code", newServerAuthCode);
+                int responseCode = httpProxy.post(data);
+                Logs.w(CLASSNAME, "switchAccount", "switch responseCode=" + responseCode);
+                if (responseCode != HttpsURLConnection.HTTP_OK) {
+                    isSwitchSuccess = false;
+                    String responseContent = httpProxy.getResponseContent();
+                    Logs.e(CLASSNAME, "switchAccount", responseContent);
+                }
+            } catch (Exception e) {
+                isSwitchSuccess = false;
+                Logs.e(CLASSNAME, "switchAccount", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxy != null) {
+                    httpProxy.disconnect();
+                }
+            }
+        }
+
+        Logs.w(CLASSNAME, "switchAccount", "isSwitchSuccess=" + isSwitchSuccess);
+        return isSwitchSuccess;
     }
 
     public static String getServerClientIdFromMgmtCluster() {
@@ -156,44 +151,31 @@ public class MgmtCluster {
 
     public interface IAuthParam {
 
-        String createAuthParamQuery();
+        ContentValues createAuthParam();
 
     }
 
     public static class GoogleAuthParam implements IAuthParam {
 
-        private String idToken;
-//        private String authCode;
+        private String authCode;
 
-        public GoogleAuthParam(String idToken) {
-            this.idToken = idToken;
+        public GoogleAuthParam(String authCode) {
+            this.authCode = authCode;
         }
 
-//        public GoogleAuthParam(String authCode) {
-//            this.authCode = authCode;
-//        }
-
         @Override
-        public String createAuthParamQuery() {
-//            List<NameValuePair> params = new ArrayList<>();
+        public ContentValues createAuthParam() {
             String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI();
 
             ContentValues cv = new ContentValues();
             cv.put("provider", "google-oauth2");
-            cv.put("token", idToken);
-//            cv.put("auth", authCode);
+//            cv.put("token", idToken);
+            cv.put("code", authCode);
             cv.put("imei_code", encryptedIMEI);
 
-//            params.add(new BasicNameValuePair("provider", "google-oauth2"));
-//            params.add(new BasicNameValuePair("token", idToken));
-//            params.add(new BasicNameValuePair("token", authCode)); // TODO
-//            params.add(new BasicNameValuePair("imei_code", encryptedIMEI));
+            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParam", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
 
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "idToken=" + idToken + ", encryptedIMEI=" + encryptedIMEI);
-//            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
-
-//            return getQuery(params);
-            return getQuery(cv);
+            return cv;
         }
 
     }
@@ -209,48 +191,31 @@ public class MgmtCluster {
         }
 
         @Override
-        public String createAuthParamQuery() {
-
-//            List<NameValuePair> params = new ArrayList<>();
+        public ContentValues createAuthParam() {
             String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI();
-//            params.add(new BasicNameValuePair("username", username));
-//            params.add(new BasicNameValuePair("password", password));
-//            params.add(new BasicNameValuePair("imei_code", encryptedIMEI));
-
             ContentValues cv = new ContentValues();
             cv.put("username", username);
             cv.put("password", password);
             cv.put("imei_code", encryptedIMEI);
 
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "NativeAuthParam", "createAuthParamQuery", "username=" + username + ", password=" + password + ", encryptedIMEI=" + encryptedIMEI);
-
-            return getQuery(cv);
-//            return getQuery(params);
+            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "NativeAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + encryptedIMEI);
+            return cv;
         }
 
     }
 
     public static AuthResultInfo authWithMgmtCluster(IAuthParam authParam) {
-        HttpsURLConnection conn = null;
+        HttpProxy httpProxy = null;
         AuthResultInfo authResultInfo = new AuthResultInfo();
         try {
-            URL url = new URL(MGMT_CLUSTER_LOGIN_URL);
-            conn = (HttpsURLConnection) url.openConnection();
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.connect();
+            httpProxy = new HttpProxy(MGMT_CLUSTER_LOGIN_URL, true);
+            httpProxy.connect();
 
-            OutputStream outputStream = conn.getOutputStream();
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-            bufferedWriter.write(authParam.createAuthParamQuery());
-            bufferedWriter.flush();
-            bufferedWriter.close();
-            outputStream.close();
-
-            int responseCode = conn.getResponseCode();
+            int responseCode = httpProxy.post(authParam.createAuthParam());
             authResultInfo.setResponseCode(responseCode);
             if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String responseContent = getResponseContent(conn, responseCode);
+                String responseContent = httpProxy.getResponseContent();
+                Logs.d(CLASSNAME, "authWithMgmtCluster", "responseContent=" + responseContent);
                 JSONObject jsonObj = new JSONObject(responseContent);
                 boolean result = jsonObj.getBoolean("result");
                 String message = jsonObj.getString("msg");
@@ -265,104 +230,32 @@ public class MgmtCluster {
                     authResultInfo.setBucket(data.getString("bucket"));
                     authResultInfo.setProtocol(data.getBoolean("TLS") ? "https" : "http");
 
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "backend_type=" + authResultInfo.getBackendType());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "account=" + authResultInfo.getAccount());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "user=" + authResultInfo.getUser());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "password=" + authResultInfo.getPassword());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "backend_url=" + authResultInfo.getBackendUrl());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authWithMgmtCluster", "protocol=" + authResultInfo.getProtocol());
+                    Logs.d(CLASSNAME, "authWithMgmtCluster", "backend_type=" + authResultInfo.getBackendType());
+                    Logs.d(CLASSNAME, "authWithMgmtCluster", "account=" + authResultInfo.getAccount());
+                    Logs.d(CLASSNAME, "authWithMgmtCluster", "user=" + authResultInfo.getUser());
+                    Logs.d(CLASSNAME, "authWithMgmtCluster", "password=" + authResultInfo.getPassword());
+                    Logs.d(CLASSNAME, "authWithMgmtCluster", "backend_url=" + authResultInfo.getBackendUrl());
+                    Logs.d(CLASSNAME, "authWithMgmtCluster", "protocol=" + authResultInfo.getProtocol());
                 }
             } else {
                 try {
-                    String responseContent = getResponseContent(conn, responseCode);
+                    String responseContent = httpProxy.getResponseContent();
                     JSONObject jsonObj = new JSONObject(responseContent);
                     String message = jsonObj.getString("msg");
                     authResultInfo.setMessage(message);
                 } catch (JSONException e) {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtCluster", Log.getStackTraceString(e));
+                    Logs.e(CLASSNAME, "authWithMgmtCluster", Log.getStackTraceString(e));
                 }
             }
         } catch (Exception e) {
             authResultInfo.setMessage(Log.getStackTraceString(e));
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "authWithMgmtCluster", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "authWithMgmtCluster", Log.getStackTraceString(e));
         } finally {
-            if (conn != null) {
-                conn.disconnect();
+            if (httpProxy != null) {
+                httpProxy.disconnect();
             }
         }
         return authResultInfo;
-    }
-
-    private static String getQuery(ContentValues cv) {
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for (Map.Entry<String, Object> entry: cv.valueSet()) {
-            if (first) {
-                first = false;
-            } else {
-                result.append("&");
-            }
-
-            try {
-                result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-                result.append("=");
-                result.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getQuery", Log.getStackTraceString(e));
-            }
-        }
-        return result.toString();
-    }
-
-    private static String getQuery(List<NameValuePair> params) {
-        StringBuilder result = new StringBuilder();
-        boolean first = true;
-        for (NameValuePair pair : params) {
-            if (first) {
-                first = false;
-            } else {
-                result.append("&");
-            }
-
-            try {
-//                if (pair.getName().equals("imei_code")) {
-//                    result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
-//                    result.append("=");
-//                    result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
-//                } else {
-                    result.append(URLEncoder.encode(pair.getName(), "UTF-8"));
-                    result.append("=");
-                    result.append(URLEncoder.encode(pair.getValue(), "UTF-8"));
-//                }
-            } catch (UnsupportedEncodingException e) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getQuery", Log.getStackTraceString(e));
-            }
-        }
-        return result.toString();
-    }
-
-    private static String getResponseContent(HttpsURLConnection conn, int responseCode) throws IOException {
-        InputStream inputStream = null;
-        StringBuilder sb = new StringBuilder();
-        try {
-            if (responseCode >= HttpURLConnection.HTTP_BAD_REQUEST) {
-                inputStream = conn.getErrorStream();
-            } else {
-                inputStream = conn.getInputStream();
-            }
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.append(line);
-            }
-        } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getResponseContent", Log.getStackTraceString(e));
-        } finally {
-            if (inputStream != null) {
-                inputStream.close();
-            }
-        }
-        return sb.toString();
     }
 
     public interface AuthListener {
@@ -392,21 +285,21 @@ public class MgmtCluster {
                 if (acct != null) {
                     final String idToken = acct.getIdToken();
                     final String serverAuthCode = acct.getServerAuthCode();
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "idToken=" + idToken);
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "serverAuthCode=" + serverAuthCode);
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "displayName=" + acct.getDisplayName());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "email=" + acct.getEmail());
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "photoUrl=" + acct.getPhotoUrl());
+                    Logs.d(CLASSNAME, "authenticate", "idToken=" + idToken);
+                    Logs.d(CLASSNAME, "authenticate", "serverAuthCode=" + serverAuthCode);
+                    Logs.d(CLASSNAME, "authenticate", "displayName=" + acct.getDisplayName());
+                    Logs.d(CLASSNAME, "authenticate", "email=" + acct.getEmail());
+                    Logs.d(CLASSNAME, "authenticate", "photoUrl=" + acct.getPhotoUrl());
 
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
-//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
+                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
                             final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
-                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);
+                            Logs.d(CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);
                             HCFSConfig.storeHCFSConfig(authResultInfo);
-                            // TODO Set auth token to HCFS
+                            // TODO Set arkflex token to HCFS
                             Handler handler = new Handler(looper);
                             if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                                 handler.post(new Runnable() {

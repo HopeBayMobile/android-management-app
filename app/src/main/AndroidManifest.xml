@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hopebaytech.hcfsmgmt">
 
-    <uses-sdk xmlns:tools="http://schemas.android.com/tools"
-        tools:overrideLibrary="android.support.v14.preference" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -12,11 +9,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!--<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />-->
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/icon_terafonn_logo_default"
+        android:icon="@drawable/icon_tera_app_default"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
 
@@ -41,7 +37,7 @@
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="com.hopebaytech.hcfsmgmt.main.ChangeAccountActivity"
+            android:name=".main.SwitchAccountActivity"
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" />
 

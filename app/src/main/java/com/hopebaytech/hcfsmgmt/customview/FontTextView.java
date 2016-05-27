@@ -15,20 +15,20 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
  * @author Aaron
  *         Created by Aaron on 2016/5/10.
  */
-public class CustomFontTextView extends TextView {
+public class FontTextView extends TextView {
 
     private final String CLASSNAME = getClass().getSimpleName();
 
-    public CustomFontTextView(Context context) {
+    public FontTextView(Context context) {
         super(context);
     }
 
-    public CustomFontTextView(Context context, AttributeSet attrs) {
+    public FontTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setCustomFont(context, attrs);
     }
 
-    public CustomFontTextView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public FontTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setCustomFont(context, attrs);
     }

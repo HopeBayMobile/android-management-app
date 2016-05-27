@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp">
+    android:orientation="vertical">
 
     <RelativeLayout
         android:layout_width="match_parent"
+        android:layout_margin="@dimen/M4"
         android:layout_height="wrap_content">
 
         <ImageView
@@ -20,13 +20,12 @@
 
         <TextView
             android:id="@+id/app_name"
+            style="@style/F3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toStartOf="@+id/app_pin_icon"
             android:layout_toEndOf="@+id/app_icon"
-            android:paddingStart="10dp"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_toStartOf="@+id/app_pin_icon"
             tools:text="TeraFonn" />
 
         <ImageView
@@ -42,46 +41,46 @@
 
     <View
         style="@style/Divider"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginTop="10dp" />
+        android:layout_marginEnd="@dimen/M2"
+        android:layout_marginStart="@dimen/M2" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/M2"
+        android:layout_marginStart="@dimen/M2"
+        android:layout_marginTop="@dimen/M1"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/app_version"
+            style="@style/F8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
+            android:layout_marginBottom="@dimen/M2"
             tools:text="版本: 1.0.1" />
 
         <TextView
             android:id="@+id/app_size"
+            style="@style/F8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
+            android:layout_marginBottom="@dimen/M2"
             tools:text="大小: 13MB" />
 
         <TextView
             android:id="@+id/app_pkg_name"
+            style="@style/F8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
+            android:layout_marginBottom="@dimen/M2"
             tools:text="套件名稱: com.hopebaytech.hcfsmgmt" />
 
         <TextView
             android:id="@+id/app_local_percentage"
+            style="@style/F8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
             tools:text="本地資料比例: 80%" />
 
     </LinearLayout>

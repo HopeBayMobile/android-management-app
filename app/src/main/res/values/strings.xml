@@ -1,11 +1,10 @@
 <resources>
 
-    <string name="app_name">TeraFonn</string>
+    <string name="app_name">Tera</string>
 
-    <string name="main_activity_require_read_external_storage_permission">需要讀取外部儲存空間的權限，否則無法瀏覽外部儲存空間的檔案。</string>
-    <string name="main_activity_require_read_phone_state_permission">需要讀取手機狀態的權限，否則無法取得手機IMEI值。</string>
-    <string name="main_activity_no_read_external_storage_permission">沒有權限以至於無法瀏覽外部儲存空間的檔案。</string>
-    <string name="main_activity_no_read_phone_state_permission">沒有權限以至於取得手機IMEI值。</string>
+    <string name="require_read_external_storage_permission">讀取檔案清單需啟用[儲存]權限。</string>
+    <string name="require_read_phone_state_permission">讀取IMEI值需啟用[電話]權限。</string>
+    <string name="enable_permission">啟用權限</string>
 
     <string name="activate_cloud_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
     <string name="activate_cloud_storage_processing_msg">處理中，請稍後&#8230;</string>
@@ -17,15 +16,15 @@
     
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
-    <string name="nav_home">首頁</string>
-    <string name="nav_system">系統</string>
+    <string name="nav_overview">總覽</string>
+    <string name="nav_app_file">應用程式/檔案</string>
     <string name="nav_sdcard1">SD卡</string>
     <string name="nav_add_mountpoint">新增共用空間</string>
     <string name="nav_settings">設定</string>
     <string name="nav_about">關於</string>
     <string-array name="nav_title">
-        <item>@string/nav_home</item>
-        <item>@string/nav_system</item>
+        <item>@string/nav_overview</item>
+        <item>@string/nav_app_file</item>
         <item>@string/nav_settings</item>
         <item>@string/nav_about</item>
     </string-array>
@@ -118,12 +117,12 @@
     <string name="hcfs_mgmt_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
 
     <string name="settings_title_bar">一般設定</string>
-    <string name="settings_section_sync">同步設定</string>
-    <string name="settings_section_sync_wifi_only">只有連接WIFI時才存取雲端</string>
-    <string name="settings_section_notify">通知設定</string>
-    <string name="settings_section_notify_conn_failed_recovery">通知連線中斷/恢復</string>
-    <string name="settings_section_notify_upload_completed">通知上傳資料完成</string>
-    <string name="settings_section_notify_local_storage_used_ratio_dialog_title">請選擇通知的比例</string>
+    <string name="settings_synchronization">同步設定</string>
+    <string name="settings_sync_wifi_only">只有連接WIFI時才存取雲端</string>
+    <string name="settings_notification">通知設定</string>
+    <string name="settings_notify_conn_failed_recovery">通知連線中斷/恢復</string>
+    <string name="settings_notify_upload_completed">通知上傳資料完成</string>
+    <string name="settings_notify_local_storage_used_ratio_dialog_title">請選擇通知的比例</string>
     <string name="settings_section_notify_local_storage_used_ratio_summary">請選擇通知的比例</string>
     <string name="settings_section_notify_local_storage_used_ratio_title">通知本地空間使用率</string>
     <string name="settings_section_execute">執行</string>
@@ -156,11 +155,11 @@
     <string name="activate_cloud_storage_google_activate">使用Google帳號啟用</string>
     <string name="failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
 
-    <string name="change_account_choose_an_account">請選擇一個欲轉換的帳號</string>
-    <string name="change_account_require_new_account">選擇的帳號不可與原本帳號相同</string>
-    <string name="change_account_start_to_change">轉換</string>
-    <string name="change_account_failed_to_change">轉換失敗，請再嘗試一次。</string>
-    <string name="change_account_another_account"><u>Choose another Google account</u></string>
+    <string name="switch_account_require_new_account">與原帳號相同，不進行帳號轉換</string>
+    <string name="switch_account_start_to_change">轉換</string>
+    <string name="switch_account_failed_to_change">帳號轉換失敗，請再嘗試一次。</string>
+    <string name="switch_account_another_account"><u>Choose another Google account</u></string>
+    <string name="switch_account_require_read_phone_state_permission">轉換帳號需啟用[電話]權限。</string>
 
     <string name="auth_at_bootup_auth_google_failed">Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
     <string name="auth_at_bootup_auth_mgmt_failed">TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
@@ -169,17 +168,13 @@
     <string name="alert_dialog_yes">是</string>
     <string name="alert_dialog_no">否</string>
     <string name="alert_dialog_confirm">確定</string>
+    <string name="alert_dialog_cancel">取消</string>
 
     <string name="pref_download_to_run">pref_download_to_run</string>
-    <string name="pref_change_account">pref_change_account</string>
-    <string name="pref_sync_wifi_only">pref_sync_wifi_only</string>
-    <string name="pref_notify_conn_failed_recovery">pref_notify_conn_failed_recovery</string>
-    <string name="pref_notify_local_storage_used_ratio">pref_notify_local_storage_used_ratio</string>
-    <string name="pref_notify_is_local_storage_used_ratio_already_notified">pref_notify_is_local_storage_used_ratio_already_notified</string>
 
-    <string name="terafonn_version_title">TeraFonn Version</string>
-    <string name="terafonn_version">-</string>
-    <string name="terafonn_imei_1">IMEI 1</string>
-    <string name="terafonn_imei_2">IMEI 2</string>
+    <string name="tera_version_title">Tera Version</string>
+    <string name="tera_version">-</string>
+    <string name="tera_imei_1">IMEI 1</string>
+    <string name="tera_imei_2">IMEI 2</string>
 
 </resources>

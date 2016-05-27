@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="@string/nav_home" />
+            android:text="@string/nav_overview" />
 
     </LinearLayout>
 
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
-            android:text="@string/nav_system" />
+            android:text="@string/nav_app_file" />
 
     </LinearLayout>
 

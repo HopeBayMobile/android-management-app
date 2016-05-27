@@ -1,7 +1,8 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 /**
- * Created by Aaron on 2016/5/3.
+ * @author Aaron
+ *         Created by Aaron on 2016/5/3.
  */
 public class RequestCode {
 

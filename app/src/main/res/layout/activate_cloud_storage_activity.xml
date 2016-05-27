@@ -28,7 +28,7 @@
             android:background="@drawable/white_background_gray_border"
             android:orientation="vertical">
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomEditText
+            <com.hopebaytech.hcfsmgmt.customview.FontEditText
                 android:id="@+id/username"
                 style="@style/F12"
                 android:layout_width="244dp"
@@ -43,7 +43,7 @@
                 style="@style/Divider"
                 android:layout_width="match_parent" />
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomEditText
+            <com.hopebaytech.hcfsmgmt.customview.FontEditText
                 android:id="@+id/password"
                 style="@style/F6"
                 android:layout_width="244dp"
@@ -66,7 +66,7 @@
             android:clickable="true"
             android:gravity="center">
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 style="@style/F2"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -75,7 +75,7 @@
                 android:text="@string/activate_cloud_storage_activate" />
         </LinearLayout>
 
-        <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
             android:id="@+id/forget_password"
             style="@style/F11"
             android:layout_width="wrap_content"
@@ -92,7 +92,7 @@
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@+id/or" />
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/or"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -117,7 +117,7 @@
             android:background="@drawable/white_background_gray_border"
             android:clickable="true">
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/google_activate"
                 style="@style/F9"
                 android:layout_width="244dp"

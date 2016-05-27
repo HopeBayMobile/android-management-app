@@ -25,7 +25,7 @@
                 android:layout_marginStart="@dimen/M2"
                 android:src="@drawable/icon_transmission_normal" />
 
-            <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/network_conn_status"
                 style="@style/F2"
                 android:layout_width="wrap_content"
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
                         style="@style/F4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -62,19 +62,19 @@
 
                     <include
                         android:id="@+id/cloud_storage"
-                        layout="@layout/dashboard_usage_item" />
+                        layout="@layout/overview_usage_item" />
 
                     <View style="@style/Divider" />
 
                     <include
                         android:id="@+id/pinned_storage"
-                        layout="@layout/dashboard_usage_item" />
+                        layout="@layout/overview_usage_item" />
 
                     <View style="@style/Divider" />
 
                     <include
                         android:id="@+id/to_be_upload_data"
-                        layout="@layout/dashboard_usage_item" />
+                        layout="@layout/overview_usage_item" />
 
                     <View style="@style/Divider" />
 
@@ -86,7 +86,7 @@
                     android:layout_marginTop="@dimen/M5"
                     android:orientation="vertical">
 
-                    <com.hopebaytech.hcfsmgmt.customview.CustomFontTextView
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
                         android:id="@+id/networkTrafficTitle"
                         style="@style/F4"
                         android:layout_width="wrap_content"
@@ -97,7 +97,7 @@
 
                     <include
                         android:id="@+id/network_xfer_today"
-                        layout="@layout/dashboard_xfer_item" />
+                        layout="@layout/overview_xfer_item" />
 
                     <View style="@style/Divider" />
                 </LinearLayout>

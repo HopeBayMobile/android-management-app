@@ -20,13 +20,13 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
-import com.hopebaytech.hcfsmgmt.info.ServiceAppInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
@@ -165,12 +165,20 @@ public class HCFSMgmtService extends Service {
                         }
 
                         /** Pin /storage/emulated/0/Android folder */
-                        String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-                        if (!HCFSMgmtUtils.isPathPinned(externalAndroidPath)) {
-                            HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        boolean isAndroidFolderPinned = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, false);
+                        if (!isAndroidFolderPinned) {
+                            String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+                            if (!HCFSMgmtUtils.isPathPinned(externalAndroidPath)) {
+                                HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
+                            }
+
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, true);
+                            editor.apply();
                         }
 
-                        /** Pin system app on system start  up */
+                        /** Pin system app on system start up */
                         ArrayList<ItemInfo> itemInfoList = DisplayTypeFactory.getListOfInstalledApps(context, DisplayTypeFactory.APP_SYSTEM);
                         for (ItemInfo itemInfo : itemInfoList) {
                             AppInfo appInfo = (AppInfo) itemInfo;
@@ -283,13 +291,15 @@ public class HCFSMgmtService extends Service {
                         if (statInfo != null) {
                             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                             String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-                            String key_pref = getString(R.string.pref_notify_local_storage_used_ratio);
-                            String storageUsedRatio = sharedPreferences.getString(key_pref, defaultValue);
+//                            String key_pref = getString(R.string.pref_notify_local_storage_used_ratio);
+                            String key = SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO;
+                            String storageUsedRatio = sharedPreferences.getString(key, defaultValue);
 
                             long occupiedSize = HCFSMgmtUtils.getOccupiedSize();
                             long rawCacheTotal = statInfo.getRawCacheTotal();
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            boolean isNotified = sharedPreferences.getBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), false);
+//                            boolean isNotified = sharedPreferences.getBoolean(getString(R.string.pref_local_storage_used_ratio_notified), false);
+                            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
                             double pinPlusUnpinButDirtyRatio = ((double) occupiedSize / rawCacheTotal) * 100;
                             HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onStartCommand",
                                     "occupiedSize=" + occupiedSize +
@@ -301,11 +311,12 @@ public class HCFSMgmtService extends Service {
                                     String notify_title = getString(R.string.app_name);
                                     String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storageUsedRatio);
                                     NotificationEvent.notify(context, notify_id, notify_title, notify_message, false);
-                                    editor.putBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), true);
+//                                    editor.putBoolean(getString(R.string.pref_local_storage_used_ratio_notified), true);
+                                    editor.putBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, true);
                                 }
                             } else {
                                 if (isNotified) {
-                                    editor.putBoolean(getString(R.string.pref_notify_is_local_storage_used_ratio_already_notified), false);
+                                    editor.putBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
                                 }
                             }
                             editor.apply();
@@ -457,7 +468,7 @@ public class HCFSMgmtService extends Service {
 
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, true);
+                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                 editor.apply();
             }
 
@@ -482,7 +493,7 @@ public class HCFSMgmtService extends Service {
 
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
+                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
                 editor.apply();
             }
 
@@ -511,7 +522,7 @@ public class HCFSMgmtService extends Service {
 
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, false);
+                    editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
                     editor.apply();
                 }
                 mGoogleApiClient.disconnect();

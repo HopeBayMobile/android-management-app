@@ -199,7 +199,6 @@ public class CircleDisplay extends View {
         float ratioTextX = getWidth() >> 1;
         float ratioTextY = getHeight() >> 1;
         canvas.drawText(formatValue + "" + mUnit, ratioTextX, ratioTextY, mRatioTextPaint);
-        HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onReceive", "ratioTextY=" + ratioTextY);
 
         int spaceBtwRatioCapacity = (int) Utils.convertDpToPixel(getResources(), 8);
         float capacityTextX = ratioTextX;
