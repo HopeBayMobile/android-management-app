@@ -31,7 +31,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".main.ActivateCloudStorageActivity"
+            android:name="com.hopebaytech.hcfsmgmt.main.ActivateActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name="com.hopebaytech.hcfsmgmt.main.ActivateCloudStorageActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"

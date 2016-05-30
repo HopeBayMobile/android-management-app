@@ -394,7 +394,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setCancelable(false);
         }
-        mProgressDialog.setMessage(getString(R.string.activate_cloud_storage_processing_msg));
+        mProgressDialog.setMessage(getString(R.string.activate_processing_msg));
         mProgressDialog.show();
     }
 

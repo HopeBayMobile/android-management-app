@@ -88,6 +88,7 @@
 
             <View
                 style="@style/Divider"
+                android:layout_width="match_parent"
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@+id/or" />
 
