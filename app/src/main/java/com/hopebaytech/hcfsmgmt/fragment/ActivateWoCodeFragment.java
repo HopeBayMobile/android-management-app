@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+<<<<<<< a336e21969d17f6ac677ca5710e0205b59e29913
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -59,6 +60,26 @@ import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 import javax.net.ssl.HttpsURLConnection;
+=======
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.hopebaytech.hcfsmgmt.R;
+
+import org.w3c.dom.Text;
+
+import java.util.Locale;
+>>>>>>> first commit
 
 /**
  * @author Aaron
