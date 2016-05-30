@@ -83,7 +83,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                     if (username.isEmpty() || password.isEmpty()) {
                         showAlertDialog(ActivateCloudStorageActivity.this,
                                 getString(R.string.alert_dialog_title_warning),
-                                getString(R.string.activate_cloud_storage_snackbar_require_username_password),
+                                getString(R.string.activate_snackbar_require_username_password),
                                 getString(R.string.alert_dialog_confirm));
                     } else {
                         mWorkHandler.post(new Runnable() {
@@ -146,7 +146,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                 } else {
                                     showAlertDialog(ActivateCloudStorageActivity.this,
                                             getString(R.string.alert_dialog_title_warning),
-                                            getString(R.string.activate_cloud_alert_dialog_message),
+                                            getString(R.string.activate_alert_dialog_message),
                                             getString(R.string.alert_dialog_confirm));
                                 }
                             }
@@ -226,7 +226,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                     } else {
                         showAlertDialog(ActivateCloudStorageActivity.this,
                                 getString(R.string.alert_dialog_title_warning),
-                                getString(R.string.activate_cloud_alert_dialog_message),
+                                getString(R.string.activate_alert_dialog_message),
                                 getString(R.string.alert_dialog_confirm));
                     }
                 }
@@ -323,7 +323,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
                         showAlertDialog(ActivateCloudStorageActivity.this,
                                 getString(R.string.alert_dialog_title_warning),
-                                getString(R.string.activate_cloud_storage_failed_to_signin_google_account),
+                                getString(R.string.activate_failed_to_signin_google_account),
                                 getString(R.string.alert_dialog_confirm));
 
                         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
@@ -373,7 +373,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setCancelable(false);
         }
-        mProgressDialog.setMessage(getString(R.string.activate_cloud_storage_processing_msg));
+        mProgressDialog.setMessage(getString(R.string.activate_processing_msg));
         mProgressDialog.show();
     }
 

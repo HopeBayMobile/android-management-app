@@ -6,14 +6,22 @@
     <string name="require_read_phone_state_permission">讀取IMEI值需啟用[電話]權限。</string>
     <string name="enable_permission">啟用權限</string>
 
-    <string name="activate_cloud_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
-    <string name="activate_cloud_storage_processing_msg">處理中，請稍後&#8230;</string>
-    <string name="activate_cloud_storage_snackbar_require_username_password">請輸入帳號密碼</string>
-    <string name="activate_cloud_storage_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
-    <string name="activate_cloud_storage_alert_dialog_exit">確定</string>
-    <string name="activate_cloud_storage_failed_to_activate">啟用失敗</string>
-    <string name="activate_cloud_storage_failed_to_signin_google_account">Google帳號認證失敗</string>
-    
+    <string name="activate_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>
+    <string name="activate_processing_msg">處理中，請稍後&#8230;</string>
+    <string name="activate_snackbar_require_username_password">請輸入帳號密碼</string>
+    <string name="activate_alert_dialog_exit">確定</string>
+    <string name="activate_failed_to_activate">啟用失敗</string>
+    <string name="activate_failed_to_signin_google_account">Google帳號認證失敗</string>
+    <string name="activate_hint_username">帳號</string>
+    <string name="activate_hint_password">密碼</string>
+    <string name="activate_hint_code">驗證碼</string>
+    <string name="activate_enable">啟用</string>
+    <string name="activate_forget_password"><u>忘記密碼</u></string>
+    <string name="activate_or">或</string>
+    <string name="activate_with_google_account">使用Google帳號啟用</string>
+    <string name="activate_with_code_msg">The activation code has been used. If your old device is lost or broken, please lock it on %s before activation.</string>
+    <string name="failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
+
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
     <string name="nav_overview">總覽</string>
@@ -147,13 +155,7 @@
         <item>50</item>
     </string-array>
     
-    <string name="activate_cloud_storage_username">帳號</string>
-    <string name="activate_cloud_storage_password">密碼</string>
-    <string name="activate_cloud_storage_activate">啟用</string>
-    <string name="activate_cloud_storage_forget_password"><u>忘記密碼</u></string>
-    <string name="activate_cloud_storage_or">或</string>
-    <string name="activate_cloud_storage_google_activate">使用Google帳號啟用</string>
-    <string name="failed_to_get_server_client_id">無法從管理伺服器取得Google認證所需的資訊，請重啟應用程式再試一次</string>
+
 
     <string name="switch_account_require_new_account">與原帳號相同，不進行帳號轉換</string>
     <string name="switch_account_start_to_change">轉換</string>
