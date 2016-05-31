@@ -43,7 +43,7 @@ public class HCFSMgmtUtils {
     public static final String CLASSNAME = "HCFSMgmtUtils";
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
-    public static final boolean ENABLE_AUTH = false;
+    public static final boolean ENABLE_AUTH = true;
     public static final boolean DEFAULT_PINNED_STATUS = false;
     public static final int LOGLEVEL = Log.DEBUG;
 
@@ -831,8 +831,8 @@ public class HCFSMgmtUtils {
     }
 
     @Nullable
-    public static String getEncryptedDeviceIMEI() {
-        String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI());
+    public static String getEncryptedDeviceIMEI(String imei) {
+        String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI(imei));
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getEncryptedDeviceIMEI", "encryptedIMEI=" + encryptedIMEI);
         return encryptedIMEI;
     }

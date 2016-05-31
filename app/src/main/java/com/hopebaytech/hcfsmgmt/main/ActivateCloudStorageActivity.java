@@ -97,7 +97,8 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                             }
                                         });
 
-                                        MgmtCluster.IAuthParam authParam = new MgmtCluster.NativeAuthParam(username, password);
+                                        String imei = HCFSMgmtUtils.getDeviceIMEI(ActivateCloudStorageActivity.this);
+                                        MgmtCluster.IAuthParam authParam = new MgmtCluster.NativeAuthParam(username, password, imei);
                                         final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
                                         if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
                                             boolean isFailed = HCFSConfig.storeHCFSConfig(authResultInfo);
@@ -199,9 +200,8 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                      * make an additional call to personalize your application.
                                      */
                                     final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                            .requestIdToken(serverClientId)
                                             .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-//                                            .requestServerAuthCode(serverClientId, false)
+                                            .requestServerAuthCode(serverClientId, false)
                                             .requestEmail()
                                             .build();
 
@@ -256,8 +256,9 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN) {
+            String imei =  HCFSMgmtUtils.getDeviceIMEI(ActivateCloudStorageActivity.this);
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(Looper.getMainLooper(), result);
+            MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(Looper.getMainLooper(), result, imei);
             mgmtAuth.setOnAuthListener(new MgmtCluster.AuthListener() {
                 @Override
                 public void onAuthSuccessful(final GoogleSignInAccount acct, final AuthResultInfo authResultInfo) {

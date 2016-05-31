@@ -162,37 +162,24 @@ public class MgmtCluster {
 
     public static class GoogleAuthParam implements IAuthParam {
 
-        private String idToken;
-//        private String authCode;
+        private String authCode;
+        private String imei;
 
-        public GoogleAuthParam(String idToken) {
-            this.idToken = idToken;
+        public GoogleAuthParam(String authCode, String imei) {
+            this.authCode = authCode;
+            this.imei = imei;
         }
-
-//        public GoogleAuthParam(String authCode) {
-//            this.authCode = authCode;
-//        }
 
         @Override
         public String createAuthParamQuery() {
-//            List<NameValuePair> params = new ArrayList<>();
-            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI();
+            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
 
             ContentValues cv = new ContentValues();
             cv.put("provider", "google-oauth2");
-            cv.put("token", idToken);
-//            cv.put("auth", authCode);
+            cv.put("code", authCode);
             cv.put("imei_code", encryptedIMEI);
 
-//            params.add(new BasicNameValuePair("provider", "google-oauth2"));
-//            params.add(new BasicNameValuePair("token", idToken));
-//            params.add(new BasicNameValuePair("token", authCode)); // TODO
-//            params.add(new BasicNameValuePair("imei_code", encryptedIMEI));
-
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "idToken=" + idToken + ", encryptedIMEI=" + encryptedIMEI);
-//            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
-
-//            return getQuery(params);
+            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
             return getQuery(cv);
         }
 
@@ -202,17 +189,19 @@ public class MgmtCluster {
 
         private String username;
         private String password;
+        private String imei;
 
-        public NativeAuthParam(String username, String password) {
+        public NativeAuthParam(String username, String password, String imei) {
             this.username = username;
             this.password = password;
+            this.imei = imei;
         }
 
         @Override
         public String createAuthParamQuery() {
 
 //            List<NameValuePair> params = new ArrayList<>();
-            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI();
+            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
 //            params.add(new BasicNameValuePair("username", username));
 //            params.add(new BasicNameValuePair("password", password));
 //            params.add(new BasicNameValuePair("imei_code", encryptedIMEI));
@@ -380,10 +369,12 @@ public class MgmtCluster {
         private GoogleSignInResult googleSignInResult;
         private AuthListener authListener;
         private Looper looper;
+        private String imei;
 
-        public MgmtAuth(Looper looper, GoogleSignInResult googleSignInResult) {
+        public MgmtAuth(Looper looper, GoogleSignInResult googleSignInResult, String imei) {
             this.looper = looper;
             this.googleSignInResult = googleSignInResult;
+            this.imei = imei;
         }
 
         public void authenticate() {
@@ -401,8 +392,7 @@ public class MgmtCluster {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
-//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode, imei);
                             final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
                             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);
                             HCFSConfig.storeHCFSConfig(authResultInfo);
