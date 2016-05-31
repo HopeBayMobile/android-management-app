@@ -456,9 +456,9 @@ public class HCFSMgmtService extends Service {
     }
 
     private void storeAuthResult(final Context context, GoogleSignInResult result) {
-        String imei = HCFSMgmtUtils.getDeviceIMEI(context);
+        String imei = HCFSMgmtUtils.getDeviceImei(HCFSMgmtService.this);
         MgmtCluster.plusRetryCount();
-        MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(Looper.getMainLooper(), result, imei);
+        MgmtCluster.MgmtAuth mgmtAuth = new MgmtCluster.MgmtAuth(result, imei);
         mgmtAuth.setOnAuthListener(new MgmtCluster.AuthListener() {
             @Override
             public void onAuthSuccessful(GoogleSignInAccount acct, AuthResultInfo authResultInfo) {

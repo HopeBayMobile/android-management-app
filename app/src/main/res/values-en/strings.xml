@@ -125,14 +125,12 @@
     <string name="settings_notify_conn_failed_recovery">Failed/Restored connection</string>
     <string name="settings_notify_upload_completed">Data upload complete.</string>
     <string name="settings_notify_local_storage_used_ratio_dialog_title">Select usage ratio to send notification.</string>
-    <string name="settings_section_notify_local_storage_used_ratio_summary">Select ratio to send notification.</string>
-    <string name="settings_section_notify_local_storage_used_ratio_title">Local space usage</string>
-    <string name="settings_section_execute">Execute</string>
-    <string name="settings_section_execute_title">Download to run</string>
-    <string name="settings_section_change_account">Account</string>
-    <string name="settings_section_change_account_title">Switch account</string>
-    <string name="settings_section_change_account_summary">轉換您目前使用的帳號至另一個帳號</string>
-    <string name="settings_section_change_account_warning_msg">帳號轉換會將您目前啟用的帳號登出，是否繼續進行帳號轉換？</string>
+    <string name="settings_notify_local_storage_used_ratio_summary">Select ratio to send notification.</string>
+    <string name="settings_notify_local_storage_used_ratio_title">Local space usage</string>
+    <string name="settings_execute">Execute</string>
+    <string name="settings_execute_title">Download to run</string>
+    <string name="settings_switch_account_title">Switch account</string>
+    <string name="settings_switch_account_warning_msg">While switching account, the system will log out your current account first. Continue?</string>
     <string name="settings_local_storage_used_ratio">Send notification when local space usage reaches %s.</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
@@ -151,12 +149,11 @@
 
     <string name="failed_to_get_server_client_id">Getting info about Google authentication from admin server failed. Please restart app and try again.</string>
 
-    <string name="switch_account_require_new_account">與原帳號相同，不進行帳號轉換</string>
-    <string name="switch_account_start_to_change">轉換</string>
-    <string name="switch_account_failed_to_change">帳號轉換失敗，請再嘗試一次。</string>
-    <string name="switch_account_google_connected_failed">請重新嘗試一次</string>
-    <string name="switch_account_another_account"><u>選擇另外一個帳號</u></string>
-    <string name="switch_account_require_read_phone_state_permission">轉換帳號需啟用[電話]權限。</string>
+    <string name="switch_account_require_new_account">Same as the current account. Switching account operation will not be performed.</string>
+    <string name="switch_account_start_to_change">Start Switching</string>
+    <string name="switch_account_failed_to_change">Switching account failed. Please try again or tap the Return key to quit.</string>
+    <string name="switch_account_another_account"><u>Choose Another Account</u></string>
+    <string name="switch_account_require_read_phone_state_permission">Switching account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
 
     <string name="auth_at_bootup_auth_google_failed">Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
     <string name="auth_at_bootup_auth_mgmt_failed">TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>

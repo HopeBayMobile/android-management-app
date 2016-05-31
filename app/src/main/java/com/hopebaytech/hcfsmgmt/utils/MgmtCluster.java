@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -273,11 +274,9 @@ public class MgmtCluster {
 
         private GoogleSignInResult googleSignInResult;
         private AuthListener authListener;
-        private Looper looper;
         private String imei;
 
-        public MgmtAuth(Looper looper, GoogleSignInResult googleSignInResult, String imei) {
-            this.looper = looper;
+        public MgmtAuth(GoogleSignInResult googleSignInResult, String imei) {
             this.googleSignInResult = googleSignInResult;
             this.imei = imei;
         }
@@ -286,9 +285,7 @@ public class MgmtCluster {
             if (googleSignInResult != null && googleSignInResult.isSuccess()) {
                 final GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
                 if (acct != null) {
-                    final String idToken = acct.getIdToken();
                     final String serverAuthCode = acct.getServerAuthCode();
-                    Logs.d(CLASSNAME, "authenticate", "idToken=" + idToken);
                     Logs.d(CLASSNAME, "authenticate", "serverAuthCode=" + serverAuthCode);
                     Logs.d(CLASSNAME, "authenticate", "displayName=" + acct.getDisplayName());
                     Logs.d(CLASSNAME, "authenticate", "email=" + acct.getEmail());
@@ -297,14 +294,13 @@ public class MgmtCluster {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
                             MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode, imei);
                             final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
                             Logs.d(CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);
-                            HCFSConfig.storeHCFSConfig(authResultInfo);
-                            // TODO Set arkflex token to HCFS
-                            Handler handler = new Handler(looper);
+                            Handler handler = new Handler(Looper.getMainLooper());
                             if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                                // TODO Set arkflex token to HCFS
+                                HCFSConfig.storeHCFSConfig(authResultInfo);
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {
