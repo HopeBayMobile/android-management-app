@@ -13,13 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -166,7 +160,7 @@ public class MgmtCluster {
         }
 
         @Override
-        public String createAuthParamQuery() {
+        public ContentValues createAuthParam() {
             String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
 
             ContentValues cv = new ContentValues();
@@ -175,7 +169,7 @@ public class MgmtCluster {
             cv.put("imei_code", encryptedIMEI);
 
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
-            return getQuery(cv);
+            return cv;
         }
 
     }
@@ -193,7 +187,7 @@ public class MgmtCluster {
         }
 
         @Override
-        public String createAuthParamQuery() {
+        public ContentValues createAuthParam() {
 
             String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
             ContentValues cv = new ContentValues();

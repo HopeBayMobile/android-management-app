@@ -1,9 +1,11 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -70,6 +72,17 @@ public class LoadingActivity extends AppCompatActivity {
                                             public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                                                 /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
                                                 HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onConnectionFailed", connectionResult.toString());
+                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LoadingActivity.this);
+                                                boolean hcfsActivated = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+                                                if (hcfsActivated) {
+                                                    Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                } else {
+                                                    Intent intent = new Intent(LoadingActivity.this, ActivateCloudStorageActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
                                             }
                                         })
                                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)

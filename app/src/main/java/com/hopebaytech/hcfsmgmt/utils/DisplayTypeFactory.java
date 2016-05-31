@@ -23,6 +23,8 @@ import android.support.v4.content.ContextCompat;
 
 public class DisplayTypeFactory {
 
+	private static final String CLASSNAME = DisplayTypeFactory.class.getSimpleName();
+
 	public static final int APP_SYSTEM = 0;
 	public static final int APP_USER = 1;
 	public static final int APP_ALL = 2;
@@ -33,21 +35,24 @@ public class DisplayTypeFactory {
 			Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
 			if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 				String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+				Logs.w(CLASSNAME, "getListOfInstalledApps", "externalPath=" + externalPath);
 				File externalAndroidFile = new File(externalPath);
-				for (File type : externalAndroidFile.listFiles()) {
-					File[] fileList = type.listFiles();
-					for (File file : fileList) {
-						String path = file.getAbsolutePath();
-						String[] splitPath = path.split("/");
-						String pkgName = splitPath[splitPath.length - 1];
+				if (externalAndroidFile.exists()) {
+					for (File type : externalAndroidFile.listFiles()) {
+						File[] fileList = type.listFiles();
+						for (File file : fileList) {
+							String path = file.getAbsolutePath();
+							String[] splitPath = path.split("/");
+							String pkgName = splitPath[splitPath.length - 1];
 
-						ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
-						if (externalPathList == null) {
-							externalPathList = new ArrayList<>();
-						}
-						externalPathList.add(path);
-						externalPkgNameMap.put(pkgName, externalPathList);
+							ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+							if (externalPathList == null) {
+								externalPathList = new ArrayList<>();
+							}
+							externalPathList.add(path);
+							externalPkgNameMap.put(pkgName, externalPathList);
 //					externalPkgNameMap.put(pkgName, path);
+						}
 					}
 				}
 			}
