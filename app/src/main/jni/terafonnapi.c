@@ -145,6 +145,7 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_reset
 	return result;
 }
 
+/*
 JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getEncryptedIMEI(
 		JNIEnv *jEnv, jobject jObject) {
 	int len = 4098;
@@ -153,6 +154,27 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
 	int ret = getEncryptCode(encrypt_code, output_length);
     jbyteArray result = (*jEnv)->NewByteArray(jEnv, strlen(encrypt_code));
     (*jEnv)->SetByteArrayRegion(jEnv, result, 0, strlen(encrypt_code), encrypt_code);
+//    __android_log_print(ANDROID_LOG_DEBUG, "HopeBay", "JNI: encrypt_code=%s", (unsigned char*) encrypt_code);
+
+//    unsigned char decrypt_code[len];
+//    decryptCode(decrypt_code, encrypt_code, output_length);
+//    __android_log_print(ANDROID_LOG_ERROR, "HopeBay", "JNI: decrypt_code=%s", (unsigned char*) decrypt_code);
+
+    free(output_length);
+    return result;
+}
+*/
+
+JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getEncryptedIMEI(
+		JNIEnv *jEnv, jobject jObject, jstring jImei) {
+	int len = 4098;
+	unsigned char encrypt_code[len];
+	const char *imei = (*jEnv)->GetStringUTFChars(jEnv, jImei, 0);
+	size_t* output_length = malloc(sizeof(size_t));
+	int ret = encryptCode(encrypt_code, imei, output_length);
+    jbyteArray result = (*jEnv)->NewByteArray(jEnv, strlen(encrypt_code));
+    (*jEnv)->SetByteArrayRegion(jEnv, result, 0, strlen(encrypt_code), encrypt_code);
+//    __android_log_print(ANDROID_LOG_DEBUG, "HopeBay", "JNI: jImei=%s", (char*) imei);
 //    __android_log_print(ANDROID_LOG_DEBUG, "HopeBay", "JNI: encrypt_code=%s", (unsigned char*) encrypt_code);
 
 //    unsigned char decrypt_code[len];

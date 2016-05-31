@@ -156,8 +156,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                             startActivity(launchIntent);
                         }
                     })
-                    .setNegativeButton(R.string.file_mgmt_dialog_app_cancel, null)
-                    .setNeutralButton(R.string.file_mgmt_dialog_app_remove, new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.file_mgmt_dialog_app_remove, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Intent intent = new Intent(Intent.ACTION_DELETE);

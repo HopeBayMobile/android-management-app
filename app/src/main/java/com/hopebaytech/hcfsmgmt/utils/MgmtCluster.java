@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -158,14 +159,16 @@ public class MgmtCluster {
     public static class GoogleAuthParam implements IAuthParam {
 
         private String authCode;
+        private String imei;
 
-        public GoogleAuthParam(String authCode) {
+        public GoogleAuthParam(String authCode, String imei) {
             this.authCode = authCode;
+            this.imei = imei;
         }
 
         @Override
         public ContentValues createAuthParam() {
-            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI();
+            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
 
             ContentValues cv = new ContentValues();
             cv.put("provider", "google-oauth2");
@@ -184,15 +187,17 @@ public class MgmtCluster {
 
         private String username;
         private String password;
+        private String imei;
 
-        public NativeAuthParam(String username, String password) {
+        public NativeAuthParam(String username, String password, String imei) {
             this.username = username;
             this.password = password;
+            this.imei = imei;
         }
 
         @Override
         public ContentValues createAuthParam() {
-            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI();
+            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
             ContentValues cv = new ContentValues();
             cv.put("username", username);
             cv.put("password", password);
@@ -272,20 +277,18 @@ public class MgmtCluster {
 
         private GoogleSignInResult googleSignInResult;
         private AuthListener authListener;
-        private Looper looper;
+        private String imei;
 
-        public MgmtAuth(Looper looper, GoogleSignInResult googleSignInResult) {
-            this.looper = looper;
+        public MgmtAuth(GoogleSignInResult googleSignInResult, String imei) {
             this.googleSignInResult = googleSignInResult;
+            this.imei = imei;
         }
 
         public void authenticate() {
             if (googleSignInResult != null && googleSignInResult.isSuccess()) {
                 final GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
                 if (acct != null) {
-                    final String idToken = acct.getIdToken();
                     final String serverAuthCode = acct.getServerAuthCode();
-                    Logs.d(CLASSNAME, "authenticate", "idToken=" + idToken);
                     Logs.d(CLASSNAME, "authenticate", "serverAuthCode=" + serverAuthCode);
                     Logs.d(CLASSNAME, "authenticate", "displayName=" + acct.getDisplayName());
                     Logs.d(CLASSNAME, "authenticate", "email=" + acct.getEmail());
@@ -294,14 +297,13 @@ public class MgmtCluster {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
-                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode, imei);
                             final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
                             Logs.d(CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);
-                            HCFSConfig.storeHCFSConfig(authResultInfo);
-                            // TODO Set arkflex token to HCFS
-                            Handler handler = new Handler(looper);
+                            Handler handler = new Handler(Looper.getMainLooper());
                             if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                                // TODO Set arkflex token to HCFS
+                                HCFSConfig.storeHCFSConfig(authResultInfo);
                                 handler.post(new Runnable() {
                                     @Override
                                     public void run() {

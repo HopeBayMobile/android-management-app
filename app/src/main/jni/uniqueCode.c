@@ -29,6 +29,7 @@ char* exec_get_out(char* cmd)
 
 int getUniqueCode(unsigned char *code)
 {
+
     int ir;
     char product_name[16];
     char imei_start[32];
@@ -116,42 +117,51 @@ void printLastError(char *msg)
 
 int getEncryptCode(unsigned char* encrypted, size_t* output_length)
 {
-    int count = 0;
-    int total_retry = 20;
-    int encrypted_length = -1;
+
     unsigned char plainText[2048/8];
-    unsigned char encrypt_code[4098] = {};
-    unsigned char* encoded;
-    char publicKey[]="-----BEGIN PUBLIC KEY-----\n"\
-			  "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx6Kp1jzh9wVZ4BiwnW2G\n"\
-			  "fhmMiZk1138w8RwmViZCqWmL0Pj9SPR6w2XMx1bVDkohVWgs4kjPrE44349QiAmp\n"\
-			  "Lb9o8mSrQxGkJCKGAE+xYE5n1QO+4zPzs0eWJyXLJ8Pn4tvk7+qbK/Ybv06/8a8B\n"\
-			  "zAhQObaPbS0hSwjqMR8kcy7OMFL/S5UxQ/Td41tDbqXYe/6MAF17jtJMRVv40nTX\n"\
-			  "jdDh77Q5u7gK79HtYZPEsKO72CfAIxLU1f1hXqgtgXS3iSVFg6H4PFpDph889GsJ\n"\
-			  "z9tnn1X/dNYJG/oP34bC7cWz8XdPeyBxB4sCdZKSy7AOryXw5vzcOeEd9OJY2Hdh\n"\
-			  "+wIDAQAB\n"\
-			  "-----END PUBLIC KEY-----\n";
-
     getUniqueCode(plainText);
+    encryptCode(encrypted, plainText, output_length);
 
-    while (count < total_retry) {
-        encrypted_length = public_encrypt(plainText,strlen(plainText),publicKey,encrypt_code);
-        if (encrypted_length == -1) {
-            printLastError("Public Encrypt failed ");
-            return -1;
-        }
-        else if (strlen(encrypt_code) == encrypted_length) {
-            break;
-        }
-        else {
-            count++;
-        }
-    }
-    // printf("[CM] Encrypted length = %d\n", strlen(encrypt_code));
-    encoded = base64_encode(encrypt_code, strlen(encrypt_code), output_length);
-    strcpy(encrypted, encoded);
-    // printf("[CM] Encrypted and encode length = %d\n", strlen(encrypted));
     return 0;
+}
+
+int encryptCode(unsigned char* encrypted, unsigned char* plainText, size_t* output_length)
+{
+       // Encrypt and base64 encode <plainText> into <encrypted> and return len of <encryted> to <output_length>
+       // @unsigned char* encrypted: 4098
+       // @unsigned char* plainText: 256
+
+       int count = 0;
+       int total_retry = 20;
+       int encrypted_length = -1;
+       unsigned char encrypt_code[4098] = {};
+       unsigned char* encoded;
+       char publicKey[]="-----BEGIN PUBLIC KEY-----\n"\
+                         "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx6Kp1jzh9wVZ4BiwnW2G\n"\
+                         "fhmMiZk1138w8RwmViZCqWmL0Pj9SPR6w2XMx1bVDkohVWgs4kjPrE44349QiAmp\n"\
+                         "Lb9o8mSrQxGkJCKGAE+xYE5n1QO+4zPzs0eWJyXLJ8Pn4tvk7+qbK/Ybv06/8a8B\n"\
+                         "zAhQObaPbS0hSwjqMR8kcy7OMFL/S5UxQ/Td41tDbqXYe/6MAF17jtJMRVv40nTX\n"\
+                         "jdDh77Q5u7gK79HtYZPEsKO72CfAIxLU1f1hXqgtgXS3iSVFg6H4PFpDph889GsJ\n"\
+                         "z9tnn1X/dNYJG/oP34bC7cWz8XdPeyBxB4sCdZKSy7AOryXw5vzcOeEd9OJY2Hdh\n"\
+                         "+wIDAQAB\n"\
+                         "-----END PUBLIC KEY-----\n";
+
+       while (count < total_retry) {
+               encrypted_length = public_encrypt(plainText,strlen(plainText),publicKey,encrypt_code);
+               if (encrypted_length == -1) {
+                       printLastError("Public Encrypt failed ");
+                       return -1;
+               }
+               else if (strlen(encrypt_code) == encrypted_length) {
+                       break;
+               }
+               else {
+                       count++;
+               }
+       }
+       encoded = base64_encode(encrypt_code, strlen(encrypt_code), output_length);
+       strcpy(encrypted, encoded);
+       return 0;
 }
 
 int decryptCode(unsigned char* decrypted, unsigned char* encrypted, size_t* input_length)

@@ -141,7 +141,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                String imei = HCFSMgmtUtils.getDeviceIMEI(SwitchAccountActivity.this);
+                                String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
                                 final boolean isSuccess = MgmtCluster.switchAccount(mOldServerAuthCode, mNewServerAuthCode, imei);
                                 runOnUiThread(new Runnable() {
                                     @Override
