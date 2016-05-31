@@ -1,7 +1,7 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -23,9 +23,11 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 public class LoadingActivity extends AppCompatActivity {
@@ -44,24 +46,34 @@ public class LoadingActivity extends AppCompatActivity {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
 
+        String logMsg = "Build.BRAND=" + Build.BRAND +
+                ", Build.BOARD=" + Build.BOARD +
+                ", Build.BOOTLOADER=" + Build.BOOTLOADER +
+                ", Build.DEVICE=" + Build.DEVICE +
+                ", Build.HARDWARE=" + Build.HARDWARE +
+                ", Build.MANUFACTURER=" + Build.MANUFACTURER +
+                ", Build.MODEL=" + Build.MODEL +
+                ", Build.PRODUCT=" + Build.PRODUCT +
+                ", Build.SERIAL=" + Build.SERIAL;
+
+        Logs.w(CLASSNAME, "onCreate", logMsg);
+
         init();
     }
 
     public void init() {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", null);
+        Logs.d(CLASSNAME, "init", null);
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (HCFSConfig.isActivated(LoadingActivity.this)) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", "Activated");
+                    Logs.d(CLASSNAME, "init", "Activated");
                     final String serverClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
                     if (serverClientId != null) {
                         Thread getGoogleAccountInfoThread = new Thread(new Runnable() {
                             @Override
                             public void run() {
                                 final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                                        .requestIdToken(serverClientId)
-//                                        .requestServerAuthCode(serverClientId, false)
                                         .requestEmail()
                                         .build();
 
@@ -106,13 +118,13 @@ public class LoadingActivity extends AppCompatActivity {
                         try {
                             getGoogleAccountInfoThread.join();
                         } catch (InterruptedException e) {
-                            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "init", Log.getStackTraceString(e));
+                            Logs.d(CLASSNAME, "init", Log.getStackTraceString(e));
                         }
                     } else {
                         handleSignInResult(null);
                     }
                 } else {
-                    HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "init", "NOT Activated");
+                    Logs.w(CLASSNAME, "init", "NOT Activated");
 //                    Intent intent = new Intent(LoadingActivity.this, ActivateCloudStorageActivity.class);
                     Intent intent = new Intent(LoadingActivity.this, ActivateActivity.class);
                     startActivity(intent);
@@ -123,7 +135,7 @@ public class LoadingActivity extends AppCompatActivity {
     }
 
     private void handleSignInResult(@Nullable GoogleSignInResult result) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "handleSignInResult", null);
+        Logs.d(CLASSNAME, "handleSignInResult", null);
         Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
         if (result != null && result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -132,11 +144,11 @@ public class LoadingActivity extends AppCompatActivity {
                 String email = acct.getEmail();
                 String photoUrl = null;
                 if (acct.getPhotoUrl() != null) {
-                    photoUrl= acct.getPhotoUrl().toString();
+                    photoUrl = acct.getPhotoUrl().toString();
                 }
 
                 AccountDAO accountDAO = AccountDAO.getInstance(LoadingActivity.this);
-                if (accountDAO.getCount() == 0)  {
+                if (accountDAO.getCount() == 0) {
                     AccountInfo accountInfo = new AccountInfo();
                     accountInfo.setName(name);
                     accountInfo.setEmail(email);

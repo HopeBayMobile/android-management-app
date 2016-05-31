@@ -113,7 +113,7 @@
                 style="@style/F6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_section_notify_local_storage_used_ratio_title" />
+                android:text="@string/settings_notify_local_storage_used_ratio_title" />
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/notify_local_storage_used_ratio_summary"
@@ -137,7 +137,7 @@
                 style="@style/F6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/settings_section_change_account_title" />
+                android:text="@string/settings_switch_account_title" />
         </LinearLayout>
 
         <View style="@style/Divider" />

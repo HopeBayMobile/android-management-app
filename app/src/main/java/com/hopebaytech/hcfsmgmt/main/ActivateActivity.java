@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.fragment.ActivateWithCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 
 public class ActivateActivity extends AppCompatActivity {
@@ -22,7 +23,7 @@ public class ActivateActivity extends AppCompatActivity {
     }
 
     private void init() {
-        ActivateWoCodeFragment fragment = ActivateWoCodeFragment.newInstance();
+        ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment);
         ft.commit();
