@@ -24,6 +24,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -53,8 +54,6 @@ public class LoadingActivity extends AppCompatActivity {
                 ", Build.HARDWARE=" + Build.HARDWARE +
                 ", Build.MANUFACTURER=" + Build.MANUFACTURER +
                 ", Build.MODEL=" + Build.MODEL +
-                ", Build.VERSION.RELEASE=" + Build.VERSION.RELEASE +
-                ", Build.VERSION.SDK_INT=" + Build.VERSION.SDK_INT +
                 ", Build.PRODUCT=" + Build.PRODUCT +
                 ", Build.SERIAL=" + Build.SERIAL;
 
