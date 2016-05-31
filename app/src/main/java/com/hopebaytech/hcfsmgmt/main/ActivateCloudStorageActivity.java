@@ -115,6 +115,11 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                                 });
                                                 HCFSConfig.resetHCFSConfig();
                                             } else {
+                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ActivateCloudStorageActivity.this);
+                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, true);
+                                                editor.apply();
+
                                                 Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
                                                 startActivity(intent);
                                                 finish();
