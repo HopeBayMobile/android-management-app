@@ -47,9 +47,13 @@ function build_system() {
 	docker pull $DOCKER_IMAGE
 	echo sdk.dir=/opt/android-sdk-linux > local.properties
 	echo ndk.dir=/opt/android-ndk-r10e >> local.properties
-	docker run --rm --volume=$(pwd):/opt/workspace --volume=$(pwd)/.root.gradle:/root/.gradle \
+	docker run --rm \
+		--volume="$(pwd):/opt/workspace" \
+		--volume="$(pwd)/.root.gradle:/root/.gradle" \
+		--volume="/mnt/nas/CloudDataSolution/HCFS_android/resources/ci_shared_storage/android-sdk-linux:/opt/android-sdk-linux" \
 		-e KEYSTORE_PASSWORD -e KEY_ALIAS -e KEY_PASSWORD \
-		$DOCKER_IMAGE /bin/sh -c "./gradlew assembleRelease"
+		$DOCKER_IMAGE /bin/bash -c "./gradlew assembleRelease"
+
 }
 function copy_lib_to_source_tree() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null

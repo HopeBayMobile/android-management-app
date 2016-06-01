@@ -38,6 +38,5 @@ RUN mkdir -p /opt/workspace
 WORKDIR /opt/workspace
 VOLUME /opt/workspace
 ENV GRADLE_USER_HOME /root/.gradle
-#COPY ci/init.gradle /root/.gradle/init.gradle
 COPY . /opt/workspace/
 RUN ls -la /opt/workspace/ && ./gradlew assembleDebug
