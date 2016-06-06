@@ -168,10 +168,12 @@ public class MgmtCluster {
 
             ContentValues cv = new ContentValues();
             cv.put("provider", "google-oauth2");
+//            cv.put("token", idToken);
             cv.put("code", authCode);
             cv.put("imei_code", encryptedIMEI);
 
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParamQuery", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
+            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GoogleAuthParam", "createAuthParam", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
+
             return cv;
         }
 
@@ -295,6 +297,7 @@ public class MgmtCluster {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+//                            MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(idToken);
                             MgmtCluster.IAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode, imei);
                             final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
                             Logs.d(CLASSNAME, "authenticate", "authResultInfo=" + authResultInfo);

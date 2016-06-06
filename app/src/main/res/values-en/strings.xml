@@ -153,6 +153,7 @@
     <string name="switch_account_require_new_account">與原帳號相同，不進行帳號轉換</string>
     <string name="switch_account_start_to_change">轉換</string>
     <string name="switch_account_failed_to_change">帳號轉換失敗，請再嘗試一次。</string>
+    <string name="switch_account_google_connected_failed">請重新嘗試一次</string>
     <string name="switch_account_another_account"><u>選擇另外一個帳號</u></string>
     <string name="switch_account_require_read_phone_state_permission">轉換帳號需啟用[電話]權限。</string>
 
