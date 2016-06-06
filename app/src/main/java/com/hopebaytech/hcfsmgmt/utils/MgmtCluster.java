@@ -27,7 +27,6 @@ public class MgmtCluster {
 
     private static final String CLASSNAME = MgmtCluster.class.getSimpleName();
     private static final String DOMAIN_NAME = "terafonnreg.hopebaytech.com";
-//    public static final String REGISTER_LOGIN_API = "https://" + DOMAIN_NAME + "/api/register/login/";
     public static final String REGISTER_AUTH_API = "https://" + DOMAIN_NAME + "/api/register/auth/";
     public static final String SOCIAL_AUTH_API = "https://" + DOMAIN_NAME + "/api/social-auth/";
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
@@ -45,6 +44,18 @@ public class MgmtCluster {
     public static final String KEY_ACTIVATION_CODE = "activation_code";
     private static int retryCount = 0;
 
+    public static final String KEY_AUTH_CODE = "code";
+    public static final String KEY_USERNAME = "username";
+    public static final String KEY_PASSWORD = "password";
+    public static final String KEY_AUTHORIZATION = "Authorization";
+    public static final String KEY_NEW_AUTH_CODE = "new_auth_code";
+    public static final String KEY_IMEI = "imei_code";
+    public static final String KEY_VENDOR = "vendor";
+    public static final String KEY_MODEL = "model";
+    public static final String KEY_ACTIVATION_CODE = "activation_code";
+
+
+    private static int retryCount = 0;
     public static final int GOOGLE_AUTH = 0;
     public static final int USER_AUTH = 1;
 
@@ -57,11 +68,11 @@ public class MgmtCluster {
             ContentValues data = new ContentValues();
             if (authParam instanceof GoogleAuthParam) {
                 url = SOCIAL_AUTH_API;
-                data.put("code", ((GoogleAuthParam) authParam).authCode);
+                data.put(KEY_AUTH_CODE, ((GoogleAuthParam) authParam).authCode);
             } else {
                 url = USER_AUTH_API;
-                data.put("username", ((UserAuthParam) authParam).username);
-                data.put("password", ((UserAuthParam) authParam).password);
+                data.put(KEY_USERNAME, ((UserAuthParam) authParam).username);
+                data.put(KEY_PASSWORD, ((UserAuthParam) authParam).password);
             }
 
             httpProxyImpl = HttpProxy.newInstance();
