@@ -14,6 +14,7 @@ import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -203,21 +204,12 @@ public class TeraFonnApiService extends Service {
             boolean enabled = false;
             String key = "swift_account";
             try {
-                String jsonResult = HCFSApiUtils.getHCFSConfig(key);
-                String logMsg = "jsonResult=" + jsonResult;
-                JSONObject jObject = new JSONObject(jsonResult);
-                if (jObject.getBoolean("result")) {
-                    JSONObject dataObj = jObject.getJSONObject("data");
-                    if (dataObj.getString(key).isEmpty()) {
-                        enabled = false;
-                    } else {
-                        enabled = true;
-                    }
-                    HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "hcfsEnabled", logMsg);
+                if (HCFSConfig.getHCFSConfig(key).isEmpty()) {
+                    enabled = false;
                 } else {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "hcfsEnabled", logMsg);
+                    enabled = true;
                 }
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
             }
             return enabled;
