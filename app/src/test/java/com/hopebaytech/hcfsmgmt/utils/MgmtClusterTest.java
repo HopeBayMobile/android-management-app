@@ -11,10 +11,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowLog;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -28,6 +31,7 @@ public class MgmtClusterTest {
     @Before
     public void setUp() throws Exception {
         HttpProxy.setMode(HttpProxy.MODE_MOCK);
+        ShadowLog.stream = System.out;
     }
 
     @After
@@ -69,17 +73,46 @@ public class MgmtClusterTest {
 
     @Test
     public void testSwitchAccount() throws Exception {
-        String oldAuthCode = HttpProxyMock.CORRECT_OLD_AUTH_CODE;
-        String newAuthCode = HttpProxyMock.CORRECT_NEW_AUTH_CODE;
-        String imei = HttpProxyMock.CORRECT_IMEI;
-        boolean switchSuccess = MgmtCluster.switchAccount(oldAuthCode, newAuthCode, imei);
+        boolean switchSuccess;
+        String correctJwtToken = HttpProxyMock.CORRECT_JWT_TOKEN;
+        String correctNewAuthCode = HttpProxyMock.CORRECT_NEW_AUTH_CODE;
+        String correctImei = HttpProxyMock.CORRECT_IMEI;
+        String incorrectJwtToken = "xxxxxxxxxx";
+        String incorrectNewAuthCode = "xxxxxxxxxx";
+        String incorrectImei = "xxxxxxxxxx";
+
+        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, correctImei);
         assertTrue(switchSuccess);
+
+        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, correctImei);
+        assertFalse(switchSuccess);
+
+        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, correctImei);
+        assertFalse(switchSuccess);
+
+        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, incorrectImei);
+        assertFalse(switchSuccess);
+
+        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, correctImei);
+        assertFalse(switchSuccess);
+
+        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, incorrectImei);
+        assertFalse(switchSuccess);
+
+        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, incorrectImei);
+        assertFalse(switchSuccess);
+
+        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, incorrectImei);
+        assertFalse(switchSuccess);
     }
 
     @Test
     public void testGetServerClientIdFromMgmtCluster() throws Exception {
-        final String expectedClientId = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
-        assertEquals(expectedClientId, MgmtCluster.getServerClientId());
+        String correctClientId = HttpProxyMock.CORRECT_CLIENT_ID;
+        String incorrectClientId = "xxxxxxxxxx";
+
+        assertEquals(correctClientId, MgmtCluster.getServerClientId());
+        assertNotEquals(incorrectClientId, MgmtCluster.getServerClientId());
     }
 
     @Test

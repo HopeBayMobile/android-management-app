@@ -18,6 +18,8 @@ public interface IHttpProxy {
 
     int post(ContentValues cv) throws IOException;
 
+    int get() throws IOException;
+
     String getResponseContent() throws IOException;
 
     void disconnect();

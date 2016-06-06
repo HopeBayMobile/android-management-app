@@ -84,53 +84,16 @@ public class MgmtCluster {
     }
 
     /**
-     * @param oldServerAuthCode the server register code of old account used to change account
+     * @param jwtToken the token to access mgmt cluster
+     * @param newServerAuthCode the auth code of google account to be switched
+     * @param imei the current device imei
      * @return true if the account is changed successfully; false otherwise.
      */
-    public static boolean switchAccount(String oldServerAuthCode, String newServerAuthCode, String imei) {
+    public static boolean switchAccount(String jwtToken, String newServerAuthCode, String imei) {
 
         boolean isSwitchSuccess = true;
-        String jwtToken = null;
-        IHttpProxy httpProxyImpl = null;
-        try {
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(SOCIAL_AUTH_API);
-            httpProxyImpl.setDoOutput(true);
-            httpProxyImpl.connect();
-
-            ContentValues data = new ContentValues();
-            data.put("backend", "google-oauth2");
-            data.put("access_token", "");
-            data.put("code", oldServerAuthCode);
-
-            int responseCode = httpProxyImpl.post(data);
-            Logs.w(CLASSNAME, "switchAccount", "responseCode=" + responseCode);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String responseContent = httpProxyImpl.getResponseContent();
-                JSONObject jsonObj = new JSONObject(responseContent);
-                String userId = jsonObj.getString("user_id");
-                String userName = jsonObj.getString("username");
-                jwtToken = jsonObj.getString("token");
-
-                Logs.w(CLASSNAME, "switchAccount", "userId=" + userId + ", userName=" + userName + ", jwtToken=" + jwtToken);
-            } else {
-                isSwitchSuccess = false;
-                String responseContent = httpProxyImpl.getResponseContent();
-
-                Logs.e(CLASSNAME, "switchAccount", responseContent);
-            }
-        } catch (Exception e) {
-            isSwitchSuccess = false;
-
-            Logs.e(CLASSNAME, "switchAccount", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
-        }
-
         if (jwtToken != null) {
-            httpProxyImpl = null;
+            IHttpProxy httpProxyImpl = null;
             try {
                 String url = DEVICE_API + imei + "/change_device_user/";
                 httpProxyImpl = HttpProxy.newInstance();
@@ -166,37 +129,32 @@ public class MgmtCluster {
     }
 
     public static String getServerClientId() {
-        String serverClientId = null;
-        HttpsURLConnection conn = null;
-        try {
-            URL url = new URL(REGISTER_AUTH_API);
-            conn = (HttpsURLConnection) url.openConnection();
-            conn.setDoInput(true);
-            int responseCode = conn.getResponseCode();
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    sb.append(line);
-                }
 
-                String jsonResponse = sb.toString();
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
+        IHttpProxy httpProxyImpl = null;
+        String serverClientId = null;
+        try {
+            httpProxyImpl = HttpProxy.newInstance();
+            httpProxyImpl.setUrl(REGISTER_AUTH_API);
+            httpProxyImpl.setDoOutput(true);
+            httpProxyImpl.connect();
+
+            int responseCode = httpProxyImpl.get();
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                String jsonResponse = httpProxyImpl.getResponseContent();
+                Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
                 if (!jsonResponse.isEmpty()) {
                     JSONObject jObj = new JSONObject(jsonResponse);
                     JSONObject dataObj = jObj.getJSONObject("data");
                     JSONObject authObj = dataObj.getJSONObject("google-oauth2");
                     serverClientId = authObj.getString("client_id");
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
-                    bufferedReader.close();
+                    Logs.d(CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
                 }
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
         } finally {
-            if (conn != null) {
-                conn.disconnect();
+            if (httpProxyImpl != null) {
+                httpProxyImpl.disconnect();
             }
         }
         return serverClientId;
