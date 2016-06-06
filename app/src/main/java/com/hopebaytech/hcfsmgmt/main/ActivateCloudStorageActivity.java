@@ -97,40 +97,11 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                         }
                                     });
 
-                                        String imei = HCFSMgmtUtils.getDeviceIMEI(ActivateCloudStorageActivity.this);
-                                        MgmtCluster.IAuthParam authParam = new MgmtCluster.NativeAuthParam(username, password, imei);
-                                        final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
-                                        if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                                            boolean isFailed = HCFSConfig.storeHCFSConfig(authResultInfo);
-                                            if (isFailed) {
-                                                runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        String failureMessage = authResultInfo.getMessage();
-                                                        showAlertDialog(ActivateCloudStorageActivity.this,
-                                                                getString(R.string.alert_dialog_title_warning),
-                                                                failureMessage,
-                                                                getString(R.string.alert_dialog_confirm));
-                                                    }
-                                                });
-                                                HCFSConfig.resetHCFSConfig();
-                                            } else {
-                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ActivateCloudStorageActivity.this);
-                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                editor.putBoolean(HCFSMgmtUtils.PREF_IS_HCFS_ACTIVATED, true);
-                                                editor.apply();
-
-                                                Intent intent = new Intent(ActivateCloudStorageActivity.this, MainActivity.class);
-                                                startActivity(intent);
-                                                finish();
-                                            }
-                                        } else {
-                                            String message = authResultInfo.getMessage();
-                                            String dialogMessage = "responseCode=" + authResultInfo.getResponseCode();
-                                            if (message != null) {
-                                                dialogMessage += ", message=" + message;
-                                            }
-                                            final String finalDialogMessage = dialogMessage;
+                                    MgmtCluster.IAuthParam authParam = new MgmtCluster.NativeAuthParam(username, password);
+                                    final AuthResultInfo authResultInfo = MgmtCluster.authWithMgmtCluster(authParam);
+                                    if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                                        boolean isFailed = HCFSConfig.storeHCFSConfig(authResultInfo);
+                                        if (isFailed) {
                                             runOnUiThread(new Runnable() {
                                                 @Override
                                                 public void run() {

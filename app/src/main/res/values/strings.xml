@@ -13,7 +13,7 @@
     <string name="activate_cloud_storage_alert_dialog_exit">確定</string>
     <string name="activate_cloud_storage_failed_to_activate">啟用失敗</string>
     <string name="activate_cloud_storage_failed_to_signin_google_account">Google帳號認證失敗</string>
-    
+
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
     <string name="nav_overview">總覽</string>
@@ -158,6 +158,7 @@
     <string name="switch_account_require_new_account">與原帳號相同，不進行帳號轉換</string>
     <string name="switch_account_start_to_change">轉換</string>
     <string name="switch_account_failed_to_change">帳號轉換失敗，請再嘗試一次。</string>
+    <string name="switch_account_google_connected_failed">請重新嘗試一次</string>
     <string name="switch_account_another_account"><u>Choose another Google account</u></string>
     <string name="switch_account_require_read_phone_state_permission">轉換帳號需啟用[電話]權限。</string>
 

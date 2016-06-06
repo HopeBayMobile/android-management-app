@@ -339,7 +339,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                         signOut();
                                         signIn();
                                     } else {
-                                        Toast.makeText(SwitchAccountActivity.this, "請重新嘗試一次", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(SwitchAccountActivity.this, R.string.switch_account_google_connected_failed, Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
