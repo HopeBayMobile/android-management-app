@@ -73,6 +73,12 @@ public class HttpProxyImpl implements IHttpProxy {
         return mResponseCode;
     }
 
+    @Override
+    public int get() throws IOException {
+        mResponseCode = mConn.getResponseCode();
+        return mResponseCode;
+    }
+
     public String getResponseContent() throws IOException {
         InputStream inputStream = null;
         StringBuilder sb = new StringBuilder();

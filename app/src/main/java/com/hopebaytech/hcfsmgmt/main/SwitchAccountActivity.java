@@ -44,12 +44,15 @@ import com.google.android.gms.plus.Plus;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
@@ -141,37 +144,44 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
-                                final boolean isSuccess = MgmtCluster.switchAccount(mOldServerAuthCode, mNewServerAuthCode, imei);
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        hideProgressDialog();
-                                        if (isSuccess) {
-                                            AccountInfo accountInfo = new AccountInfo();
-                                            accountInfo.setName(mAccountName);
-                                            accountInfo.setEmail(mAccountEmail);
-                                            accountInfo.setImgUrl(mAccountPhotoUrl);
+                                MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                                authParam.setAuthCode(mOldServerAuthCode);
+                                AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+                                if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                                    String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
+                                    final boolean isSuccess = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            hideProgressDialog();
+                                            if (isSuccess) {
+                                                AccountInfo accountInfo = new AccountInfo();
+                                                accountInfo.setName(mAccountName);
+                                                accountInfo.setEmail(mAccountEmail);
+                                                accountInfo.setImgUrl(mAccountPhotoUrl);
 
-                                            AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
-                                            accountDAO.clear();
-                                            accountDAO.insert(accountInfo);
-                                            accountDAO.close();
+                                                AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
+                                                accountDAO.clear();
+                                                accountDAO.insert(accountInfo);
+                                                accountDAO.close();
 
-                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
-                                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                                            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                            editor.apply();
+                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
+                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
+                                                editor.apply();
 
-                                            Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
-                                            startActivity(intent);
-                                            finish();
-                                        } else {
-                                            mErrorMsg.setText(R.string.switch_account_failed_to_change);
-                                            signOut();
+                                                Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            } else {
+                                                mErrorMsg.setText(R.string.switch_account_failed);
+                                                signOut();
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                } else {
+                                    mErrorMsg.setText(R.string.switch_account_failed);
+                                }
                             }
                         }).start();
                     } else {
