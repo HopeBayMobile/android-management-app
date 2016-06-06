@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.Font;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 /**
  * @author Aaron
@@ -35,7 +36,6 @@ public class FontTextView extends TextView {
 
     private void setCustomFont(Context context, AttributeSet attrs) {
         if (!isInEditMode()) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "setCustomFont", "");
             TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CustomFont);
             int fontCode = typedArray.getInteger(R.styleable.CustomFont_customFont, -1);
             String fontPath = Font.getFontAssetPath(fontCode);
@@ -43,7 +43,7 @@ public class FontTextView extends TextView {
                 Typeface typeface = Typeface.createFromAsset(context.getAssets(), fontPath);
                 setTypeface(typeface);
             } catch (Exception e) {
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "setCustomFont", Log.getStackTraceString(e));
+                Logs.d(CLASSNAME, "setCustomFont", Log.getStackTraceString(e));
             }
             typedArray.recycle();
         }

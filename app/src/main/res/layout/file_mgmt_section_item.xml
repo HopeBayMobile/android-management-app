@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="92dp"
+    android:layout_marginEnd="@dimen/M2"
+    android:layout_marginStart="@dimen/M2"
     android:orientation="horizontal">
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
