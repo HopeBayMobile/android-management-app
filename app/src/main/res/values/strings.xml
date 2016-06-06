@@ -165,6 +165,7 @@
     <string name="switch_account_require_new_account">與原帳戶相同，不會進行轉換帳戶。</string>
     <string name="switch_account_start_to_switch">開始轉換</string>
     <string name="switch_account_failed">轉換帳戶失敗，請再嘗試一次或點選返回鍵退出。</string>
+    <string name="switch_account_another_account"><u>選擇其他帳戶</u></string>
     <string name="switch_account_require_read_phone_state_permission">轉換帳戶需啟用Tera的電話權限，請點選右方鍵繼續。</string>
 
     <string name="auth_at_bootup_auth_google_failed">Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
