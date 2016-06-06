@@ -501,7 +501,7 @@ public class HCFSMgmtService extends Service {
     private void registerToMgmtCluster(final Context context, String serverAuthCode) {
         MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
         authParam.setAuthCode(serverAuthCode);
-        authParam.setImei(HCFSMgmtUtils.getDeviceImei(HCFSMgmtService.this));
+        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(HCFSMgmtService.this)));
         authParam.setVendor(Build.BRAND);
         authParam.setModel(Build.MODEL);
 

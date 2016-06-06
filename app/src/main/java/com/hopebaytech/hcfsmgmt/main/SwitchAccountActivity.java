@@ -148,7 +148,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                 authParam.setAuthCode(mOldServerAuthCode);
                                 AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
                                 if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-                                    String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
+                                    String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this));
                                     final boolean isSuccess = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
                                     runOnUiThread(new Runnable() {
                                         @Override

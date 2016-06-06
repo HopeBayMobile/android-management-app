@@ -1,9 +1,13 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.os.Build;
+
+import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxyMock;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,6 +41,96 @@ public class MgmtClusterTest {
     @After
     public void tearDown() throws Exception {
 
+    }
+
+    @Test
+    public void testRegister() {
+        MgmtCluster.GoogleAuthParam googleAuthParam;
+        MgmtCluster.UserAuthParam userAuthParam;
+        String correctJwtToken = HttpProxyMock.CORRECT_JWT_TOKEN;
+        String correctAuthCode = HttpProxyMock.CORRECT_AUTH_CODE;
+        String correctImei = HttpProxyMock.CORRECT_IMEI;
+        String correctUsername = HttpProxyMock.CORRECT_USER_NAME;
+        String correctPassword = HttpProxyMock.CORRECT_USER_PASSWORD;
+        String correctActivationCode = HttpProxyMock.CORRECT_ACTIVATION_CODE;
+        String incorrectJwtToken = "xxxxxxxxxx";
+        String incorrectAuthCode = "xxxxxxxxxx";
+        String incorrectImei = "xxxxxxxxxx";
+        String incorrectUsername = "xxxxxxxxxx";
+        String incorrectPassword = "xxxxxxxxxx";
+        String incorrectActivationCode = "xxxxxxxxxx";
+
+        googleAuthParam = new MgmtCluster.GoogleAuthParam();
+        googleAuthParam.setAuthCode(correctAuthCode);
+        googleAuthParam.setImei(correctImei);
+        RegisterResultInfo info = MgmtCluster.register(googleAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_OK, info.getResponseCode());
+
+        googleAuthParam = new MgmtCluster.GoogleAuthParam();
+        googleAuthParam.setAuthCode(incorrectAuthCode);
+        googleAuthParam.setImei(correctImei);
+        info = MgmtCluster.register(googleAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, info.getResponseCode());
+
+        googleAuthParam = new MgmtCluster.GoogleAuthParam();
+        googleAuthParam.setAuthCode(correctAuthCode);
+        googleAuthParam.setImei(incorrectImei);
+        info = MgmtCluster.register(googleAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_NOT_FOUND, info.getResponseCode());
+
+        googleAuthParam = new MgmtCluster.GoogleAuthParam();
+        googleAuthParam.setAuthCode(correctAuthCode);
+        googleAuthParam.setImei(correctImei);
+        info = MgmtCluster.register(googleAuthParam, incorrectJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, info.getResponseCode());
+
+        userAuthParam = new MgmtCluster.UserAuthParam();
+        userAuthParam.setUsername(correctUsername);
+        userAuthParam.setPassword(correctPassword);
+        userAuthParam.setActivateCode(correctActivationCode);
+        userAuthParam.setImei(correctImei);
+        info = MgmtCluster.register(userAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_OK, info.getResponseCode());
+
+        userAuthParam = new MgmtCluster.UserAuthParam();
+        userAuthParam.setUsername(incorrectUsername);
+        userAuthParam.setPassword(correctPassword);
+        userAuthParam.setActivateCode(correctActivationCode);
+        userAuthParam.setImei(correctImei);
+        info = MgmtCluster.register(userAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, info.getResponseCode());
+
+        userAuthParam = new MgmtCluster.UserAuthParam();
+        userAuthParam.setUsername(correctUsername);
+        userAuthParam.setPassword(incorrectPassword);
+        userAuthParam.setActivateCode(correctActivationCode);
+        userAuthParam.setImei(correctImei);
+        info = MgmtCluster.register(userAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, info.getResponseCode());
+
+        userAuthParam = new MgmtCluster.UserAuthParam();
+        userAuthParam.setUsername(correctUsername);
+        userAuthParam.setPassword(correctPassword);
+        userAuthParam.setActivateCode(incorrectActivationCode);
+        userAuthParam.setImei(correctImei);
+        info = MgmtCluster.register(userAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, info.getResponseCode());
+
+        userAuthParam = new MgmtCluster.UserAuthParam();
+        userAuthParam.setUsername(correctUsername);
+        userAuthParam.setPassword(correctPassword);
+        userAuthParam.setActivateCode(correctActivationCode);
+        userAuthParam.setImei(incorrectImei);
+        info = MgmtCluster.register(userAuthParam, correctJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_NOT_FOUND, info.getResponseCode());
+
+        userAuthParam = new MgmtCluster.UserAuthParam();
+        userAuthParam.setUsername(correctUsername);
+        userAuthParam.setPassword(correctPassword);
+        userAuthParam.setActivateCode(correctActivationCode);
+        userAuthParam.setImei(correctImei);
+        info = MgmtCluster.register(userAuthParam, incorrectJwtToken);
+        assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, info.getResponseCode());
     }
 
     @Test

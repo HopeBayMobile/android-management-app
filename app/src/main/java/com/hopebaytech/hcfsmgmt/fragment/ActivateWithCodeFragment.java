@@ -108,7 +108,7 @@ public class ActivateWithCodeFragment extends Fragment {
                         @Override
                         public void run() {
                             final int authType = getArguments().getInt(ActivateWoCodeFragment.KEY_AUTH_TYPE);
-                            String imei = HCFSMgmtUtils.getDeviceImei(mContext);
+                            String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext));
                             MgmtCluster.IAuthParam authParam;
                             if (authType == MgmtCluster.GOOGLE_AUTH) {
                                 String authCode = getArguments().getString(ActivateWoCodeFragment.KEY_AUTH_CODE);
