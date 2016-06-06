@@ -173,7 +173,7 @@ public class ActivateWoCodeFragment extends Fragment {
                             MgmtCluster.UserAuthParam authParam = new MgmtCluster.UserAuthParam();
                             authParam.setUsername(username);
                             authParam.setPassword(password);
-                            authParam.setImei(HCFSMgmtUtils.getDeviceImei(mContext));
+                            authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
 
                             MgmtCluster.Register mgmtRegister = new MgmtCluster.Register(authParam);
                             mgmtRegister.setOnRegisterListener(new MgmtCluster.RegisterListener() {
@@ -408,7 +408,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     final String email = acct.getEmail();
                     MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
                     authParam.setAuthCode(serverAuthCode);
-                    authParam.setImei(HCFSMgmtUtils.getDeviceImei(mContext));
+                    authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
                     authParam.setVendor(Build.BRAND);
                     authParam.setModel(Build.MODEL);
 
