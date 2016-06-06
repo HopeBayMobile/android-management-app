@@ -1,5 +1,8 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
+import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxyMock;
+import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 
 import org.junit.After;

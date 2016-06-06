@@ -63,6 +63,7 @@ public class HttpProxyImpl implements IHttpProxy {
     }
 
     public int post(ContentValues cv) throws IOException {
+
         OutputStream outputStream = mConn.getOutputStream();
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
         bufferedWriter.write(getQuery(cv));

@@ -5,12 +5,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.fragment.ActivateWithCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
@@ -28,7 +29,7 @@ public class ActivateActivity extends AppCompatActivity {
     }
 
     private void init() {
-        ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+        ActivateWoCodeFragment fragment = ActivateWoCodeFragment.newInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment, ActivateWoCodeFragment.TAG);
         ft.commit();

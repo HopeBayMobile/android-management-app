@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -20,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="26dp"
             android:layout_marginTop="132dp"
-            android:src="@drawable/icon_tera_logo_l_login"/>
+            android:src="@drawable/icon_tera_logo_l_login" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -28,7 +29,7 @@
             android:background="@drawable/white_background_gray_border"
             android:orientation="vertical">
 
-            <com.hopebaytech.hcfsmgmt.customview.FontEditText
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 android:id="@+id/username"
                 style="@style/F12"
                 android:layout_width="244dp"
@@ -74,57 +75,15 @@
         </LinearLayout>
 
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            android:id="@+id/forget_password"
-            style="@style/F11"
-            android:layout_width="wrap_content"
+            android:id="@+id/error_msg"
+            style="@style/F6"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/activate_forget_password" />
-
-        <RelativeLayout
-            android:layout_width="244dp"
-            android:layout_height="wrap_content">
-
-            <View
-                style="@style/Divider"
-                android:layout_width="match_parent"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/or" />
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/or"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginBottom="@dimen/M2"
-                android:layout_marginLeft="@dimen/M7"
-                android:layout_marginRight="@dimen/M7"
-                android:layout_marginTop="@dimen/M2"
-                android:gravity="center"
-                android:text="@string/activate_or" />
-
-            <View
-                style="@style/Divider"
-                android:layout_width="match_parent"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/or" />
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/white_background_gray_border"
-            android:clickable="true">
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/google_activate"
-                style="@style/F9"
-                android:layout_width="244dp"
-                android:layout_height="36dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center"
-                android:text="@string/activate_with_google_account"
-                android:textColor="@color/colorAccent" />
-        </LinearLayout>
+            android:layout_marginEnd="30dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginTop="40dp"
+            android:gravity="center"
+            android:text="@string/activate_device_not_registered" />
 
     </LinearLayout>
 </RelativeLayout>

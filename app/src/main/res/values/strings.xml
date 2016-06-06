@@ -4,6 +4,7 @@
 
     <string name="require_read_external_storage_permission">讀取檔案清單需啟用[儲存]權限。</string>
     <string name="require_read_phone_state_permission">讀取IMEI值需啟用[電話]權限。</string>
+    <string name="activation_require_read_phone_state_permission">啟用Tera需啟用[電話]權限。</string>
     <string name="enable_permission">啟用權限</string>
 
     <string name="activate_alert_dialog_message">目前網路無法正常連線，請確認網路狀況後再重試一次。</string>

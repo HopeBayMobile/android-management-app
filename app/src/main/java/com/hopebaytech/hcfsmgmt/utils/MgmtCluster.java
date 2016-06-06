@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -34,7 +33,6 @@ public class MgmtCluster {
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
     public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
 
-
     public static final String KEY_AUTH_CODE = "code";
     public static final String KEY_ERROR_CODE = "error_code";
     public static final String KEY_USERNAME = "username";
@@ -45,6 +43,53 @@ public class MgmtCluster {
     public static final String KEY_VENDOR = "vendor";
     public static final String KEY_MODEL = "model";
     public static final String KEY_ACTIVATION_CODE = "activation_code";
+    private static int retryCount = 0;
+
+    public static final int GOOGLE_AUTH = 0;
+    public static final int USER_AUTH = 1;
+
+    public static AuthResultInfo auth(IAuthParam authParam) {
+
+        IHttpProxy httpProxyImpl = null;
+        AuthResultInfo authResultInfo = new AuthResultInfo();
+        try {
+            String url;
+            ContentValues data = new ContentValues();
+            if (authParam instanceof GoogleAuthParam) {
+                url = SOCIAL_AUTH_API;
+                data.put("code", ((GoogleAuthParam) authParam).authCode);
+            } else {
+                url = USER_AUTH_API;
+                data.put("username", ((UserAuthParam) authParam).username);
+                data.put("password", ((UserAuthParam) authParam).password);
+            }
+
+            httpProxyImpl = HttpProxy.newInstance();
+            httpProxyImpl.setUrl(url);
+            httpProxyImpl.setDoOutput(true);
+            httpProxyImpl.connect();
+
+            int responseCode = httpProxyImpl.post(data);
+            authResultInfo.setResponseCode(responseCode);
+            String responseContent = httpProxyImpl.getResponseContent();
+            Logs.d(CLASSNAME, "auth", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                JSONObject jsonObj = new JSONObject(responseContent);
+                String jwtToken = jsonObj.getString("token");
+                Logs.d(CLASSNAME, "auth", "jwtToken=" + jwtToken);
+                authResultInfo.setToken(jwtToken);
+            } else {
+                authResultInfo.setMessage(responseContent);
+            }
+        } catch (Exception e) {
+            Logs.e(CLASSNAME, "auth", Log.getStackTraceString(e));
+        } finally {
+            if (httpProxyImpl != null) {
+                httpProxyImpl.disconnect();
+            }
+        }
+        return authResultInfo;
+    }
 
     /**
      * Unknown error.
