@@ -827,17 +827,17 @@ public class HCFSMgmtUtils {
     }
 
 //    @Nullable
-//    public static String getEncryptedDeviceIMEI() {
+//    public static String getEncryptedDeviceImei() {
 //        String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI());
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getEncryptedDeviceIMEI", "encryptedIMEI=" + encryptedIMEI);
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getEncryptedDeviceImei", "encryptedIMEI=" + encryptedIMEI);
 //        return encryptedIMEI;
 //    }
 
     @Nullable
-    public static String getEncryptedDeviceIMEI(String imei) {
+    public static String getEncryptedDeviceImei(String imei) {
         String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI(imei));
-        Logs.d(CLASSNAME, "getEncryptedDeviceIMEI", "imei=" + imei);
-        Logs.d(CLASSNAME, "getEncryptedDeviceIMEI", "encryptedIMEI=" + encryptedIMEI);
+        Logs.d(CLASSNAME, "getEncryptedDeviceImei", "imei=" + imei);
+        Logs.d(CLASSNAME, "getEncryptedDeviceImei", "encryptedIMEI=" + encryptedIMEI);
         return encryptedIMEI;
     }
 

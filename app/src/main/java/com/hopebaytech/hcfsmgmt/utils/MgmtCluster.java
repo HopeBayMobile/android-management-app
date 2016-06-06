@@ -13,11 +13,8 @@ import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
@@ -30,13 +27,24 @@ public class MgmtCluster {
 
     private static final String CLASSNAME = MgmtCluster.class.getSimpleName();
     private static final String DOMAIN_NAME = "terafonnreg.hopebaytech.com";
-    private static final String REGISTER_LOGIN_API = "https://" + DOMAIN_NAME + "/api/register/login/";
+    public static final String REGISTER_LOGIN_API = "https://" + DOMAIN_NAME + "/api/register/login/";
     public static final String REGISTER_AUTH_API = "https://" + DOMAIN_NAME + "/api/register/auth/";
     public static final String SOCIAL_AUTH_API = "https://" + DOMAIN_NAME + "/api/social-auth/";
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
     public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
-    private static int retryCount = 0;
 
+    public static final String KEY_AUTH_CODE = "code";
+    public static final String KEY_USERNAME = "username";
+    public static final String KEY_PASSWORD = "password";
+    public static final String KEY_AUTHORIZATION = "Authorization";
+    public static final String KEY_NEW_AUTH_CODE = "new_auth_code";
+    public static final String KEY_IMEI = "imei_code";
+    public static final String KEY_VENDOR = "vendor";
+    public static final String KEY_MODEL = "model";
+    public static final String KEY_ACTIVATION_CODE = "activation_code";
+
+
+    private static int retryCount = 0;
     public static final int GOOGLE_AUTH = 0;
     public static final int USER_AUTH = 1;
 
@@ -49,11 +57,11 @@ public class MgmtCluster {
             ContentValues data = new ContentValues();
             if (authParam instanceof GoogleAuthParam) {
                 url = SOCIAL_AUTH_API;
-                data.put("code", ((GoogleAuthParam) authParam).authCode);
+                data.put(KEY_AUTH_CODE, ((GoogleAuthParam) authParam).authCode);
             } else {
                 url = USER_AUTH_API;
-                data.put("username", ((UserAuthParam) authParam).username);
-                data.put("password", ((UserAuthParam) authParam).password);
+                data.put(KEY_USERNAME, ((UserAuthParam) authParam).username);
+                data.put(KEY_PASSWORD, ((UserAuthParam) authParam).password);
             }
 
             httpProxyImpl = HttpProxy.newInstance();
@@ -101,12 +109,12 @@ public class MgmtCluster {
                 httpProxyImpl.setDoOutput(true);
 
                 ContentValues header = new ContentValues();
-                header.put("Authorization", "JWT " + jwtToken);
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
                 httpProxyImpl.setHeaders(header);
                 httpProxyImpl.connect();
 
                 ContentValues data = new ContentValues();
-                data.put("new_auth_code", newServerAuthCode);
+                data.put(KEY_NEW_AUTH_CODE, newServerAuthCode);
                 int responseCode = httpProxyImpl.post(data);
                 Logs.w(CLASSNAME, "switchAccount", "switch responseCode=" + responseCode);
                 if (responseCode != HttpsURLConnection.HTTP_OK) {
@@ -175,16 +183,15 @@ public class MgmtCluster {
 
         @Override
         public ContentValues createAuthParam() {
-            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
 
             ContentValues cv = new ContentValues();
             cv.put("provider", "google-oauth2");
-            cv.put("code", authCode);
-            cv.put("imei_code", encryptedIMEI);
-            cv.put("vendor", vendor);
-            cv.put("model", model);
+            cv.put(KEY_AUTH_CODE, authCode);
+            cv.put(KEY_IMEI, imei);
+            cv.put(KEY_VENDOR, vendor);
+            cv.put(KEY_MODEL, model);
 
-            Logs.d(CLASSNAME, "GoogleAuthParam", "createAuthParam", "authCode=" + authCode + ", encryptedIMEI=" + encryptedIMEI);
+            Logs.d(CLASSNAME, "GoogleAuthParam", "createAuthParam", "authCode=" + authCode + ", encryptedIMEI=" + imei);
 
             return cv;
         }
@@ -217,16 +224,16 @@ public class MgmtCluster {
 
         @Override
         public ContentValues createAuthParam() {
-            String encryptedIMEI = HCFSMgmtUtils.getEncryptedDeviceIMEI(imei);
-            ContentValues cv = new ContentValues();
-            cv.put("username", username);
-            cv.put("password", password);
-            cv.put("imei_code", encryptedIMEI);
-            cv.put("activation_code", activateCode);
-            cv.put("vendor", vender);
-            cv.put("model", model);
 
-            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + encryptedIMEI);
+            ContentValues cv = new ContentValues();
+            cv.put(KEY_USERNAME, username);
+            cv.put(KEY_PASSWORD, password);
+            cv.put(KEY_IMEI, imei);
+            cv.put(KEY_ACTIVATION_CODE, activateCode);
+            cv.put(KEY_VENDOR, vender);
+            cv.put(KEY_MODEL, model);
+
+            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + imei);
             return cv;
         }
 
@@ -263,7 +270,7 @@ public class MgmtCluster {
             httpProxyImpl.setUrl(REGISTER_LOGIN_API);
             httpProxyImpl.setDoOutput(true);
             ContentValues header = new ContentValues();
-            header.put("Authorization", "JWT " + jwtToken);
+            header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
             httpProxyImpl.setHeaders(header);
             httpProxyImpl.connect();
 
