@@ -1,7 +1,10 @@
-package com.hopebaytech.hcfsmgmt.utils;
+package com.hopebaytech.hcfsmgmt.httpproxy;
 
 import android.content.ContentValues;
 import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,35 +25,43 @@ import javax.net.ssl.HttpsURLConnection;
  * @author Aaron
  *         Created by Aaron on 2016/5/25.
  */
-public class HttpProxy {
+public class HttpProxyImpl implements IHttpProxy {
 
-    private static final String CLASSNAME = HttpProxy.class.getSimpleName();
+    private static final String CLASSNAME = HttpProxyImpl.class.getSimpleName();
     private HttpsURLConnection mConn;
     private int mResponseCode;
+    private String url;
+    private ContentValues header;
+    private boolean allowPost;
 
-    public HttpProxy(String url) throws IOException {
-        this(url, false);
+    @Override
+    public void setDoOutput(boolean allowPost) {
+        this.allowPost = allowPost;
     }
 
-    public HttpProxy(String url, boolean allowPost) throws IOException {
+    @Override
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setHeaders(ContentValues cv) {
+        this.header = cv;
+    }
+
+    public void connect() throws IOException {
         mConn = (HttpsURLConnection) new URL(url).openConnection();
         mConn.setDoInput(true);
         if (allowPost) {
             mConn.setDoOutput(true);
         }
-    }
-
-    public void setHeaders(ContentValues cv) {
-        for (String key: cv.keySet()) {
-            mConn.setRequestProperty(key, cv.getAsString(key));
+        for (String key: header.keySet()) {
+            mConn.setRequestProperty(key, header.getAsString(key));
         }
-    }
-
-    public void connect() throws IOException {
         mConn.connect();
     }
 
     public int post(ContentValues cv) throws IOException {
+
         OutputStream outputStream = mConn.getOutputStream();
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
         bufferedWriter.write(getQuery(cv));
@@ -90,7 +101,7 @@ public class HttpProxy {
         mConn.disconnect();
     }
 
-    public static String getQuery(ContentValues cv) {
+    private static String getQuery(ContentValues cv) {
         StringBuilder result = new StringBuilder();
         boolean first = true;
         for (Map.Entry<String, Object> entry: cv.valueSet()) {
@@ -103,11 +114,14 @@ public class HttpProxy {
             try {
                 result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
                 result.append("=");
-                result.append(URLEncoder.encode(entry.getValue().toString(), "UTF-8"));
+                String value = entry.getValue() == null ? "" : entry.getValue().toString();
+                result.append(URLEncoder.encode(value, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 Logs.e(CLASSNAME, "getQuery", Log.getStackTraceString(e));
             }
         }
         return result.toString();
     }
+
+
 }

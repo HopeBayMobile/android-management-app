@@ -1,7 +1,7 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -23,7 +23,6 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -46,17 +45,19 @@ public class LoadingActivity extends AppCompatActivity {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
 
-        String logMsg = "Build.BRAND=" + Build.BRAND +
-                ", Build.BOARD=" + Build.BOARD +
-                ", Build.BOOTLOADER=" + Build.BOOTLOADER +
-                ", Build.DEVICE=" + Build.DEVICE +
-                ", Build.HARDWARE=" + Build.HARDWARE +
-                ", Build.MANUFACTURER=" + Build.MANUFACTURER +
-                ", Build.MODEL=" + Build.MODEL +
-                ", Build.PRODUCT=" + Build.PRODUCT +
-                ", Build.SERIAL=" + Build.SERIAL;
-
-        Logs.w(CLASSNAME, "onCreate", logMsg);
+//        String logMsg = "Build.BRAND=" + Build.BRAND +
+//                ", Build.BOARD=" + Build.BOARD +
+//                ", Build.BOOTLOADER=" + Build.BOOTLOADER +
+//                ", Build.DEVICE=" + Build.DEVICE +
+//                ", Build.HARDWARE=" + Build.HARDWARE +
+//                ", Build.MANUFACTURER=" + Build.MANUFACTURER +
+//                ", Build.MODEL=" + Build.MODEL +
+//                ", Build.VERSION.RELEASE=" + Build.VERSION.RELEASE +
+//                ", Build.VERSION.SDK_INT=" + Build.VERSION.SDK_INT +
+//                ", Build.PRODUCT=" + Build.PRODUCT +
+//                ", Build.SERIAL=" + Build.SERIAL;
+//
+//        Logs.w(CLASSNAME, "onCreate", logMsg);
 
         init();
     }
@@ -68,7 +69,7 @@ public class LoadingActivity extends AppCompatActivity {
             public void run() {
                 if (HCFSConfig.isActivated(LoadingActivity.this)) {
                     Logs.d(CLASSNAME, "init", "Activated");
-                    final String serverClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
+                    final String serverClientId = MgmtCluster.getServerClientId();
                     if (serverClientId != null) {
                         Thread getGoogleAccountInfoThread = new Thread(new Runnable() {
                             @Override
@@ -83,17 +84,15 @@ public class LoadingActivity extends AppCompatActivity {
                                             @Override
                                             public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                                                 /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
-                                                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onConnectionFailed", connectionResult.toString());
+                                                Logs.e(CLASSNAME, "onConnectionFailed", connectionResult.toString());
                                                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LoadingActivity.this);
                                                 boolean hcfsActivated = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
                                                 if (hcfsActivated) {
                                                     Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
                                                     startActivity(intent);
-                                                    finish();
                                                 } else {
-                                                    Intent intent = new Intent(LoadingActivity.this, ActivateCloudStorageActivity.class);
+                                                    Intent intent = new Intent(LoadingActivity.this, ActivateActivity.class);
                                                     startActivity(intent);
-                                                    finish();
                                                 }
                                             }
                                         })
@@ -125,7 +124,6 @@ public class LoadingActivity extends AppCompatActivity {
                     }
                 } else {
                     Logs.w(CLASSNAME, "init", "NOT Activated");
-//                    Intent intent = new Intent(LoadingActivity.this, ActivateCloudStorageActivity.class);
                     Intent intent = new Intent(LoadingActivity.this, ActivateActivity.class);
                     startActivity(intent);
                     finish();

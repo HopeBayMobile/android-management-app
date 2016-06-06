@@ -218,10 +218,9 @@ public class SwitchAccountActivity extends AppCompatActivity {
                 }
                 accountDAO.close();
 
-                mServerClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
+                mServerClientId = MgmtCluster.getServerClientId();
                 if (mServerClientId != null) {
                     mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                            .requestIdToken(mServerClientId)
                             .requestServerAuthCode(mServerClientId, false)
                             .requestEmail()
                             .build();
@@ -310,7 +309,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (mServerClientId == null) {
-                            mServerClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
+                            mServerClientId = MgmtCluster.getServerClientId();
                             mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                     .requestIdToken(mServerClientId)
                                     .requestScopes(new Scope(Scopes.PLUS_LOGIN))
@@ -349,7 +348,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                 public void run() {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
                                     builder.setTitle(R.string.alert_dialog_title_warning);
-                                    builder.setMessage(R.string.failed_to_get_server_client_id);
+                                    builder.setMessage(R.string.activate_get_server_client_id_failed);
                                     builder.setPositiveButton(R.string.alert_dialog_confirm, null);
                                     builder.show();
                                 }
