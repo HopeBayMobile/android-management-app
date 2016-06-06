@@ -4,14 +4,15 @@
 
     <string name="require_read_external_storage_permission">讀取檔案清單需啟用[儲存]權限。</string>
     <string name="require_read_phone_state_permission">讀取IMEI值需啟用[電話]權限。</string>
+    <string name="activation_require_read_phone_state_permission">啟用Tera需啟用[電話]權限。</string>
     <string name="enable_permission">啟用權限</string>
 
     <string name="activate_alert_dialog_message">Network connection failed. Please try again later.</string>
     <string name="activate_processing_msg">Processing&#8230; Please wait.</string>
-    <string name="activate_snackbar_require_username_password">Please enter username &#38; password.</string>
+    <string name="activate_require_username_password">Please enter username &#38; password.</string>
     <string name="activate_alert_dialog_exit">OK</string>
-    <string name="activate_failed_to_activate">Activation failed.</string>
-    <string name="activate_failed_to_signin_google_account">Google account authentication failed.</string>
+    <string name="activate_failed">Activation failed.</string>
+    <string name="activate_signin_google_account_failed">Google account authentication failed.</string>
     <string name="activate_hint_username">User name</string>
     <string name="activate_hint_password">Password</string>
     <string name="activate_hint_code">Activation code</string>
@@ -19,7 +20,14 @@
     <string name="activate_forget_password"><u>Forgot password</u></string>
     <string name="activate_or">or</string>
     <string name="activate_with_code_msg">The activation code has been used. If your old device is lost or broken, please lock it on %s before activation.</string>
+    <string name="activate_without_google_play_services">Tera can\'t run without Google Play services, which are missing from your phone.</string>
+    <string name="activate_incorrect_username_password">帳號密碼不正確</string>
+    <string name="activate_incorrect_activation_code">啟用碼不正確</string>
+    <string name="activate_require_activation_code">請輸入啟用碼</string>
     <string name="activate_with_google_account">Use Google account for activation</string>
+    <string name="activate_auth_failed">認證失敗</string>
+    <string name="activate_device_not_registered">The device is not registered. Please enter activation code to activate Tera. </string>
+    <string name="activate_get_server_client_id_failed">Getting info about Google authentication from admin server failed. Please restart app and try again.</string>
 
     <string name="nav_drawer_open">Open navigation drawer.</string>
     <string name="nav_drawer_close">Close navigation drawer.</string>
@@ -146,8 +154,6 @@
         <item>60</item>
         <item>50</item>
     </string-array>
-
-    <string name="failed_to_get_server_client_id">Getting info about Google authentication from admin server failed. Please restart app and try again.</string>
 
     <string name="switch_account_require_new_account">Same as the current account. Switching account operation will not be performed.</string>
     <string name="switch_account_start_to_change">Start Switching</string>

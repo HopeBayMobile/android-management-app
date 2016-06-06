@@ -842,9 +842,9 @@ public class HCFSMgmtUtils {
     }
 
     public static String getDeviceImei(Context context) {
-        String IMEI = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceImei", "IMEI=" + IMEI);
-        return IMEI == null ? "" : IMEI;
+        String imei = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
+        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceImei", "IMEI=" + imei);
+        return imei == null ? "" : imei;
     }
 
     public static long getOccupiedSize() {
