@@ -156,8 +156,8 @@
     </string-array>
 
     <string name="switch_account_require_new_account">Same as the current account. Switching account operation will not be performed.</string>
-    <string name="switch_account_start_to_change">Start Switching</string>
-    <string name="switch_account_failed_to_change">Switching account failed. Please try again or tap the Return key to quit.</string>
+    <string name="switch_account_start_to_switch">Start Switching</string>
+    <string name="switch_account_failed">Switching account failed. Please try again or tap the Return key to quit.</string>
     <string name="switch_account_another_account"><u>Choose Another Account</u></string>
     <string name="switch_account_require_read_phone_state_permission">Switching account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
 

@@ -72,7 +72,7 @@ android {
 
     clean.dependsOn cleanNative
 
-    //sourceSets.androidTest.setRoot('src/test')
+    //sourceSets.androidTest.setRoot('src/`')
 }
 
 dependencies {
