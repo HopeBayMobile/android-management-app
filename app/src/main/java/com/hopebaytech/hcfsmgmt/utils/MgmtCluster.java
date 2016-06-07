@@ -32,6 +32,7 @@ public class MgmtCluster {
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
     public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
 
+
     public static final String KEY_AUTH_CODE = "code";
     public static final String KEY_ERROR_CODE = "error_code";
     public static final String KEY_USERNAME = "username";
@@ -54,6 +55,60 @@ public class MgmtCluster {
     public static final String KEY_MODEL = "model";
     public static final String KEY_ACTIVATION_CODE = "activation_code";
 
+    /**
+     * Unknown error.
+     */
+    public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
+
+    /**
+     * Input parameter relative error.
+     */
+    public static final String INPUT_ERROR = "INPUT_ERROR";
+
+    /**
+     * Device IMEI code is not registered.
+     */
+    public static final String IMEI_NOT_FOUND = "IMEI_NOT_FOUND";
+
+    /**
+     * Device IMEI code decrypt failed.
+     */
+    public static final String IMEI_DECRYPT_FAILED = "IMEI_DECRYPT_FAILED";
+
+    /**
+     * The model information is not matched with the device. It may not support tera service.
+     */
+    public static final String INCORRECT_MODEL = "INCORRECT_MODEL";
+
+    /**
+     * The vendor information is not matched with the device. It may not support tera service.
+     */
+    public static final String INCORRECT_VENDOR = "INCORRECT_VENDOR";
+
+    /**
+     * The device is expired. No support tera service anymore.
+     */
+    public static final String DEVICE_EXPIRED = "DEVICE_EXPIRED";
+
+    /**
+     * Invalid activation code or wrong model mapping. The device may not support tera service.
+     */
+    public static final String INVALID_CODE_OR_MODEL = "INVALID_CODE_OR_MODEL";
+
+    /**
+     * No service registered for the user and device.
+     */
+    public static final String MAPPING_NOT_FOUND = "MAPPING_NOT_FOUND";
+
+    /**
+     * The device is registered.
+     */
+    public static final String MAPPING_EXISTED = "MAPPING_EXISTED";
+
+    /**
+     * The device service is locked or expired.
+     */
+    public static final String SERVICE_BLOCK = "SERVICE_BLOCK";
 
     private static int retryCount = 0;
     public static final int GOOGLE_AUTH = 0;

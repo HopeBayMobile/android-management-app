@@ -11,7 +11,6 @@
     <string name="activate_processing_msg">Processing&#8230; Please wait.</string>
     <string name="activate_require_username_password">Please enter username &#38; password.</string>
     <string name="activate_alert_dialog_exit">OK</string>
-    <string name="activate_failed">Activation failed.</string>
     <string name="activate_signin_google_account_failed">Google account authentication failed.</string>
     <string name="activate_hint_username">User name</string>
     <string name="activate_hint_password">Password</string>
