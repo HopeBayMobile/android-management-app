@@ -69,15 +69,23 @@ public class ActivateWoCodeFragment extends Fragment {
     public static final String TAG = ActivateWoCodeFragment.class.getSimpleName();
     private final String CLASSNAME = ActivateWoCodeFragment.class.getSimpleName();
 
-    /** Google auth and User auth */
+    /**
+     * Google auth and User auth
+     */
     public static final String KEY_AUTH_TYPE = "auth_type";
 
-    /** Only for User authentication */
+    /**
+     * Only for User authentication
+     */
     public static final String KEY_PASSWORD = "password";
-    /** Only for User authentication */
+    /**
+     * Only for User authentication
+     */
     public static final String KEY_USERNAME = "username";
 
-    /** Only for Google authentication */
+    /**
+     * Only for Google authentication
+     */
     public static final String KEY_AUTH_CODE = "auth_code";
 
     private GoogleApiClient mGoogleApiClient;
@@ -213,21 +221,29 @@ public class ActivateWoCodeFragment extends Fragment {
                                 @Override
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                                     hideProgressDialog();
-                                    if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_NOT_FOUND) {
-                                        Bundle bundle = new Bundle();
-                                        bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.USER_AUTH);
-                                        bundle.putString(KEY_USERNAME, username);
-                                        bundle.putString(KEY_PASSWORD, password);
 
-                                        ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                        fragment.setArguments(bundle);
+                                    int errorMsgResId = R.string.activate_failed;
+                                    if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                                        if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                                            Bundle bundle = new Bundle();
+                                            bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.USER_AUTH);
+                                            bundle.putString(KEY_USERNAME, username);
+                                            bundle.putString(KEY_PASSWORD, password);
 
-                                        FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                        ft.replace(R.id.fragment_container, fragment, ActivateWithCodeFragment.TAG);
-                                        ft.commit();
-                                    } else {
-                                        mErrorMessage.setText(R.string.activate_incorrect_username_password);
+                                            ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                                            fragment.setArguments(bundle);
+
+                                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                            ft.replace(R.id.fragment_container, fragment, ActivateWithCodeFragment.TAG);
+                                            ft.commit();
+                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                                                registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                            errorMsgResId = R.string.activate_failed_not_supported_device;
+                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                            errorMsgResId = R.string.activate_failed_device_expired;
+                                        }
                                     }
+                                    mErrorMessage.setText(errorMsgResId);
                                 }
 
                                 @Override
@@ -478,35 +494,39 @@ public class ActivateWoCodeFragment extends Fragment {
                             hideProgressDialog();
                             Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
-                            if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_NOT_FOUND) {
-                                Bundle bundle = new Bundle();
-                                bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
-                                bundle.putString(KEY_USERNAME, email);
-                                bundle.putString(KEY_AUTH_CODE, serverAuthCode);
+                            Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                                    .setResultCallback(new ResultCallback<Status>() {
+                                        @Override
+                                        public void onResult(@NonNull Status status) {
+                                            Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
+                                        }
+                                    });
 
-                                ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                fragment.setArguments(bundle);
+                            if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                                if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                                    Bundle bundle = new Bundle();
+                                    bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
+                                    bundle.putString(KEY_USERNAME, email);
+                                    bundle.putString(KEY_AUTH_CODE, serverAuthCode);
 
-                                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                ft.replace(R.id.fragment_container, fragment);
-                                ft.commit();
-                            } else {
-                                Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                                        .setResultCallback(new ResultCallback<Status>() {
-                                            @Override
-                                            public void onResult(@NonNull Status status) {
-                                                Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
-                                            }
-                                        });
+                                    ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                                    fragment.setArguments(bundle);
 
-                                String message = registerResultInfo.getMessage();
-                                String dialogMessage = "responseCode=" + registerResultInfo.getResponseCode();
-                                if (message != null) {
-                                    dialogMessage += ", message=" + message;
+                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                    ft.replace(R.id.fragment_container, fragment);
+                                    ft.commit();
+                                    return;
                                 }
-
-                                mErrorMessage.setText(dialogMessage);
                             }
+
+                            String message = registerResultInfo.getMessage();
+                            String errorMessage = "responseCode=" + registerResultInfo.getResponseCode();
+                            if (message != null) {
+                                errorMessage += ", message=" + message;
+                            }
+
+                            mErrorMessage.setText(errorMessage);
+
                         }
 
                         @Override
@@ -520,12 +540,12 @@ public class ActivateWoCodeFragment extends Fragment {
                                     });
 
                             String message = authResultInfo.getMessage();
-                            String dialogMessage = "responseCode=" + authResultInfo.getResponseCode();
+                            String errorMessage = "responseCode=" + authResultInfo.getResponseCode();
                             if (message != null) {
-                                dialogMessage += ", message=" + message;
+                                errorMessage += ", message=" + message;
                             }
 
-                            mErrorMessage.setText(dialogMessage);
+                            mErrorMessage.setText(errorMessage);
                         }
 
                     });
