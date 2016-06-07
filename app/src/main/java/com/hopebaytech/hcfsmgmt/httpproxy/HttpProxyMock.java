@@ -94,7 +94,7 @@ public class HttpProxyMock implements IHttpProxy {
                     return HttpsURLConnection.HTTP_BAD_REQUEST;
                 }
             }
-        } else if (mUrl.equals(MgmtCluster.REGISTER_LOGIN_API)) {
+        } else if (mUrl.equals(MgmtCluster.DEVICE_API)) {
             String jwtToken = headers.getAsString(MgmtCluster.KEY_AUTHORIZATION).replace("JWT ", "");
             String imei = cv.getAsString(MgmtCluster.KEY_IMEI);
             String authCode = cv.getAsString(MgmtCluster.KEY_AUTH_CODE);

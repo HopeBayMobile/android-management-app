@@ -20,6 +20,7 @@ public class RegisterResultInfo {
     private String bucket;
     private String protocol;
     private String message;
+    private String errorCode;
     private String storageAccessToken;
     private int responseCode;
 
@@ -102,6 +103,14 @@ public class RegisterResultInfo {
 
     public void setStorageAccessToken(String storageAccessToken) {
         this.storageAccessToken = storageAccessToken;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
     @Override
