@@ -409,6 +409,17 @@ public class HCFSMgmtService extends Service {
                                 }
                             }
                         });
+                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_INSUFFICIENT_PIN_SPACE)) {
+                        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                        if (statInfo != null) {
+                            long pinTotal = statInfo.getPinTotal();
+                            long pinMax = statInfo.getPinMax();
+                            double ratio = (double) pinTotal / pinMax;
+                            if (ratio > 0.8) {
+                                int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
+                                NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, false);
+                            }
+                        }
                     }
                 }
             });

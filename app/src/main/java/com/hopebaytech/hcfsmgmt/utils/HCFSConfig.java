@@ -142,7 +142,7 @@ public class HCFSConfig {
         boolean isFailed = false;
 
         boolean firstReloadConfig = false;
-        if (getHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND).isEmpty()) {
+        if (getHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty()) {
             firstReloadConfig = true;
         }
 

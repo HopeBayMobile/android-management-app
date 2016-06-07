@@ -28,40 +28,41 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
         if (isHCFSActivated) {
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-                /** Detect network status and determine whether sync data to cloud */
-//                boolean syncWifiOnly = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
+                // Detect network status and determine whether sync data to cloud
                 boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
                 HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
-                /** Start an alarm to notify user when data is completed uploaded */
+                // Start an alarm to notify user when data is completed uploaded
 //                boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, true);
 //                if (notifyUploadCompletedPref) {
 //                    HCFSMgmtUtils.startNotifyUploadCompletedAlarm(mContext);
 //                }
 
-                /** Start an alarm to periodically pin/unpin data type file */
+                // Start an alarm to periodically pin/unpin data type file */
 //                DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(mContext);
 //                if (dataTypeDAO.getCount() != 0) {
 //                    HCFSMgmtUtils.startPinDataTypeFileAlarm(mContext);
 //                }
 
-                /** Start an alarm to reset xfer */
+                // Start an alarm to reset xfer
                 HCFSMgmtUtils.startResetXferAlarm(context);
 
-                /** Start an alarm to notify local storage used ratio */
+                // Start an alarm to notify local storage used ratio
                 HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(context);
 
-                /** Set silent Google sign-in to false */
+                // Start an alarm to notify insufficient pin space
+                HCFSMgmtUtils.startNotifyInsufficientPinSpaceAlarm(context);
+
+                // Set silent Google sign-in to false
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, false);
                 editor.apply();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                /** Detect network status changed and enable/disable data sync to cloud */
-//                boolean syncWifiOnly = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
+                // Detect network status changed and enable/disable data sync to cloud
                 boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
                 HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
-                /** Execute silent Google sign-in */
+                // Execute silent Google sign-in
                 boolean isSilentSignIn = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, false);
                 if (!isSilentSignIn) {
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isSilentSignIn=" + isSilentSignIn);
