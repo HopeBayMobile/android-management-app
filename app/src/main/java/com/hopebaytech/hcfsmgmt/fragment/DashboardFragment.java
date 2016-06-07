@@ -85,21 +85,21 @@ public class DashboardFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
         if (mStatInfo != null) {
-            String cloudStorageUsage = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getVolUsed(), mStatInfo.getCloudTotal());
+            String cloudStorageUsage = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatVolUsed(), mStatInfo.getFormatCloudTotal());
             outState.putString(KEY_CLOUD_STORAGE_USAGE, cloudStorageUsage);
             outState.putInt(KEY_CLOUD_STORAGE_USAGE_PROGRESS, mStatInfo.getCloudUsedPercentage());
             outState.putInt(KEY_CLOUD_STORAGE_USAGE_SECONDARY_PROGRESS, 0);
 
-            outState.putString(KEY_PINNED_STORAGE_USAGE, mStatInfo.getPinTotal());
+            outState.putString(KEY_PINNED_STORAGE_USAGE, mStatInfo.getFormatPinTotal());
             outState.putInt(KEY_PINNED_STORAGE_USAGE_PROGRESS, mStatInfo.getPinnedUsedPercentage());
             outState.putInt(KEY_PINNED_STORAGE_USAGE_SECONDARY_PROGRESS, 0);
 
-            outState.putString(KEY_WAIT_TO_UPLOAD_DATA_USAGE, mStatInfo.getCacheDirtyUsed());
+            outState.putString(KEY_WAIT_TO_UPLOAD_DATA_USAGE, mStatInfo.getFormatCacheDirtyUsed());
             outState.putInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_PROGRESS, mStatInfo.getDirtyPercentage());
             outState.putInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_SECONDARY_PROGRESS, 0);
 
-            outState.putString(KEY_NETWORK_XFER_UP, mStatInfo.getXferUpload());
-            outState.putString(KEY_NETWORK_XFER_DOWNLOAD, mStatInfo.getXferDownload());
+            outState.putString(KEY_NETWORK_XFER_UP, mStatInfo.getFormatXferUpload());
+            outState.putString(KEY_NETWORK_XFER_DOWNLOAD, mStatInfo.getFormatXferDownload());
             outState.putInt(KEY_NETWORK_XFER_PROGRESS, mStatInfo.getXterDownloadPercentage());
             outState.putInt(KEY_NETWORK_XFER_SECONDARY_PROGRESS, 100);
         }
@@ -202,21 +202,21 @@ public class DashboardFragment extends Fragment {
                                 if (mStatInfo != null) {
                                     displayNetworkStatus(HCFSConnStatus.getConnStatus(mContext, mStatInfo));
 
-                                    String storageUsageText = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getVolUsed(), mStatInfo.getCloudTotal());
+                                    String storageUsageText = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatVolUsed(), mStatInfo.getFormatCloudTotal());
                                     mCloudStorageUsage.setText(storageUsageText);
                                     mCloudStorageProgressBar.setProgress(mStatInfo.getCloudUsedPercentage());
                                     mCloudStorageProgressBar.setSecondaryProgress(0);
 
-                                    mPinnedStorageUsage.setText(mStatInfo.getPinTotal());
+                                    mPinnedStorageUsage.setText(mStatInfo.getFormatPinTotal());
                                     mPinnedStorageProgressBar.setProgress(mStatInfo.getPinnedUsedPercentage());
                                     mPinnedStorageProgressBar.setSecondaryProgress(0);
 
-                                    mWaitToUploadDataUsage.setText(mStatInfo.getCacheDirtyUsed());
+                                    mWaitToUploadDataUsage.setText(mStatInfo.getFormatCacheDirtyUsed());
                                     mWaitToUploadDataUsageProgressBar.setProgress(mStatInfo.getDirtyPercentage());
                                     mWaitToUploadDataUsageProgressBar.setSecondaryProgress(0);
 
-                                    String xferDownload = mStatInfo.getXferDownload();
-                                    String xferUpload = mStatInfo.getXferUpload();
+                                    String xferDownload = mStatInfo.getFormatXferDownload();
+                                    String xferUpload = mStatInfo.getFormatXferUpload();
                                     mNetworkXferUp.setText(xferUpload);
                                     mNetworkXferDown.setText(xferDownload);
                                     mXferProgressBar.setProgress(mStatInfo.getXterDownloadPercentage());

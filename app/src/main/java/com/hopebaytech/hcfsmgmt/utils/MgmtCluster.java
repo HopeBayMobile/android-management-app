@@ -391,33 +391,35 @@ public class MgmtCluster {
 
     public static boolean verifyActivationCode(String activationCode) {
         boolean isVerified = false;
-        char verifyCode1 = activationCode.charAt(3);
-        char verifyCode2 = activationCode.charAt(7);
-        String verifyCode = String.valueOf(verifyCode1) + String.valueOf(verifyCode2);
+        if (activationCode.length() == 10) {
+            char verifyCode1 = activationCode.charAt(3);
+            char verifyCode2 = activationCode.charAt(7);
+            String verifyCode = String.valueOf(verifyCode1) + String.valueOf(verifyCode2);
 
-        Logs.d(CLASSNAME, "verifyActivationCode", "activationCode=" + activationCode);
-        Logs.d(CLASSNAME, "verifyActivationCode", "verifyCode1=" + verifyCode1);
-        Logs.d(CLASSNAME, "verifyActivationCode", "verifyCode2=" + verifyCode2);
+            Logs.d(CLASSNAME, "verifyActivationCode", "activationCode=" + activationCode);
+            Logs.d(CLASSNAME, "verifyActivationCode", "verifyCode1=" + verifyCode1);
+            Logs.d(CLASSNAME, "verifyActivationCode", "verifyCode2=" + verifyCode2);
 
-        String part1 = activationCode.substring(0, 3);
-        String part2 = activationCode.substring(4, 7);
-        String part3 = activationCode.substring(8, activationCode.length());
+            String part1 = activationCode.substring(0, 3);
+            String part2 = activationCode.substring(4, 7);
+            String part3 = activationCode.substring(8, activationCode.length());
 
-        String originalCode = part1 + part2 + part3;
-        Logs.w(CLASSNAME, "verifyActivationCode", "originalCode=" + originalCode);
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(originalCode.getBytes(StandardCharsets.UTF_8));
-            String hexHash = String.format("%064x", new BigInteger(1, hash));
-            String base32 = Base32.encodeOriginal(hexHash.getBytes());
-            String calcVerifyCode = base32.substring(0, 2);
-            if (verifyCode.equals(calcVerifyCode)) {
-                isVerified = true;
+            String originalCode = part1 + part2 + part3;
+            Logs.d(CLASSNAME, "verifyActivationCode", "originalCode=" + originalCode);
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                byte[] hash = md.digest(originalCode.getBytes(StandardCharsets.UTF_8));
+                String hexHash = String.format("%064x", new BigInteger(1, hash));
+                String base32 = Base32.encodeOriginal(hexHash.getBytes());
+                String calcVerifyCode = base32.substring(0, 2);
+                if (verifyCode.equals(calcVerifyCode)) {
+                    isVerified = true;
+                }
+                Logs.d(CLASSNAME, "verifyActivationCode", "hexHash=" + hexHash);
+                Logs.d(CLASSNAME, "verifyActivationCode", "base32=" + base32);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "verifyActivationCode", Log.getStackTraceString(e));
             }
-            Logs.w(CLASSNAME, "verifyActivationCode", "hexHash=" + hexHash);
-            Logs.w(CLASSNAME, "verifyActivationCode", "base32=" + base32);
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "verifyActivationCode", Log.getStackTraceString(e));
         }
         return isVerified;
     }
