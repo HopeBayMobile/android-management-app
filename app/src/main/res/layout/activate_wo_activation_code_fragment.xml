@@ -134,8 +134,7 @@
             android:layout_marginTop="@dimen/M1"
             android:layout_width="244dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            tools:text="@string/activate_incorrect_username_password" />
+            android:gravity="center" />
 
     </LinearLayout>
 </RelativeLayout>
