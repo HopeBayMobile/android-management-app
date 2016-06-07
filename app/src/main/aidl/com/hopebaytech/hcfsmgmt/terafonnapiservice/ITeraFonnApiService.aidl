@@ -21,7 +21,6 @@ interface ITeraFonnApiService {
      * */
     boolean addTrackAppStatus(in List<String> packageNameList);
 
-    /** Mark packages in pkgNameList untracked. */
     boolean removeTrackAppStatus(in List<String> packageNameList);
 
     /** Clear the package tracked list. No packages are tracked anymore. */
@@ -30,13 +29,16 @@ interface ITeraFonnApiService {
     /** Get app status of all apps in packageNameList */
     AppInfo getAppInfo(in List<String> packageNameList);
 
-    /** Mark this app pinned */
     boolean pinApp(String packageName);
 
-    /** Mark this app unpinned  */
     boolean unpinApp(String packageName);
 
     /** Check datalocation of all apps in appList */
     int checkAppAvailable(String packageName);
 
+    int getQuota();
+
+    int getCloudUsed();
+
+    boolean hcfsEnabled();
 }

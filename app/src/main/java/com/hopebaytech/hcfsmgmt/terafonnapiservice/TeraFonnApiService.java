@@ -14,6 +14,7 @@ import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -164,6 +165,54 @@ public class TeraFonnApiService extends Service {
         @Override
         public int checkAppAvailable(String packageName) throws RemoteException {
             return getDefaultStatus(packageName);
+        }
+
+        @Override
+        public int getQuota() throws RemoteException {
+            boolean isSuccess = false;
+            int quota = -1;
+            try {
+                JSONObject jObject = new JSONObject(HCFSApiUtils.getHCFSStat());
+                isSuccess = jObject.getBoolean("result");
+                if (isSuccess) {
+                    quota = jObject.getInt("quota");
+                }
+            } catch (Exception e) {
+                log(Log.ERROR, CLASSNAME, "getQuota", e.toString());
+            }
+            return quota;
+        }
+
+        @Override
+        public int getCloudUsed() throws RemoteException {
+            boolean isSuccess = false;
+            int cloudUsed = -1;
+            try {
+                JSONObject jObject = new JSONObject(HCFSApiUtils.getHCFSStat());
+                isSuccess = jObject.getBoolean("result");
+                if (isSuccess) {
+                    cloudUsed = jObject.getInt("cloud_used");
+                }
+            } catch (Exception e) {
+                log(Log.ERROR, CLASSNAME, "getCloudUsed", e.toString());
+            }
+            return cloudUsed;
+        }
+
+        @Override
+        public boolean hcfsEnabled() throws RemoteException {
+            boolean enabled = false;
+            String key = "swift_account";
+            try {
+                if (HCFSConfig.getHCFSConfig(key).isEmpty()) {
+                    enabled = false;
+                } else {
+                    enabled = true;
+                }
+            } catch (Exception e) {
+                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
+            }
+            return enabled;
         }
     };
 
