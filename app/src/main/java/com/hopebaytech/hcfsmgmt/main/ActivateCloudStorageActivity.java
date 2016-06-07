@@ -141,12 +141,13 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                             }
                                         });
 
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            hideProgressDialog();
-                                        }
-                                    });
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                hideProgressDialog();
+                                            }
+                                        });
+                                    }
                                 } else {
                                     showAlertDialog(ActivateCloudStorageActivity.this,
                                             getString(R.string.alert_dialog_title_warning),
@@ -158,12 +159,12 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                     }
                 }
             });
+
         }
 
-        TextView forgetPassword = (TextView) findViewById(R.id.forget_password);
-        if (forgetPassword != null)
 
-        {
+        TextView forgetPassword = (TextView) findViewById(R.id.forget_password);
+        if (forgetPassword != null) {
             forgetPassword.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -176,9 +177,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
         }
 
         final TextView googleActivate = (TextView) findViewById(R.id.google_activate);
-        if (googleActivate != null)
-
-        {
+        if (googleActivate != null) {
             googleActivate.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -244,7 +243,7 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
+        // An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
         HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onConnectionFailed", "connectionResult=" + connectionResult);
     }
 
@@ -319,7 +318,6 @@ public class ActivateCloudStorageActivity extends AppCompatActivity implements G
                                     finish();
 
                                 }
-
                             }
                         });
 
