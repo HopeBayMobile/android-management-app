@@ -54,14 +54,15 @@ public class HttpProxyImpl implements IHttpProxy {
         if (allowPost) {
             mConn.setDoOutput(true);
         }
-        for (String key: header.keySet()) {
-            mConn.setRequestProperty(key, header.getAsString(key));
+        if (header != null) {
+            for (String key: header.keySet()) {
+                mConn.setRequestProperty(key, header.getAsString(key));
+            }
         }
         mConn.connect();
     }
 
     public int post(ContentValues cv) throws IOException {
-
         OutputStream outputStream = mConn.getOutputStream();
         BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
         bufferedWriter.write(getQuery(cv));

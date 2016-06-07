@@ -315,7 +315,7 @@ public class HCFSMgmtService extends Service {
                                                         default:
                                                             notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
                                                     }
-                                                    String notifyMsg = getString(R.string.dashboard_used_space) + ": " + statInfo.getVolUsed() + " / " + statInfo.getCloudTotal();
+                                                    String notifyMsg = getString(R.string.dashboard_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
                                                     NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, true);
                                                 }
                                                 Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
