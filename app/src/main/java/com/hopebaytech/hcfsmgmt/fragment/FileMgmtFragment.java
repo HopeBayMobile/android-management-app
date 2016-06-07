@@ -137,7 +137,6 @@ public class FileMgmtFragment extends Fragment {
     private boolean mRecyclerViewScrollDown;
     private boolean mCurrentVisible;
     private boolean mServiceBound;
-    private int mLanguage;
     private HCFSMgmtService mMgmtService;
     private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.GRID;
     //    private ExternalStorageObserver mExternalStorageObserver;

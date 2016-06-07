@@ -697,7 +697,7 @@ public class HCFSMgmtUtils {
     public static boolean isDataUploadCompleted() {
         HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
         if (hcfsStatInfo != null) {
-            return hcfsStatInfo.getCacheDirtyUsed().equals("0B");
+            return hcfsStatInfo.getFormatCacheDirtyUsed().equals("0B");
         }
         return false;
     }
@@ -842,9 +842,14 @@ public class HCFSMgmtUtils {
     }
 
     public static String getDeviceImei(Context context) {
-        String imei = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceImei", "IMEI=" + imei);
-        return imei == null ? "" : imei;
+        String imei = "";
+        TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (manager.getPhoneCount() != 0) {
+            imei = manager.getDeviceId(0);
+        }
+
+        Logs.d(CLASSNAME, "getDeviceImei", "Imei=" + imei);
+        return imei;
     }
 
     public static long getOccupiedSize() {
