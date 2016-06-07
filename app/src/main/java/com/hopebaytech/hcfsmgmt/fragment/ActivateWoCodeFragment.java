@@ -142,7 +142,7 @@ public class ActivateWoCodeFragment extends Fragment {
         mForgotPassword = (TextView) view.findViewById(R.id.forget_password);
         mGoogleActivate = (TextView) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
-        mSnackbar = Snackbar.make(view, R.string.activation_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
+        mSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
                 .setAction(R.string.enable_permission, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -220,6 +220,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                 @Override
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+
                                     hideProgressDialog();
 
                                     int errorMsgResId = R.string.activate_failed;
@@ -248,6 +250,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                 @Override
                                 public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "authResultInfo=" + authResultInfo.toString());
+
                                     hideProgressDialog();
                                     mErrorMessage.setText(R.string.activate_auth_failed);
                                 }
@@ -261,7 +265,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
                             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(mContext);
                             builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                            builder.setMessage(getString(R.string.activation_require_read_phone_state_permission));
+                            builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
                             builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -363,7 +367,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
                         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(mContext);
                         builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                        builder.setMessage(getString(R.string.activation_require_read_phone_state_permission));
+                        builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
                         builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -491,8 +495,9 @@ public class ActivateWoCodeFragment extends Fragment {
 
                         @Override
                         public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                            hideProgressDialog();
                             Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+
+                            hideProgressDialog();
 
                             Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                                     .setResultCallback(new ResultCallback<Status>() {
@@ -502,6 +507,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                         }
                                     });
 
+                            int errorMsgResId = R.string.activate_failed;
                             if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
                                 if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
                                     Bundle bundle = new Bundle();
@@ -515,22 +521,21 @@ public class ActivateWoCodeFragment extends Fragment {
                                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                                     ft.replace(R.id.fragment_container, fragment);
                                     ft.commit();
-                                    return;
+                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                                        registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                    errorMsgResId = R.string.activate_failed_not_supported_device;
+                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                    errorMsgResId = R.string.activate_failed_device_expired;
                                 }
                             }
-
-                            String message = registerResultInfo.getMessage();
-                            String errorMessage = "responseCode=" + registerResultInfo.getResponseCode();
-                            if (message != null) {
-                                errorMessage += ", message=" + message;
-                            }
-
-                            mErrorMessage.setText(errorMessage);
+                            mErrorMessage.setText(errorMsgResId);
 
                         }
 
                         @Override
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
+                            Logs.e(CLASSNAME, "onRegisterFailed", "authResultInfo=" + authResultInfo.toString());
+
                             Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                                     .setResultCallback(new ResultCallback<Status>() {
                                         @Override
@@ -539,13 +544,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                         }
                                     });
 
-                            String message = authResultInfo.getMessage();
-                            String errorMessage = "responseCode=" + authResultInfo.getResponseCode();
-                            if (message != null) {
-                                errorMessage += ", message=" + message;
-                            }
-
-                            mErrorMessage.setText(errorMessage);
+                            mErrorMessage.setText(R.string.activate_auth_failed);
                         }
 
                     });

@@ -27,6 +27,7 @@ import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import java.net.HttpURLConnection;
@@ -49,7 +50,7 @@ public class ActivateWithCodeFragment extends Fragment {
     private TextView mUsername;
     private EditText mActivateCode;
     private LinearLayout mActivateButton;
-    private TextView mErrorMsg;
+    private TextView mErrorMessage;
     private ProgressDialog mProgressDialog;
 
     public static ActivateWithCodeFragment newInstance() {
@@ -85,7 +86,7 @@ public class ActivateWithCodeFragment extends Fragment {
         mUsername = (TextView) view.findViewById(R.id.username);
         mActivateCode = (EditText) view.findViewById(R.id.activate_code);
         mActivateButton = (LinearLayout) view.findViewById(R.id.activate);
-        mErrorMsg = (TextView) view.findViewById(R.id.error_msg);
+        mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
     @Override
@@ -99,9 +100,9 @@ public class ActivateWithCodeFragment extends Fragment {
             public void onClick(View v) {
                 final String activateCode = mActivateCode.getText().toString();
                 if (activateCode.isEmpty()) {
-                    mErrorMsg.setText(R.string.activate_require_activation_code);
+                    mErrorMessage.setText(R.string.activate_require_activation_code);
                 } else if (!MgmtCluster.verifyActivationCode(activateCode)) {
-                    mErrorMsg.setText(R.string.activate_incorrect_activation_code);
+                    mErrorMessage.setText(R.string.activate_incorrect_activation_code);
                 } else {
                     showProgressDialog();
                     mWorkHandler.post(new Runnable() {
@@ -148,7 +149,7 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 public void run() {
                                                     hideProgressDialog();
                                                     if (failed) {
-                                                        mErrorMsg.setText(registerResultInfo.getMessage());
+                                                        mErrorMessage.setText(registerResultInfo.getMessage());
                                                     } else {
                                                         Intent intent = new Intent(mContext, MainActivity.class);
                                                         startActivity(intent);
@@ -162,23 +163,34 @@ public class ActivateWithCodeFragment extends Fragment {
 
                                 @Override
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+
                                     hideProgressDialog();
+
+                                    int errorMsgResId = R.string.activate_incorrect_activation_code;
                                     if (registerResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
                                         if (registerResultInfo.getErrorCode().equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
                                             String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
                                             Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(), getString(R.string.activate_with_code_msg), hyperLink));
-                                            mErrorMsg.setMovementMethod(LinkMovementMethod.getInstance());
-                                            mErrorMsg.setText(errorMsg);
+                                            mErrorMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                                            mErrorMessage.setText(errorMsg);
                                             return;
+                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                                                registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                            errorMsgResId = R.string.activate_failed_not_supported_device;
+                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                            errorMsgResId = R.string.activate_failed_device_expired;
                                         }
                                     }
-                                    mErrorMsg.setText(R.string.activate_incorrect_activation_code);
+                                    mErrorMessage.setText(errorMsgResId);
                                 }
 
                                 @Override
                                 public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "authResultInfo=" + authResultInfo.toString());
+
                                     hideProgressDialog();
-                                    mErrorMsg.setText(R.string.activate_auth_failed);
+                                    mErrorMessage.setText(R.string.activate_auth_failed);
                                 }
 
                             });
