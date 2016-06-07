@@ -124,7 +124,7 @@ public class ActivateWithCodeFragment extends Fragment {
                                 userAuthParam.setPassword(getArguments().getString(ActivateWoCodeFragment.KEY_PASSWORD));
                                 userAuthParam.setActivateCode(activateCode);
                                 userAuthParam.setImei(imei);
-                                userAuthParam.setVender(Build.BRAND);
+                                userAuthParam.setVendor(Build.BRAND);
                                 userAuthParam.setModel(Build.MODEL);
                                 authParam = userAuthParam;
                             }
@@ -162,16 +162,17 @@ public class ActivateWithCodeFragment extends Fragment {
 
                                 @Override
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                                    // TODO Error code is not defined
                                     hideProgressDialog();
-                                    if (registerResultInfo.getResponseCode() == HttpURLConnection.HTTP_NOT_ACCEPTABLE) {
-                                        String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
-                                        Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(), getString(R.string.activate_with_code_msg), hyperLink));
-                                        mErrorMsg.setMovementMethod(LinkMovementMethod.getInstance());
-                                        mErrorMsg.setText(errorMsg);
-                                    } else {
-                                        mErrorMsg.setText(R.string.activate_incorrect_activation_code);
+                                    if (registerResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                                        if (registerResultInfo.getErrorCode().equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
+                                            String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
+                                            Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(), getString(R.string.activate_with_code_msg), hyperLink));
+                                            mErrorMsg.setMovementMethod(LinkMovementMethod.getInstance());
+                                            mErrorMsg.setText(errorMsg);
+                                            return;
+                                        }
                                     }
+                                    mErrorMsg.setText(R.string.activate_incorrect_activation_code);
                                 }
 
                                 @Override

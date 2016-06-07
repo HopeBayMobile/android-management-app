@@ -27,13 +27,15 @@ public class MgmtCluster {
 
     private static final String CLASSNAME = MgmtCluster.class.getSimpleName();
     private static final String DOMAIN_NAME = "terafonnreg.hopebaytech.com";
-    public static final String REGISTER_LOGIN_API = "https://" + DOMAIN_NAME + "/api/register/login/";
+//    public static final String REGISTER_LOGIN_API = "https://" + DOMAIN_NAME + "/api/register/login/";
     public static final String REGISTER_AUTH_API = "https://" + DOMAIN_NAME + "/api/register/auth/";
     public static final String SOCIAL_AUTH_API = "https://" + DOMAIN_NAME + "/api/social-auth/";
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
     public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
 
+
     public static final String KEY_AUTH_CODE = "code";
+    public static final String KEY_ERROR_CODE = "error_code";
     public static final String KEY_USERNAME = "username";
     public static final String KEY_PASSWORD = "password";
     public static final String KEY_AUTHORIZATION = "Authorization";
@@ -43,6 +45,60 @@ public class MgmtCluster {
     public static final String KEY_MODEL = "model";
     public static final String KEY_ACTIVATION_CODE = "activation_code";
 
+    /**
+     * Unknown error.
+     */
+    public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
+
+    /**
+     * Input parameter relative error.
+     */
+    public static final String INPUT_ERROR = "INPUT_ERROR";
+
+    /**
+     * Device IMEI code is not registered.
+     */
+    public static final String IMEI_NOT_FOUND = "IMEI_NOT_FOUND";
+
+    /**
+     * Device IMEI code decrypt failed.
+     */
+    public static final String IMEI_DECRYPT_FAILED = "IMEI_DECRYPT_FAILED";
+
+    /**
+     * The model information is not matched with the device. It may not support tera service.
+     */
+    public static final String INCORRECT_MODEL = "INCORRECT_MODEL";
+
+    /**
+     * The vendor information is not matched with the device. It may not support tera service.
+     */
+    public static final String INCORRECT_VENDOR = "INCORRECT_VENDOR";
+
+    /**
+     * The device is expired. No support tera service anymore.
+     */
+    public static final String DEVICE_EXPIRED = "DEVICE_EXPIRED";
+
+    /**
+     * Invalid activation code or wrong model mapping. The device may not support tera service.
+     */
+    public static final String INVALID_CODE_OR_MODEL = "INVALID_CODE_OR_MODEL";
+
+    /**
+     * No service registered for the user and device.
+     */
+    public static final String MAPPING_NOT_FOUND = "MAPPING_NOT_FOUND";
+
+    /**
+     * The device is registered.
+     */
+    public static final String MAPPING_EXISTED = "MAPPING_EXISTED";
+
+    /**
+     * The device service is locked or expired.
+     */
+    public static final String SERVICE_BLOCK = "SERVICE_BLOCK";
 
     private static int retryCount = 0;
     public static final int GOOGLE_AUTH = 0;
@@ -92,9 +148,9 @@ public class MgmtCluster {
     }
 
     /**
-     * @param jwtToken the token to access mgmt cluster
+     * @param jwtToken          the token to access mgmt cluster
      * @param newServerAuthCode the auth code of google account to be switched
-     * @param imei the current device imei
+     * @param imei              the current device imei
      * @return true if the account is changed successfully; false otherwise.
      */
     public static boolean switchAccount(String jwtToken, String newServerAuthCode, String imei) {
@@ -220,7 +276,7 @@ public class MgmtCluster {
         private String imei;
         private String activateCode;
         private String model;
-        private String vender;
+        private String vendor;
 
         @Override
         public ContentValues createAuthParam() {
@@ -230,7 +286,7 @@ public class MgmtCluster {
             cv.put(KEY_PASSWORD, password);
             cv.put(KEY_IMEI, imei);
             cv.put(KEY_ACTIVATION_CODE, activateCode);
-            cv.put(KEY_VENDOR, vender);
+            cv.put(KEY_VENDOR, vendor);
             cv.put(KEY_MODEL, model);
 
             Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + imei);
@@ -257,8 +313,8 @@ public class MgmtCluster {
             this.model = model;
         }
 
-        public void setVender(String vender) {
-            this.vender = vender;
+        public void setVendor(String vendor) {
+            this.vendor = vendor;
         }
     }
 
@@ -267,7 +323,7 @@ public class MgmtCluster {
         IHttpProxy httpProxyImpl = null;
         try {
             httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(REGISTER_LOGIN_API);
+            httpProxyImpl.setUrl(DEVICE_API);
             httpProxyImpl.setDoOutput(true);
             ContentValues header = new ContentValues();
             header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
@@ -280,15 +336,14 @@ public class MgmtCluster {
                 String responseContent = httpProxyImpl.getResponseContent();
                 Logs.d(CLASSNAME, "register", "responseContent=" + responseContent);
                 JSONObject jsonObj = new JSONObject(responseContent);
-                JSONObject data = jsonObj.getJSONObject("data");
-                registerResultInfo.setBackendType(data.getString("backend_type"));
-                registerResultInfo.setAccount(data.getString("account").split(":")[0]);
-                registerResultInfo.setUser(data.getString("account").split(":")[1]);
-                registerResultInfo.setPassword(data.getString("password"));
-                registerResultInfo.setBackendUrl(data.getString("domain") + ":" + data.getInt("port"));
-                registerResultInfo.setBucket(data.getString("bucket"));
-                registerResultInfo.setProtocol(data.getBoolean("TLS") ? "https" : "http");
-                registerResultInfo.setStorageAccessToken(data.getString("token"));
+                registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+                registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]);
+                registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]);
+                registerResultInfo.setPassword(jsonObj.getString("password"));
+                registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
+                registerResultInfo.setBucket(jsonObj.getString("bucket"));
+                registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
+                registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
 
                 Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
                 Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
@@ -298,9 +353,13 @@ public class MgmtCluster {
                 Logs.d(CLASSNAME, "register", "protocol=" + registerResultInfo.getProtocol());
                 Logs.d(CLASSNAME, "register", "storageAccessToken=" + registerResultInfo.getStorageAccessToken());
             } else {
+                String responseContent = httpProxyImpl.getResponseContent();
                 try {
-                    String responseContent = httpProxyImpl.getResponseContent();
                     JSONObject jsonObj = new JSONObject(responseContent);
+                    if (responseCode != HttpsURLConnection.HTTP_INTERNAL_ERROR) {
+                        String errorCode = jsonObj.getString("error_code");
+                        registerResultInfo.setErrorCode(errorCode);
+                    }
                     String message = jsonObj.getString("detail");
                     registerResultInfo.setMessage(message);
                 } catch (JSONException e) {
@@ -324,16 +383,13 @@ public class MgmtCluster {
         void onRegisterSuccessful(RegisterResultInfo registerResultInfo);
 
         /**
-         * User authentication success, but registration to mgmt cluster failed. There are
-         * three conditions: 400 Bad Request means login failed, 404 Not Found means device not
-         * registered and 500 Internal Server Error means unknown error happened on server.
-         * */
+         * User authentication success, but registration to mgmt cluster failed.
+         */
         void onRegisterFailed(RegisterResultInfo registerResultInfo);
 
         /**
-         * User authentication failed. There are two conditions: 400 Bad Request means authentication
-         * failed and 500 Internal Server Error means unknown error happened on server.
-         * */
+         * User authentication failed.
+         */
         void onAuthFailed(AuthResultInfo authResultInfo);
 
     }
@@ -435,4 +491,36 @@ public class MgmtCluster {
     public static void plusRetryCount() {
         retryCount = retryCount + 1;
     }
+
+    public static int errorMessageResId(String errorCode) {
+        int resId = 0;
+        if (errorCode.equals(UNKNOWN_ERROR)) {
+
+        } else if (errorCode.equals(UNKNOWN_ERROR)) {
+
+        } else if (errorCode.equals(INPUT_ERROR)) {
+
+        } else if (errorCode.equals(IMEI_NOT_FOUND)) {
+
+        } else if (errorCode.equals(IMEI_DECRYPT_FAILED)) {
+
+        } else if (errorCode.equals(INCORRECT_MODEL)) {
+
+        } else if (errorCode.equals(INCORRECT_VENDOR)) {
+
+        } else if (errorCode.equals(DEVICE_EXPIRED)) {
+
+        } else if (errorCode.equals(INVALID_CODE_OR_MODEL)) {
+
+        } else if (errorCode.equals(MAPPING_EXISTED)) {
+
+        } else if (errorCode.equals(SERVICE_BLOCK)) {
+
+        } else if (errorCode.equals(MAPPING_NOT_FOUND)) {
+
+        }
+        return resId;
+    }
+
+
 }
