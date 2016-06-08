@@ -12,6 +12,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 public class HCFSMgmtReceiver extends BroadcastReceiver {
@@ -111,7 +112,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //            }
             else if (action.equals(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM)) {
                 String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "operation=" + operation);
+                Logs.d(CLASSNAME, "onReceive", "operation=" + operation);
                 Intent intentService = new Intent(context, HCFSMgmtService.class);
                 if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED)) {
                     intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
@@ -121,22 +122,24 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_RESET_XFER);
                 } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
                     intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+                } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_INSUFFICIENT_PIN_SPACE)) {
+                    intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
                 } else {
                     intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NONE);
                 }
                 context.startService(intentService);
             }
         } else {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
+            Logs.d(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
         }
 
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-            /** Add uid and pin system app */
+            // Add uid and pin system app
             Intent addUidAndPinSystemAppIntent = new Intent(context, HCFSMgmtService.class);
             addUidAndPinSystemAppIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP);
             context.startService(addUidAndPinSystemAppIntent);
         } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
-            /** Add uid info of new installed app to database and unpin user app on /data/data and /data/app */
+            // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (!isReplacing) {
                 Intent intentService = new Intent(context, HCFSMgmtService.class);
@@ -148,7 +151,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 context.startService(intentService);
             }
         } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
-            /** Pin or unpin an update app according to pin_status field in uid.db */
+            // Pin or unpin an update app according to pin_status field in uid.db
             String packageName = intent.getData().getSchemeSpecificPart();
             Intent intentService = new Intent(context, HCFSMgmtService.class);
             int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
@@ -157,7 +160,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME, packageName);
             context.startService(intentService);
         } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
-            /** Remove uid info of uninstalled app from database */
+            // Remove uid info of uninstalled app from database
             boolean isDataRemoved = intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false);
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (isDataRemoved && !isReplacing) {

@@ -31,7 +31,7 @@
     <View style="@style/Divider" />
 
     <LinearLayout
-        android:id="@+id/nav_system"
+        android:id="@+id/nav_app_file"
         android:clickable="true"
         android:background="?android:attr/selectableItemBackground"
         android:layout_width="match_parent"

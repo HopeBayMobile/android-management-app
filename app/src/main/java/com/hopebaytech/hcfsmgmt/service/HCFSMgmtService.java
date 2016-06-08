@@ -49,6 +49,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
@@ -271,7 +272,8 @@ public class HCFSMgmtService extends Service {
                                     int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;
                                     String notify_title = getString(R.string.app_name);
                                     String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storageUsedRatio);
-                                    NotificationEvent.notify(context, notify_id, notify_title, notify_message, false);
+                                    NotificationEvent.notify(context, notify_id, notify_title, notify_message);
+
                                     editor.putBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, true);
                                 }
                             } else {
@@ -354,7 +356,7 @@ public class HCFSMgmtService extends Service {
                                                     int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
                                                     String notify_title = getString(R.string.app_name);
                                                     String notify_content = "Google sign-in is failed";
-                                                    NotificationEvent.notify(context, id_notify, notify_title, notify_content, false);
+                                                    NotificationEvent.notify(context, id_notify, notify_title, notify_content);
                                                 }
                                             })
                                             .build();
@@ -412,13 +414,32 @@ public class HCFSMgmtService extends Service {
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_INSUFFICIENT_PIN_SPACE)) {
                         HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
                         if (statInfo != null) {
+                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
+
                             long pinTotal = statInfo.getPinTotal();
                             long pinMax = statInfo.getPinMax();
-                            double ratio = (double) pinTotal / pinMax;
-                            if (ratio > 0.8) {
-                                int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
-                                NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, false);
+                            String notifyRatio = HCFSMgmtUtils.NOTIFY_INSUFFICIENT_PIN_PACE_RATIO;
+                            double ratio = ((double) pinTotal / pinMax) * 100;
+                            Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio + ", ratio=" + ratio);
+                            if (ratio >= Integer.valueOf(notifyRatio)) {
+                                if (!isNotified) {
+                                    int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+                                    String notifyTitle = getString(R.string.app_name);
+                                    String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
+                                    Bundle extras = new Bundle();
+                                    extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
+                                    NotificationEvent.notify(HCFSMgmtService.this, idNotify, notifyTitle, notifyContent, extras);
+
+                                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
+                                }
+                            } else {
+                                if (isNotified) {
+                                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
+                                }
                             }
+                            editor.apply();
                         }
                     }
                 }
@@ -466,7 +487,7 @@ public class HCFSMgmtService extends Service {
             int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
             String notify_title = getString(R.string.app_name);
             String notify_content = getString(R.string.auth_at_bootup_auth_mgmt_failed);
-            NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, false);
+            NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content);
 
             Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<Status>() {
@@ -491,7 +512,7 @@ public class HCFSMgmtService extends Service {
         int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
         String notify_title = getString(R.string.app_name);
         String notify_content = getString(R.string.auth_at_bootup_auth_google_failed);
-        NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, false);
+        NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content);
 
         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<Status>() {
@@ -559,7 +580,7 @@ public class HCFSMgmtService extends Service {
     }
 
     private void pinOrUnpinApp(AppInfo info) {
-        Logs.e(CLASSNAME, "pinOrUnpinApp", info.getName());
+        Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
         final boolean isPinned = info.isPinned();
         if (isPinned) {
             if (!HCFSMgmtUtils.pinApp(info)) {
@@ -600,7 +621,7 @@ public class HCFSMgmtService extends Service {
         int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
         String notify_title = getString(R.string.app_name);
         String notify_message = notifyMsg + ": " + info.getName();
-        NotificationEvent.notify(this, notify_id, notify_title, notify_message, false);
+        NotificationEvent.notify(this, notify_id, notify_title, notify_message);
     }
 
     private void pinOrUnpinDataTypeFile() {
@@ -732,7 +753,7 @@ public class HCFSMgmtService extends Service {
                 }
             }
             int notify_id = HCFSMgmtUtils.NOTIFY_ID_PIN_UNPIN_FAILURE;
-            NotificationEvent.notify(this, notify_id, notify_title, notify_message.toString(), false);
+            NotificationEvent.notify(this, notify_id, notify_title, notify_message.toString());
         }
     }
 
@@ -748,7 +769,7 @@ public class HCFSMgmtService extends Service {
                 int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
                 String notify_title = getString(R.string.app_name);
                 String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message, false);
+                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
             }
         } else {
             boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
@@ -756,7 +777,7 @@ public class HCFSMgmtService extends Service {
                 int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
                 String notify_title = getString(R.string.app_name);
                 String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message, false);
+                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
             }
         }
     }
@@ -777,7 +798,7 @@ public class HCFSMgmtService extends Service {
                 int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
                 String notify_title = getString(R.string.app_name);
                 String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message, false);
+                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
 
                 info.setPinned(!info.isPinned());
                 listener.OnPinUnpinFailed(info);
@@ -788,7 +809,7 @@ public class HCFSMgmtService extends Service {
                 int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
                 String notify_title = getString(R.string.app_name);
                 String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message, false);
+                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
 
                 info.setPinned(!info.isPinned());
                 listener.OnPinUnpinFailed(info);

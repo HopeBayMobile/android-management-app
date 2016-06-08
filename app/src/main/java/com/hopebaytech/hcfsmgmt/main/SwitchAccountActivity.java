@@ -393,7 +393,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
 
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN);
+        startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
     }
 
     private void showProgressDialog() {
@@ -420,7 +420,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN) {
+        if (requestCode == RequestCode.GOOGLE_SIGN_IN) {
             hideProgressDialog();
 
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);

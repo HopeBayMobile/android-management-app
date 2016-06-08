@@ -46,19 +46,19 @@ public class LoadingActivity extends AppCompatActivity {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
 
-        String logMsg = "Build.BRAND=" + Build.BRAND +
-                ", Build.BOARD=" + Build.BOARD +
-                ", Build.BOOTLOADER=" + Build.BOOTLOADER +
-                ", Build.DEVICE=" + Build.DEVICE +
-                ", Build.HARDWARE=" + Build.HARDWARE +
-                ", Build.MANUFACTURER=" + Build.MANUFACTURER +
-                ", Build.MODEL=" + Build.MODEL +
-                ", Build.VERSION.RELEASE=" + Build.VERSION.RELEASE +
-                ", Build.VERSION.SDK_INT=" + Build.VERSION.SDK_INT +
-                ", Build.PRODUCT=" + Build.PRODUCT +
-                ", Build.SERIAL=" + Build.SERIAL;
-
-        Logs.w(CLASSNAME, "onCreate", logMsg);
+//        String logMsg = "Build.BRAND=" + Build.BRAND +
+//                ", Build.BOARD=" + Build.BOARD +
+//                ", Build.BOOTLOADER=" + Build.BOOTLOADER +
+//                ", Build.DEVICE=" + Build.DEVICE +
+//                ", Build.HARDWARE=" + Build.HARDWARE +
+//                ", Build.MANUFACTURER=" + Build.MANUFACTURER +
+//                ", Build.MODEL=" + Build.MODEL +
+//                ", Build.VERSION.RELEASE=" + Build.VERSION.RELEASE +
+//                ", Build.VERSION.SDK_INT=" + Build.VERSION.SDK_INT +
+//                ", Build.PRODUCT=" + Build.PRODUCT +
+//                ", Build.SERIAL=" + Build.SERIAL;
+//
+//        Logs.w(CLASSNAME, "onCreate", logMsg);
 
         init();
     }
@@ -86,15 +86,10 @@ public class LoadingActivity extends AppCompatActivity {
                                             public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                                                 /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
                                                 Logs.e(CLASSNAME, "onConnectionFailed", connectionResult.toString());
-                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(LoadingActivity.this);
-                                                boolean hcfsActivated = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
-                                                if (hcfsActivated) {
-                                                    Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
-                                                    startActivity(intent);
-                                                } else {
-                                                    Intent intent = new Intent(LoadingActivity.this, ActivateActivity.class);
-                                                    startActivity(intent);
-                                                }
+
+                                                Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
+                                                intent.putExtras(getIntent().getExtras());
+                                                startActivity(intent);
                                             }
                                         })
                                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -136,6 +131,7 @@ public class LoadingActivity extends AppCompatActivity {
     private void handleSignInResult(@Nullable GoogleSignInResult result) {
         Logs.d(CLASSNAME, "handleSignInResult", null);
         Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
+        intent.putExtras(getIntent().getExtras());
         if (result != null && result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
             if (acct != null) {

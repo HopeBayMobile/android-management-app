@@ -346,7 +346,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                             }
 
                                             Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                                            ((Activity) mContext).startActivityForResult(signInIntent, HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN);
+                                            ((Activity) mContext).startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
                                         }
                                     });
                                 } else {
@@ -419,7 +419,7 @@ public class ActivateWoCodeFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         Logs.w(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
-        if (requestCode == HCFSMgmtUtils.REQUEST_CODE_GOOGLE_SIGN_IN) {
+        if (requestCode == RequestCode.GOOGLE_SIGN_IN) {
             if (resultCode == Activity.RESULT_OK) {
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 final GoogleSignInAccount acct = result.getSignInAccount();

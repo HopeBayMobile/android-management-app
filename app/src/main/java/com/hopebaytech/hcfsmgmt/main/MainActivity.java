@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -37,7 +36,7 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
-import com.hopebaytech.hcfsmgmt.fragment.DashboardFragment;
+import com.hopebaytech.hcfsmgmt.fragment.OverviewFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
@@ -102,16 +101,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (mDrawerLayout != null) {
             ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
-//        drawer.setDrawerListener(toggle);
             mDrawerLayout.addDrawerListener(toggle);
             toggle.syncState();
         }
 
         mNavigationView = (NavigationView) findViewById(R.id.nav_view);
         if (mNavigationView != null) {
-//            mNavigationView.setNavigationItemSelectedListener(this);
             mNavigationView.findViewById(R.id.nav_dashboard).setOnClickListener(this);
-            mNavigationView.findViewById(R.id.nav_system).setOnClickListener(this);
+            mNavigationView.findViewById(R.id.nav_app_file).setOnClickListener(this);
             mNavigationView.findViewById(R.id.nav_settings).setOnClickListener(this);
             mNavigationView.findViewById(R.id.nav_about).setOnClickListener(this);
             final AccountDAO accountDAO = AccountDAO.getInstance(MainActivity.this);
@@ -175,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-        /** Detect whether sdcard1 exists, if exists, add to left slide menu. */
+        // Detect whether sdcard1 exists, if exists, add to left slide menu.
 //        mHandler.post(new Runnable() {
 //            @Override
 //            public void run() {
@@ -212,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            }
 //        });
 
-        /** Inert default value of image, video and audio type to "dataFtype" table in database */
+        // Inert default value of image, video and audio type to "dataType" table in database
 //        mHandler.post(new Runnable() {
 //            @Override
 //            public void run() {
@@ -233,10 +230,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            }
 //        });
 
-        /** Start NotifyUploadCompletedAlarm if user enables this notification in settings. Others, stop it */
+        // Start NotifyUploadCompletedAlarm if user enables this notification in settings. Others, stop it
 //        Intent intent = new Intent(this, HCFSMgmtReceiver.class);
 //        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-//        boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED, intent,
+//        boolean isNotifyUploadCompletedAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_NOTIFY_UPLOAD_COMPLETED, intent,
 //                PendingIntent.FLAG_NO_CREATE) != null;
 //        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 //        boolean notifyUploadCompletedPref = sharedPreferences.getBoolean(SettingsFragment.KEY_PREF_NOTIFY_UPLOAD_COMPLETED, false);
@@ -250,16 +247,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            }
 //        }
 
-        /** Start ResetXferAlarm if it doesn't exist */
+        // Start ResetXferAlarm if it doesn't exist
         Intent intent = new Intent(this, HCFSMgmtReceiver.class);
         intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, HCFSMgmtUtils.REQUEST_CODE_RESET_XFER, intent,
+        boolean isResetXferAlarmExist = PendingIntent.getBroadcast(this, RequestCode.RESET_XFER, intent,
                 PendingIntent.FLAG_NO_CREATE) != null;
         if (!isResetXferAlarmExist) {
             HCFSMgmtUtils.startResetXferAlarm(this);
         }
 
-        /** Start PinDataTypeFileAlarm if it doesn't exist */
+        // Start PinDataTypeFileAlarm if it doesn't exist
 //        intent = new Intent(this, HCFSMgmtReceiver.class);
 //        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
 //        intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE);
@@ -269,18 +266,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            HCFSMgmtUtils.startPinDataTypeFileAlarm(this);
 //        }
 
-        /** Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist */
+        // Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist
         intent = new Intent(this, HCFSMgmtReceiver.class);
         intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
         boolean isNotifyLocalStorageUsedRatioAlarmExist = PendingIntent.getBroadcast(this,
-                HCFSMgmtUtils.REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO,
+                RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
         if (!isNotifyLocalStorageUsedRatioAlarmExist) {
             HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(this);
         }
 
-        /** Initialize ViewPager with CustomPagerTabStrip */
+        // Start NotifyInsufficientPinSpaceAlarm if it doesn't exist
+        intent = new Intent(this, HCFSMgmtReceiver.class);
+        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+        intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+        boolean isNotifyInsufficientPinSpaceAlarmExist = PendingIntent.getBroadcast(this,
+                RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE,
+                intent, PendingIntent.FLAG_NO_CREATE) != null;
+        HCFSMgmtUtils.stopNotifyInsufficientPinSpaceAlarm(this);
+        if (!isNotifyInsufficientPinSpaceAlarmExist) {
+            HCFSMgmtUtils.startNotifyInsufficientPinSpaceAlarm(this);
+        }
+
+        // Initialize ViewPager with CustomPagerTabStrip
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.viewpager);
         if (mViewPager != null) {
@@ -288,6 +297,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
             pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(this, R.color.C2));
             mViewPager.setAdapter(mPagerAdapter);
+        }
+
+        boolean insufficientPinSpace = getIntent().getBooleanExtra(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, false);
+        if (insufficientPinSpace) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            Thread.sleep(500);
+                            Fragment fragment = mPagerAdapter.getFragment(0);
+                            if (fragment != null && fragment.isVisible()) {
+                                Thread.sleep(500);
+                                mViewPager.setCurrentItem(1, true);
+                                break;
+                            }
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
         }
 
     }
@@ -298,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = v.getId();
         if (id == R.id.nav_dashboard) {
             mViewPager.setCurrentItem(0, true);
-        } else if (id == R.id.nav_system) {
+        } else if (id == R.id.nav_app_file) {
             isSDCard1 = false;
             mViewPager.setCurrentItem(1, true);
         } else if (id == R.id.nav_settings) {
@@ -327,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Fragment fragment;
             String title = titleArray[i];
             if (title.equals(getString(R.string.nav_overview))) {
-                fragment = DashboardFragment.newInstance();
+                fragment = OverviewFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_app_file))) {
                 fragment = FileMgmtFragment.newInstance(false);
             } else if (title.equals(getString(R.string.nav_settings))) {
@@ -401,27 +432,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }, 2000);
         }
     }
-
-//    @Override
-//    public boolean onNavigationItemSelected(MenuItem item) {
-//        /** Handle navigation view item clicks here. */
-//        int id = item.getItemId();
-//        if (id == R.id.nav_dashboard) {
-//            mViewPager.setCurrentItem(0, true);
-//        } else if (id == R.id.nav_system) {
-//            isSDCard1 = false;
-//            mViewPager.setCurrentItem(1, true);
-//        } else if (id == R.id.nav_settings) {
-//            mViewPager.setCurrentItem(2, true);
-//        } else if (id == R.id.nav_about) {
-//            mViewPager.setCurrentItem(3, true);
-//        } else if (id == NAV_MENU_SDCARD1_ID) {
-//            isSDCard1 = true;
-//        }
-//
-//        mDrawerLayout.closeDrawer(GravityCompat.START);
-//        return true;
-//    }
 
     public class SDCardBroadcastReceiver extends BroadcastReceiver {
         @Override
