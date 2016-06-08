@@ -9,6 +9,7 @@ import android.util.Log;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IGenericDAO;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,23 +91,37 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
 
     @Override
     public boolean insert(AccountInfo info) {
+
+        String name = info.getName() == null ? "" : info.getName();
+        String email = info.getEmail() == null ? "" : info.getEmail();
+        String imgUrl = info.getImgUrl();
+        String base64 = info.getImgBase64();
+
         ContentValues cv = new ContentValues();
-        cv.put(NAME_COLUMN, info.getName());
-        cv.put(EMAIL_COLUMN, info.getEmail());
-        cv.put(IMG_URL_COLUMN, info.getImgUrl());
-        cv.put(IMG_BASE64_COLUMN, info.getImgBase64());
+        cv.put(NAME_COLUMN, name);
+        cv.put(EMAIL_COLUMN, email);
+        if (imgUrl != null) {
+            cv.put(IMG_URL_COLUMN, imgUrl);
+        }
+        if (base64 != null) {
+            cv.put(IMG_BASE64_COLUMN, base64);
+        }
         cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpringTime());
 
         boolean isSuccess = mDataBase.insert(TABLE_NAME, null, cv) != -1;
         if (isSuccess) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "insert",
+            Logs.d(CLASSNAME, "insert",
+                    "name=" + name +
+                            ", email=" + email +
+                            ", imgUrl=" + imgUrl +
+                            ", imgBase64=" + base64 +
+                            ", imgExpiringTime=" + info.getImgExpringTime());
+        } else {
+            Logs.e(CLASSNAME, "insert",
                     "name=" + info.getName() +
                             ", email=" + info.getEmail() +
                             ", imgUrl=" + info.getImgUrl() +
-                            ", imgBase64=" + info.getImgBase64() +
-                            ", imgExpiringTime=" + info.getImgExpringTime());
-        } else {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "insert", "name=" + info.getName() + ", email=" + info.getEmail() + ", imgUrl=" + info.getImgUrl() + ", imgBase64=" + info.getImgBase64());
+                            ", imgBase64=" + info.getImgBase64());
         }
         return isSuccess;
     }

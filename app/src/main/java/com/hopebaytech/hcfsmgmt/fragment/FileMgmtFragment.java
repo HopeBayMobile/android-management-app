@@ -689,7 +689,7 @@ public class FileMgmtFragment extends Fragment {
         mPinUnpinAppMap = new ConcurrentHashMap<>();
         mPinUnpinTypeMap = new ConcurrentHashMap<>();
 
-        /** Register mAddRemovePackageStatusReceiver */
+        /** RegisterProxy mAddRemovePackageStatusReceiver */
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);

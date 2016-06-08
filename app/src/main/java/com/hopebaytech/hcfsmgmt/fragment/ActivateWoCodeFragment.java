@@ -145,6 +145,8 @@ public class ActivateWoCodeFragment extends Fragment {
      */
     public static final String KEY_AUTH_CODE = "auth_code";
 
+    public static final String KEY_JWT_TOKEN = "jwt_token";
+
     private GoogleApiClient mGoogleApiClient;
     private Handler mWorkHandler;
     private Handler mUiHandler;
@@ -235,74 +237,92 @@ public class ActivateWoCodeFragment extends Fragment {
                         if (NetworkUtils.isNetworkConnected(mContext)) {
                             showProgressDialog();
 
-                            MgmtCluster.UserAuthParam authParam = new MgmtCluster.UserAuthParam();
+                            final MgmtCluster.UserAuthParam authParam = new MgmtCluster.UserAuthParam();
                             authParam.setUsername(username);
                             authParam.setPassword(password);
                             authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
 
-                            MgmtCluster.Register mgmtRegister = new MgmtCluster.Register(authParam);
-                            mgmtRegister.setOnRegisterListener(new MgmtCluster.RegisterListener() {
+                            MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                            authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
                                 @Override
-                                public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
-                                    hideProgressDialog();
-                                    mWorkHandler.post(new Runnable() {
+                                public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
+                                    MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
+                                    registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
                                         @Override
-                                        public void run() {
-                                            // TODO Set arkflex token to hcfs
-                                            // registerResultInfo.getStorageAccessToken();
-                                            final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                            if (failed) {
-                                                HCFSConfig.resetHCFSConfig();
-                                            }
-                                            mUiHandler.post(new Runnable() {
+                                        public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+                                            hideProgressDialog();
+                                            mWorkHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
+                                                    // TODO Set arkflex token to hcfs
+                                                    // registerResultInfo.getStorageAccessToken();
+                                                    final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
                                                     if (failed) {
-                                                        mErrorMessage.setText(registerResultInfo.getMessage());
+                                                        HCFSConfig.resetHCFSConfig();
                                                     } else {
+                                                        AccountInfo accountInfo = new AccountInfo();
+                                                        accountInfo.setName(username);
+
+                                                        AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+                                                        accountDAO.clear();
+                                                        accountDAO.insert(accountInfo);
+                                                        accountDAO.close();
+
                                                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                                         editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                         editor.apply();
-
-                                                        Intent intent = new Intent(mContext, MainActivity.class);
-                                                        startActivity(intent);
-                                                        ((Activity) mContext).finish();
                                                     }
+
+                                                    mUiHandler.post(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            if (failed) {
+                                                                mErrorMessage.setText(registerResultInfo.getMessage());
+                                                            } else {
+                                                                Intent intent = new Intent(mContext, MainActivity.class);
+                                                                startActivity(intent);
+                                                                ((Activity) mContext).finish();
+                                                            }
+                                                        }
+                                                    });
                                                 }
                                             });
                                         }
-                                    });
-                                }
 
-                                @Override
-                                public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+                                        @Override
+                                        public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+                                            Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
-                                    hideProgressDialog();
+                                            hideProgressDialog();
 
-                                    int errorMsgResId = R.string.activate_failed;
-                                    if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                                        if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
-                                            Bundle bundle = new Bundle();
-                                            bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.USER_AUTH);
-                                            bundle.putString(KEY_USERNAME, username);
-                                            bundle.putString(KEY_PASSWORD, password);
+                                            int errorMsgResId = R.string.activate_failed;
+                                            if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                                                if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                                                    Bundle bundle = new Bundle();
+                                                    bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.USER_AUTH);
+                                                    bundle.putString(KEY_USERNAME, username);
+                                                    bundle.putString(KEY_PASSWORD, password);
+                                                    bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
 
-                                            ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                            fragment.setArguments(bundle);
+                                                    ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                                                    fragment.setArguments(bundle);
 
-                                            FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                            ft.replace(R.id.fragment_container, fragment, ActivateWithCodeFragment.TAG);
-                                            ft.commit();
-                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                                                registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                                            errorMsgResId = R.string.activate_failed_not_supported_device;
-                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
-                                            errorMsgResId = R.string.activate_failed_device_expired;
+                                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                                    ft.replace(R.id.fragment_container, fragment, ActivateWithCodeFragment.TAG);
+                                                    ft.commit();
+                                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                                                        registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                                    errorMsgResId = R.string.activate_failed_not_supported_device;
+                                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                                    errorMsgResId = R.string.activate_failed_device_expired;
+                                                }
+                                            }
+                                            mErrorMessage.setText(errorMsgResId);
                                         }
-                                    }
-                                    mErrorMessage.setText(errorMsgResId);
+
+                                    });
+                                    registerProxy.register();
                                 }
 
                                 @Override
@@ -312,9 +332,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                     hideProgressDialog();
                                     mErrorMessage.setText(R.string.activate_auth_failed);
                                 }
-
                             });
-                            mgmtRegister.register();
+                            authProxy.auth();
                         } else {
                             mErrorMessage.setText(R.string.activate_alert_dialog_message);
                         }
@@ -483,111 +502,120 @@ public class ActivateWoCodeFragment extends Fragment {
                 if (acct != null) {
                     final String serverAuthCode = acct.getServerAuthCode();
                     final String email = acct.getEmail();
-                    MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                    final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
                     authParam.setAuthCode(serverAuthCode);
                     authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
                     authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
                     authParam.setVendor(Build.BRAND);
                     authParam.setModel(Build.MODEL);
 
-                    MgmtCluster.Register mgmtRegister = new MgmtCluster.Register(authParam);
-                    mgmtRegister.setOnRegisterListener(new MgmtCluster.RegisterListener() {
+                    MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                    authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
                         @Override
-                        public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
-                            mWorkHandler.post(new Runnable() {
+                        public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
+                            MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
+                            registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
                                 @Override
-                                public void run() {
-                                    boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                    if (isFailed) {
-                                        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
-                                        HCFSConfig.resetHCFSConfig();
-
-                                        mUiHandler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                hideProgressDialog();
-                                                mErrorMessage.setText(registerResultInfo.getMessage());
-                                            }
-                                        });
-                                    } else {
-                                        String name = acct.getDisplayName();
-                                        String email = acct.getEmail();
-                                        String photoUrl = null;
-                                        if (acct.getPhotoUrl() != null) {
-                                            photoUrl = acct.getPhotoUrl().toString();
-                                        }
-
-                                        AccountInfo accountInfo = new AccountInfo();
-                                        accountInfo.setName(name);
-                                        accountInfo.setEmail(email);
-                                        accountInfo.setImgUrl(photoUrl);
-
-                                        AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-                                        accountDAO.clear();
-                                        accountDAO.insert(accountInfo);
-                                        accountDAO.close();
-
-                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                        editor.apply();
-
-                                        mUiHandler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                hideProgressDialog();
-                                            }
-                                        });
-
-                                        Intent intent = new Intent(mContext, MainActivity.class);
-                                        intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-                                        intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, email);
-                                        intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
-                                        startActivity(intent);
-
-                                        ((Activity) mContext).finish();
-                                    }
-                                }
-                            });
-                        }
-
-                        @Override
-                        public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                            Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
-
-                            hideProgressDialog();
-
-                            Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                                    .setResultCallback(new ResultCallback<Status>() {
+                                public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+                                    mWorkHandler.post(new Runnable() {
                                         @Override
-                                        public void onResult(@NonNull Status status) {
-                                            Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
+                                        public void run() {
+                                            boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            if (isFailed) {
+                                                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+                                                HCFSConfig.resetHCFSConfig();
+
+                                                mUiHandler.post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        hideProgressDialog();
+                                                        mErrorMessage.setText(registerResultInfo.getMessage());
+                                                    }
+                                                });
+                                            } else {
+                                                String name = acct.getDisplayName();
+                                                String email = acct.getEmail();
+                                                String photoUrl = null;
+                                                if (acct.getPhotoUrl() != null) {
+                                                    photoUrl = acct.getPhotoUrl().toString();
+                                                }
+
+                                                AccountInfo accountInfo = new AccountInfo();
+                                                accountInfo.setName(name);
+                                                accountInfo.setEmail(email);
+                                                accountInfo.setImgUrl(photoUrl);
+
+                                                AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+                                                accountDAO.clear();
+                                                accountDAO.insert(accountInfo);
+                                                accountDAO.close();
+
+                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
+                                                editor.apply();
+
+                                                mUiHandler.post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        hideProgressDialog();
+                                                    }
+                                                });
+
+                                                Intent intent = new Intent(mContext, MainActivity.class);
+                                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+                                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, email);
+                                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
+                                                startActivity(intent);
+
+                                                ((Activity) mContext).finish();
+                                            }
                                         }
                                     });
-
-                            int errorMsgResId = R.string.activate_failed;
-                            if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                                if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
-                                    Bundle bundle = new Bundle();
-                                    bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
-                                    bundle.putString(KEY_USERNAME, email);
-                                    bundle.putString(KEY_AUTH_CODE, serverAuthCode);
-
-                                    ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                    fragment.setArguments(bundle);
-
-                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                    ft.replace(R.id.fragment_container, fragment);
-                                    ft.commit();
-                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                                        registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                                    errorMsgResId = R.string.activate_failed_not_supported_device;
-                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
-                                    errorMsgResId = R.string.activate_failed_device_expired;
                                 }
-                            }
-                            mErrorMessage.setText(errorMsgResId);
 
+                                @Override
+                                public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+
+                                    hideProgressDialog();
+
+                                    Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                                            .setResultCallback(new ResultCallback<Status>() {
+                                                @Override
+                                                public void onResult(@NonNull Status status) {
+                                                    Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
+                                                }
+                                            });
+
+                                    int errorMsgResId = R.string.activate_failed;
+                                    if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                                        if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                                            Bundle bundle = new Bundle();
+                                            bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
+                                            bundle.putString(KEY_USERNAME, email);
+                                            bundle.putString(KEY_AUTH_CODE, serverAuthCode);
+                                            bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
+
+                                            ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                                            fragment.setArguments(bundle);
+
+                                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                            ft.replace(R.id.fragment_container, fragment);
+                                            ft.commit();
+                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                                                registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                            errorMsgResId = R.string.activate_failed_not_supported_device;
+                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                            errorMsgResId = R.string.activate_failed_device_expired;
+                                        }
+                                    }
+                                    mErrorMessage.setText(errorMsgResId);
+
+                                }
+
+                            });
+                            registerProxy.register();
                         }
 
                         @Override
@@ -606,13 +634,15 @@ public class ActivateWoCodeFragment extends Fragment {
 
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }
-
                     });
-                    mgmtRegister.register();
+                    authProxy.auth();
+
                 } else {
                     String failedMsg = "acct is null";
                     googleAuthFailed(failedMsg);
                 }
+            } else {
+                hideProgressDialog();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
