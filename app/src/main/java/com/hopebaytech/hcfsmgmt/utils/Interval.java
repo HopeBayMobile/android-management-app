@@ -1,7 +1,8 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 /**
- * Created by Aaron on 2016/5/4.
+ * @author Aaron
+ *         Created by Aaron on 2016/5/4.
  */
 public class Interval {
 

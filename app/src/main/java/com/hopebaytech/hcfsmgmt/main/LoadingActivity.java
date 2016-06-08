@@ -90,9 +90,11 @@ public class LoadingActivity extends AppCompatActivity {
                                             public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                                                 /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
                                                 Logs.e(CLASSNAME, "onConnectionFailed", connectionResult.toString());
+
                                                 Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
+                                                intent.putExtras(getIntent().getExtras());
                                                 startActivity(intent);
-                                                finish();
+						finish();
                                             }
                                         })
                                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
@@ -134,6 +136,7 @@ public class LoadingActivity extends AppCompatActivity {
     private void handleSignInResult(@Nullable GoogleSignInResult result) {
         Logs.d(CLASSNAME, "handleSignInResult", null);
         Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
+        intent.putExtras(getIntent().getExtras());
         if (result != null && result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
             if (acct != null) {
