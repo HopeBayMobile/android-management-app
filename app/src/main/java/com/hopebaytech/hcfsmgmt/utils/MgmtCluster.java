@@ -32,7 +32,6 @@ public class MgmtCluster {
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
     public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
 
-
     public static final String KEY_AUTH_CODE = "code";
     public static final String KEY_ERROR_CODE = "error_code";
     public static final String KEY_USERNAME = "username";
@@ -43,17 +42,9 @@ public class MgmtCluster {
     public static final String KEY_VENDOR = "vendor";
     public static final String KEY_MODEL = "model";
     public static final String KEY_ACTIVATION_CODE = "activation_code";
-    private static int retryCount = 0;
+    public static final String KEY_BACKEND = "backend";
 
-    public static final String KEY_AUTH_CODE = "code";
-    public static final String KEY_USERNAME = "username";
-    public static final String KEY_PASSWORD = "password";
-    public static final String KEY_AUTHORIZATION = "Authorization";
-    public static final String KEY_NEW_AUTH_CODE = "new_auth_code";
-    public static final String KEY_IMEI = "imei_code";
-    public static final String KEY_VENDOR = "vendor";
-    public static final String KEY_MODEL = "model";
-    public static final String KEY_ACTIVATION_CODE = "activation_code";
+    public static final String GOOGLE_AUTH_BACKEND = "google-oauth2";
 
     /**
      * Unknown error.
@@ -124,108 +115,7 @@ public class MgmtCluster {
             if (authParam instanceof GoogleAuthParam) {
                 url = SOCIAL_AUTH_API;
                 data.put(KEY_AUTH_CODE, ((GoogleAuthParam) authParam).authCode);
-            } else {
-                url = USER_AUTH_API;
-                data.put(KEY_USERNAME, ((UserAuthParam) authParam).username);
-                data.put(KEY_PASSWORD, ((UserAuthParam) authParam).password);
-            }
-
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(url);
-            httpProxyImpl.setDoOutput(true);
-            httpProxyImpl.connect();
-
-            int responseCode = httpProxyImpl.post(data);
-            authResultInfo.setResponseCode(responseCode);
-            String responseContent = httpProxyImpl.getResponseContent();
-            Logs.d(CLASSNAME, "auth", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                JSONObject jsonObj = new JSONObject(responseContent);
-                String jwtToken = jsonObj.getString("token");
-                Logs.d(CLASSNAME, "auth", "jwtToken=" + jwtToken);
-                authResultInfo.setToken(jwtToken);
-            } else {
-                authResultInfo.setMessage(responseContent);
-            }
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "auth", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
-        }
-        return authResultInfo;
-    }
-
-    /**
-     * Unknown error.
-     */
-    public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
-
-    /**
-     * Input parameter relative error.
-     */
-    public static final String INPUT_ERROR = "INPUT_ERROR";
-
-    /**
-     * Device IMEI code is not registered.
-     */
-    public static final String IMEI_NOT_FOUND = "IMEI_NOT_FOUND";
-
-    /**
-     * Device IMEI code decrypt failed.
-     */
-    public static final String IMEI_DECRYPT_FAILED = "IMEI_DECRYPT_FAILED";
-
-    /**
-     * The model information is not matched with the device. It may not support tera service.
-     */
-    public static final String INCORRECT_MODEL = "INCORRECT_MODEL";
-
-    /**
-     * The vendor information is not matched with the device. It may not support tera service.
-     */
-    public static final String INCORRECT_VENDOR = "INCORRECT_VENDOR";
-
-    /**
-     * The device is expired. No support tera service anymore.
-     */
-    public static final String DEVICE_EXPIRED = "DEVICE_EXPIRED";
-
-    /**
-     * Invalid activation code or wrong model mapping. The device may not support tera service.
-     */
-    public static final String INVALID_CODE_OR_MODEL = "INVALID_CODE_OR_MODEL";
-
-    /**
-     * No service registered for the user and device.
-     */
-    public static final String MAPPING_NOT_FOUND = "MAPPING_NOT_FOUND";
-
-    /**
-     * The device is registered.
-     */
-    public static final String MAPPING_EXISTED = "MAPPING_EXISTED";
-
-    /**
-     * The device service is locked or expired.
-     */
-    public static final String SERVICE_BLOCK = "SERVICE_BLOCK";
-
-    private static int retryCount = 0;
-    public static final int GOOGLE_AUTH = 0;
-    public static final int USER_AUTH = 1;
-
-    public static AuthResultInfo auth(IAuthParam authParam) {
-
-        IHttpProxy httpProxyImpl = null;
-        AuthResultInfo authResultInfo = new AuthResultInfo();
-        try {
-            String url;
-            ContentValues data = new ContentValues();
-            if (authParam instanceof GoogleAuthParam) {
-                url = SOCIAL_AUTH_API;
-                data.put(KEY_AUTH_CODE, ((GoogleAuthParam) authParam).authCode);
+                data.put(KEY_BACKEND, ((GoogleAuthParam) authParam).authBackend);
             } else {
                 url = USER_AUTH_API;
                 data.put(KEY_USERNAME, ((UserAuthParam) authParam).username);
@@ -311,10 +201,10 @@ public class MgmtCluster {
         try {
             httpProxyImpl = HttpProxy.newInstance();
             httpProxyImpl.setUrl(REGISTER_AUTH_API);
-            httpProxyImpl.setDoOutput(true);
             httpProxyImpl.connect();
 
             int responseCode = httpProxyImpl.get();
+            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 String jsonResponse = httpProxyImpl.getResponseContent();
                 Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
@@ -348,18 +238,27 @@ public class MgmtCluster {
         private String imei;
         private String model;
         private String vendor;
+        private String authBackend;
 
         @Override
         public ContentValues createAuthParam() {
 
             ContentValues cv = new ContentValues();
-            cv.put("provider", "google-oauth2");
-            cv.put(KEY_AUTH_CODE, authCode);
-            cv.put(KEY_IMEI, imei);
-            cv.put(KEY_VENDOR, vendor);
-            cv.put(KEY_MODEL, model);
-
-            Logs.d(CLASSNAME, "GoogleAuthParam", "createAuthParam", "authCode=" + authCode + ", encryptedIMEI=" + imei);
+            if (authBackend != null) {
+                cv.put(KEY_BACKEND, authBackend);
+            }
+            if (authCode != null) {
+                cv.put(KEY_AUTH_CODE, authCode);
+            }
+            if (imei != null) {
+                cv.put(KEY_IMEI, imei);
+            }
+            if (vendor != null) {
+                cv.put(KEY_VENDOR, vendor);
+            }
+            if (model != null) {
+                cv.put(KEY_MODEL, model);
+            }
 
             return cv;
         }
@@ -379,6 +278,10 @@ public class MgmtCluster {
         public void setVendor(String vendor) {
             this.vendor = vendor;
         }
+
+        public void setAuthBackend(String authBackend) {
+            this.authBackend = authBackend;
+        }
     }
 
     public static class UserAuthParam implements IAuthParam {
@@ -394,14 +297,26 @@ public class MgmtCluster {
         public ContentValues createAuthParam() {
 
             ContentValues cv = new ContentValues();
-            cv.put(KEY_USERNAME, username);
-            cv.put(KEY_PASSWORD, password);
-            cv.put(KEY_IMEI, imei);
-            cv.put(KEY_ACTIVATION_CODE, activateCode);
-            cv.put(KEY_VENDOR, vendor);
-            cv.put(KEY_MODEL, model);
+            if (username != null) {
+                cv.put(KEY_USERNAME, username);
+            }
+            if (password != null) {
+                cv.put(KEY_PASSWORD, password);
+            }
+            if (imei != null) {
+                cv.put(KEY_IMEI, imei);
+            }
+            if (activateCode != null) {
+                cv.put(KEY_ACTIVATION_CODE, activateCode);
+            }
+            if (vendor != null) {
+                cv.put(KEY_VENDOR, vendor);
+            }
+            if (model != null) {
+                cv.put(KEY_MODEL, model);
+            }
 
-            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + imei);
+//            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + imei);
             return cv;
         }
 

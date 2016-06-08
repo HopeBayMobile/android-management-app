@@ -30,6 +30,10 @@ import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+
 public class LoadingActivity extends AppCompatActivity {
 
     private final String CLASSNAME = getClass().getSimpleName();
@@ -46,19 +50,19 @@ public class LoadingActivity extends AppCompatActivity {
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
 
-        String logMsg = "Build.BRAND=" + Build.BRAND +
-                ", Build.BOARD=" + Build.BOARD +
-                ", Build.BOOTLOADER=" + Build.BOOTLOADER +
-                ", Build.DEVICE=" + Build.DEVICE +
-                ", Build.HARDWARE=" + Build.HARDWARE +
-                ", Build.MANUFACTURER=" + Build.MANUFACTURER +
-                ", Build.MODEL=" + Build.MODEL +
-                ", Build.VERSION.RELEASE=" + Build.VERSION.RELEASE +
-                ", Build.VERSION.SDK_INT=" + Build.VERSION.SDK_INT +
-                ", Build.PRODUCT=" + Build.PRODUCT +
-                ", Build.SERIAL=" + Build.SERIAL;
-
-        Logs.w(CLASSNAME, "onCreate", logMsg);
+//        String logMsg = "Build.BRAND=" + Build.BRAND +
+//                ", Build.BOARD=" + Build.BOARD +
+//                ", Build.BOOTLOADER=" + Build.BOOTLOADER +
+//                ", Build.DEVICE=" + Build.DEVICE +
+//                ", Build.HARDWARE=" + Build.HARDWARE +
+//                ", Build.MANUFACTURER=" + Build.MANUFACTURER +
+//                ", Build.MODEL=" + Build.MODEL +
+//                ", Build.VERSION.RELEASE=" + Build.VERSION.RELEASE +
+//                ", Build.VERSION.SDK_INT=" + Build.VERSION.SDK_INT +
+//                ", Build.PRODUCT=" + Build.PRODUCT +
+//                ", Build.SERIAL=" + Build.SERIAL;
+//
+//        Logs.w(CLASSNAME, "onCreate", logMsg);
 
         init();
     }
