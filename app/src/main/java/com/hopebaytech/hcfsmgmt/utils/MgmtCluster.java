@@ -226,18 +226,36 @@ public class MgmtCluster {
         return serverClientId;
     }
 
-    public interface IAuthParam {
+    public static abstract class IAuthParam {
 
-        ContentValues createAuthParam();
+        protected String activateCode;
+        protected String model;
+        protected String vendor;
+        protected String imei;
+
+        abstract ContentValues createAuthParam();
+
+        public void setActivateCode(String activateCode) {
+            this.activateCode = activateCode;
+        }
+
+        public void setModel(String model) {
+            this.model = model;
+        }
+
+        public void setVendor(String vendor) {
+            this.vendor = vendor;
+        }
+
+        public void setImei(String imei) {
+            this.imei = imei;
+        }
 
     }
 
-    public static class GoogleAuthParam implements IAuthParam {
+    public static class GoogleAuthParam extends IAuthParam {
 
         private String authCode;
-        private String imei;
-        private String model;
-        private String vendor;
         private String authBackend;
 
         @Override
@@ -250,6 +268,9 @@ public class MgmtCluster {
             if (authCode != null) {
                 cv.put(KEY_AUTH_CODE, authCode);
             }
+            if (activateCode != null) {
+                cv.put(KEY_ACTIVATION_CODE, activateCode);
+            }
             if (imei != null) {
                 cv.put(KEY_IMEI, imei);
             }
@@ -260,6 +281,15 @@ public class MgmtCluster {
                 cv.put(KEY_MODEL, model);
             }
 
+            Logs.d(CLASSNAME, "createAuthParam",
+                    "authBackend=" + authBackend +
+                    ", authCode=" + authCode +
+                    ", activateCode=" + activateCode +
+                    ", imei=" + imei +
+                    ", vendor=" + vendor +
+                    ", model=" + model
+            );
+
             return cv;
         }
 
@@ -267,31 +297,16 @@ public class MgmtCluster {
             this.authCode = authCode;
         }
 
-        public void setImei(String imei) {
-            this.imei = imei;
-        }
-
-        public void setModel(String model) {
-            this.model = model;
-        }
-
-        public void setVendor(String vendor) {
-            this.vendor = vendor;
-        }
-
         public void setAuthBackend(String authBackend) {
             this.authBackend = authBackend;
         }
+
     }
 
-    public static class UserAuthParam implements IAuthParam {
+    public static class UserAuthParam extends IAuthParam {
 
         private String username;
         private String password;
-        private String imei;
-        private String activateCode;
-        private String model;
-        private String vendor;
 
         @Override
         public ContentValues createAuthParam() {
@@ -328,21 +343,6 @@ public class MgmtCluster {
             this.password = password;
         }
 
-        public void setImei(String imei) {
-            this.imei = imei;
-        }
-
-        public void setActivateCode(String activateCode) {
-            this.activateCode = activateCode;
-        }
-
-        public void setModel(String model) {
-            this.model = model;
-        }
-
-        public void setVendor(String vendor) {
-            this.vendor = vendor;
-        }
     }
 
     public static RegisterResultInfo register(IAuthParam authParam, String jwtToken) {
@@ -414,6 +414,12 @@ public class MgmtCluster {
          */
         void onRegisterFailed(RegisterResultInfo registerResultInfo);
 
+    }
+
+    public interface AuthListener {
+
+        void onAuthSuccessful(AuthResultInfo authResultInfo);
+
         /**
          * User authentication failed.
          */
@@ -421,13 +427,55 @@ public class MgmtCluster {
 
     }
 
-    public static class Register {
+    public static class AuthProxy {
+
+        private AuthListener authListener;
+        private MgmtCluster.IAuthParam authParam;
+
+        public AuthProxy(IAuthParam authParam) {
+            this.authParam = authParam;
+        }
+
+        public void auth() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+                    if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                authListener.onAuthSuccessful(authResultInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                authListener.onAuthFailed(authResultInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnAuthListener(AuthListener listener) {
+            this.authListener = listener;
+        }
+
+    }
+
+    public static class RegisterProxy {
 
         private RegisterListener registerListener;
         private MgmtCluster.IAuthParam authParam;
+        private String jwtToken;
 
-        public Register(IAuthParam authParam) {
+        public RegisterProxy(IAuthParam authParam, String jwtToken) {
             this.authParam = authParam;
+            this.jwtToken = jwtToken;
         }
 
         public void register() {
@@ -435,9 +483,9 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
-                    if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, authResultInfo.getToken());
+//                    final AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+//                    if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
                         Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
                         if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                             uiHandler.post(new Runnable() {
@@ -454,14 +502,14 @@ public class MgmtCluster {
                                 }
                             });
                         }
-                    } else {
-                        uiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                registerListener.onAuthFailed(authResultInfo);
-                            }
-                        });
-                    }
+//                    } else {
+//                        uiHandler.post(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                registerListener.onAuthFailed(authResultInfo);
+//                            }
+//                        });
+//                    }
                 }
             }).start();
         }

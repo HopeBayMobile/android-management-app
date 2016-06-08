@@ -117,30 +117,27 @@ public class ActivateWithCodeFragment extends Fragment {
                         public void run() {
                             final int authType = getArguments().getInt(ActivateWoCodeFragment.KEY_AUTH_TYPE);
                             String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext));
-                            MgmtCluster.IAuthParam authParam;
+                            final MgmtCluster.IAuthParam authParam;
                             if (authType == MgmtCluster.GOOGLE_AUTH) {
                                 String authCode = getArguments().getString(ActivateWoCodeFragment.KEY_AUTH_CODE);
-                                Logs.w(CLASSNAME, "onActivityCreated", "authCode=" + authCode);
                                 MgmtCluster.GoogleAuthParam googleAuthParam = new MgmtCluster.GoogleAuthParam();
-//                                googleAuthParam.setAuthCode(authCode);
-//                                googleAuthParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                                googleAuthParam.setImei(imei);
-                                googleAuthParam.setVendor(Build.BRAND);
-                                googleAuthParam.setModel(Build.MODEL);
+                                googleAuthParam.setAuthCode(authCode);
+                                googleAuthParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
                                 authParam = googleAuthParam;
                             } else {
                                 MgmtCluster.UserAuthParam userAuthParam = new MgmtCluster.UserAuthParam();
                                 userAuthParam.setUsername(username);
                                 userAuthParam.setPassword(getArguments().getString(ActivateWoCodeFragment.KEY_PASSWORD));
-                                userAuthParam.setActivateCode(activateCode);
-                                userAuthParam.setImei(imei);
-                                userAuthParam.setVendor(Build.BRAND);
-                                userAuthParam.setModel(Build.MODEL);
                                 authParam = userAuthParam;
                             }
+                            authParam.setImei(imei);
+                            authParam.setVendor(Build.BRAND);
+                            authParam.setModel(Build.MODEL);
+                            authParam.setActivateCode(activateCode);
 
-                            MgmtCluster.Register mgmtRegister = new MgmtCluster.Register(authParam);
-                            mgmtRegister.setOnRegisterListener(new MgmtCluster.RegisterListener() {
+                            String jwtToken = getArguments().getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
+                            MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, jwtToken);
+                            registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
                                 @Override
                                 public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
                                     mWorkHandler.post(new Runnable() {
@@ -194,16 +191,9 @@ public class ActivateWithCodeFragment extends Fragment {
                                     mErrorMessage.setText(errorMsgResId);
                                 }
 
-                                @Override
-                                public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "authResultInfo=" + authResultInfo.toString());
-
-                                    hideProgressDialog();
-                                    mErrorMessage.setText(R.string.activate_auth_failed);
-                                }
-
                             });
-                            mgmtRegister.register();
+                            registerProxy.register();
+
                         }
                     });
                 }

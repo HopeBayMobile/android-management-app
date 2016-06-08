@@ -499,51 +499,58 @@ public class HCFSMgmtService extends Service {
     }
 
     private void registerToMgmtCluster(final Context context, String serverAuthCode) {
-        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
         authParam.setAuthCode(serverAuthCode);
         authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(HCFSMgmtService.this)));
         authParam.setVendor(Build.BRAND);
         authParam.setModel(Build.MODEL);
 
         MgmtCluster.plusRetryCount();
-        MgmtCluster.Register mgmtRegister = new MgmtCluster.Register(authParam);
-        mgmtRegister.setOnRegisterListener(new MgmtCluster.RegisterListener() {
+        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+        authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
             @Override
-            public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
-                mCacheExecutor.execute(new Runnable() {
+            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                MgmtCluster.RegisterProxy mgmtRegister = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
+                mgmtRegister.setOnRegisterListener(new MgmtCluster.RegisterListener() {
                     @Override
-                    public void run() {
-                        // TODO Set arkflex token to hcfs
-                        // registerResultInfo.getStorageAccessToken();
-                        boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                        if (failed) {
-                            HCFSConfig.resetHCFSConfig();
-                        }
+                    public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+                        mCacheExecutor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                // TODO Set arkflex token to hcfs
+                                // registerResultInfo.getStorageAccessToken();
+                                boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                if (failed) {
+                                    HCFSConfig.resetHCFSConfig();
+                                }
+                            }
+                        });
+
+                        mGoogleApiClient.disconnect();
+                        MgmtCluster.resetRetryCount();
+                        HCFSConfig.startSyncToCloud();
+
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
+                        editor.apply();
                     }
+
+                    @Override
+                    public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+                        mgmtAuthOrRegisterFailed();
+                    }
+
                 });
-
-                mGoogleApiClient.disconnect();
-                MgmtCluster.resetRetryCount();
-                HCFSConfig.startSyncToCloud();
-
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                editor.apply();
-            }
-
-            @Override
-            public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                mgmtAuthOrRegisterFailed();
+                mgmtRegister.register();
             }
 
             @Override
             public void onAuthFailed(AuthResultInfo authResultInfo) {
                 mgmtAuthOrRegisterFailed();
             }
-
         });
-        mgmtRegister.register();
+        authProxy.auth();
 
     }
 
