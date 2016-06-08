@@ -106,7 +106,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
         View contentView = findViewById(android.R.id.content);
         if (contentView != null) {
             mSnackbar = Snackbar.make(contentView, R.string.switch_account_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE);
-            mSnackbar.setAction(R.string.enable_permission, new View.OnClickListener() {
+            mSnackbar.setAction(R.string.got_to_enable_permission, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String packageName = getPackageName();

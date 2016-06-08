@@ -143,7 +143,7 @@ public class ActivateWoCodeFragment extends Fragment {
         mGoogleActivate = (TextView) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
         mSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.enable_permission, new View.OnClickListener() {
+                .setAction(R.string.got_to_enable_permission, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         String packageName = getContext().getPackageName();
@@ -428,6 +428,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     final String email = acct.getEmail();
                     MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
                     authParam.setAuthCode(serverAuthCode);
+                    authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
                     authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
                     authParam.setVendor(Build.BRAND);
                     authParam.setModel(Build.MODEL);
@@ -534,7 +535,9 @@ public class ActivateWoCodeFragment extends Fragment {
 
                         @Override
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
-                            Logs.e(CLASSNAME, "onRegisterFailed", "authResultInfo=" + authResultInfo.toString());
+                            Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
+
+                            hideProgressDialog();
 
                             Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                                     .setResultCallback(new ResultCallback<Status>() {
@@ -571,6 +574,7 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private void showProgressDialog() {
+        Logs.w(CLASSNAME, "showProgressDialog", null);
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(mContext);
             mProgressDialog.setIndeterminate(true);
@@ -581,6 +585,7 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private void hideProgressDialog() {
+        Logs.w(CLASSNAME, "hideProgressDialog", null);
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }

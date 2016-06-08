@@ -79,20 +79,18 @@ public class HttpProxyMock implements IHttpProxy {
             } else {
                 return HttpsURLConnection.HTTP_BAD_REQUEST;
             }
-        } else if (mUrl.startsWith(MgmtCluster.DEVICE_API)) {
-            if (mUrl.contains("change_device_user")) {
-                String jwtToken = headers.getAsString(MgmtCluster.KEY_AUTHORIZATION).replace("JWT ", "");
-                String urlImei = mUrl.replace(MgmtCluster.DEVICE_API, "").replace("/change_device_user/", "");
-                if (jwtToken.equals(CORRECT_JWT_TOKEN) && urlImei.equals(CORRECT_IMEI)) {
-                    String newAuthCode = cv.getAsString(MgmtCluster.KEY_NEW_AUTH_CODE);
-                    if (newAuthCode.equals(CORRECT_NEW_AUTH_CODE)) {
-                        return HttpsURLConnection.HTTP_OK;
-                    } else {
-                        return HttpsURLConnection.HTTP_BAD_REQUEST;
-                    }
+        } else if (mUrl.startsWith(MgmtCluster.DEVICE_API) && mUrl.contains("change_device_user")) {
+            String jwtToken = headers.getAsString(MgmtCluster.KEY_AUTHORIZATION).replace("JWT ", "");
+            String urlImei = mUrl.replace(MgmtCluster.DEVICE_API, "").replace("/change_device_user/", "");
+            if (jwtToken.equals(CORRECT_JWT_TOKEN) && urlImei.equals(CORRECT_IMEI)) {
+                String newAuthCode = cv.getAsString(MgmtCluster.KEY_NEW_AUTH_CODE);
+                if (newAuthCode.equals(CORRECT_NEW_AUTH_CODE)) {
+                    return HttpsURLConnection.HTTP_OK;
                 } else {
                     return HttpsURLConnection.HTTP_BAD_REQUEST;
                 }
+            } else {
+                return HttpsURLConnection.HTTP_BAD_REQUEST;
             }
         } else if (mUrl.equals(MgmtCluster.DEVICE_API)) {
             String jwtToken = headers.getAsString(MgmtCluster.KEY_AUTHORIZATION).replace("JWT ", "");
@@ -109,7 +107,7 @@ public class HttpProxyMock implements IHttpProxy {
                         if (imei.equals(CORRECT_IMEI)) {
                             correct = true;
                             responseCode = HttpsURLConnection.HTTP_OK;
-                        }  else {
+                        } else {
                             responseCode = HttpsURLConnection.HTTP_NOT_FOUND;
                         }
                     }

@@ -27,12 +27,10 @@ public class MgmtCluster {
 
     private static final String CLASSNAME = MgmtCluster.class.getSimpleName();
     private static final String DOMAIN_NAME = "terafonnreg.hopebaytech.com";
-//    public static final String REGISTER_LOGIN_API = "https://" + DOMAIN_NAME + "/api/register/login/";
     public static final String REGISTER_AUTH_API = "https://" + DOMAIN_NAME + "/api/register/auth/";
     public static final String SOCIAL_AUTH_API = "https://" + DOMAIN_NAME + "/api/social-auth/";
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
     public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
-
 
     public static final String KEY_AUTH_CODE = "code";
     public static final String KEY_ERROR_CODE = "error_code";
@@ -44,6 +42,9 @@ public class MgmtCluster {
     public static final String KEY_VENDOR = "vendor";
     public static final String KEY_MODEL = "model";
     public static final String KEY_ACTIVATION_CODE = "activation_code";
+    public static final String KEY_BACKEND = "backend";
+
+    public static final String GOOGLE_AUTH_BACKEND = "google-oauth2";
 
     /**
      * Unknown error.
@@ -114,6 +115,7 @@ public class MgmtCluster {
             if (authParam instanceof GoogleAuthParam) {
                 url = SOCIAL_AUTH_API;
                 data.put(KEY_AUTH_CODE, ((GoogleAuthParam) authParam).authCode);
+                data.put(KEY_BACKEND, ((GoogleAuthParam) authParam).authBackend);
             } else {
                 url = USER_AUTH_API;
                 data.put(KEY_USERNAME, ((UserAuthParam) authParam).username);
@@ -199,10 +201,10 @@ public class MgmtCluster {
         try {
             httpProxyImpl = HttpProxy.newInstance();
             httpProxyImpl.setUrl(REGISTER_AUTH_API);
-            httpProxyImpl.setDoOutput(true);
             httpProxyImpl.connect();
 
             int responseCode = httpProxyImpl.get();
+            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 String jsonResponse = httpProxyImpl.getResponseContent();
                 Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
@@ -236,18 +238,27 @@ public class MgmtCluster {
         private String imei;
         private String model;
         private String vendor;
+        private String authBackend;
 
         @Override
         public ContentValues createAuthParam() {
 
             ContentValues cv = new ContentValues();
-            cv.put("provider", "google-oauth2");
-            cv.put(KEY_AUTH_CODE, authCode);
-            cv.put(KEY_IMEI, imei);
-            cv.put(KEY_VENDOR, vendor);
-            cv.put(KEY_MODEL, model);
-
-            Logs.d(CLASSNAME, "GoogleAuthParam", "createAuthParam", "authCode=" + authCode + ", encryptedIMEI=" + imei);
+            if (authBackend != null) {
+                cv.put(KEY_BACKEND, authBackend);
+            }
+            if (authCode != null) {
+                cv.put(KEY_AUTH_CODE, authCode);
+            }
+            if (imei != null) {
+                cv.put(KEY_IMEI, imei);
+            }
+            if (vendor != null) {
+                cv.put(KEY_VENDOR, vendor);
+            }
+            if (model != null) {
+                cv.put(KEY_MODEL, model);
+            }
 
             return cv;
         }
@@ -267,6 +278,10 @@ public class MgmtCluster {
         public void setVendor(String vendor) {
             this.vendor = vendor;
         }
+
+        public void setAuthBackend(String authBackend) {
+            this.authBackend = authBackend;
+        }
     }
 
     public static class UserAuthParam implements IAuthParam {
@@ -282,14 +297,26 @@ public class MgmtCluster {
         public ContentValues createAuthParam() {
 
             ContentValues cv = new ContentValues();
-            cv.put(KEY_USERNAME, username);
-            cv.put(KEY_PASSWORD, password);
-            cv.put(KEY_IMEI, imei);
-            cv.put(KEY_ACTIVATION_CODE, activateCode);
-            cv.put(KEY_VENDOR, vendor);
-            cv.put(KEY_MODEL, model);
+            if (username != null) {
+                cv.put(KEY_USERNAME, username);
+            }
+            if (password != null) {
+                cv.put(KEY_PASSWORD, password);
+            }
+            if (imei != null) {
+                cv.put(KEY_IMEI, imei);
+            }
+            if (activateCode != null) {
+                cv.put(KEY_ACTIVATION_CODE, activateCode);
+            }
+            if (vendor != null) {
+                cv.put(KEY_VENDOR, vendor);
+            }
+            if (model != null) {
+                cv.put(KEY_MODEL, model);
+            }
 
-            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + imei);
+//            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + imei);
             return cv;
         }
 

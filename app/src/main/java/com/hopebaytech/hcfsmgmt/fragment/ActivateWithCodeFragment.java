@@ -16,6 +16,7 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -98,6 +99,12 @@ public class ActivateWithCodeFragment extends Fragment {
         mActivateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                View currentFocusView = ((Activity) mContext).getCurrentFocus();
+                if (currentFocusView != null) {
+                    InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(currentFocusView.getWindowToken(), 0);
+                }
+
                 final String activateCode = mActivateCode.getText().toString();
                 if (activateCode.isEmpty()) {
                     mErrorMessage.setText(R.string.activate_require_activation_code);
@@ -113,8 +120,10 @@ public class ActivateWithCodeFragment extends Fragment {
                             MgmtCluster.IAuthParam authParam;
                             if (authType == MgmtCluster.GOOGLE_AUTH) {
                                 String authCode = getArguments().getString(ActivateWoCodeFragment.KEY_AUTH_CODE);
+                                Logs.w(CLASSNAME, "onActivityCreated", "authCode=" + authCode);
                                 MgmtCluster.GoogleAuthParam googleAuthParam = new MgmtCluster.GoogleAuthParam();
-                                googleAuthParam.setAuthCode(authCode);
+//                                googleAuthParam.setAuthCode(authCode);
+//                                googleAuthParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
                                 googleAuthParam.setImei(imei);
                                 googleAuthParam.setVendor(Build.BRAND);
                                 googleAuthParam.setModel(Build.MODEL);
