@@ -155,6 +155,8 @@ public class ActivateWithCodeFragment extends Fragment {
                             authParam.setImei(imei);
                             authParam.setVendor(Build.BRAND);
                             authParam.setModel(Build.MODEL);
+                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                            authParam.setHcfsVersion("1.0.1");
                             authParam.setActivateCode(activateCode);
 
                             String jwtToken = getArguments().getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
@@ -177,7 +179,7 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 public void run() {
                                                     hideProgressDialog();
                                                     if (failed) {
-                                                        mErrorMessage.setText(registerResultInfo.getMessage());
+                                                        mErrorMessage.setText(R.string.activate_failed);
                                                     } else {
                                                         Intent intent = new Intent(mContext, MainActivity.class);
                                                         startActivity(intent);

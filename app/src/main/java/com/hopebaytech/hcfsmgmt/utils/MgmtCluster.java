@@ -43,6 +43,8 @@ public class MgmtCluster {
     public static final String KEY_MODEL = "model";
     public static final String KEY_ACTIVATION_CODE = "activation_code";
     public static final String KEY_BACKEND = "backend";
+    public static final String KEY_ANDROID_VERSION = "android_version";
+    public static final String KEY_HCFS_VERSION = "HCFS_version";
 
     public static final String GOOGLE_AUTH_BACKEND = "google-oauth2";
 
@@ -232,6 +234,8 @@ public class MgmtCluster {
         protected String model;
         protected String vendor;
         protected String imei;
+        protected String android_version;
+        protected String hcfs_version;
 
         abstract ContentValues createAuthParam();
 
@@ -251,6 +255,13 @@ public class MgmtCluster {
             this.imei = imei;
         }
 
+        public void setAndroidVersion(String android_version) {
+            this.android_version = android_version;
+        }
+
+        public void setHcfsVersion(String hcfs_version) {
+            this.hcfs_version = hcfs_version;
+        }
     }
 
     public static class GoogleAuthParam extends IAuthParam {
@@ -280,15 +291,22 @@ public class MgmtCluster {
             if (model != null) {
                 cv.put(KEY_MODEL, model);
             }
+            if (android_version != null) {
+                cv.put(KEY_ANDROID_VERSION, android_version);
+            }
+            if (hcfs_version != null) {
+                cv.put(KEY_HCFS_VERSION, hcfs_version);
+            }
 
             Logs.d(CLASSNAME, "createAuthParam",
                     "authBackend=" + authBackend +
-                    ", authCode=" + authCode +
-                    ", activateCode=" + activateCode +
-                    ", imei=" + imei +
-                    ", vendor=" + vendor +
-                    ", model=" + model
-            );
+                            ", authCode=" + authCode +
+                            ", activateCode=" + activateCode +
+                            ", android_version=" + android_version +
+                            ", hcfs_version=" + hcfs_version +
+                            ", imei=" + imei +
+                            ", vendor=" + vendor +
+                            ", model=" + model);
 
             return cv;
         }
@@ -330,8 +348,23 @@ public class MgmtCluster {
             if (model != null) {
                 cv.put(KEY_MODEL, model);
             }
+            if (android_version != null) {
+                cv.put(KEY_ANDROID_VERSION, android_version);
+            }
+            if (hcfs_version != null) {
+                cv.put(KEY_HCFS_VERSION, hcfs_version);
+            }
 
-//            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam", "username=" + username + ", password=" + password + ", encryptedIMEI=" + imei);
+            Logs.d(CLASSNAME, "UserAuthParam", "createAuthParam",
+                    "username=" + username +
+                            ", password=" + password +
+                            ", imei=" + imei +
+                            ", activateCode=" + activateCode +
+                            ", android_version=" + android_version +
+                            ", hcfs_version=" + hcfs_version +
+                            ", vendor=" + vendor +
+                            ", model=" + model
+            );
             return cv;
         }
 

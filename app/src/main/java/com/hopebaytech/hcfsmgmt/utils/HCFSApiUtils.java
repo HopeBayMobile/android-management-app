@@ -18,10 +18,6 @@ public class HCFSApiUtils {
 	public static native String resetXfer();
 	public static native String setHCFSSyncStatus(int enabled);
 	public static native String getHCFSSyncStatus();
-<<<<<<< bae1676d27a9e6aa1e166dc1a98ee9b9955eed78
-=======
-//	public static native byte[] getEncryptedIMEI();
->>>>>>> Encrypt IMEI got from android api
 	public static native byte[] getEncryptedIMEI(String imei);
 	public static native String getOccupiedSize();
 

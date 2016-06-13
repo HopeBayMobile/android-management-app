@@ -241,6 +241,10 @@ public class ActivateWoCodeFragment extends Fragment {
                             authParam.setUsername(username);
                             authParam.setPassword(password);
                             authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
+                            authParam.setVendor(Build.BRAND);
+                            authParam.setModel(Build.MODEL);
+                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                            authParam.setHcfsVersion("1.0.1");
 
                             MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                             authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
@@ -250,7 +254,6 @@ public class ActivateWoCodeFragment extends Fragment {
                                     registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
                                         @Override
                                         public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
-                                            hideProgressDialog();
                                             mWorkHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
@@ -277,8 +280,10 @@ public class ActivateWoCodeFragment extends Fragment {
                                                     mUiHandler.post(new Runnable() {
                                                         @Override
                                                         public void run() {
+                                                            hideProgressDialog();
                                                             if (failed) {
-                                                                mErrorMessage.setText(registerResultInfo.getMessage());
+//                                                                mErrorMessage.setText(registerResultInfo.getMessage());
+                                                                mErrorMessage.setText(R.string.activate_failed);
                                                             } else {
                                                                 Intent intent = new Intent(mContext, MainActivity.class);
                                                                 startActivity(intent);
@@ -327,7 +332,7 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                 @Override
                                 public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "authResultInfo=" + authResultInfo.toString());
+                                    Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
 
                                     hideProgressDialog();
                                     mErrorMessage.setText(R.string.activate_auth_failed);
@@ -508,6 +513,8 @@ public class ActivateWoCodeFragment extends Fragment {
                     authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
                     authParam.setVendor(Build.BRAND);
                     authParam.setModel(Build.MODEL);
+                    authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                    authParam.setHcfsVersion("1.0.1");
 
                     MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                     authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
@@ -529,7 +536,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                                     @Override
                                                     public void run() {
                                                         hideProgressDialog();
-                                                        mErrorMessage.setText(registerResultInfo.getMessage());
+                                                        mErrorMessage.setText(R.string.activate_failed);
                                                     }
                                                 });
                                             } else {
