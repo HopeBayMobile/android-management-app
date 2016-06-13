@@ -94,7 +94,7 @@ public class LoadingActivity extends AppCompatActivity {
                                                 Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
                                                 intent.putExtras(getIntent().getExtras());
                                                 startActivity(intent);
-						finish();
+                                                finish();
                                             }
                                         })
                                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
