@@ -1,12 +1,11 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Build;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -25,16 +24,23 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.info.AppInfo;
+import com.hopebaytech.hcfsmgmt.info.ItemInfo;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.PinType;
 
-import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class LoadingActivity extends AppCompatActivity {
 
@@ -66,6 +72,22 @@ public class LoadingActivity extends AppCompatActivity {
 //
 //        Logs.w(CLASSNAME, "onCreate", logMsg);
 
+        ArrayList<ItemInfo> itemInfoList = DisplayTypeFactory.getListOfInstalledApps(this, DisplayTypeFactory.APP_SYSTEM);
+        for (ItemInfo itemInfo : itemInfoList) {
+            AppInfo appInfo = (AppInfo) itemInfo;
+            appInfo.setPinned(true);
+            final boolean isPinned = appInfo.isPinned();
+            if (isPinned) {
+                if (!HCFSMgmtUtils.pinApp(appInfo, PinType.PRIORITY)) {
+                    Logs.e(CLASSNAME, "onCreate", "pin failed");
+                }
+            } else {
+                if (!HCFSMgmtUtils.unpinApp(appInfo)) {
+                    Logs.e(CLASSNAME, "onCreate", "unpin failed");
+                }
+            }
+        }
+
         init();
     }
 
@@ -87,12 +109,12 @@ public class LoadingActivity extends AppCompatActivity {
                                         .requestEmail()
                                         .build();
 
-                                /** GoogleApiClient should be called from main thread of process */
+                                // GoogleApiClient should be called from main thread of process
                                 mGoogleApiClient = new GoogleApiClient.Builder(LoadingActivity.this)
                                         .enableAutoManage(LoadingActivity.this, new GoogleApiClient.OnConnectionFailedListener() {
                                             @Override
                                             public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                                                /** An unresolvable error has occurred and Google APIs (including Sign-In) will not be available. */
+                                                // An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
                                                 Logs.e(CLASSNAME, "onConnectionFailed", connectionResult.toString());
 
                                                 Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
@@ -114,7 +136,7 @@ public class LoadingActivity extends AppCompatActivity {
                                 } else {
                                     opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                                         @Override
-                                        public void onResult(GoogleSignInResult googleSignInResult) {
+                                        public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
                                             handleSignInResult(googleSignInResult);
                                         }
                                     });

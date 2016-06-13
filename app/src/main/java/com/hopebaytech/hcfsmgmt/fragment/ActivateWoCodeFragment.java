@@ -669,7 +669,7 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private void showProgressDialog() {
-        Logs.w(CLASSNAME, "showProgressDialog", null);
+        Logs.d(CLASSNAME, "showProgressDialog", null);
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(mContext);
             mProgressDialog.setIndeterminate(true);
@@ -680,7 +680,7 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private void hideProgressDialog() {
-        Logs.w(CLASSNAME, "hideProgressDialog", null);
+        Logs.d(CLASSNAME, "hideProgressDialog", null);
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }
