@@ -17,7 +17,7 @@
     <string name="activate_forget_password"><u>忘記密碼</u></string>
     <string name="activate_or">或</string>
     <string name="activate_with_google_account">使用Google帳號啟動</string>
-    <string name="activate_with_code_msg">The activation code has been used. If your old device is lost or broken, please lock it on %s before activation.</string>
+    <string name="activate_with_code_msg">此啟動碼已被使用過。如果您的舊裝置已經遺失或損壞，請先在％s鎖定該裝置，然後再嘗試啟動。</string>
     <string name="activate_get_server_client_id_failed">無法從管理伺服器取得Google認證所需的資訊。</string>
     <string name="activate_require_username_password">請輸入使用者名稱及密碼。</string>
     <string name="activate_without_google_play_services">Tera必須在Google Play服務上執行，但您的手機目前無法找到此服務。</string>
