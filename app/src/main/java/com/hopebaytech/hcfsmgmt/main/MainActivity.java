@@ -284,7 +284,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         boolean isNotifyInsufficientPinSpaceAlarmExist = PendingIntent.getBroadcast(this,
                 RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
-        HCFSMgmtUtils.stopNotifyInsufficientPinSpaceAlarm(this);
         if (!isNotifyInsufficientPinSpaceAlarmExist) {
             HCFSMgmtUtils.startNotifyInsufficientPinSpaceAlarm(this);
         }

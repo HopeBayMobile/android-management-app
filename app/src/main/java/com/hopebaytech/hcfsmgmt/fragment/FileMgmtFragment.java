@@ -80,6 +80,7 @@ import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
@@ -434,7 +435,6 @@ public class FileMgmtFragment extends Fragment {
 //                                        }
                                     }
                                 }
-                                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "LinearRecyclerViewHolder", "------");
                                 if (needToHideProgress) {
                                     hidePorgressCircle();
                                 }
@@ -1950,7 +1950,7 @@ public class FileMgmtFragment extends Fragment {
         @Override
         public void onReceive(final Context context, Intent intent) {
             final String action = intent.getAction();
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onReceive", "action=" + action);
+            Logs.d(CLASSNAME, "onReceive", "action=" + action);
             if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
                 boolean isDataRemoved = intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false);
                 boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
