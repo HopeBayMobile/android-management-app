@@ -43,6 +43,8 @@ public class HCFSMgmtUtils {
     public static final String CLASSNAME = "HCFSMgmtUtils";
     public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
+    public static final String NOTIFY_INSUFFICIENT_PIN_PACE_RATIO = "80";
+
     public static final boolean DEFAULT_PINNED_STATUS = false;
     public static final int LOG_LEVEL = Log.DEBUG;
 
@@ -51,12 +53,7 @@ public class HCFSMgmtUtils {
     public static final int NOTIFY_ID_ONGOING = 2;
     public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 3;
     public static final int NOTIFY_ID_FAILED_SILENT_SIGN_IN = 4;
-
-    public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
-    public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
-    public static final int REQUEST_CODE_GOOGLE_SIGN_IN = 102;
-    public static final int REQUEST_CODE_RESET_XFER = 103;
-    public static final int REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO = 104;
+    public static final int NOTIFY_ID_INSUFFICIENT_PIN_SPACE = 5;
 
     public static final String DATA_STATUS_CLOUD = "cloud";
     public static final String DATA_STATUS_HYBRID = "hybrid";
@@ -90,18 +87,13 @@ public class HCFSMgmtUtils {
     public static final String INTENT_VALUE_ONGOING_NOTIFICATION = "intent_value_ongoing_notification";
     public static final String INTENT_VALUE_PIN_UNPIN_UDPATE_APP = "intent_value_pin_unpin_update_app";
     public static final String INTENT_VALUE_SILENT_SIGN_IN = "intent_value_silent_sign_in";
+    public static final String INTENT_VALUE_INSUFFICIENT_PIN_SPACE = "intent_value_insufficient_pin_space";
+
+    public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
 
     public static final String PREF_SILENT_SIGN_IN = "pref_silent_sign_in";
     public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
-
-//    public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
-//    public static final String HCFS_CONFIG_SWIFT_ACCOUNT = "swift_account";
-//    public static final String HCFS_CONFIG_SWIFT_USER = "swift_user";
-//    public static final String HCFS_CONFIG_SWIFT_PASS = "swift_pass";
-//    public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
-//    public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
-//    public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
 
     public static final String ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
     public static final String ITENT_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
@@ -139,7 +131,7 @@ public class HCFSMgmtUtils {
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
 
-        int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
+        int requestCode = RequestCode.PIN_DATA_TYPE_FILE;
         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
         pi.cancel();
@@ -148,22 +140,22 @@ public class HCFSMgmtUtils {
         am.cancel(pi);
     }
 
-    public static void startPinDataTypeFileAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "startPinDataTypeFileAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
-
-        int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = Interval.PIN_DATA_TYPE_FILE;
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, intervalMillis, pi);
-    }
+//    public static void startPinDataTypeFileAlarm(Context context) {
+//        log(Log.DEBUG, CLASSNAME, "startPinDataTypeFileAlarm", null);
+//
+//        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
+//
+//        int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
+//        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+//        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+//
+//        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+//        long triggerAtMillis = SystemClock.elapsedRealtime();
+//        long intervalMillis = Interval.PIN_DATA_TYPE_FILE;
+//        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, intervalMillis, pi);
+//    }
 
     public static void startResetXferAlarm(Context context) {
         log(Log.DEBUG, CLASSNAME, "startResetXferAlarm", null);
@@ -172,7 +164,7 @@ public class HCFSMgmtUtils {
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
 
-        int requestCode = REQUEST_CODE_RESET_XFER;
+        int requestCode = RequestCode.RESET_XFER;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
@@ -194,7 +186,7 @@ public class HCFSMgmtUtils {
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
 
-        int requestCode = REQUEST_CODE_RESET_XFER;
+        int requestCode = RequestCode.RESET_XFER;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
         pi.cancel();
@@ -203,22 +195,22 @@ public class HCFSMgmtUtils {
         am.cancel(pi);
     }
 
-    public static void startNotifyUploadCompletedAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "startNotifyUploadCompletedAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
-
-        int requestCode = REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = Interval.NOTIFY_UPLOAD_COMPLETED;
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
-    }
+//    public static void startNotifyUploadCompletedAlarm(Context context) {
+//        log(Log.DEBUG, CLASSNAME, "startNotifyUploadCompletedAlarm", null);
+//
+//        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
+//
+//        int requestCode = REQUEST_CODE_NOTIFY_UPLOAD_COMPLETED;
+//        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+//        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+//
+//        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+//        long triggerAtMillis = SystemClock.elapsedRealtime();
+//        long intervalMillis = Interval.NOTIFY_UPLOAD_COMPLETED;
+//        am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
+//    }
 
     public static void stopNotifyUploadCompletedAlarm(Context context) {
         log(Log.DEBUG, CLASSNAME, "stopNotifyUploadCompletedAlarm", null);
@@ -227,7 +219,7 @@ public class HCFSMgmtUtils {
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
 
-        int requestCode = REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED;
+        int requestCode = RequestCode.NOTIFY_UPLOAD_COMPLETED;
         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
         pi.cancel();
@@ -746,13 +738,46 @@ public class HCFSMgmtUtils {
         }
     }
 
-    public static void notify_network_status(Context context, int notify_id, String notify_title, String notify_content) {
+    public static void notifyNetworkStatus(Context context, int notify_id, String notify_title, String notify_content) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         String key = SettingsFragment.PREF_NOTIFY_CONN_FAILED_RECOVERY;
         boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(key, false);
         if (notifyConnFailedRecoveryPref) {
-            NotificationEvent.notify(context, notify_id, notify_title, notify_content, false);
+            NotificationEvent.notify(context, notify_id, notify_title, notify_content);
         }
+    }
+
+    public static void startNotifyInsufficientPinSpaceAlarm(Context context) {
+        log(Log.DEBUG, CLASSNAME, "startNotifyInsufficientPinSpaceAlarm", null);
+
+        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+
+        int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        long triggerAtMillis = SystemClock.elapsedRealtime();
+        long intervalMillis = Interval.NOTIFY_INSUFFICIENT_PIN_SPACE;
+        am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
+    }
+
+    public static void stopNotifyInsufficientPinSpaceAlarm(Context context) {
+        log(Log.DEBUG, CLASSNAME, "stopNotifyInsufficientPinSpaceAlarm", null);
+
+        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+
+        int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+        pi.cancel();
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.cancel(pi);
     }
 
     public static void startNotifyLocalStorageUsedRatioAlarm(Context context) {
@@ -762,7 +787,7 @@ public class HCFSMgmtUtils {
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
-        int requestCode = REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+        int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
@@ -779,7 +804,7 @@ public class HCFSMgmtUtils {
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
         intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
-        int requestCode = REQUEST_CODE_NOTIFY_LOCAL_STORAGE_USED_RATIO;
+        int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
         pi.cancel();

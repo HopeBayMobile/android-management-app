@@ -6,7 +6,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 
 import org.json.JSONException;
@@ -106,7 +105,7 @@ public class HCFSConfig {
         int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
         String notify_title = context.getString(R.string.app_name);
         String notify_content = context.getString(R.string.notify_network_connected);
-        HCFSMgmtUtils.notify_network_status(context, notify_id, notify_title, notify_content);
+        HCFSMgmtUtils.notifyNetworkStatus(context, notify_id, notify_title, notify_content);
         startSyncToCloud();
         // editor.putBoolean(key_connected, false);
         // }
@@ -130,7 +129,7 @@ public class HCFSConfig {
         int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
         String notify_title = context.getString(R.string.app_name);
         String notify_content = context.getString(R.string.notify_network_disconnected);
-        HCFSMgmtUtils.notify_network_status(context, notify_id, notify_title, notify_content);
+        HCFSMgmtUtils.notifyNetworkStatus(context, notify_id, notify_title, notify_content);
         stopSyncToCloud();
         // editor.putBoolean(key_disconnected, false);
         // }

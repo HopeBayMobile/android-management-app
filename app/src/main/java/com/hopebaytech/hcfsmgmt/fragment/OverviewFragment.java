@@ -21,9 +21,9 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 import java.util.Locale;
 
-public class DashboardFragment extends Fragment {
+public class OverviewFragment extends Fragment {
 
-    public static String TAG = DashboardFragment.class.getSimpleName();
+    public static String TAG = OverviewFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private final String KEY_CLOUD_STORAGE_USAGE = "cloud_storage_usage";
     private final String KEY_CLOUD_STORAGE_USAGE_PROGRESS = "cloud_storage_usage_progress";
@@ -56,8 +56,8 @@ public class DashboardFragment extends Fragment {
     private Context mContext;
     private HCFSStatInfo mStatInfo;
 
-    public static DashboardFragment newInstance() {
-        return new DashboardFragment();
+    public static OverviewFragment newInstance() {
+        return new OverviewFragment();
     }
 
     @Override
