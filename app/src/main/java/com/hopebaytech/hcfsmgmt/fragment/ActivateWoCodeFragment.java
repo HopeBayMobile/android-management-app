@@ -282,7 +282,6 @@ public class ActivateWoCodeFragment extends Fragment {
                                                         public void run() {
                                                             hideProgressDialog();
                                                             if (failed) {
-//                                                                mErrorMessage.setText(registerResultInfo.getMessage());
                                                                 mErrorMessage.setText(R.string.activate_failed);
                                                             } else {
                                                                 Intent intent = new Intent(mContext, MainActivity.class);
