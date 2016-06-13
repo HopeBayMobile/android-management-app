@@ -39,7 +39,7 @@ public class SwitchAccountDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setTitle(getString(R.string.alert_dialog_title_warning));
-        builder.setMessage(getString(R.string.settings_section_change_account_warning_msg));
+        builder.setMessage(getString(R.string.settings_switch_account_warning_msg));
         builder.setPositiveButton(getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

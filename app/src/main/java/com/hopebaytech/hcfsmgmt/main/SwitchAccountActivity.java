@@ -44,12 +44,15 @@ import com.google.android.gms.plus.Plus;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
@@ -103,7 +106,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
         View contentView = findViewById(android.R.id.content);
         if (contentView != null) {
             mSnackbar = Snackbar.make(contentView, R.string.switch_account_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE);
-            mSnackbar.setAction(R.string.enable_permission, new View.OnClickListener() {
+            mSnackbar.setAction(R.string.got_to_enable_permission, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String packageName = getPackageName();
@@ -141,37 +144,44 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                String imei = HCFSMgmtUtils.getDeviceIMEI(SwitchAccountActivity.this);
-                                final boolean isSuccess = MgmtCluster.switchAccount(mOldServerAuthCode, mNewServerAuthCode, imei);
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        hideProgressDialog();
-                                        if (isSuccess) {
-                                            AccountInfo accountInfo = new AccountInfo();
-                                            accountInfo.setName(mAccountName);
-                                            accountInfo.setEmail(mAccountEmail);
-                                            accountInfo.setImgUrl(mAccountPhotoUrl);
+                                MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                                authParam.setAuthCode(mOldServerAuthCode);
+                                AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+                                if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                                    String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this));
+                                    final boolean isSuccess = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            hideProgressDialog();
+                                            if (isSuccess) {
+                                                AccountInfo accountInfo = new AccountInfo();
+                                                accountInfo.setName(mAccountName);
+                                                accountInfo.setEmail(mAccountEmail);
+                                                accountInfo.setImgUrl(mAccountPhotoUrl);
 
-                                            AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
-                                            accountDAO.clear();
-                                            accountDAO.insert(accountInfo);
-                                            accountDAO.close();
+                                                AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
+                                                accountDAO.clear();
+                                                accountDAO.insert(accountInfo);
+                                                accountDAO.close();
 
-                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
-                                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                                            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                            editor.apply();
+                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
+                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
+                                                editor.apply();
 
-                                            Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
-                                            startActivity(intent);
-                                            finish();
-                                        } else {
-                                            mErrorMsg.setText(R.string.switch_account_failed_to_change);
-                                            signOut();
+                                                Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
+                                                startActivity(intent);
+                                                finish();
+                                            } else {
+                                                mErrorMsg.setText(R.string.switch_account_failed);
+                                                signOut();
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                } else {
+                                    mErrorMsg.setText(R.string.switch_account_failed);
+                                }
                             }
                         }).start();
                     } else {
@@ -218,10 +228,9 @@ public class SwitchAccountActivity extends AppCompatActivity {
                 }
                 accountDAO.close();
 
-                mServerClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
+                mServerClientId = MgmtCluster.getServerClientId();
                 if (mServerClientId != null) {
                     mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                            .requestIdToken(mServerClientId)
                             .requestServerAuthCode(mServerClientId, false)
                             .requestEmail()
                             .build();
@@ -310,7 +319,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if (mServerClientId == null) {
-                            mServerClientId = MgmtCluster.getServerClientIdFromMgmtCluster();
+                            mServerClientId = MgmtCluster.getServerClientId();
                             mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                     .requestIdToken(mServerClientId)
                                     .requestScopes(new Scope(Scopes.PLUS_LOGIN))
@@ -339,7 +348,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                         signOut();
                                         signIn();
                                     } else {
-                                        Toast.makeText(SwitchAccountActivity.this, R.string.switch_account_google_connected_failed, Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(SwitchAccountActivity.this, R.string.switch_account_failed, Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
@@ -349,7 +358,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                 public void run() {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
                                     builder.setTitle(R.string.alert_dialog_title_warning);
-                                    builder.setMessage(R.string.failed_to_get_server_client_id);
+                                    builder.setMessage(R.string.activate_get_server_client_id_failed);
                                     builder.setPositiveButton(R.string.alert_dialog_confirm, null);
                                     builder.show();
                                 }
@@ -394,7 +403,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setCancelable(false);
         }
-        mProgressDialog.setMessage(getString(R.string.activate_cloud_storage_processing_msg));
+        mProgressDialog.setMessage(getString(R.string.activate_processing_msg));
         mProgressDialog.show();
     }
 

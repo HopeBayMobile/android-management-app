@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -20,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="26dp"
             android:layout_marginTop="132dp"
-            android:src="@drawable/icon_tera_logo_l_login"/>
+            android:src="@drawable/icon_tera_logo_l_login" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -88,6 +89,7 @@
 
             <View
                 style="@style/Divider"
+                android:layout_width="match_parent"
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@+id/or" />
 
@@ -126,6 +128,13 @@
                 android:text="@string/activate_with_google_account"
                 android:textColor="@color/colorAccent" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/error_msg"
+            android:layout_marginTop="@dimen/M1"
+            android:layout_width="244dp"
+            android:layout_height="wrap_content"
+            android:gravity="center" />
 
     </LinearLayout>
 </RelativeLayout>

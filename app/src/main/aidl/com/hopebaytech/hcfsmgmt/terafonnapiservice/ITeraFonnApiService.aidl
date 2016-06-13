@@ -6,13 +6,13 @@ import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppInfo;
 
 interface ITeraFonnApiService {
 
-    /** Register the FetchAppData listener */
+    /** RegisterProxy the FetchAppData listener */
     void setFetchAppDataListener(IFetchAppDataListener listener);
 
     /** Force system to download all data not in local of this app */
     boolean fetchAppData(String packageName);
 
-    /** Register the FetchAppData listener */
+    /** RegisterProxy the FetchAppData listener */
     void setTrackAppStatusListener(ITrackAppStatusListener listener);
 
     /**

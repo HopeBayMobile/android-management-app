@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -137,36 +138,36 @@ public class HCFSConfig {
         // editor.commit();
     }
 
-    public static boolean storeHCFSConfig(AuthResultInfo authResultInfo) {
+    public static boolean storeHCFSConfig(RegisterResultInfo registerResultInfo) {
         boolean isFailed = false;
 
-        boolean reloadConfig = true;
-        if (!getHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND).isEmpty()) {
-            reloadConfig = false;
+        boolean firstReloadConfig = false;
+        if (getHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty()) {
+            firstReloadConfig = true;
         }
 
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, authResultInfo.getBackendType())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT, authResultInfo.getAccount())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT, registerResultInfo.getAccount())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, authResultInfo.getUser())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, registerResultInfo.getUser())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, authResultInfo.getPassword())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, registerResultInfo.getPassword())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, authResultInfo.getBackendUrl())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, registerResultInfo.getBackendUrl())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, authResultInfo.getBucket())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, authResultInfo.getProtocol())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, registerResultInfo.getProtocol())) {
             isFailed = true;
         }
-        if (reloadConfig) {
+        if (firstReloadConfig) {
             if (!reloadConfig()) {
                 isFailed = true;
             }

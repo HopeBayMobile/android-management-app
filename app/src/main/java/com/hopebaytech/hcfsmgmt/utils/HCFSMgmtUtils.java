@@ -47,11 +47,10 @@ public class HCFSMgmtUtils {
     public static final int LOG_LEVEL = Log.DEBUG;
 
     public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
-    public static final int NOTIFY_ID_UPLOAD_COMPLETED = 1;
-    public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 2;
-    public static final int NOTIFY_ID_ONGOING = 3;
-    public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 4;
-    public static final int NOTIFY_ID_FAILED_SILENT_SIGN_IN = 5;
+    public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 1;
+    public static final int NOTIFY_ID_ONGOING = 2;
+    public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 3;
+    public static final int NOTIFY_ID_FAILED_SILENT_SIGN_IN = 4;
 
     public static final int REQUEST_CODE_NOTIFY_UPLAOD_COMPLETED = 100;
     public static final int REQUEST_CODE_PIN_DATA_TYPE_FILE = 101;
@@ -337,7 +336,7 @@ public class HCFSMgmtUtils {
 
     @Nullable
     public static ArrayList<String> getAvailableImagePaths(Context context, long dateUpdated) {
-        /* External storage */
+        // External storage
         ArrayList<String> imagePaths = null;
         ContentResolver resolver = context.getContentResolver();
         String[] projection = {MediaStore.Images.Media._ID, MediaStore.Images.Media.DATA, MediaStore.Audio.Media.DATE_ADDED};
@@ -357,7 +356,7 @@ public class HCFSMgmtUtils {
             cursor.close();
         }
 
-		/* Internal storage */
+		// Internal storage
         // cursor = resolver.query(MediaStore.Images.Media.INTERNAL_CONTENT_URI,
         // projection, null, null, MediaStore.Images.Media._ID);
         // cursor.moveToFirst();
@@ -425,7 +424,6 @@ public class HCFSMgmtUtils {
         return hcfsStatInfo;
     }
 
-//    public static boolean pinApp(ServiceAppInfo info) {
     public static boolean pinApp(AppInfo info) {
         HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "pinApp", "AppName=" + info.getName());
         String sourceDir = info.getSourceDir();
@@ -699,7 +697,7 @@ public class HCFSMgmtUtils {
     public static boolean isDataUploadCompleted() {
         HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
         if (hcfsStatInfo != null) {
-            return hcfsStatInfo.getCacheDirtyUsed().equals("0B");
+            return hcfsStatInfo.getFormatCacheDirtyUsed().equals("0B");
         }
         return false;
     }
@@ -828,17 +826,29 @@ public class HCFSMgmtUtils {
         return ContextCompat.getDrawable(context, isPinned ? R.drawable.icon_btn_app_pin : R.drawable.icon_btn_app_unpin);
     }
 
+//    @Nullable
+//    public static String getEncryptedDeviceImei() {
+//        String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI());
+//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getEncryptedDeviceImei", "encryptedIMEI=" + encryptedIMEI);
+//        return encryptedIMEI;
+//    }
+
     @Nullable
-    public static String getEncryptedDeviceIMEI(String imei) {
+    public static String getEncryptedDeviceImei(String imei) {
         String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI(imei));
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getEncryptedDeviceIMEI", "encryptedIMEI=" + encryptedIMEI);
+        Logs.d(CLASSNAME, "getEncryptedDeviceImei", "encryptedIMEI=" + encryptedIMEI);
         return encryptedIMEI;
     }
 
-    public static String getDeviceIMEI(Context context) {
-        String IMEI = ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE)).getDeviceId();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "getDeviceIMEI", "IMEI=" + IMEI);
-        return IMEI == null ? "" : IMEI;
+    public static String getDeviceImei(Context context) {
+        String imei = "";
+        TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        if (manager.getPhoneCount() != 0) {
+            imei = manager.getDeviceId(0);
+        }
+
+        Logs.d(CLASSNAME, "getDeviceImei", "Imei=" + imei);
+        return imei;
     }
 
     public static long getOccupiedSize() {

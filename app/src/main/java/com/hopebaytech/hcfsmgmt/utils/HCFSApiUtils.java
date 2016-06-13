@@ -9,8 +9,6 @@ public class HCFSApiUtils {
 	public static native String getFileStatus(String filePath);
 	public static native String getDirStatus(String filePath);
 	public static native String getHCFSConfig(String key);
-//	public static native String getHCFSProperty(String key);
-//	public static native String setHCFSProperty(String key, String value);
 	public static native String pin(String pinPath);
 	public static native String getPinStatus(String filePath);
 	public static native String setHCFSConfig(String key, String value);

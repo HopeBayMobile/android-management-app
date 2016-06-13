@@ -137,7 +137,6 @@ public class FileMgmtFragment extends Fragment {
     private boolean mRecyclerViewScrollDown;
     private boolean mCurrentVisible;
     private boolean mServiceBound;
-    private int mLanguage;
     private HCFSMgmtService mMgmtService;
     private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.GRID;
     //    private ExternalStorageObserver mExternalStorageObserver;
@@ -690,7 +689,7 @@ public class FileMgmtFragment extends Fragment {
         mPinUnpinAppMap = new ConcurrentHashMap<>();
         mPinUnpinTypeMap = new ConcurrentHashMap<>();
 
-        /** Register mAddRemovePackageStatusReceiver */
+        /** RegisterProxy mAddRemovePackageStatusReceiver */
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -1915,7 +1914,7 @@ public class FileMgmtFragment extends Fragment {
                 } else {
                     mSnackbar.setText(R.string.require_read_external_storage_permission);
                     mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                    mSnackbar.setAction(R.string.enable_permission, mPermissionListener);
+                    mSnackbar.setAction(R.string.got_to_enable_permission, mPermissionListener);
                     mSnackbar.show();
                 }
             }
@@ -2387,7 +2386,7 @@ public class FileMgmtFragment extends Fragment {
                     } else {
                         mSnackbar.setText(R.string.require_read_external_storage_permission);
                         mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                        mSnackbar.setAction(R.string.enable_permission, mPermissionListener);
+                        mSnackbar.setAction(R.string.got_to_enable_permission, mPermissionListener);
                     }
                     mSnackbar.show();
                 }

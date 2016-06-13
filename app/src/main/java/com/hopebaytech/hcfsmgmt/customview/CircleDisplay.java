@@ -18,7 +18,8 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 /**
- * Created by Aaron on 2016/5/13.
+ * @author Aaron
+ *         Created by Aaron on 2016/5/13.
  */
 public class CircleDisplay extends View {
 
@@ -30,31 +31,49 @@ public class CircleDisplay extends View {
     private Paint mCapacityTextPaint;
     private Paint mRatioTextPaint;
 
-    /** object animator for doing the drawing animations */
+    /**
+     * object animator for doing the drawing animations
+     */
     private ObjectAnimator mDrawAnimator;
 
-    /** percent of the maximum width the arc takes */
+    /**
+     * percent of the maximum width the arc takes
+     */
     private float mValueWidthPercent = 25f;
 
-    /** the currently displayed value, can be percent or actual value */
+    /**
+     * the currently displayed value, can be percent or actual value
+     */
     private float mValue = 0f;
 
-    /** the maximum displayable value, depends on the set value */
+    /**
+     * the maximum displayable value, depends on the set value
+     */
     private float mMaxValue = 0f;
 
-    /** angle that represents the displayed value */
+    /**
+     * angle that represents the displayed value
+     */
     private float mAngle = 0f;
 
-    /** current state of the animation */
+    /**
+     * current state of the animation
+     */
     private float mPhase = 0f;
 
-    /** the unit that is represented by the circle-display */
+    /**
+     * the unit that is represented by the circle-display
+     */
     private String mUnit = "%";
 
-    /** the decimal format responsible for formatting the values in the view */
+    /**
+     * the decimal format responsible for formatting the values in the view
+     */
     private String mCapacityValue = "0B";
 
-    /** startangle of the view */
+    /**
+     * startangle of the view
+     */
     private float mStartAngle = 270f;
 
     public CircleDisplay(Context context) {
