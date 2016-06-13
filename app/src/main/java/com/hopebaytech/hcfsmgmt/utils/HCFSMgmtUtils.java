@@ -761,7 +761,6 @@ public class HCFSMgmtUtils {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long triggerAtMillis = SystemClock.elapsedRealtime();
         long intervalMillis = Interval.NOTIFY_INSUFFICIENT_PIN_SPACE;
-//        long intervalMillis = Interval.MINUTE;
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
     }
 
