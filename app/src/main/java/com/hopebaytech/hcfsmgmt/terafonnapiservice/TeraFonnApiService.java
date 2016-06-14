@@ -168,35 +168,16 @@ public class TeraFonnApiService extends Service {
         }
 
         @Override
-        public long getQuota() throws RemoteException {
-            boolean isSuccess = false;
-            long quota = -1;
+        public String getHCFSStat() throws RemoteException {
+            String data;
             try {
-                JSONObject jObject = new JSONObject(HCFSApiUtils.getHCFSStat());
-                isSuccess = jObject.getBoolean("result");
-                if (isSuccess) {
-                    quota = jObject.getLong("quota");
-                }
+                data = HCFSApiUtils.getHCFSStat();
             } catch (Exception e) {
-                log(Log.ERROR, CLASSNAME, "getQuota", e.toString());
+                data = "{\"result\": false}";
+                log(Log.ERROR, CLASSNAME, "getHCFSStat", e.toString());
             }
-            return quota;
-        }
 
-        @Override
-        public long getCloudUsed() throws RemoteException {
-            boolean isSuccess = false;
-            long cloudUsed = -1;
-            try {
-                JSONObject jObject = new JSONObject(HCFSApiUtils.getHCFSStat());
-                isSuccess = jObject.getBoolean("result");
-                if (isSuccess) {
-                    cloudUsed = jObject.getLong("cloud_used");
-                }
-            } catch (Exception e) {
-                log(Log.ERROR, CLASSNAME, "getCloudUsed", e.toString());
-            }
-            return cloudUsed;
+            return data;
         }
 
         @Override

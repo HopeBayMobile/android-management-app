@@ -36,9 +36,7 @@ interface ITeraFonnApiService {
     /** Check datalocation of all apps in appList */
     int checkAppAvailable(String packageName);
 
-    long getQuota();
-
-    long getCloudUsed();
+    String getHCFSStat();
 
     boolean hcfsEnabled();
 }
