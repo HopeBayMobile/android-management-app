@@ -169,7 +169,6 @@ public class TeraFonnApiService extends Service {
             return getDefaultStatus(packageName);
         }
 
-
         @Override
         public String getHCFSStat() throws RemoteException {
             String data;
