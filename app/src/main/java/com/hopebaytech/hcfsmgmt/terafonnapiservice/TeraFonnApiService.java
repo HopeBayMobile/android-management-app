@@ -10,6 +10,7 @@ import android.os.RemoteException;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -167,6 +168,7 @@ public class TeraFonnApiService extends Service {
         public int checkAppAvailable(String packageName) throws RemoteException {
             return getDefaultStatus(packageName);
         }
+
 
         @Override
         public String getHCFSStat() throws RemoteException {
