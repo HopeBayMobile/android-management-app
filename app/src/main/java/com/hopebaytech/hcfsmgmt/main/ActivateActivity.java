@@ -40,7 +40,7 @@ public class ActivateActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentByTag(ActivateWoCodeFragment.TAG);
-        Logs.w(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
+        Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
         if (fragment != null) {
             fragment.onActivityResult(requestCode, resultCode, data);
         } else {

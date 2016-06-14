@@ -92,7 +92,10 @@ public class LoadingActivity extends AppCompatActivity {
                                                 Logs.e(CLASSNAME, "onConnectionFailed", connectionResult.toString());
 
                                                 Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
-                                                intent.putExtras(getIntent().getExtras());
+                                                Bundle bundle = getIntent().getExtras();
+                                                if (bundle != null) {
+                                                    intent.putExtras(bundle);
+                                                }
                                                 startActivity(intent);
                                                 finish();
                                             }
@@ -136,7 +139,10 @@ public class LoadingActivity extends AppCompatActivity {
     private void handleSignInResult(@Nullable GoogleSignInResult result) {
         Logs.d(CLASSNAME, "handleSignInResult", null);
         Intent intent = new Intent(LoadingActivity.this, MainActivity.class);
-        intent.putExtras(getIntent().getExtras());
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            intent.putExtras(bundle);
+        }
         if (result != null && result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
             if (acct != null) {

@@ -299,26 +299,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mViewPager.setAdapter(mPagerAdapter);
         }
 
-        boolean insufficientPinSpace = getIntent().getBooleanExtra(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, false);
-        if (insufficientPinSpace) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        try {
-                            Thread.sleep(500);
-                            Fragment fragment = mPagerAdapter.getFragment(0);
-                            if (fragment != null && fragment.isVisible()) {
+        intent = getIntent();
+        if (intent != null) {
+            boolean insufficientPinSpace = intent.getBooleanExtra(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, false);
+            if (insufficientPinSpace) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            try {
                                 Thread.sleep(500);
-                                mViewPager.setCurrentItem(1, true);
-                                break;
+                                Fragment fragment = mPagerAdapter.getFragment(0);
+                                if (fragment != null && fragment.isVisible()) {
+                                    Thread.sleep(500);
+                                    mViewPager.setCurrentItem(1, true);
+                                    break;
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
                         }
                     }
-                }
-            }).start();
+                }).start();
+            }
         }
 
     }
