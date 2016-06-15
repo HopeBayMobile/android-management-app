@@ -67,6 +67,7 @@ function publish_apk() {
 	echo APP_NAME=${APP_NAME} >> export_props.properties
 	echo APP_DIR=${APP_DIR} >> export_props.properties
 	mkdir -p ${PUBLISH_DIR}/${JOB_NAME}
+	rm -rf ${PUBLISH_DIR}/${JOB_NAME}/*
 	if [ -f app/build/outputs/apk/app-release.apk ]; then
 		rsync -arcv --no-owner --no-group --no-times \
 			app/build/outputs/apk/app-release.apk ${PUBLISH_DIR}/${JOB_NAME}/${APP_NAME}.apk
