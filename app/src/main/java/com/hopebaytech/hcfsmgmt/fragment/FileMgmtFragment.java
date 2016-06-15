@@ -1914,7 +1914,7 @@ public class FileMgmtFragment extends Fragment {
                 } else {
                     mSnackbar.setText(R.string.require_read_external_storage_permission);
                     mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                    mSnackbar.setAction(R.string.got_to_enable_permission, mPermissionListener);
+                    mSnackbar.setAction(R.string.go, mPermissionListener);
                     mSnackbar.show();
                 }
             }
@@ -2386,7 +2386,7 @@ public class FileMgmtFragment extends Fragment {
                     } else {
                         mSnackbar.setText(R.string.require_read_external_storage_permission);
                         mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                        mSnackbar.setAction(R.string.got_to_enable_permission, mPermissionListener);
+                        mSnackbar.setAction(R.string.go, mPermissionListener);
                     }
                     mSnackbar.show();
                 }

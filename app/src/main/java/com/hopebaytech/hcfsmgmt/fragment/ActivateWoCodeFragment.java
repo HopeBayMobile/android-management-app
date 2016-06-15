@@ -22,7 +22,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,63 +58,6 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
-import javax.net.ssl.HttpsURLConnection;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.preference.PreferenceManager;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.plus.Plus;
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.AccountDAO;
-import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
-import com.hopebaytech.hcfsmgmt.main.MainActivity;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.RequestCode;
-
-import java.util.Locale;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -161,7 +104,6 @@ public class ActivateWoCodeFragment extends Fragment {
     private TextView mForgotPassword;
     private TextView mGoogleActivate;
     private TextView mErrorMessage;
-    private Snackbar mSnackbar;
 
     public static ActivateWoCodeFragment newInstance() {
         return new ActivateWoCodeFragment();
@@ -201,17 +143,6 @@ public class ActivateWoCodeFragment extends Fragment {
         mForgotPassword = (TextView) view.findViewById(R.id.forget_password);
         mGoogleActivate = (TextView) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
-        mSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.got_to_enable_permission, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String packageName = getContext().getPackageName();
-                        Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
-                        teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                        teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(teraPermissionSettings);
-                    }
-                });
 
     }
 
@@ -355,7 +286,7 @@ public class ActivateWoCodeFragment extends Fragment {
                             builder.setCancelable(false);
                             builder.show();
                         } else {
-                            mSnackbar.show();
+                            PermissionSnackbar.getInstance(mContext, mView).show();
                         }
                     }
                 }
@@ -375,12 +306,6 @@ public class ActivateWoCodeFragment extends Fragment {
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-                if (googleAPI.isGooglePlayServicesAvailable(mContext) != ConnectionResult.SUCCESS) {
-                    mErrorMessage.setText(R.string.activate_without_google_play_services);
-                    return;
-                }
-
                 if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     if (NetworkUtils.isNetworkConnected(mContext)) {
                         showProgressDialog();
@@ -404,29 +329,42 @@ public class ActivateWoCodeFragment extends Fragment {
                                         public void run() {
                                             if (mGoogleApiClient == null) {
                                                 mGoogleApiClient = new GoogleApiClient.Builder(mContext)
-                                                        .enableAutoManage((AppCompatActivity) mContext, new GoogleApiClient.OnConnectionFailedListener() {
+                                                        .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                                                             @Override
                                                             public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
                                                                 // An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
                                                                 Logs.d(CLASSNAME, "onConnectionFailed", "connectionResult=" + connectionResult);
-                                                                hideProgressDialog();
-
-                                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                                                                boolean hcfsActivated = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
-                                                                if (hcfsActivated) {
-                                                                    Intent intent = new Intent(mContext, MainActivity.class);
-                                                                    mContext.startActivity(intent);
-                                                                    ((Activity) mContext).finish();
+                                                                if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_MISSING) {
+                                                                    mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                                                } else if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
+                                                                    mErrorMessage.setText(R.string.activate_update_google_play_services_required);
+                                                                    PlayServiceSnackbar.getInstance(mContext, mView).show();
+                                                                } else {
+                                                                    mErrorMessage.setText(R.string.activate_signin_google_account_failed);
                                                                 }
+                                                                hideProgressDialog();
+                                                                mGoogleApiClient.disconnect();
+                                                            }
+                                                        })
+                                                        .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                                                            @Override
+                                                            public void onConnected(@Nullable Bundle bundle) {
+                                                                Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
+                                                                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                                                                ((Activity) mContext).startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
+                                                            }
+
+                                                            @Override
+                                                            public void onConnectionSuspended(int i) {
+                                                                Logs.d(CLASSNAME, "onConnectionSuspended", "i=" + i);
                                                             }
                                                         })
                                                         .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                                                         .addApi(Plus.API)
                                                         .build();
                                             }
-
-                                            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                                            ((Activity) mContext).startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
+                                            mGoogleApiClient.disconnect();
+                                            mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
                                         }
                                     });
                                 } else {
@@ -445,7 +383,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     }
                 } else {
                     if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
-                        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(mContext);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(getString(R.string.alert_dialog_title_warning));
                         builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
                         builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
@@ -457,10 +395,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         builder.setCancelable(false);
                         builder.show();
                     } else {
-                        View view = getView();
-                        if (view != null) {
-                            mSnackbar.show();
-                        }
+                        PermissionSnackbar.getInstance(mContext, mView).show();
                     }
                 }
             }
@@ -472,10 +407,63 @@ public class ActivateWoCodeFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if (mSnackbar != null) {
+        Snackbar snackbar = PermissionSnackbar.getInstance(mContext, mView);
+        if (snackbar != null) {
             if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                mSnackbar.dismiss();
+                snackbar.dismiss();
             }
+        }
+
+    }
+
+    public static class PlayServiceSnackbar {
+
+        private static Snackbar playServiceSnackbar;
+
+        public static Snackbar getInstance(final Context context, View view) {
+            if (playServiceSnackbar == null) {
+                playServiceSnackbar = Snackbar.make(view, R.string.activate_update_google_play_services_go, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.update, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String playServicesPackage = GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE;
+                                Intent intent;
+                                try {
+                                    // Open app with Google Play app
+                                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + playServicesPackage));
+                                    context.startActivity(intent);
+                                } catch (android.content.ActivityNotFoundException anfe) {
+                                    // Open Google Play website
+                                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + playServicesPackage));
+                                    context.startActivity(intent);
+                                }
+                            }
+                        });
+            }
+            return playServiceSnackbar;
+        }
+
+    }
+
+    public static class PermissionSnackbar {
+
+        private static Snackbar permissionSnackbar;
+
+        public static Snackbar getInstance(final Context context, View view) {
+            if (permissionSnackbar == null) {
+                permissionSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.go, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String packageName = context.getPackageName();
+                                Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
+                                teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                                teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(teraPermissionSettings);
+                            }
+                        });
+            }
+            return permissionSnackbar;
         }
 
     }
@@ -586,13 +574,15 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                     hideProgressDialog();
 
-                                    Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                                            .setResultCallback(new ResultCallback<Status>() {
-                                                @Override
-                                                public void onResult(@NonNull Status status) {
-                                                    Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
-                                                }
-                                            });
+                                    if (mGoogleApiClient.isConnected()) {
+                                        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                                                .setResultCallback(new ResultCallback<Status>() {
+                                                    @Override
+                                                    public void onResult(@NonNull Status status) {
+                                                        Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
+                                                    }
+                                                });
+                                    }
 
                                     int errorMsgResId = R.string.activate_failed;
                                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
@@ -630,13 +620,15 @@ public class ActivateWoCodeFragment extends Fragment {
 
                             hideProgressDialog();
 
-                            Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                                    .setResultCallback(new ResultCallback<Status>() {
-                                        @Override
-                                        public void onResult(@NonNull Status status) {
-                                            Logs.d(CLASSNAME, "onAuthFailed", "status=" + status);
-                                        }
-                                    });
+                            if (mGoogleApiClient.isConnected()) {
+                                Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                                        .setResultCallback(new ResultCallback<Status>() {
+                                            @Override
+                                            public void onResult(@NonNull Status status) {
+                                                Logs.d(CLASSNAME, "onAuthFailed", "status=" + status);
+                                            }
+                                        });
+                            }
 
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }
@@ -664,6 +656,10 @@ public class ActivateWoCodeFragment extends Fragment {
             mHandlerThread.quit();
         }
 
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
+
     }
 
     private void showProgressDialog() {
@@ -684,4 +680,17 @@ public class ActivateWoCodeFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE:
+                if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    PermissionSnackbar.getInstance(mContext, mView).show();
+                }
+                break;
+        }
+
+    }
 }

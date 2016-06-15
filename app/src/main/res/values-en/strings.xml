@@ -4,7 +4,8 @@
 
     <string name="require_read_external_storage_permission">讀取檔案清單需啟用[儲存]權限。</string>
     <string name="require_read_phone_state_permission">讀取IMEI值需啟用[電話]權限。</string>
-    <string name="got_to_enable_permission">GO</string>
+    <string name="go">GO</string>
+    <string name="update">UPDATE</string>
 
     <string name="activate_alert_dialog_message">Network connection failed. Please try again later.</string>
     <string name="activate_processing_msg">Processing&#8230; Please wait.</string>
@@ -21,6 +22,8 @@
     <string name="activate_get_server_client_id_failed">Getting info about Google authentication from admin server failed. </string>
     <string name="activate_require_username_password">Enter user name &amp; password.</string>
     <string name="activate_without_google_play_services">Tera must run on Google Play services, which are missing on your phone.</string>
+    <string name="activate_update_google_play_services_required">Tera won\'t run unless you update Google Play services.</string>
+    <string name="activate_update_google_play_services_go">Update Google Play services</string>
     <string name="activate_require_activation_code">Enter activation code.</string>
     <string name="activate_incorrect_activation_code">Incorrect activation code.</string>
     <string name="activate_auth_failed">Account authentication failed.</string>

@@ -110,7 +110,7 @@ public class AboutFragment extends Fragment {
                     } else {
                         mSnackbar.setText(R.string.require_read_phone_state_permission);
                         mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                        mSnackbar.setAction(R.string.got_to_enable_permission, listener);
+                        mSnackbar.setAction(R.string.go, listener);
                         mSnackbar.show();
                     }
                 }
@@ -137,7 +137,7 @@ public class AboutFragment extends Fragment {
                     } else {
                         mSnackbar.setText(R.string.require_read_phone_state_permission);
                         mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                        mSnackbar.setAction(R.string.got_to_enable_permission, listener);
+                        mSnackbar.setAction(R.string.go, listener);
                     }
                     mSnackbar.show();
                 } else {
