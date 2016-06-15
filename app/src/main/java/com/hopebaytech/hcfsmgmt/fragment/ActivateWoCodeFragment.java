@@ -477,6 +477,58 @@ public class ActivateWoCodeFragment extends Fragment {
 
     }
 
+    public static class PlayServiceSnackbar {
+
+        private static Snackbar playServiceSnackbar;
+
+        public static Snackbar getInstance(final Context context, View view) {
+            if (playServiceSnackbar == null) {
+                playServiceSnackbar = Snackbar.make(view, R.string.activate_update_google_play_services_go, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.update, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String playServicesPackage = GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE;
+                                Intent intent;
+                                try {
+                                    // Open app with Google Play app
+                                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + playServicesPackage));
+                                    context.startActivity(intent);
+                                } catch (android.content.ActivityNotFoundException anfe) {
+                                    // Open Google Play website
+                                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + playServicesPackage));
+                                    context.startActivity(intent);
+                                }
+                            }
+                        });
+            }
+            return playServiceSnackbar;
+        }
+
+    }
+
+    public static class PermissionSnackbar {
+
+        private static Snackbar permissionSnackbar;
+
+        public static Snackbar getInstance(final Context context, View view) {
+            if (permissionSnackbar == null) {
+                permissionSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.go, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String packageName = context.getPackageName();
+                                Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
+                                teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                                teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(teraPermissionSettings);
+                            }
+                        });
+            }
+            return permissionSnackbar;
+        }
+
+    }
+
     private void googleAuthFailed(String failedMsg) {
         Logs.e(CLASSNAME, "googleAuthFailed", "failedMsg=" + failedMsg);
 
