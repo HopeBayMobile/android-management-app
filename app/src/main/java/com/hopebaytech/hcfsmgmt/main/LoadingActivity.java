@@ -72,22 +72,6 @@ public class LoadingActivity extends AppCompatActivity {
 //
 //        Logs.w(CLASSNAME, "onCreate", logMsg);
 
-        ArrayList<ItemInfo> itemInfoList = DisplayTypeFactory.getListOfInstalledApps(this, DisplayTypeFactory.APP_SYSTEM);
-        for (ItemInfo itemInfo : itemInfoList) {
-            AppInfo appInfo = (AppInfo) itemInfo;
-            appInfo.setPinned(true);
-            final boolean isPinned = appInfo.isPinned();
-            if (isPinned) {
-                if (!HCFSMgmtUtils.pinApp(appInfo, PinType.PRIORITY)) {
-                    Logs.e(CLASSNAME, "onCreate", "pin failed");
-                }
-            } else {
-                if (!HCFSMgmtUtils.unpinApp(appInfo)) {
-                    Logs.e(CLASSNAME, "onCreate", "unpin failed");
-                }
-            }
-        }
-
         init();
     }
 

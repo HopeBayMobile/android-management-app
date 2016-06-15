@@ -309,6 +309,12 @@ public class ActivateWoCodeFragment extends Fragment {
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+                if (googleAPI.isGooglePlayServicesAvailable(mContext) == ConnectionResult.SERVICE_MISSING) {
+                    mErrorMessage.setText(R.string.activate_without_google_play_services);
+                    return;
+                }
+
                 if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     if (NetworkUtils.isNetworkConnected(mContext)) {
                         showProgressDialog();
