@@ -179,8 +179,8 @@ public class HCFSMgmtService extends Service {
                         try {
                             PackageManager pm = getPackageManager();
                             ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                            String sourceDir = applicationInfo.sourceDir;
-                            int lastIndex = sourceDir.lastIndexOf("/");
+//                            String sourceDir = applicationInfo.sourceDir;
+//                            int lastIndex = sourceDir.lastIndexOf("/");
 //                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
                             boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
                             if (!isSystemApp) {
@@ -213,9 +213,9 @@ public class HCFSMgmtService extends Service {
                         try {
                             PackageManager pm = getPackageManager();
                             ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                            String sourceDir = applicationInfo.sourceDir;
-                            int lastIndex = sourceDir.lastIndexOf("/");
-                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
+//                            String sourceDir = applicationInfo.sourceDir;
+//                            int lastIndex = sourceDir.lastIndexOf("/");
+//                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
                             UidInfo uidInfo = mUidDAO.get(packageName);
                             if (uidInfo != null) {
                                 boolean isPinned = uidInfo.isPinned();
@@ -229,7 +229,7 @@ public class HCFSMgmtService extends Service {
 //                                pinOrUnpinApp(serviceAppInfo);
 
                                 AppInfo appInfo = new AppInfo(context);
-                                appInfo.setPinned(false);
+                                appInfo.setPinned(isPinned);
                                 appInfo.setUid(applicationInfo.uid);
                                 appInfo.setApplicationInfo(applicationInfo);
                                 appInfo.setName(applicationInfo.loadLabel(pm).toString());
