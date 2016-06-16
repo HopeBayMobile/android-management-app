@@ -267,7 +267,7 @@ public class MgmtCluster {
     public static class GoogleAuthParam extends IAuthParam {
 
         private String authCode;
-        private String authBackend;
+        private String authBackend = GOOGLE_AUTH_BACKEND;
 
         @Override
         public ContentValues createAuthParam() {

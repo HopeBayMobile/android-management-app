@@ -127,6 +127,7 @@ public class HttpProxyImpl implements IHttpProxy {
                 Logs.e(CLASSNAME, "getQuery", Log.getStackTraceString(e));
             }
         }
+        Logs.d(CLASSNAME, "getQuery", "query=" + result.toString());
         return result.toString();
     }
 
