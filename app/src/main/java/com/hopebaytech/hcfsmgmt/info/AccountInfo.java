@@ -1,7 +1,8 @@
 package com.hopebaytech.hcfsmgmt.info;
 
 /**
- * Created by Aaron on 2016/4/19.
+ * @author Aaron
+ *         Created by Aaron on 2016/4/19.
  */
 public class AccountInfo {
 

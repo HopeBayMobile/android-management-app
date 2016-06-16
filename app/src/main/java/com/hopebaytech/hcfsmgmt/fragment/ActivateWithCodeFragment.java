@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Html;
@@ -22,6 +24,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.AccountDAO;
+import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.google.android.gms.auth.api.Auth;
@@ -172,6 +176,19 @@ public class ActivateWithCodeFragment extends Fragment {
                                             final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
                                             if (failed) {
                                                 HCFSConfig.resetHCFSConfig();
+                                            } else {
+                                                AccountInfo accountInfo = new AccountInfo();
+                                                accountInfo.setName(username);
+
+                                                AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+                                                accountDAO.clear();
+                                                accountDAO.insert(accountInfo);
+                                                accountDAO.close();
+
+                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
+                                                editor.apply();
                                             }
 
                                             mUiHandler.post(new Runnable() {

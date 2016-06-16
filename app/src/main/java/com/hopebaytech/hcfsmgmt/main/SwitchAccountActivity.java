@@ -231,6 +231,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                 mServerClientId = MgmtCluster.getServerClientId();
                 if (mServerClientId != null) {
                     mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                             .requestServerAuthCode(mServerClientId, false)
                             .requestEmail()
                             .build();
@@ -321,8 +322,8 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         if (mServerClientId == null) {
                             mServerClientId = MgmtCluster.getServerClientId();
                             mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                    .requestIdToken(mServerClientId)
                                     .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                                    .requestServerAuthCode(mServerClientId)
                                     .requestEmail()
                                     .build();
                         }

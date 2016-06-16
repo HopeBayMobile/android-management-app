@@ -12,9 +12,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
@@ -54,6 +56,7 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 public class HCFSMgmtService extends Service {
@@ -263,8 +266,7 @@ public class HCFSMgmtService extends Service {
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
                             double pinPlusUnpinButDirtyRatio = ((double) occupiedSize / rawCacheTotal) * 100;
-                            Logs.w(CLASSNAME, "onStartCommand",
-                                    "occupiedSize=" + occupiedSize +
+                            Logs.d(CLASSNAME, "onStartCommand", "occupiedSize=" + occupiedSize +
                                             ", rawCacheTotal=" + rawCacheTotal +
                                             ", pinPlusUnpinButDirty=" + pinPlusUnpinButDirtyRatio);
                             if (pinPlusUnpinButDirtyRatio >= Double.valueOf(storageUsedRatio)) {
@@ -343,7 +345,8 @@ public class HCFSMgmtService extends Service {
                                 final String serverClientId = MgmtCluster.getServerClientId();
                                 if (serverClientId != null) {
                                     final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                            .requestIdToken(serverClientId)
+                                            .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                                            .requestServerAuthCode(serverClientId)
                                             .requestEmail()
                                             .build();
 
@@ -360,7 +363,7 @@ public class HCFSMgmtService extends Service {
                                                 }
                                             })
                                             .build();
-                                    mGoogleApiClient.connect();
+                                    mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
 
                                     OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
                                     if (opr.isDone()) {
@@ -370,6 +373,7 @@ public class HCFSMgmtService extends Service {
                                             final GoogleSignInAccount acct = result.getSignInAccount();
                                             if (acct != null) {
                                                 String serverAuthCode = acct.getServerAuthCode();
+                                                Logs.w(CLASSNAME, "onStartCommand", "serverAuthCode=" + serverAuthCode);
                                                 registerToMgmtCluster(context, serverAuthCode);
                                             } else {
                                                 String failedMsg = "acct is null";
@@ -533,9 +537,12 @@ public class HCFSMgmtService extends Service {
     private void registerToMgmtCluster(final Context context, String serverAuthCode) {
         final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
         authParam.setAuthCode(serverAuthCode);
+        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
         authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(HCFSMgmtService.this)));
         authParam.setVendor(Build.BRAND);
         authParam.setModel(Build.MODEL);
+        authParam.setAndroidVersion(Build.VERSION.RELEASE);
+        authParam.setHcfsVersion("1.0.1");
 
         MgmtCluster.plusRetryCount();
         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
