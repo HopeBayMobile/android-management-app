@@ -427,11 +427,12 @@ public class HCFSMgmtUtils {
         String dataDir = info.getDataDir();
         ArrayList<String> externalDirList = info.getExternalDirList();
         boolean isSourceDirSuccess = true;
-//        if (sourceDir != null) {
-//            if (sourceDir.startsWith("/data/app")) {
+        if (sourceDir != null) {
+            if (sourceDir.startsWith("/data/app")) {
 //                isSourceDirSuccess = pinFileOrDirectory(sourceDir, pinType);
-//            }
-//        }
+                isSourceDirSuccess = (pinFileOrDirectory(dataDir, PinType.PRIORITY) == 0);
+            }
+        }
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
