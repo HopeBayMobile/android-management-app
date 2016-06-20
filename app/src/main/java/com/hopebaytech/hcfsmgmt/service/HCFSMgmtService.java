@@ -508,6 +508,8 @@ public class HCFSMgmtService extends Service {
         }
         mGoogleApiClient.disconnect();
         HCFSConfig.stopSyncToCloud();
+
+        NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
     private void googleAuthFailed(String failedMsg) {
@@ -532,6 +534,8 @@ public class HCFSMgmtService extends Service {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
         editor.apply();
+
+        NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
     private void registerToMgmtCluster(final Context context, String serverAuthCode) {
@@ -588,6 +592,7 @@ public class HCFSMgmtService extends Service {
             public void onAuthFailed(AuthResultInfo authResultInfo) {
                 mgmtAuthOrRegisterFailed();
             }
+
         });
         authProxy.auth();
 

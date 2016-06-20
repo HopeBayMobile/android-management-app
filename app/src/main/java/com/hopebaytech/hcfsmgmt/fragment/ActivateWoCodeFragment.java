@@ -206,6 +206,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                                         editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                         editor.apply();
+
+                                                        // Start sync to cloud
+                                                        HCFSConfig.startSyncToCloud();
                                                     }
 
                                                     mUiHandler.post(new Runnable() {
@@ -555,6 +558,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                         hideProgressDialog();
                                                     }
                                                 });
+
+                                                // Start sync to cloud
+                                                HCFSConfig.startSyncToCloud();
 
                                                 Intent intent = new Intent(mContext, MainActivity.class);
                                                 intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);

@@ -189,6 +189,9 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                                 editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                 editor.apply();
+
+                                                // Start sync to cloud
+                                                HCFSConfig.startSyncToCloud();
                                             }
 
                                             mUiHandler.post(new Runnable() {

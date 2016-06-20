@@ -42,6 +42,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
@@ -299,6 +300,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             mViewPager.setAdapter(mPagerAdapter);
         }
 
+        // Jump to App/File page if app is launched from insufficient notification
         intent = getIntent();
         if (intent != null) {
             boolean insufficientPinSpace = intent.getBooleanExtra(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, false);

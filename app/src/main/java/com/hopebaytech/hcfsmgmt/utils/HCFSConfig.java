@@ -91,7 +91,7 @@ public class HCFSConfig {
 
     public static void startSyncToCloud() {
         String jsonResult = HCFSApiUtils.setHCFSSyncStatus(1);
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "startSyncToCloud", jsonResult);
+        Logs.d(CLASSNAME, "startSyncToCloud", jsonResult);
     }
 
     public static void startSyncToCloud(Context context, String logMsg) {
