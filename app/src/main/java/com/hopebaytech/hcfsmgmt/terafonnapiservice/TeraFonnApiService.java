@@ -431,19 +431,23 @@ public class TeraFonnApiService extends Service {
     }
 
     private List<String> getExternalDir(String packageName) {
-        List<String> externalDir = new ArrayList<>();
+        List<String> externalDir = new ArrayList<String>();
         String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-        File externalAndroidFile = new File(externalPath);
-        for (File type : externalAndroidFile.listFiles()) {
-            File[] fileList = type.listFiles();
-            for (File file : fileList) {
-                String path = file.getAbsolutePath();
-                if (path.contains(packageName)) {
-                    log(Log.INFO, CLASSNAME, "getExternalDir", path);
-                    externalDir.add(path);
-                    break;
+        try {
+            File externalAndroidFile = new File(externalPath);
+            for (File type : externalAndroidFile.listFiles()) {
+                File[] fileList = type.listFiles();
+                for (File file : fileList) {
+                    String path = file.getAbsolutePath();
+                    if (path.indexOf(packageName) != -1) {
+                        log(Log.INFO, CLASSNAME, "getExternalDir", path);
+                        externalDir.add(path);
+                        break;
+                    }
                 }
             }
+        } catch (Exception e) {
+            externalDir.clear();
         }
 
         return externalDir;
