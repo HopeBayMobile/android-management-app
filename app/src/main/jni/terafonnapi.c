@@ -7,7 +7,8 @@
 extern void HCFS_file_status(const char **json_res, const char *pathname);
 extern void HCFS_dir_status(const char **json_res, const char *pathname);
 extern void HCFS_get_config(const char **json_res, const char *key);
-extern void HCFS_pin_path(const char **json_res, const char *pin_path);
+//extern void HCFS_pin_path(const char **json_res, const char *pin_path);
+extern void HCFS_pin_path(const char **json_res, const char *pin_path, const char pin_type);
 extern void HCFS_pin_status(const char **json_res, const char *pathname);
 extern void HCFS_set_config(const char **json_res, const char *key, const char *value);
 extern void HCFS_stat(const char **json_res);
@@ -53,11 +54,22 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHC
 	return result;
 }
 
+//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_pin(
+//		JNIEnv *jEnv, jobject jObject, jstring jString) {
+//	const char *json_res;
+//	const char *pin_path = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
+//	HCFS_pin_path(&json_res, pin_path);
+//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+//	free((char *)json_res);
+//	free((char *)pin_path);
+//	return result;
+//}
+
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_pin(
-		JNIEnv *jEnv, jobject jObject, jstring jString) {
+		JNIEnv *jEnv, jobject jObject, jstring pinPath, jint pinType) {
 	const char *json_res;
-	const char *pin_path = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
-	HCFS_pin_path(&json_res, pin_path);
+	const char *pin_path = (*jEnv)->GetStringUTFChars(jEnv, pinPath, 0);
+	HCFS_pin_path(&json_res, pin_path, (char) pinType);
 	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
 	free((char *)json_res);
 	free((char *)pin_path);

@@ -23,6 +23,7 @@
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.LoadingActivity"
             android:exported="true"
+            android:launchMode="singleInstance"
             android:screenOrientation="portrait">
 
             <intent-filter>
@@ -32,9 +33,6 @@
         </activity>
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.ActivateActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name="com.hopebaytech.hcfsmgmt.main.ActivateCloudStorageActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"

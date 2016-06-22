@@ -10,11 +10,13 @@ import android.os.RemoteException;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.PinType;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -364,7 +366,7 @@ public class TeraFonnApiService extends Service {
 
         if (!dataDir.equals("")) {
             try {
-                String jsonResult = pinOP ? HCFSApiUtils.pin(dataDir) : HCFSApiUtils.unpin(dataDir);
+                String jsonResult = pinOP ? HCFSApiUtils.pin(dataDir, PinType.NORMAL) : HCFSApiUtils.unpin(dataDir);
                 JSONObject jObject = new JSONObject(jsonResult);
                 isSuccess = jObject.getBoolean("result");
 
@@ -375,7 +377,7 @@ public class TeraFonnApiService extends Service {
                     List<String> externalPath = getExternalDir(packageName);
                     if (externalPath.size() != 0) {
                         for (String path : externalPath) {
-                            jsonResult = pinOP ? HCFSApiUtils.pin(path) : HCFSApiUtils.unpin(path);
+                            jsonResult = pinOP ? HCFSApiUtils.pin(path, PinType.NORMAL) : HCFSApiUtils.unpin(path);
                             jObject = new JSONObject(jsonResult);
                             isSuccess = jObject.getBoolean("result");
 

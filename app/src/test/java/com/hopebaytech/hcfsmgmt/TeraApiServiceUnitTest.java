@@ -11,6 +11,8 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.PinType;
 
 import junit.framework.Assert;
 
@@ -137,7 +139,7 @@ public class TeraApiServiceUnitTest extends AndroidTestCase {
 
     public void test_pin() throws Exception {
         String dataDir =  "/data/user/0/" + packageName;
-        String jsonResult = HCFSApiUtils.pin(dataDir);
+        String jsonResult = HCFSApiUtils.pin(dataDir, PinType.NORMAL);
         JSONObject jObject = new JSONObject(jsonResult);
         log(Log.DEBUG, "test_pin", jsonResult);
         Assert.assertEquals(true, jObject.getBoolean("result"));

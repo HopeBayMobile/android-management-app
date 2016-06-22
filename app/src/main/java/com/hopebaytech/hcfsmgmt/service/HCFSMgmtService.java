@@ -42,6 +42,7 @@ import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
+import com.hopebaytech.hcfsmgmt.utils.PinType;
 
 import android.app.Service;
 import android.content.Context;
@@ -152,7 +153,7 @@ public class HCFSMgmtService extends Service {
                         for (ItemInfo itemInfo : itemInfoList) {
                             AppInfo appInfo = (AppInfo) itemInfo;
                             appInfo.setPinned(true);
-                            pinOrUnpinApp(appInfo);
+                            pinOrUnpinApp(appInfo, PinType.PRIORITY);
 //                            ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
 //                            serviceAppInfo.setPinned(true);
 //                            serviceAppInfo.setAppName(appInfo.getName());
@@ -178,8 +179,8 @@ public class HCFSMgmtService extends Service {
                         try {
                             PackageManager pm = getPackageManager();
                             ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                            String sourceDir = applicationInfo.sourceDir;
-                            int lastIndex = sourceDir.lastIndexOf("/");
+//                            String sourceDir = applicationInfo.sourceDir;
+//                            int lastIndex = sourceDir.lastIndexOf("/");
 //                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
                             boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
                             if (!isSystemApp) {
@@ -212,9 +213,9 @@ public class HCFSMgmtService extends Service {
                         try {
                             PackageManager pm = getPackageManager();
                             ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                            String sourceDir = applicationInfo.sourceDir;
-                            int lastIndex = sourceDir.lastIndexOf("/");
-                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
+//                            String sourceDir = applicationInfo.sourceDir;
+//                            int lastIndex = sourceDir.lastIndexOf("/");
+//                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
                             UidInfo uidInfo = mUidDAO.get(packageName);
                             if (uidInfo != null) {
                                 boolean isPinned = uidInfo.isPinned();
@@ -228,7 +229,7 @@ public class HCFSMgmtService extends Service {
 //                                pinOrUnpinApp(serviceAppInfo);
 
                                 AppInfo appInfo = new AppInfo(context);
-                                appInfo.setPinned(false);
+                                appInfo.setPinned(isPinned);
                                 appInfo.setUid(applicationInfo.uid);
                                 appInfo.setApplicationInfo(applicationInfo);
                                 appInfo.setName(applicationInfo.loadLabel(pm).toString());
@@ -600,9 +601,14 @@ public class HCFSMgmtService extends Service {
 
     private void pinOrUnpinApp(AppInfo info) {
         Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
+        pinOrUnpinApp(info, PinType.NORMAL);
+    }
+
+    private void pinOrUnpinApp(AppInfo info, int pinType) {
+        Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
         final boolean isPinned = info.isPinned();
         if (isPinned) {
-            if (!HCFSMgmtUtils.pinApp(info)) {
+            if (!HCFSMgmtUtils.pinApp(info, pinType)) {
                 handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
             }
         } else {
@@ -778,8 +784,7 @@ public class HCFSMgmtService extends Service {
 
     private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
         String filePath = info.getFilePath();
-        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory",
-                "filePath=" + filePath + ", threadName=" + Thread.currentThread().getName());
+        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
         boolean isPinned = info.isPinned();
         if (isPinned) {
             int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);

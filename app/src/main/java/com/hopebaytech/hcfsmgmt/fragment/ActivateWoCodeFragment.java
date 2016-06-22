@@ -309,6 +309,12 @@ public class ActivateWoCodeFragment extends Fragment {
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+                if (googleAPI.isGooglePlayServicesAvailable(mContext) == ConnectionResult.SERVICE_MISSING) {
+                    mErrorMessage.setText(R.string.activate_without_google_play_services);
+                    return;
+                }
+
                 if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                     if (NetworkUtils.isNetworkConnected(mContext)) {
                         showProgressDialog();
@@ -419,6 +425,29 @@ public class ActivateWoCodeFragment extends Fragment {
 
     }
 
+    public static class PermissionSnackbar {
+
+        private static Snackbar permissionSnackbar;
+
+        public static Snackbar getInstance(final Context context, View view) {
+            if (permissionSnackbar == null) {
+                permissionSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.go, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String packageName = context.getPackageName();
+                                Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
+                                teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                                teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                context.startActivity(teraPermissionSettings);
+                            }
+                        });
+            }
+            return permissionSnackbar;
+        }
+
+    }
+
     public static class PlayServiceSnackbar {
 
         private static Snackbar playServiceSnackbar;
@@ -444,29 +473,6 @@ public class ActivateWoCodeFragment extends Fragment {
                         });
             }
             return playServiceSnackbar;
-        }
-
-    }
-
-    public static class PermissionSnackbar {
-
-        private static Snackbar permissionSnackbar;
-
-        public static Snackbar getInstance(final Context context, View view) {
-            if (permissionSnackbar == null) {
-                permissionSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.go, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String packageName = context.getPackageName();
-                                Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
-                                teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                                teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                context.startActivity(teraPermissionSettings);
-                            }
-                        });
-            }
-            return permissionSnackbar;
         }
 
     }
@@ -669,7 +675,7 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private void showProgressDialog() {
-        Logs.w(CLASSNAME, "showProgressDialog", null);
+        Logs.d(CLASSNAME, "showProgressDialog", null);
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(mContext);
             mProgressDialog.setIndeterminate(true);
@@ -680,7 +686,7 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private void hideProgressDialog() {
-        Logs.w(CLASSNAME, "hideProgressDialog", null);
+        Logs.d(CLASSNAME, "hideProgressDialog", null);
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
             mProgressDialog.hide();
         }

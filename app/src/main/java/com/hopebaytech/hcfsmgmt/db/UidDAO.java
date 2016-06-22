@@ -56,12 +56,24 @@ public class UidDAO {
 
     public boolean insert(UidInfo uidInfo) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(PIN_STATUS_COLUMN, uidInfo.isPinned() ? 1 : 0);
+        int pinStatus = 0;
+        if (uidInfo.isPinned()) {
+            if (uidInfo.isSystemApp()) {
+                pinStatus = 2;
+            } else {
+                pinStatus = 1;
+            }
+        }
+        contentValues.put(PIN_STATUS_COLUMN, pinStatus);
         contentValues.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
         contentValues.put(UID_COLUMN, uidInfo.getUid());
         contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
         boolean isInserted = getDataBase().insert(TABLE_NAME, null, contentValues) > -1;
-        String logMsg = "isPinned=" + uidInfo.isPinned() + ", isSystemApp=" + uidInfo.isSystemApp() + ", uid=" + uidInfo.getUid() + ", packageName=" + uidInfo.getPackageName();
+        String logMsg = "isPinned=" + uidInfo.isPinned() +
+                ", pinStatus=" + pinStatus +
+                ", isSystemApp=" + uidInfo.isSystemApp() +
+                ", uid=" + uidInfo.getUid() +
+                ", packageName=" + uidInfo.getPackageName();
         if (isInserted) {
             HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "insert", logMsg);
             return true;
@@ -142,7 +154,7 @@ public class UidDAO {
 
     public UidInfo getRecord(Cursor cursor) {
         UidInfo result = new UidInfo();
-        result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) == 1);
+        result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
         result.setSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
         result.setUid(cursor.getInt(cursor.getColumnIndex(UID_COLUMN)));
         result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));

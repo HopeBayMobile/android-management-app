@@ -418,25 +418,33 @@ public class HCFSMgmtUtils {
 
     public static boolean pinApp(AppInfo info) {
         HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "pinApp", "AppName=" + info.getName());
+        return pinApp(info, PinType.NORMAL);
+    }
+
+    public static boolean pinApp(AppInfo info, int pinType) {
+        Logs.d(CLASSNAME, "pinApp", "AppName=" + info.getName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
         ArrayList<String> externalDirList = info.getExternalDirList();
         boolean isSourceDirSuccess = true;
-//        if (sourceDir != null) {
-//            if (sourceDir.startsWith("/data/app")) {
-//                isSourceDirSuccess = pinFileOrDirectory(sourceDir);
-//            }
-//        }
+        if (sourceDir != null) {
+            Logs.d(CLASSNAME, "pinApp", "sourceDir=" + sourceDir);
+            if (sourceDir.startsWith("/data/app")) {
+//                isSourceDirSuccess = pinFileOrDirectory(sourceDir, pinType);
+                // Priority pin for /data/app no matter pin or unpin
+                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
+            }
+        }
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
-                isDataDirSuccess = (pinFileOrDirectory(dataDir) == 0);
+                isDataDirSuccess = (pinFileOrDirectory(dataDir, pinType) == 0);
             }
         }
         boolean isExternalDirSuccess = true;
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
-                isExternalDirSuccess &= (pinFileOrDirectory(externalDir) == 0);
+                isExternalDirSuccess &= (pinFileOrDirectory(externalDir, pinType) == 0);
             }
         }
         return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
@@ -451,11 +459,12 @@ public class HCFSMgmtUtils {
         ArrayList<String> externalDirList = info.getExternalDirList();
 
         boolean isSourceDirSuccess = true;
-//        if (sourceDir != null) {
-//            if (sourceDir.startsWith("/data/app")) {
-//                isSourceDirSuccess = unpinFileOrDirectory(sourceDir);
-//            }
-//        }
+        if (sourceDir != null) {
+            if (sourceDir.startsWith("/data/app")) {
+                // Priority pin for /data/app no matter pin or unpin
+                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
+            }
+        }
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
@@ -476,19 +485,24 @@ public class HCFSMgmtUtils {
      * @return 0 if pin file or directory is successful, error otherwise.
      * */
     public static int pinFileOrDirectory(String filePath) {
+        return pinFileOrDirectory(filePath, PinType.NORMAL);
+    }
+
+    /**
+     * @return 0 if pin file or directory is successful, error otherwise.
+     * */
+    public static int pinFileOrDirectory(String filePath, int pinType) {
         int code = DEFAULT_PINNED_STATUS ? 0 : -1;
         try {
-            String jsonResult = HCFSApiUtils.pin(filePath);
+            String jsonResult = HCFSApiUtils.pin(filePath, pinType);
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             String logMsg = "operation=Pin, filePath=" + filePath + ", jsonResult=" + jsonResult;
             if (isSuccess) {
                 code = 0;
-                logMsg += ", code=" + code;
                 log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
             } else {
                 code = jObject.getInt("code");
-                logMsg += ", code=" + code;
                 log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", logMsg);
             }
         } catch (JSONException e) {
