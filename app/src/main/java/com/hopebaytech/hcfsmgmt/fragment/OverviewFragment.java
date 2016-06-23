@@ -122,27 +122,30 @@ public class OverviewFragment extends Fragment {
 
         RelativeLayout cloudStorage = (RelativeLayout) view.findViewById(R.id.cloud_storage);
         mCloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
+        mCloudStorageUsage.setContentDescription(getString(R.string.overview_used_space));
         mCloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
         TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
-        cloudStorageTitle.setText(mContext.getString(R.string.dashboard_used_space));
+        cloudStorageTitle.setText(mContext.getString(R.string.overview_used_space));
         ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.iconView);
         cloudStorageImageView.setImageResource(R.drawable.icon_system_used_space);
 
         RelativeLayout pinnedStorage = (RelativeLayout) view.findViewById(R.id.pinned_storage);
         mPinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
+        mPinnedStorageUsage.setContentDescription(getString(R.string.overview_pinned_storage));
         mPinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
         mPinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
-        pinnedStorageTitle.setText(mContext.getString(R.string.dashboard_pinned_storage));
+        pinnedStorageTitle.setText(mContext.getString(R.string.overview_pinned_storage));
         ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.iconView);
         pinnedStorageImageView.setImageResource(R.drawable.icon_system_pinned_space);
 
         RelativeLayout waitToUploadData = (RelativeLayout) view.findViewById(R.id.to_be_upload_data);
         mWaitToUploadDataUsage = (TextView) waitToUploadData.findViewById(R.id.textViewUsage);
+        mWaitToUploadDataUsage.setContentDescription(getString(R.string.overview_data_to_be_uploaded));
         mWaitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
         mWaitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
-        waitToUploadDataTitle.setText(mContext.getString(R.string.dashboard_data_to_be_uploaded));
+        waitToUploadDataTitle.setText(mContext.getString(R.string.overview_data_to_be_uploaded));
         ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.iconView);
         waitToUploadDataUsageImageView.setImageResource(R.drawable.icon_system_upload_data);
 

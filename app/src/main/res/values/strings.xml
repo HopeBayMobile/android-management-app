@@ -72,12 +72,12 @@
     <string name="dashboard_hcfs_conn_status_slow">連線緩慢</string>
     <string name="dashboard_hcfs_conn_status_in_progress">傳輸中</string>
     <string name="dashboard_space_usage_title">空間使用量</string>
-    <string name="dashboard_used_space">已使用空間</string>
+    <string name="overview_used_space">已使用空間</string>
     <string name="dashboard_local_storage">快取空間</string>
-    <string name="dashboard_pinned_storage">釘選空間</string>
+    <string name="overview_pinned_storage">釘選空間</string>
     <string name="dashboard_network_traffic_title">資料傳輸量</string>
     <string name="dashboard_data_transmission_today">本日資料傳輸</string>
-    <string name="dashboard_data_to_be_uploaded">待上傳資料</string>
+    <string name="overview_data_to_be_uploaded">待上傳資料</string>
     <string name="dashboard_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
     
     <string name="action_settings">設定</string>

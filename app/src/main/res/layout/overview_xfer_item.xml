@@ -24,7 +24,7 @@
         android:layout_toEndOf="@+id/iconView"
         android:paddingLeft="-1sp"
         android:paddingRight="-1sp"
-        android:text="@string/dashboard_used_space"
+        android:text="@string/overview_used_space"
         android:textColor="@color/colorHomePageProgressBarText" />
 
     <ProgressBar
