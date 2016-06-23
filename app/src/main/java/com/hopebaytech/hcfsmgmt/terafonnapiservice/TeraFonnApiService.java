@@ -388,8 +388,8 @@ public class TeraFonnApiService extends Service {
                 String logMsg = "operation=" + OP + ", filePath=" + dataDir + ", jsonResult=" + jsonResult;
                 if (isSuccess) {
                     log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
-                    updateDB(pinOP, packageName);
                     List<String> externalPath = getExternalDir(packageName);
+
                     if (externalPath.size() != 0) {
                         for (String path : externalPath) {
                             jsonResult = pinOP ? HCFSApiUtils.pin(path, PinType.NORMAL) : HCFSApiUtils.unpin(path);
@@ -414,6 +414,8 @@ public class TeraFonnApiService extends Service {
                 log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
             }
         }
+
+        if (isSuccess) updateDB(pinOP, packageName);
 
         return isSuccess;
     }
