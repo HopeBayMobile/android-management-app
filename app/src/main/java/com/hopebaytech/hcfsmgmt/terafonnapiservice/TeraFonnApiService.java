@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Environment;
@@ -10,12 +11,13 @@ import android.os.RemoteException;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
-import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
 import org.json.JSONException;
@@ -274,7 +276,9 @@ public class TeraFonnApiService extends Service {
         // TODO: not implemented yet
         boolean isOnFetching = random.nextBoolean();
 
-        boolean isPin = true;
+        boolean isPin = false;
+
+        /*
         String dataDir = getDataDir(packageName);
         List<String> appPath = getExternalDir(packageName);
 
@@ -286,6 +290,17 @@ public class TeraFonnApiService extends Service {
         }
         if (pinStatus.contains(false)) {
             isPin = false;
+        }
+        */
+
+        try {
+            UidDAO uidDAO = UidDAO.getInstance(this);
+            UidInfo uidInfo = uidDAO.get(packageName);
+            if (uidInfo == null) isPin = false;
+            else isPin = uidInfo.isPinned();
+
+        } catch (Exception e) {
+            log(Log.ERROR, CLASSNAME, "getDefaultAppStatus", e.toString());
         }
 
         int status = getDefaultStatus(packageName);
@@ -373,8 +388,8 @@ public class TeraFonnApiService extends Service {
                 String logMsg = "operation=" + OP + ", filePath=" + dataDir + ", jsonResult=" + jsonResult;
                 if (isSuccess) {
                     log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
-
                     List<String> externalPath = getExternalDir(packageName);
+
                     if (externalPath.size() != 0) {
                         for (String path : externalPath) {
                             jsonResult = pinOP ? HCFSApiUtils.pin(path, PinType.NORMAL) : HCFSApiUtils.unpin(path);
@@ -400,7 +415,26 @@ public class TeraFonnApiService extends Service {
             }
         }
 
+        if (isSuccess) updateDB(pinOP, packageName);
+
         return isSuccess;
+    }
+
+    private void updateDB(boolean pinOP, String packageName) {
+        try {
+            UidDAO uidDAO = UidDAO.getInstance(this);
+            UidInfo uidInfo = uidDAO.get(packageName);
+            if (uidInfo != null) {
+                uidInfo.setPinned(pinOP);
+                uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
+            } else {
+                PackageManager pm = getPackageManager();
+                ApplicationInfo packageInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+                uidDAO.insert(new UidInfo(pinOP, false, packageInfo.uid, packageName));
+            }
+        } catch (Exception e) {
+            log(Log.ERROR, CLASSNAME, "updateDB", e.toString());
+        }
     }
 
     private String getSourceDir(String packageName) {
