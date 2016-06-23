@@ -631,8 +631,8 @@ public class FileMgmtFragment extends Fragment {
 //                    android.R.attr.textSize,
 //                    R.attr.customFont};
 
-//            @Override
-//            public View getView(int position, View convertView, ViewGroup parent) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
 //                TypedArray typedArray = mContext.obtainStyledAttributes(R.style.F2, attrs);
 //
 //                int textColor = typedArray.getColor(0, Color.BLACK);
@@ -642,20 +642,20 @@ public class FileMgmtFragment extends Fragment {
 //                int fontCode = typedArray.getInteger(2, 0);
 //
 //                Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), Font.getFontAssetPath(fontCode));
-//
-//                TextView textView = (TextView) super.getView(position, convertView, parent);
+
+                TextView textView = (TextView) super.getView(position, convertView, parent);
+                textView.setId(position);
 //                textView.setTextColor(textColor);
 //                textView.setTextSize(textSize);
 //                textView.setTypeface(typeface);
-//
+
 //                typedArray.recycle();
-//
-//                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getView", "textColor=" + textColor + ", textSize=" + textSize + ", fontCode=" + fontCode);
-//                return textView;
-//            }
-//
-//            @Override
-//            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+
+                return textView;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
 //                TypedArray typedArray = mContext.obtainStyledAttributes(R.style.F6, attrs);
 //
 //                int textColor = typedArray.getColor(0, Color.BLACK);
@@ -665,17 +665,17 @@ public class FileMgmtFragment extends Fragment {
 //                int fontCode = typedArray.getInteger(2, 0);
 //
 //                Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), Font.getFontAssetPath(fontCode));
-//
-//                TextView textView = (TextView) super.getView(position, convertView, parent);
+
+                TextView textView = (TextView) super.getDropDownView(position, convertView, parent);
+                textView.setContentDescription(textView.getText());
 //                textView.setTextColor(textColor);
 //                textView.setTextSize(textSize);
 //                textView.setTypeface(typeface);
-//
+
 //                typedArray.recycle();
-//
-//                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDropDownView", "textColor=" + textColor + ", textSize=" + textSize + ", typeface=" + typeface.toString());
-//                return textView;
-//            }
+
+                return textView;
+            }
         };
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -1061,6 +1061,7 @@ public class FileMgmtFragment extends Fragment {
             itemInfo.setViewHolder(holder);
             holder.setItemInfo(itemInfo);
             holder.itemName.setText(itemInfo.getName());
+            holder.rootView.setContentDescription(itemInfo.getName());
 
             displayImageIcon(position, holder, mMemoryCache, mExecutor);
         }
@@ -1076,7 +1077,6 @@ public class FileMgmtFragment extends Fragment {
             protected View rootView;
             protected TextView itemName;
             protected ImageView iconView;
-//            protected ItemInfo itemInfo;
 
             public GridRecyclerViewHolder(View itemView) {
                 super(itemView);
@@ -1085,13 +1085,10 @@ public class FileMgmtFragment extends Fragment {
                 itemName = (TextView) itemView.findViewById(R.id.itemName);
                 itemView.setOnClickListener(this);
                 itemView.setOnLongClickListener(this);
-
-
             }
 
             @Override
             public void onClick(View v) {
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GridRecyclerViewHolder", "onClick", null);
                 if (v.getId() == R.id.gridItemLayout) {
                     onItemClick(itemInfo);
                 }
@@ -1124,7 +1121,6 @@ public class FileMgmtFragment extends Fragment {
 
             @Override
             public boolean onLongClick(View v) {
-                HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "GridRecyclerViewHolder", "onLongClick", null);
                 if (itemInfo instanceof FileDirInfo) {
                     FileMgmtFileDirDialogFragment dialogFragment = FileMgmtFileDirDialogFragment.newInstance();
                     dialogFragment.setViewHolder(this);
@@ -1160,7 +1156,6 @@ public class FileMgmtFragment extends Fragment {
         }
 
         public void shutdownExecutor() {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "LinearRecyclerViewAdapter", "shutdownExecutor", null);
             mExecutor.shutdownNow();
         }
 

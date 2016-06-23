@@ -66,12 +66,12 @@
     <string name="dashboard_hcfs_conn_status_in_progress">Transmitting</string>
     <string name="dashboard_hcfs_conn_status_slow">Transmission slow</string>
     <string name="dashboard_space_usage_title">Space Usage</string>
-    <string name="dashboard_used_space">Used space</string>
+    <string name="overview_used_space">Used space</string>
     <string name="dashboard_local_storage">Local space</string>
-    <string name="dashboard_pinned_storage">Pinned space</string>
+    <string name="overview_pinned_storage">Pinned space</string>
     <string name="dashboard_network_traffic_title">Data Transmission</string>
     <string name="dashboard_data_transmission_today">Data transmission today</string>
-    <string name="dashboard_data_to_be_uploaded">Data to be uploaded</string>
+    <string name="overview_data_to_be_uploaded">Data to be uploaded</string>
     <string name="dashboard_snackbar_exit_app">Tap Return key again to quit.</string>
 
     <string name="action_settings">Settings</string>

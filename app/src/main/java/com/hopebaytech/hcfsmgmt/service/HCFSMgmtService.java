@@ -57,7 +57,6 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 public class HCFSMgmtService extends Service {
@@ -320,7 +319,7 @@ public class HCFSMgmtService extends Service {
                                                         default:
                                                             notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
                                                     }
-                                                    String notifyMsg = getString(R.string.dashboard_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
+                                                    String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
                                                     NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, true);
                                                 }
                                                 Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);

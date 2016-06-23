@@ -54,7 +54,7 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
         String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
         final String ratio = sharedPreferences.getString(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO, defaultValue).concat("%");
 
-        final List<LinearLayout> radioButtonLayoutList = new ArrayList<>();
+//        final List<LinearLayout> radioButtonLayoutList = new ArrayList<>();
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,6 +79,7 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
         String[] ratioNameArr = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_name);
         for (String ratioName: ratioNameArr) {
             LinearLayout radioButtonLayout = (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.settings_radio_button, radioButtonContainer, false);
+            radioButtonLayout.setContentDescription(ratioName);
             radioButtonLayout.setOnClickListener(listener);
 
             TextView radioName = (TextView) radioButtonLayout.findViewById(R.id.radio_name);
@@ -90,7 +91,7 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
             }
 
             radioButtonContainer.addView(radioButtonLayout);
-            radioButtonLayoutList.add(radioButtonLayout);
+//            radioButtonLayoutList.add(radioButtonLayout);
         }
 
         LinearLayout cancel = (LinearLayout) view.findViewById(R.id.cancel);
