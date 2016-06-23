@@ -3,6 +3,7 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -276,21 +277,22 @@ public class ActivateWoCodeFragment extends Fragment {
                             mErrorMessage.setText(R.string.activate_alert_dialog_message);
                         }
                     } else {
-                        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
-                            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(mContext);
-                            builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                            builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
-                            builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-                                }
-                            });
-                            builder.setCancelable(false);
-                            builder.show();
-                        } else {
-                            PermissionSnackbar.getInstance(mContext, mView).show();
-                        }
+                        ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+//                        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
+//                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+//                            builder.setTitle(getString(R.string.alert_dialog_title_warning));
+//                            builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
+//                            builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+//                                @Override
+//                                public void onClick(DialogInterface dialog, int which) {
+//                                    ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+//                                }
+//                            });
+//                            builder.setCancelable(false);
+//                            builder.show();
+//                        } else {
+//                            PermissionSnackbar.newInstance(mContext, mView).show();
+//                        }
                     }
                 }
             }
@@ -347,7 +349,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                                                     mErrorMessage.setText(R.string.activate_without_google_play_services);
                                                                 } else if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
                                                                     mErrorMessage.setText(R.string.activate_update_google_play_services_required);
-                                                                    PlayServiceSnackbar.getInstance(mContext, mView).show();
+                                                                    PlayServiceSnackbar.newInstance(mContext, mView).show();
                                                                 } else {
                                                                     mErrorMessage.setText(R.string.activate_signin_google_account_failed);
                                                                 }
@@ -404,7 +406,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         builder.setCancelable(false);
                         builder.show();
                     } else {
-                        PermissionSnackbar.getInstance(mContext, mView).show();
+                        PermissionSnackbar.newInstance(mContext, mView).show();
                     }
                 }
             }
@@ -412,37 +414,22 @@ public class ActivateWoCodeFragment extends Fragment {
 
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        Snackbar snackbar = PermissionSnackbar.getInstance(mContext, mView);
-        if (snackbar != null) {
-            if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                snackbar.dismiss();
-            }
-        }
-
-    }
-
     public static class PermissionSnackbar {
 
         private static Snackbar permissionSnackbar;
 
-        public static Snackbar getInstance(final Context context, View view) {
-            if (permissionSnackbar == null) {
-                permissionSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.go, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String packageName = context.getPackageName();
-                                Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
-                                teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                                teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                context.startActivity(teraPermissionSettings);
-                            }
-                        });
-            }
+        public static Snackbar newInstance(final Context context, View view) {
+            permissionSnackbar = Snackbar.make(view, R.string.activate_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.go, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String packageName = context.getPackageName();
+                            Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
+                            teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                            teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(teraPermissionSettings);
+                        }
+                    });
             return permissionSnackbar;
         }
 
@@ -452,26 +439,24 @@ public class ActivateWoCodeFragment extends Fragment {
 
         private static Snackbar playServiceSnackbar;
 
-        public static Snackbar getInstance(final Context context, View view) {
-            if (playServiceSnackbar == null) {
-                playServiceSnackbar = Snackbar.make(view, R.string.activate_update_google_play_services_go, Snackbar.LENGTH_INDEFINITE)
-                        .setAction(R.string.update, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                String playServicesPackage = GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE;
-                                Intent intent;
-                                try {
-                                    // Open app with Google Play app
-                                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + playServicesPackage));
-                                    context.startActivity(intent);
-                                } catch (android.content.ActivityNotFoundException anfe) {
-                                    // Open Google Play website
-                                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + playServicesPackage));
-                                    context.startActivity(intent);
-                                }
+        public static Snackbar newInstance(final Context context, View view) {
+            playServiceSnackbar = Snackbar.make(view, R.string.activate_update_google_play_services_go, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.update, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            String playServicesPackage = GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE;
+                            Intent intent;
+                            try {
+                                // Open app with Google Play app
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + playServicesPackage));
+                                context.startActivity(intent);
+                            } catch (ActivityNotFoundException e) {
+                                // Open Google Play website
+                                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + playServicesPackage));
+                                context.startActivity(intent);
                             }
-                        });
-            }
+                        }
+                    });
             return playServiceSnackbar;
         }
 
@@ -696,10 +681,28 @@ public class ActivateWoCodeFragment extends Fragment {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        Logs.w(CLASSNAME, "onRequestPermissionsResult", "requestCode=" + requestCode + ", grantResults.length=" + grantResults.length);
+        for (int result : grantResults) {
+            Logs.e(CLASSNAME, "onRequestPermissionsResult", "result=" + result);
+        }
         switch (requestCode) {
             case RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE:
                 if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    PermissionSnackbar.getInstance(mContext, mView).show();
+                    if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle(R.string.alert_dialog_title_warning);
+                        builder.setMessage(R.string.activate_require_read_phone_state_permission);
+                        builder.setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                            }
+                        });
+                        builder.setNegativeButton(R.string.alert_dialog_cancel, null);
+                        builder.show();
+                    } else {
+                        PermissionSnackbar.newInstance(mContext, mView).show();
+                    }
                 }
                 break;
         }

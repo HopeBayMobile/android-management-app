@@ -855,7 +855,7 @@ public class FileMgmtFragment extends Fragment {
                     HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityCreated", logMsg);
 //                    mWorkerHandler.post(new Runnable() {
 //                        public void run() {
-//                            DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(mContext);
+//                            DataTypeDAO dataTypeDAO = DataTypeDAO.newInstance(mContext);
 //                            DataTypeInfo imageTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_IMAGE);
 //                            DataTypeInfo videoTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_VIDEO);
 //                            DataTypeInfo audioTypeInfo = dataTypeDAO.get(DataTypeDAO.DATA_TYPE_AUDIO);

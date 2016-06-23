@@ -40,7 +40,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //                }
 
                 // Start an alarm to periodically pin/unpin data type file */
-//                DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(mContext);
+//                DataTypeDAO dataTypeDAO = DataTypeDAO.newInstance(mContext);
 //                if (dataTypeDAO.getCount() != 0) {
 //                    HCFSMgmtUtils.startPinDataTypeFileAlarm(mContext);
 //                }
