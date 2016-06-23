@@ -215,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        mHandler.post(new Runnable() {
 //            @Override
 //            public void run() {
-//                DataTypeDAO dataTypeDAO = DataTypeDAO.getInstance(MainActivity.this);
+//                DataTypeDAO dataTypeDAO = DataTypeDAO.newInstance(MainActivity.this);
 //                if (dataTypeDAO.getCount() == 0) {
 //                    DataTypeInfo dataTypeInfo = new DataTypeInfo(MainActivity.this);
 //                    dataTypeInfo.setPinned(HCFSMgmtUtils.DEFAULT_PINNED_STATUS);
