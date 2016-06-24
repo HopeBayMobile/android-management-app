@@ -7,8 +7,13 @@ public class UidInfo {
     private String packageName;
     private boolean isSystemApp;
 
-    public UidInfo() {
+    public UidInfo() {}
 
+    public UidInfo(AppInfo appInfo) {
+        setUid(appInfo.getUid());
+        setPackageName(appInfo.getPackageName());
+        setPinned(appInfo.isPinned());
+        setSystemApp(appInfo.isSystemApp());
     }
 
     public UidInfo(boolean isPinned, boolean isSystemApp, int uid, String packageName) {

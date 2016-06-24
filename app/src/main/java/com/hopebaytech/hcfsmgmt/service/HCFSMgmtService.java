@@ -637,11 +637,14 @@ public class HCFSMgmtService extends Service {
     private void handleAppFailureOfPinOrUnpin(AppInfo info, String notifyMsg) {
         Logs.d(CLASSNAME, "pinOrUnpinFailure", info.getName());
 
-        UidInfo uidInfo = new UidInfo();
-        uidInfo.setPackageName(info.getPackageName());
-        uidInfo.setPinned(!info.isPinned());
-        mUidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
+        // Pin/Unpin failed, reset to original status.
+        if (info.isPinned()) {
+            HCFSMgmtUtils.unpinApp(info);
+        } else {
+            HCFSMgmtUtils.pinApp(info);
+        }
 
+        // Notify user pin/unpin failed
         int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
         String notify_title = getString(R.string.app_name);
         String notify_message = notifyMsg + ": " + info.getName();
