@@ -486,29 +486,22 @@ public class FileMgmtFragment extends Fragment {
                         if (itemInfo instanceof AppInfo) {
                             final AppInfo appInfo = (AppInfo) itemInfo;
 
-                            UidInfo uidInfo = new UidInfo();
-                            uidInfo.setUid(appInfo.getUid());
-                            uidInfo.setPackageName(appInfo.getPackageName());
-                            uidInfo.setPinned(appInfo.isPinned());
-                            uidInfo.setSystemApp(appInfo.isSystemApp());
-                            UidDAO.getInstance(mContext).update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
+                            final UidDAO uidDAO = UidDAO.getInstance(mContext);
+                            UidInfo uidInfo = new UidInfo(appInfo);
+                            uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
                             mMgmtService.pinOrUnpinApp(appInfo, new IPinUnpinListener() {
                                 @Override
                                 public void OnPinUnpinFailed(final ItemInfo itemInfo) {
                                     processPinUnpinFailed(itemInfo);
+
+                                    // Update pin status to uid.db
+                                    AppInfo info = (AppInfo) itemInfo;
+                                    info.setPinned(!info.isPinned());
+                                    UidInfo uidInfo = new UidInfo(appInfo);
+                                    uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
                                 }
                             });
-
-//                            Intent intent = new Intent(mContext, HCFSMgmtService.class);
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_APP);
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_NAME, appInfo.getName());
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_PIN_PACKAGE_NAME, appInfo.getPackageName());
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_DATA_DIR, appInfo.getDataDir());
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_SOURCE_DIR, appInfo.getSourceDir());
-//                            intent.putStringArrayListExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_EXTERNAL_DIR, appInfo.getExternalDirList());
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_PIN_APP_PIN_STATUS, appInfo.isPinned());
-//                            mContext.startService(intent);
                         } else if (itemInfo instanceof DataTypeInfo) {
                             /** Nothing to do here */
                         } else if (itemInfo instanceof FileDirInfo) {
@@ -519,12 +512,6 @@ public class FileMgmtFragment extends Fragment {
                                     processPinUnpinFailed(itemInfo);
                                 }
                             });
-//                            FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
-//                            Intent intent = new Intent(mContext, HCFSMgmtService.class);
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_FILE_DIRECTORY);
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_FILEAPTH, fileDirInfo.getFilePath());
-//                            intent.putExtra(HCFSMgmtUtils.INTENT_KEY_PIN_FILE_DIR_PIN_STATUS, fileDirInfo.isPinned());
-//                            mContext.startService(intent);
                         }
                         if (mWaitToExecuteSparseArr.get(key).getLastProcessTime() == lastProcessTime) {
                             mWaitToExecuteSparseArr.remove(key);
