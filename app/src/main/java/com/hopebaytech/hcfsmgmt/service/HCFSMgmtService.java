@@ -480,13 +480,13 @@ public class HCFSMgmtService extends Service {
     }
 
     private void mgmtAuthOrRegisterFailed() {
-        Logs.e(CLASSNAME, "registerToMgmtCluster", "onMmgtRegisterFailed", null);
+        Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
 
         if (MgmtCluster.isNeedToRetryAgain()) {
             Intent intentService = new Intent(HCFSMgmtService.this, HCFSMgmtService.class);
             intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_SILENT_SIGN_IN);
             startService(intentService);
-            Logs.e(CLASSNAME, this.getClass().getName(), "onGoogleAuthFailed", "Authentication failed, retry again");
+            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
         } else {
             int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
             String notify_title = getString(R.string.app_name);
@@ -497,7 +497,7 @@ public class HCFSMgmtService extends Service {
                     .setResultCallback(new ResultCallback<Status>() {
                         @Override
                         public void onResult(Status status) {
-                            Logs.e(CLASSNAME, "onMmgtRegisterFailed", "status=" + status);
+                            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "status=" + status);
                         }
                     });
 
@@ -513,7 +513,7 @@ public class HCFSMgmtService extends Service {
     }
 
     private void googleAuthFailed(String failedMsg) {
-        Logs.e(CLASSNAME, "registerToMgmtCluster", "onGoogleAuthFailed", failedMsg);
+        Logs.e(CLASSNAME, "googleAuthFailed", failedMsg);
 
         int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
         String notify_title = getString(R.string.app_name);
@@ -524,7 +524,7 @@ public class HCFSMgmtService extends Service {
                 .setResultCallback(new ResultCallback<Status>() {
                     @Override
                     public void onResult(Status status) {
-                        Logs.e(CLASSNAME, "onGoogleAuthFailed", "status=" + status);
+                        Logs.e(CLASSNAME, "googleAuthFailed", "status=" + status);
                     }
                 });
         mGoogleApiClient.disconnect();

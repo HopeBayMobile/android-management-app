@@ -12,7 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by Aaron on 2016/3/31.
+ * @author Aaron
+ *         Created by Aaron on 2016/3/31.
  */
 public class HCFSConfig {
 
@@ -42,12 +43,12 @@ public class HCFSConfig {
             String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;
 
             if (isSuccess) {
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "setHCFSConfig", logMsg);
+                Logs.i(CLASSNAME, "setHCFSConfig", logMsg);
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "setHCFSConfig", logMsg);
+                Logs.e(CLASSNAME, "setHCFSConfig", logMsg);
             }
         } catch (JSONException e) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "setHCFSConfig", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "setHCFSConfig", Log.getStackTraceString(e));
         }
         return isSuccess;
     }
@@ -62,12 +63,12 @@ public class HCFSConfig {
             if (isSuccess) {
                 JSONObject dataObj = jObject.getJSONObject("data");
                 resultStr = dataObj.getString(key);
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getHCFSConfig", logMsg);
+                Logs.i(CLASSNAME, "getHCFSConfig", logMsg);
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", logMsg);
+                Logs.e(CLASSNAME, "getHCFSConfig", logMsg);
             }
         } catch (JSONException e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getHCFSConfig", Log.getStackTraceString(e));
         }
         return resultStr;
     }
@@ -79,12 +80,12 @@ public class HCFSConfig {
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
+                Logs.i(CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
+                Logs.e(CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
             }
         } catch (JSONException e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "reloadConfig", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "reloadConfig", Log.getStackTraceString(e));
         }
         return isSuccess;
     }
@@ -95,46 +96,26 @@ public class HCFSConfig {
     }
 
     public static void startSyncToCloud(Context context, String logMsg) {
-        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        // Editor editor = sharedPreferences.edit();
-        // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
-        // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
-        // boolean is_first_network_connected_received = sharedPreferences.getBoolean(key_connected, true);
-        // if (is_first_network_connected_received) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "startSyncToCloud", logMsg);
+        Logs.d(CLASSNAME, "startSyncToCloud", logMsg);
         int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
         String notify_title = context.getString(R.string.app_name);
         String notify_content = context.getString(R.string.notify_network_connected);
         HCFSMgmtUtils.notifyNetworkStatus(context, notify_id, notify_title, notify_content);
         startSyncToCloud();
-        // editor.putBoolean(key_connected, false);
-        // }
-        // editor.putBoolean(key_disconnected, true);
-        // editor.commit();
     }
 
     public static void stopSyncToCloud() {
         String jsonResult = HCFSApiUtils.setHCFSSyncStatus(0);
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "stopSyncToCloud", jsonResult);
+        Logs.d(CLASSNAME, "stopSyncToCloud", jsonResult);
     }
 
     public static void stopSyncToCloud(Context context, String logMsg) {
-        // SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        // Editor editor = sharedPreferences.edit();
-        // String key_disconnected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_DISCONNECTED_RECEIVED;
-        // String key_connected = SettingsFragment.KEY_PREF_IS_FIRST_NETWORK_CONNECTED_RECEIVED;
-        // boolean is_first_network_disconnected_received = sharedPreferences.getBoolean(key_disconnected, true);
-        // if (is_first_network_disconnected_received) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "stopSyncToCloud", logMsg);
+        Logs.d(CLASSNAME, "stopSyncToCloud", logMsg);
         int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
         String notify_title = context.getString(R.string.app_name);
         String notify_content = context.getString(R.string.notify_network_disconnected);
         HCFSMgmtUtils.notifyNetworkStatus(context, notify_id, notify_title, notify_content);
         stopSyncToCloud();
-        // editor.putBoolean(key_disconnected, false);
-        // }
-        // editor.putBoolean(key_connected, true);
-        // editor.commit();
     }
 
     public static boolean storeHCFSConfig(RegisterResultInfo registerResultInfo) {

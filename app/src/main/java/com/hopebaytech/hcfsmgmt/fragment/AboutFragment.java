@@ -17,14 +17,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 public class AboutFragment extends Fragment {
@@ -155,12 +154,12 @@ public class AboutFragment extends Fragment {
             mImeiTwo.setText("-");
         } else if (manager.getPhoneCount() == 1) {
             mImeiOne.setText(manager.getDeviceId(0));
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
+            Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
         } else {
             mImeiOne.setText(manager.getDeviceId(0));
             mImeiTwo.setText(manager.getDeviceId(1));
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", "imei_2=" + manager.getDeviceId(1));
+            Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
+            Logs.d(CLASSNAME, "onViewCreated", "imei_2=" + manager.getDeviceId(1));
         }
         isImeiShown = true;
     }

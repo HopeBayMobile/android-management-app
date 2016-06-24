@@ -1,17 +1,16 @@
 package com.hopebaytech.hcfsmgmt.db;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.hopebaytech.hcfsmgmt.info.UidInfo;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.Nullable;
-import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UidDAO {
 
@@ -30,7 +29,6 @@ public class UidDAO {
                     UID_COLUMN + " TEXT NOT NULL, " +
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL)";
 
-//    private SQLiteDatabase db;
     private Context context;
     private static UidDAO mUidDAO;
 
@@ -75,10 +73,10 @@ public class UidDAO {
                 ", uid=" + uidInfo.getUid() +
                 ", packageName=" + uidInfo.getPackageName();
         if (isInserted) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "insert", logMsg);
+            Logs.d(CLASSNAME, "insert", logMsg);
             return true;
         } else {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "insert", logMsg);
+            Logs.e(CLASSNAME, "insert", logMsg);
             return false;
         }
     }
@@ -86,9 +84,9 @@ public class UidDAO {
     /** Update specific column */
     public boolean update(UidInfo uidInfo, String column) {
         String logMsg = "uidInfo=" + uidInfo + ", column=" + column;
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "update", logMsg);
+        Logs.d(CLASSNAME, "update", logMsg);
         if (uidInfo.getPackageName() == null) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "update", "msg=package name cannot be null");
+            Logs.e(CLASSNAME, "update", "msg=package name cannot be null");
             return false;
         } else {
             ContentValues contentValues = new ContentValues();
@@ -106,7 +104,7 @@ public class UidDAO {
             if (get(uidInfo.getPackageName()) != null) {
                 isSuccess = getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
                 if (!isSuccess) {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
+                    Logs.e(CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
                 }
             } else {
                 isSuccess = insert(uidInfo);
@@ -119,9 +117,9 @@ public class UidDAO {
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
         boolean isDeleted = getDataBase().delete(TABLE_NAME, where, null) > 0;
         if (isDeleted) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "delete", "packageName=" + packageName);
+            Logs.d(CLASSNAME, "delete", "packageName=" + packageName);
         } else {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "delete", "packageName=" + packageName);
+            Logs.e(CLASSNAME, "delete", "packageName=" + packageName);
         }
         return isDeleted;
     }

@@ -17,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
@@ -195,7 +196,7 @@ public class TeraFonnApiService extends Service {
                     enabled = true;
                 }
             } catch (Exception e) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
             }
             return enabled;
         }

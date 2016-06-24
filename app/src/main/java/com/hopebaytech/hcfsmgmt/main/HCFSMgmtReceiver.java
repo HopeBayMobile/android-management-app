@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
@@ -24,10 +23,10 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String action = intent.getAction();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "action=" + action);
+        Logs.d(CLASSNAME, "onReceive", "action=" + action);
         boolean isHCFSActivated = HCFSConfig.isActivated(context);
         if (isHCFSActivated) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
+            Logs.d(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 // Detect network status and determine whether sync data to cloud
                 boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
@@ -66,7 +65,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 // Execute silent Google sign-in
                 boolean isSilentSignIn = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, false);
                 if (!isSilentSignIn) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "isSilentSignIn=" + isSilentSignIn);
+                    Logs.d(CLASSNAME, "onReceive", "isSilentSignIn=" + isSilentSignIn);
                     if (NetworkUtils.isNetworkConnected(context)) {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, true);

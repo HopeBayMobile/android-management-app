@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.Font;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 /**
  * @author Aaron
@@ -43,7 +43,7 @@ public class CustomPagerTabStrip extends PagerTabStrip {
 
     @Nullable
     private Typeface getCustomTypeFace(Context context, AttributeSet attrs) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "setCustomFont", "");
+        Logs.d(CLASSNAME, "setCustomFont", "");
 
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CustomFont);
         int fontCode = typedArray.getInteger(R.styleable.CustomFont_customFont, 0);
@@ -52,7 +52,7 @@ public class CustomPagerTabStrip extends PagerTabStrip {
         try {
             typeface = Typeface.createFromAsset(context.getAssets(), fontPath);
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "setCustomFont", Log.getStackTraceString(e));
+            Logs.d(CLASSNAME, "setCustomFont", Log.getStackTraceString(e));
         }
         typedArray.recycle();
 

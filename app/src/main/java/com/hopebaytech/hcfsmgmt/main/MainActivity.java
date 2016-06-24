@@ -36,13 +36,12 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AboutFragment;
-import com.hopebaytech.hcfsmgmt.fragment.OverviewFragment;
 import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
+import com.hopebaytech.hcfsmgmt.fragment.OverviewFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
@@ -153,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             accountInfo.setImgBase64(imgBase64);
                                             accountDAO.update(accountInfo);
                                         } catch (Exception e) {
-                                            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
+                                            Logs.e(CLASSNAME, "init", Log.getStackTraceString(e));
                                         }
                                         final Bitmap photoBmp = bitmap;
                                         if (photoBmp != null) {
@@ -442,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onReceive", "sdcard_action=" + action);
+            Logs.d(CLASSNAME, "onReceive", "sdcard_action=" + action);
             sdcard1_path = intent.getData().getSchemeSpecificPart().replace("///", "/");
             if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
                 runOnUiThread(new Runnable() {

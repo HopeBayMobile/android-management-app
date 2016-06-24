@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.Locale;
 
@@ -161,27 +161,19 @@ public class OverviewFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mCloudStorageUsage.setText(savedInstanceState.getString(KEY_CLOUD_STORAGE_USAGE));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "CloudStorageProgressBar=" + savedInstanceState.getInt(KEY_CLOUD_STORAGE_USAGE_PROGRESS));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "CloudStorageSecondaryProgressBar=" + savedInstanceState.getInt(KEY_CLOUD_STORAGE_USAGE_SECONDARY_PROGRESS));
             mCloudStorageProgressBar.setProgress(savedInstanceState.getInt(KEY_CLOUD_STORAGE_USAGE_PROGRESS));
             mCloudStorageProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_CLOUD_STORAGE_USAGE_SECONDARY_PROGRESS));
 
             mPinnedStorageUsage.setText(savedInstanceState.getString(KEY_PINNED_STORAGE_USAGE));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "PinnedStorageProgressBar=" + savedInstanceState.getInt(KEY_PINNED_STORAGE_USAGE_PROGRESS));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "PinnedStorageSecondaryProgressBar=" + savedInstanceState.getInt(KEY_PINNED_STORAGE_USAGE_SECONDARY_PROGRESS));
             mPinnedStorageProgressBar.setProgress(savedInstanceState.getInt(KEY_PINNED_STORAGE_USAGE_PROGRESS));
             mPinnedStorageProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_PINNED_STORAGE_USAGE_SECONDARY_PROGRESS));
 
             mWaitToUploadDataUsage.setText(savedInstanceState.getString(KEY_WAIT_TO_UPLOAD_DATA_USAGE));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "WaitToUploadDataUsageProgressBar=" + savedInstanceState.getInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_PROGRESS));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "WaitToUploadDataUsageSecondaryProgressBar=" + savedInstanceState.getInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_SECONDARY_PROGRESS));
             mWaitToUploadDataUsageProgressBar.setProgress(savedInstanceState.getInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_PROGRESS));
             mWaitToUploadDataUsageProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_SECONDARY_PROGRESS));
 
             mNetworkXferUp.setText(savedInstanceState.getString(KEY_NETWORK_XFER_UP));
             mNetworkXferDown.setText(savedInstanceState.getString(KEY_NETWORK_XFER_DOWNLOAD));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "XferProgressBar=" + savedInstanceState.getInt(KEY_NETWORK_XFER_PROGRESS));
-            HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "onViewCreated", "XferSecondaryProgressBar=" + savedInstanceState.getInt(KEY_NETWORK_XFER_SECONDARY_PROGRESS));
             mXferProgressBar.setProgress(savedInstanceState.getInt(KEY_NETWORK_XFER_PROGRESS));
             mXferProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_NETWORK_XFER_SECONDARY_PROGRESS));
         }
@@ -243,7 +235,7 @@ public class OverviewFragment extends Fragment {
                         });
                         Thread.sleep(3000);
                     } catch (InterruptedException e) {
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "Runnable", "run", "UiRefreshThread is interrupted");
+                        Logs.d(CLASSNAME, "Runnable", "run", "UiRefreshThread is interrupted");
                         break;
                     }
                 }
@@ -254,13 +246,13 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onResume", null);
+        Logs.d(CLASSNAME, "onResume", null);
         if (mUiRefreshThread == null) {
             if (mUiRefreshRunnable != null) {
                 if (mIsCurrentVisible) {
                     mUiRefreshThread = new Thread(mUiRefreshRunnable);
                     mUiRefreshThread.start();
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onPause", "UiRefreshThread is started");
+                    Logs.d(CLASSNAME, "onPause", "UiRefreshThread is started");
                 }
             }
         }
@@ -268,7 +260,7 @@ public class OverviewFragment extends Fragment {
 
     @Override
     public void onPause() {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onPause", null);
+        Logs.d(CLASSNAME, "onPause", null);
         if (mUiRefreshThread != null && !mUiRefreshThread.isInterrupted()) {
             mUiRefreshThread.interrupt();
             mUiRefreshThread = null;
@@ -278,7 +270,7 @@ public class OverviewFragment extends Fragment {
 
     @Override
     public void setMenuVisibility(boolean menuVisible) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "setMenuVisibility", null);
+        Logs.d(CLASSNAME, "setMenuVisibility", null);
         super.setMenuVisibility(menuVisible);
         if (menuVisible) {
             mIsCurrentVisible = true;
@@ -286,7 +278,7 @@ public class OverviewFragment extends Fragment {
                 if (mUiRefreshRunnable != null) {
                     mUiRefreshThread = new Thread(mUiRefreshRunnable);
                     mUiRefreshThread.start();
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "setMenuVisibility", "UiRefreshThread is started");
+                    Logs.d(CLASSNAME, "setMenuVisibility", "UiRefreshThread is started");
                 }
             }
         } else {

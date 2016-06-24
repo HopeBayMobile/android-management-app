@@ -46,7 +46,6 @@ public class HCFSMgmtUtils {
     public static final String NOTIFY_INSUFFICIENT_PIN_PACE_RATIO = "80";
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
-    public static final int LOG_LEVEL = Log.DEBUG;
 
     public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
     public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 1;
@@ -105,7 +104,7 @@ public class HCFSMgmtUtils {
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
-        log(Log.DEBUG, CLASSNAME, "isAppPinned", appInfo.getName());
+        Logs.d(CLASSNAME, "isAppPinned", appInfo.getName());
         UidDAO uidDAO = UidDAO.getInstance(context);
         UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
         return uidInfo != null && uidInfo.isPinned();
@@ -125,7 +124,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void stopPinDataTypeFileAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "stopPinDataTypeFileAlarm", null);
+        Logs.d(CLASSNAME, "stopPinDataTypeFileAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -158,7 +157,7 @@ public class HCFSMgmtUtils {
 //    }
 
     public static void startResetXferAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "startResetXferAlarm", null);
+        Logs.d(CLASSNAME, "startResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -180,7 +179,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void stopResetXferAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "stopResetXferAlarm", null);
+        Logs.d(CLASSNAME, "stopResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -213,7 +212,7 @@ public class HCFSMgmtUtils {
 //    }
 
     public static void stopNotifyUploadCompletedAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "stopNotifyUploadCompletedAlarm", null);
+        Logs.d(CLASSNAME, "stopNotifyUploadCompletedAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -244,9 +243,9 @@ public class HCFSMgmtUtils {
                 String path = cursor.getString(index);
                 File file = new File(path);
                 if (file.isDirectory()) {
-                    log(Log.DEBUG, CLASSNAME, "getAvailableFilesPaths", "dir_path=" + path);
+                    Logs.d(CLASSNAME, "getAvailableFilesPaths", "dir_path=" + path);
                 } else {
-                    log(Log.DEBUG, CLASSNAME, "getAvailableFilesPaths", "file_path=" + path);
+                    Logs.d(CLASSNAME, "getAvailableFilesPaths", "file_path=" + path);
                 }
                 nonMediaFilePaths.add(path);
                 cursor.moveToNext();
@@ -370,15 +369,15 @@ public class HCFSMgmtUtils {
             JSONObject dataObj = jObject.getJSONObject("data");
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                log(Log.INFO, CLASSNAME, "getHCFSSyncStatus", "jsonResult=" + jsonResult);
+                Logs.i(CLASSNAME, "getHCFSSyncStatus", "jsonResult=" + jsonResult);
 
                 boolean enabled = dataObj.getBoolean("enabled");
                 return enabled;
             } else {
-                log(Log.ERROR, CLASSNAME, "getHCFSSyncStatus", "jsonResult=" + jsonResult);
+                Logs.e(CLASSNAME, "getHCFSSyncStatus", "jsonResult=" + jsonResult);
             }
         } catch (JSONException e) {
-            log(Log.ERROR, CLASSNAME, "getHCFSSyncStatus", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getHCFSSyncStatus", Log.getStackTraceString(e));
         }
         return false;
     }
@@ -392,7 +391,7 @@ public class HCFSMgmtUtils {
             JSONObject dataObj = jObject.getJSONObject("data");
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                log(Log.INFO, CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
+                Logs.i(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
 
                 hcfsStatInfo = new HCFSStatInfo();
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
@@ -408,16 +407,16 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setCloudConn(dataObj.getBoolean(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
                 hcfsStatInfo.setDataTransfer(dataObj.getInt(HCFSStatInfo.STAT_DATA_DATA_TRANSFER));
             } else {
-                log(Log.ERROR, CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
+                Logs.e(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
             }
         } catch (JSONException e) {
-            log(Log.ERROR, CLASSNAME, "getHCFSStatInfo", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getHCFSStatInfo", Log.getStackTraceString(e));
         }
         return hcfsStatInfo;
     }
 
     public static boolean pinApp(AppInfo info) {
-        HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "pinApp", "AppName=" + info.getName());
+        Logs.i(CLASSNAME, "pinApp", "AppName=" + info.getName());
         return pinApp(info, PinType.NORMAL);
     }
 
@@ -452,7 +451,7 @@ public class HCFSMgmtUtils {
 
 //    public static boolean unpinApp(ServiceAppInfo info) {
     public static boolean unpinApp(AppInfo info) {
-        HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "unpinApp", "appName=" + info.getName());
+        Logs.i(CLASSNAME, "unpinApp", "appName=" + info.getName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
 //        String externalDir = info.getExternalDir();
@@ -500,13 +499,13 @@ public class HCFSMgmtUtils {
             String logMsg = "operation=Pin, filePath=" + filePath + ", jsonResult=" + jsonResult;
             if (isSuccess) {
                 code = 0;
-                log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
+                Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
             } else {
                 code = jObject.getInt("code");
-                log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", logMsg);
+                Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
             }
         } catch (JSONException e) {
-            log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
         }
         return code;
     }
@@ -524,14 +523,14 @@ public class HCFSMgmtUtils {
             if (isSuccess) {
                 code = 0;
                 logMsg += ", code=" + code;
-                log(Log.INFO, CLASSNAME, "unpinFileOrDirectory", logMsg);
+                Logs.i(CLASSNAME, "unpinFileOrDirectory", logMsg);
             } else {
                 code = jObject.getInt("code");
                 logMsg += ", code=" + code;
-                log(Log.ERROR, CLASSNAME, "unpinFileOrDirectory", logMsg);
+                Logs.e(CLASSNAME, "unpinFileOrDirectory", logMsg);
             }
         } catch (JSONException e) {
-            log(Log.ERROR, CLASSNAME, "unpinFileOrDirectory", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "unpinFileOrDirectory", Log.getStackTraceString(e));
         }
         return code;
     }
@@ -564,19 +563,15 @@ public class HCFSMgmtUtils {
                     } else {
                         locationStatus = LocationStatus.HYBRID;
                     }
-                    HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getDirLocationStatus", logMsg);
-                    // Log.i(TAG, "getDirLocationStatus[" + pathName + "]: " + jsonResult);
+                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
                 } else {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirLocationStatus", logMsg);
-                    // Log.e(TAG, "getDirLocationStatus[" + pathName + "]: " + jsonResult);
+                    Logs.e(CLASSNAME, "getDirLocationStatus", logMsg);
                 }
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirLocationStatus", logMsg);
-                // Log.e(TAG, "getDirLocationStatus[" + pathName + "]: " + jsonResult);
+                Logs.e(CLASSNAME, "getDirLocationStatus", logMsg);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirLocationStatus", Log.getStackTraceString(e));
-            // Log.e(TAG, Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getDirLocationStatus", Log.getStackTraceString(e));
         }
         return locationStatus;
     }
@@ -601,15 +596,12 @@ public class HCFSMgmtUtils {
                         status = LocationStatus.HYBRID;
                         break;
                 }
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getFileLocationStatus", logMsg);
-                // Log.i(TAG, "getFileLocationStatus[" + pathName + "]: " + jsonResult);
+                Logs.i(CLASSNAME, "getFileLocationStatus", logMsg);
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileLocationStatus", logMsg);
-                // Log.e(TAG, "getFileLocationStatus: " + jsonResult);
+                Logs.e(CLASSNAME, "getFileLocationStatus", logMsg);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileLocationStatus", Log.getStackTraceString(e));
-            // Log.e(TAG, Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getFileLocationStatus", Log.getStackTraceString(e));
         }
         return status;
     }
@@ -622,8 +614,7 @@ public class HCFSMgmtUtils {
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "isPathPinned", logMsg);
-                // Log.i(TAG, "isPathPinned[" + pathName + "]: " + jsonResult);
+                Logs.i(CLASSNAME, "isPathPinned", logMsg);
                 int code = jObject.getInt("code");
                 if (code == 1) {
                     isPinned = true;
@@ -631,74 +622,13 @@ public class HCFSMgmtUtils {
                     isPinned = false;
                 }
             } else {
-                // Log.e(TAG, "isPathPinned[" + pathName + "]: " + jsonResult);
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "isPathPinned", logMsg);
+                Logs.e(CLASSNAME, "isPathPinned", logMsg);
             }
         } catch (JSONException e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "isPathPinned", Log.getStackTraceString(e));
-            // Log.e(TAG, Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "isPathPinned", Log.getStackTraceString(e));
         }
         return isPinned;
     }
-
-//    public static String getHCFSConfig(String key) {
-//        String resultStr = "";
-//        try {
-//            String jsonResult = HCFSApiUtils.getHCFSConfig(key);
-//            String logMsg = "jsonResult=" + jsonResult;
-//            JSONObject jObject = new JSONObject(jsonResult);
-//            boolean isSuccess = jObject.getBoolean("result");
-//            if (isSuccess) {
-//                JSONObject dataObj = jObject.getJSONObject("data");
-//                resultStr = dataObj.getString(key);
-//                // Log.i(TAG, "getHCFSConfig: " + jsonResult);
-//                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getHCFSConfig", logMsg);
-//            } else {
-//                // Log.e(TAG, "getHCFSConfig: " + jsonResult);
-//                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", logMsg);
-//            }
-//        } catch (JSONException e) {
-//            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getHCFSConfig", Log.getStackTraceString(e));
-//            // Log.e(TAG, Log.getStackTraceString(e));
-//        }
-//        return resultStr;
-//    }
-
-//    public static boolean setHCFSConfig(String key, String value) {
-//        boolean isSuccess = false;
-//        try {
-//            String jsonResult = HCFSApiUtils.setHCFSConfig(key, value);
-//            JSONObject jObject = new JSONObject(jsonResult);
-//            isSuccess = jObject.getBoolean("result");
-//            String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;
-//            ;
-//            if (isSuccess) {
-//                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "setHCFSConfig", logMsg);
-//            } else {
-//                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "setHCFSConfig", logMsg);
-//            }
-//        } catch (JSONException e) {
-//            Log.e(TAG, Log.getStackTraceString(e));
-//        }
-//        return isSuccess;
-//    }
-
-//    public static boolean reloadConfig() {
-//        boolean isSuccess = false;
-//        try {
-//            String jsonResult = HCFSApiUtils.reloadConfig();
-//            JSONObject jObject = new JSONObject(jsonResult);
-//            isSuccess = jObject.getBoolean("result");
-//            if (isSuccess) {
-//                log(Log.INFO, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
-//            } else {
-//                log(Log.ERROR, CLASSNAME, "reloadConfig", "jsonResult=" + jsonResult);
-//            }
-//        } catch (JSONException e) {
-//            log(Log.ERROR, CLASSNAME, "reloadConfig", Log.getStackTraceString(e));
-//        }
-//        return isSuccess;
-//    }
 
     public static boolean isDataUploadCompleted() {
         HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
@@ -730,7 +660,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void changeCloudSyncStatus(Context context, boolean syncWifiOnly) {
-        log(Log.DEBUG, CLASSNAME, "changeCloudSyncStatus", null);
+        Logs.d(CLASSNAME, "changeCloudSyncStatus", null);
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (syncWifiOnly) {
@@ -762,7 +692,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void startNotifyInsufficientPinSpaceAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "startNotifyInsufficientPinSpaceAlarm", null);
+        Logs.d(CLASSNAME, "startNotifyInsufficientPinSpaceAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -779,7 +709,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void stopNotifyInsufficientPinSpaceAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "stopNotifyInsufficientPinSpaceAlarm", null);
+        Logs.d(CLASSNAME, "stopNotifyInsufficientPinSpaceAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -795,7 +725,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void startNotifyLocalStorageUsedRatioAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "startNotifyLocalStorageUsedRatioAlarm", null);
+        Logs.d(CLASSNAME, "startNotifyLocalStorageUsedRatioAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -812,7 +742,7 @@ public class HCFSMgmtUtils {
     }
 
     public static void stopNotifyLocalStorageUsedRatioAlarm(Context context) {
-        log(Log.DEBUG, CLASSNAME, "stopNotifyLocalStorageUsedRatioAlarm", null);
+        Logs.d(CLASSNAME, "stopNotifyLocalStorageUsedRatioAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
@@ -827,39 +757,39 @@ public class HCFSMgmtUtils {
         am.cancel(pi);
     }
 
-    public static void log(int logLevel, String className, String funcName, String logMsg) {
-        if (logLevel >= LOG_LEVEL) {
-            if (logMsg == null) {
-                logMsg = "";
-            }
-            if (logLevel == Log.DEBUG) {
-                Log.d(TAG, className + "(" + funcName + "): " + logMsg);
-            } else if (logLevel == Log.INFO) {
-                Log.i(TAG, className + "(" + funcName + "): " + logMsg);
-            } else if (logLevel == Log.WARN) {
-                Log.w(TAG, className + "(" + funcName + "): " + logMsg);
-            } else if (logLevel == Log.ERROR) {
-                Log.e(TAG, className + "(" + funcName + "): " + logMsg);
-            }
-        }
-    }
-
-    public static void log(int logLevel, String className, String innerClassName, String funcName, String logMsg) {
-        if (logLevel >= LOG_LEVEL) {
-            if (logMsg == null) {
-                logMsg = "";
-            }
-            if (logLevel == Log.DEBUG) {
-                Log.d(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-            } else if (logLevel == Log.INFO) {
-                Log.i(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-            } else if (logLevel == Log.WARN) {
-                Log.w(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-            } else if (logLevel == Log.ERROR) {
-                Log.e(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-            }
-        }
-    }
+//    public static void log(int logLevel, String className, String funcName, String logMsg) {
+//        if (logLevel >= LOG_LEVEL) {
+//            if (logMsg == null) {
+//                logMsg = "";
+//            }
+//            if (logLevel == Log.DEBUG) {
+//                Log.d(TAG, className + "(" + funcName + "): " + logMsg);
+//            } else if (logLevel == Log.INFO) {
+//                Log.i(TAG, className + "(" + funcName + "): " + logMsg);
+//            } else if (logLevel == Log.WARN) {
+//                Log.w(TAG, className + "(" + funcName + "): " + logMsg);
+//            } else if (logLevel == Log.ERROR) {
+//                Log.e(TAG, className + "(" + funcName + "): " + logMsg);
+//            }
+//        }
+//    }
+//
+//    public static void log(int logLevel, String className, String innerClassName, String funcName, String logMsg) {
+//        if (logLevel >= LOG_LEVEL) {
+//            if (logMsg == null) {
+//                logMsg = "";
+//            }
+//            if (logLevel == Log.DEBUG) {
+//                Log.d(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
+//            } else if (logLevel == Log.INFO) {
+//                Log.i(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
+//            } else if (logLevel == Log.WARN) {
+//                Log.w(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
+//            } else if (logLevel == Log.ERROR) {
+//                Log.e(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
+//            }
+//        }
+//    }
 
     public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
         return ContextCompat.getDrawable(context, isPinned ? R.drawable.icon_btn_app_pin : R.drawable.icon_btn_app_unpin);
@@ -899,9 +829,9 @@ public class HCFSMgmtUtils {
             JSONObject jObject = new JSONObject(jsonResult);
             JSONObject dataObj = jObject.getJSONObject("data");
             occupiedSize = dataObj.getLong("occupied");
-            HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getOccupiedSize", logMsg);
+            Logs.i(CLASSNAME, "getOccupiedSize", logMsg);
         } catch (JSONException e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getOccupiedSize", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getOccupiedSize", Log.getStackTraceString(e));
         }
         return occupiedSize;
     }

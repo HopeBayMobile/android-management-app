@@ -258,7 +258,7 @@ public class FileMgmtFragment extends Fragment {
                         }
                     }
                 } catch (InterruptedException e) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "AutoUiRefreshRunnable", "mAutoUiRefreshThread is interrupted");
+                    Logs.d(CLASSNAME, "AutoUiRefreshRunnable", "mAutoUiRefreshThread is interrupted");
                     break;
                 }
             }
@@ -385,7 +385,7 @@ public class FileMgmtFragment extends Fragment {
                                         if (viewHolder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
                                             final LinearRecyclerViewAdapter.LinearRecyclerViewHolder holder = (LinearRecyclerViewAdapter.LinearRecyclerViewHolder) viewHolder;
                                             if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                                                HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "LinearRecyclerViewHolder", "name=" + holder.getItemInfo().getName() + ", isExpectedPinned=" + isExpectedPinned);
+                                                Logs.d(CLASSNAME, "LinearRecyclerViewHolder", "name=" + holder.getItemInfo().getName() + ", isExpectedPinned=" + isExpectedPinned);
 //                                                final Bitmap iconBitmap = itemInfo.getIconImage();
 //                                                final int alpha = itemInfo.getIconAlpha();
                                                 ((Activity) mContext).runOnUiThread(new Runnable() {
@@ -440,11 +440,11 @@ public class FileMgmtFragment extends Fragment {
                                 }
                             }
                         } catch (NullPointerException e) {
-                            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "mProcessPinRunnable", Log.getStackTraceString(e));
+                            Logs.e(CLASSNAME, "mProcessPinRunnable", Log.getStackTraceString(e));
                         }
                     }
                 } catch (InterruptedException e) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "mProcessPinRunnable", "mProcessPinRunnable is interrupted");
+                    Logs.d(CLASSNAME, "mProcessPinRunnable", "mProcessPinRunnable is interrupted");
                     break;
                 }
             }
@@ -532,10 +532,10 @@ public class FileMgmtFragment extends Fragment {
                     }
                     Thread.sleep(INTERVAL_EXECUTE_API);
                 } catch (InterruptedException e) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", "mApiExecutorThread is interrupted");
+                    Logs.d(CLASSNAME, "onCreate", "mApiExecutorThread is interrupted");
                     break;
                 } catch (NullPointerException e) {
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", "mApiExecutorThread is interrupted");
+                    Logs.e(CLASSNAME, "onCreate", "mApiExecutorThread is interrupted");
                     break;
                 }
             }
@@ -852,7 +852,7 @@ public class FileMgmtFragment extends Fragment {
                     showTypeContent(R.string.file_mgmt_spinner_data_type);
                 } else if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_files))) {
                     String logMsg = "FILE_ROOT_DIR_PATH=" + FILE_ROOT_DIR_PATH;
-                    HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityCreated", logMsg);
+                    Logs.d(CLASSNAME, "onActivityCreated", logMsg);
 //                    mWorkerHandler.post(new Runnable() {
 //                        public void run() {
 //                            DataTypeDAO dataTypeDAO = DataTypeDAO.newInstance(mContext);
@@ -952,7 +952,7 @@ public class FileMgmtFragment extends Fragment {
     }
 
     public void showTypeContent(final int resourceStringId) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "showTypeContent", null);
+        Logs.d(CLASSNAME, "showTypeContent", null);
         mSectionedRecyclerViewAdapter.clearSubAdapter();
         mSectionedRecyclerViewAdapter.notifySubAdapterDataSetChanged();
 
@@ -1170,7 +1170,7 @@ public class FileMgmtFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(final LinearRecyclerViewHolder holder, int position) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "LinearRecyclerViewAdapter", "onBindViewHolder");
+            Logs.d(CLASSNAME, "LinearRecyclerViewAdapter", "onBindViewHolder");
 
             final ItemInfo itemInfo = mItemInfoList.get(position);
             itemInfo.setViewHolder(holder);
@@ -1232,7 +1232,7 @@ public class FileMgmtFragment extends Fragment {
         @Nullable
         @Override
         public LinearRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "LinearRecyclerViewAdapter", "onCreateViewHolder");
+            Logs.d(CLASSNAME, "LinearRecyclerViewAdapter", "onCreateViewHolder");
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_mgmt_linear_item, parent, false);
             return new LinearRecyclerViewHolder(view, mExecutor);
         }
@@ -1349,7 +1349,7 @@ public class FileMgmtFragment extends Fragment {
         }
 
         private void init() {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "SectionedRecyclerViewAdapter", "init", null);
+            Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "init", null);
             isFirstCircleAnimated = true;
             shutdownSubAdapterExecutor();
             subAdapterInit();
@@ -1368,7 +1368,7 @@ public class FileMgmtFragment extends Fragment {
         }
 
         private void shutdownSubAdapterExecutor() {
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "SectionedRecyclerViewAdapter", "shutdownSubAdapterExecutor", null);
+            Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "shutdownSubAdapterExecutor", null);
             if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
                 ((GridRecyclerViewAdapter) mBaseAdapter).shutdownExecutor();
             } else {
@@ -1800,7 +1800,7 @@ public class FileMgmtFragment extends Fragment {
             lastVisibleItemPosition = findRecyclerViewLastVisibleItemPosition();
         } catch (NullPointerException e) {
             firstVisibleItemPosition = lastVisibleItemPosition = position;
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "isViewHolderThreadNeedToExecute", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "isViewHolderThreadNeedToExecute", Log.getStackTraceString(e));
         }
 
         if (mRecyclerViewScrollDown) {
@@ -1988,7 +1988,7 @@ public class FileMgmtFragment extends Fragment {
                                         appInfo.setApplicationInfo(applicationInfo);
                                         appInfo.setName(applicationInfo.loadLabel(pm).toString());
                                     } catch (PackageManager.NameNotFoundException e) {
-                                        HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "AddRemovePackageBroadcastReceiver", "onReceive", Log.getStackTraceString(e));
+                                        Logs.e(CLASSNAME, "AddRemovePackageBroadcastReceiver", "onReceive", Log.getStackTraceString(e));
                                     }
                                     final AppInfo finalAppInfo = appInfo;
                                     ((Activity) context).runOnUiThread(new Runnable() {

@@ -1,12 +1,5 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import java.io.File;
-import java.util.regex.Pattern;
-
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -26,6 +19,14 @@ import android.support.v7.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
+
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+
+import java.io.File;
+import java.util.regex.Pattern;
 
 public class FileDirInfo extends ItemInfo {
 
@@ -55,7 +56,7 @@ public class FileDirInfo extends ItemInfo {
 			String filePath = currentFile.getAbsolutePath();
 			String mimeType = getMimeType();
 			String logMsg = "filePath=" + filePath + ", mimeType=" + mimeType;
-			HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getIconImage", logMsg);
+			Logs.d(CLASS_NAME, "getIconImage", logMsg);
 			if (mimeType != null) {
 				int width, height;
 				width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
@@ -107,7 +108,7 @@ public class FileDirInfo extends ItemInfo {
 //                    iconImage = ((BitmapDrawable) drawable).getBitmap();
 					// return ContextCompat.getDrawable(mContext, R.drawable.ic_file_black);
 				} catch (Exception e) {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASS_NAME, "getIconImage", Log.getStackTraceString(e));
+					Logs.e(CLASS_NAME, "getIconImage", Log.getStackTraceString(e));
 				}
 			}
 		}
@@ -200,7 +201,7 @@ public class FileDirInfo extends ItemInfo {
 
 	public int getFileDirStatus() {
 		int locationStatus = getFileDirLocationStatus();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
+		Logs.d(CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
         if (locationStatus == LocationStatus.LOCAL) {
             return ItemStatus.STATUS_AVAILABLE;
         } else {
