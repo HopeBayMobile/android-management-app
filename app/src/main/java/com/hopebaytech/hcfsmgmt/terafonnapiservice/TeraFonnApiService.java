@@ -158,12 +158,12 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean pinApp(String packageName) throws RemoteException {
-            return pinOrUnpin(true, packageName);
+            return handleFailureOfPinOrUnpin(true, packageName);
         }
 
         @Override
         public boolean unpinApp(String packageName) throws RemoteException {
-            return pinOrUnpin(false, packageName);
+            return handleFailureOfPinOrUnpin(false, packageName);
         }
 
         @Override
@@ -374,6 +374,13 @@ public class TeraFonnApiService extends Service {
         return status != currentStatus ? status : -1;
     }
 
+    private Boolean handleFailureOfPinOrUnpin (Boolean pinOP, String packageName) {
+        boolean isSuccess = pinOrUnpin(pinOP, packageName);
+        if (isSuccess) updateDB(pinOP, packageName);
+        else pinOrUnpin(!pinOP, packageName);
+        return isSuccess;
+    }
+
     private Boolean pinOrUnpin(Boolean pinOP, String packageName) {
         boolean isSuccess = false;
         String OP = pinOP ? "Pin" : "Unpin";
@@ -414,8 +421,6 @@ public class TeraFonnApiService extends Service {
                 log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
             }
         }
-
-        if (isSuccess) updateDB(pinOP, packageName);
 
         return isSuccess;
     }
