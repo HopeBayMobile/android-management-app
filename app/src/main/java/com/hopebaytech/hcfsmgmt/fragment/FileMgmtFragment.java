@@ -855,28 +855,33 @@ public class FileMgmtFragment extends Fragment {
         mLayoutType.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mDisplayType == DISPLAY_TYPE.LINEAR) {
-                    mLayoutType.setImageResource(R.drawable.icon_btn_tab_listview_light);
+                ArrayList<ItemInfo> itemInfoList;
+                switch (mDisplayType) {
+                    case LINEAR:
+                        mLayoutType.setImageResource(R.drawable.icon_btn_tab_listview_light);
 
-                    mSectionedRecyclerViewAdapter.init();
-                    ArrayList<ItemInfo> itemInfoList = mSectionedRecyclerViewAdapter.getSubAdapterItemInfoList();
-                    mSectionedRecyclerViewAdapter.setBaseAdapter(new GridRecyclerViewAdapter(itemInfoList));
-                    mRecyclerView.setLayoutManager(new GridLayoutManager(mContext, GRID_LAYOUT_SPAN_COUNT));
-                    mRecyclerView.removeItemDecoration(mDividerItemDecoration);
-                    mSectionedRecyclerViewAdapter.setGridLayoutManagerSpanSize();
+                        mRecyclerView.setLayoutManager(new GridLayoutManager(mContext, GRID_LAYOUT_SPAN_COUNT));
+                        mRecyclerView.removeItemDecoration(mDividerItemDecoration);
 
-                    mDisplayType = DISPLAY_TYPE.GRID;
-                } else {
-                    mLayoutType.setImageResource(R.drawable.icon_btn_tab_gridview_light);
+                        itemInfoList = mSectionedRecyclerViewAdapter.getSubAdapterItemInfoList();
+                        mSectionedRecyclerViewAdapter.setBaseAdapter(new GridRecyclerViewAdapter(itemInfoList));
+                        mSectionedRecyclerViewAdapter.setGridLayoutManagerSpanSize();
 
-                    mSectionedRecyclerViewAdapter.init();
-                    ArrayList<ItemInfo> itemInfoList = mSectionedRecyclerViewAdapter.getSubAdapterItemInfoList();
-                    mSectionedRecyclerViewAdapter.setBaseAdapter(new LinearRecyclerViewAdapter(itemInfoList));
-                    mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-                    mRecyclerView.addItemDecoration(mDividerItemDecoration);
+                        mDisplayType = DISPLAY_TYPE.GRID;
+                        break;
+                    case GRID:
+                        mLayoutType.setImageResource(R.drawable.icon_btn_tab_gridview_light);
 
-                    mDisplayType = DISPLAY_TYPE.LINEAR;
+                        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+                        mRecyclerView.addItemDecoration(mDividerItemDecoration);
+
+                        itemInfoList = mSectionedRecyclerViewAdapter.getSubAdapterItemInfoList();
+                        mSectionedRecyclerViewAdapter.setBaseAdapter(new LinearRecyclerViewAdapter(itemInfoList));
+
+                        mDisplayType = DISPLAY_TYPE.LINEAR;
+                        break;
                 }
+                mRecyclerView.setAdapter(mSectionedRecyclerViewAdapter);
             }
         });
     }
@@ -1440,6 +1445,11 @@ public class FileMgmtFragment extends Fragment {
                 View view = LayoutInflater.from(mContext).inflate(R.layout.file_mgmt_section_item, parent, false);
                 return new SectionedViewHolder(view);
             } else {
+                if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
+                    Logs.e(CLASSNAME, "onCreateViewHolder", "GridRecyclerViewAdapter");
+                } else if (mBaseAdapter instanceof LinearRecyclerViewAdapter) {
+                    Logs.e(CLASSNAME, "onCreateViewHolder", "LinearRecyclerViewAdapter");
+                }
                 return mBaseAdapter.onCreateViewHolder(parent, typeView - 1);
             }
         }
@@ -1668,7 +1678,6 @@ public class FileMgmtFragment extends Fragment {
                 }
             });
         }
-
 
 
         public String getCurrentFilePath() {
