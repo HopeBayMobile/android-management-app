@@ -19,19 +19,26 @@ import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
  */
 public class NotificationEvent {
 
+    private static final int FLAG_DEFAULT = 0;
+    public static final int FLAG_ON_GOING = 1;
+    public static final int FLAG_JUMP_TO_APP = 1 << 1;
+
     public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage) {
-        notify(context, notifyId, notifyTitle, notifyMessage, false, null);
+        notify(context, notifyId, notifyTitle, notifyMessage, FLAG_DEFAULT, null);
     }
 
-    public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage, boolean onGoing) {
-        notify(context, notifyId, notifyTitle, notifyMessage, onGoing, null);
+    public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage, int flag) {
+        notify(context, notifyId, notifyTitle, notifyMessage, flag, null);
     }
 
     public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage, Bundle extras) {
-        notify(context, notifyId, notifyTitle, notifyMessage, false, extras);
+        notify(context, notifyId, notifyTitle, notifyMessage, FLAG_DEFAULT, extras);
     }
 
-    public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage, boolean onGoing, Bundle extras) {
+    public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage, int flag, Bundle extras) {
+        boolean onGoing = (flag & FLAG_ON_GOING) != 0;
+        boolean jumpToApp = (flag & FLAG_JUMP_TO_APP) != 0;
+
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
         bigStyle.bigText(notifyMessage);
 
@@ -50,15 +57,16 @@ public class NotificationEvent {
                 .setTicker(notifyTitle)
                 .setContentTitle(notifyTitle)
                 .setContentText(notifyMessage)
-                .setStyle(bigStyle)
-                .setContentIntent(contentIntent);
+                .setStyle(bigStyle);
+        if (jumpToApp) {
+            builder.setContentIntent(contentIntent);
+        }
 
         if (onGoing) {
             builder = (NotificationCompat.Builder) builder
                     .setAutoCancel(false)
                     .setOngoing(true)
                     .setPriority(Notification.PRIORITY_MAX);
-//                    .setContentIntent(contentIntent);
         } else {
             int defaults = 0;
             defaults |= NotificationCompat.DEFAULT_VIBRATE;
@@ -66,7 +74,6 @@ public class NotificationEvent {
                     .setAutoCancel(true)
                     .setOngoing(false)
                     .setDefaults(defaults)
-//                    .setContentIntent(contentIntent)
                     .setFullScreenIntent(contentIntent, true);
         }
         Notification notification = builder.build();

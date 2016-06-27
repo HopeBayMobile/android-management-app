@@ -320,7 +320,8 @@ public class HCFSMgmtService extends Service {
                                                             notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
                                                     }
                                                     String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
-                                                    NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, true);
+                                                    int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_JUMP_TO_APP;
+                                                    NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
                                                 }
                                                 Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
                                             } catch (InterruptedException e) {
