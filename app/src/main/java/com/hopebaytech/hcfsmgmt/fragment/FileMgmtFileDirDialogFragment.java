@@ -102,7 +102,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         mCalculateFileDirDataRatioThread.start();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(view).setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+        builder.setView(view).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             }

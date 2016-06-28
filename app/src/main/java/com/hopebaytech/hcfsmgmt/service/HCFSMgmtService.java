@@ -302,25 +302,25 @@ public class HCFSMgmtService extends Service {
                                                     String notifyTitle;
                                                     switch (connStatus) {
                                                         case HCFSConnStatus.TRANS_FAILED:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_failed);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
                                                             break;
                                                         case HCFSConnStatus.TRANS_NOT_ALLOWED:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_not_allowed);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
                                                             break;
                                                         case HCFSConnStatus.TRANS_NORMAL:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                                                             break;
                                                         case HCFSConnStatus.TRANS_IN_PROGRESS:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_in_progress);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
                                                             break;
                                                         case HCFSConnStatus.TRANS_SLOW:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_slow);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
                                                             break;
                                                         default:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                                                     }
                                                     String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
-                                                    int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_JUMP_TO_APP;
+                                                    int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
                                                     NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
                                                 }
                                                 Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
@@ -377,17 +377,17 @@ public class HCFSMgmtService extends Service {
                                                 Logs.w(CLASSNAME, "onStartCommand", "serverAuthCode=" + serverAuthCode);
                                                 registerToMgmtCluster(context, serverAuthCode);
                                             } else {
-                                                String failedMsg = "acct is null";
-                                                googleAuthFailed(failedMsg);
+                                                String googleAuthErrMsg = "GoogleSignInAccount is null";
+                                                googleAuthFailed(googleAuthErrMsg);
                                             }
                                         } else {
-                                            String failedMsg;
+                                            String googleAuthErrMsg;
                                             if (result == null) {
-                                                failedMsg = "googleSignInResult == null";
+                                                googleAuthErrMsg = "GoogleSignInResult is null";
                                             } else {
-                                                failedMsg = "googleSignInResult.isSuccess()=" + result.isSuccess();
+                                                googleAuthErrMsg = result.getStatus().getStatusMessage();
                                             }
-                                            googleAuthFailed(failedMsg);
+                                            googleAuthFailed(googleAuthErrMsg);
                                         }
                                     } else {
                                         Logs.d(CLASSNAME, "onStartCommand", "!opr.isDone()");
@@ -400,13 +400,12 @@ public class HCFSMgmtService extends Service {
                                                         String serverAuthCode = acct.getServerAuthCode();
                                                         registerToMgmtCluster(context, serverAuthCode);
                                                     } else {
-                                                        String failedMsg = "acct is null";
-                                                        googleAuthFailed(failedMsg);
+                                                        String googleAuthErrMsg = "GoogleSignInAccount is null";
+                                                        googleAuthFailed(googleAuthErrMsg);
                                                     }
                                                 } else {
-                                                    String failedMsg;
-                                                    failedMsg = "googleSignInResult.isSuccess()=" + result.isSuccess();
-                                                    googleAuthFailed(failedMsg);
+                                                    String googleAuthErrMsg = result.getStatus().getStatusMessage();
+                                                    googleAuthFailed(googleAuthErrMsg);
                                                 }
                                             }
                                         });
@@ -480,7 +479,7 @@ public class HCFSMgmtService extends Service {
         // return START_REDELIVER_INTENT;
     }
 
-    private void mgmtAuthOrRegisterFailed() {
+    private void mgmtAuthOrRegisterFailed(String failedMsg) {
         Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
 
         if (MgmtCluster.isNeedToRetryAgain()) {
@@ -489,10 +488,13 @@ public class HCFSMgmtService extends Service {
             startService(intentService);
             Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
         } else {
+            int flag = NotificationEvent.FLAG_OPEN_APP;
             int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
             String notify_title = getString(R.string.app_name);
-            String notify_content = getString(R.string.auth_at_bootup_auth_mgmt_failed);
-            NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content);
+            String notify_content = failedMsg;
+            Bundle extras = new Bundle();
+            extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+            NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
             Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<Status>() {
@@ -505,6 +507,7 @@ public class HCFSMgmtService extends Service {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(HCFSMgmtService.this);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
             editor.apply();
         }
         mGoogleApiClient.disconnect();
@@ -516,10 +519,13 @@ public class HCFSMgmtService extends Service {
     private void googleAuthFailed(String failedMsg) {
         Logs.e(CLASSNAME, "googleAuthFailed", failedMsg);
 
+        int flag = NotificationEvent.FLAG_OPEN_APP;
         int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
         String notify_title = getString(R.string.app_name);
-        String notify_content = getString(R.string.auth_at_bootup_auth_google_failed);
-        NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content);
+        String notify_content = getString(R.string.auth_at_bootup_auth_failed_google_auth) + "(" + failedMsg + ")";
+        Bundle extras = new Bundle();
+        extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+        NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<Status>() {
@@ -534,6 +540,7 @@ public class HCFSMgmtService extends Service {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(HCFSMgmtService.this);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+        editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
         editor.apply();
 
         NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
@@ -582,7 +589,9 @@ public class HCFSMgmtService extends Service {
 
                     @Override
                     public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                        mgmtAuthOrRegisterFailed();
+                        String authErrorMsg = "Error(" + registerResultInfo.getResponseCode() + "): " + registerResultInfo.getMessage();
+                        String failedMsg = getString(R.string.auth_at_bootup_auth_failed_mgmt_register) + authErrorMsg;
+                        mgmtAuthOrRegisterFailed(failedMsg);
                     }
 
                 });
@@ -591,7 +600,9 @@ public class HCFSMgmtService extends Service {
 
             @Override
             public void onAuthFailed(AuthResultInfo authResultInfo) {
-                mgmtAuthOrRegisterFailed();
+                String authErrorMsg = "Error(" + authResultInfo.getResponseCode() + "): " + authResultInfo.getMessage();
+                String failedMsg = getString(R.string.auth_at_bootup_auth_failed_mgmt_auth) + authErrorMsg;
+                mgmtAuthOrRegisterFailed(failedMsg);
             }
 
         });

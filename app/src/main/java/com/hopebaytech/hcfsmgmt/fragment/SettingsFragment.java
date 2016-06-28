@@ -4,8 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -18,6 +22,9 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+
+import java.util.List;
 
 /**
  * @author Aaron
@@ -27,7 +34,7 @@ public class SettingsFragment extends Fragment {
 
     private final String CLASSNAME = SettingsFragment.class.getSimpleName();
 
-    public static final String PREF_SYNC_WIFI_ONLY= "pref_sync_wifi_only";
+    public static final String PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
     public static final String PREF_NOTIFY_CONN_FAILED_RECOVERY = "pref_notify_conn_failed_recovery";
     public static final String PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO = "pref_notify_local_storage_usage_ratio";
     public static final String PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED = "pref_local_storage_usage_ratio_notified";
@@ -37,12 +44,13 @@ public class SettingsFragment extends Fragment {
 
     public static final int REQUEST_CODE_RATIO = 0;
 
+    private Context mContext;
+    private View mView;
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
     private LinearLayout mNotifyLocalStorageUsedRatio;
     private LinearLayout mSwitchAccount;
-
-    private Context mContext;
+    private LinearLayout mFeedback;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -69,10 +77,14 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Logs.w(CLASSNAME, "onViewCreated", null);
+        mView = view;
+
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
         mSwitchAccount = (LinearLayout) view.findViewById(R.id.switch_account);
+        mFeedback = (LinearLayout) view.findViewById(R.id.feedback);
     }
 
     @Override
@@ -126,8 +138,26 @@ public class SettingsFragment extends Fragment {
                 SwitchAccountDialogFragment dialogFragment = SwitchAccountDialogFragment.newInstance();
                 dialogFragment.show(getFragmentManager(), SwitchAccountDialogFragment.TAG);
 
-                /** Unknown cause results in that dialog show twice, thus we manually dismiss one of them */
+                // Unknown cause results in that dialog show twice, thus we manually dismiss one of them
                 dialogFragment.dismiss();
+            }
+        });
+
+        mFeedback.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Uri uri = Uri.parse("mailto:cs@tera.mobi");
+                Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+                PackageManager manager = mContext.getPackageManager();
+                List<ResolveInfo> infoList = manager.queryIntentActivities(intent, 0);
+                if (infoList.size() != 0) {
+                    startActivity(intent);
+                } else {
+                    Snackbar snackbar = Snackbar.make(mView, R.string.settings_snackbar_no_available_email_app_found, Snackbar.LENGTH_LONG);
+                    TextView textView = (TextView) snackbar.getView().findViewById(android.support.design.R.id.snackbar_text);
+                    textView.setMaxLines(10);
+                    snackbar.show();
+                }
             }
         });
     }
@@ -154,4 +184,5 @@ public class SettingsFragment extends Fragment {
         }
 
     }
+
 }

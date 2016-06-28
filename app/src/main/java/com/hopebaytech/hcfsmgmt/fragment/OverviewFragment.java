@@ -155,7 +155,7 @@ public class OverviewFragment extends Fragment {
         mXferProgressBar = (ProgressBar) data_transmission_today.findViewById(R.id.progressBar);
         mXferProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.xfer_progressbar));
         TextView network_xfer_today_title = (TextView) data_transmission_today.findViewById(R.id.textViewTitle);
-        network_xfer_today_title.setText(mContext.getString(R.string.dashboard_data_transmission_today));
+        network_xfer_today_title.setText(mContext.getString(R.string.overview_data_transmission_today));
         ImageView networkXferImageView = (ImageView) data_transmission_today.findViewById(R.id.iconView);
         networkXferImageView.setImageResource(R.drawable.icon_system_transmitting);
 
@@ -294,23 +294,23 @@ public class OverviewFragment extends Fragment {
         switch (connStatus) {
             case HCFSConnStatus.TRANS_FAILED:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
-                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_failed));
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_failed));
                 break;
             case HCFSConnStatus.TRANS_NOT_ALLOWED:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
-                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_not_allowed));
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_not_allowed));
                 break;
             case HCFSConnStatus.TRANS_NORMAL:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_normal);
-                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_normal));
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_normal));
                 break;
             case HCFSConnStatus.TRANS_IN_PROGRESS:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_transmitting);
-                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_in_progress));
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_in_progress));
                 break;
             case HCFSConnStatus.TRANS_SLOW:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_slow);
-                mNetworkConnStatusText.setText(mContext.getString(R.string.dashboard_hcfs_conn_status_slow));
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_slow));
                 break;
         }
     }

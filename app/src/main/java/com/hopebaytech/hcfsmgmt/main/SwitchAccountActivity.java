@@ -188,7 +188,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
                         builder.setTitle(R.string.alert_dialog_title_warning);
                         builder.setMessage(R.string.switch_account_require_read_phone_state_permission);
-                        builder.setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (ActivityCompat.shouldShowRequestPermissionRationale(SwitchAccountActivity.this, Manifest.permission.READ_PHONE_STATE)) {
@@ -360,7 +360,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
                                     builder.setTitle(R.string.alert_dialog_title_warning);
                                     builder.setMessage(R.string.activate_get_server_client_id_failed);
-                                    builder.setPositiveButton(R.string.alert_dialog_confirm, null);
+                                    builder.setPositiveButton(R.string.confirm, null);
                                     builder.show();
                                 }
                             });
@@ -482,7 +482,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
         builder.setTitle(R.string.alert_dialog_title_warning);
         builder.setMessage(message);
-        builder.setPositiveButton(R.string.alert_dialog_confirm, null);
+        builder.setPositiveButton(R.string.confirm, null);
         builder.show();
     }
 

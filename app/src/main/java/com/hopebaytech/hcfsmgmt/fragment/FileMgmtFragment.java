@@ -1445,11 +1445,6 @@ public class FileMgmtFragment extends Fragment {
                 View view = LayoutInflater.from(mContext).inflate(R.layout.file_mgmt_section_item, parent, false);
                 return new SectionedViewHolder(view);
             } else {
-                if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
-                    Logs.e(CLASSNAME, "onCreateViewHolder", "GridRecyclerViewAdapter");
-                } else if (mBaseAdapter instanceof LinearRecyclerViewAdapter) {
-                    Logs.e(CLASSNAME, "onCreateViewHolder", "LinearRecyclerViewAdapter");
-                }
                 return mBaseAdapter.onCreateViewHolder(parent, typeView - 1);
             }
         }
@@ -1838,7 +1833,7 @@ public class FileMgmtFragment extends Fragment {
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                     builder.setTitle(getString(R.string.alert_dialog_title_warning));
                     builder.setMessage(getString(R.string.require_read_external_storage_permission));
-                    builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                    builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, RequestCode.PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
@@ -2111,7 +2106,7 @@ public class FileMgmtFragment extends Fragment {
                     builder.setTitle(dataTypeText);
                     if (dataTypeInfo.isPinned()) {
                         builder.setMessage(mContext.getString(R.string.file_mgmt_alert_dialog_message_pin_datatype));
-                        builder.setPositiveButton(mContext.getString(R.string.alert_dialog_yes), new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(mContext.getString(R.string.yes), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dataTypeInfo.setDateUpdated(0);
@@ -2125,7 +2120,7 @@ public class FileMgmtFragment extends Fragment {
                                 mPinUnpinTypeMap.put(dataTypeInfo.getDataType(), isPinned);
                             }
                         });
-                        builder.setNegativeButton(mContext.getString(R.string.alert_dialog_no), new DialogInterface.OnClickListener() {
+                        builder.setNegativeButton(mContext.getString(R.string.no), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 long currentTimeMillis = System.currentTimeMillis();
@@ -2144,7 +2139,7 @@ public class FileMgmtFragment extends Fragment {
                         });
                     } else {
                         builder.setMessage(mContext.getString(R.string.file_mgmt_alert_dialog_message_unpin_datatype));
-                        builder.setPositiveButton(mContext.getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(mContext.getString(R.string.confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dataTypeInfo.setDateUpdated(0);
@@ -2173,7 +2168,7 @@ public class FileMgmtFragment extends Fragment {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(fileDirInfo.getName());
                         builder.setMessage(mContext.getString(R.string.file_mgmt_cannot_unpin_files_in_android_folder));
-                        builder.setPositiveButton(mContext.getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(mContext.getString(R.string.confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 
