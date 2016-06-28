@@ -422,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             finish();
         } else {
             isExitApp = true;
-            String message = getString(R.string.dashboard_snackbar_exit_app);
+            String message = getString(R.string.overview_snackbar_exit_app);
             View contentView = findViewById(android.R.id.content);
             if (contentView != null) {
                 Snackbar.make(contentView, message, Snackbar.LENGTH_SHORT).show();

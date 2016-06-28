@@ -380,7 +380,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(getString(R.string.alert_dialog_title_warning));
                         builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
-                        builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
@@ -691,13 +691,13 @@ public class ActivateWoCodeFragment extends Fragment {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(R.string.alert_dialog_title_warning);
                         builder.setMessage(R.string.activate_require_read_phone_state_permission);
-                        builder.setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
                             }
                         });
-                        builder.setNegativeButton(R.string.alert_dialog_cancel, null);
+                        builder.setNegativeButton(R.string.cancel, null);
                         builder.show();
                     } else {
                         PermissionSnackbar.newInstance(mContext, mView).show();

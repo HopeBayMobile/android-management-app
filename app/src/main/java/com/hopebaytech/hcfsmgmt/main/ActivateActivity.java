@@ -38,7 +38,7 @@ public class ActivateActivity extends AppCompatActivity {
         ft.replace(R.id.fragment_container, fragment, ActivateWoCodeFragment.TAG);
         ft.commit();
     }
-    
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         FragmentManager fm = getSupportFragmentManager();

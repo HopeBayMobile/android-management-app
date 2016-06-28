@@ -302,22 +302,22 @@ public class HCFSMgmtService extends Service {
                                                     String notifyTitle;
                                                     switch (connStatus) {
                                                         case HCFSConnStatus.TRANS_FAILED:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_failed);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
                                                             break;
                                                         case HCFSConnStatus.TRANS_NOT_ALLOWED:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_not_allowed);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
                                                             break;
                                                         case HCFSConnStatus.TRANS_NORMAL:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                                                             break;
                                                         case HCFSConnStatus.TRANS_IN_PROGRESS:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_in_progress);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
                                                             break;
                                                         case HCFSConnStatus.TRANS_SLOW:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_slow);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
                                                             break;
                                                         default:
-                                                            notifyTitle = getString(R.string.dashboard_hcfs_conn_status_normal);
+                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                                                     }
                                                     String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
                                                     int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
