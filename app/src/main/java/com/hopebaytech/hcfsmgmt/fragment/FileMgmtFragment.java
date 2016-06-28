@@ -1445,11 +1445,6 @@ public class FileMgmtFragment extends Fragment {
                 View view = LayoutInflater.from(mContext).inflate(R.layout.file_mgmt_section_item, parent, false);
                 return new SectionedViewHolder(view);
             } else {
-                if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
-                    Logs.e(CLASSNAME, "onCreateViewHolder", "GridRecyclerViewAdapter");
-                } else if (mBaseAdapter instanceof LinearRecyclerViewAdapter) {
-                    Logs.e(CLASSNAME, "onCreateViewHolder", "LinearRecyclerViewAdapter");
-                }
                 return mBaseAdapter.onCreateViewHolder(parent, typeView - 1);
             }
         }

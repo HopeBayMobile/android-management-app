@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 
@@ -19,9 +20,11 @@ import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
  */
 public class NotificationEvent {
 
+    private static final String CLASSNAME = NotificationEvent.class.getSimpleName();
+
     private static final int FLAG_DEFAULT = 0;
     public static final int FLAG_ON_GOING = 1;
-    public static final int FLAG_JUMP_TO_APP = 1 << 1;
+    public static final int FLAG_OPEN_APP = 1 << 1;
 
     public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage) {
         notify(context, notifyId, notifyTitle, notifyMessage, FLAG_DEFAULT, null);
@@ -37,13 +40,15 @@ public class NotificationEvent {
 
     public static void notify(Context context, int notifyId, String notifyTitle, String notifyMessage, int flag, Bundle extras) {
         boolean onGoing = (flag & FLAG_ON_GOING) != 0;
-        boolean jumpToApp = (flag & FLAG_JUMP_TO_APP) != 0;
+        boolean openApp = (flag & FLAG_OPEN_APP) != 0;
 
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
         bigStyle.bigText(notifyMessage);
 
         Intent intent = new Intent(context, LoadingActivity.class);
         if (extras != null) {
+            String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
+            Logs.w(CLASSNAME, "notify", "cause=" + cause);
             intent.putExtras(extras);
         }
         PendingIntent contentIntent = PendingIntent.getActivity(context, notifyId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -58,7 +63,7 @@ public class NotificationEvent {
                 .setContentTitle(notifyTitle)
                 .setContentText(notifyMessage)
                 .setStyle(bigStyle);
-        if (jumpToApp) {
+        if (openApp) {
             builder.setContentIntent(contentIntent);
         }
 

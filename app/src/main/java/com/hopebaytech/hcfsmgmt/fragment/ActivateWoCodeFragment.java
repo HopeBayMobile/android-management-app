@@ -143,7 +143,6 @@ public class ActivateWoCodeFragment extends Fragment {
         mForgotPassword = (TextView) view.findViewById(R.id.forget_password);
         mGoogleActivate = (TextView) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
-
     }
 
     @Override
@@ -396,7 +395,23 @@ public class ActivateWoCodeFragment extends Fragment {
             }
         });
 
+        Bundle extras = getArguments();
+        if (extras != null) {
+            String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
+            mErrorMessage.setText(cause);
+        } else {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            String cause = sharedPreferences.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, null);
+            if (cause != null) {
+                mErrorMessage.setText(cause);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.remove(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
+                editor.apply();
+            }
+        }
+
     }
+
 
     public static class PermissionSnackbar {
 
@@ -464,7 +479,7 @@ public class ActivateWoCodeFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Logs.w(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
+        Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
         if (requestCode == RequestCode.GOOGLE_SIGN_IN) {
             if (resultCode == Activity.RESULT_OK) {
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);

@@ -171,8 +171,9 @@
     <string name="switch_account_another_account"><u>選擇其他帳戶</u></string>
     <string name="switch_account_require_read_phone_state_permission">轉換帳戶需啟用Tera的電話權限，請點選右方鍵繼續。</string>
 
-    <string name="auth_at_bootup_auth_google_failed">Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
-    <string name="auth_at_bootup_auth_mgmt_failed">TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
+    <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗導致無法存取雲端資料。</string>
+    <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗導致無法存取雲端資料。</string>
+    <string name="auth_at_bootup_auth_failed_mgmt_register">Tera 註冊失敗導致無法存取雲端資料。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
     <string name="alert_dialog_yes">是</string>
