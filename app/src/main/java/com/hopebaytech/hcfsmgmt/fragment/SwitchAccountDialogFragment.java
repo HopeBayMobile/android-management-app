@@ -40,7 +40,7 @@ public class SwitchAccountDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setTitle(getString(R.string.alert_dialog_title_warning));
         builder.setMessage(getString(R.string.settings_switch_account_warning_msg));
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string._continue), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
@@ -53,7 +53,7 @@ public class SwitchAccountDialogFragment extends DialogFragment {
                 mActivity.finish();
             }
         });
-        builder.setNegativeButton(getString(R.string.no), null);
+        builder.setNegativeButton(getString(R.string.cancel), null);
         builder.show();
 
         return builder.create();
