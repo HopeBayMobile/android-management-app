@@ -30,10 +30,10 @@
         android:id="@+id/content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:paddingEnd="@dimen/M2"
         android:paddingStart="@dimen/M2"
-        android:paddingTop="@dimen/M3"
-        android:orientation="vertical">
+        android:paddingTop="@dimen/M3">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -53,12 +53,12 @@
                 android:layout_height="wrap_content"
                 tools:text="2.0.6.0513" />
 
-        </LinearLayout>
+            <View
+                style="@style/Divider"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp" />
 
-        <View
-            style="@style/Divider"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -78,12 +78,12 @@
                 android:layout_height="wrap_content"
                 tools:text="7947584920752" />
 
-        </LinearLayout>
+            <View
+                style="@style/Divider"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp" />
 
-        <View
-            style="@style/Divider"
-            android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp" />
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/device_imei_2_layout"
@@ -103,6 +103,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="7947584920753" />
+
+            <View
+                style="@style/Divider"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp" />
 
         </LinearLayout>
 

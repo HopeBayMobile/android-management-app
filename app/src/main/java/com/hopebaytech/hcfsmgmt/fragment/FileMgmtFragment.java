@@ -1584,7 +1584,7 @@ public class FileMgmtFragment extends Fragment {
             lastVisibleItemPosition = findRecyclerViewLastVisibleItemPosition();
         } catch (NullPointerException e) {
             firstVisibleItemPosition = lastVisibleItemPosition = position;
-            Logs.e(CLASSNAME, "isViewHolderThreadNeedToExecute", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "isPositionVisible", Log.getStackTraceString(e));
         }
 
         if (mRecyclerViewScrollDown) {
