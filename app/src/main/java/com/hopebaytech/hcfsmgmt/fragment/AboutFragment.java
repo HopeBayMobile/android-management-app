@@ -20,6 +20,7 @@ import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
@@ -34,6 +35,7 @@ public class AboutFragment extends Fragment {
     private Context mContext;
     private TextView mImeiOne;
     private TextView mImeiTwo;
+    private LinearLayout mImeiTwoLayout;
     private Snackbar mSnackbar;
 
     private View.OnClickListener listener = new View.OnClickListener() {
@@ -70,6 +72,7 @@ public class AboutFragment extends Fragment {
 
         mImeiOne = (TextView) view.findViewById(R.id.device_imei_1);
         mImeiTwo = (TextView) view.findViewById(R.id.device_imei_2);
+        mImeiTwoLayout = (LinearLayout) view.findViewById(R.id.device_imei_2_layout);
 
         TextView teraVersion = (TextView) view.findViewById(R.id.terafonn_version);
         teraVersion.setText(getString(R.string.tera_version));
@@ -151,9 +154,10 @@ public class AboutFragment extends Fragment {
         TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (manager.getPhoneCount() == 0) {
             mImeiOne.setText("-");
-            mImeiTwo.setText("-");
+            mImeiTwoLayout.setVisibility(View.GONE);
         } else if (manager.getPhoneCount() == 1) {
             mImeiOne.setText(manager.getDeviceId(0));
+            mImeiTwoLayout.setVisibility(View.GONE);
             Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
         } else {
             mImeiOne.setText(manager.getDeviceId(0));
