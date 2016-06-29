@@ -94,6 +94,7 @@ public class HCFSMgmtUtils {
     public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
+    public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
 
     public static final String ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
     public static final String ITENT_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";

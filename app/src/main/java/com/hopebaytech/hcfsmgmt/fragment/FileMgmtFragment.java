@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -28,6 +29,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.StatFs;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -140,7 +142,7 @@ public class FileMgmtFragment extends Fragment {
     private boolean mCurrentVisible;
     private boolean mServiceBound;
     private HCFSMgmtService mMgmtService;
-    private DISPLAY_TYPE mDisplayType = DISPLAY_TYPE.GRID;
+    private DISPLAY_TYPE mDisplayType;
     //    private ExternalStorageObserver mExternalStorageObserver;
 
     /**
@@ -613,6 +615,10 @@ public class FileMgmtFragment extends Fragment {
                 mRecyclerViewScrollDown = (dy >= 0);
             }
         });
+
+        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        int ordinal = sharedPreferences.getInt(HCFSMgmtUtils.PREF_APP_FILE_DISPLAY_LAYOUT, DISPLAY_TYPE.GRID.ordinal());
+        mDisplayType = DISPLAY_TYPE.values()[ordinal];
         switch (mDisplayType) {
             case LINEAR:
                 mLayoutType.setImageResource(R.drawable.icon_btn_tab_gridview_light);
@@ -731,6 +737,10 @@ public class FileMgmtFragment extends Fragment {
                         break;
                 }
                 mRecyclerView.setAdapter(mSectionedRecyclerViewAdapter);
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(HCFSMgmtUtils.PREF_APP_FILE_DISPLAY_LAYOUT, mDisplayType.ordinal());
+                editor.apply();
             }
         });
     }
