@@ -121,11 +121,14 @@ public class FileMgmtFragment extends Fragment {
     private SectionedRecyclerViewAdapter mSectionedRecyclerViewAdapter;
     private DividerItemDecoration mDividerItemDecoration;
     private ArrayAdapter<String> mSpinnerAdapter;
+
     private HandlerThread mHandlerThread;
     private Thread mApiExecutorThread;
     private Thread mAutoUiRefreshThread;
     private Thread mProcessPinThread;
     private Handler mWorkerHandler;
+    private Handler mUiHandler;
+
     private SparseArray<ItemInfo> mWaitToExecuteSparseArr;
     private Map<String, Boolean> mPinUnpinFileMap;
     private Map<String, AppInfo> mPinUnpinAppMap;
@@ -176,98 +179,19 @@ public class FileMgmtFragment extends Fragment {
             while (true) {
                 try {
                     Thread.sleep(INTERVAL_AUTO_REFRESH_UI);
-                    if (mSectionedRecyclerViewAdapter != null) {
-                        int firstVisiblePosition = findRecyclerViewFirstVisibleItemPosition();
-                        int lastVisiblePosition = findRecyclerViewLastVisibleItemPosition();
-                        final SectionedRecyclerViewAdapter adapter = (SectionedRecyclerViewAdapter) mRecyclerView.getAdapter();
-                        ArrayList<ItemInfo> itemInfoList = adapter.getSubAdapterItemInfoList();
-                        // Update section value (storage usage)
-                        if (firstVisiblePosition == 0) {
-                            final Section section = adapter.getSections().get(0);
-                            if (section.viewHolder != null) {
-                                StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
-                                final long totalStorageSpace = statFs.getTotalBytes();
-                                final long availableStorageSpace = statFs.getAvailableBytes();
-
-                                ((Activity) mContext).runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mSectionedRecyclerViewAdapter.updateSection(section.viewHolder, totalStorageSpace, availableStorageSpace, false);
-                                    }
-                                });
-                            }
-                        }
-
-                        for (int i = firstVisiblePosition + 1; i < lastVisiblePosition + 1; i++) {
-                            int index = i - 1;
-                            if (index >= itemInfoList.size()) {
-                                break;
-                            }
-
-                            final ItemInfo itemInfo = itemInfoList.get(index);
-                            RecyclerViewHolder viewHolder = itemInfo.getViewHolder();
-                            if (viewHolder != null) {
-                                if (viewHolder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
-                                    final LinearRecyclerViewAdapter.LinearRecyclerViewHolder holder = (LinearRecyclerViewAdapter.LinearRecyclerViewHolder) viewHolder;
-                                    if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                                        final int alpha = itemInfo.getIconAlpha();
-                                        final Bitmap iconBitmap = itemInfo.getIconImage();
-                                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Bitmap bitmap = iconBitmap;
-                                                if (!itemInfo.isPinned()) {
-                                                    Bitmap adjustBitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
-                                                    if (adjustBitmap != null) {
-                                                        bitmap = adjustBitmap;
-                                                    }
-                                                }
-                                                if (bitmap != null) {
-                                                    holder.setIconBitmap(bitmap);
-                                                }
-                                                holder.setIconAlpha(alpha);
-                                            }
-                                        });
-                                    }
-                                } else if (viewHolder instanceof GridRecyclerViewAdapter.GridRecyclerViewHolder) {
-                                    final GridRecyclerViewAdapter.GridRecyclerViewHolder holder = (GridRecyclerViewAdapter.GridRecyclerViewHolder) viewHolder;
-                                    if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                                        final int alpha = itemInfo.getIconAlpha();
-                                        final Bitmap iconBitmap = itemInfo.getIconImage();
-                                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Bitmap bitmap = iconBitmap;
-                                                if (!itemInfo.isPinned()) {
-                                                    Bitmap adjustBitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
-                                                    if (adjustBitmap != null) {
-                                                        bitmap = adjustBitmap;
-                                                    }
-                                                }
-                                                if (bitmap != null) {
-                                                    holder.setIconBitmap(bitmap);
-                                                }
-                                                holder.setIconAlpha(alpha);
-                                            }
-                                        });
-                                    }
-                                }
-                            }
-                        }
+                    if (mProgressCircle.getVisibility() == View.GONE) {
+                        notifyRecyclerViewItemChanged();
                     }
                 } catch (InterruptedException e) {
                     Logs.d(CLASSNAME, "AutoUiRefreshRunnable", "mAutoUiRefreshThread is interrupted");
                     break;
                 }
             }
+
         }
     };
 
     private Runnable mProcessPinRunnable = new Runnable() {
-
-        private Map<String, Boolean> finishedPinUnpinAppMap = new HashMap<>();
-        private Map<String, Boolean> finishedPinUnpinFileMap = new HashMap<>();
-        private Map<String, Boolean> finishedPinUnpinTypeMap = new HashMap<>();
 
         @Override
         public void run() {
@@ -276,13 +200,7 @@ public class FileMgmtFragment extends Fragment {
                     Thread.sleep(INTERVAL_PROCESS_PIN);
                     if (mSectionedRecyclerViewAdapter != null) {
                         try {
-                            int firstVisiblePosition = findRecyclerViewFirstVisibleItemPosition();
-                            int lastVisiblePosition = findRecyclerViewLastVisibleItemPosition();
-                            final SectionedRecyclerViewAdapter adapter = (SectionedRecyclerViewAdapter) mRecyclerView.getAdapter();
-                            ArrayList<ItemInfo> itemInfoList = adapter.getSubAdapterItemInfoList();
-
-                            boolean needToHideProgress = true;
-                            boolean needToProcessPin = false;
+                            boolean hideProgress = true;
                             String selectedItemName = mSpinner.getSelectedItem().toString();
                             if (selectedItemName.equals(getString(R.string.file_mgmt_spinner_apps))) {
                                 // Check pin/unpin process finished in display-by-app page
@@ -294,21 +212,18 @@ public class FileMgmtFragment extends Fragment {
                                     if (isRealPinned == isExpectedPinned) {
                                         // Remove packageName from mPinUnpinAppMap if the pin status has became what user expected
                                         mPinUnpinAppMap.remove(packageName);
-                                        finishedPinUnpinAppMap.put(packageName, isExpectedPinned);
-                                        needToProcessPin = true;
                                     }
                                 }
                                 if (mPinUnpinAppMap.size() != 0) {
-                                    needToHideProgress = false;
+                                    hideProgress = false;
                                 }
                             } else if (selectedItemName.equals(getString(R.string.file_mgmt_spinner_data_type))) {
                                 // Check pin/unpin process finished in display-by-files page
-                                for (String dataType : mPinUnpinTypeMap.keySet()) {
-                                    boolean isExpectedPinned = mPinUnpinTypeMap.get(dataType);
-                                    mPinUnpinTypeMap.remove(dataType);
-                                    finishedPinUnpinTypeMap.put(dataType, isExpectedPinned);
-                                    needToProcessPin = true;
-                                }
+//                                for (String dataType : mPinUnpinTypeMap.keySet()) {
+//                                    boolean isExpectedPinned = mPinUnpinTypeMap.get(dataType);
+//                                    mPinUnpinTypeMap.remove(dataType);
+//                                    needToProcessPin = true;
+//                                }
                             } else if (selectedItemName.equals(getString(R.string.file_mgmt_spinner_files))) {
                                 // Check pin/unpin process finished in display-by-files page
                                 for (String path : mPinUnpinFileMap.keySet()) {
@@ -319,10 +234,8 @@ public class FileMgmtFragment extends Fragment {
                                         if (isRealPinned == isExpectedPinned) {
                                             // Remove pinUnpinPath from mPinUnpinFileMap if the pin status has became what user expected
                                             mPinUnpinFileMap.remove(path);
-                                            finishedPinUnpinFileMap.put(path, isExpectedPinned);
-                                            needToProcessPin = true;
                                         } else {
-                                            needToHideProgress = false;
+                                            hideProgress = false;
                                         }
                                     }
                                 }
@@ -330,74 +243,9 @@ public class FileMgmtFragment extends Fragment {
                                 continue;
                             }
 
-                            if (needToProcessPin) {
-                                // Update icon image and pin/unpin image
-                                for (int i = firstVisiblePosition + 1; i < lastVisiblePosition + 1; i++) {
-                                    int index = i - 1;
-                                    if (index >= itemInfoList.size()) {
-                                        break;
-                                    }
-
-                                    boolean isExpectedPinned = false;
-                                    final ItemInfo itemInfo = itemInfoList.get(index);
-                                    if (itemInfo instanceof AppInfo) {
-                                        AppInfo appInfo = (AppInfo) itemInfo;
-                                        boolean isContainInMap = false;
-                                        if (finishedPinUnpinAppMap.containsKey(appInfo.getPackageName())) {
-                                            isExpectedPinned = finishedPinUnpinAppMap.get(appInfo.getPackageName());
-                                            isContainInMap = true;
-                                        }
-                                        if (!isContainInMap) {
-                                            continue;
-                                        }
-                                    } else if (itemInfo instanceof DataTypeInfo) {
-                                        DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
-                                        boolean isContainInMap = false;
-                                        if (finishedPinUnpinTypeMap.containsKey(dataTypeInfo.getDataType())) {
-                                            isExpectedPinned = finishedPinUnpinTypeMap.get(dataTypeInfo.getDataType());
-                                            isContainInMap = true;
-                                        }
-                                        if (!isContainInMap) {
-                                            continue;
-                                        }
-                                    } else if (itemInfo instanceof FileDirInfo) {
-                                        FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
-                                        boolean isContainInMap = false;
-                                        for (String finishPinUnpinPath : finishedPinUnpinFileMap.keySet()) {
-                                            if (fileDirInfo.getFilePath().equals(finishPinUnpinPath) ||
-                                                    fileDirInfo.getFilePath().startsWith(finishPinUnpinPath.concat("/"))) {
-                                                isExpectedPinned = finishedPinUnpinFileMap.get(finishPinUnpinPath);
-                                                finishedPinUnpinFileMap.remove(finishPinUnpinPath);
-                                                isContainInMap = true;
-                                                break;
-                                            }
-                                        }
-                                        if (!isContainInMap) {
-                                            continue;
-                                        }
-                                    }
-
-                                    final boolean isItemExpectedPinned = isExpectedPinned;
-                                    RecyclerViewHolder viewHolder = itemInfo.getViewHolder();
-                                    if (viewHolder != null) {
-                                        if (viewHolder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
-                                            final LinearRecyclerViewAdapter.LinearRecyclerViewHolder holder = (LinearRecyclerViewAdapter.LinearRecyclerViewHolder) viewHolder;
-                                            if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                                                Logs.d(CLASSNAME, "LinearRecyclerViewHolder", "name=" + holder.getItemInfo().getName() + ", isExpectedPinned=" + isExpectedPinned);
-                                                ((Activity) mContext).runOnUiThread(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        holder.pinView.setImageDrawable(HCFSMgmtUtils.getPinUnpinImage(mContext, isItemExpectedPinned));
-                                                        holder.pinView.setContentDescription(getPinViewContentDescription(isItemExpectedPinned));
-                                                    }
-                                                });
-                                            }
-                                        }
-                                    }
-                                }
-                                if (needToHideProgress) {
-                                    hideProgressCircle();
-                                }
+                            if (hideProgress) {
+                                notifyRecyclerViewItemChanged();
+                                hideProgressCircle();
                             }
                         } catch (NullPointerException e) {
                             Logs.e(CLASSNAME, "mProcessPinRunnable", Log.getStackTraceString(e));
@@ -508,7 +356,7 @@ public class FileMgmtFragment extends Fragment {
     };
 
     private void showProgressCircle() {
-        ((Activity) mContext).runOnUiThread(new Runnable() {
+        mUiHandler.post(new Runnable() {
             @Override
             public void run() {
                 mProgressCircle.setVisibility(View.VISIBLE);
@@ -517,7 +365,7 @@ public class FileMgmtFragment extends Fragment {
     }
 
     private void hideProgressCircle() {
-        ((Activity) mContext).runOnUiThread(new Runnable() {
+        mUiHandler.post(new Runnable() {
             @Override
             public void run() {
                 mProgressCircle.setVisibility(View.GONE);
@@ -551,6 +399,8 @@ public class FileMgmtFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mUiHandler = new Handler();
 
         Bundle bundle = getArguments();
         isSDCard1 = bundle.getBoolean(KEY_ARGUMENT_IS_SDCARD1);
@@ -846,7 +696,6 @@ public class FileMgmtFragment extends Fragment {
                     } else {
                         showTypeContent(R.string.file_mgmt_spinner_files);
                     }
-                    Snackbar.make(getView(), mContext.getString(R.string.file_mgmt_snackbar_refresh), Snackbar.LENGTH_SHORT).show();
                     lastClickTime = currentTime;
                 }
             }
@@ -1750,6 +1599,21 @@ public class FileMgmtFragment extends Fragment {
         return false;
     }
 
+    private void notifyRecyclerViewItemChanged() {
+        try {
+            if (mSectionedRecyclerViewAdapter != null) {
+                int firstVisiblePosition = findRecyclerViewFirstVisibleItemPosition();
+                int lastVisiblePosition = findRecyclerViewLastVisibleItemPosition();
+                final SectionedRecyclerViewAdapter adapter = (SectionedRecyclerViewAdapter) mRecyclerView.getAdapter();
+                for (int i = firstVisiblePosition; i < lastVisiblePosition + 1; i++) {
+                    adapter.notifyItemChanged(i);
+                }
+            }
+        } catch (IllegalStateException e) {
+            Logs.w(CLASSNAME, "notifyRecyclerViewItemChanged", Log.getStackTraceString(e));
+        }
+    }
+
     private int findRecyclerViewFirstVisibleItemPosition() throws NullPointerException {
         int firstVisibleItemPosition;
         LayoutManager layoutManager = mRecyclerView.getLayoutManager();
@@ -2087,6 +1951,7 @@ public class FileMgmtFragment extends Fragment {
                 mPinUnpinAppMap.put(appInfo.getPackageName(), appInfo);
                 mWaitToExecuteSparseArr.put(appInfo.hashCode(), appInfo);
             } else if (itemInfo instanceof DataTypeInfo) {
+                /*
                 final DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
                 dataTypeInfo.setDateUpdated(0);
 
@@ -2158,6 +2023,7 @@ public class FileMgmtFragment extends Fragment {
                     builder.setCancelable(false);
                     builder.show();
                 }
+                */
             } else if (itemInfo instanceof FileDirInfo) {
                 final FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
                 boolean isNeedToProcess = true;
