@@ -1600,13 +1600,17 @@ public class FileMgmtFragment extends Fragment {
     }
 
     private void notifyRecyclerViewItemChanged() {
-        if (mSectionedRecyclerViewAdapter != null) {
-            int firstVisiblePosition = findRecyclerViewFirstVisibleItemPosition();
-            int lastVisiblePosition = findRecyclerViewLastVisibleItemPosition();
-            final SectionedRecyclerViewAdapter adapter = (SectionedRecyclerViewAdapter) mRecyclerView.getAdapter();
-            for (int i = firstVisiblePosition; i < lastVisiblePosition + 1; i++) {
-                adapter.notifyItemChanged(i);
+        try {
+            if (mSectionedRecyclerViewAdapter != null) {
+                int firstVisiblePosition = findRecyclerViewFirstVisibleItemPosition();
+                int lastVisiblePosition = findRecyclerViewLastVisibleItemPosition();
+                final SectionedRecyclerViewAdapter adapter = (SectionedRecyclerViewAdapter) mRecyclerView.getAdapter();
+                for (int i = firstVisiblePosition; i < lastVisiblePosition + 1; i++) {
+                    adapter.notifyItemChanged(i);
+                }
             }
+        } catch (IllegalStateException e) {
+            Logs.w(CLASSNAME, "notifyRecyclerViewItemChanged", Log.getStackTraceString(e));
         }
     }
 
