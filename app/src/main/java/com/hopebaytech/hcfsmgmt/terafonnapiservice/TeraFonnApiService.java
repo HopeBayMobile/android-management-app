@@ -38,12 +38,40 @@ public class TeraFonnApiService extends Service {
 
     private final String TAG = "TeraFonnService";
     private final String CLASSNAME = getClass().getSimpleName();
+    private IGetJWTandIMEIListener mGetJWTandIMEIListener;
     private IFetchAppDataListener mFetchAppDataListener;
     private ITrackAppStatusListener mTrackAppStatusListener;
     private Map<String, AppStatus> mPackageNameMap;
     private ExecutorService mCacheExecutor;
 
     private final ITeraFonnApiService.Stub mBinder = new ITeraFonnApiService.Stub() {
+
+        @Override
+        public void setJWTandIMEIListener(IGetJWTandIMEIListener listener) throws RemoteException {
+            mGetJWTandIMEIListener = listener;
+        }
+
+        @Override
+        public boolean getJWTandIMEI() throws RemoteException {
+            boolean isSuccess = true;
+            mCacheExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        String imei = HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this);
+                        String jwt = "jwt";
+                        mGetJWTandIMEIListener.onDataGet(imei, jwt);
+                        
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            return isSuccess;
+        }
 
         @Override
         public void setFetchAppDataListener(IFetchAppDataListener listener) throws RemoteException {
@@ -236,6 +264,7 @@ public class TeraFonnApiService extends Service {
 
                         Thread.sleep(3000);
                     } catch (Exception e) {
+                        mGetJWTandIMEIListener = null;
                         mTrackAppStatusListener = null;
                         mFetchAppDataListener = null;
                         mPackageNameMap.clear();

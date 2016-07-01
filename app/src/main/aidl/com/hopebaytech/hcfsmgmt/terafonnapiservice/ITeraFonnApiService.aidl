@@ -1,10 +1,15 @@
 package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 
+import com.hopebaytech.hcfsmgmt.terafonnapiservice.IGetJWTandIMEIListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.IFetchAppDataListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.ITrackAppStatusListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppInfo;
 
 interface ITeraFonnApiService {
+
+    void setJWTandIMEIListener(IGetJWTandIMEIListener listener);
+
+    boolean getJWTandIMEI();
 
     /** RegisterProxy the FetchAppData listener */
     void setFetchAppDataListener(IFetchAppDataListener listener);
