@@ -176,8 +176,8 @@ public class FileMgmtFragment extends Fragment {
             while (true) {
                 try {
                     Thread.sleep(INTERVAL_AUTO_REFRESH_UI);
-                    if (mProgressCircle.getVisibility() == View.GONE) {
-//                            mRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (mProgressCircle.getVisibility() == View.GONE &&
+                            mRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
                         notifyRecyclerViewItemChanged();
                     }
                 } catch (InterruptedException e) {
@@ -1528,7 +1528,7 @@ public class FileMgmtFragment extends Fragment {
                 mFilePathNavigationLayout.removeViewAt(childCount - 1);
                 showTypeContent(R.string.file_mgmt_spinner_files);
 
-                ((Activity) mContext).runOnUiThread(new Runnable() {
+                mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         mRecyclerView.scrollToPosition(firstVisibleItemPosition);
