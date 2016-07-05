@@ -177,7 +177,10 @@ public class FileMgmtFragment extends Fragment {
                 try {
                     Thread.sleep(INTERVAL_AUTO_REFRESH_UI);
                     if (mProgressCircle.getVisibility() == View.GONE &&
-                            mRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
+                            mRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
+                            mWaitToExecuteSparseArr.size() == 0 &&
+                            mPinUnpinAppMap.size() == 0 &&
+                            mPinUnpinFileMap.size() == 0) {
                         notifyRecyclerViewItemChanged();
                     }
                 } catch (InterruptedException e) {
@@ -195,7 +198,7 @@ public class FileMgmtFragment extends Fragment {
             while (true) {
                 try {
                     Thread.sleep(INTERVAL_PROCESS_PIN);
-                    if (mSectionedRecyclerViewAdapter != null) {
+                    if (mSectionedRecyclerViewAdapter != null && mWaitToExecuteSparseArr.size() == 0) {
                         try {
                             boolean isProcessDone = true;
                             String selectedItemName = mSpinner.getSelectedItem().toString();
@@ -262,7 +265,13 @@ public class FileMgmtFragment extends Fragment {
     private Runnable mApiExecutorRunnable = new Runnable() {
 
         private void processPinUnpinFailed(final ItemInfo itemInfo) {
-            ((Activity) mContext).runOnUiThread(new Runnable() {
+            if (itemInfo instanceof AppInfo) {
+                mPinUnpinAppMap.remove(((AppInfo) itemInfo).getPackageName());
+            } else if (itemInfo instanceof FileDirInfo) {
+                mPinUnpinFileMap.remove(((FileDirInfo) itemInfo).getFilePath());
+            }
+
+            mUiHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     FileMgmtFileDirDialogFragment fragment = (FileMgmtFileDirDialogFragment) getFragmentManager().findFragmentByTag(FileMgmtFileDirDialogFragment.TAG);
@@ -314,6 +323,7 @@ public class FileMgmtFragment extends Fragment {
                             // Nothing to do here
                         } else if (itemInfo instanceof FileDirInfo) {
                             FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
+                            Logs.e(CLASSNAME, "run", fileDirInfo.getName() + ": " + fileDirInfo.isPinned());
                             mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
                                 @Override
                                 public void OnPinUnpinFailed(final ItemInfo itemInfo) {
@@ -1011,7 +1021,6 @@ public class FileMgmtFragment extends Fragment {
             protected ImageView iconView;
             protected ImageView pinView;
             protected TextView datePinnedTextView;
-//            protected ItemInfo itemInfo;
 
             public LinearRecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
                 super(itemView, executor);
@@ -1031,6 +1040,7 @@ public class FileMgmtFragment extends Fragment {
                 if (v.getId() == R.id.pinView) {
                     // Pin/Unpin the selected item */
                     boolean isPinned = !itemInfo.isPinned();
+                    Logs.w(CLASSNAME, "onClick", "isPinned=" + isPinned);
                     boolean allowPinUnpin = pinUnpinItem(isPinned);
                     if (allowPinUnpin) {
                         pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
@@ -1808,13 +1818,13 @@ public class FileMgmtFragment extends Fragment {
     }
 
     private boolean isItemPinned(ItemInfo itemInfo) {
-        /** Get the pinned/unpinned status of item */
+        // Get the pinned/unpinned status of item
         boolean isPinned = false;
         if (itemInfo instanceof AppInfo) {
             AppInfo appInfo = (AppInfo) itemInfo;
             isPinned = HCFSMgmtUtils.isAppPinned(mContext, appInfo);
         } else if (itemInfo instanceof DataTypeInfo) {
-            /** The pin status of DataTypeInfo has got in getListOfDataType() */
+            // The pin status of DataTypeInfo has got in getListOfDataType()
             isPinned = itemInfo.isPinned();
         } else if (itemInfo instanceof FileDirInfo) {
             FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
@@ -1918,7 +1928,11 @@ public class FileMgmtFragment extends Fragment {
                 appInfo.setLastProcessTime(System.currentTimeMillis());
 
                 mPinUnpinAppMap.put(appInfo.getPackageName(), appInfo);
-                mWaitToExecuteSparseArr.put(appInfo.hashCode(), appInfo);
+                try {
+                    mWaitToExecuteSparseArr.put(appInfo.hashCode(), (AppInfo) appInfo.clone());
+                } catch (CloneNotSupportedException e) {
+                    Logs.e(CLASSNAME, "pinUnpinItem", Log.getStackTraceString(e));
+                }
             } else if (itemInfo instanceof DataTypeInfo) {
                 /*
                 final DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
@@ -2018,8 +2032,14 @@ public class FileMgmtFragment extends Fragment {
                     showProgressCircle();
                     fileDirInfo.setLastProcessTime(System.currentTimeMillis());
 
+                    Logs.d(CLASSNAME, "pinUnpinItem", "itemInfo.isPinned()=" + itemInfo.isPinned()
+                            + ", fileDirInfo.isPinned()=" + fileDirInfo.isPinned() + ", isPinned=" + isPinned);
                     mPinUnpinFileMap.put(fileDirInfo.getFilePath(), isPinned);
-                    mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), fileDirInfo);
+                    try {
+                        mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), (FileDirInfo) fileDirInfo.clone());
+                    } catch (CloneNotSupportedException e) {
+                        Logs.e(CLASSNAME, "pinUnpinItem", Log.getStackTraceString(e));
+                    }
                 } else {
                     fileDirInfo.setPinned(!isPinned);
                     allowPinUnpin = false;
@@ -2043,6 +2063,7 @@ public class FileMgmtFragment extends Fragment {
 
 
     private void displayItem(final int position, final RecyclerViewHolder holder, final LruCache<Integer, Bitmap> memoryCache, ThreadPoolExecutor executor) {
+
         if (!isPositionVisible(position)) {
             return;
         }
@@ -2056,8 +2077,10 @@ public class FileMgmtFragment extends Fragment {
                 public void run() {
                     if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
                         final int alpha = itemInfo.getIconAlpha();
-
-                        boolean isPinned = isItemPinned(itemInfo);
+                        final boolean isPinned = isItemPinned(itemInfo);
+                        if (mWaitToExecuteSparseArr.get(itemInfo.hashCode()) != null) {
+                            return;
+                        }
                         itemInfo.setPinned(isPinned);
                         mUiHandler.post(new Runnable() {
                             @Override
@@ -2067,11 +2090,10 @@ public class FileMgmtFragment extends Fragment {
                                 // Display pinned/unpinned item image
                                 if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
                                     ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
+                                            .pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
                                     ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setContentDescription(getPinViewContentDescription(itemInfo.isPinned()));
+                                            .pinView.setContentDescription(getPinViewContentDescription(isPinned));
                                 }
-
                             }
                         });
                     }
@@ -2083,7 +2105,7 @@ public class FileMgmtFragment extends Fragment {
                 @Override
                 public void run() {
                     if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                        boolean isPinned = isItemPinned(itemInfo);
+                        final boolean isPinned = isItemPinned(itemInfo);
                         itemInfo.setPinned(isPinned);
                         final int alpha = itemInfo.getIconAlpha();
                         mUiHandler.post(new Runnable() {
@@ -2116,9 +2138,9 @@ public class FileMgmtFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
+                                            .pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
                                     ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setContentDescription(getPinViewContentDescription(itemInfo.isPinned()));
+                                            .pinView.setContentDescription(getPinViewContentDescription(isPinned));
 
                                 }
                             });

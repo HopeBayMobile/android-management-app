@@ -27,12 +27,10 @@ public class HCFSConfig {
     public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
     public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
     public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
-    public static final String HCFS_CONFIG_SWIFT_TOKEN = "swift_token";
 
     public static boolean isActivated(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
-//        return true;
     }
 
     public static boolean setHCFSConfig(String key, String value) {
