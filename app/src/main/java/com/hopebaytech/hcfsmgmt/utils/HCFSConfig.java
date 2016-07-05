@@ -31,6 +31,7 @@ public class HCFSConfig {
     public static boolean isActivated(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//        return true; // TODO for testing
     }
 
     public static boolean setHCFSConfig(String key, String value) {
@@ -119,12 +120,6 @@ public class HCFSConfig {
 
     public static boolean storeHCFSConfig(RegisterResultInfo registerResultInfo) {
         boolean isFailed = false;
-
-        boolean firstReloadConfig = false;
-        if (getHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT).isEmpty()) {
-            firstReloadConfig = true;
-        }
-
         if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
             isFailed = true;
         }
@@ -146,10 +141,8 @@ public class HCFSConfig {
         if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, registerResultInfo.getProtocol())) {
             isFailed = true;
         }
-        if (firstReloadConfig) {
-            if (!reloadConfig()) {
-                isFailed = true;
-            }
+        if (!reloadConfig()) {
+            isFailed = true;
         }
         return isFailed;
     }
