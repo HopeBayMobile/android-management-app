@@ -18,7 +18,7 @@ import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import java.util.ArrayList;
 
-public class AppInfo extends ItemInfo {
+public class AppInfo extends ItemInfo implements Cloneable {
 
     private final String CLASSNAME = AppInfo.class.getSimpleName();
     private long dbId;
@@ -226,5 +226,10 @@ public class AppInfo extends ItemInfo {
 
     public void setSystemApp(boolean systemApp) {
         isSystemApp = systemApp;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

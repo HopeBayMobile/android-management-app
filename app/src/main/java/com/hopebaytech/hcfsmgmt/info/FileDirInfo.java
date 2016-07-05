@@ -28,7 +28,7 @@ import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import java.io.File;
 import java.util.regex.Pattern;
 
-public class FileDirInfo extends ItemInfo {
+public class FileDirInfo extends ItemInfo implements Cloneable {
 
     private final String CLASS_NAME = this.getClass().getSimpleName();
 
@@ -201,7 +201,7 @@ public class FileDirInfo extends ItemInfo {
 
     public int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
-        Logs.d(CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
+//        Logs.d(CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
         if (NetworkUtils.isNetworkConnected(mContext)) {
             return ItemStatus.STATUS_AVAILABLE;
         } else {
@@ -238,4 +238,8 @@ public class FileDirInfo extends ItemInfo {
         return getFileDirStatus() == ItemStatus.STATUS_AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

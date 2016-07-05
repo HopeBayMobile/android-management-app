@@ -565,7 +565,7 @@ public class HCFSMgmtUtils {
                     } else {
                         locationStatus = LocationStatus.HYBRID;
                     }
-                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
+//                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
                 } else {
                     Logs.e(CLASSNAME, "getDirLocationStatus", logMsg);
                 }
@@ -598,7 +598,7 @@ public class HCFSMgmtUtils {
                         status = LocationStatus.HYBRID;
                         break;
                 }
-                Logs.i(CLASSNAME, "getFileLocationStatus", logMsg);
+//                Logs.i(CLASSNAME, "getFileLocationStatus", logMsg);
             } else {
                 Logs.e(CLASSNAME, "getFileLocationStatus", logMsg);
             }
@@ -616,7 +616,7 @@ public class HCFSMgmtUtils {
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "isPathPinned", logMsg);
+//                Logs.i(CLASSNAME, "isPathPinned", logMsg);
                 int code = jObject.getInt("code");
                 if (code == 1) {
                     isPinned = true;
