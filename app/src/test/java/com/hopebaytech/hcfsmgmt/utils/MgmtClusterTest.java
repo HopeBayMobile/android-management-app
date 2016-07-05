@@ -163,7 +163,7 @@ public class MgmtClusterTest {
 
     @Test
     public void testSwitchAccount() throws Exception {
-        boolean switchSuccess;
+        RegisterResultInfo registerResultInfo;
         String correctJwtToken = HttpProxyMock.CORRECT_JWT_TOKEN;
         String correctNewAuthCode = HttpProxyMock.CORRECT_NEW_AUTH_CODE;
         String correctImei = HttpProxyMock.CORRECT_IMEI;
@@ -171,29 +171,29 @@ public class MgmtClusterTest {
         String incorrectNewAuthCode = "xxxxxxxxxx";
         String incorrectImei = "xxxxxxxxxx";
 
-        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, correctImei);
-        assertTrue(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, correctImei);
+        assertTrue(registerResultInfo != null);
 
-        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, correctImei);
-        assertFalse(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, correctImei);
+        assertFalse(registerResultInfo != null);
 
-        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, correctImei);
-        assertFalse(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, correctImei);
+        assertFalse(registerResultInfo != null);
 
-        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, incorrectImei);
-        assertFalse(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, incorrectImei);
+        assertFalse(registerResultInfo != null);
 
-        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, correctImei);
-        assertFalse(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, correctImei);
+        assertFalse(registerResultInfo != null);
 
-        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, incorrectImei);
-        assertFalse(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, incorrectImei);
+        assertFalse(registerResultInfo != null);
 
-        switchSuccess = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, incorrectImei);
-        assertFalse(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, incorrectImei);
+        assertFalse(registerResultInfo != null);
 
-        switchSuccess = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, incorrectImei);
-        assertFalse(switchSuccess);
+        registerResultInfo = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, incorrectImei);
+        assertFalse(registerResultInfo != null);
     }
 
     @Test

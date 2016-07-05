@@ -157,9 +157,8 @@ public class MgmtCluster {
      * @param imei              the current device imei
      * @return true if the account is changed successfully; false otherwise.
      */
-    public static boolean switchAccount(String jwtToken, String newServerAuthCode, String imei) {
-
-        boolean isSwitchSuccess = true;
+    public static RegisterResultInfo switchAccount(String jwtToken, String newServerAuthCode, String imei) {
+        RegisterResultInfo registerResultInfo = null;
         if (jwtToken != null) {
             IHttpProxy httpProxyImpl = null;
             try {
@@ -177,13 +176,13 @@ public class MgmtCluster {
                 data.put(KEY_NEW_AUTH_CODE, newServerAuthCode);
                 int responseCode = httpProxyImpl.post(data);
                 Logs.w(CLASSNAME, "switchAccount", "switch responseCode=" + responseCode);
-                if (responseCode != HttpsURLConnection.HTTP_OK) {
-                    isSwitchSuccess = false;
-                    String responseContent = httpProxyImpl.getResponseContent();
-                    Logs.e(CLASSNAME, "switchAccount", responseContent);
+                String responseContent = httpProxyImpl.getResponseContent();
+                Logs.e(CLASSNAME, "switchAccount", responseContent);
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    registerResultInfo = new RegisterResultInfo();
+                    convertRegisterResult(registerResultInfo, responseContent);
                 }
             } catch (Exception e) {
-                isSwitchSuccess = false;
                 Logs.e(CLASSNAME, "switchAccount", Log.getStackTraceString(e));
             } finally {
                 if (httpProxyImpl != null) {
@@ -192,8 +191,8 @@ public class MgmtCluster {
             }
         }
 
-        Logs.w(CLASSNAME, "switchAccount", "isSwitchSuccess=" + isSwitchSuccess);
-        return isSwitchSuccess;
+        Logs.w(CLASSNAME, "switchAccount", "registerResultInfo=" + registerResultInfo);
+        return registerResultInfo;
     }
 
     public static String getServerClientId() {
@@ -378,6 +377,20 @@ public class MgmtCluster {
 
     }
 
+    private static RegisterResultInfo convertRegisterResult(RegisterResultInfo registerResultInfo,
+                                                            String responseContent) throws JSONException {
+        JSONObject jsonObj = new JSONObject(responseContent);
+        registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]);
+        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]);
+        registerResultInfo.setPassword(jsonObj.getString("password"));
+        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
+        registerResultInfo.setBucket(jsonObj.getString("bucket"));
+        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
+        registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
+        return registerResultInfo;
+    }
+
     public static RegisterResultInfo register(IAuthParam authParam, String jwtToken) {
         RegisterResultInfo registerResultInfo = new RegisterResultInfo();
         IHttpProxy httpProxyImpl = null;
@@ -395,15 +408,17 @@ public class MgmtCluster {
             if (responseCode == HttpsURLConnection.HTTP_OK) {
                 String responseContent = httpProxyImpl.getResponseContent();
                 Logs.d(CLASSNAME, "register", "responseContent=" + responseContent);
-                JSONObject jsonObj = new JSONObject(responseContent);
-                registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
-                registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]);
-                registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]);
-                registerResultInfo.setPassword(jsonObj.getString("password"));
-                registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
-                registerResultInfo.setBucket(jsonObj.getString("bucket"));
-                registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
-                registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
+
+                convertRegisterResult(registerResultInfo, responseContent);
+//                JSONObject jsonObj = new JSONObject(responseContent);
+//                registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+//                registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]);
+//                registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]);
+//                registerResultInfo.setPassword(jsonObj.getString("password"));
+//                registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
+//                registerResultInfo.setBucket(jsonObj.getString("bucket"));
+//                registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
+//                registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
 
                 Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
                 Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
