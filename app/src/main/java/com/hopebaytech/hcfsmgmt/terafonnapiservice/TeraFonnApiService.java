@@ -227,7 +227,7 @@ public class TeraFonnApiService extends Service {
                             authParam.setHcfsVersion("1.0.1");
 
                             MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                            authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                            authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                                 @Override
                                 public void onAuthSuccessful(AuthResultInfo authResultInfo){
                                     String jwtToken = authResultInfo.getToken();
@@ -611,7 +611,5 @@ public class TeraFonnApiService extends Service {
 
         return progress;
     }
-
-
 
 }

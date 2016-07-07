@@ -177,7 +177,7 @@ public class ActivateWoCodeFragment extends Fragment {
                             authParam.setHcfsVersion("1.0.1");
 
                             MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                            authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                            authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                                 @Override
                                 public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
                                     MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
@@ -497,7 +497,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     authParam.setHcfsVersion("1.0.1");
 
                     MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                    authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                    authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                         @Override
                         public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
                             MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
