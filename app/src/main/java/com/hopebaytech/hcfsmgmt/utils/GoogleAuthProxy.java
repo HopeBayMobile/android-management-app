@@ -121,45 +121,4 @@ public class GoogleAuthProxy {
 
     }
 
-//    private String getServerAuthCode(GoogleSignInResult result) {
-//        String serverAuthCode = null;
-//        if (result != null && result.isSuccess()) {
-//            GoogleSignInAccount acct = result.getSignInAccount();
-//            if (acct != null) {
-//                serverAuthCode = acct.getServerAuthCode();
-//            }
-//        }
-//        return serverAuthCode;
-//    }
-
-//    private void tmp() {
-//        final String currentAuthCode = getServerAuthCode(result);
-//        Logs.w(CLASSNAME, "onConnected", "currentAuthCode=" + currentAuthCode);
-//        if (currentAuthCode != null) {
-//            final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-//            authParam.setAuthCode(currentAuthCode);
-//            authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-//            authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
-//            authParam.setVendor(Build.BRAND);
-//            authParam.setModel(Build.MODEL);
-//            authParam.setAndroidVersion(Build.VERSION.RELEASE);
-//            authParam.setHcfsVersion("1.0.1");
-//
-//            MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-//            authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-//                @Override
-//                public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-//                    mOnAuthListener.onAuthSuccessful(authResultInfo.getToken());
-//                }
-//
-//                @Override
-//                public void onAuthFailed(AuthResultInfo authResultInfo) {
-//                    mOnAuthListener.onAuthFailed();
-//                }
-//            });
-//        } else {
-//            mOnAuthListener.onAuthFailed();
-//        }
-//    }
-
 }
