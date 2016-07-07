@@ -21,7 +21,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.hopebaytech.hcfsmgmt.main.LoadingActivity"
+            android:name="com.hopebaytech.hcfsmgmt.main.TestActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait">

@@ -3,6 +3,7 @@ package com.hopebaytech.hcfsmgmt.utils;
 import android.content.ContentValues;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;

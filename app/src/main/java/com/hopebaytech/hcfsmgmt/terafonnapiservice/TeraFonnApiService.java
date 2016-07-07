@@ -5,19 +5,24 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.GoogleAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
@@ -68,7 +73,6 @@ public class TeraFonnApiService extends Service {
                                 } else {
                                     mFetchAppDataListener.onProgressUpdate(packageName, progress);
                                 }
-
                                 Thread.sleep(3000);
                             }
 
@@ -200,6 +204,66 @@ public class TeraFonnApiService extends Service {
             }
             return enabled;
         }
+
+        @Override
+        public void getMgmtServerToken(final IFetchTokenListener listener) throws RemoteException {
+            mCacheExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    final String serverClientId = MgmtCluster.getServerClientId();
+                    GoogleAuthProxy googleAuthProxy = new GoogleAuthProxy(TeraFonnApiService.this, serverClientId);
+                    googleAuthProxy.setOnAuthListener(new GoogleAuthProxy.OnAuthListener() {
+                        @Override
+                        public void onAuthSuccessful(GoogleSignInResult result) {
+                            String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+
+                            final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                            authParam.setAuthCode(serverAuthCode);
+                            authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+                            authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this)));
+                            authParam.setVendor(Build.BRAND);
+                            authParam.setModel(Build.MODEL);
+                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                            authParam.setHcfsVersion("1.0.1");
+
+                            MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                            authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                                @Override
+                                public void onAuthSuccessful(AuthResultInfo authResultInfo){
+                                    String jwtToken = authResultInfo.getToken();
+                                    try {
+                                        listener.onFetchSuccessful(jwtToken);
+                                    } catch (RemoteException e) {
+                                        Logs.e(CLASSNAME, "MgmtCluster.AuthProxy", "onAuthSuccessful", Log.getStackTraceString(e));
+                                    }
+                                }
+
+                                @Override
+                                public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                    try {
+                                        listener.onFetchFailed();
+                                    } catch (RemoteException e) {
+                                        Logs.e(CLASSNAME, "MgmtCluster.AuthProxy", "onAuthFailed", Log.getStackTraceString(e));
+                                    }
+                                }
+                            });
+                            authProxy.auth();
+                        }
+
+                        @Override
+                        public void onAuthFailed() {
+                            try {
+                                listener.onFetchFailed();
+                            } catch (RemoteException e) {
+                                Logs.e(CLASSNAME, "GoogleAuthProxy", "onAuthFailed", Log.getStackTraceString(e));
+                            }
+                        }
+                    });
+                    googleAuthProxy.auth();
+                }
+            });
+        }
+
     };
 
     @Override
@@ -547,5 +611,7 @@ public class TeraFonnApiService extends Service {
 
         return progress;
     }
+
+
 
 }
