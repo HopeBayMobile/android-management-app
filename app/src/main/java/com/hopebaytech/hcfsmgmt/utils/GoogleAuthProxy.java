@@ -50,6 +50,11 @@ public class GoogleAuthProxy {
 
         if (mServerClientId == null) {
             mServerClientId = MgmtCluster.getServerClientId();
+            if (mServerClientId == null) {
+                Logs.e(CLASSNAME, "auth", "mServerClientId=" + mServerClientId);
+                mOnAuthListener.onAuthFailed();
+                return;
+            }
         }
 
         if (mGoogleSignInOptions == null) {
