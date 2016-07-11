@@ -14,6 +14,8 @@ import android.util.Log;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.interfaces.IFetchJwtTokenListener;
+import com.hopebaytech.hcfsmgmt.utils.GoogleAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -256,7 +258,8 @@ public class TeraFonnApiService extends Service {
                             for (String packageName : keyList) {
                                 AppStatus appStatus = mPackageNameMap.get(packageName);
                                 int reportStatus = getDifferentStatus(packageName, appStatus.getStatus());
-                                if (reportStatus != -1) mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
+                                if (reportStatus != -1)
+                                    mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
                             }
                         }
 
@@ -289,7 +292,7 @@ public class TeraFonnApiService extends Service {
             case Log.DEBUG:
                 Log.d(TAG, className + "(" + funcName + "): " + logMsg);
                 break;
-            case Log.INFO :
+            case Log.INFO:
                 Log.i(TAG, className + "(" + funcName + "): " + logMsg);
                 break;
             case Log.WARN:
@@ -385,7 +388,7 @@ public class TeraFonnApiService extends Service {
             } else if (appLocation.contains(LocationStatus.CLOUD)) {
                 location = LocationStatus.CLOUD;
             } else {
-                location =LocationStatus.LOCAL;
+                location = LocationStatus.LOCAL;
             }
 
             log(Log.DEBUG, CLASSNAME, "getDefaultLocation", "APP Location: " + String.valueOf(location));
@@ -404,7 +407,7 @@ public class TeraFonnApiService extends Service {
         return status != currentStatus ? status : -1;
     }
 
-    private Boolean handleFailureOfPinOrUnpin (Boolean pinOP, String packageName) {
+    private Boolean handleFailureOfPinOrUnpin(Boolean pinOP, String packageName) {
         boolean isSuccess = pinOrUnpin(pinOP, packageName);
         if (isSuccess) updateDB(pinOP, packageName);
         else pinOrUnpin(!pinOP, packageName);
@@ -481,7 +484,7 @@ public class TeraFonnApiService extends Service {
             sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
             log(Log.INFO, CLASSNAME, "getSourceDir", sourceDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getSourceDir",  "Error: Package (" + packageName + ") not found ");
+            log(Log.WARN, CLASSNAME, "getSourceDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return sourceDir;
@@ -495,7 +498,7 @@ public class TeraFonnApiService extends Service {
             dataDir = p.applicationInfo.dataDir;
             log(Log.INFO, CLASSNAME, "getDataDir", dataDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getDataDir",  "Error: Package (" + packageName + ") not found ");
+            log(Log.WARN, CLASSNAME, "getDataDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return dataDir;
