@@ -95,7 +95,7 @@ public class HttpProxyImpl implements IHttpProxy {
                 sb.append(line);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getResponseContent", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getResponseContent", Log.getStackTraceString(e));
         } finally {
             if (inputStream != null) {
                 inputStream.close();

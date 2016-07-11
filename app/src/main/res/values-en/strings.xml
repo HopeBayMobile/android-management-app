@@ -9,7 +9,6 @@
 
     <string name="activate_alert_dialog_message">Network connection failed. Please try again later.</string>
     <string name="activate_processing_msg">Processing&#8230; Please wait.</string>
-    <string name="activate_alert_dialog_exit">OK</string>
     <string name="activate_signin_google_account_failed">Google account authentication failed.</string>
     <string name="activate_hint_username">User name</string>
     <string name="activate_hint_password">Password</string>
@@ -60,19 +59,19 @@
 
     <string name="active_cloud_storage_auth_fail">Account authentication failed.</string>
 
-    <string name="dashboard_hcfs_conn_status_normal">Transmission normal</string>
-    <string name="dashboard_hcfs_conn_status_not_allowed">Not allow to transmit</string>
-    <string name="dashboard_hcfs_conn_status_failed">Transmission failed</string>
-    <string name="dashboard_hcfs_conn_status_in_progress">Transmitting</string>
-    <string name="dashboard_hcfs_conn_status_slow">Transmission slow</string>
-    <string name="dashboard_space_usage_title">Space Usage</string>
+    <string name="overview_hcfs_conn_status_normal">Transmission normal</string>
+    <string name="overview_hcfs_conn_status_not_allowed">Not allow to transmit</string>
+    <string name="overview_hcfs_conn_status_failed">Transmission failed</string>
+    <string name="overview_hcfs_conn_status_in_progress">Transmitting</string>
+    <string name="overview_hcfs_conn_status_slow">Transmission slow</string>
+    <string name="overview_space_usage_title">Space Usage</string>
     <string name="overview_used_space">Used space</string>
-    <string name="dashboard_local_storage">Local space</string>
+    <string name="overview_local_storage">Local space</string>
     <string name="overview_pinned_storage">Pinned space</string>
-    <string name="dashboard_network_traffic_title">Data Transmission</string>
-    <string name="dashboard_data_transmission_today">Data transmission today</string>
+    <string name="overview_network_traffic_title">Data Transmission</string>
+    <string name="overview_data_transmission_today">Data transmission today</string>
     <string name="overview_data_to_be_uploaded">Data to be uploaded</string>
-    <string name="dashboard_snackbar_exit_app">Tap Return key again to quit.</string>
+    <string name="overview_snackbar_exit_app">Tap Return key again to quit.</string>
 
     <string name="action_settings">Settings</string>
 
@@ -145,6 +144,8 @@
     <string name="settings_switch_account_title">Switch account</string>
     <string name="settings_switch_account_warning_msg">While switching account, the system will log out your current account first. Continue?</string>
     <string name="settings_local_storage_used_ratio">Send notification when local space usage reaches %s.</string>
+    <string name="settings_feedback">Feedback</string>
+    <string name="settings_snackbar_no_available_email_app_found">No available Email apps found or no Email accounts have been set. Please at least install an Email app, and set a valid Email account.</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
         <item>80%</item>
@@ -166,14 +167,17 @@
     <string name="switch_account_another_account"><u>Choose Another Account</u></string>
     <string name="switch_account_require_read_phone_state_permission">Switching account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
 
-    <string name="auth_at_bootup_auth_google_failed">Google 帳號認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
-    <string name="auth_at_bootup_auth_mgmt_failed">TeraFonn 雲端認證失敗導致無法存取雲端資料，請開啟應用程式重新認證。</string>
+    <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗導致無法存取雲端資料。</string>
+    <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗導致無法存取雲端資料。</string>
+    <string name="auth_at_bootup_auth_failed_mgmt_register">Tera 註冊失敗導致無法存取雲端資料。</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
-    <string name="alert_dialog_yes">Yes</string>
-    <string name="alert_dialog_no">No</string>
-    <string name="alert_dialog_confirm">Confirm</string>
-    <string name="alert_dialog_cancel">CANCEL</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="confirm">Confirm</string>
+    <string name="_continue">Continue</string>
+    <string name="cancel">CANCEL</string>
+    <string name="ok">OK</string>
 
     <string name="pref_download_to_run">pref_download_to_run</string>
 

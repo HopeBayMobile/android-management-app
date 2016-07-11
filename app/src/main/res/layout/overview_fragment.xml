@@ -58,7 +58,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/M5"
                         android:includeFontPadding="false"
-                        android:text="@string/dashboard_space_usage_title" />
+                        android:text="@string/overview_space_usage_title" />
 
                     <include
                         android:id="@+id/cloud_storage"
@@ -93,7 +93,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/M5"
                         android:includeFontPadding="false"
-                        android:text="@string/dashboard_network_traffic_title" />
+                        android:text="@string/overview_network_traffic_title" />
 
                     <include
                         android:id="@+id/network_xfer_today"

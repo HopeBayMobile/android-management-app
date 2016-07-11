@@ -23,7 +23,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import org.json.JSONObject;
@@ -82,7 +82,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                 String version = String.format(getString(R.string.file_mgmt_dialog_app_version), packageInfo.versionName);
                 appVersion.setText(version);
             } catch (PackageManager.NameNotFoundException e) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
             }
 
             final TextView appSize = (TextView) view.findViewById(R.id.app_size);
@@ -103,14 +103,14 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                                 + pStats.externalMediaSize
                                 + pStats.externalObbSize;
 
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "cacheSize=" + UnitConverter.convertByteToProperUnit(pStats.cacheSize));
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "codeSize=" + UnitConverter.convertByteToProperUnit(pStats.codeSize));
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "dataSize=" + UnitConverter.convertByteToProperUnit(pStats.dataSize));
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "externalCacheSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCacheSize));
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "externalCodeSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCodeSize));
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "externalDataSize=" + UnitConverter.convertByteToProperUnit(pStats.externalDataSize));
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "externalMediaSize=" + UnitConverter.convertByteToProperUnit(pStats.externalMediaSize));
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateDialog", "externalObbSize=" + UnitConverter.convertByteToProperUnit(pStats.externalObbSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "cacheSize=" + UnitConverter.convertByteToProperUnit(pStats.cacheSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "codeSize=" + UnitConverter.convertByteToProperUnit(pStats.codeSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "dataSize=" + UnitConverter.convertByteToProperUnit(pStats.dataSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "externalCacheSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCacheSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "externalCodeSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCodeSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "externalDataSize=" + UnitConverter.convertByteToProperUnit(pStats.externalDataSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "externalMediaSize=" + UnitConverter.convertByteToProperUnit(pStats.externalMediaSize));
+                        Logs.d(CLASSNAME, "onCreateDialog", "externalObbSize=" + UnitConverter.convertByteToProperUnit(pStats.externalObbSize));
 
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -123,7 +123,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                     }
                 });
             } catch (Exception e) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
             }
 
             final TextView appPkgName = (TextView) view.findViewById(R.id.app_pkg_name);
@@ -241,13 +241,13 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                     int num_cloud = dataObj.getInt("num_cloud");
                     dirStatusInfo = new DirStatusInfo(num_local, num_hybrid, num_cloud);
                 } else {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatusInfo", logMsg);
+                    Logs.e(CLASSNAME, "getDirStatusInfo", logMsg);
                 }
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatusInfo", logMsg);
+                Logs.e(CLASSNAME, "getDirStatusInfo", logMsg);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatusInfo", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getDirStatusInfo", Log.getStackTraceString(e));
         }
         return dirStatusInfo;
     }

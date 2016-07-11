@@ -1,8 +1,6 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -24,23 +22,12 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
-import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.info.AppInfo;
-import com.hopebaytech.hcfsmgmt.info.ItemInfo;
-import com.hopebaytech.hcfsmgmt.info.UidInfo;
-import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.PinType;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class LoadingActivity extends AppCompatActivity {
 

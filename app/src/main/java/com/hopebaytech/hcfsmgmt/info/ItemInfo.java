@@ -13,7 +13,9 @@ public abstract class ItemInfo {
     protected final int ICON_COLORFUL = 255;
     protected final int ICON_TRANSPARENT = 50;
 
+	/** The pin/unpin status of the item */
     private boolean isPinned;
+
     private String name;
     private boolean isProcessing;
     private long lastProcessTime;
@@ -63,7 +65,7 @@ public abstract class ItemInfo {
 	public void setPinned(boolean isPinned) {
 		this.isPinned = isPinned;
 	}
-	
+
 	@Nullable
 	public abstract Bitmap getIconImage();
 	

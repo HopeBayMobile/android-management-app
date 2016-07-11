@@ -16,7 +16,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import org.json.JSONObject;
@@ -102,7 +102,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         mCalculateFileDirDataRatioThread.start();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setView(view).setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+        builder.setView(view).setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             }
@@ -158,13 +158,13 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
                     int num_cloud = dataObj.getInt("num_cloud");
                     fileDirStatusInfo = new FileDirStatusInfo(num_local, num_hybrid, num_cloud);
                 } else {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatusInfo", logMsg);
+                    Logs.e(CLASSNAME, "getDirStatusInfo", logMsg);
                 }
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatusInfo", logMsg);
+                Logs.e(CLASSNAME, "getDirStatusInfo", logMsg);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getDirStatusInfo", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getDirStatusInfo", Log.getStackTraceString(e));
         }
         return fileDirStatusInfo;
     }
@@ -196,12 +196,12 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
                         break;
                 }
                 fileDirStatusInfo = new FileDirStatusInfo(num_local, num_hybrid, num_cloud);
-                HCFSMgmtUtils.log(Log.INFO, CLASSNAME, "getFileStatusInfo", logMsg);
+                Logs.i(CLASSNAME, "getFileStatusInfo", logMsg);
             } else {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileStatusInfo", logMsg);
+                Logs.e(CLASSNAME, "getFileStatusInfo", logMsg);
             }
         } catch (Exception e) {
-            HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "getFileStatusInfo", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "getFileStatusInfo", Log.getStackTraceString(e));
         }
         return fileDirStatusInfo;
     }

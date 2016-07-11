@@ -24,7 +24,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -144,7 +143,6 @@ public class ActivateWoCodeFragment extends Fragment {
         mForgotPassword = (TextView) view.findViewById(R.id.forget_password);
         mGoogleActivate = (TextView) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
-
     }
 
     @Override
@@ -278,21 +276,6 @@ public class ActivateWoCodeFragment extends Fragment {
                         }
                     } else {
                         ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-//                        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
-//                            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-//                            builder.setTitle(getString(R.string.alert_dialog_title_warning));
-//                            builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
-//                            builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
-//                                @Override
-//                                public void onClick(DialogInterface dialog, int which) {
-//                                    ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-//                                }
-//                            });
-//                            builder.setCancelable(false);
-//                            builder.show();
-//                        } else {
-//                            PermissionSnackbar.newInstance(mContext, mView).show();
-//                        }
                     }
                 }
             }
@@ -397,7 +380,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(getString(R.string.alert_dialog_title_warning));
                         builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
-                        builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
@@ -412,7 +395,23 @@ public class ActivateWoCodeFragment extends Fragment {
             }
         });
 
+        Bundle extras = getArguments();
+        if (extras != null) {
+            String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
+            mErrorMessage.setText(cause);
+        } else {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            String cause = sharedPreferences.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, null);
+            if (cause != null) {
+                mErrorMessage.setText(cause);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.remove(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
+                editor.apply();
+            }
+        }
+
     }
+
 
     public static class PermissionSnackbar {
 
@@ -470,7 +469,7 @@ public class ActivateWoCodeFragment extends Fragment {
                 .setResultCallback(new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
-                        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onGoogleAuthFailed", "status=" + status);
+                        Logs.d(CLASSNAME, "onGoogleAuthFailed", "status=" + status);
                     }
                 });
 
@@ -480,7 +479,7 @@ public class ActivateWoCodeFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        Logs.w(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
+        Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
         if (requestCode == RequestCode.GOOGLE_SIGN_IN) {
             if (resultCode == Activity.RESULT_OK) {
                 GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
@@ -692,13 +691,13 @@ public class ActivateWoCodeFragment extends Fragment {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(R.string.alert_dialog_title_warning);
                         builder.setMessage(R.string.activate_require_read_phone_state_permission);
-                        builder.setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
                             }
                         });
-                        builder.setNegativeButton(R.string.alert_dialog_cancel, null);
+                        builder.setNegativeButton(R.string.cancel, null);
                         builder.show();
                     } else {
                         PermissionSnackbar.newInstance(mContext, mView).show();

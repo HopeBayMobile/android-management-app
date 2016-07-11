@@ -141,6 +141,22 @@
         </LinearLayout>
 
         <View style="@style/Divider" />
+
+        <LinearLayout
+            android:id="@+id/feedback"
+            android:layout_width="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_height="56dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                style="@style/F6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_feedback" />
+        </LinearLayout>
+
+        <View style="@style/Divider" />
     </LinearLayout>
 
 </LinearLayout>

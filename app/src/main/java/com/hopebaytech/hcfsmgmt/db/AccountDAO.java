@@ -4,11 +4,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IGenericDAO;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.ArrayList;
@@ -152,7 +150,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
 
         String where = KEY_ID + "=" + info.getId();
         boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "update",
+        Logs.d(CLASSNAME, "update",
                 "id=" + info.getId() +
                         "name=" + info.getName() +
                         ", email=" + info.getEmail() +

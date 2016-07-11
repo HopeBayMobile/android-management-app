@@ -45,6 +45,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -71,9 +73,9 @@ public class SwitchAccountActivity extends AppCompatActivity {
     private TextView mSwitchAccount;
     private LinearLayout mSwitchAccountLayoutIcon;
     private String mServerClientId;
+    private String mOldServerAuthCode;
     private GoogleSignInOptions mGoogleSignInOptions;
     private ProgressDialog mProgressDialog;
-    private String mOldServerAuthCode;
     private String mNewServerAuthCode;
     private String mAccountEmail;
     private String mAccountName;
@@ -95,7 +97,6 @@ public class SwitchAccountActivity extends AppCompatActivity {
     private static final String DIALOG_ERROR = "dialog_error";
 
     private static final String STATE_RESOLVING_ERROR = "resolving_error";
-    private static final String ORIGINAL_SERVER_AUTH_CODE = "original_server_auth_code";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -146,41 +147,50 @@ public class SwitchAccountActivity extends AppCompatActivity {
                             public void run() {
                                 MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
                                 authParam.setAuthCode(mOldServerAuthCode);
-                                AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+                                AuthResultInfo authResultInfo = MgmtCluster.auth(authParam); // TODO replace with MgmtCluster.AuthProxy
                                 if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-                                    String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this));
-                                    final boolean isSuccess = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
+                                    String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
+                                    final RegisterResultInfo registerResultInfo = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
+                                    if (registerResultInfo != null) {
+                                        AccountInfo accountInfo = new AccountInfo();
+                                        accountInfo.setName(mAccountName);
+                                        accountInfo.setEmail(mAccountEmail);
+                                        accountInfo.setImgUrl(mAccountPhotoUrl);
+
+                                        AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
+                                        accountDAO.clear();
+                                        accountDAO.insert(accountInfo);
+                                        accountDAO.close();
+
+                                        HCFSConfig.storeHCFSConfig(registerResultInfo);
+
+                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
+                                        editor.apply();
+                                    }
+
                                     runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            hideProgressDialog();
-                                            if (isSuccess) {
-                                                AccountInfo accountInfo = new AccountInfo();
-                                                accountInfo.setName(mAccountName);
-                                                accountInfo.setEmail(mAccountEmail);
-                                                accountInfo.setImgUrl(mAccountPhotoUrl);
-
-                                                AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
-                                                accountDAO.clear();
-                                                accountDAO.insert(accountInfo);
-                                                accountDAO.close();
-
-                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
-                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                                editor.apply();
-
+                                            if (registerResultInfo != null) {
                                                 Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
                                                 startActivity(intent);
                                                 finish();
                                             } else {
-                                                mErrorMsg.setText(R.string.switch_account_failed);
                                                 signOut();
+                                                mErrorMsg.setText(R.string.switch_account_failed);
                                             }
+                                            hideProgressDialog();
                                         }
                                     });
                                 } else {
-                                    mErrorMsg.setText(R.string.switch_account_failed);
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mErrorMsg.setText(R.string.switch_account_failed);
+                                        }
+                                    });
                                 }
                             }
                         }).start();
@@ -188,7 +198,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
                         builder.setTitle(R.string.alert_dialog_title_warning);
                         builder.setMessage(R.string.switch_account_require_read_phone_state_permission);
-                        builder.setPositiveButton(R.string.alert_dialog_confirm, new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if (ActivityCompat.shouldShowRequestPermissionRationale(SwitchAccountActivity.this, Manifest.permission.READ_PHONE_STATE)) {
@@ -207,6 +217,80 @@ public class SwitchAccountActivity extends AppCompatActivity {
 
                 }
             });
+        }
+
+        View.OnClickListener chooseAccountListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showProgressDialog();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (mServerClientId == null) {
+                            mServerClientId = MgmtCluster.getServerClientId();
+                        }
+                        if (mGoogleSignInOptions == null) {
+                            mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                    .requestScopes(new Scope(Scopes.PLUS_LOGIN))
+                                    .requestServerAuthCode(mServerClientId)
+                                    .requestEmail()
+                                    .build();
+                        }
+
+                        if (mServerClientId != null) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mGoogleApiClient = new GoogleApiClient.Builder(SwitchAccountActivity.this)
+                                            .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                                                @Override
+                                                public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                                                    Logs.e(CLASSNAME, "onConnectionFailed", "");
+                                                }
+                                            })
+                                            .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                                                @Override
+                                                public void onConnected(@Nullable Bundle bundle) {
+                                                    signOut();
+                                                    signIn();
+                                                }
+
+                                                @Override
+                                                public void onConnectionSuspended(int i) {
+
+                                                }
+                                            })
+                                            .addApi(Auth.GOOGLE_SIGN_IN_API, mGoogleSignInOptions)
+                                            .addApi(Plus.API)
+                                            .build();
+                                    mGoogleApiClient.disconnect();
+                                    mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
+                                }
+                            });
+                        } else {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
+                                    builder.setTitle(R.string.alert_dialog_title_warning);
+                                    builder.setMessage(R.string.activate_get_server_client_id_failed);
+                                    builder.setPositiveButton(R.string.confirm, null);
+                                    builder.show();
+                                }
+                            });
+                        }
+                    }
+                }).start();
+            }
+        };
+
+        ImageView chooseAccountIcon = (ImageView) findViewById(R.id.choose_account_icon);
+        if (chooseAccountIcon != null) {
+            chooseAccountIcon.setOnClickListener(chooseAccountListener);
+        }
+        TextView chooseAccountText = (TextView) findViewById(R.id.choose_account_text);
+        if (chooseAccountText != null) {
+            chooseAccountText.setOnClickListener(chooseAccountListener);
         }
 
         showProgressDialog();
@@ -228,156 +312,84 @@ public class SwitchAccountActivity extends AppCompatActivity {
                 }
                 accountDAO.close();
 
-                mServerClientId = MgmtCluster.getServerClientId();
-                if (mServerClientId != null) {
+                if (mServerClientId == null) {
+                    mServerClientId = MgmtCluster.getServerClientId();
+                }
+
+                if (mGoogleSignInOptions == null) {
                     mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                             .requestServerAuthCode(mServerClientId, false)
                             .requestEmail()
                             .build();
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            mGoogleApiClient = new GoogleApiClient.Builder(SwitchAccountActivity.this)
-                                    .enableAutoManage(SwitchAccountActivity.this, new GoogleApiClient.OnConnectionFailedListener() {
-                                        @Override
-                                        public void onConnectionFailed(@NonNull ConnectionResult result) {
-                                            Logs.d(CLASSNAME, "onConnectionFailed", "");
-                                            if (!mResolvingError) {
-                                                if (result.hasResolution()) {
-                                                    try {
-                                                        mResolvingError = true;
-                                                        result.startResolutionForResult(SwitchAccountActivity.this, REQUEST_RESOLVE_ERROR);
-                                                    } catch (IntentSender.SendIntentException e) {
-                                                        // There was an error with the resolution intent. Try again.
-                                                        mGoogleApiClient.connect();
-                                                    }
-                                                } else {
-                                                    // Show dialog using GoogleApiAvailability.getErrorDialog()
-                                                    showErrorDialog(result.getErrorCode());
-                                                    mResolvingError = true;
-                                                    hideProgressDialog();
-                                                }
-                                            }
-                                        }
-                                    })
-                                    .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                                        @Override
-                                        public void onConnected(@Nullable Bundle bundle) {
-                                            OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-                                            if (opr.isDone()) {
-                                                GoogleSignInResult result = opr.get();
-                                                String currentAuthCode = getServerAuthCode(result);
-                                                if (mOldServerAuthCode == null) {
-                                                    mOldServerAuthCode = currentAuthCode;
-                                                }
-                                                Logs.w(CLASSNAME, "onCreate", "serverAuthCode=" + mOldServerAuthCode);
-                                                hideProgressDialog();
-                                            } else {
-                                                opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                                                    @Override
-                                                    public void onResult(@NonNull GoogleSignInResult result) {
-                                                        String currentAuthCode = getServerAuthCode(result);
-                                                        if (mOldServerAuthCode == null) {
-                                                            mOldServerAuthCode = currentAuthCode;
-                                                        }
-                                                        Logs.w(CLASSNAME, "onCreate", "serverAuthCode=" + mOldServerAuthCode);
-                                                        hideProgressDialog();
-                                                    }
-                                                });
-                                            }
-
-                                            // Sign out previous account first
-                                            signOut();
-                                        }
-
-                                        @Override
-                                        public void onConnectionSuspended(int cause) {
-
-                                        }
-                                    })
-                                    .addApi(Auth.GOOGLE_SIGN_IN_API, mGoogleSignInOptions)
-                                    .build();
-                        }
-                    });
-                } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            hideProgressDialog();
-                        }
-                    });
                 }
-            }
-        }).start();
 
-        View.OnClickListener chooseAccountListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showProgressDialog();
-                new Thread(new Runnable() {
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (mServerClientId == null) {
-                            mServerClientId = MgmtCluster.getServerClientId();
-                            mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                    .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-                                    .requestServerAuthCode(mServerClientId)
-                                    .requestEmail()
-                                    .build();
-                        }
-
-                        if (mServerClientId != null) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (mGoogleApiClient == null) {
-                                        mGoogleApiClient = new GoogleApiClient.Builder(SwitchAccountActivity.this)
-                                                .enableAutoManage(SwitchAccountActivity.this, new GoogleApiClient.OnConnectionFailedListener() {
-                                                    @Override
-                                                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                                                        Logs.e(CLASSNAME, "onConnectionFailed", "");
-                                                    }
-                                                })
-                                                .addApi(Auth.GOOGLE_SIGN_IN_API, mGoogleSignInOptions)
-                                                .addApi(Plus.API)
-                                                .build();
+                        mGoogleApiClient = new GoogleApiClient.Builder(SwitchAccountActivity.this)
+                                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                                    @Override
+                                    public void onConnectionFailed(@NonNull ConnectionResult result) {
+                                        Logs.d(CLASSNAME, "onConnectionFailed", "");
+                                        if (!mResolvingError) {
+                                            if (result.hasResolution()) {
+                                                try {
+                                                    mResolvingError = true;
+                                                    result.startResolutionForResult(SwitchAccountActivity.this, REQUEST_RESOLVE_ERROR);
+                                                } catch (IntentSender.SendIntentException e) {
+                                                    // There was an error with the resolution intent. Try again.
+                                                    mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
+                                                }
+                                            } else {
+                                                // Show dialog using GoogleApiAvailability.getErrorDialog()
+                                                showErrorDialog(result.getErrorCode());
+                                                mResolvingError = true;
+                                                hideProgressDialog();
+                                            }
+                                        }
                                     }
+                                })
+                                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                                    @Override
+                                    public void onConnected(@Nullable Bundle bundle) {
+                                        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+                                        if (opr.isDone()) {
+                                            GoogleSignInResult result = opr.get();
+                                            final String currentAuthCode = getServerAuthCode(result);
+                                            Logs.w(CLASSNAME, "onConnected", "currentAuthCode=" + currentAuthCode);
+                                            mOldServerAuthCode = currentAuthCode;
+                                        } else {
+                                            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                                                @Override
+                                                public void onResult(@NonNull GoogleSignInResult result) {
+                                                    final String currentAuthCode = getServerAuthCode(result);
+                                                    Logs.w(CLASSNAME, "onCreate", "currentAuthCode=" + currentAuthCode);
+                                                    mOldServerAuthCode = currentAuthCode;
+                                                }
+                                            });
+                                        }
 
-                                    if (mGoogleApiClient.isConnected()) {
+                                        // Sign out previous account first
                                         signOut();
-                                        signIn();
-                                    } else {
-                                        Toast.makeText(SwitchAccountActivity.this, R.string.switch_account_failed, Toast.LENGTH_SHORT).show();
                                     }
-                                }
-                            });
-                        } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
-                                    builder.setTitle(R.string.alert_dialog_title_warning);
-                                    builder.setMessage(R.string.activate_get_server_client_id_failed);
-                                    builder.setPositiveButton(R.string.alert_dialog_confirm, null);
-                                    builder.show();
-                                }
-                            });
-                        }
-                    }
-                }).start();
-            }
-        };
 
-        ImageView chooseAccountIcon = (ImageView) findViewById(R.id.choose_account_icon);
-        if (chooseAccountIcon != null) {
-            chooseAccountIcon.setOnClickListener(chooseAccountListener);
-        }
-        TextView chooseAccountText = (TextView) findViewById(R.id.choose_account_text);
-        if (chooseAccountText != null) {
-            chooseAccountText.setOnClickListener(chooseAccountListener);
-        }
+                                    @Override
+                                    public void onConnectionSuspended(int cause) {
+
+                                    }
+                                })
+                                .addApi(Auth.GOOGLE_SIGN_IN_API, mGoogleSignInOptions)
+                                .build();
+                        mGoogleApiClient.disconnect();
+                        mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
+
+                        hideProgressDialog();
+                    }
+                });
+
+            }
+        }).start();
 
     }
 
@@ -408,9 +420,6 @@ public class SwitchAccountActivity extends AppCompatActivity {
     }
 
     private void hideProgressDialog() {
-//        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-//            mProgressDialog.hide();
-//        }
         if (mProgressDialog != null) {
             mProgressDialog.hide();
         }
@@ -459,7 +468,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Make sure the app is not already connected or attempting to connect
                 if (!mGoogleApiClient.isConnecting() && !mGoogleApiClient.isConnected()) {
-                    mGoogleApiClient.connect();
+                    mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
                 }
             }
         }
@@ -476,14 +485,6 @@ public class SwitchAccountActivity extends AppCompatActivity {
             }
         }
         return serverAuthCode;
-    }
-
-    private void showAlertConfirmDialog(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
-        builder.setTitle(R.string.alert_dialog_title_warning);
-        builder.setMessage(message);
-        builder.setPositiveButton(R.string.alert_dialog_confirm, null);
-        builder.show();
     }
 
     /**
@@ -532,7 +533,6 @@ public class SwitchAccountActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putBoolean(STATE_RESOLVING_ERROR, mResolvingError);
-        outState.putString(ORIGINAL_SERVER_AUTH_CODE, mOldServerAuthCode);
         super.onSaveInstanceState(outState);
     }
 
@@ -541,7 +541,6 @@ public class SwitchAccountActivity extends AppCompatActivity {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState != null) {
             mResolvingError = savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
-            mOldServerAuthCode = savedInstanceState.getString(ORIGINAL_SERVER_AUTH_CODE);
         }
     }
 

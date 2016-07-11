@@ -4,9 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 public class HCFSDBHelper extends SQLiteOpenHelper {
 
@@ -23,7 +22,7 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", "");
+        Logs.d(CLASSNAME, "onCreate", "");
 //        db.execSQL(DataTypeDAO.CREATE_TABLE);
         db.execSQL(AccountDAO.CREATE_TABLE);
         db.execSQL(ServiceFileDirDAO.CREATE_TABLE);

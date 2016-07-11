@@ -1,12 +1,5 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import java.io.File;
-import java.util.regex.Pattern;
-
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,77 +20,85 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-public class FileDirInfo extends ItemInfo {
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
-	private final String CLASS_NAME = this.getClass().getSimpleName();
+import java.io.File;
+import java.util.regex.Pattern;
 
-	public static final String MIME_TYPE_IMAGE = "image";
-	public static final String MIME_TYPE_VIDEO = "video";
-	public static final String MIME_TYPE_AUDIO = "audio";
-	public static final String MIME_TYPE_APPLICATION = "application";
-	public static final String MIME_SUBTYPE_APK = "vnd.android.package-archive";
-	public static final String MIME_SUBTYPE_OGG = "ogg";
-	public static final String MIME_SUBTYPE_PNG = "png";
-	public static final String MIME_SUBTYPE_SVG = "svg";
-	private File currentFile;
+public class FileDirInfo extends ItemInfo implements Cloneable {
 
-	public FileDirInfo(Context context) {
-		super(context);
-	}
+    private final String CLASS_NAME = this.getClass().getSimpleName();
+
+    public static final String MIME_TYPE_IMAGE = "image";
+    public static final String MIME_TYPE_VIDEO = "video";
+    public static final String MIME_TYPE_AUDIO = "audio";
+    public static final String MIME_TYPE_APPLICATION = "application";
+    public static final String MIME_SUBTYPE_APK = "vnd.android.package-archive";
+    public static final String MIME_SUBTYPE_OGG = "ogg";
+    public static final String MIME_SUBTYPE_PNG = "png";
+    public static final String MIME_SUBTYPE_SVG = "svg";
+    private File currentFile;
+
+    public FileDirInfo(Context context) {
+        super(context);
+    }
 
     @Nullable
-	public Bitmap getIconImage() {
+    public Bitmap getIconImage() {
         Bitmap iconImage = null;
-		if (currentFile.isDirectory()) {
-			Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_folder_default);
+        if (currentFile.isDirectory()) {
+            Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_folder_default);
             iconImage = ((BitmapDrawable) drawable).getBitmap();
-		} else {
-			String filePath = currentFile.getAbsolutePath();
-			String mimeType = getMimeType();
-			String logMsg = "filePath=" + filePath + ", mimeType=" + mimeType;
-			HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getIconImage", logMsg);
-			if (mimeType != null) {
-				int width, height;
-				width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
-				try {
-					if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
-						if (mimeType.contains(MIME_SUBTYPE_PNG)) {
-							/** Show PNG file with alpha supported */
-							Bitmap image = BitmapFactory.decodeFile(filePath);
+        } else {
+            String filePath = currentFile.getAbsolutePath();
+            String mimeType = getMimeType();
+            String logMsg = "filePath=" + filePath + ", mimeType=" + mimeType;
+            Logs.d(CLASS_NAME, "getIconImage", logMsg);
+            if (mimeType != null) {
+                int width, height;
+                width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
+                try {
+                    if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
+                        if (mimeType.contains(MIME_SUBTYPE_PNG)) {
+                            /** Show PNG file with alpha supported */
+                            Bitmap image = BitmapFactory.decodeFile(filePath);
                             iconImage = ThumbnailUtils.extractThumbnail(image, width, height);
-						} else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
-							// TODO show svg file
-						} else {
-							Bitmap thumbImage = getImageThumbnail(filePath);
-							if (thumbImage == null) {
-								Bitmap image = BitmapFactory.decodeFile(filePath);
-								thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
-							}
+                        } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
+                            // TODO show svg file
+                        } else {
+                            Bitmap thumbImage = getImageThumbnail(filePath);
+                            if (thumbImage == null) {
+                                Bitmap image = BitmapFactory.decodeFile(filePath);
+                                thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+                            }
                             iconImage = thumbImage;
-						}
-					} else if (mimeType.startsWith(MIME_TYPE_VIDEO)) {
-						Bitmap thumbImage = getVideoThumbnail(filePath);
-						if (thumbImage == null) {
-							Bitmap image = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
-							thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
-						}
+                        }
+                    } else if (mimeType.startsWith(MIME_TYPE_VIDEO)) {
+                        Bitmap thumbImage = getVideoThumbnail(filePath);
+                        if (thumbImage == null) {
+                            Bitmap image = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
+                            thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+                        }
                         iconImage = thumbImage;
-					} else if (mimeType.startsWith(MIME_TYPE_APPLICATION)) {
-						if (mimeType.contains(MIME_SUBTYPE_APK)) {
-							String archiveFilePath = filePath;
-							PackageManager pm = mContext.getPackageManager();
-							PackageInfo packageInfo = pm.getPackageArchiveInfo(archiveFilePath, PackageManager.GET_ACTIVITIES);
-							ApplicationInfo appInfo = packageInfo.applicationInfo;
-							appInfo.sourceDir = archiveFilePath;
-							appInfo.publicSourceDir = archiveFilePath;
+                    } else if (mimeType.startsWith(MIME_TYPE_APPLICATION)) {
+                        if (mimeType.contains(MIME_SUBTYPE_APK)) {
+                            String archiveFilePath = filePath;
+                            PackageManager pm = mContext.getPackageManager();
+                            PackageInfo packageInfo = pm.getPackageArchiveInfo(archiveFilePath, PackageManager.GET_ACTIVITIES);
+                            ApplicationInfo appInfo = packageInfo.applicationInfo;
+                            appInfo.sourceDir = archiveFilePath;
+                            appInfo.publicSourceDir = archiveFilePath;
                             iconImage = ((BitmapDrawable) appInfo.loadIcon(pm)).getBitmap();
-						}
+                        }
 //						else if (mimeType.contains(MIME_SUBTYPE_OGG)) {
 //							Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_audio_white);
 //							return ((BitmapDrawable) drawable).getBitmap();
 //							// return ContextCompat.getDrawable(mContext, R.drawable.ic_audio_white);
 //						}
-					}
+                    }
 //					else if (mimeType.contains(MIME_TYPE_AUDIO)) {
 //						Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_audio_white);
 //						return ((BitmapDrawable) drawable).getBitmap();
@@ -105,12 +106,12 @@ public class FileDirInfo extends ItemInfo {
 //					}
 //					Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
 //                    iconImage = ((BitmapDrawable) drawable).getBitmap();
-					// return ContextCompat.getDrawable(mContext, R.drawable.ic_file_black);
-				} catch (Exception e) {
-                    HCFSMgmtUtils.log(Log.ERROR, CLASS_NAME, "getIconImage", Log.getStackTraceString(e));
-				}
-			}
-		}
+                    // return ContextCompat.getDrawable(mContext, R.drawable.ic_file_black);
+                } catch (Exception e) {
+                    Logs.e(CLASS_NAME, "getIconImage", Log.getStackTraceString(e));
+                }
+            }
+        }
 
         /** Unknown file type */
         if (iconImage == null) {
@@ -118,105 +119,99 @@ public class FileDirInfo extends ItemInfo {
             iconImage = ((BitmapDrawable) drawable).getBitmap();
         }
         return iconImage;
-	}
+    }
 
-	@Nullable
-	private Bitmap getImageThumbnail(String path) {
+    @Nullable
+    private Bitmap getImageThumbnail(String path) {
         Bitmap thumbnail = null;
-		ContentResolver cr = mContext.getContentResolver();
-		Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID },
-				MediaStore.MediaColumns.DATA + "=?", new String[] { path }, null);
-		if (cursor != null) {
+        ContentResolver cr = mContext.getContentResolver();
+        Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
+                MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+        if (cursor != null) {
             if (cursor.moveToFirst()) {
                 int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
                 thumbnail = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
             }
             cursor.close();
         }
-		return thumbnail;
-	}
+        return thumbnail;
+    }
 
-	@Nullable
-	private Bitmap getVideoThumbnail(String path) {
+    @Nullable
+    private Bitmap getVideoThumbnail(String path) {
         Bitmap thumbnail = null;
-		ContentResolver cr = mContext.getContentResolver();
-		Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.MediaColumns._ID },
-				MediaStore.MediaColumns.DATA + "=?", new String[] { path }, null);
-		if (cursor != null) {
+        ContentResolver cr = mContext.getContentResolver();
+        Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
+                MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+        if (cursor != null) {
             if (cursor.moveToFirst()) {
                 int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
                 thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
             }
             cursor.close();
         }
-		return thumbnail;
-	}
+        return thumbnail;
+    }
 
-	public File getCurrentFile() {
-		return currentFile;
-	}
+    public File getCurrentFile() {
+        return currentFile;
+    }
 
-	public void setCurrentFile(File currentFile) {
-		this.currentFile = currentFile;
-	}
+    public void setCurrentFile(File currentFile) {
+        this.currentFile = currentFile;
+    }
 
-	public String getFilePath() {
-		return currentFile.getAbsolutePath();
-	}
+    public String getFilePath() {
+        return currentFile.getAbsolutePath();
+    }
 
-	public String getFileName() {
-		return currentFile.getName();
-	}
+    public String getFileName() {
+        return currentFile.getName();
+    }
 
-	public String getMimeType() {
-		return getMimeType(currentFile.getAbsolutePath());
-	}
+    public String getMimeType() {
+        return getMimeType(currentFile.getAbsolutePath());
+    }
 
-	@Nullable
-	public static String getMimeType(String url) {
-		String type = null;
-		String extension = getFileExtensionFromUrl(url);
-		if (extension != null) {
-			type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-		}
-		return type;
-	}
+    @Nullable
+    public static String getMimeType(String url) {
+        String type = null;
+        String extension = getFileExtensionFromUrl(url);
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return type;
+    }
 
-	private static String getFileExtensionFromUrl(String url) {
-		if (!TextUtils.isEmpty(url)) {
-			int filenamePos = url.lastIndexOf('/');
-			String filename = 0 <= filenamePos ? url.substring(filenamePos + 1) : url;
+    private static String getFileExtensionFromUrl(String url) {
+        if (!TextUtils.isEmpty(url)) {
+            int filenamePos = url.lastIndexOf('/');
+            String filename = 0 <= filenamePos ? url.substring(filenamePos + 1) : url;
 
-			/** if the filename contains special characters, we don't consider it valid for our matching purposes */
-			if (!filename.isEmpty() && Pattern.matches("^[^\\/:?\"<>|]+$", filename)) {
-				int dotPos = filename.lastIndexOf('.');
-				if (0 <= dotPos) {
-					return filename.substring(dotPos + 1);
-				}
-			}
-		}
-		return "";
-	}
-
-	public int getFileDirStatus() {
-		int locationStatus = getFileDirLocationStatus();
-        HCFSMgmtUtils.log(Log.DEBUG, CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
-        if (locationStatus == LocationStatus.LOCAL) {
-            return ItemStatus.STATUS_AVAILABLE;
-        } else {
-            if (!NetworkUtils.isNetworkConnected(mContext)) {
-                return ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
-            } else {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                boolean downloadToRun = sharedPreferences.getBoolean(mContext.getString(R.string.pref_download_to_run), false);
-                if (downloadToRun) {
-                    return ItemStatus.STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD;
-                } else {
-                    return ItemStatus.STATUS_AVAILABLE;
+            /** if the filename contains special characters, we don't consider it valid for our matching purposes */
+            if (!filename.isEmpty() && Pattern.matches("^[^\\/:?\"<>|]+$", filename)) {
+                int dotPos = filename.lastIndexOf('.');
+                if (0 <= dotPos) {
+                    return filename.substring(dotPos + 1);
                 }
             }
         }
-	}
+        return "";
+    }
+
+    public int getFileDirStatus() {
+        int locationStatus = getFileDirLocationStatus();
+//        Logs.d(CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
+        if (NetworkUtils.isNetworkConnected(mContext)) {
+            return ItemStatus.STATUS_AVAILABLE;
+        } else {
+            if (locationStatus == LocationStatus.LOCAL) {
+                return ItemStatus.STATUS_AVAILABLE;
+            } else {
+                return ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
+            }
+        }
+    }
 
     private int getFileDirLocationStatus() {
         int locationStatus;
@@ -228,19 +223,23 @@ public class FileDirInfo extends ItemInfo {
         return locationStatus;
     }
 
-	@Override
-	public Drawable getPinUnpinImage(boolean isPinned) {
-		return HCFSMgmtUtils.getPinUnpinImage(mContext, isPinned);
-	}
+    @Override
+    public Drawable getPinUnpinImage(boolean isPinned) {
+        return HCFSMgmtUtils.getPinUnpinImage(mContext, isPinned);
+    }
 
-	@Override
-	public int hashCode() {
-		return getFilePath().hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return getFilePath().hashCode();
+    }
 
     @Override
     public int getIconAlpha() {
         return getFileDirStatus() == ItemStatus.STATUS_AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 }

@@ -17,14 +17,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 public class AboutFragment extends Fragment {
@@ -35,6 +35,7 @@ public class AboutFragment extends Fragment {
     private Context mContext;
     private TextView mImeiOne;
     private TextView mImeiTwo;
+    private LinearLayout mImeiTwoLayout;
     private Snackbar mSnackbar;
 
     private View.OnClickListener listener = new View.OnClickListener() {
@@ -71,6 +72,7 @@ public class AboutFragment extends Fragment {
 
         mImeiOne = (TextView) view.findViewById(R.id.device_imei_1);
         mImeiTwo = (TextView) view.findViewById(R.id.device_imei_2);
+        mImeiTwoLayout = (LinearLayout) view.findViewById(R.id.device_imei_2_layout);
 
         TextView teraVersion = (TextView) view.findViewById(R.id.terafonn_version);
         teraVersion.setText(getString(R.string.tera_version));
@@ -99,7 +101,7 @@ public class AboutFragment extends Fragment {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(getString(R.string.alert_dialog_title_warning));
                         builder.setMessage(getString(R.string.require_read_phone_state_permission));
-                        builder.setPositiveButton(getString(R.string.alert_dialog_confirm), new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
@@ -152,15 +154,16 @@ public class AboutFragment extends Fragment {
         TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         if (manager.getPhoneCount() == 0) {
             mImeiOne.setText("-");
-            mImeiTwo.setText("-");
+            mImeiTwoLayout.setVisibility(View.GONE);
         } else if (manager.getPhoneCount() == 1) {
             mImeiOne.setText(manager.getDeviceId(0));
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
+            mImeiTwoLayout.setVisibility(View.GONE);
+            Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
         } else {
             mImeiOne.setText(manager.getDeviceId(0));
             mImeiTwo.setText(manager.getDeviceId(1));
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
-            HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", "imei_2=" + manager.getDeviceId(1));
+            Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
+            Logs.d(CLASSNAME, "onViewCreated", "imei_2=" + manager.getDeviceId(1));
         }
         isImeiShown = true;
     }

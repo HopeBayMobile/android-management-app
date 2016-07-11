@@ -5,18 +5,25 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.interfaces.IFetchJwtTokenListener;
+import com.hopebaytech.hcfsmgmt.utils.GoogleAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
@@ -95,7 +102,6 @@ public class TeraFonnApiService extends Service {
                                 } else {
                                     mFetchAppDataListener.onProgressUpdate(packageName, progress);
                                 }
-
                                 Thread.sleep(3000);
                             }
 
@@ -186,12 +192,12 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean pinApp(String packageName) throws RemoteException {
-            return pinOrUnpin(true, packageName);
+            return handleFailureOfPinOrUnpin(true, packageName);
         }
 
         @Override
         public boolean unpinApp(String packageName) throws RemoteException {
-            return pinOrUnpin(false, packageName);
+            return handleFailureOfPinOrUnpin(false, packageName);
         }
 
         @Override
@@ -223,10 +229,11 @@ public class TeraFonnApiService extends Service {
                     enabled = true;
                 }
             } catch (Exception e) {
-                HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
             }
             return enabled;
         }
+
     };
 
     @Override
@@ -255,7 +262,8 @@ public class TeraFonnApiService extends Service {
                             for (String packageName : keyList) {
                                 AppStatus appStatus = mPackageNameMap.get(packageName);
                                 int reportStatus = getDifferentStatus(packageName, appStatus.getStatus());
-                                if (reportStatus != -1) mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
+                                if (reportStatus != -1)
+                                    mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
                             }
                         }
 
@@ -288,7 +296,7 @@ public class TeraFonnApiService extends Service {
             case Log.DEBUG:
                 Log.d(TAG, className + "(" + funcName + "): " + logMsg);
                 break;
-            case Log.INFO :
+            case Log.INFO:
                 Log.i(TAG, className + "(" + funcName + "): " + logMsg);
                 break;
             case Log.WARN:
@@ -384,7 +392,7 @@ public class TeraFonnApiService extends Service {
             } else if (appLocation.contains(LocationStatus.CLOUD)) {
                 location = LocationStatus.CLOUD;
             } else {
-                location =LocationStatus.LOCAL;
+                location = LocationStatus.LOCAL;
             }
 
             log(Log.DEBUG, CLASSNAME, "getDefaultLocation", "APP Location: " + String.valueOf(location));
@@ -401,6 +409,13 @@ public class TeraFonnApiService extends Service {
             status = AppStatus.STATUS_UNAVAILABLE;
         }
         return status != currentStatus ? status : -1;
+    }
+
+    private Boolean handleFailureOfPinOrUnpin(Boolean pinOP, String packageName) {
+        boolean isSuccess = pinOrUnpin(pinOP, packageName);
+        if (isSuccess) updateDB(pinOP, packageName);
+        else pinOrUnpin(!pinOP, packageName);
+        return isSuccess;
     }
 
     private Boolean pinOrUnpin(Boolean pinOP, String packageName) {
@@ -444,8 +459,6 @@ public class TeraFonnApiService extends Service {
             }
         }
 
-        if (isSuccess) updateDB(pinOP, packageName);
-
         return isSuccess;
     }
 
@@ -475,7 +488,7 @@ public class TeraFonnApiService extends Service {
             sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
             log(Log.INFO, CLASSNAME, "getSourceDir", sourceDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getSourceDir",  "Error: Package (" + packageName + ") not found ");
+            log(Log.WARN, CLASSNAME, "getSourceDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return sourceDir;
@@ -489,7 +502,7 @@ public class TeraFonnApiService extends Service {
             dataDir = p.applicationInfo.dataDir;
             log(Log.INFO, CLASSNAME, "getDataDir", dataDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getDataDir",  "Error: Package (" + packageName + ") not found ");
+            log(Log.WARN, CLASSNAME, "getDataDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return dataDir;
@@ -569,6 +582,52 @@ public class TeraFonnApiService extends Service {
         }
 
         return progress;
+    }
+
+    public void getMgmtServerToken(final IFetchJwtTokenListener listener) throws RemoteException {
+        mCacheExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                final String serverClientId = MgmtCluster.getServerClientId();
+                GoogleAuthProxy googleAuthProxy = new GoogleAuthProxy(TeraFonnApiService.this, serverClientId);
+                googleAuthProxy.setOnAuthListener(new GoogleAuthProxy.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccessful(GoogleSignInResult result) {
+                        String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+
+                        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                        authParam.setAuthCode(serverAuthCode);
+                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this)));
+                        authParam.setVendor(Build.BRAND);
+                        authParam.setModel(Build.MODEL);
+                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                        authParam.setHcfsVersion("1.0.1");
+
+                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                        authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                            @Override
+                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                                String jwtToken = authResultInfo.getToken();
+                                listener.onFetchSuccessful(jwtToken);
+                            }
+
+                            @Override
+                            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                listener.onFetchFailed();
+                            }
+                        });
+                        authProxy.auth();
+                    }
+
+                    @Override
+                    public void onAuthFailed() {
+                        listener.onFetchFailed();
+                    }
+                });
+                googleAuthProxy.auth();
+            }
+        });
     }
 
 }
