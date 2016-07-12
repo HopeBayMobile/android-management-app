@@ -63,11 +63,29 @@ public class TeraFonnApiService extends Service {
             mCacheExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
+
                     try {
-                        String imei = HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this);
-                        String jwt = "jwt";
-                        mGetJWTandIMEIListener.onDataGet(imei, jwt);
-                        
+                        getMgmtServerToken(new IFetchJwtTokenListener() {
+                            @Override
+                            public void onFetchSuccessful(String jwt) {
+                                String imei = HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this);
+                                try {
+                                    mGetJWTandIMEIListener.onDataGet(imei, jwt);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onFetchFailed() {
+                                try {
+                                    mGetJWTandIMEIListener.onDataGet("", "");
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     } catch (Exception e) {
