@@ -38,7 +38,6 @@
             android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
 
-
         <activity
             android:name=".main.SwitchAccountActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"

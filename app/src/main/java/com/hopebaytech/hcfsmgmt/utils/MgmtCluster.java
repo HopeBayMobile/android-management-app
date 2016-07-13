@@ -857,8 +857,11 @@ public class MgmtCluster {
         return isVerified;
     }
 
+    /**
+     * Get an available JWT token from MGMT server
+     */
     public static void getJwtToken(final Context context, final OnFetchJwtTokenListener listener) {
-        new Thread(new Runnable() {
+       new Thread(new Runnable() {
             @Override
             public void run() {
                 final String serverClientId = MgmtCluster.getServerClientId();
