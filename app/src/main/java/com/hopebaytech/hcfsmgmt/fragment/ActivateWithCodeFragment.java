@@ -160,7 +160,7 @@ public class ActivateWithCodeFragment extends Fragment {
                             authParam.setVendor(Build.BRAND);
                             authParam.setModel(Build.MODEL);
                             authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                            authParam.setHcfsVersion("1.0.1");
+                            authParam.setHcfsVersion(getString(R.string.tera_version));
                             authParam.setActivateCode(activateCode);
 
                             String jwtToken = getArguments().getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);

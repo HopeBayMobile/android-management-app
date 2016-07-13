@@ -554,7 +554,7 @@ public class HCFSMgmtService extends Service {
         authParam.setVendor(Build.BRAND);
         authParam.setModel(Build.MODEL);
         authParam.setAndroidVersion(Build.VERSION.RELEASE);
-        authParam.setHcfsVersion("1.0.1");
+        authParam.setHcfsVersion(getString(R.string.tera_version));
 
         MgmtCluster.plusRetryCount();
         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);

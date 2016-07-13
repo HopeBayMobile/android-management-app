@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.IFetchAppDataListener;
-import com.hopebaytech.hcfsmgmt.terafonnapiservice.IFetchTokenListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.ITrackAppStatusListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppInfo;
 
@@ -40,8 +39,5 @@ interface ITeraFonnApiService {
     String getHCFSStat();
 
     boolean hcfsEnabled();
-
-    /** Get available token from MGMT server */
-    void getMgmtServerToken(IFetchTokenListener listener);
 
 }
