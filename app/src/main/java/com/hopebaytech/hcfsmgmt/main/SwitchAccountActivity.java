@@ -100,7 +100,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.swtich_account_activity);
+        setContentView(R.layout.switch_account_activity);
 
         View contentView = findViewById(android.R.id.content);
         if (contentView != null) {
@@ -149,7 +149,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         authParam.setVendor(Build.BRAND);
                         authParam.setModel(Build.MODEL);
                         authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                        authParam.setHcfsVersion("1.0.1");
+                        authParam.setHcfsVersion(getString(R.string.tera_version));
 
                         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                         authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {

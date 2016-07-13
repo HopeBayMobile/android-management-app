@@ -31,18 +31,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.ActivateActivity"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
+
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".main.SwitchAccountActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:launchMode="singleInstance" />
+
+        <activity
+            android:name=".main.TransferContentActivity"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait" />
+
         <activity android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" />
 
         <receiver
