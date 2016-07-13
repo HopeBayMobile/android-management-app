@@ -435,46 +435,6 @@ public class MgmtCluster {
         return serverClientId;
     }
 
-    public static JSONObject getMgmtCommands(String JWT, String imei) {
-        JSONObject jsonObj = null;
-
-        if (JWT != null) {
-            IHttpProxy httpProxyImpl = null;
-
-            try {
-                String url = DEVICE_API + imei + "/service";
-                httpProxyImpl = HttpProxy.newInstance();
-                httpProxyImpl.setUrl(url);
-                httpProxyImpl.setDoOutput(true);
-
-                ContentValues header = new ContentValues();
-                header.put(KEY_AUTHORIZATION, "JWT " + JWT);
-                httpProxyImpl.setHeaders(header);
-                httpProxyImpl.connect();
-
-                int responseCode = httpProxyImpl.get();
-                Logs.d(CLASSNAME, "getMgmtCommands", "responseCode=" + responseCode);
-                if (responseCode == HttpsURLConnection.HTTP_OK) {
-                    String jsonResponse = httpProxyImpl.getResponseContent();
-                    Logs.d(CLASSNAME, "getMgmtCommands", "jsonResponse=" + jsonResponse);
-                    if (!jsonResponse.isEmpty()) {
-                        jsonObj = new JSONObject(jsonResponse);
-                    }
-                }
-
-            } catch (Exception e) {
-                Logs.e(CLASSNAME, "getMgmtCommands", Log.getStackTraceString(e));
-
-            } finally {
-                if (httpProxyImpl != null) {
-                    httpProxyImpl.disconnect();
-                }
-            }
-        }
-
-        return jsonObj;
-    }
-
     public static abstract class IAuthParam {
 
         protected String activateCode;
@@ -659,6 +619,22 @@ public class MgmtCluster {
 
     }
 
+    /**
+     * Listener for fetching available JWT token from MGMT server
+     *
+     * @author Aaron
+     *         Created by Aaron on 2016/7/11.
+     */
+    public interface FetchJwtTokenListener {
+
+        /** Callback function when fetch successful */
+        void onFetchSuccessful(String jwtToken);
+
+        /** Callback function when fetch failed */
+        void onFetchFailed();
+
+    }
+
     public interface RegisterListener {
 
         void onRegisterSuccessful(RegisterResultInfo registerResultInfo);
@@ -781,7 +757,9 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final RegisterResultInfo registerResultInfo = register(authParam, jwtToken);
+//                    final AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+//                    if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
                     Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
@@ -896,9 +874,6 @@ public class MgmtCluster {
         return isVerified;
     }
 
-    /**
-     * Get an available JWT token from MGMT server
-     */
     public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) {
         new Thread(new Runnable() {
             @Override
