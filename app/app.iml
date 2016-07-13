@@ -106,6 +106,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.firebase/firebase-common/9.0.2/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.firebase/firebase-core/9.0.2/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.firebase/firebase-iid/9.0.2/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/pl.droidsonroids.gif/android-gif-drawable/1.1.17/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/incremental-safeguard" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/manifests" />
@@ -122,6 +123,7 @@
     <orderEntry type="library" exported="" name="support-annotations-23.4.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-1.8.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-base-9.0.2" level="project" />
+    <orderEntry type="library" exported="" name="android-gif-drawable-1.1.17" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="accessibility-test-framework-1.0" level="project" />
     <orderEntry type="library" exported="" name="preference-v7-23.4.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="ant-launcher-1.8.0" level="project" />
@@ -148,8 +150,8 @@
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-resources-3.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-tasks-9.0.2" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="robolectric-annotations-3.0" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="sqlite4java-0.282" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-tree-5.0.1" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="sqlite4java-0.282" level="project" />
     <orderEntry type="library" exported="" name="preference-v14-23.4.0" level="project" />
     <orderEntry type="library" exported="" name="firebase-analytics-impl-9.0.2" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="asm-analysis-5.0.1" level="project" />

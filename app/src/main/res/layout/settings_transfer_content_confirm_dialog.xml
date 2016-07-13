@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        style="@style/F4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/M3"
+        android:text="@string/settings_transfer_content_confirm_title"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/M3"
+        android:text="@string/settings_transfer_content_confirm_message"
+        android:textColor="@android:color/black" />
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/M3"
+        android:textColor="@android:color/black"
+        tools:text="aaron.chu@happygorgi.com" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/M3"
+        android:layout_marginStart="@dimen/M3"
+        android:background="@drawable/white_background_gray_border"
+        android:orientation="horizontal">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontEditText
+            android:id="@+id/password"
+            style="@style/F6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center_vertical"
+            android:hint="@string/activate_hint_password"
+            android:inputType="textPassword"
+            android:padding="10dp"
+            android:singleLine="true" />
+    </LinearLayout>
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/error_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/M3"
+        android:text="@string/settings_transfer_content_confirm_error_message"
+        android:textColor="@android:color/black" />
+
+</LinearLayout>

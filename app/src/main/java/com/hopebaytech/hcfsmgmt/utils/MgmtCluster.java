@@ -8,10 +8,13 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
+import com.hopebaytech.hcfsmgmt.interfaces.IFetchJwtTokenListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -199,8 +202,91 @@ public class MgmtCluster {
         return registerResultInfo;
     }
 
-    public static String getServerClientId() {
+    public static class TransferContentProxy {
 
+        private String jwtToken;
+        private String imei;
+
+        private OnTransferContentListener listener;
+
+        public TransferContentProxy(String jwtToken, String imei) {
+            this.jwtToken = jwtToken;
+            this.imei = imei;
+        }
+
+        public void transfer() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final TransferContentInfo transferContentInfo = transferContents(jwtToken, imei);
+                    if (transferContentInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onTransferSuccessful(transferContentInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onTransferFailed(transferContentInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnTransferContentListener(OnTransferContentListener listener) {
+            this.listener = listener;
+        }
+
+        public interface OnTransferContentListener {
+
+            void onTransferSuccessful(TransferContentInfo transferContentInfo);
+
+            void onTransferFailed(TransferContentInfo transferContentInfo);
+
+        }
+
+    }
+
+    private static TransferContentInfo transferContents(String jwtToken, String imei) {
+        IHttpProxy httpProxyImpl = null;
+        TransferContentInfo transferContentInfo = new TransferContentInfo();
+        try {
+            String url = DEVICE_API + imei + "/tx_ready/";
+
+            httpProxyImpl = HttpProxy.newInstance();
+            httpProxyImpl.setUrl(url);
+            httpProxyImpl.setDoOutput(true);
+
+            ContentValues header = new ContentValues();
+            header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+            httpProxyImpl.setHeaders(header);
+            httpProxyImpl.connect();
+
+            ContentValues data = new ContentValues();
+            int responseCode = httpProxyImpl.post(data);
+            String responseContent = httpProxyImpl.getResponseContent();
+            transferContentInfo.setResponseCode(responseCode);
+            Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+            if (responseCode != HttpsURLConnection.HTTP_OK) {
+                transferContentInfo.setMessage(responseContent);
+            }
+        } catch (Exception e) {
+            Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
+        } finally {
+            if (httpProxyImpl != null) {
+                httpProxyImpl.disconnect();
+            }
+        }
+        return transferContentInfo;
+    }
+
+    public static String getServerClientId() {
         IHttpProxy httpProxyImpl = null;
         String serverClientId = null;
         try {
@@ -605,6 +691,9 @@ public class MgmtCluster {
         return isVerified;
     }
 
+    /**
+     * Get an available JWT token from MGMT server
+     */
     public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) {
         new Thread(new Runnable() {
             @Override
@@ -623,10 +712,10 @@ public class MgmtCluster {
                         authParam.setVendor(Build.BRAND);
                         authParam.setModel(Build.MODEL);
                         authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                        authParam.setHcfsVersion("1.0.1");
+                        authParam.setHcfsVersion(context.getString(R.string.tera_version));
 
                         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                             @Override
                             public void onAuthSuccessful(AuthResultInfo authResultInfo) {
                                 String jwtToken = authResultInfo.getToken();

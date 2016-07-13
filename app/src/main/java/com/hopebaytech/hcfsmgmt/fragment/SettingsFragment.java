@@ -50,6 +50,7 @@ public class SettingsFragment extends Fragment {
     private CheckBox mNotifyConnFailedRecovery;
     private LinearLayout mNotifyLocalStorageUsedRatio;
     private LinearLayout mSwitchAccount;
+    private LinearLayout mTransferContent;
     private LinearLayout mFeedback;
 
     public static SettingsFragment newInstance() {
@@ -84,6 +85,7 @@ public class SettingsFragment extends Fragment {
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
         mSwitchAccount = (LinearLayout) view.findViewById(R.id.switch_account);
+        mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
         mFeedback = (LinearLayout) view.findViewById(R.id.feedback);
     }
 
@@ -140,6 +142,14 @@ public class SettingsFragment extends Fragment {
 
                 // Unknown cause results in that dialog show twice, thus we manually dismiss one of them
                 dialogFragment.dismiss();
+            }
+        });
+
+        mTransferContent.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TransferContentDescDialogFragment dialogFragment = TransferContentDescDialogFragment.newInstance();
+                dialogFragment.show(getFragmentManager(), TransferContentDescDialogFragment.TAG);
             }
         });
 

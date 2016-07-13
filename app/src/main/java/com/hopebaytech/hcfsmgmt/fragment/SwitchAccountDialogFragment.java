@@ -16,7 +16,8 @@ import com.hopebaytech.hcfsmgmt.main.SwitchAccountActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
 /**
- * Created by Aaron on 2016/4/15.
+ * @author Aaron
+ *         Created by Aaron on 2016/4/15.
  */
 public class SwitchAccountDialogFragment extends DialogFragment {
 
