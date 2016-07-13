@@ -147,7 +147,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                             public void run() {
                                 MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
                                 authParam.setAuthCode(mOldServerAuthCode);
-                                AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+                                AuthResultInfo authResultInfo = MgmtCluster.auth(authParam); // TODO replace with MgmtCluster.AuthProxy
                                 if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                                     String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
                                     final RegisterResultInfo registerResultInfo = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);

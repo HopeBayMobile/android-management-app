@@ -18,6 +18,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
@@ -38,12 +39,54 @@ public class TeraFonnApiService extends Service {
 
     private final String TAG = "TeraFonnService";
     private final String CLASSNAME = getClass().getSimpleName();
+    private IGetJWTandIMEIListener mGetJWTandIMEIListener;
     private IFetchAppDataListener mFetchAppDataListener;
     private ITrackAppStatusListener mTrackAppStatusListener;
     private Map<String, AppStatus> mPackageNameMap;
     private ExecutorService mCacheExecutor;
 
     private final ITeraFonnApiService.Stub mBinder = new ITeraFonnApiService.Stub() {
+
+        @Override
+        public void setJWTandIMEIListener(IGetJWTandIMEIListener listener) throws RemoteException {
+            mGetJWTandIMEIListener = listener;
+        }
+
+        @Override
+        public boolean getJWTandIMEI() throws RemoteException {
+            boolean isSuccess = true;
+            mCacheExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        MgmtCluster.getJwtToken(TeraFonnApiService.this, new MgmtCluster.FetchJwtTokenListener() {
+                            @Override
+                            public void onFetchSuccessful(String jwt) {
+                                String imei = HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this);
+                                try {
+                                    mGetJWTandIMEIListener.onDataGet(imei, jwt);
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onFetchFailed() {
+                                try {
+                                    mGetJWTandIMEIListener.onDataGet("", "");
+                                } catch (RemoteException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+
+            return isSuccess;
+        }
 
         @Override
         public void setFetchAppDataListener(IFetchAppDataListener listener) throws RemoteException {
@@ -68,7 +111,6 @@ public class TeraFonnApiService extends Service {
                                 } else {
                                     mFetchAppDataListener.onProgressUpdate(packageName, progress);
                                 }
-
                                 Thread.sleep(3000);
                             }
 
@@ -200,6 +242,7 @@ public class TeraFonnApiService extends Service {
             }
             return enabled;
         }
+
     };
 
     @Override
@@ -228,7 +271,8 @@ public class TeraFonnApiService extends Service {
                             for (String packageName : keyList) {
                                 AppStatus appStatus = mPackageNameMap.get(packageName);
                                 int reportStatus = getDifferentStatus(packageName, appStatus.getStatus());
-                                if (reportStatus != -1) mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
+                                if (reportStatus != -1)
+                                    mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
                             }
                         }
 
@@ -236,6 +280,7 @@ public class TeraFonnApiService extends Service {
 
                         Thread.sleep(3000);
                     } catch (Exception e) {
+                        mGetJWTandIMEIListener = null;
                         mTrackAppStatusListener = null;
                         mFetchAppDataListener = null;
                         mPackageNameMap.clear();
@@ -260,7 +305,7 @@ public class TeraFonnApiService extends Service {
             case Log.DEBUG:
                 Log.d(TAG, className + "(" + funcName + "): " + logMsg);
                 break;
-            case Log.INFO :
+            case Log.INFO:
                 Log.i(TAG, className + "(" + funcName + "): " + logMsg);
                 break;
             case Log.WARN:
@@ -356,7 +401,7 @@ public class TeraFonnApiService extends Service {
             } else if (appLocation.contains(LocationStatus.CLOUD)) {
                 location = LocationStatus.CLOUD;
             } else {
-                location =LocationStatus.LOCAL;
+                location = LocationStatus.LOCAL;
             }
 
             log(Log.DEBUG, CLASSNAME, "getDefaultLocation", "APP Location: " + String.valueOf(location));
@@ -375,7 +420,7 @@ public class TeraFonnApiService extends Service {
         return status != currentStatus ? status : -1;
     }
 
-    private Boolean handleFailureOfPinOrUnpin (Boolean pinOP, String packageName) {
+    private Boolean handleFailureOfPinOrUnpin(Boolean pinOP, String packageName) {
         boolean isSuccess = pinOrUnpin(pinOP, packageName);
         if (isSuccess) updateDB(pinOP, packageName);
         else pinOrUnpin(!pinOP, packageName);
@@ -452,7 +497,7 @@ public class TeraFonnApiService extends Service {
             sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
             log(Log.INFO, CLASSNAME, "getSourceDir", sourceDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getSourceDir",  "Error: Package (" + packageName + ") not found ");
+            log(Log.WARN, CLASSNAME, "getSourceDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return sourceDir;
@@ -466,7 +511,7 @@ public class TeraFonnApiService extends Service {
             dataDir = p.applicationInfo.dataDir;
             log(Log.INFO, CLASSNAME, "getDataDir", dataDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getDataDir",  "Error: Package (" + packageName + ") not found ");
+            log(Log.WARN, CLASSNAME, "getDataDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return dataDir;

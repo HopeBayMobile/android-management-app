@@ -1,10 +1,14 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.util.Log;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
@@ -226,6 +230,7 @@ public class MgmtCluster {
         }
         return serverClientId;
     }
+
 
     public static abstract class IAuthParam {
 
@@ -453,6 +458,22 @@ public class MgmtCluster {
         return registerResultInfo;
     }
 
+    /**
+     * Listener for fetching available JWT token from MGMT server
+     *
+     * @author Aaron
+     *         Created by Aaron on 2016/7/11.
+     */
+    public interface FetchJwtTokenListener {
+
+        /** Callback function when fetch successful */
+        void onFetchSuccessful(String jwtToken);
+
+        /** Callback function when fetch failed */
+        void onFetchFailed();
+
+    }
+
     public interface RegisterListener {
 
         void onRegisterSuccessful(RegisterResultInfo registerResultInfo);
@@ -533,23 +554,23 @@ public class MgmtCluster {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
 //                    final AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
 //                    if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
-                        Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
-                        if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-                            uiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    registerListener.onRegisterSuccessful(registerResultInfo);
-                                }
-                            });
-                        } else {
-                            uiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    registerListener.onRegisterFailed(registerResultInfo);
-                                }
-                            });
-                        }
+                    final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
+                    Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
+                    if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                registerListener.onRegisterSuccessful(registerResultInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                registerListener.onRegisterFailed(registerResultInfo);
+                            }
+                        });
+                    }
 //                    } else {
 //                        uiHandler.post(new Runnable() {
 //                            @Override
@@ -601,6 +622,52 @@ public class MgmtCluster {
             }
         }
         return isVerified;
+    }
+
+    public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) throws RemoteException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String serverClientId = MgmtCluster.getServerClientId();
+                GoogleAuthProxy googleAuthProxy = new GoogleAuthProxy(context, serverClientId);
+                googleAuthProxy.setOnAuthListener(new GoogleAuthProxy.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccessful(GoogleSignInResult result) {
+                        String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+
+                        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                        authParam.setAuthCode(serverAuthCode);
+                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(context)));
+                        authParam.setVendor(Build.BRAND);
+                        authParam.setModel(Build.MODEL);
+                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                        authParam.setHcfsVersion("1.0.1");
+
+                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                        authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                            @Override
+                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                                String jwtToken = authResultInfo.getToken();
+                                listener.onFetchSuccessful(jwtToken);
+                            }
+
+                            @Override
+                            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                listener.onFetchFailed();
+                            }
+                        });
+                        authProxy.auth();
+                    }
+
+                    @Override
+                    public void onAuthFailed() {
+                        listener.onFetchFailed();
+                    }
+                });
+                googleAuthProxy.auth();
+            }
+        }).start();
     }
 
     public static void resetRetryCount() {
