@@ -872,6 +872,9 @@ public class MgmtCluster {
         return isVerified;
     }
 
+    /**
+     * Get an available JWT token from MGMT server
+     */
     public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) {
         new Thread(new Runnable() {
             @Override
