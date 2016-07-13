@@ -63,7 +63,7 @@ public class TeraFonnApiService extends Service {
                                 String imei = HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this);
                                 try {
                                     mGetJWTandIMEIListener.onDataGet(imei, jwt);
-                                } catch (Exception e) {
+                                } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -72,7 +72,7 @@ public class TeraFonnApiService extends Service {
                             public void onFetchFailed() {
                                 try {
                                     mGetJWTandIMEIListener.onDataGet("", "");
-                                } catch (Exception e) {
+                                } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
                             }
