@@ -10,6 +10,7 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -26,7 +27,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -53,8 +53,6 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
@@ -140,60 +138,71 @@ public class SwitchAccountActivity extends AppCompatActivity {
             mSwitchAccount.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (ContextCompat.checkSelfPermission(SwitchAccountActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(SwitchAccountActivity.this, Manifest.permission.READ_PHONE_STATE)
+                            == PackageManager.PERMISSION_GRANTED) {
                         showProgressDialog();
-                        new Thread(new Runnable() {
+
+                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                        authParam.setAuthCode(mOldServerAuthCode);
+                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this)));
+                        authParam.setVendor(Build.BRAND);
+                        authParam.setModel(Build.MODEL);
+                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                        authParam.setHcfsVersion("1.0.1");
+
+                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                             @Override
-                            public void run() {
-                                MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                                authParam.setAuthCode(mOldServerAuthCode);
-                                AuthResultInfo authResultInfo = MgmtCluster.auth(authParam); // TODO replace with MgmtCluster.AuthProxy
-                                if (authResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
-                                    String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
-                                    final RegisterResultInfo registerResultInfo = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
-                                    if (registerResultInfo != null) {
-                                        AccountInfo accountInfo = new AccountInfo();
-                                        accountInfo.setName(mAccountName);
-                                        accountInfo.setEmail(mAccountEmail);
-                                        accountInfo.setImgUrl(mAccountPhotoUrl);
+                            public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
+                                        final RegisterResultInfo registerResultInfo = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
+                                        if (registerResultInfo != null) {
+                                            AccountInfo accountInfo = new AccountInfo();
+                                            accountInfo.setName(mAccountName);
+                                            accountInfo.setEmail(mAccountEmail);
+                                            accountInfo.setImgUrl(mAccountPhotoUrl);
 
-                                        AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
-                                        accountDAO.clear();
-                                        accountDAO.insert(accountInfo);
-                                        accountDAO.close();
+                                            AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
+                                            accountDAO.clear();
+                                            accountDAO.insert(accountInfo);
+                                            accountDAO.close();
 
-                                        HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            HCFSConfig.storeHCFSConfig(registerResultInfo);
 
-                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                        editor.apply();
-                                    }
+                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
+                                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                                            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
+                                            editor.apply();
+                                        }
 
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (registerResultInfo != null) {
-                                                Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
-                                                startActivity(intent);
-                                                finish();
-                                            } else {
-                                                signOut();
-                                                mErrorMsg.setText(R.string.switch_account_failed);
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                if (registerResultInfo != null) {
+                                                    Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
+                                                    startActivity(intent);
+                                                    finish();
+                                                } else {
+                                                    signOut();
+                                                    mErrorMsg.setText(R.string.switch_account_failed);
+                                                }
+                                                hideProgressDialog();
                                             }
-                                            hideProgressDialog();
-                                        }
-                                    });
-                                } else {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mErrorMsg.setText(R.string.switch_account_failed);
-                                        }
-                                    });
-                                }
+                                        });
+                                    }
+                                }).start();
                             }
-                        }).start();
+
+                            @Override
+                            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                mErrorMsg.setText(R.string.switch_account_failed);
+                            }
+                        });
+                        authProxy.auth();
                     } else {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
                         builder.setTitle(R.string.alert_dialog_title_warning);

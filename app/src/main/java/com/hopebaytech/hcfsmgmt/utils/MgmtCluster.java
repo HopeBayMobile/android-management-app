@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.RemoteException;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -179,14 +178,15 @@ public class MgmtCluster {
                 ContentValues data = new ContentValues();
                 data.put(KEY_NEW_AUTH_CODE, newServerAuthCode);
                 int responseCode = httpProxyImpl.post(data);
-                Logs.w(CLASSNAME, "switchAccount", "switch responseCode=" + responseCode);
+                Logs.d(CLASSNAME, "switchAccount", "responseCode=" + responseCode);
                 String responseContent = httpProxyImpl.getResponseContent();
-                Logs.e(CLASSNAME, "switchAccount", responseContent);
+                Logs.d(CLASSNAME, "switchAccount", "responseContent=" + responseContent);
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     registerResultInfo = new RegisterResultInfo();
                     convertRegisterResult(registerResultInfo, responseContent);
                 }
             } catch (Exception e) {
+                registerResultInfo = null;
                 Logs.e(CLASSNAME, "switchAccount", Log.getStackTraceString(e));
             } finally {
                 if (httpProxyImpl != null) {
@@ -195,7 +195,7 @@ public class MgmtCluster {
             }
         }
 
-        Logs.w(CLASSNAME, "switchAccount", "registerResultInfo=" + registerResultInfo);
+        Logs.d(CLASSNAME, "switchAccount", "registerResultInfo=" + registerResultInfo);
         return registerResultInfo;
     }
 
@@ -415,15 +415,6 @@ public class MgmtCluster {
                 Logs.d(CLASSNAME, "register", "responseContent=" + responseContent);
 
                 convertRegisterResult(registerResultInfo, responseContent);
-//                JSONObject jsonObj = new JSONObject(responseContent);
-//                registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
-//                registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]);
-//                registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]);
-//                registerResultInfo.setPassword(jsonObj.getString("password"));
-//                registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
-//                registerResultInfo.setBucket(jsonObj.getString("bucket"));
-//                registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
-//                registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
 
                 Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
                 Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
@@ -485,7 +476,7 @@ public class MgmtCluster {
 
     }
 
-    public interface AuthListener {
+    public interface OnAuthListener {
 
         void onAuthSuccessful(AuthResultInfo authResultInfo);
 
@@ -498,7 +489,7 @@ public class MgmtCluster {
 
     public static class AuthProxy {
 
-        private AuthListener authListener;
+        private OnAuthListener authListener;
         private MgmtCluster.IAuthParam authParam;
 
         public AuthProxy(IAuthParam authParam) {
@@ -530,7 +521,7 @@ public class MgmtCluster {
             }).start();
         }
 
-        public void setOnAuthListener(AuthListener listener) {
+        public void setOnAuthListener(OnAuthListener listener) {
             this.authListener = listener;
         }
 
@@ -552,8 +543,6 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-//                    final AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
-//                    if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
                     final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
                     Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
@@ -571,14 +560,6 @@ public class MgmtCluster {
                             }
                         });
                     }
-//                    } else {
-//                        uiHandler.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                registerListener.onAuthFailed(authResultInfo);
-//                            }
-//                        });
-//                    }
                 }
             }).start();
         }
@@ -711,6 +692,5 @@ public class MgmtCluster {
         }
         return resId;
     }
-
 
 }

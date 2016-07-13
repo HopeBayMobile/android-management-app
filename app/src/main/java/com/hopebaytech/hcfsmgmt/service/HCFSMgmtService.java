@@ -558,7 +558,7 @@ public class HCFSMgmtService extends Service {
 
         MgmtCluster.plusRetryCount();
         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-        authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
             @Override
             public void onAuthSuccessful(AuthResultInfo authResultInfo) {
                 MgmtCluster.RegisterProxy mgmtRegister = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
