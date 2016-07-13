@@ -14,8 +14,6 @@ import android.util.Log;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
-import com.hopebaytech.hcfsmgmt.interfaces.IFetchJwtTokenListener;
-import com.hopebaytech.hcfsmgmt.utils.GoogleAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -59,7 +57,6 @@ public class TeraFonnApiService extends Service {
             mCacheExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-
                     try {
                         MgmtCluster.getJwtToken(TeraFonnApiService.this, new MgmtCluster.FetchJwtTokenListener() {
                             @Override
@@ -67,7 +64,7 @@ public class TeraFonnApiService extends Service {
                                 String imei = HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this);
                                 try {
                                     mGetJWTandIMEIListener.onDataGet(imei, jwt);
-                                } catch (Exception e) {
+                                } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -76,10 +73,11 @@ public class TeraFonnApiService extends Service {
                             public void onFetchFailed() {
                                 try {
                                     mGetJWTandIMEIListener.onDataGet("", "");
-                                } catch (Exception e) {
+                                } catch (RemoteException e) {
                                     e.printStackTrace();
                                 }
                             }
+                        });
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
