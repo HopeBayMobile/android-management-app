@@ -119,6 +119,7 @@ public class ActivateWoCodeFragment extends Fragment {
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
         mUiHandler = new Handler();
+
     }
 
     @Nullable
