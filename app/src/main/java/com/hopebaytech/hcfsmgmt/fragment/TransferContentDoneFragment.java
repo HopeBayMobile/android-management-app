@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RecoverySystem;
@@ -28,12 +29,6 @@ public class TransferContentDoneFragment extends Fragment {
         return new TransferContentDoneFragment();
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -50,7 +45,7 @@ public class TransferContentDoneFragment extends Fragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 10; i >= 0; i--) {
+                for (int i = 5; i >= 0; i--) {
                     final String seconds = String.valueOf(i);
                     uiHandler.post(new Runnable() {
                         @Override
@@ -66,6 +61,12 @@ public class TransferContentDoneFragment extends Fragment {
                         e.printStackTrace();
                     }
                 }
+
+                // Factory reset
+                Intent intent = new Intent("android.intent.action.MASTER_CLEAR");
+                intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                intent.putExtra("android.intent.extra.REASON", "MasterClearConfirm");
+                getActivity().sendBroadcast(intent);
             }
         }).start();
 
