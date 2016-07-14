@@ -100,7 +100,7 @@ public class HCFSMgmtService extends Service {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         if (intent != null) {
             final String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
-            final Context context = getApplicationContext();
+            final Context context = this;
             Logs.d(CLASSNAME, "onStartCommand", "operation=" + operation);
             mCacheExecutor.execute(new Runnable() {
                 public void run() {
