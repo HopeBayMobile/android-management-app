@@ -406,6 +406,8 @@ public class MgmtCluster {
         }
     }
 
+
+
     public static String getServerClientId() {
 //        IHttpProxy httpProxyImpl = null;
 //        String serverClientId = null;
@@ -641,9 +643,6 @@ public class MgmtCluster {
 
     /**
      * Listener for fetching available JWT token from MGMT server
-     *
-     * @author Aaron
-     *         Created by Aaron on 2016/7/11.
      */
     public interface FetchJwtTokenListener {
 
