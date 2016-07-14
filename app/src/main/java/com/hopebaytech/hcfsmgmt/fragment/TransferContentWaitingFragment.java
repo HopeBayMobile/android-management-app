@@ -149,6 +149,20 @@ public class TransferContentWaitingFragment extends Fragment {
             }
         }
 
+        public void registerReceiver(IntentFilter intentFilter) {
+            if (!isRegister) {
+                mContext.registerReceiver(this, intentFilter);
+                isRegister = true;
+            }
+        }
+
+        public void unregisterReceiver() {
+            if (isRegister) {
+                mContext.unregisterReceiver(this);
+                isRegister = false;
+            }
+        }
+
     }
 
     private void showProgressDialog() {

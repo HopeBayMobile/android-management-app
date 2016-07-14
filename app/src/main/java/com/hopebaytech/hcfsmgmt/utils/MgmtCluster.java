@@ -8,10 +8,7 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
 import com.google.android.gms.common.api.GoogleApiClient;
-=======
->>>>>>> Apply UI and implement partial detailed operations
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
@@ -19,11 +16,7 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
-=======
-import com.hopebaytech.hcfsmgmt.interfaces.IFetchJwtTokenListener;
->>>>>>> Apply UI and implement partial detailed operations
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -169,7 +162,6 @@ public class MgmtCluster {
         return registerResultInfo;
     }
 
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
     public static class GetDeviceInfoProxy {
 
         private String jwtToken;
@@ -251,61 +243,35 @@ public class MgmtCluster {
     }
 
     public static class UnlockDeviceProxy {
-=======
-    public static class TransferContentProxy {
->>>>>>> Apply UI and implement partial detailed operations
 
         private String jwtToken;
         private String imei;
 
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
         private OnUnlockDeviceListener listener;
 
         public UnlockDeviceProxy(String jwtToken, String imei) {
-=======
-        private OnTransferContentListener listener;
-
-        public TransferContentProxy(String jwtToken, String imei) {
->>>>>>> Apply UI and implement partial detailed operations
             this.jwtToken = jwtToken;
             this.imei = imei;
         }
 
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
         public void unlock() {
-=======
-        public void transfer() {
->>>>>>> Apply UI and implement partial detailed operations
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
                     final UnlockDeviceInfo unlockDeviceInfo = unlockDevice(jwtToken, imei);
                     if (unlockDeviceInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 listener.onUnlockDeviceSuccessful(unlockDeviceInfo);
-=======
-                    final TransferContentInfo transferContentInfo = transferContents(jwtToken, imei);
-                    if (transferContentInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        uiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                listener.onTransferSuccessful(transferContentInfo);
->>>>>>> Apply UI and implement partial detailed operations
                             }
                         });
                     } else {
                         uiHandler.post(new Runnable() {
                             @Override
                             public void run() {
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
                                 listener.onUnlockDeviceFailed(unlockDeviceInfo);
-=======
-                                listener.onTransferFailed(transferContentInfo);
->>>>>>> Apply UI and implement partial detailed operations
                             }
                         });
                     }
@@ -313,7 +279,6 @@ public class MgmtCluster {
             }).start();
         }
 
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
         public void setOnUnlockDeviceListener(OnUnlockDeviceListener listener) {
             this.listener = listener;
         }
@@ -404,21 +369,10 @@ public class MgmtCluster {
 
             void onTransferSuccessful(TransferContentInfo transferContentInfo);
 
-=======
-        public void setOnTransferContentListener(OnTransferContentListener listener) {
-            this.listener = listener;
-        }
-
-        public interface OnTransferContentListener {
-
-            void onTransferSuccessful(TransferContentInfo transferContentInfo);
-
->>>>>>> Apply UI and implement partial detailed operations
             void onTransferFailed(TransferContentInfo transferContentInfo);
 
         }
 
-<<<<<<< e6ce3d4392ed3732ad604ee4bda0b1624af0a6df
         public static TransferContentInfo transferContents(String jwtToken, String imei) {
             IHttpProxy httpProxyImpl = null;
             TransferContentInfo transferContentInfo = new TransferContentInfo();
@@ -438,8 +392,10 @@ public class MgmtCluster {
                 int responseCode = httpProxyImpl.post(data);
                 String responseContent = httpProxyImpl.getResponseContent();
                 transferContentInfo.setResponseCode(responseCode);
-                transferContentInfo.setMessage(responseContent);
                 Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                if (responseCode != HttpsURLConnection.HTTP_OK) {
+                    transferContentInfo.setMessage(responseContent);
+                }
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
             } finally {
@@ -449,43 +405,8 @@ public class MgmtCluster {
             }
             return transferContentInfo;
         }
-
-=======
     }
 
-    private static TransferContentInfo transferContents(String jwtToken, String imei) {
-        IHttpProxy httpProxyImpl = null;
-        TransferContentInfo transferContentInfo = new TransferContentInfo();
-        try {
-            String url = DEVICE_API + imei + "/tx_ready/";
-
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(url);
-            httpProxyImpl.setDoOutput(true);
-
-            ContentValues header = new ContentValues();
-            header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
-            httpProxyImpl.setHeaders(header);
-            httpProxyImpl.connect();
-
-            ContentValues data = new ContentValues();
-            int responseCode = httpProxyImpl.post(data);
-            String responseContent = httpProxyImpl.getResponseContent();
-            transferContentInfo.setResponseCode(responseCode);
-            Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-            if (responseCode != HttpsURLConnection.HTTP_OK) {
-                transferContentInfo.setMessage(responseContent);
-            }
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
-        }
-        return transferContentInfo;
->>>>>>> Apply UI and implement partial detailed operations
-    }
 
     public static String getServerClientId() {
         IHttpProxy httpProxyImpl = null;
@@ -686,6 +607,9 @@ public class MgmtCluster {
 
     /**
      * Listener for fetching available JWT token from MGMT server
+     *
+     * @author Aaron
+     *         Created by Aaron on 2016/4/19.
      */
     public interface OnFetchJwtTokenListener {
 
