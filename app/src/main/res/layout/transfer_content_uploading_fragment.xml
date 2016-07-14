@@ -52,6 +52,7 @@
         android:layout_gravity="center_horizontal">
 
         <RelativeLayout
+            android:id="@+id/progressbar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -77,6 +78,8 @@
             android:id="@+id/error_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@android:color/black"
             android:layout_centerInParent="true" />
 
     </RelativeLayout>
