@@ -54,7 +54,6 @@ public class TransferContentDoneFragment extends Fragment {
                                 factoryResetMsg.setText(message);
                             }
                         });
-
                         Thread.sleep(1000);
                     }
                     // Factory reset

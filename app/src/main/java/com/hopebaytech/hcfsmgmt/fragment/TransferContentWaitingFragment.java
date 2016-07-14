@@ -79,7 +79,6 @@ public class TransferContentWaitingFragment extends Fragment {
                             public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
                                 dismissProgressDialog();
-                                getActivity().finish();
                             }
 
                             @Override
@@ -96,7 +95,6 @@ public class TransferContentWaitingFragment extends Fragment {
                     public void onFetchFailed() {
                         Logs.e(CLASSNAME, "onFetchFailed", null);
                         dismissProgressDialog();
-                        getActivity().finish();
                     }
                 });
             }
