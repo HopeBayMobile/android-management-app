@@ -165,6 +165,7 @@
     <string name="settings_transfer_content_done_title">Done</string>
     <string name="settings_transfer_content_done_message">Your device content have been successfully uploaded onto the cloud, and are being restored to the new device. This device will be reset in a few seconds.</string>
     <string name="settings_transfer_content_done_factory_reset">Factory Reset in %s seconds</string>
+    <string name="settings_transfer_content_failed">Transfer contents failed</string>
     <string name="settings_feedback">意見回饋</string>
     <string name="settings_snackbar_no_available_email_app_found">無可用的 Email 應用程式或無已設定的 Email 帳戶。請至少安裝一個 Email 應用程式，且設定一組正確的 Email 帳戶。</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">

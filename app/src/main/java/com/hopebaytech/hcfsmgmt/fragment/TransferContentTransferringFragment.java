@@ -47,11 +47,4 @@ public class TransferContentTransferringFragment extends Fragment {
         return inflater.inflate(R.layout.transfer_content_transferring_fragment, container, false);
     }
 
-    @Override
-    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-
-    }
-
 }

@@ -60,7 +60,7 @@
     <string name="active_cloud_storage_auth_fail">Account authentication failed.</string>
 
     <string name="overview_hcfs_conn_status_normal">Transmission normal</string>
-    <string name="overview_hcfs_conn_status_not_allowed">Not allow to transmit</string>
+    <string name="overview_hcfs_conn_status_not_allowed">Not allowed to transmit</string>
     <string name="overview_hcfs_conn_status_failed">Transmission failed</string>
     <string name="overview_hcfs_conn_status_in_progress">Transmitting</string>
     <string name="overview_hcfs_conn_status_slow">Transmission slow</string>
@@ -160,6 +160,7 @@
     <string name="settings_transfer_content_done_title">Done</string>
     <string name="settings_transfer_content_done_message">Your device content have been successfully uploaded onto the cloud, and are being restored to the new device. This device will be reset in a few seconds.</string>
     <string name="settings_transfer_content_done_factory_reset">Factory Reset in %s seconds</string>
+    <string name="settings_transfer_content_failed">Transfer contents failed</string>
     <string name="settings_feedback">Feedback</string>
     <string name="settings_snackbar_no_available_email_app_found">No available Email apps found or no Email accounts have been set. Please at least install an Email app, and set a valid Email account.</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
