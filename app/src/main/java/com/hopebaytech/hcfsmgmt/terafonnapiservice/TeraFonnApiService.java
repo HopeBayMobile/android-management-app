@@ -10,11 +10,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-<<<<<<< 0aec17bdc3d3a70e4183be2c111f7e54f0cf905f
-=======
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.hopebaytech.hcfsmgmt.R;
->>>>>>> Apply UI and implement partial detailed operations
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;

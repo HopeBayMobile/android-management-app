@@ -573,7 +573,6 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                     signOut();
                                     dismissProgressDialog();
->>>>>>> Integrate with mgmt server
 
                                     int errorMsgResId = R.string.activate_failed;
                                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
@@ -608,7 +607,8 @@ public class ActivateWoCodeFragment extends Fragment {
                         @Override
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
                             Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
-                            signOut();
+                            
+			    signOut();
                             dismissProgressDialog();
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }
