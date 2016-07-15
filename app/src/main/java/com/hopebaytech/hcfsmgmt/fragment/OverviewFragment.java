@@ -14,10 +14,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import java.util.Locale;
 
@@ -69,8 +72,8 @@ public class OverviewFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreate", null);
         super.onCreate(savedInstanceState);
+
     }
 
     @Override
