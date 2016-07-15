@@ -60,6 +60,7 @@ public class TransferContentConfirmDialogFragment extends DialogFragment {
         TextView username = (TextView) view.findViewById(R.id.username);
 
         final TextView errorMsg = (TextView) view.findViewById(R.id.error_msg);
+        errorMsg.setVisibility(View.GONE);
 
         AccountDAO accountDAO = AccountDAO.getInstance(getActivity());
         List<AccountInfo> accountInfoList = accountDAO.getAll();
