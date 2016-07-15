@@ -392,10 +392,8 @@ public class MgmtCluster {
                 int responseCode = httpProxyImpl.post(data);
                 String responseContent = httpProxyImpl.getResponseContent();
                 transferContentInfo.setResponseCode(responseCode);
+                transferContentInfo.setMessage(responseContent);
                 Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-                if (responseCode != HttpsURLConnection.HTTP_OK) {
-                    transferContentInfo.setMessage(responseContent);
-                }
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
             } finally {
@@ -406,7 +404,6 @@ public class MgmtCluster {
             return transferContentInfo;
         }
     }
-
 
     public static String getServerClientId() {
         IHttpProxy httpProxyImpl = null;
