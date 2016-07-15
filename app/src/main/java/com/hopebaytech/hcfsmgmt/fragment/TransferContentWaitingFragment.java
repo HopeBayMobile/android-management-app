@@ -78,6 +78,7 @@ public class TransferContentWaitingFragment extends Fragment {
                             @Override
                             public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
+                                dismissProgressDialog();
                                 getActivity().finish();
                             }
 
