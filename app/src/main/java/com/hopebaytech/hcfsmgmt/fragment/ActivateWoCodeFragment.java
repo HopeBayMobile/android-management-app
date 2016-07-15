@@ -312,9 +312,39 @@ public class ActivateWoCodeFragment extends Fragment {
                                     GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
                                             mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
                                         @Override
+<<<<<<< 2efbbb365869a9d0dc4c8a293e95ed8f3afe1404
                                         public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
                                             Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
                                             mGoogleApiClient = googleApiClient;
+=======
+                                        public void run() {
+                                            if (mGoogleApiClient == null) {
+                                                mGoogleApiClient = new GoogleApiClient.Builder(mContext)
+                                                        .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                                                            @Override
+                                                            public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                                                                // An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
+                                                                Logs.d(CLASSNAME, "onConnectionFailed", "connectionResult=" + connectionResult);
+                                                                if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_MISSING) {
+                                                                    mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                                                } else if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
+                                                                    mErrorMessage.setText(R.string.activate_update_google_play_services_required);
+                                                                    PlayServiceSnackbar.newInstance(mContext, mView).show();
+                                                                } else {
+                                                                    mErrorMessage.setText(R.string.activate_signin_google_account_failed);
+                                                                }
+                                                                dismissProgressDialog();
+                                                                mGoogleApiClient.disconnect();
+                                                            }
+                                                        })
+                                                        .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                                                            @Override
+                                                            public void onConnected(@Nullable Bundle bundle) {
+                                                                Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
+                                                                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+                                                                ((Activity) mContext).startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
+                                                            }
+>>>>>>> Integrate with mgmt server
 
                                             signIn();
                                         }
@@ -571,8 +601,22 @@ public class ActivateWoCodeFragment extends Fragment {
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                                     Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
+<<<<<<< 2efbbb365869a9d0dc4c8a293e95ed8f3afe1404
                                     signOut();
                                     dismissProgressDialog();
+=======
+                                    dismissProgressDialog();
+
+                                    if (mGoogleApiClient.isConnected()) {
+                                        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                                                .setResultCallback(new ResultCallback<Status>() {
+                                                    @Override
+                                                    public void onResult(@NonNull Status status) {
+                                                        Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
+                                                    }
+                                                });
+                                    }
+>>>>>>> Integrate with mgmt server
 
                                     int errorMsgResId = R.string.activate_failed;
                                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
@@ -606,9 +650,26 @@ public class ActivateWoCodeFragment extends Fragment {
 
                         @Override
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
+<<<<<<< 2efbbb365869a9d0dc4c8a293e95ed8f3afe1404
                             Logs.e(CLASSNAME, "onConnectionFailed", "authResultInfo=" + authResultInfo.toString());
                             signOut();
                             dismissProgressDialog();
+=======
+                            Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
+
+                            dismissProgressDialog();
+
+                            if (mGoogleApiClient.isConnected()) {
+                                Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                                        .setResultCallback(new ResultCallback<Status>() {
+                                            @Override
+                                            public void onResult(@NonNull Status status) {
+                                                Logs.d(CLASSNAME, "onAuthFailed", "status=" + status);
+                                            }
+                                        });
+                            }
+
+>>>>>>> Integrate with mgmt server
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }
                     });
