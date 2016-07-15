@@ -373,11 +373,7 @@ public class MgmtCluster {
 
         }
 
-<<<<<<< b865d1f552ebc5bc3bd6e60ddd8f022f582bc191
         public static TransferContentInfo transferContents(String jwtToken, String imei) {
-=======
-        private TransferContentInfo transferContents(String jwtToken, String imei) {
->>>>>>> Implement detailed operations
             IHttpProxy httpProxyImpl = null;
             TransferContentInfo transferContentInfo = new TransferContentInfo();
             try {
@@ -396,15 +392,8 @@ public class MgmtCluster {
                 int responseCode = httpProxyImpl.post(data);
                 String responseContent = httpProxyImpl.getResponseContent();
                 transferContentInfo.setResponseCode(responseCode);
-<<<<<<< b865d1f552ebc5bc3bd6e60ddd8f022f582bc191
                 transferContentInfo.setMessage(responseContent);
                 Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-=======
-                Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-                if (responseCode != HttpsURLConnection.HTTP_OK) {
-                    transferContentInfo.setMessage(responseContent);
-                }
->>>>>>> Implement detailed operations
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
             } finally {
@@ -416,8 +405,6 @@ public class MgmtCluster {
         }
 
     }
-
-
 
     public static String getServerClientId() {
         IHttpProxy httpProxyImpl = null;
@@ -617,12 +604,10 @@ public class MgmtCluster {
     }
 
     /**
-<<<<<<< b865d1f552ebc5bc3bd6e60ddd8f022f582bc191
      * Listener for fetching available JWT token from MGMT server
-=======
+     *
      * @author Aaron
      *         Created by Aaron on 2016/4/19.
->>>>>>> Implement detailed operations
      */
     public interface OnFetchJwtTokenListener {
 
@@ -878,13 +863,8 @@ public class MgmtCluster {
     /**
      * Get an available JWT token from MGMT server
      */
-<<<<<<< b865d1f552ebc5bc3bd6e60ddd8f022f582bc191
     public static void getJwtToken(final Context context, final OnFetchJwtTokenListener listener) {
        new Thread(new Runnable() {
-=======
-    public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) {
-        new Thread(new Runnable() {
->>>>>>> Implement detailed operations
             @Override
             public void run() {
                 final String serverClientId = MgmtCluster.getServerClientId();
