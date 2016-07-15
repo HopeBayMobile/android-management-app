@@ -214,7 +214,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                                     mUiHandler.post(new Runnable() {
                                                         @Override
                                                         public void run() {
-                                                            hideProgressDialog();
+                                                            dismissProgressDialog();
                                                             if (failed) {
                                                                 mErrorMessage.setText(R.string.activate_failed);
                                                             } else {
@@ -232,7 +232,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                         public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                                             Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
-                                            hideProgressDialog();
+                                            dismissProgressDialog();
 
                                             int errorMsgResId = R.string.activate_failed;
                                             if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
@@ -267,7 +267,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                 public void onAuthFailed(AuthResultInfo authResultInfo) {
                                     Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
 
-                                    hideProgressDialog();
+                                    dismissProgressDialog();
                                     mErrorMessage.setText(R.string.activate_auth_failed);
                                 }
                             });
@@ -337,7 +337,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                                                 } else {
                                                                     mErrorMessage.setText(R.string.activate_signin_google_account_failed);
                                                                 }
-                                                                hideProgressDialog();
+                                                                dismissProgressDialog();
                                                                 mGoogleApiClient.disconnect();
                                                             }
                                                         })
@@ -366,7 +366,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                     mUiHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            hideProgressDialog();
+                                            dismissProgressDialog();
                                             mErrorMessage.setText(R.string.activate_get_server_client_id_failed);
                                         }
                                     });
@@ -465,7 +465,7 @@ public class ActivateWoCodeFragment extends Fragment {
     private void googleAuthFailed(String failedMsg) {
         Logs.e(CLASSNAME, "googleAuthFailed", "failedMsg=" + failedMsg);
 
-        hideProgressDialog();
+        dismissProgressDialog();
         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<Status>() {
                     @Override
@@ -516,7 +516,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 mUiHandler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
-                                                        hideProgressDialog();
+                                                        dismissProgressDialog();
                                                         mErrorMessage.setText(R.string.activate_failed);
                                                     }
                                                 });
@@ -546,7 +546,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 mUiHandler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
-                                                        hideProgressDialog();
+                                                        dismissProgressDialog();
                                                     }
                                                 });
 
@@ -569,7 +569,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                                     Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
-                                    hideProgressDialog();
+                                    dismissProgressDialog();
 
                                     if (mGoogleApiClient.isConnected()) {
                                         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
@@ -615,7 +615,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
                             Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
 
-                            hideProgressDialog();
+                            dismissProgressDialog();
 
                             if (mGoogleApiClient.isConnected()) {
                                 Auth.GoogleSignInApi.signOut(mGoogleApiClient)
@@ -637,7 +637,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     googleAuthFailed(failedMsg);
                 }
             } else {
-                hideProgressDialog();
+                dismissProgressDialog();
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);
@@ -670,10 +670,9 @@ public class ActivateWoCodeFragment extends Fragment {
         mProgressDialog.show();
     }
 
-    private void hideProgressDialog() {
-        Logs.d(CLASSNAME, "hideProgressDialog", null);
+    private void dismissProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.hide();
+            mProgressDialog.dismiss();
         }
     }
 

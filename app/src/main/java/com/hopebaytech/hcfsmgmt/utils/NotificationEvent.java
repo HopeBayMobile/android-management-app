@@ -78,8 +78,8 @@ public class NotificationEvent {
             builder = (NotificationCompat.Builder) builder
                     .setAutoCancel(true)
                     .setOngoing(false)
-                    .setDefaults(defaults)
-                    .setFullScreenIntent(contentIntent, true);
+                    .setDefaults(defaults);
+//                    .setFullScreenIntent(contentIntent, true);
         }
         Notification notification = builder.build();
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);

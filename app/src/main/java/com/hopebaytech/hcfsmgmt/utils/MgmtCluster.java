@@ -12,6 +12,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
@@ -202,6 +203,86 @@ public class MgmtCluster {
         return registerResultInfo;
     }
 
+    public static class GetDeviceInfoProxy {
+
+        private String jwtToken;
+        private String imei;
+
+        private OnGetDeviceInfoListener listener;
+
+        public GetDeviceInfoProxy(String jwtToken, String imei) {
+            this.jwtToken = jwtToken;
+            this.imei = imei;
+        }
+
+        public void get() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final GetDeviceInfo getDeviceInfo = getDeviceInfo(jwtToken, imei);
+                    if (getDeviceInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetDeviceInfoSuccessful(getDeviceInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetDeviceInfoFailed(getDeviceInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnGetDeviceInfoListener(OnGetDeviceInfoListener listener) {
+            this.listener = listener;
+        }
+
+        public interface OnGetDeviceInfoListener {
+
+            void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo);
+
+            void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo);
+
+        }
+
+        private GetDeviceInfo getDeviceInfo(String jwtToken, String imei) {
+            IHttpProxy httpProxyImpl = null;
+            GetDeviceInfo getDeviceInfo = new GetDeviceInfo();
+            try {
+                String url = DEVICE_API + imei + "/service/";
+
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                int responseCode = httpProxyImpl.get();
+                String responseContent = httpProxyImpl.getResponseContent();
+                getDeviceInfo.setResponseCode(responseCode);
+                getDeviceInfo.setMessage(responseContent);
+                Logs.d(CLASSNAME, "getDeviceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "getDeviceInfo", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+            return getDeviceInfo;
+        }
+
+    }
+
     public static class UnlockDeviceProxy {
 
         private String jwtToken;
@@ -270,10 +351,8 @@ public class MgmtCluster {
                 int responseCode = httpProxyImpl.post(data);
                 String responseContent = httpProxyImpl.getResponseContent();
                 unlockDeviceInfo.setResponseCode(responseCode);
+                unlockDeviceInfo.setMessage(responseContent);
                 Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-                if (responseCode != HttpsURLConnection.HTTP_OK) {
-                    unlockDeviceInfo.setMessage(responseContent);
-                }
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
             } finally {
@@ -354,10 +433,8 @@ public class MgmtCluster {
                 int responseCode = httpProxyImpl.post(data);
                 String responseContent = httpProxyImpl.getResponseContent();
                 transferContentInfo.setResponseCode(responseCode);
+                transferContentInfo.setMessage(responseContent);
                 Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-                if (responseCode != HttpsURLConnection.HTTP_OK) {
-                    transferContentInfo.setMessage(responseContent);
-                }
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
             } finally {
@@ -369,8 +446,6 @@ public class MgmtCluster {
         }
 
     }
-
-
 
     public static String getServerClientId() {
         IHttpProxy httpProxyImpl = null;

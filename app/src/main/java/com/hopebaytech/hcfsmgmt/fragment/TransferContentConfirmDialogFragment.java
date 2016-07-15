@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
@@ -27,6 +28,7 @@ import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.main.SwitchAccountActivity;
 import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import java.util.List;
 
@@ -57,7 +59,7 @@ public class TransferContentConfirmDialogFragment extends DialogFragment {
         final View view = inflater.inflate(R.layout.settings_transfer_content_confirm_dialog, null);
         TextView username = (TextView) view.findViewById(R.id.username);
 
-        TextView errorMsg = (TextView) view.findViewById(R.id.error_msg);
+        final TextView errorMsg = (TextView) view.findViewById(R.id.error_msg);
         errorMsg.setVisibility(View.GONE);
 
         AccountDAO accountDAO = AccountDAO.getInstance(getActivity());
@@ -85,11 +87,17 @@ public class TransferContentConfirmDialogFragment extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!password.getText().toString().isEmpty()) {
+                        boolean isConnected = NetworkUtils.isNetworkConnected(getActivity());
+                        if (NetworkUtils.isNetworkConnected(getActivity())) {
+                            errorMsg.setVisibility(View.GONE);
+
                             Intent intent = new Intent(getActivity(), TransferContentActivity.class);
                             startActivity(intent);
+                            dismiss();
+                        } else {
+                            errorMsg.setVisibility(View.VISIBLE);
+                            errorMsg.setText(R.string.activate_alert_dialog_message);
                         }
-                        dismiss();
                     }
                 });
 

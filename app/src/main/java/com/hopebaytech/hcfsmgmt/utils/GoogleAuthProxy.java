@@ -2,6 +2,8 @@ package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -50,6 +52,17 @@ public class GoogleAuthProxy {
 
         if (mServerClientId == null) {
             mServerClientId = MgmtCluster.getServerClientId();
+            if (mServerClientId == null) {
+                Logs.e(CLASSNAME, "auth", "mServerClientId == null");
+                Handler uiHandler = new Handler(Looper.getMainLooper());
+                uiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mOnAuthListener.onAuthFailed();
+                    }
+                });
+                return;
+            }
         }
 
         if (mGoogleSignInOptions == null) {
