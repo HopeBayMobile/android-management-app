@@ -26,21 +26,6 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.plus.Plus;
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
@@ -48,14 +33,6 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-
-import java.net.HttpURLConnection;
-import java.util.Locale;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-
-import java.net.HttpURLConnection;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import java.net.HttpURLConnection;
 import java.util.Locale;
@@ -197,7 +174,7 @@ public class ActivateWithCodeFragment extends Fragment {
                                             mUiHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    hideProgressDialog();
+                                                    dismissProgressDialog();
                                                     if (failed) {
                                                         mErrorMessage.setText(R.string.activate_failed);
                                                     } else {
@@ -215,7 +192,7 @@ public class ActivateWithCodeFragment extends Fragment {
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                                     Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
-                                    hideProgressDialog();
+                                    dismissProgressDialog();
 
                                     int errorMsgResId = R.string.activate_incorrect_activation_code;
                                     if (registerResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -265,9 +242,9 @@ public class ActivateWithCodeFragment extends Fragment {
         mProgressDialog.show();
     }
 
-    private void hideProgressDialog() {
+    private void dismissProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.hide();
+            mProgressDialog.dismiss();
         }
     }
 

@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -32,6 +32,8 @@ public class TransferContentWaitingFragment extends Fragment {
     private String ACTION_TRANSFER_COMPLETED = "hbt.intent.action.TRANSFER_COMPLETED";
 
     private TransferCompletedReceiver mTransferCompletedReceiver;
+
+    private ProgressDialog mProgressDialog;
 
     public static TransferContentWaitingFragment newInstance() {
         return new TransferContentWaitingFragment();
@@ -63,29 +65,34 @@ public class TransferContentWaitingFragment extends Fragment {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                showProgressDialog();
+                final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
                 MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.FetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {
-                        String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
                         MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
                         unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
                             @Override
                             public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
+                                dismissProgressDialog();
                                 getActivity().finish();
                             }
 
                             @Override
                             public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
+                                dismissProgressDialog();
                                 getActivity().finish();
                             }
                         });
+                        unlockDeviceProxy.unlock();
                     }
 
                     @Override
                     public void onFetchFailed() {
                         Logs.e(CLASSNAME, "onFetchFailed", null);
+                        dismissProgressDialog();
                         getActivity().finish();
                     }
                 });
@@ -139,6 +146,22 @@ public class TransferContentWaitingFragment extends Fragment {
             }
         }
 
+    }
+
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
+        }
+        mProgressDialog.setMessage(getString(R.string.cancel_processing_msg));
+        mProgressDialog.show();
+    }
+
+    private void dismissProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
     }
 
 }

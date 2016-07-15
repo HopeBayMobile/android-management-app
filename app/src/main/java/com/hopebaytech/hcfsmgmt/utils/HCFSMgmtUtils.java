@@ -349,7 +349,7 @@ public class HCFSMgmtUtils {
             cursor.close();
         }
 
-		// Internal storage
+        // Internal storage
         // cursor = resolver.query(MediaStore.Images.Media.INTERNAL_CONTENT_URI,
         // projection, null, null, MediaStore.Images.Media._ID);
         // cursor.moveToFirst();
@@ -451,7 +451,7 @@ public class HCFSMgmtUtils {
         return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
-//    public static boolean unpinApp(ServiceAppInfo info) {
+    //    public static boolean unpinApp(ServiceAppInfo info) {
     public static boolean unpinApp(AppInfo info) {
         Logs.i(CLASSNAME, "unpinApp", "appName=" + info.getName());
         String sourceDir = info.getSourceDir();
@@ -484,14 +484,14 @@ public class HCFSMgmtUtils {
 
     /**
      * @return 0 if pin file or directory is successful, error otherwise.
-     * */
+     */
     public static int pinFileOrDirectory(String filePath) {
         return pinFileOrDirectory(filePath, PinType.NORMAL);
     }
 
     /**
      * @return 0 if pin file or directory is successful, error otherwise.
-     * */
+     */
     public static int pinFileOrDirectory(String filePath, int pinType) {
         int code = DEFAULT_PINNED_STATUS ? 0 : -1;
         try {
@@ -514,7 +514,7 @@ public class HCFSMgmtUtils {
 
     /**
      * @return 0 if unpin file or directory is successful, error otherwise.
-     * */
+     */
     public static int unpinFileOrDirectory(String filePath) {
         int code = DEFAULT_PINNED_STATUS ? 0 : -1;
         try {
@@ -540,11 +540,10 @@ public class HCFSMgmtUtils {
     public static int getDirLocationStatus(String pathName) {
         int locationStatus = LocationStatus.LOCAL;
         try {
-            // String logMsg = "pathName=" + pathName + ", startTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirLocationStatus", logMsg);
+            long start = System.currentTimeMillis();
             String jsonResult = HCFSApiUtils.getDirStatus(pathName);
-            // logMsg = "pathName=" + pathName + ", endTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirLocationStatus", logMsg);
+            long end = System.currentTimeMillis();
+            Logs.w(CLASSNAME, "getDirLocationStatus", pathName + ": " + (end - start));
             String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");

@@ -5,25 +5,19 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
-import com.hopebaytech.hcfsmgmt.utils.GoogleAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
