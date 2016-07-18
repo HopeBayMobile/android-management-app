@@ -15,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.HBTIntent;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -29,7 +30,7 @@ public class TransferContentUploadingFragment extends Fragment {
     public static final String TAG = TransferContentUploadingFragment.class.getSimpleName();
     private final String CLASSNAME = TransferContentUploadingFragment.class.getSimpleName();
 
-    private String ACTION_UPLOAD_COMPLETED = "hbt.intent.action.UPLOAD_COMPLETED";
+
 
     private TextView mErrorMsg;
     private RelativeLayout mProgressLayout;
@@ -45,7 +46,7 @@ public class TransferContentUploadingFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_UPLOAD_COMPLETED);
+        filter.addAction(HBTIntent.ACTION_UPLOAD_COMPLETED);
         mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
         mUploadCompletedReceiver.registerReceiver(filter);
 
@@ -59,7 +60,7 @@ public class TransferContentUploadingFragment extends Fragment {
                 }
 
                 Intent intent = new Intent();
-                intent.setAction(ACTION_UPLOAD_COMPLETED);
+                intent.setAction(HBTIntent.ACTION_UPLOAD_COMPLETED);
                 getActivity().sendBroadcast(intent);
             }
         }).start();
@@ -108,8 +109,8 @@ public class TransferContentUploadingFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if (action.equals(ACTION_UPLOAD_COMPLETED)) {
-                Logs.d(CLASSNAME, "onReceive", ACTION_UPLOAD_COMPLETED);
+            if (action.equals(HBTIntent.ACTION_UPLOAD_COMPLETED)) {
+                Logs.d(CLASSNAME, "onReceive", HBTIntent.ACTION_UPLOAD_COMPLETED);
                 MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.FetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {
