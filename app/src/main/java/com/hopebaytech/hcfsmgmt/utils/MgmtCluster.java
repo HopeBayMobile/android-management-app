@@ -435,7 +435,6 @@ public class MgmtCluster {
         return serverClientId;
     }
 
-
     public static abstract class IAuthParam {
 
         protected String activateCode;
