@@ -1,6 +1,5 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -63,10 +62,7 @@ public class TransferContentDoneFragment extends Fragment {
                 }
 
                 // Factory reset
-                Intent intent = new Intent("android.intent.action.MASTER_CLEAR");
-                intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra("android.intent.extra.REASON", "MasterClearConfirm");
-                getActivity().sendBroadcast(intent);
+                FactoryResetUtils.reset(getActivity());
             }
         }).start();
 
