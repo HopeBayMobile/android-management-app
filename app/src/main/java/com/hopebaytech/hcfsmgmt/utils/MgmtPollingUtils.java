@@ -38,4 +38,5 @@ public class MgmtPollingUtils {
         Intent intentService = new Intent(context, cls);
         context.stopService(intentService);
     }
+
 }
