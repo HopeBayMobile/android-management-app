@@ -177,9 +177,7 @@ public class MgmtPollingService extends Service {
                     bundle.putString("lockMsg", lockMsg);
                     lockDeviceActivity.putExtras(bundle);
                     startActivity(lockDeviceActivity);
-
                     break;
-
                 default:
             }
         }
