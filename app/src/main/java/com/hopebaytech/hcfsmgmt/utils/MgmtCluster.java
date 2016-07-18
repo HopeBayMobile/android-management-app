@@ -605,7 +605,7 @@ public class MgmtCluster {
         return isVerified;
     }
 
-    public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) throws RemoteException {
+    public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) {
         new Thread(new Runnable() {
             @Override
             public void run() {
