@@ -103,7 +103,7 @@ public class MgmtPollingService extends Service {
                                                     break;
 
                                                 default:
-                                                    if (result.getJSONObject("state").equals(GetDeviceInfo.ACTIVATED) stopped = true;
+                                                    if (result.getString("state").equals(GetDeviceInfo.ACTIVATED) stopped = true;
                                                     break;
                                             }
                                         } catch (JSONException e) {
