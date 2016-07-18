@@ -90,13 +90,20 @@ public class MgmtPollingService extends Service {
                                                 case GetDeviceInfo.LOCK:
                                                     action.lock(piggyback);
                                                     break;
+
                                                 case GetDeviceInfo.RESET:
                                                     action.reset();
                                                     break;
+
                                                 case GetDeviceInfo.TX_WAITING:
                                                     break;
+
                                                 case GetDeviceInfo.UNREGISTERED:
                                                     action.unregistered();
+                                                    break;
+
+                                                default:
+                                                    if (result.getJSONObject("state").equals(GetDeviceInfo.ACTIVATED) stopped = true;
                                                     break;
                                             }
                                         } catch (JSONException e) {
