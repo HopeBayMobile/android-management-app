@@ -15,10 +15,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.HBTIntent;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
+import com.hopebaytech.hcfsmgmt.service.MgmtPollingService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
 
 /**
  * @author Aaron
@@ -28,8 +31,6 @@ public class TransferContentWaitingFragment extends Fragment {
 
     public static final String TAG = TransferContentWaitingFragment.class.getSimpleName();
     private final String CLASSNAME = TransferContentWaitingFragment.class.getSimpleName();
-
-    private String ACTION_TRANSFER_COMPLETED = "hbt.intent.action.TRANSFER_COMPLETED";
 
     private TransferCompletedReceiver mTransferCompletedReceiver;
 
@@ -44,11 +45,13 @@ public class TransferContentWaitingFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_TRANSFER_COMPLETED);
+        filter.addAction(HBTIntent.ACTION_TRANSFER_COMPLETED);
         mTransferCompletedReceiver = new TransferCompletedReceiver(getActivity());
         mTransferCompletedReceiver.registerReceiver(filter);
 
-        // TODO call polling api of MgmtCluster.java to check device status
+        // Start polling service to check device status (need to register a BroadcastReceiver for
+        // receiving intent with HBTIntent.ACTION_TRANSFER_COMPLETED action.)
+        MgmtPollingUtils.startPollingService(getActivity(), 10, MgmtPollingService.class);
     }
 
     @Nullable
@@ -105,6 +108,7 @@ public class TransferContentWaitingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mTransferCompletedReceiver.unregisterReceiver();
+        MgmtPollingUtils.stopPollingService(getActivity(), MgmtPollingService.class);
     }
 
     public class TransferCompletedReceiver extends BroadcastReceiver {
@@ -121,8 +125,8 @@ public class TransferContentWaitingFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if (action.equals(ACTION_TRANSFER_COMPLETED)) {
-                Logs.w(CLASSNAME, "onReceive", ACTION_TRANSFER_COMPLETED);
+            if (action.equals(HBTIntent.ACTION_TRANSFER_COMPLETED)) {
+                Logs.w(CLASSNAME, "onReceive", HBTIntent.ACTION_TRANSFER_COMPLETED);
                 TransferContentTransferringFragment fragment = TransferContentTransferringFragment.newInstance();
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();

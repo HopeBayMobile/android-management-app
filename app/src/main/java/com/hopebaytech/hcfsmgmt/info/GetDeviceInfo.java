@@ -6,6 +6,11 @@ package com.hopebaytech.hcfsmgmt.info;
  */
 public class GetDeviceInfo {
 
+    public static final String LOCK = "pb_001";
+    public static final String RESET = "pb_002";
+    public static final String TX_WAITING = "pb_003";
+    public static final String UNREGISTERED = "pb_004";
+
     private String message;
     private int responseCode;
 
