@@ -6,7 +6,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
+import com.hopebaytech.hcfsmgmt.info.HBTIntent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -16,7 +19,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Created by Vince on 2016/7/14.
+ * @author Vince
+ *         Created by Vince on 2016/7/14.
  */
 
 public class MgmtPollingService extends Service {
@@ -53,7 +57,7 @@ public class MgmtPollingService extends Service {
         super.onDestroy();
     }
 
-    class PollingThread extends Thread {
+    private class PollingThread extends Thread {
         private long interval;
 
         public PollingThread(int i) {
@@ -71,39 +75,41 @@ public class MgmtPollingService extends Service {
                         MgmtCluster.getJwtToken(MgmtPollingService.this, new MgmtCluster.FetchJwtTokenListener() {
                             @Override
                             public void onFetchSuccessful(String jwt) {
-
                                 String imei = HCFSMgmtUtils.getDeviceImei(MgmtPollingService.this);
-                                try {
-                                    JSONObject result = MgmtCluster.getMgmtCommands(jwt, imei);
-                                    Logs.d(CLASSNAME, this.getClass().getName(), result.toString());
-
-                                    JSONObject piggyback = result.getJSONObject("piggyback");
-                                    String category = piggyback.getString("category");
-
-                                    switch (category) {
-                                        //Lock
-                                        case "pb_001":
-                                            action.lock(piggyback);
-                                            break;
-
-                                        // Reset
-                                        case "pb_002":
-                                            action.reset();
-                                            break;
-
-                                        // TXWaiting
-                                        case "pb_003":
-                                            break;
-
-                                        // Unregistered
-                                        case "pb_004":
-                                            action.unregistered();
-                                            break;
+                                MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwt, imei);
+                                proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+                                    @Override
+                                    public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
+                                        try {
+                                            String responseContent = getDeviceInfo.getMessage();
+                                            JSONObject result = new JSONObject(responseContent);
+                                            JSONObject piggyback = result.getJSONObject("piggyback");
+                                            String category = piggyback.getString("category");
+                                            switch (category) {
+                                                case GetDeviceInfo.LOCK:
+                                                    action.lock(piggyback);
+                                                    break;
+                                                case GetDeviceInfo.RESET:
+                                                    action.reset();
+                                                    break;
+                                                case GetDeviceInfo.TX_WAITING:
+                                                    break;
+                                                case GetDeviceInfo.UNREGISTERED:
+                                                    action.unregistered();
+                                                    break;
+                                            }
+                                        } catch (JSONException e) {
+                                            Logs.e(CLASSNAME, "onGetDeviceInfoFailed", Log.getStackTraceString(e));
+                                        }
                                     }
 
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
+                                    @Override
+                                    public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+                                        Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                                    }
+                                });
+                                proxy.get();
+
                             }
 
                             @Override
@@ -113,7 +119,6 @@ public class MgmtPollingService extends Service {
 
                         });
                     }
-
                 } catch (Exception e) {
                     Logs.e(CLASSNAME, this.getClass().getName(), e.toString());
                 }
@@ -121,14 +126,14 @@ public class MgmtPollingService extends Service {
                 try {
                     Thread.sleep(interval * 1000);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Logs.e(CLASSNAME, "onGetDeviceInfoFailed", Log.getStackTraceString(e));
                 }
             }
 
         }
     }
 
-    class Action {
+    private class Action {
 
         private void lock(JSONObject piggyback) {
             try {
@@ -139,8 +144,6 @@ public class MgmtPollingService extends Service {
 
             } catch (JSONException e) {
                 Logs.e(CLASSNAME, this.getClass().getName() + ".Lock", e.toString());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
 
@@ -149,7 +152,7 @@ public class MgmtPollingService extends Service {
         }
 
         private void unregistered() {
-            sendBroadcast(new Intent("hbt.intent.action.TRANSFER_COMPLETED"));
+            sendBroadcast(new Intent(HBTIntent.ACTION_TRANSFER_COMPLETED));
         }
 
     }
@@ -158,17 +161,16 @@ public class MgmtPollingService extends Service {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 0:
-                    Intent lockDeviceActivit = new Intent(MgmtPollingService.this, com.hopebaytech.hcfsmgmt.main.LockDeviceActivity.class);
-                    lockDeviceActivit.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Intent lockDeviceActivity = new Intent(MgmtPollingService.this, com.hopebaytech.hcfsmgmt.main.LockDeviceActivity.class);
+                    lockDeviceActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     Bundle bundle = new Bundle();
                     bundle.putString("lockMsg", lockMsg);
-                    lockDeviceActivit.putExtras(bundle);
-                    startActivity(lockDeviceActivit);
+                    lockDeviceActivity.putExtras(bundle);
+                    startActivity(lockDeviceActivity);
 
                     break;
 
                 default:
-
             }
         }
     };
