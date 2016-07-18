@@ -63,6 +63,7 @@ public class MgmtPollingService extends Service {
     }
 
     private class PollingThread extends Thread {
+
         private long interval;
 
         public PollingThread(int i) {
