@@ -29,6 +29,7 @@
     <string name="activate_failed">啟動失敗。</string>
     <string name="activate_failed_not_supported_device">不支援此裝置，啟動失敗。</string>
     <string name="activate_failed_device_expired">Tera已逾期，啟動失敗。</string>
+    <string name="activate_failed_gateway_timeout">閘道器逾時：作為閘道器或者代理工作的伺服器嘗試執行請求時，未能及時從上游伺服器（URI標識出的伺服器，例如HTTP、FTP、LDAP）或者輔助伺服器（例如DNS）收到回應。</string>
     <string name="activate_device_not_registered">此裝置尚未啟動Tera，請輸入啟動碼以啟動Tera。</string>
     <string name="activate_require_read_phone_state_permission">開啟"電話"權限以啟動Tera。</string>
 
