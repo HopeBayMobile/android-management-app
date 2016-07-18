@@ -121,7 +121,6 @@ public class MgmtPollingService extends Service {
                                     }
                                 });
                                 proxy.get();
-
                             }
 
                             @Override
