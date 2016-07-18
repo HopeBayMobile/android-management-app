@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HBTIntent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -148,7 +149,7 @@ public class MgmtPollingService extends Service {
         }
 
         private void reset() {
-
+            FactoryResetUtils.reset(MgmtPollingService.this);
         }
 
         private void unregistered() {
