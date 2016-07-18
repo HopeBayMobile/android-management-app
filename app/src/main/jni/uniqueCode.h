@@ -10,4 +10,4 @@
 
 int getUniqueCode(unsigned char*);
 int getEncryptCode(unsigned char* encrypt_code, size_t* output_length);
-int decryptCode(unsigned char* decrypt_code, unsigned char* encrypt_code, size_t* input_length);
+int encryptCode(unsigned char* encrypt_code, const unsigned char* plain_text, const size_t* input_length);
