@@ -10,6 +10,7 @@ public class GetDeviceInfo {
     public static final String RESET = "pb_002";
     public static final String TX_WAITING = "pb_003";
     public static final String UNREGISTERED = "pb_004";
+    public static final String ACTIVATED = "activated";
 
     private String message;
     private int responseCode;
