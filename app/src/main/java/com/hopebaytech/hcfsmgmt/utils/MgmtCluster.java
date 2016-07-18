@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -602,24 +603,6 @@ public class MgmtCluster {
     }
 
     /**
-     * @author Aaron
-     *         Created by Aaron on 2016/4/19.
-     */
-    public interface FetchJwtTokenListener {
-
-        /**
-         * Callback function when fetch successful
-         */
-        void onFetchSuccessful(String jwtToken);
-
-        /**
-         * Callback function when fetch failed
-         */
-        void onFetchFailed();
-
-    }
-
-    /**
      * Listener for fetching available JWT token from MGMT server
      */
     public interface FetchJwtTokenListener {
@@ -754,7 +737,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
+                    final RegisterResultInfo registerResultInfo = register(authParam, jwtToken);
                     Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
