@@ -29,10 +29,17 @@ public class HttpProxyMock implements IHttpProxy {
     public static final String CORRECT_NEW_AUTH_CODE = "0000000002";
     public static final String CORRECT_JWT_TOKEN = "0000000003";
     public static final String CORRECT_ACTIVATION_CODE = "000000004";
-
     public static final String CORRECT_USER_NAME = "aaron";
     public static final String CORRECT_USER_PASSWORD = "0000";
     public static final String CORRECT_CLIENT_ID = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
+
+    public static final String INCORRECT_IMEI = "-";
+    public static final String INCORRECT_AUTH_CODE = "-";
+    public static final String INCORRECT_JWT_TOKEN = "-";
+    public static final String INCORRECT_USER_NAME = "-";
+    public static final String INCORRECT_USER_PASSWORD = "-";
+    public static final String INCORRECT_ACTIVATION_CODE = "-";
+    public static final String INCORRECT_CLIENT_ID = "-";
 
     private String mUrl;
 
@@ -85,12 +92,45 @@ public class HttpProxyMock implements IHttpProxy {
             if (jwtToken.equals(CORRECT_JWT_TOKEN) && urlImei.equals(CORRECT_IMEI)) {
                 String newAuthCode = cv.getAsString(MgmtCluster.KEY_NEW_AUTH_CODE);
                 if (newAuthCode.equals(CORRECT_NEW_AUTH_CODE)) {
+                    JSONObject jsonObj = new JSONObject();
+                    try {
+                        jsonObj.put("backend_type", "swift");
+                        jsonObj.put("account", "aaron:aaron");
+                        jsonObj.put("password", "0000");
+                        jsonObj.put("domain", "www.hopebaytech.com");
+                        jsonObj.put("port", "80");
+                        jsonObj.put("bucket", "");
+                        jsonObj.put("TLS", true);
+                        jsonObj.put("token", "xxxxxxxx");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    mResponseContent = jsonObj.toString();
                     return HttpsURLConnection.HTTP_OK;
                 } else {
                     return HttpsURLConnection.HTTP_BAD_REQUEST;
                 }
             } else {
                 return HttpsURLConnection.HTTP_BAD_REQUEST;
+            }
+        } else if (mUrl.startsWith(MgmtCluster.DEVICE_API) && mUrl.contains("tx_ready")) {
+            String jwtToken = headers.getAsString(MgmtCluster.KEY_AUTHORIZATION).replace("JWT ", "");
+            String imei = mUrl.replace(MgmtCluster.DEVICE_API, "").replace("/tx_ready/", "");
+            if (jwtToken.equals(CORRECT_JWT_TOKEN)) {
+                if (imei.equals(CORRECT_IMEI)) {
+                    return HttpsURLConnection.HTTP_OK;
+                } else {
+                    return HttpsURLConnection.HTTP_BAD_REQUEST;
+                }
+            } else {
+                try {
+                    JSONObject jsonObj = new JSONObject();
+                    jsonObj.put("detail", "HTTP_FORBIDDEN");
+                    mResponseContent = jsonObj.toString();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return HttpsURLConnection.HTTP_FORBIDDEN;
             }
         } else if (mUrl.equals(MgmtCluster.DEVICE_API)) {
             String jwtToken = headers.getAsString(MgmtCluster.KEY_AUTHORIZATION).replace("JWT ", "");
@@ -129,16 +169,14 @@ public class HttpProxyMock implements IHttpProxy {
                 if (correct) {
                     JSONObject jsonObj = new JSONObject();
                     try {
-                        JSONObject data = new JSONObject();
-                        data.put("backend_type", "swift");
-                        data.put("account", "aaron:aaron");
-                        data.put("password", "0000");
-                        data.put("domain", "www.hopebaytech.com");
-                        data.put("port", "80");
-                        data.put("bucket", "");
-                        data.put("TLS", true);
-                        data.put("token", "xxxxxxxx");
-                        jsonObj.put("data", data);
+                        jsonObj.put("backend_type", "swift");
+                        jsonObj.put("account", "aaron:aaron");
+                        jsonObj.put("password", "0000");
+                        jsonObj.put("domain", "www.hopebaytech.com");
+                        jsonObj.put("port", "80");
+                        jsonObj.put("bucket", "");
+                        jsonObj.put("TLS", true);
+                        jsonObj.put("token", "xxxxxxxx");
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -147,6 +185,7 @@ public class HttpProxyMock implements IHttpProxy {
                     try {
                         JSONObject jsonObj = new JSONObject();
                         jsonObj.put("detail", "HTTP_NOT_FOUND");
+                        jsonObj.put("error_code", MgmtCluster.INVALID_CODE_OR_MODEL);
                         mResponseContent = jsonObj.toString();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -157,11 +196,12 @@ public class HttpProxyMock implements IHttpProxy {
                 try {
                     JSONObject jsonObj = new JSONObject();
                     jsonObj.put("detail", "HTTP_BAD_REQUEST");
+                    jsonObj.put("error_code", MgmtCluster.INVALID_CODE_OR_MODEL);
                     mResponseContent = jsonObj.toString();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                return HttpsURLConnection.HTTP_BAD_REQUEST;
+                return HttpsURLConnection.HTTP_FORBIDDEN;
             }
         }
         return HttpsURLConnection.HTTP_INTERNAL_ERROR;
