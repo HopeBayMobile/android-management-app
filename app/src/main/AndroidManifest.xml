@@ -55,6 +55,8 @@
 
         <activity android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" />
 
+        <activity android:name=".main.LockDeviceActivity"></activity>
+
         <receiver
             android:name="com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver"
             android:enabled="true"
@@ -78,6 +80,8 @@
         </receiver>
 
         <service android:name="com.hopebaytech.hcfsmgmt.service.HCFSMgmtService" />
+
+        <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
 
         <service
             android:name="com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService"
