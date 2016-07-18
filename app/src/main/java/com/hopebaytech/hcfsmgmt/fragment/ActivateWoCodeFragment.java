@@ -24,6 +24,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -255,6 +256,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
                                                     errorMsgResId = R.string.activate_failed_device_expired;
                                                 }
+                                            } else if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_GATEWAY_TIMEOUT) {
+                                                errorMsgResId = R.string.activate_failed_gateway_timeout;
                                             }
                                             mErrorMessage.setText(errorMsgResId);
                                         }

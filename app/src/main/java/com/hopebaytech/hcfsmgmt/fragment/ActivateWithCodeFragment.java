@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -99,6 +100,7 @@ public class ActivateWithCodeFragment extends Fragment {
 
         final String username = getArguments().getString(ActivateWoCodeFragment.KEY_USERNAME);
         mUsername.setText(username);
+        mActivateCode.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         mActivateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
