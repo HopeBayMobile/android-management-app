@@ -148,19 +148,22 @@ public class HCFSMgmtService extends Service {
                         }
 
                         // Pin system app on system start up
+                        boolean isSuccess = true;
                         ArrayList<ItemInfo> itemInfoList = DisplayTypeFactory.getListOfInstalledApps(context, DisplayTypeFactory.APP_SYSTEM);
                         for (ItemInfo itemInfo : itemInfoList) {
                             AppInfo appInfo = (AppInfo) itemInfo;
                             appInfo.setPinned(true);
-                            pinOrUnpinApp(appInfo, PinType.PRIORITY);
-//                            ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
-//                            serviceAppInfo.setPinned(true);
-//                            serviceAppInfo.setAppName(appInfo.getName());
-//                            serviceAppInfo.setPackageName(appInfo.getPackageName());
-//                            serviceAppInfo.setSourceDir(appInfo.getSourceDir());
-//                            serviceAppInfo.setDataDir(appInfo.getDataDir());
-//                            serviceAppInfo.setExternalDirList(appInfo.getExternalDirList());
-//                            pinOrUnpinApp(serviceAppInfo);
+                            boolean result = pinOrUnpinApp(appInfo, PinType.PRIORITY);
+                            if (!result) {
+                                isSuccess = false;
+                            }
+                        }
+                        if (!isSuccess) {
+                            // Notify user pin/unpin system app failed
+                            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+                            String notify_title = getString(R.string.app_name);
+                            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
+                            NotificationEvent.notify(HCFSMgmtService.this, notify_id, notify_title, notify_message);
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
                         // From HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
@@ -178,20 +181,8 @@ public class HCFSMgmtService extends Service {
                         try {
                             PackageManager pm = getPackageManager();
                             ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-//                            String sourceDir = applicationInfo.sourceDir;
-//                            int lastIndex = sourceDir.lastIndexOf("/");
-//                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
                             boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
                             if (!isSystemApp) {
-//                                ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
-//                                serviceAppInfo.setPinned(false);
-//                                serviceAppInfo.setAppName(applicationInfo.loadLabel(pm).toString());
-//                                serviceAppInfo.setPackageName(packageName);
-//                                serviceAppInfo.setSourceDir(null);
-//                                serviceAppInfo.setDataDir(applicationInfo.dataDir);
-//                                serviceAppInfo.setExternalDirList(null);
-//                                pinOrUnpinApp(serviceAppInfo);
-
                                 AppInfo appInfo = new AppInfo(context);
                                 appInfo.setPinned(false);
                                 appInfo.setUid(applicationInfo.uid);
@@ -212,20 +203,9 @@ public class HCFSMgmtService extends Service {
                         try {
                             PackageManager pm = getPackageManager();
                             ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-//                            String sourceDir = applicationInfo.sourceDir;
-//                            int lastIndex = sourceDir.lastIndexOf("/");
-//                            String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
                             UidInfo uidInfo = mUidDAO.get(packageName);
                             if (uidInfo != null) {
                                 boolean isPinned = uidInfo.isPinned();
-//                                ServiceAppInfo serviceAppInfo = new ServiceAppInfo();
-//                                serviceAppInfo.setPinned(isPinned);
-//                                serviceAppInfo.setAppName(applicationInfo.loadLabel(pm).toString());
-//                                serviceAppInfo.setPackageName(packageName);
-//                                serviceAppInfo.setSourceDir(null);
-//                                serviceAppInfo.setDataDir(applicationInfo.dataDir);
-//                                serviceAppInfo.setExternalDirList(null);
-//                                pinOrUnpinApp(serviceAppInfo);
 
                                 AppInfo appInfo = new AppInfo(context);
                                 appInfo.setPinned(isPinned);
@@ -615,18 +595,26 @@ public class HCFSMgmtService extends Service {
         pinOrUnpinApp(info, PinType.NORMAL);
     }
 
-    private void pinOrUnpinApp(AppInfo info, int pinType) {
+    private boolean pinOrUnpinApp(AppInfo info, int pinType) {
         Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
+        boolean isSuccess = true;
         final boolean isPinned = info.isPinned();
         if (isPinned) {
             if (!HCFSMgmtUtils.pinApp(info, pinType)) {
-                handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
+                isSuccess = false;
+                if (pinType != PinType.PRIORITY) {
+                    handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
+                }
             }
         } else {
             if (!HCFSMgmtUtils.unpinApp(info)) {
-                handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
+                isSuccess = false;
+                if (pinType != PinType.PRIORITY) {
+                    handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
+                }
             }
         }
+        return isSuccess;
     }
 
     public void pinOrUnpinApp(AppInfo info, @NonNull IPinUnpinListener listener) {
