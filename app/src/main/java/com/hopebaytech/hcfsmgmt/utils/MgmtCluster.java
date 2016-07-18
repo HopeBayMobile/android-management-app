@@ -478,6 +478,46 @@ public class MgmtCluster {
         return serverClientId;
     }
 
+    public static JSONObject getMgmtCommands(String JWT, String imei) {
+       JSONObject jsonObj = null;
+
+        if (JWT != null) {
+            IHttpProxy httpProxyImpl = null;
+
+            try {
+                String url = DEVICE_API + imei + "/service";
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+                httpProxyImpl.setDoOutput(true);
+
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + JWT);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                int responseCode = httpProxyImpl.get();
+                Logs.d(CLASSNAME, "getMgmtCommands", "responseCode=" + responseCode);
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    String jsonResponse = httpProxyImpl.getResponseContent();
+                    Logs.d(CLASSNAME, "getMgmtCommands", "jsonResponse=" + jsonResponse);
+                    if (!jsonResponse.isEmpty()) {
+                        jsonObj = new JSONObject(jsonResponse);
+                    }
+                }
+
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "getMgmtCommands", Log.getStackTraceString(e));
+
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+        }
+
+        return jsonObj;
+    }
+
     public static abstract class IAuthParam {
 
         protected String activateCode;
