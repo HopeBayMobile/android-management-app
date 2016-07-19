@@ -36,7 +36,8 @@
                 android:background="@android:color/transparent"
                 android:gravity="center_vertical"
                 android:hint="@string/activate_hint_username"
-                android:padding="10dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
                 android:singleLine="true" />
 
             <View
@@ -52,7 +53,8 @@
                 android:gravity="center_vertical"
                 android:hint="@string/activate_hint_password"
                 android:inputType="textPassword"
-                android:padding="10dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
                 android:singleLine="true" />
         </LinearLayout>
 

@@ -17,46 +17,44 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="26dp"
-        android:layout_marginTop="132dp"
+        android:layout_marginTop="100dp"
         android:src="@drawable/icon_tera_logo_l_login" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/title"
+        style="@style/F3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/logo"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/M4"
         android:gravity="center"
-        android:text="@string/settings_transfer_content_waiting_title"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/black" />
+        android:text="@string/settings_transfer_content_waiting_title" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/message"
+        style="@style/F6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginEnd="40dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginStart="30dp"
         android:gravity="center_horizontal"
-        android:text="@string/settings_transfer_content_waiting_message"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@android:color/black" />
+        android:text="@string/settings_transfer_content_waiting_message" />
 
     <RelativeLayout
         android:id="@+id/uploading_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/message"
+        android:layout_above="@+id/cancel_layout"
         android:layout_gravity="center_horizontal">
 
         <LinearLayout
-            android:gravity="center_horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="horizontal">
 
             <ImageView
@@ -72,9 +70,9 @@
                     style="?android:attr/progressBarStyleLarge"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
-                    android:indeterminateTint="@color/C4"
                     android:layout_centerInParent="true"
-                    android:indeterminate="true" />
+                    android:indeterminate="true"
+                    android:indeterminateTint="@color/C4" />
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -93,12 +91,14 @@
     </RelativeLayout>
 
     <FrameLayout
-        android:layout_width="244dp"
+        android:id="@+id/cancel_layout"
+        android:layout_width="100dp"
         android:layout_height="36dp"
-        android:layout_below="@+id/uploading_layout"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
-        android:layout_marginTop="@dimen/M1"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="40dp"
         android:background="@color/colorAccent"
         android:clickable="true">
 

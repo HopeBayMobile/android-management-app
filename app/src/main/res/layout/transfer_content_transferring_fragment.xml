@@ -17,41 +17,39 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="26dp"
-        android:layout_marginTop="132dp"
+        android:layout_marginTop="100dp"
         android:src="@drawable/icon_tera_logo_l_login" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/title"
+        style="@style/F3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/logo"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/M4"
         android:gravity="center"
-        android:text="@string/settings_transfer_content_transferring_title"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="@android:color/black" />
+        android:text="@string/settings_transfer_content_transferring_title" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/message"
+        style="@style/F6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
         android:layout_gravity="center_horizontal"
-        android:layout_marginEnd="@dimen/M1"
-        android:layout_marginStart="@dimen/M1"
-        android:layout_marginTop="@dimen/M1"
+        android:layout_marginEnd="30dp"
+        android:layout_marginStart="30dp"
         android:gravity="center_horizontal"
-        android:text="@string/settings_transfer_content_transferring_message"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@android:color/black" />
+        android:text="@string/settings_transfer_content_transferring_message" />
 
     <pl.droidsonroids.gif.GifImageView
         android:layout_width="wrap_content"
-        android:layout_marginTop="@dimen/M1"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/message"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="156dp"
         android:src="@drawable/icon_transfer_transferring" />
 
 </RelativeLayout>
