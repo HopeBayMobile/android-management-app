@@ -3,9 +3,11 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +35,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
     public static final String TAG = FileMgmtFileDirDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private FileMgmtFragment.RecyclerViewHolder mViewHolder;
+    private Thread mDisplayIconThread;
     private Thread mCalculateFileDirDataRatioThread;
     private Thread mCalculateFileDirSizeThread;
 
@@ -47,8 +50,21 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_file_dir_info, null);
 
-        ImageView fileDirIcon = (ImageView) view.findViewById(R.id.file_dir_icon);
-        fileDirIcon.setImageBitmap(itemInfo.getIconImage());
+        final ImageView fileDirIcon = (ImageView) view.findViewById(R.id.file_dir_icon);
+        fileDirIcon.setImageDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.icon_doc_default_gray));
+        mDisplayIconThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final Bitmap iconBitmap = itemInfo.getIconImage();
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        fileDirIcon.setImageBitmap(iconBitmap);
+                    }
+                });
+            }
+        });
+        mDisplayIconThread.start();
 
         TextView fileDirName = (TextView) view.findViewById(R.id.file_dir_name);
         fileDirName.setText(itemInfo.getName());
@@ -114,6 +130,10 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        if (mDisplayIconThread != null) {
+            mDisplayIconThread.interrupt();
+        }
 
         if (mCalculateFileDirSizeThread != null) {
             mCalculateFileDirSizeThread.interrupt();

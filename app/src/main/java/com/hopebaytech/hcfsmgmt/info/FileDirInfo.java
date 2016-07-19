@@ -65,14 +65,14 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
                         if (mimeType.contains(MIME_SUBTYPE_PNG)) {
                             /** Show PNG file with alpha supported */
                             Bitmap image = BitmapFactory.decodeFile(filePath);
-                            iconImage = ThumbnailUtils.extractThumbnail(image, width, height);
+                            iconImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                         } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
                             // TODO show svg file
                         } else {
                             Bitmap thumbImage = getImageThumbnail(filePath);
                             if (thumbImage == null) {
                                 Bitmap image = BitmapFactory.decodeFile(filePath);
-                                thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+                                thumbImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             }
                             iconImage = thumbImage;
                         }
@@ -80,7 +80,7 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
                         Bitmap thumbImage = getVideoThumbnail(filePath);
                         if (thumbImage == null) {
                             Bitmap image = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
-                            thumbImage = ThumbnailUtils.extractThumbnail(image, width, height);
+                            thumbImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                         }
                         iconImage = thumbImage;
                     } else if (mimeType.startsWith(MIME_TYPE_APPLICATION)) {
