@@ -22,7 +22,8 @@
     <string name="activate_require_username_password">Enter user name &amp; password.</string>
     <string name="activate_without_google_play_services">Tera must run on Google Play services, which are missing on your phone.</string>
     <string name="activate_update_google_play_services_required">Tera won\'t run unless you update Google Play services.</string>
-    <string name="activate_update_google_play_services_go">Update Google Play services</string>
+    <string name="activate_update_google_play_services_go">Update Google Play services.</string>
+    <string name="activate_update_google_play_service_missing_permission">Missing Google Play services permissions.</string>
     <string name="activate_require_activation_code">Enter activation code.</string>
     <string name="activate_incorrect_activation_code">Incorrect activation code.</string>
     <string name="activate_auth_failed">Account authentication failed.</string>

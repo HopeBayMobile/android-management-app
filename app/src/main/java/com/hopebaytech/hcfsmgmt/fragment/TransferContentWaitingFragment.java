@@ -126,9 +126,8 @@ public class TransferContentWaitingFragment extends Fragment {
 
             String action = intent.getAction();
             if (action.equals(HBTIntent.ACTION_TRANSFER_COMPLETED)) {
-                Logs.w(CLASSNAME, "onReceive", HBTIntent.ACTION_TRANSFER_COMPLETED);
+                Logs.d(CLASSNAME, "onReceive", HBTIntent.ACTION_TRANSFER_COMPLETED);
                 TransferContentTransferringFragment fragment = TransferContentTransferringFragment.newInstance();
-
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.fragment_container, fragment, TransferContentTransferringFragment.TAG);
                 ft.commit();

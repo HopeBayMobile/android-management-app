@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.HBTIntent;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
+import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -30,11 +32,10 @@ public class TransferContentUploadingFragment extends Fragment {
     public static final String TAG = TransferContentUploadingFragment.class.getSimpleName();
     private final String CLASSNAME = TransferContentUploadingFragment.class.getSimpleName();
 
-
-
     private TextView mErrorMsg;
     private RelativeLayout mProgressLayout;
     private UploadCompletedReceiver mUploadCompletedReceiver;
+    private ProgressDialog mProgressDialog;
 
     public static TransferContentUploadingFragment newInstance() {
         return new TransferContentUploadingFragment();
@@ -50,20 +51,20 @@ public class TransferContentUploadingFragment extends Fragment {
         mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
         mUploadCompletedReceiver.registerReceiver(filter);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                Intent intent = new Intent();
-                intent.setAction(HBTIntent.ACTION_UPLOAD_COMPLETED);
-                getActivity().sendBroadcast(intent);
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    Thread.sleep(5000);
+//
+//                    Intent intent = new Intent();
+//                    intent.setAction(HBTIntent.ACTION_UPLOAD_COMPLETED);
+//                    getActivity().sendBroadcast(intent);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
     }
 
     @Nullable
@@ -80,7 +81,37 @@ public class TransferContentUploadingFragment extends Fragment {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().finish();
+                showProgressDialog();
+                final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
+                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.FetchJwtTokenListener() {
+                    @Override
+                    public void onFetchSuccessful(String jwtToken) {
+                        MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
+                        unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
+                            @Override
+                            public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
+                                Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
+                                dismissProgressDialog();
+                                getActivity().finish();
+                            }
+
+                            @Override
+                            public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
+                                Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
+                                dismissProgressDialog();
+                                getActivity().finish();
+                            }
+                        });
+                        unlockDeviceProxy.unlock();
+                    }
+
+                    @Override
+                    public void onFetchFailed() {
+                        Logs.e(CLASSNAME, "onFetchFailed", null);
+                        dismissProgressDialog();
+                        getActivity().finish();
+                    }
+                });
             }
         });
 
@@ -103,7 +134,7 @@ public class TransferContentUploadingFragment extends Fragment {
 
         public UploadCompletedReceiver(Context context) {
             this.mContext = context;
-       }
+        }
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -159,6 +190,22 @@ public class TransferContentUploadingFragment extends Fragment {
             }
         }
 
+    }
+
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
+        }
+        mProgressDialog.setMessage(getString(R.string.cancel_processing_msg));
+        mProgressDialog.show();
+    }
+
+    private void dismissProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.dismiss();
+        }
     }
 
 }

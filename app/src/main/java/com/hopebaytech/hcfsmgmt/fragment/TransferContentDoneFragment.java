@@ -38,30 +38,29 @@ public class TransferContentDoneFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         final TextView factoryResetMsg = (TextView) view.findViewById(R.id.factory_reset_message);
-
         final Handler uiHandler = new Handler();
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (int i = 5; i >= 0; i--) {
-                    final String seconds = String.valueOf(i);
-                    uiHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            String template = getString(R.string.settings_transfer_content_done_factory_reset);
-                            String message = String.format(Locale.getDefault(), template, seconds);
-                            factoryResetMsg.setText(message);
-                        }
-                    });
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
+                try {
+                    for (int i = 5; i >= 0; i--) {
+                        final String seconds = String.valueOf(i);
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                String template = getString(R.string.settings_transfer_content_done_factory_reset);
+                                String message = String.format(Locale.getDefault(), template, seconds);
+                                factoryResetMsg.setText(message);
+                            }
+                        });
 
-                // Factory reset
-                FactoryResetUtils.reset(getActivity());
+                        Thread.sleep(1000);
+                    }
+                    // Factory reset
+                    FactoryResetUtils.reset(getActivity());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
 
