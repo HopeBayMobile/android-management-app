@@ -201,11 +201,7 @@
     <string name="transfer">TRANSFER</string>
 
     <string name="pref_download_to_run">pref_download_to_run</string>
-
     <string name="tera_version_title">Tera Version</string>
-    <string name="tera_version">-</string>
-    <string name="tera_imei_1">IMEI 1</string>
-    <string name="tera_imei_2">IMEI 2</string>
 
     <string name="cancel_processing_msg">Canceling&#8230; Please wait.</string>
 
