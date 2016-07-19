@@ -60,9 +60,6 @@ public class TransferContentDoneFragment extends Fragment {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                // Factory reset
-                FactoryResetUtils.reset(getActivity());
             }
         }).start();
 
