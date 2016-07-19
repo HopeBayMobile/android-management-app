@@ -97,9 +97,8 @@ function update_version_num() {
 	if [ -z $VERSION_NUM ]; then
 		export VERSION_NUM = Manual build $(shell date +%Y%m%d-%H%M%S)
 	fi
-	sed -i"" -e 's#\(<string name="terafonn_version">\).*\(</string>\)#\1'$VERSION_NUM'\2#' \
-		app/src/main/res/values/strings.xml \
-		app/src/main/res/values-en/strings.xml
+	sed -i"" -e 's#\(<string name="tera_version" translatable="false">\).*\(</string>\)#\1'$VERSION_NUM'\2#' \
+		app/src/main/res/values/config.xml
 }
 
 # Enable error trace
