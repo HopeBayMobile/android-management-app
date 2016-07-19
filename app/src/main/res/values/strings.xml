@@ -21,8 +21,9 @@
     <string name="activate_get_server_client_id_failed">無法從管理伺服器取得Google認證所需的資訊。</string>
     <string name="activate_require_username_password">請輸入使用者名稱及密碼。</string>
     <string name="activate_without_google_play_services">Tera必須在Google Play服務上執行，但您的手機目前無法找到此服務。</string>
-    <string name="activate_update_google_play_services_required">您必須更新 Google Play 服務才能執行「Tera」</string>
-    <string name="activate_update_google_play_services_go">更新您的 Google Play 服務</string>
+    <string name="activate_update_google_play_services_required">您必須更新 Google Play 服務才能執行「Tera」。</string>
+    <string name="activate_update_google_play_services_go">更新您的 Google Play 服務。</string>
+    <string name="activate_update_google_play_service_missing_permission">Google Play 服務權限遺失。</string>
     <string name="activate_require_activation_code">請輸入啟動碼。</string>
     <string name="activate_incorrect_activation_code">啟動碼不正確。</string>
     <string name="activate_auth_failed">帳戶認證失敗。</string>
