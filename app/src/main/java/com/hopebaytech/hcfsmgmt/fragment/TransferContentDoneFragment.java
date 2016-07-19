@@ -53,6 +53,10 @@ public class TransferContentDoneFragment extends Fragment {
                                 factoryResetMsg.setText(message);
                             }
                         });
+<<<<<<< 31c734cdc4eb7cc53c71cb4fc4cf730aecc6b62f
+=======
+
+>>>>>>> Integrate with polling service and mgmt server
                         Thread.sleep(1000);
                     }
                     // Factory reset
@@ -60,9 +64,6 @@ public class TransferContentDoneFragment extends Fragment {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                // Factory reset
-                FactoryResetUtils.reset(getActivity());
             }
         }).start();
 
