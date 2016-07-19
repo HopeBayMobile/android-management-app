@@ -87,23 +87,21 @@ public class MgmtPollingService extends Service {
                                             JSONObject piggyback = result.getJSONObject("piggyback");
                                             String category = piggyback.getString("category");
                                             switch (category) {
-                                                case GetDeviceInfo.LOCK:
+                                                case GetDeviceInfo.Category.LOCK:
                                                     action.lock(piggyback);
                                                     break;
-
-                                                case GetDeviceInfo.RESET:
+                                                case GetDeviceInfo.Category.RESET:
                                                     action.reset();
                                                     break;
-
-                                                case GetDeviceInfo.TX_WAITING:
+                                                case GetDeviceInfo.Category.TX_WAITING:
                                                     break;
-
-                                                case GetDeviceInfo.UNREGISTERED:
+                                                case GetDeviceInfo.Category.UNREGISTERED:
                                                     action.unregistered();
                                                     break;
-
                                                 default:
-                                                    if (result.getString("state").equals(GetDeviceInfo.ACTIVATED) stopped = true;
+                                                    if (result.getString("state").equals(GetDeviceInfo.State.ACTIVATED)) {
+                                                        stopped = true;
+                                                    }
                                                     break;
                                             }
                                         } catch (JSONException e) {
@@ -182,7 +180,6 @@ public class MgmtPollingService extends Service {
             }
         }
     };
-
 
 }
 

@@ -9,7 +9,11 @@ import android.content.Intent;
  */
 public class FactoryResetUtils {
 
+    private static final String CLASSNAME = FactoryResetUtils.class.getSimpleName();
+
     public static void reset(Context context) {
+        Logs.d(CLASSNAME, "reset", null);
+
         Intent intent = new Intent("android.intent.action.MASTER_CLEAR");
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.putExtra("android.intent.extra.REASON", "MasterClearConfirm");

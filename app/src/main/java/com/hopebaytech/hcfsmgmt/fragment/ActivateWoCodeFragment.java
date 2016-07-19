@@ -337,6 +337,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                                                 } else if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
                                                                     mErrorMessage.setText(R.string.activate_update_google_play_services_required);
                                                                     PlayServiceSnackbar.newInstance(mContext, mView).show();
+                                                                } else if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_MISSING_PERMISSION) {
+                                                                    mErrorMessage.setText(R.string.activate_update_google_play_service_missing_permission);
                                                                 } else {
                                                                     mErrorMessage.setText(R.string.activate_signin_google_account_failed);
                                                                 }
