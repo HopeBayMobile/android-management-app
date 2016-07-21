@@ -5,10 +5,10 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
@@ -606,10 +606,14 @@ public class MgmtCluster {
      */
     public interface FetchJwtTokenListener {
 
-        /** Callback function when fetch successful */
+        /**
+         * Callback function when fetch successful
+         */
         void onFetchSuccessful(String jwtToken);
 
-        /** Callback function when fetch failed */
+        /**
+         * Callback function when fetch failed
+         */
         void onFetchFailed();
 
     }
@@ -859,42 +863,43 @@ public class MgmtCluster {
             @Override
             public void run() {
                 final String serverClientId = MgmtCluster.getServerClientId();
-                GoogleAuthProxy googleAuthProxy = new GoogleAuthProxy(context, serverClientId);
-                googleAuthProxy.setOnAuthListener(new GoogleAuthProxy.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(GoogleSignInResult result) {
-                        String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-
-                        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                        authParam.setAuthCode(serverAuthCode);
-                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(context)));
-                        authParam.setVendor(Build.BRAND);
-                        authParam.setModel(Build.MODEL);
-                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                        authParam.setHcfsVersion(context.getString(R.string.tera_version));
-
-                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(context, serverClientId,
+                        new GoogleSilentAuthProxy.OnAuthListener() {
                             @Override
-                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                                String jwtToken = authResultInfo.getToken();
-                                listener.onFetchSuccessful(jwtToken);
+                            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                                String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+
+                                final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                                authParam.setAuthCode(serverAuthCode);
+                                authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+                                authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(context)));
+                                authParam.setVendor(Build.BRAND);
+                                authParam.setModel(Build.MODEL);
+                                authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                                authParam.setHcfsVersion(context.getString(R.string.tera_version));
+
+                                MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                                authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                                    @Override
+                                    public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                                        String jwtToken = authResultInfo.getToken();
+                                        listener.onFetchSuccessful(jwtToken);
+                                    }
+
+                                    @Override
+                                    public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                        listener.onFetchFailed();
+                                    }
+                                });
+                                authProxy.auth();
                             }
 
                             @Override
-                            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                            public void onAuthFailed() {
                                 listener.onFetchFailed();
                             }
-                        });
-                        authProxy.auth();
-                    }
 
-                    @Override
-                    public void onAuthFailed() {
-                        listener.onFetchFailed();
-                    }
-                });
+                        });
                 googleAuthProxy.auth();
             }
         }).start();

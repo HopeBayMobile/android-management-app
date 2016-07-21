@@ -78,7 +78,7 @@ public class SettingsFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Logs.w(CLASSNAME, "onViewCreated", null);
+        Logs.d(CLASSNAME, "onViewCreated", null);
         mView = view;
 
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.text.InputFilter;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,23 +36,18 @@ import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.plus.Plus;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
-import com.hopebaytech.hcfsmgmt.main.MainActivity;
+import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -120,7 +116,7 @@ public class ActivateWoCodeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mHandlerThread = new HandlerThread(LoadingActivity.class.getSimpleName());
+        mHandlerThread = new HandlerThread(CLASSNAME);
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
         mUiHandler = new Handler();
@@ -219,9 +215,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                             if (failed) {
                                                                 mErrorMessage.setText(R.string.activate_failed);
                                                             } else {
-                                                                Intent intent = new Intent(mContext, MainActivity.class);
-                                                                startActivity(intent);
-                                                                ((Activity) mContext).finish();
+                                                                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                                                ft.replace(R.id.fragment_container, MainFragment.newInstance(), MainFragment.TAG);
+                                                                ft.commit();
                                                             }
                                                         }
                                                     });
@@ -268,7 +264,7 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                 @Override
                                 public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                    Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
+                                    Logs.e(CLASSNAME, "onConnectionFailed", "authResultInfo=" + authResultInfo.toString());
 
                                     dismissProgressDialog();
                                     mErrorMessage.setText(R.string.activate_auth_failed);
@@ -304,69 +300,52 @@ public class ActivateWoCodeFragment extends Fragment {
                     return;
                 }
 
-                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
                     if (NetworkUtils.isNetworkConnected(mContext)) {
                         showProgressDialog();
                         mWorkHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 String serverClientId = MgmtCluster.getServerClientId();
+//                                String serverClientId = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
                                 if (serverClientId != null) {
-                                    // Request only the user's ID token, which can be used to identify the
-                                    // user securely to your backend. This will contain the user's basic
-                                    // profile (name, profile picture URL, etc) so you should not need to
-                                    // make an additional call to personalize your application.
-                                    final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                            .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-                                            .requestServerAuthCode(serverClientId, false)
-                                            .requestEmail()
-                                            .build();
-
-                                    mUiHandler.post(new Runnable() {
+                                    GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
+                                            mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
                                         @Override
-                                        public void run() {
-                                            if (mGoogleApiClient == null) {
-                                                mGoogleApiClient = new GoogleApiClient.Builder(mContext)
-                                                        .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                                                            @Override
-                                                            public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                                                                // An unresolvable error has occurred and Google APIs (including Sign-In) will not be available.
-                                                                Logs.d(CLASSNAME, "onConnectionFailed", "connectionResult=" + connectionResult);
-                                                                if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_MISSING) {
-                                                                    mErrorMessage.setText(R.string.activate_without_google_play_services);
-                                                                } else if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
-                                                                    mErrorMessage.setText(R.string.activate_update_google_play_services_required);
-                                                                    PlayServiceSnackbar.newInstance(mContext, mView).show();
-                                                                } else if (connectionResult.getErrorCode() == ConnectionResult.SERVICE_MISSING_PERMISSION) {
-                                                                    mErrorMessage.setText(R.string.activate_update_google_play_service_missing_permission);
-                                                                } else {
-                                                                    mErrorMessage.setText(R.string.activate_signin_google_account_failed);
-                                                                }
-                                                                dismissProgressDialog();
-                                                                mGoogleApiClient.disconnect();
-                                                            }
-                                                        })
-                                                        .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                                                            @Override
-                                                            public void onConnected(@Nullable Bundle bundle) {
-                                                                Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
-                                                                Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-                                                                ((Activity) mContext).startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
-                                                            }
+                                        public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
+                                            Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
+                                            mGoogleApiClient = googleApiClient;
 
-                                                            @Override
-                                                            public void onConnectionSuspended(int i) {
-                                                                Logs.d(CLASSNAME, "onConnectionSuspended", "i=" + i);
-                                                            }
-                                                        })
-                                                        .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                                                        .addApi(Plus.API)
-                                                        .build();
+                                            signIn();
+                                        }
+
+                                        @Override
+                                        public void onConnectionFailed(@NonNull ConnectionResult result) {
+                                            Logs.d(CLASSNAME, "onConnectionFailed", "result=" + result);
+
+                                            signOut();
+
+                                            int errorCode = result.getErrorCode();
+                                            if (errorCode == ConnectionResult.SERVICE_MISSING) {
+                                                mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                            } else if (errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
+                                                mErrorMessage.setText(R.string.activate_update_google_play_services_required);
+                                                PlayServiceSnackbar.newInstance(mContext, mView).show();
+                                            } else if (errorCode == ConnectionResult.SERVICE_MISSING_PERMISSION) {
+                                                mErrorMessage.setText(R.string.activate_update_google_play_service_missing_permission);
+                                            } else {
+                                                mErrorMessage.setText(R.string.activate_signin_google_account_failed);
                                             }
-                                            mGoogleApiClient.disconnect();
-                                            mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
+
+                                            dismissProgressDialog();
+                                        }
+
+                                        @Override
+                                        public void onConnectionSuspended(int cause) {
+                                            Logs.d(CLASSNAME, "onConnectionSuspended", "cause=" + cause);
                                         }
                                     });
+                                    signInApiClient.connect();
                                 } else {
                                     mUiHandler.post(new Runnable() {
                                         @Override
@@ -376,12 +355,13 @@ public class ActivateWoCodeFragment extends Fragment {
                                         }
                                     });
                                 }
+
                             }
                         });
                     } else {
                         mErrorMessage.setText(R.string.activate_alert_dialog_message);
                     }
-                } else {
+                else {
                     if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(getString(R.string.alert_dialog_title_warning));
@@ -417,7 +397,6 @@ public class ActivateWoCodeFragment extends Fragment {
         }
 
     }
-
 
     public static class PermissionSnackbar {
 
@@ -471,15 +450,29 @@ public class ActivateWoCodeFragment extends Fragment {
         Logs.e(CLASSNAME, "googleAuthFailed", "failedMsg=" + failedMsg);
 
         dismissProgressDialog();
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                .setResultCallback(new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        Logs.d(CLASSNAME, "onGoogleAuthFailed", "status=" + status);
-                    }
-                });
+
+        signOut();
 
         mErrorMessage.setText(R.string.activate_signin_google_account_failed);
+    }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        ((Activity) mContext).startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
+    }
+
+    private void signOut() {
+        Logs.w(CLASSNAME, "signOut", null);
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            Logs.w(CLASSNAME, "signOut", "---");
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+                    .setResultCallback(new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(@NonNull Status status) {
+                            Logs.d(CLASSNAME, "signOut", "status=" + status);
+                        }
+                    });
+        }
     }
 
     @Override
@@ -515,9 +508,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                         public void run() {
                                             boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
                                             if (isFailed) {
-                                                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+                                                signOut();
                                                 HCFSConfig.resetHCFSConfig();
-
                                                 mUiHandler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
@@ -526,8 +518,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                                     }
                                                 });
                                             } else {
-                                                String name = acct.getDisplayName();
-                                                String email = acct.getEmail();
+                                                final String name = acct.getDisplayName();
+                                                final String email = acct.getEmail();
                                                 String photoUrl = null;
                                                 if (acct.getPhotoUrl() != null) {
                                                     photoUrl = acct.getPhotoUrl().toString();
@@ -548,23 +540,29 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                 editor.apply();
 
+                                                // Start sync to cloud
+                                                HCFSConfig.startSyncToCloud();
+
+                                                final String finalPhotoUrl = photoUrl;
                                                 mUiHandler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
+                                                        Bundle args = new Bundle();
+                                                        args.putString(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+                                                        args.putString(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, email);
+                                                        args.putString(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, finalPhotoUrl);
+
+                                                        MainFragment mainFragment = MainFragment.newInstance();
+                                                        mainFragment.setArguments(args);
+
+                                                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                                        ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
+                                                        ft.commit();
+
                                                         dismissProgressDialog();
                                                     }
                                                 });
 
-                                                // Start sync to cloud
-                                                HCFSConfig.startSyncToCloud();
-
-                                                Intent intent = new Intent(mContext, MainActivity.class);
-                                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-                                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, email);
-                                                intent.putExtra(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
-                                                startActivity(intent);
-
-                                                ((Activity) mContext).finish();
                                             }
                                         }
                                     });
@@ -574,17 +572,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                                     Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
+                                    signOut();
                                     dismissProgressDialog();
-
-                                    if (mGoogleApiClient.isConnected()) {
-                                        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                                                .setResultCallback(new ResultCallback<Status>() {
-                                                    @Override
-                                                    public void onResult(@NonNull Status status) {
-                                                        Logs.d(CLASSNAME, "onRegisterFailed", "status=" + status);
-                                                    }
-                                                });
-                                    }
 
                                     int errorMsgResId = R.string.activate_failed;
                                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
@@ -618,20 +607,9 @@ public class ActivateWoCodeFragment extends Fragment {
 
                         @Override
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
-                            Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
-
+                            Logs.e(CLASSNAME, "onConnectionFailed", "authResultInfo=" + authResultInfo.toString());
+                            signOut();
                             dismissProgressDialog();
-
-                            if (mGoogleApiClient.isConnected()) {
-                                Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                                        .setResultCallback(new ResultCallback<Status>() {
-                                            @Override
-                                            public void onResult(@NonNull Status status) {
-                                                Logs.d(CLASSNAME, "onAuthFailed", "status=" + status);
-                                            }
-                                        });
-                            }
-
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }
                     });

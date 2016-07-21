@@ -31,7 +31,7 @@ public class HCFSConfig {
     public static boolean isActivated(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
-//        return true; // TODO for testing
+//        return true; //TODO for test
     }
 
     public static boolean setHCFSConfig(String key, String value) {
