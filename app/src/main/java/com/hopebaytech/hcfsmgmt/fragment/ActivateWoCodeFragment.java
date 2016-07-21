@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.text.InputFilter;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -306,6 +307,7 @@ public class ActivateWoCodeFragment extends Fragment {
                             @Override
                             public void run() {
                                 String serverClientId = MgmtCluster.getServerClientId();
+//                                String serverClientId = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
                                 if (serverClientId != null) {
                                     GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
                                             mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
