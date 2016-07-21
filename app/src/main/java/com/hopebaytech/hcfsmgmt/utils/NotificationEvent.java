@@ -7,12 +7,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
 
 /**
  * @author Aaron
@@ -45,7 +44,7 @@ public class NotificationEvent {
         NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
         bigStyle.bigText(notifyMessage);
 
-        Intent intent = new Intent(context, LoadingActivity.class);
+        Intent intent = new Intent(context, MainActivity.class);
         if (extras != null) {
             String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
             Logs.w(CLASSNAME, "notify", "cause=" + cause);

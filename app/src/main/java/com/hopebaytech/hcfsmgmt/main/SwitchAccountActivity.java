@@ -183,14 +183,14 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                             @Override
                                             public void run() {
                                                 if (registerResultInfo != null) {
-                                                    Intent intent = new Intent(SwitchAccountActivity.this, LoadingActivity.class);
+                                                    Intent intent = new Intent(SwitchAccountActivity.this, MainActivity.class);
                                                     startActivity(intent);
                                                     finish();
                                                 } else {
                                                     signOut();
                                                     mErrorMsg.setText(R.string.switch_account_failed);
                                                 }
-                                                hideProgressDialog();
+                                                dismissProgressDialog();
                                             }
                                         });
                                     }
@@ -354,7 +354,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                                 // Show dialog using GoogleApiAvailability.getErrorDialog()
                                                 showErrorDialog(result.getErrorCode());
                                                 mResolvingError = true;
-                                                hideProgressDialog();
+                                                dismissProgressDialog();
                                             }
                                         }
                                     }
@@ -393,7 +393,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         mGoogleApiClient.disconnect();
                         mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
 
-                        hideProgressDialog();
+                        dismissProgressDialog();
                     }
                 });
 
@@ -418,7 +418,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
     }
 
     private void showProgressDialog() {
-        hideProgressDialog();
+        dismissProgressDialog();
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setIndeterminate(true);
@@ -428,9 +428,9 @@ public class SwitchAccountActivity extends AppCompatActivity {
         mProgressDialog.show();
     }
 
-    private void hideProgressDialog() {
+    private void dismissProgressDialog() {
         if (mProgressDialog != null) {
-            mProgressDialog.hide();
+            mProgressDialog.dismiss();
         }
     }
 
@@ -439,7 +439,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RequestCode.GOOGLE_SIGN_IN) {
-            hideProgressDialog();
+            dismissProgressDialog();
 
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result != null && result.isSuccess()) {
@@ -566,4 +566,11 @@ public class SwitchAccountActivity extends AppCompatActivity {
         }
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        signOut();
+    }
+
 }

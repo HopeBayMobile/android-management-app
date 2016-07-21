@@ -35,7 +35,7 @@ public class DisplayTypeFactory {
 			Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
 			if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
 				String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-				Logs.w(CLASSNAME, "getListOfInstalledApps", "externalPath=" + externalPath);
+				Logs.d(CLASSNAME, "getListOfInstalledApps", "externalPath=" + externalPath);
 				File externalAndroidFile = new File(externalPath);
 				if (externalAndroidFile.exists()) {
 					for (File type : externalAndroidFile.listFiles()) {

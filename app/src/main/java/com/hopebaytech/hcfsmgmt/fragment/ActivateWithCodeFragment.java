@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +11,7 @@ import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -28,8 +28,6 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
-import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -72,7 +70,7 @@ public class ActivateWithCodeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mHandlerThread = new HandlerThread(LoadingActivity.class.getSimpleName());
+        mHandlerThread = new HandlerThread(CLASSNAME);
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
         mUiHandler = new Handler();
@@ -180,9 +178,9 @@ public class ActivateWithCodeFragment extends Fragment {
                                                     if (failed) {
                                                         mErrorMessage.setText(R.string.activate_failed);
                                                     } else {
-                                                        Intent intent = new Intent(mContext, MainActivity.class);
-                                                        startActivity(intent);
-                                                        ((Activity) mContext).finish();
+                                                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                                        ft.replace(R.id.fragment_container, MainFragment.newInstance(), MainFragment.TAG);
+                                                        ft.commit();
                                                     }
                                                 }
                                             });
