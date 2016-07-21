@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.service.TeraAPIServer;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -137,6 +138,11 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             Intent addUidAndPinSystemAppIntent = new Intent(context, HCFSMgmtService.class);
             addUidAndPinSystemAppIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP);
             context.startService(addUidAndPinSystemAppIntent);
+
+            // start tera api server
+            Intent teraAPIServer = new Intent(context, TeraAPIServer.class);
+            context.startService(teraAPIServer);
+
         } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
