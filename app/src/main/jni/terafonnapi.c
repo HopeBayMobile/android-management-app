@@ -206,6 +206,17 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getOc
 	return result;
 }
 
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setNotifyServer(
+		JNIEnv *jEnv, jobject jObject, jstring jString) {
+	const char *json_res;
+    const char *pathname = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
+    HCFS_set_notify_server(&json_res, pathname);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pathname);
+    return result;
+}
+
 //JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHCFSProperty(
 //		JNIEnv *jEnv, jobject jObject, jstring jKey, jstring jValue) {
 //	char *json_res;
