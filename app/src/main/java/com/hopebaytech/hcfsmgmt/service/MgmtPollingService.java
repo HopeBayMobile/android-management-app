@@ -58,6 +58,10 @@ public class MgmtPollingService extends Service {
         super.onDestroy();
     }
 
+    public void stopPollingService() {
+        stopSelf();
+    }
+
     private class PollingThread extends Thread {
         private long interval;
 
@@ -101,6 +105,7 @@ public class MgmtPollingService extends Service {
                                                 default:
                                                     if (result.getString("state").equals(GetDeviceInfo.State.ACTIVATED)) {
                                                         stopped = true;
+                                                        stopPollingService();
                                                     }
                                                     break;
                                             }
