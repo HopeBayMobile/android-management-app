@@ -41,7 +41,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
-import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -511,7 +511,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onStart() {
         super.onStart();
-        Intent intentService = new Intent(mContext, HCFSMgmtService.class);
+        Intent intentService = new Intent(mContext, TeraMgmtService.class);
         intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, false);
         mContext.startService(intentService);
@@ -520,7 +520,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onPause() {
         super.onPause();
-        Intent intentService = new Intent(mContext, HCFSMgmtService.class);
+        Intent intentService = new Intent(mContext, TeraMgmtService.class);
         intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, true);
         mContext.startService(intentService);

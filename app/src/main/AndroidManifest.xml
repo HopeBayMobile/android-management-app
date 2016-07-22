@@ -77,9 +77,13 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.hopebaytech.hcfsmgmt.service.HCFSMgmtService" />
+        <service android:name=".service.TeraMgmtService" />
 
         <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
+
+        <service
+            android:name="com.hopebaytech.hcfsmgmt.service.TeraAPIServer"
+            android:process=":server" />
 
         <service
             android:name="com.hopebaytech.hcfsmgmt.service.TeraAPIServer"

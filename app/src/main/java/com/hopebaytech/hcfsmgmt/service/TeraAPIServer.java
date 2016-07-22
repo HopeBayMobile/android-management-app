@@ -4,13 +4,19 @@ import android.app.Service;
 import android.content.Intent;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
-import android.net.LocalSocketAddress;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,7 +47,7 @@ public class TeraAPIServer extends Service {
 
         new SocketListener().start();
 
-        new Thread(new Runnable(){
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -52,11 +58,11 @@ public class TeraAPIServer extends Service {
                         if (isSuccess) {
                             break;
                         } else {
-                            Logs.e(CLASSNAME, this.getClass().getName(), jsonResult);
+                            Logs.e(CLASSNAME, this.getClass().getName(), "run", jsonResult);
                         }
                     }
-                } catch(Exception e){
-                    Logs.e(CLASSNAME, this.getClass().getName(), e.toString());
+                } catch (Exception e) {
+                    Logs.e(CLASSNAME, this.getClass().getName(), "run", Log.getStackTraceString(e));
                 }
             }
         }).start();
@@ -77,19 +83,19 @@ public class TeraAPIServer extends Service {
         super.onDestroy();
     }
 
-    private void writeSocket(int result) throws IOException {
-        Logs.i(CLASSNAME, "writeSocket", String.valueOf(result));
-        LocalSocket sender = new LocalSocket();
-        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
-        sender.getOutputStream().write(result);
-        sender.getOutputStream().close();
-        sender.close();
-    }
+//    private void writeSocket(int result) throws IOException {
+//        Logs.i(CLASSNAME, "writeSocket", String.valueOf(result));
+//        LocalSocket sender = new LocalSocket();
+//        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
+//        sender.getOutputStream().write(result);
+//        sender.getOutputStream().close();
+//        sender.close();
+//    }
 
     class SocketListener extends Thread {
         @Override
         public void run() {
-            Logs.d(CLASSNAME, this.getClass().getName(), "Server socket run . . . start");
+            Logs.d(CLASSNAME, this.getClass().getName(), "run", "Server socket run . . . start");
             LocalServerSocket server = null;
             try {
                 server = new LocalServerSocket(SOCKET_ADDRESS);
@@ -101,16 +107,14 @@ public class TeraAPIServer extends Service {
                             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-                            String inputLine = null;
-                            inputLine = bufferedReader.readLine();
-                            Logs.d(CLASSNAME, this.getClass().getName(), inputLine);
+                            String inputLine = bufferedReader.readLine();
+                            Logs.d(CLASSNAME, this.getClass().getName(), "run", inputLine);
                             try {
                                 JSONArray jsonArray = new JSONArray(inputLine);
                                 receiver.getOutputStream().write(1);
-                                pool.execute(new Thread(new mgmtApiUtils(jsonArray)));
-
+                                pool.execute(new Thread(new MgmtApiUtils(jsonArray)));
                             } catch (JSONException e) {
-                                Logs.e(CLASSNAME, this.getClass().getName(), e.toString());
+                                Logs.e(CLASSNAME, this.getClass().getName(), "run", Log.getStackTraceString(e));
                                 receiver.getOutputStream().write(0);
                             }
 
@@ -118,30 +122,31 @@ public class TeraAPIServer extends Service {
                             receiver.close();
                         }
                     } catch (Exception e) {
-                        Logs.e(CLASSNAME, this.getClass().getName(), e.getMessage());
+                        Logs.e(CLASSNAME, this.getClass().getName(), "run", Log.getStackTraceString(e));
                     }
                 }
             } catch (IOException e) {
-                Logs.e(CLASSNAME, this.getClass().getName(), e.getMessage());
+                Logs.e(CLASSNAME, this.getClass().getName(), "run", Log.getStackTraceString(e));
 
             } finally {
                 if (server != null) {
                     try {
                         server.close();
                     } catch (IOException e) {
-                        Log.e(getClass().getName(), e.getMessage());
+                        Logs.e(getClass().getName(), "run", Log.getStackTraceString(e));
                     }
                 }
             }
 
-            Logs.d(CLASSNAME, this.getClass().getName(), "Server socket run . . . end");
+            Logs.d(CLASSNAME, this.getClass().getName(), "run", "Server socket run . . . end");
         }
     }
 
-    class mgmtApiUtils implements Runnable {
+    class MgmtApiUtils implements Runnable {
 
-        JSONArray jsonArray;
-        public mgmtApiUtils(JSONArray j) {
+        private JSONArray jsonArray;
+
+        public MgmtApiUtils(JSONArray j) {
             this.jsonArray = j;
         }
 
@@ -151,19 +156,79 @@ public class TeraAPIServer extends Service {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObj = jsonArray.getJSONObject(i);
                     int eventID = jsonObj.getInt("event_id");
-
                     switch (eventID) {
                         case HCFSEventInfo.TEST:
-                            Logs.d(CLASSNAME, this.getClass().getName() + ".test", jsonObj.toString());
+                            Logs.d(CLASSNAME, this.getClass().getName() + ".test", "run", jsonObj.toString());
+                            break;
+                        case HCFSEventInfo.TOKEN_EXPIRED:
+                            refreshBackendToken();
+                            break;
+                        case HCFSEventInfo.UPLOAD_COMPLETED:
+                            sendUploadCompletedIntent();
+                            break;
+                        case HCFSEventInfo.EXCEED_PIN_MAX:
+                            notifyUserExceedPinMax();
                             break;
                     }
                 }
-
             } catch (Exception e) {
-                Logs.e(CLASSNAME, this.getClass().getName(), e.toString());
+                Logs.e(CLASSNAME, this.getClass().getName(), "run", Log.getStackTraceString(e));
             }
-
         }
+
+        private void notifyUserExceedPinMax() {
+            int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+            String notifyTitle = getString(R.string.app_name);
+            String notifyContent =getString(R.string.notify_exceed_pin_max);
+
+            Bundle extras = new Bundle();
+            extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
+            NotificationEvent.notify(TeraAPIServer.this, idNotify, notifyTitle, notifyContent, extras);
+        }
+
+        private void refreshBackendToken() {
+            MgmtCluster.getJwtToken(TeraAPIServer.this, new MgmtCluster.FetchJwtTokenListener() {
+                @Override
+                public void onFetchSuccessful(String jwtToken) {
+                    String imei = HCFSMgmtUtils.getDeviceImei(TeraAPIServer.this);
+                    MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
+                    proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+                        @Override
+                        public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
+                            try {
+                                String responseContent = getDeviceInfo.getMessage();
+                                JSONObject result = new JSONObject(responseContent);
+                                JSONObject backend = result.getJSONObject("backend");
+                                String url = backend.getString("url");
+                                String token = backend.getString("token");
+
+                                // TODO set backend token to hcfs via hcfsapid
+                            } catch (JSONException e) {
+                                Logs.e(CLASSNAME, "onGetDeviceInfoFailed", Log.getStackTraceString(e));
+                            }
+                        }
+
+                        @Override
+                        public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+                            Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                        }
+                    });
+                    proxy.get();
+                }
+
+                @Override
+                public void onFetchFailed() {
+                    Logs.e(CLASSNAME, "onFetchFailed", null);
+                }
+            });
+        }
+
+        private void sendUploadCompletedIntent() {
+            Intent intent = new Intent();
+            intent.setAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
+            sendBroadcast(intent);
+        }
+
     }
 
 }

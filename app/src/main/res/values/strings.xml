@@ -64,6 +64,7 @@
     <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
     <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達 %s%%</string>
     <string name="notify_exceed_pin_used_ratio">釘選空間使用率已達 %s%%</string>
+    <string name="notify_exceed_pin_max">釘選空間使用率不足</string>
     <string name="notify_pin_unpin_system_app_failed">系統應用程式釘選失敗</string>
 
     <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>

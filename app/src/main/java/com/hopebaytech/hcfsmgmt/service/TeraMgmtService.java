@@ -59,7 +59,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-public class HCFSMgmtService extends Service {
+public class TeraMgmtService extends Service {
 
     private final String CLASSNAME = getClass().getSimpleName();
     private ExecutorService mCacheExecutor;
@@ -76,9 +76,9 @@ public class HCFSMgmtService extends Service {
      */
     public class MgmtServiceBinder extends Binder implements IMgmtBinder {
         @Override
-        public HCFSMgmtService getService() {
+        public TeraMgmtService getService() {
             /** Return this instance of LocalService so clients can call public methods */
-            return HCFSMgmtService.this;
+            return TeraMgmtService.this;
         }
     }
 
@@ -163,7 +163,7 @@ public class HCFSMgmtService extends Service {
                             int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
                             String notify_title = getString(R.string.app_name);
                             String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
-                            NotificationEvent.notify(HCFSMgmtService.this, notify_id, notify_title, notify_message);
+                            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
                         // From HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
@@ -301,7 +301,7 @@ public class HCFSMgmtService extends Service {
                                                     }
                                                     String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
                                                     int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
-                                                    NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
+                                                    NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
                                                 }
                                                 Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
                                             } catch (InterruptedException e) {
@@ -317,7 +317,7 @@ public class HCFSMgmtService extends Service {
                                 mOngoingThread.interrupt();
                                 mOngoingThread = null;
                             }
-                            NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+                            NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
                         }
                     } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_SILENT_SIGN_IN)) {
                         mCacheExecutor.execute(new Runnable() {
@@ -414,7 +414,7 @@ public class HCFSMgmtService extends Service {
                                     String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
                                     Bundle extras = new Bundle();
                                     extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
-                                    NotificationEvent.notify(HCFSMgmtService.this, idNotify, notifyTitle, notifyContent, extras);
+                                    NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, extras);
 
                                     editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
                                 }
@@ -463,7 +463,7 @@ public class HCFSMgmtService extends Service {
         Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
 
         if (MgmtCluster.isNeedToRetryAgain()) {
-            Intent intentService = new Intent(HCFSMgmtService.this, HCFSMgmtService.class);
+            Intent intentService = new Intent(TeraMgmtService.this, TeraMgmtService.class);
             intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_SILENT_SIGN_IN);
             startService(intentService);
             Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
@@ -474,7 +474,7 @@ public class HCFSMgmtService extends Service {
             String notify_content = failedMsg;
             Bundle extras = new Bundle();
             extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-            NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
+            NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
             Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<Status>() {
@@ -484,7 +484,7 @@ public class HCFSMgmtService extends Service {
                         }
                     });
 
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(HCFSMgmtService.this);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
             editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
@@ -493,7 +493,7 @@ public class HCFSMgmtService extends Service {
         mGoogleApiClient.disconnect();
         HCFSConfig.stopSyncToCloud();
 
-        NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
     private void googleAuthFailed(String failedMsg) {
@@ -505,7 +505,7 @@ public class HCFSMgmtService extends Service {
         String notify_content = getString(R.string.auth_at_bootup_auth_failed_google_auth) + "(" + failedMsg + ")";
         Bundle extras = new Bundle();
         extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-        NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
+        NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
         Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                 .setResultCallback(new ResultCallback<Status>() {
@@ -517,20 +517,20 @@ public class HCFSMgmtService extends Service {
         mGoogleApiClient.disconnect();
         HCFSConfig.stopSyncToCloud();
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(HCFSMgmtService.this);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
         editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
         editor.apply();
 
-        NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
     private void registerToMgmtCluster(final Context context, String serverAuthCode) {
         final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
         authParam.setAuthCode(serverAuthCode);
         authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(HCFSMgmtService.this)));
+        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this)));
         authParam.setVendor(Build.BRAND);
         authParam.setModel(Build.MODEL);
         authParam.setAndroidVersion(Build.VERSION.RELEASE);

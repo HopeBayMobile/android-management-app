@@ -435,6 +435,7 @@ public class MgmtCluster {
         return serverClientId;
     }
 
+
     public static abstract class IAuthParam {
 
         protected String activateCode;
@@ -588,10 +589,10 @@ public class MgmtCluster {
     private static RegisterResultInfo convertRegisterResult(RegisterResultInfo registerResultInfo,
                                                             String responseContent) throws JSONException {
         JSONObject jsonObj = new JSONObject(responseContent);
-        registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
-        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]);
-        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]);
-        registerResultInfo.setPassword(jsonObj.getString("password"));
+        registerResultInfo.setBackendType(jsonObj.getString("backend_type")); // swifttoken
+        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
+        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
+        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
 //        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port")); ?
         registerResultInfo.setBackendUrl(jsonObj.getString("domain").split("://")[1] + ":" + jsonObj.getInt("port"));
         registerResultInfo.setBucket(jsonObj.getString("bucket"));
@@ -602,8 +603,7 @@ public class MgmtCluster {
     }
 
     /**
-     * @author Aaron
-     *         Created by Aaron on 2016/4/19.
+     * Listener for fetching available JWT token from MGMT server
      */
     public interface FetchJwtTokenListener {
 
@@ -615,22 +615,6 @@ public class MgmtCluster {
         /**
          * Callback function when fetch failed
          */
-        void onFetchFailed();
-
-    }
-
-    /**
-     * Listener for fetching available JWT token from MGMT server
-     *
-     * @author Aaron
-     *         Created by Aaron on 2016/7/11.
-     */
-    public interface FetchJwtTokenListener {
-
-        /** Callback function when fetch successful */
-        void onFetchSuccessful(String jwtToken);
-
-        /** Callback function when fetch failed */
         void onFetchFailed();
 
     }
@@ -757,7 +741,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
+                    final RegisterResultInfo registerResultInfo = register(authParam, jwtToken);
                     Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {

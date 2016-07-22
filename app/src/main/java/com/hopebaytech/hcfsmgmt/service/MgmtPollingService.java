@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.HBTIntent;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -163,7 +163,7 @@ public class MgmtPollingService extends Service {
         }
 
         private void unregistered() {
-            sendBroadcast(new Intent(HBTIntent.ACTION_TRANSFER_COMPLETED));
+            sendBroadcast(new Intent(TeraIntent.ACTION_TRANSFER_COMPLETED));
         }
 
     }
