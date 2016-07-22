@@ -45,12 +45,6 @@ public class TransferContentConfirmDialogFragment extends DialogFragment {
         return new TransferContentConfirmDialogFragment();
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Logs.w(CLASSNAME, "onCreate", null);
-    }
-
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

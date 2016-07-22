@@ -70,7 +70,7 @@ public class TransferContentWaitingFragment extends Fragment {
             public void onClick(View v) {
                 showProgressDialog();
                 final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
-                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.FetchJwtTokenListener() {
+                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {
                         MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);

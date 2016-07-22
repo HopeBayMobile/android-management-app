@@ -8,6 +8,13 @@ import android.net.LocalSocketAddress;
 import android.os.IBinder;
 import android.util.Log;
 
+import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -162,6 +169,54 @@ public class TeraAPIServer extends Service {
             } catch (Exception e) {
                 Logs.e(CLASSNAME, this.getClass().getName(), e.toString());
             }
+        }
+
+        private void notifyUserExceedPinMax() {
+            int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+            String notifyTitle = getString(R.string.app_name);
+            String notifyContent =getString(R.string.notify_exceed_pin_max);
+
+            Bundle extras = new Bundle();
+            extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
+            NotificationEvent.notify(TeraAPIServer.this, idNotify, notifyTitle, notifyContent, extras);
+        }
+
+        private void refreshBackendToken() {
+            MgmtCluster.getJwtToken(TeraAPIServer.this, new MgmtCluster.OnFetchJwtTokenListener() {
+                @Override
+                public void onFetchSuccessful(String jwtToken) {
+                    String imei = HCFSMgmtUtils.getDeviceImei(TeraAPIServer.this);
+                    MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
+                    proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+                        @Override
+                        public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
+                            try {
+                                String responseContent = getDeviceInfo.getMessage();
+                                JSONObject result = new JSONObject(responseContent);
+                                JSONObject backend = result.getJSONObject("backend");
+                                String url = backend.getString("url");
+                                String token = backend.getString("token");
+
+                                // TODO set backend token to hcfs via hcfsapid
+                            } catch (JSONException e) {
+                                Logs.e(CLASSNAME, "onGetDeviceInfoFailed", Log.getStackTraceString(e));
+                            }
+                        }
+
+                        @Override
+                        public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+                            Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                        }
+                    });
+                    proxy.get();
+                }
+
+                @Override
+                public void onFetchFailed() {
+                    Logs.e(CLASSNAME, "onFetchFailed", null);
+                }
+            });
+        }
 
         }
     }

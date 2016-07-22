@@ -16,6 +16,7 @@ public class GetDeviceInfo {
     public static class State {
         public static final String ACTIVATED = "activated";
         public static final String DISABLED = "disabled";
+        public static final String TXReady = "TXReady";
     }
 
     private String message;

@@ -56,6 +56,8 @@ public class MgmtCluster {
 
     public static final String GOOGLE_AUTH_BACKEND = "google-oauth2";
 
+    public static final String SERVER_CLIENT_ID = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
+
     /**
      * Unknown error.
      */
@@ -604,7 +606,7 @@ public class MgmtCluster {
     /**
      * Listener for fetching available JWT token from MGMT server
      */
-    public interface FetchJwtTokenListener {
+    public interface OnFetchJwtTokenListener {
 
         /**
          * Callback function when fetch successful
@@ -871,7 +873,7 @@ public class MgmtCluster {
         return isVerified;
     }
 
-    public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) {
+    public static void getJwtToken(final Context context, final OnFetchJwtTokenListener listener) {
         new Thread(new Runnable() {
             @Override
             public void run() {

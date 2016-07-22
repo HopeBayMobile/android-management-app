@@ -8,15 +8,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
@@ -27,14 +21,19 @@ import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
+import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
+import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -59,16 +58,23 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-public class HCFSMgmtService extends Service {
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class TeraMgmtService extends Service {
 
     private final String CLASSNAME = getClass().getSimpleName();
+
+    private final IBinder mBinder = new MgmtServiceBinder();
+
     private ExecutorService mCacheExecutor;
-    private ServiceFileDirDAO mServiceFileDirDAO;
+
     private Thread mOngoingThread;
-    private GoogleApiClient mGoogleApiClient;
+
+    private Context mContext;
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
-    private final IBinder mBinder = new MgmtServiceBinder();
+    private ServiceFileDirDAO mServiceFileDirDAO;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -76,9 +82,9 @@ public class HCFSMgmtService extends Service {
      */
     public class MgmtServiceBinder extends Binder implements IMgmtBinder {
         @Override
-        public HCFSMgmtService getService() {
-            /** Return this instance of LocalService so clients can call public methods */
-            return HCFSMgmtService.this;
+        public TeraMgmtService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return TeraMgmtService.this;
         }
     }
 
@@ -98,358 +104,44 @@ public class HCFSMgmtService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
+        mContext = this;
         if (intent != null) {
-            final String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
-            final Context context = this;
+            final String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
             Logs.d(CLASSNAME, "onStartCommand", "operation=" + operation);
             mCacheExecutor.execute(new Runnable() {
                 public void run() {
-//                    if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE)) {
-//                        /** Pin data type files */
-//                        pinOrUnpinDataTypeFile();
-//                    }
-                    if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
-                        // From HCFSMgmtReceiver's ACTION_BOOT_COMPLETED */
-
-                        // Add NEW uid info to database when system boot up
-                        List<UidInfo> uidInfoList = mUidDAO.getAll();
-                        Set<String> packageNameSet = new HashSet<>();
-                        for (UidInfo uidInfo : uidInfoList) {
-                            packageNameSet.add(uidInfo.getPackageName());
-                        }
-                        PackageManager pm = getPackageManager();
-                        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-                        for (ApplicationInfo packageInfo : packages) {
-                            String packageName = packageInfo.packageName;
-                            if (!packageNameSet.contains(packageName)) {
-                                int uid = packageInfo.uid;
-                                boolean isPinned = false;
-                                boolean isSystemApp = false;
-                                if (HCFSMgmtUtils.isSystemPackage(packageInfo)) {
-                                    isPinned = true;
-                                    isSystemApp = true;
-                                }
-                                mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
-                            }
-                        }
-
-                        // Pin /storage/emulated/0/Android folder
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                        boolean isAndroidFolderPinned = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, false);
-                        if (!isAndroidFolderPinned) {
-                            String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-                            if (!HCFSMgmtUtils.isPathPinned(externalAndroidPath)) {
-                                HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
-                            }
-
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, true);
-                            editor.apply();
-                        }
-
-                        // Pin system app on system start up
-                        boolean isSuccess = true;
-                        ArrayList<ItemInfo> itemInfoList = DisplayTypeFactory.getListOfInstalledApps(context, DisplayTypeFactory.APP_SYSTEM);
-                        for (ItemInfo itemInfo : itemInfoList) {
-                            AppInfo appInfo = (AppInfo) itemInfo;
-                            appInfo.setPinned(true);
-                            boolean result = pinOrUnpinApp(appInfo, PinType.PRIORITY);
-                            if (!result) {
-                                isSuccess = false;
-                            }
-                        }
-                        if (!isSuccess) {
-                            // Notify user pin/unpin system app failed
-                            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                            String notify_title = getString(R.string.app_name);
-                            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
-                            NotificationEvent.notify(HCFSMgmtService.this, notify_id, notify_title, notify_message);
-                        }
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
-                        // From HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
-
-                        // Add uid info of new installed app to database
-                        int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
-                        String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
-                        if (mUidDAO.get(packageName) == null) {
-                            final boolean isPinned = false;
-                            final boolean isSystemApp = false;
-                            mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
-                        }
-
-                        // Unpin user app on /data/data and /data/app
-                        try {
-                            PackageManager pm = getPackageManager();
-                            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                            boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
-                            if (!isSystemApp) {
-                                AppInfo appInfo = new AppInfo(context);
-                                appInfo.setPinned(false);
-                                appInfo.setUid(applicationInfo.uid);
-                                appInfo.setSystemApp(isSystemApp);
-                                appInfo.setApplicationInfo(applicationInfo);
-                                appInfo.setName(applicationInfo.loadLabel(pm).toString());
-                                appInfo.setExternalDirList(null);
-                                pinOrUnpinApp(appInfo);
-                            }
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
-                        }
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_UNPIN_UDPATE_APP)) {
-                        // From HCFSMgmtReceiver's ACTION_PACKAGE_REPLACED
-
-                        // Pin or unpin an update app according to pin_status field in uid.db
-                        String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
-                        try {
-                            PackageManager pm = getPackageManager();
-                            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                            UidInfo uidInfo = mUidDAO.get(packageName);
-                            if (uidInfo != null) {
-                                boolean isPinned = uidInfo.isPinned();
-
-                                AppInfo appInfo = new AppInfo(context);
-                                appInfo.setPinned(isPinned);
-                                appInfo.setUid(applicationInfo.uid);
-                                appInfo.setApplicationInfo(applicationInfo);
-                                appInfo.setName(applicationInfo.loadLabel(pm).toString());
-                                appInfo.setExternalDirList(null);
-                                pinOrUnpinApp(appInfo);
-                            }
-                        } catch (PackageManager.NameNotFoundException e) {
-                            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
-                        }
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE)) {
-                        // From HCFSMgmtReceiver's ACTION_PACKAGE_REMOVED
-
-                        // Remove uid info of uninstalled app from database
-                        int uid = intent.getIntExtra(HCFSMgmtUtils.INTENT_KEY_UID, -1);
-                        String packageName = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_PACKAGE_NAME);
-                        if (mUidDAO.get(packageName) != null) {
-                            String logMsg = "operation=" + operation + ", uid=" + uid + ", packageName=" + packageName;
-                            Logs.d(CLASSNAME, "onStartCommand", logMsg);
-                            mUidDAO.delete(packageName);
-                        }
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_RESET_XFER)) {
-                        // Reset xfer at 23:59:59 everyday
+                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
+                        addUidAndPinSystemAppWhenBootUp();
+                    } else if (operation.equals(TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
+                        addUidAndUnpinUserApp(intent);
+                    } else if (operation.equals(TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP)) {
+                        pinUnpinAgainWhenAppUpdated(intent);
+                    } else if (operation.equals(TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE)) {
+                        removeUidFromDatabase(intent, operation);
+                    } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
                         HCFSMgmtUtils.resetXfer();
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
-                        // Send a notification to user when storage used ratio is above the value set by user
-                        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-                        if (statInfo != null) {
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                            String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-                            String key = SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO;
-                            String storageUsedRatio = sharedPreferences.getString(key, defaultValue);
-
-                            long occupiedSize = HCFSMgmtUtils.getOccupiedSize();
-                            long rawCacheTotal = statInfo.getRawCacheTotal();
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
-                            double pinPlusUnpinButDirtyRatio = ((double) occupiedSize / rawCacheTotal) * 100;
-                            Logs.d(CLASSNAME, "onStartCommand", "occupiedSize=" + occupiedSize +
-                                            ", rawCacheTotal=" + rawCacheTotal +
-                                            ", pinPlusUnpinButDirty=" + pinPlusUnpinButDirtyRatio);
-                            if (pinPlusUnpinButDirtyRatio >= Double.valueOf(storageUsedRatio)) {
-                                if (!isNotified) {
-                                    int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;
-                                    String notify_title = getString(R.string.app_name);
-                                    String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storageUsedRatio);
-                                    NotificationEvent.notify(context, notify_id, notify_title, notify_message);
-
-                                    editor.putBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, true);
-                                }
-                            } else {
-                                if (isNotified) {
-                                    editor.putBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
-                                }
-                            }
-                            editor.apply();
-                        }
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_ONGOING_NOTIFICATION)) {
-                        // Send an ongoing notification to show HCFS network status and storage usage
-                        boolean isOnGoing = intent.getBooleanExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, false);
-                        if (isOnGoing) {
-                            if (mOngoingThread == null) {
-                                mOngoingThread = new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        final long FIVE_MINUTES_IN_MILLISECONDS = Interval.MINUTE * 5;
-                                        while (true) {
-                                            try {
-                                                HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-                                                if (statInfo != null) {
-                                                    int connStatus = HCFSConnStatus.getConnStatus(context, statInfo);
-                                                    String notifyTitle;
-                                                    switch (connStatus) {
-                                                        case HCFSConnStatus.TRANS_FAILED:
-                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
-                                                            break;
-                                                        case HCFSConnStatus.TRANS_NOT_ALLOWED:
-                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
-                                                            break;
-                                                        case HCFSConnStatus.TRANS_NORMAL:
-                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
-                                                            break;
-                                                        case HCFSConnStatus.TRANS_IN_PROGRESS:
-                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
-                                                            break;
-                                                        case HCFSConnStatus.TRANS_SLOW:
-                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
-                                                            break;
-                                                        default:
-                                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
-                                                    }
-                                                    String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
-                                                    int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
-                                                    NotificationEvent.notify(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
-                                                }
-                                                Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
-                                            } catch (InterruptedException e) {
-                                                break;
-                                            }
-                                        }
-                                    }
-                                });
-                                mOngoingThread.start();
-                            }
-                        } else {
-                            if (mOngoingThread != null) {
-                                mOngoingThread.interrupt();
-                                mOngoingThread = null;
-                            }
-                            NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
-                        }
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_SILENT_SIGN_IN)) {
-                        mCacheExecutor.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                final String serverClientId = MgmtCluster.getServerClientId();
-                                if (serverClientId != null) {
-                                    final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                            .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-                                            .requestServerAuthCode(serverClientId)
-                                            .requestEmail()
-                                            .build();
-
-                                    mGoogleApiClient = new GoogleApiClient.Builder(context)
-                                            .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                                            .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                                                @Override
-                                                public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                                                    Logs.d(CLASSNAME, "onConnectionFailed", "");
-                                                    int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
-                                                    String notify_title = getString(R.string.app_name);
-                                                    String notify_content = "Google sign-in is failed";
-                                                    NotificationEvent.notify(context, id_notify, notify_title, notify_content);
-                                                }
-                                            })
-                                            .build();
-                                    mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
-
-                                    OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-                                    if (opr.isDone()) {
-                                        Logs.d(CLASSNAME, "onStartCommand", "opr.isDone()");
-                                        GoogleSignInResult result = opr.get();
-                                        if (result != null && result.isSuccess()) {
-                                            final GoogleSignInAccount acct = result.getSignInAccount();
-                                            if (acct != null) {
-                                                String serverAuthCode = acct.getServerAuthCode();
-                                                Logs.w(CLASSNAME, "onStartCommand", "serverAuthCode=" + serverAuthCode);
-                                                registerToMgmtCluster(context, serverAuthCode);
-                                            } else {
-                                                String googleAuthErrMsg = "GoogleSignInAccount is null";
-                                                googleAuthFailed(googleAuthErrMsg);
-                                            }
-                                        } else {
-                                            String googleAuthErrMsg;
-                                            if (result == null) {
-                                                googleAuthErrMsg = "GoogleSignInResult is null";
-                                            } else {
-                                                googleAuthErrMsg = result.getStatus().getStatusMessage();
-                                            }
-                                            googleAuthFailed(googleAuthErrMsg);
-                                        }
-                                    } else {
-                                        Logs.d(CLASSNAME, "onStartCommand", "!opr.isDone()");
-                                        opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                                            @Override
-                                            public void onResult(@NonNull GoogleSignInResult result) {
-                                                if (result.isSuccess()) {
-                                                    final GoogleSignInAccount acct = result.getSignInAccount();
-                                                    if (acct != null) {
-                                                        String serverAuthCode = acct.getServerAuthCode();
-                                                        registerToMgmtCluster(context, serverAuthCode);
-                                                    } else {
-                                                        String googleAuthErrMsg = "GoogleSignInAccount is null";
-                                                        googleAuthFailed(googleAuthErrMsg);
-                                                    }
-                                                } else {
-                                                    String googleAuthErrMsg = result.getStatus().getStatusMessage();
-                                                    googleAuthFailed(googleAuthErrMsg);
-                                                }
-                                            }
-                                        });
-                                    }
-                                } else {
-                                    Logs.e(CLASSNAME, "onStartCommand", "serverClientId == null");
-                                }
-                            }
-                        });
-                    } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_INSUFFICIENT_PIN_SPACE)) {
-                        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-                        if (statInfo != null) {
-                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
-
-                            long pinTotal = statInfo.getPinTotal();
-                            long pinMax = statInfo.getPinMax();
-                            String notifyRatio = HCFSMgmtUtils.NOTIFY_INSUFFICIENT_PIN_PACE_RATIO;
-                            double ratio = ((double) pinTotal / pinMax) * 100;
-                            Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio + ", ratio=" + ratio);
-                            if (ratio >= Integer.valueOf(notifyRatio)) {
-                                if (!isNotified) {
-                                    int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
-                                    String notifyTitle = getString(R.string.app_name);
-                                    String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
-                                    Bundle extras = new Bundle();
-                                    extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
-                                    NotificationEvent.notify(HCFSMgmtService.this, idNotify, notifyTitle, notifyContent, extras);
-
-                                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
-                                }
-                            } else {
-                                if (isNotified) {
-                                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
-                                }
-                            }
-                            editor.apply();
-                        }
+                    } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+                        notifyLocalStorageUsedRatio();
+                    } else if (operation.equals(TeraIntent.VALUE_ONGOING_NOTIFICATION)) {
+                        startOngoingNotificationService(intent);
+                    } else if (operation.equals(TeraIntent.VALUE_CHECK_DEVICE_STATUS)) {
+                        checkDeviceStatus();
+                    } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
+                        notifyInsufficientPinSpace();
                     }
                 }
             });
         } else {
-            // Service is restarted and then execute the uncompleted pin/unpin operation when user manually close app and removes it from background.
-            mCacheExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (mServiceFileDirDAO.getCount() > 0) {
-                        List<ServiceFileDirInfo> infoList = mServiceFileDirDAO.getAll();
-                        for (final ServiceFileDirInfo info : infoList) {
-                            pinOrUnpinFileOrDirectory(info);
-                            mServiceFileDirDAO.delete(info.getFilePath());
-                        }
-                    }
-                }
-            });
+            // Service is restarted and then execute the uncompleted pin/unpin operation when user
+            // manually close app and removes it from background.
 //            mCacheExecutor.execute(new Runnable() {
 //                @Override
 //                public void run() {
-//                    if (mServiceAppDAO.getCount() > 0) {
-//                        List<ServiceAppInfo> infoList = mServiceAppDAO.getAll();
-//                        for (final ServiceAppInfo serviceAppInfo : infoList) {
-//                            pinOrUnpinApp(serviceAppInfo);
-//                            mServiceAppDAO.delete(serviceAppInfo);
+//                    if (mServiceFileDirDAO.getCount() > 0) {
+//                        List<ServiceFileDirInfo> infoList = mServiceFileDirDAO.getAll();
+//                        for (final ServiceFileDirInfo info : infoList) {
+//                            pinOrUnpinFileOrDirectory(info);
+//                            mServiceFileDirDAO.delete(info.getFilePath());
 //                        }
 //                    }
 //                }
@@ -459,12 +151,12 @@ public class HCFSMgmtService extends Service {
         // return START_REDELIVER_INTENT;
     }
 
-    private void mgmtAuthOrRegisterFailed(String failedMsg) {
+    private void mgmtAuthOrRegisterFailed(GoogleApiClient googleApiClient, String failedMsg) {
         Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
 
         if (MgmtCluster.isNeedToRetryAgain()) {
-            Intent intentService = new Intent(HCFSMgmtService.this, HCFSMgmtService.class);
-            intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_SILENT_SIGN_IN);
+            Intent intentService = new Intent(TeraMgmtService.this, TeraMgmtService.class);
+            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
             startService(intentService);
             Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
         } else {
@@ -476,7 +168,7 @@ public class HCFSMgmtService extends Service {
             extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
             NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+            Auth.GoogleSignInApi.signOut(googleApiClient)
                     .setResultCallback(new ResultCallback<Status>() {
                         @Override
                         public void onResult(Status status) {
@@ -490,31 +182,31 @@ public class HCFSMgmtService extends Service {
             editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
             editor.apply();
         }
-        mGoogleApiClient.disconnect();
+        googleApiClient.disconnect();
         HCFSConfig.stopSyncToCloud();
 
         NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
-    private void googleAuthFailed(String failedMsg) {
-        Logs.e(CLASSNAME, "googleAuthFailed", failedMsg);
+    private void googleSilentAuthFailed() {
+        Logs.e(CLASSNAME, "googleSilentAuthFailed", null);
 
         int flag = NotificationEvent.FLAG_OPEN_APP;
         int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
         String notify_title = getString(R.string.app_name);
-        String notify_content = getString(R.string.auth_at_bootup_auth_failed_google_auth) + "(" + failedMsg + ")";
+        String notify_content = getString(R.string.auth_at_bootup_auth_failed_google_auth);
         Bundle extras = new Bundle();
         extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
         NotificationEvent.notify(HCFSMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                .setResultCallback(new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        Logs.e(CLASSNAME, "googleAuthFailed", "status=" + status);
-                    }
-                });
-        mGoogleApiClient.disconnect();
+//        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
+//                .setResultCallback(new ResultCallback<Status>() {
+//                    @Override
+//                    public void onResult(Status status) {
+//                        Logs.e(CLASSNAME, "googleSilentAuthFailed", "status=" + status);
+//                    }
+//                });
+//        mGoogleApiClient.disconnect();
         HCFSConfig.stopSyncToCloud();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(HCFSMgmtService.this);
@@ -526,7 +218,7 @@ public class HCFSMgmtService extends Service {
         NotificationEvent.cancel(HCFSMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
-    private void registerToMgmtCluster(final Context context, String serverAuthCode) {
+    private void registerToMgmtCluster(final Context context, String serverAuthCode, final GoogleApiClient googleApiClient) {
         final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
         authParam.setAuthCode(serverAuthCode);
         authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
@@ -557,7 +249,7 @@ public class HCFSMgmtService extends Service {
                             }
                         });
 
-                        mGoogleApiClient.disconnect();
+                        googleApiClient.disconnect();
                         MgmtCluster.resetRetryCount();
                         HCFSConfig.startSyncToCloud();
 
@@ -571,7 +263,7 @@ public class HCFSMgmtService extends Service {
                     public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                         String authErrorMsg = "Error(" + registerResultInfo.getResponseCode() + "): " + registerResultInfo.getMessage();
                         String failedMsg = getString(R.string.auth_at_bootup_auth_failed_mgmt_register) + authErrorMsg;
-                        mgmtAuthOrRegisterFailed(failedMsg);
+                        mgmtAuthOrRegisterFailed(googleApiClient, failedMsg);
                     }
 
                 });
@@ -582,7 +274,7 @@ public class HCFSMgmtService extends Service {
             public void onAuthFailed(AuthResultInfo authResultInfo) {
                 String authErrorMsg = "Error(" + authResultInfo.getResponseCode() + "): " + authResultInfo.getMessage();
                 String failedMsg = getString(R.string.auth_at_bootup_auth_failed_mgmt_auth) + authErrorMsg;
-                mgmtAuthOrRegisterFailed(failedMsg);
+                mgmtAuthOrRegisterFailed(googleApiClient, failedMsg);
             }
 
         });
@@ -842,6 +534,345 @@ public class HCFSMgmtService extends Service {
             }
         }
         mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
+    }
+
+    private void checkDeviceStatus() {
+        MgmtCluster.getJwtToken(TeraMgmtService.this, new MgmtCluster.OnFetchJwtTokenListener() {
+            @Override
+            public void onFetchSuccessful(final String jwtToken) {
+                final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
+                MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
+                proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+                    @Override
+                    public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
+                        try {
+                            String responseContent = getDeviceInfo.getMessage();
+                            JSONObject result = new JSONObject(responseContent);
+                            String state = result.getString("state");
+                            if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
+                                String serverClientId = MgmtCluster.SERVER_CLIENT_ID;
+                                GoogleSilentAuthProxy silentAuthProxy = new GoogleSilentAuthProxy(
+                                        TeraMgmtService.this,
+                                        serverClientId,
+                                        new GoogleSilentAuthProxy.OnAuthListener() {
+                                            @Override
+                                            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                                                String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+                                                Logs.d(CLASSNAME, "onStartCommand", "serverAuthCode=" + serverAuthCode);
+                                                registerToMgmtCluster(TeraMgmtService.this, serverAuthCode, googleApiClient);
+                                            }
+
+                                            @Override
+                                            public void onAuthFailed() {
+                                                googleSilentAuthFailed();
+                                            }
+                                        });
+                                silentAuthProxy.auth();
+                            } else {
+                                JSONObject piggyback = result.getJSONObject("piggyback");
+                                String category = piggyback.getString("category");
+                                switch (category) {
+                                    // Device is not transferred completely, revert device status to "activated" status
+                                    case GetDeviceInfo.Category.TX_WAITING:
+                                        MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
+                                        unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
+                                            @Override
+                                            public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
+                                                Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
+                                            }
+
+                                            @Override
+                                            public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
+                                                Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
+                                            }
+                                        });
+                                        unlockDeviceProxy.unlock();
+                                        break;
+                                    // Device is already transferred, execute factory reset
+                                    case GetDeviceInfo.Category.UNREGISTERED:
+                                        FactoryResetUtils.reset(TeraMgmtService.this);
+                                        break;
+                                }
+                            }
+                        } catch (JSONException e) {
+                            Logs.e(CLASSNAME, "checkDeviceStatus", Log.getStackTraceString(e));
+                        }
+                    }
+
+                    @Override
+                    public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+                        Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                    }
+                });
+                proxy.get();
+            }
+
+            @Override
+            public void onFetchFailed() {
+                Logs.e(CLASSNAME, "onFetchFailed", null);
+            }
+        });
+    }
+
+    private void notifyInsufficientPinSpace() {
+        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+        if (statInfo != null) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
+
+            long pinTotal = statInfo.getPinTotal();
+            long pinMax = statInfo.getPinMax();
+            String notifyRatio = HCFSMgmtUtils.NOTIFY_INSUFFICIENT_PIN_PACE_RATIO;
+            double ratio = ((double) pinTotal / pinMax) * 100;
+            Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio + ", ratio=" + ratio);
+            if (ratio >= Integer.valueOf(notifyRatio)) {
+                if (!isNotified) {
+                    int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+                    String notifyTitle = getString(R.string.app_name);
+                    String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
+                    Bundle extras = new Bundle();
+                    extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
+                    NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, extras);
+
+                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
+                }
+            } else {
+                if (isNotified) {
+                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
+                }
+            }
+            editor.apply();
+        }
+    }
+
+    /**
+     * Send an ongoing notification to show HCFS network status and storage usage
+     */
+    private void startOngoingNotificationService(Intent intent) {
+        boolean isOnGoing = intent.getBooleanExtra(TeraIntent.KEY_ONGOING, false);
+        if (isOnGoing) {
+            if (mOngoingThread == null) {
+                mOngoingThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        final long FIVE_MINUTES_IN_MILLISECONDS = Interval.MINUTE * 5;
+                        while (true) {
+                            try {
+                                HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                                if (statInfo != null) {
+                                    int connStatus = HCFSConnStatus.getConnStatus(TeraMgmtService.this, statInfo);
+                                    String notifyTitle;
+                                    switch (connStatus) {
+                                        case HCFSConnStatus.TRANS_FAILED:
+                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
+                                            break;
+                                        case HCFSConnStatus.TRANS_NOT_ALLOWED:
+                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
+                                            break;
+                                        case HCFSConnStatus.TRANS_NORMAL:
+                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
+                                            break;
+                                        case HCFSConnStatus.TRANS_IN_PROGRESS:
+                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
+                                            break;
+                                        case HCFSConnStatus.TRANS_SLOW:
+                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
+                                            break;
+                                        default:
+                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
+                                    }
+                                    String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
+                                    int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
+                                    NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
+                                }
+                                Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
+                            } catch (InterruptedException e) {
+                                break;
+                            }
+                        }
+                    }
+                });
+                mOngoingThread.start();
+            }
+        } else {
+            if (mOngoingThread != null) {
+                mOngoingThread.interrupt();
+                mOngoingThread = null;
+            }
+            NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+        }
+    }
+
+    /**
+     * Send a notification to user when storage used ratio exceeds the threshold set by user
+     */
+    private void notifyLocalStorageUsedRatio() {
+        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+        if (statInfo != null) {
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+            String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+            String key = SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO;
+            String storageUsedRatio = sharedPreferences.getString(key, defaultValue);
+
+            long occupiedSize = HCFSMgmtUtils.getOccupiedSize();
+            long rawCacheTotal = statInfo.getRawCacheTotal();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
+            double pinPlusUnpinButDirtyRatio = ((double) occupiedSize / rawCacheTotal) * 100;
+            Logs.d(CLASSNAME, "onStartCommand", "occupiedSize=" + occupiedSize +
+                    ", rawCacheTotal=" + rawCacheTotal +
+                    ", pinPlusUnpinButDirty=" + pinPlusUnpinButDirtyRatio);
+            if (pinPlusUnpinButDirtyRatio >= Double.valueOf(storageUsedRatio)) {
+                if (!isNotified) {
+                    int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;
+                    String notify_title = getString(R.string.app_name);
+                    String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storageUsedRatio);
+                    NotificationEvent.notify(mContext, notify_id, notify_title, notify_message);
+
+                    editor.putBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, true);
+                }
+            } else {
+                if (isNotified) {
+                    editor.putBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
+                }
+            }
+            editor.apply();
+        }
+    }
+
+    /**
+     * Remove uid info of uninstalled app from database, triggered by HCFSMgmtReceiver's ACTION_PACKAGE_REMOVED
+     */
+    private void removeUidFromDatabase(Intent intent, String operation) {
+        int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
+        String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
+        if (mUidDAO.get(packageName) != null) {
+            String logMsg = "operation=" + operation + ", uid=" + uid + ", packageName=" + packageName;
+            Logs.d(CLASSNAME, "onStartCommand", logMsg);
+            mUidDAO.delete(packageName);
+        }
+    }
+
+    /**
+     * Pin/unpin an app again after app updated according to pin_status field in uid.db, triggered
+     * by HCFSMgmtReceiver's ACTION_PACKAGE_REPLACED
+     */
+    private void pinUnpinAgainWhenAppUpdated(Intent intent) {
+        String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
+        try {
+            PackageManager pm = getPackageManager();
+            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+            UidInfo uidInfo = mUidDAO.get(packageName);
+            if (uidInfo != null) {
+                boolean isPinned = uidInfo.isPinned();
+
+                AppInfo appInfo = new AppInfo(mContext);
+                appInfo.setPinned(isPinned);
+                appInfo.setUid(applicationInfo.uid);
+                appInfo.setApplicationInfo(applicationInfo);
+                appInfo.setName(applicationInfo.loadLabel(pm).toString());
+                appInfo.setExternalDirList(null);
+                pinOrUnpinApp(appInfo);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+        }
+    }
+
+    /**
+     * Add uid info of new installed app to database and unpin user app on /data/data and /data/app,
+     * triggered by HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
+     */
+    private void addUidAndUnpinUserApp(Intent intent) {
+        // Add uid info of new installed app to database
+        int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
+        String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
+        if (mUidDAO.get(packageName) == null) {
+            final boolean isPinned = false;
+            final boolean isSystemApp = false;
+            mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
+        }
+
+        // Unpin user app on /data/data and /data/app
+        try {
+            PackageManager pm = getPackageManager();
+            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+            boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
+            if (!isSystemApp) {
+                AppInfo appInfo = new AppInfo(mContext);
+                appInfo.setPinned(false);
+                appInfo.setUid(applicationInfo.uid);
+                appInfo.setSystemApp(isSystemApp);
+                appInfo.setApplicationInfo(applicationInfo);
+                appInfo.setName(applicationInfo.loadLabel(pm).toString());
+                appInfo.setExternalDirList(null);
+                pinOrUnpinApp(appInfo);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+        }
+    }
+
+    /**
+     * Add NEW uid info to database when system boot up and pin /storage/emulated/0/Android folder,
+     * and then pin system app, triggered by HCFSMgmtReceiver's ACTION_BOOT_COMPLETED
+     */
+    private void addUidAndPinSystemAppWhenBootUp() {
+        // Add NEW uid info to database when system boot up
+        List<UidInfo> uidInfoList = mUidDAO.getAll();
+        Set<String> packageNameSet = new HashSet<>();
+        for (UidInfo uidInfo : uidInfoList) {
+            packageNameSet.add(uidInfo.getPackageName());
+        }
+        PackageManager pm = getPackageManager();
+        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        for (ApplicationInfo packageInfo : packages) {
+            String packageName = packageInfo.packageName;
+            if (!packageNameSet.contains(packageName)) {
+                int uid = packageInfo.uid;
+                boolean isPinned = false;
+                boolean isSystemApp = false;
+                if (HCFSMgmtUtils.isSystemPackage(packageInfo)) {
+                    isPinned = true;
+                    isSystemApp = true;
+                }
+                mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
+            }
+        }
+
+        // Pin /storage/emulated/0/Android folder
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        boolean isAndroidFolderPinned = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, false);
+        if (!isAndroidFolderPinned) {
+            String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+            if (!HCFSMgmtUtils.isPathPinned(externalAndroidPath)) {
+                HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
+            }
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, true);
+            editor.apply();
+        }
+
+        // Pin system app on system start up
+        boolean isSuccess = true;
+        ArrayList<ItemInfo> itemInfoList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_SYSTEM);
+        for (ItemInfo itemInfo : itemInfoList) {
+            AppInfo appInfo = (AppInfo) itemInfo;
+            appInfo.setPinned(true);
+            boolean result = pinOrUnpinApp(appInfo, PinType.PRIORITY);
+            if (!result) {
+                isSuccess = false;
+            }
+        }
+        if (!isSuccess) {
+            // Notify user pin/unpin system app failed
+            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+            String notify_title = getString(R.string.app_name);
+            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
+            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
+        }
     }
 
 }

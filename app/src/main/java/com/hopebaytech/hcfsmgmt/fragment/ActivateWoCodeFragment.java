@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,7 +24,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +45,7 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -548,9 +547,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                     @Override
                                                     public void run() {
                                                         Bundle args = new Bundle();
-                                                        args.putString(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-                                                        args.putString(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_EMAIL, email);
-                                                        args.putString(HCFSMgmtUtils.ITENT_GOOGLE_SIGN_IN_PHOTO_URI, finalPhotoUrl);
+                                                        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+                                                        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
+                                                        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, finalPhotoUrl);
 
                                                         MainFragment mainFragment = MainFragment.newInstance();
                                                         mainFragment.setArguments(args);
