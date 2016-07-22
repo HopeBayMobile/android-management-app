@@ -625,7 +625,7 @@ public class MgmtCluster {
     /**
      * Listener for fetching available JWT token from MGMT server
      */
-    public interface FetchJwtTokenListener {
+    public interface OnFetchJwtTokenListener {
 
         /**
          * Callback function when fetch successful
