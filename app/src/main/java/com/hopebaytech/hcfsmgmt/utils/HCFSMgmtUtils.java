@@ -120,27 +120,6 @@ public class HCFSMgmtUtils {
 //        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 //        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
-        int requestCode = RequestCode.RESET_XFER;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long intervalMillis = Interval.RESET_XFER;
-        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
-    }
-
-    public static void startUpdateExternalAppDirAlarm(Context context) {
-        Logs.d(CLASSNAME, "startUpdateExternalAppDirAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR);
-
         int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);

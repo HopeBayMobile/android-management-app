@@ -8,6 +8,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
