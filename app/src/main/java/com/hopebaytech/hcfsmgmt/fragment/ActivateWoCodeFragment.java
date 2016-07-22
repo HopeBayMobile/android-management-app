@@ -462,9 +462,7 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private void signOut() {
-        Logs.w(CLASSNAME, "signOut", null);
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            Logs.w(CLASSNAME, "signOut", "---");
             Auth.GoogleSignInApi.signOut(mGoogleApiClient)
                     .setResultCallback(new ResultCallback<Status>() {
                         @Override

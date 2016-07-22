@@ -16,7 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.HBTIntent;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -47,7 +47,7 @@ public class TransferContentUploadingFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(HBTIntent.ACTION_UPLOAD_COMPLETED);
+        filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
         mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
         mUploadCompletedReceiver.registerReceiver(filter);
 
@@ -58,7 +58,7 @@ public class TransferContentUploadingFragment extends Fragment {
 //                    Thread.sleep(5000);
 //
 //                    Intent intent = new Intent();
-//                    intent.setAction(HBTIntent.ACTION_UPLOAD_COMPLETED);
+//                    intent.setAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
 //                    getActivity().sendBroadcast(intent);
 //                } catch (Exception e) {
 //                    e.printStackTrace();
@@ -140,8 +140,8 @@ public class TransferContentUploadingFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if (action.equals(HBTIntent.ACTION_UPLOAD_COMPLETED)) {
-                Logs.d(CLASSNAME, "onReceive", HBTIntent.ACTION_UPLOAD_COMPLETED);
+            if (action.equals(TeraIntent.ACTION_UPLOAD_COMPLETED)) {
+                Logs.d(CLASSNAME, "onReceive", TeraIntent.ACTION_UPLOAD_COMPLETED);
                 MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.FetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {

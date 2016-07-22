@@ -22,6 +22,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
@@ -244,65 +245,6 @@ public class TeraFonnApiService extends Service {
                 Logs.e(CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
             }
             return enabled;
-        }
-
-        @Override
-        public void getMgmtServerToken(final IFetchTokenListener listener) throws RemoteException {
-            mCacheExecutor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    final String serverClientId = MgmtCluster.getServerClientId();
-                    GoogleAuthProxy googleAuthProxy = new GoogleAuthProxy(TeraFonnApiService.this, serverClientId);
-                    googleAuthProxy.setOnAuthListener(new GoogleAuthProxy.OnAuthListener() {
-                        @Override
-                        public void onAuthSuccessful(GoogleSignInResult result) {
-                            String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-
-                            final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                            authParam.setAuthCode(serverAuthCode);
-                            authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                            authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraFonnApiService.this)));
-                            authParam.setVendor(Build.BRAND);
-                            authParam.setModel(Build.MODEL);
-                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                            authParam.setHcfsVersion("1.0.1");
-
-                            MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                            authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                                @Override
-                                public void onAuthSuccessful(AuthResultInfo authResultInfo){
-                                    String jwtToken = authResultInfo.getToken();
-                                    try {
-                                        listener.onFetchSuccessful(jwtToken);
-                                    } catch (RemoteException e) {
-                                        Logs.e(CLASSNAME, "MgmtCluster.AuthProxy", "onAuthSuccessful", Log.getStackTraceString(e));
-                                    }
-                                }
-
-                                @Override
-                                public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                    try {
-                                        listener.onFetchFailed();
-                                    } catch (RemoteException e) {
-                                        Logs.e(CLASSNAME, "MgmtCluster.AuthProxy", "onAuthFailed", Log.getStackTraceString(e));
-                                    }
-                                }
-                            });
-                            authProxy.auth();
-                        }
-
-                        @Override
-                        public void onAuthFailed() {
-                            try {
-                                listener.onFetchFailed();
-                            } catch (RemoteException e) {
-                                Logs.e(CLASSNAME, "GoogleAuthProxy", "onAuthFailed", Log.getStackTraceString(e));
-                            }
-                        }
-                    });
-                    googleAuthProxy.auth();
-                }
-            });
         }
 
     };

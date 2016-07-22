@@ -8,7 +8,7 @@ import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
-import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.service.TeraAPIServer;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -72,7 +72,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                         editor.putBoolean(HCFSMgmtUtils.PREF_SILENT_SIGN_IN, true);
                         editor.apply();
 
-                        Intent intentService = new Intent(context, HCFSMgmtService.class);
+                        Intent intentService = new Intent(context, TeraMgmtService.class);
                         intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_SILENT_SIGN_IN);
                         context.startService(intentService);
                     }
@@ -81,7 +81,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //            else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
 //                boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
 //                if (!isReplacing) {
-//                    Intent intentService = new Intent(mContext, HCFSMgmtService.class);
+//                    Intent intentService = new Intent(mContext, TeraMgmtService.class);
 //                    int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
 //                    String packageName = intent.getData().getSchemeSpecificPart();
 //                    intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP);
@@ -91,7 +91,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //                }
 //            } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
 //                String packageName = intent.getData().getSchemeSpecificPart();
-//                Intent intentService = new Intent(mContext, HCFSMgmtService.class);
+//                Intent intentService = new Intent(mContext, TeraMgmtService.class);
 //                int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
 //                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_UNPIN_UDPATE_APP);
 //                intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
@@ -101,7 +101,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //                boolean isDataRemoved = intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false);
 //                boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
 //                if (isDataRemoved && !isReplacing) {
-//                    Intent intentService = new Intent(mContext, HCFSMgmtService.class);
+//                    Intent intentService = new Intent(mContext, TeraMgmtService.class);
 //                    int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
 //                    String packageName = intent.getData().getSchemeSpecificPart();
 //                    intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE);
@@ -113,7 +113,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             else if (action.equals(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM)) {
                 String operation = intent.getStringExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION);
                 Logs.d(CLASSNAME, "onReceive", "operation=" + operation);
-                Intent intentService = new Intent(context, HCFSMgmtService.class);
+                Intent intentService = new Intent(context, TeraMgmtService.class);
                 if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED)) {
                     intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
                 } else if (operation.equals(HCFSMgmtUtils.INTENT_VALUE_PIN_DATA_TYPE_FILE)) {
@@ -135,7 +135,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
             // Add uid and pin system app
-            Intent addUidAndPinSystemAppIntent = new Intent(context, HCFSMgmtService.class);
+            Intent addUidAndPinSystemAppIntent = new Intent(context, TeraMgmtService.class);
             addUidAndPinSystemAppIntent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP);
             context.startService(addUidAndPinSystemAppIntent);
 
@@ -147,7 +147,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (!isReplacing) {
-                Intent intentService = new Intent(context, HCFSMgmtService.class);
+                Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();
                 intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP);
@@ -158,7 +158,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
         } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
             // Pin or unpin an update app according to pin_status field in uid.db
             String packageName = intent.getData().getSchemeSpecificPart();
-            Intent intentService = new Intent(context, HCFSMgmtService.class);
+            Intent intentService = new Intent(context, TeraMgmtService.class);
             int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
             intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_PIN_UNPIN_UDPATE_APP);
             intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_UID, uid);
@@ -169,7 +169,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             boolean isDataRemoved = intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false);
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (isDataRemoved && !isReplacing) {
-                Intent intentService = new Intent(context, HCFSMgmtService.class);
+                Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();
                 intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_REMOVE_UID_FROM_DATABASE);
