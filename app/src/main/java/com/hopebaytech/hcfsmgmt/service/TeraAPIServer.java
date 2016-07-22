@@ -4,15 +4,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
-import android.net.LocalSocketAddress;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
+import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -186,7 +185,7 @@ public class TeraAPIServer extends Service {
         }
 
         private void refreshBackendToken() {
-            MgmtCluster.getJwtToken(TeraAPIServer.this, new MgmtCluster.FetchJwtTokenListener() {
+            MgmtCluster.getJwtToken(TeraAPIServer.this, new MgmtCluster.OnFetchJwtTokenListener() {
                 @Override
                 public void onFetchSuccessful(String jwtToken) {
                     String imei = HCFSMgmtUtils.getDeviceImei(TeraAPIServer.this);

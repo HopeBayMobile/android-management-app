@@ -25,6 +25,7 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -54,51 +55,13 @@ public class HCFSMgmtUtils {
     public static final int NOTIFY_ID_FAILED_SILENT_SIGN_IN = 4;
     public static final int NOTIFY_ID_INSUFFICIENT_PIN_SPACE = 5;
 
-    public static final String DATA_STATUS_CLOUD = "cloud";
-    public static final String DATA_STATUS_HYBRID = "hybrid";
-    public static final String DATA_STATUS_LOCAL = "local";
-
-    public static final String INTENT_KEY_OPERATION = "intent_key_action";
-    public static final String INTENT_KEY_PIN_FILE_DIR_FILEAPTH = "intent_key_pin_firdir_filepath";
-    public static final String INTENT_KEY_PIN_FILE_DIR_PIN_STATUS = "intent_key_pin_firdir_pin_status";
-    public static final String INTENT_KEY_PIN_APP_DATA_DIR = "intent_key_pin_app_data_dir";
-    public static final String INTENT_KEY_PIN_APP_SOURCE_DIR = "intent_key_pin_app_source_dir";
-    public static final String INTENT_KEY_PIN_APP_EXTERNAL_DIR = "intent_key_pin_app_external_dir";
-    public static final String INTENT_KEY_PIN_APP_PIN_STATUS = "intent_key_pin_app_pin_status";
-    public static final String INTENT_KEY_PIN_APP_NAME = "intent_key_pin_app_name";
-    public static final String INTENT_KEY_PIN_PACKAGE_NAME = "intent_key_pin_package_name";
-    public static final String INTENT_KEY_SERVER_CLIENT_ID = "server_client_id";
-    public static final String INTENT_KEY_UID = "intent_key_uid";
-    public static final String INTENT_KEY_PACKAGE_NAME = "intent_key_package_name";
-    public static final String INTENT_KEY_ONGOING = "intent_key_ongoing";
-    public static final String INTENT_KEY_SILENT_SIGN_IN = "intent_key_silent_sign_in";
-
-    public static final String INTENT_VALUE_NONE = "intent_value_none";
-    public static final String INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED = "intent_value_notify_upload_complete";
-    public static final String INTENT_VALUE_PIN_DATA_TYPE_FILE = "intent_value_pin_data_type_file";
-    public static final String INTENT_VALUE_PIN_APP = "intent_value_pin_app";
-    public static final String INTENT_VALUE_PIN_FILE_DIRECTORY = "intent_value_pin_file_directory";
-    public static final String INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP = "intent_value_add_uid_and_pin_system_app_when_boot_up";
-    public static final String INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP = "intent_value_add_uid_to_database_and_unpin_user_app";
-    public static final String INTENT_VALUE_REMOVE_UID_FROM_DATABASE = "intent_value_remove_uid_from_database";
-    public static final String INTENT_VALUE_RESET_XFER = "intent_value_reset_xfer";
-    public static final String INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO = "intent_value_notify_local_storage_used_ratio";
-    public static final String INTENT_VALUE_ONGOING_NOTIFICATION = "intent_value_ongoing_notification";
-    public static final String INTENT_VALUE_PIN_UNPIN_UDPATE_APP = "intent_value_pin_unpin_update_app";
-    public static final String INTENT_VALUE_SILENT_SIGN_IN = "intent_value_silent_sign_in";
-    public static final String INTENT_VALUE_INSUFFICIENT_PIN_SPACE = "intent_value_insufficient_pin_space";
-
     public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
 
-    public static final String PREF_SILENT_SIGN_IN = "pref_silent_sign_in";
+    public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
     public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
-
-    public static final String ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
-    public static final String ITENT_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
-    public static final String ITENT_GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
 
     // public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
@@ -130,7 +93,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_DATA_TYPE_FILE);
 
         int requestCode = RequestCode.PIN_DATA_TYPE_FILE;
         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
@@ -141,29 +104,12 @@ public class HCFSMgmtUtils {
         am.cancel(pi);
     }
 
-//    public static void startPinDataTypeFileAlarm(Context context) {
-//        log(Log.DEBUG, CLASSNAME, "startPinDataTypeFileAlarm", null);
-//
-//        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
-//
-//        int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
-//        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-//        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-//
-//        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//        long triggerAtMillis = SystemClock.elapsedRealtime();
-//        long intervalMillis = Interval.PIN_DATA_TYPE_FILE;
-//        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, intervalMillis, pi);
-//    }
-
     public static void startResetXferAlarm(Context context) {
         Logs.d(CLASSNAME, "startResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
         int requestCode = RequestCode.RESET_XFER;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -185,7 +131,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
         int requestCode = RequestCode.RESET_XFER;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -201,7 +147,7 @@ public class HCFSMgmtUtils {
 //
 //        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
 //        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
+//        intent.putExtra(KEY_OPERATION, VALUE_NOTIFY_UPLOAD_COMPLETED);
 //
 //        int requestCode = REQUEST_CODE_NOTIFY_UPLOAD_COMPLETED;
 //        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -218,7 +164,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_UPLOAD_COMPLETED);
 
         int requestCode = RequestCode.NOTIFY_UPLOAD_COMPLETED;
         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
@@ -643,6 +589,9 @@ public class HCFSMgmtUtils {
         return (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
+    /**
+     * Reset xfer at 23:59:59 everyday
+     */
     public static boolean resetXfer() {
         boolean isSuccess = false;
         try {
@@ -697,7 +646,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
 
         int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -714,7 +663,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
 
         int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -730,7 +679,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
         int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -747,7 +696,7 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
         int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;

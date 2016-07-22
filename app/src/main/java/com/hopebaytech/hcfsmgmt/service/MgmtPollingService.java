@@ -8,9 +8,9 @@ import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -77,7 +77,7 @@ public class MgmtPollingService extends Service {
             while (!stopped) {
                 try {
                     if (NetworkUtils.isNetworkConnected(MgmtPollingService.this)) {
-                        MgmtCluster.getJwtToken(MgmtPollingService.this, new MgmtCluster.FetchJwtTokenListener() {
+                        MgmtCluster.getJwtToken(MgmtPollingService.this, new MgmtCluster.OnFetchJwtTokenListener() {
                             @Override
                             public void onFetchSuccessful(String jwt) {
                                 String imei = HCFSMgmtUtils.getDeviceImei(MgmtPollingService.this);
@@ -152,7 +152,6 @@ public class MgmtPollingService extends Service {
                 Logs.d(CLASSNAME, this.getClass().getName(), lockMsg);
 
                 mHandler.sendEmptyMessage(0);
-
             } catch (JSONException e) {
                 Logs.e(CLASSNAME, this.getClass().getName() + ".Lock", e.toString());
             }

@@ -51,6 +51,7 @@ public class TransferContentUploadingFragment extends Fragment {
         mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
         mUploadCompletedReceiver.registerReceiver(filter);
 
+        // Only for test
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
@@ -83,7 +84,7 @@ public class TransferContentUploadingFragment extends Fragment {
             public void onClick(View v) {
                 showProgressDialog();
                 final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
-                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.FetchJwtTokenListener() {
+                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {
                         MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
@@ -142,7 +143,7 @@ public class TransferContentUploadingFragment extends Fragment {
             String action = intent.getAction();
             if (action.equals(TeraIntent.ACTION_UPLOAD_COMPLETED)) {
                 Logs.d(CLASSNAME, "onReceive", TeraIntent.ACTION_UPLOAD_COMPLETED);
-                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.FetchJwtTokenListener() {
+                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {
                         String imei = HCFSMgmtUtils.getDeviceImei(getActivity());

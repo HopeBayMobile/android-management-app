@@ -40,6 +40,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
@@ -318,7 +319,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         // Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist
         intent = new Intent(mContext, HCFSMgmtReceiver.class);
         intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
         boolean isNotifyLocalStorageUsedRatioAlarmExist = PendingIntent.getBroadcast(mContext,
                 RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
@@ -329,7 +330,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         // Start NotifyInsufficientPinSpaceAlarm if it doesn't exist
         intent = new Intent(mContext, HCFSMgmtReceiver.class);
         intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
         boolean isNotifyInsufficientPinSpaceAlarmExist = PendingIntent.getBroadcast(mContext,
                 RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
@@ -512,8 +513,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onStart() {
         super.onStart();
         Intent intentService = new Intent(mContext, TeraMgmtService.class);
-        intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ONGOING_NOTIFICATION);
-        intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, false);
+        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
+        intentService.putExtra(TeraIntent.KEY_ONGOING, false);
         mContext.startService(intentService);
     }
 
@@ -521,8 +522,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
         Intent intentService = new Intent(mContext, TeraMgmtService.class);
-        intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_OPERATION, HCFSMgmtUtils.INTENT_VALUE_ONGOING_NOTIFICATION);
-        intentService.putExtra(HCFSMgmtUtils.INTENT_KEY_ONGOING, true);
+        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
+        intentService.putExtra(TeraIntent.KEY_ONGOING, true);
         mContext.startService(intentService);
     }
 
