@@ -146,7 +146,7 @@
     <string name="settings_execute_title">Download to run</string>
     <string name="settings_switch_account_title">Switch account</string>
     <string name="settings_switch_account_warning_msg">While switching account, the system will log out your current account first. Continue?</string>
-    <string name="settings_local_storage_used_ratio">Send notification when local space usage reaches %s.</string>
+    <string name="settings_local_storage_used_ratio">Send notification if local space usage reaches <b>%s</b>.</string>
     <string name="settings_transfer_content">Transfer contents</string>
     <string name="settings_transfer_content_desc_title">Transfer contents</string>
     <string name="settings_transfer_content_desc_hint">Transfer contents may transfer all of your device and cloud contents to another device. You will need to reset this device when all contents are uploaded onto Tera Cloud.</string>
