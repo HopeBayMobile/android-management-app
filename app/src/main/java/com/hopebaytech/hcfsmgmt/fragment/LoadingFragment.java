@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -10,6 +11,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,6 +26,7 @@ import java.util.TimerTask;
 public class LoadingFragment extends Fragment {
 
     public static final String TAG = LoadingFragment.class.getSimpleName();
+    private final String CLASSNAME = LoadingFragment.class.getSimpleName();
 
     public static LoadingFragment newInstance() {
         return new LoadingFragment();
