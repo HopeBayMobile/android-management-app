@@ -131,15 +131,15 @@ public class HCFSConfig {
 //        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, registerResultInfo.getPassword())) {
 //            isFailed = true;
 //        }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, registerResultInfo.getBackendUrl())) {
-            isFailed = true;
-        }
+//        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, registerResultInfo.getBackendUrl())) {
+//            isFailed = true;
+//        }
         if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
             isFailed = true;
-        }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, registerResultInfo.getProtocol())) {
-            isFailed = true;
-        }
+//        }
+//        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, registerResultInfo.getProtocol())) {
+//            isFailed = true;
+//        }
         if (!reloadConfig()) {
             isFailed = true;
         }
