@@ -590,8 +590,22 @@ public class MgmtCluster {
     private static RegisterResultInfo convertRegisterResult(RegisterResultInfo registerResultInfo,
                                                             String responseContent) throws JSONException {
         JSONObject jsonObj = new JSONObject(responseContent);
+
+        String token = null;
+        try {
+            token = jsonObj.getString("token");
+        } catch (JSONException e) {
+            Logs.w(CLASSNAME, "convertRegisterResult", Log.getStackTraceString(e));
+        }
+
 //        registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
-        registerResultInfo.setBackendType(jsonObj.getString("backend_type") + "token"); // swifttoken
+        if (token != null) {
+            registerResultInfo.setBackendType(jsonObj.getString("backend_type") + "token"); // swifttoken
+            registerResultInfo.setStorageAccessToken(token);
+        } else {
+            registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+        }
+
 //        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
 //        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
 //        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
@@ -600,8 +614,8 @@ public class MgmtCluster {
         registerResultInfo.setBucket(jsonObj.getString("bucket"));
 //        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
 //        registerResultInfo.setProtocol(jsonObj.getString("url").split(":")[0]);
-        registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
         return registerResultInfo;
+
     }
 
     /**
