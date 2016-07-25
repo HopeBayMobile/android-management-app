@@ -590,15 +590,15 @@ public class MgmtCluster {
     private static RegisterResultInfo convertRegisterResult(RegisterResultInfo registerResultInfo,
                                                             String responseContent) throws JSONException {
         JSONObject jsonObj = new JSONObject(responseContent);
-        registerResultInfo.setBackendType(jsonObj.getString("backend_type")); // swifttoken
-        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
-        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
-        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
-//        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port")); ?
-        registerResultInfo.setBackendUrl(jsonObj.getString("domain").split("://")[1] + ":" + jsonObj.getInt("port"));
-        registerResultInfo.setBucket(jsonObj.getString("bucket"));
+//        registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+        registerResultInfo.setBackendType(jsonObj.getString("backend_type") + "token"); // swifttoken
+//        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
+//        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
+//        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
+//        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
+        registerResultInfo.setBackendUrl(jsonObj.getString("url"));
 //        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
-        registerResultInfo.setProtocol(jsonObj.getString("domain").split("://")[0]);
+        registerResultInfo.setProtocol(jsonObj.getString("url").split(":")[0]);
         registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
         return registerResultInfo;
     }

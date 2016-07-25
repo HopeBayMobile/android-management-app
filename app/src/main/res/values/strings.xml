@@ -63,110 +63,110 @@
     <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
     <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
     <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達 %s%%</string>
-    <string name="notify_exceed_pin_used_ratio">釘選空間使用率已達 %s%%</string>
-    <string name="notify_exceed_pin_max">釘選空間使用率不足</string>
-    <string name="notify_pin_unpin_system_app_failed">系統應用程式釘選失敗</string>
+<string name="notify_exceed_pin_used_ratio">已釘選空間使用率已達 %s%%</string>
+<string name="notify_exceed_pin_max">釘選空間使用率不足</string>
+<string name="notify_pin_unpin_system_app_failed">系統應用程式釘選失敗</string>
 
-    <string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
-    
-    <string name="overview_hcfs_conn_status_normal">連線正常</string>
-    <string name="overview_hcfs_conn_status_not_allowed">不允許傳輸</string>
-    <string name="overview_hcfs_conn_status_failed">連線中斷</string>
-    <string name="overview_hcfs_conn_status_slow">連線緩慢</string>
-    <string name="overview_hcfs_conn_status_in_progress">傳輸中</string>
-    <string name="overview_space_usage_title">空間使用量</string>
-    <string name="overview_used_space">已使用空間</string>
-    <string name="overview_local_storage">快取空間</string>
-    <string name="overview_pinned_storage">釘選空間</string>
-    <string name="overview_network_traffic_title">資料傳輸量</string>
-    <string name="overview_data_transmission_today">本日資料傳輸</string>
-    <string name="overview_data_to_be_uploaded">待上傳資料</string>
-    <string name="overview_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
-    
-    <string name="action_settings">設定</string>
-    
-    <string name="file_mgmt_hint_no_file">這個資料夾是空的</string>
-    <string name="file_mgmt_snackbar_refresh">重新整理</string>
-    <string name="file_mgmt_snackbar_unknown_type_file">無可開啟此類型檔案的應用程式</string>
-    <string name="file_mgmt_spinner_apps">依應用程式顯示</string>
-    <string name="file_mgmt_spinner_data_type">依資料型態顯示</string>
-    <string name="file_mgmt_spinner_files">依檔案顯示</string>
-    <string-array name="file_mgmt_spinner">
-        <item>@string/file_mgmt_spinner_apps</item>
-        <!--<item>@string/file_mgmt_spinner_data_type</item>-->
-        <item>@string/file_mgmt_spinner_files</item>
-    </string-array>
-    <string name="file_mgmt_list_data_type_image">圖片</string>
-    <string name="file_mgmt_list_data_type_video">視訊</string>
-    <string name="file_mgmt_list_data_type_audio">音樂</string>
-    <string-array name="file_mgmt_list_data_types">
-        <item>@string/file_mgmt_list_data_type_image</item>
-        <item>@string/file_mgmt_list_data_type_video</item>
-        <item>@string/file_mgmt_list_data_type_audio</item>
-    </string-array>
-    <string name="file_mgmt_menu_list">清單</string>
-    <string name="file_mgmt_menu_grid">圖示</string>
-    <string name="file_mgmt_whether_allowed_to_unpin_image">圖片資料型態已釘選，是否仍要取消釘選？</string>
-    <string name="file_mgmt_whether_allowed_to_unpin_video">視訊資料型態已釘選，是否仍要取消釘選？</string>
-    <string name="file_mgmt_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
-    <string name="file_mgmt_internal_storage_name">內部儲存空間</string>
-    <string name="file_mgmt_sdcard1_storage_name">SD卡儲存空間</string>
-    <string name="file_mgmt_section_item_calculating">計算中&#8230;</string>
-    <string name="file_mgmt_section_item_total_storage_space">總空間:&#160;</string>
-    <string name="file_mgmt_section_item_available_storage_space">可用空間:&#160;</string>
-    <string name="file_mgmt_section_item_internal_storage_space">本地空間:&#160;</string>
-    <string name="file_mgmt_alert_dialog_title">提示</string>
-    <string name="file_mgmt_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
-    <string name="file_mgmt_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
-    <string name="file_mgmt_date_since_pinned">自 %1$s 開始釘選</string>
-    <string name="file_mgmt_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
-    <string name="file_mgmt_popup_menu_pin">釘選</string>
-    <string name="file_mgmt_popup_menu_unpin">取消釘選</string>
-    <string name="file_mgmt_popup_menu_app_type_more_info">更多資訊</string>
-    <string name="file_mgmt_dialog_app_version">版本: %s</string>
-    <string name="file_mgmt_dialog_data_size">大小: %s</string>
-    <string name="file_mgmt_dialog_app_package_name">套件名稱: %s</string>
-    <string name="file_mgmt_dialog_local_data_ratio">本地資料比例: %s</string>
-    <string name="file_mgmt_dialog_app_open">開啟</string>
-    <string name="file_mgmt_dialog_app_remove">解除安裝</string>
-    <string name="file_mgmt_dialog_app_cancel">取消</string>
-    <string name="file_mgmt_dialog_calculating">計算中&#8230;</string>
+<string name="active_cloud_storage_auth_fail">帳戶驗證失敗</string>
 
-    <string name="hcfs_mgmt_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
-    <string name="hcfs_mgmt_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
-    <string name="hcfs_mgmt_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>
-    <string name="hcfs_mgmt_service_image_failed_to_unpin">圖片類型取消釘選失敗數量</string>
-    <string name="hcfs_mgmt_service_video_failed_to_unpin">視訊類型取消釘選失敗數量</string>
-    <string name="hcfs_mgmt_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
+<string name="overview_hcfs_conn_status_normal">連線正常</string>
+<string name="overview_hcfs_conn_status_not_allowed">不允許傳輸</string>
+<string name="overview_hcfs_conn_status_failed">連線中斷</string>
+<string name="overview_hcfs_conn_status_slow">連線緩慢</string>
+<string name="overview_hcfs_conn_status_in_progress">傳輸中</string>
+<string name="overview_space_usage_title">空間使用量</string>
+<string name="overview_used_space">已使用空間</string>
+<string name="overview_local_storage">快取空間</string>
+<string name="overview_pinned_storage">已釘選空間</string>
+<string name="overview_network_traffic_title">資料傳輸量</string>
+<string name="overview_data_transmission_today">本日資料傳輸</string>
+<string name="overview_data_to_be_uploaded">待上傳資料</string>
+<string name="overview_snackbar_exit_app">再按一次返回鍵離開應用程式</string>
 
-    <string name="settings_title_bar">一般設定</string>
-    <string name="settings_synchronization">同步設定</string>
-    <string name="settings_sync_wifi_only">只有連接WIFI時才存取雲端</string>
-    <string name="settings_notification">通知設定</string>
-    <string name="settings_notify_conn_failed_recovery">通知連線中斷/恢復</string>
-    <string name="settings_notify_upload_completed">通知上傳資料完成</string>
-    <string name="settings_notify_local_storage_used_ratio_dialog_title">請選擇通知的比例</string>
-    <string name="settings_notify_local_storage_used_ratio_summary">請選擇通知的比例</string>
-    <string name="settings_notify_local_storage_used_ratio_title">通知本地空間使用率</string>
-    <string name="settings_execute">執行</string>
-    <string name="settings_execute_title">下載完成後才執行</string>
-    <string name="settings_switch_account_title">轉換帳戶</string>
-    <string name="settings_switch_account_warning_msg">轉換帳戶時系統會先登出您目前使用的帳戶，要繼續?</string>
-    <string name="settings_local_storage_used_ratio">本地空間使用率達 %s 時進行通知</string>
-    <string name="settings_transfer_content">轉換內容</string>
-    <string name="settings_transfer_content_desc_title">Transfer contents</string>
-    <string name="settings_transfer_content_desc_hint">Transfer contents may transfer all of your device and cloud contents to another device. You will need to reset this device when all contents are uploaded onto Tera Cloud.</string>
-    <string name="settings_transfer_content_desc_check">I understand the risks described above</string>
-    <string name="settings_transfer_content_confirm_title">Confirm Password</string>
-    <string name="settings_transfer_content_confirm_message">Confirm your Google account password:</string>
-    <string name="settings_transfer_content_confirm_error_message">Incorrect password, please try again.</string>
-    <string name="settings_transfer_content_uploading_title">Processing&#8230;</string>
-    <string name="settings_transfer_content_uploading_message">The preparation may taken some time, depending on the total file sizes.\n\nWhile this device has started transmission process, please execute factory reset on the other device, and login Tera app to wait for available backup to restore.</string>
-    <string name="settings_transfer_content_waiting_title">Waiting for another device&#8230;</string>
-    <string name="settings_transfer_content_waiting_message">All contents are ready to transfer. The transfer process will auto start when the backup is chosen by the other device.</string>
-    <string name="settings_transfer_content_transferring_title">Transferring Contents&#8230;</string>
-    <string name="settings_transfer_content_transferring_message">While transferring contents, please do not execute any other apps or actions</string>
-    <string name="settings_transfer_content_done_title">Done</string>
+<string name="action_settings">設定</string>
+
+<string name="file_mgmt_hint_no_file">這個資料夾是空的</string>
+<string name="file_mgmt_snackbar_refresh">重新整理</string>
+<string name="file_mgmt_snackbar_unknown_type_file">無可開啟此類型檔案的應用程式</string>
+<string name="file_mgmt_spinner_apps">依應用程式顯示</string>
+<string name="file_mgmt_spinner_data_type">依資料型態顯示</string>
+<string name="file_mgmt_spinner_files">依檔案顯示</string>
+<string-array name="file_mgmt_spinner">
+<item>@string/file_mgmt_spinner_apps</item>
+<!--<item>@string/file_mgmt_spinner_data_type</item>-->
+<item>@string/file_mgmt_spinner_files</item>
+</string-array>
+<string name="file_mgmt_list_data_type_image">圖片</string>
+<string name="file_mgmt_list_data_type_video">視訊</string>
+<string name="file_mgmt_list_data_type_audio">音樂</string>
+<string-array name="file_mgmt_list_data_types">
+<item>@string/file_mgmt_list_data_type_image</item>
+<item>@string/file_mgmt_list_data_type_video</item>
+<item>@string/file_mgmt_list_data_type_audio</item>
+</string-array>
+<string name="file_mgmt_menu_list">清單</string>
+<string name="file_mgmt_menu_grid">圖示</string>
+<string name="file_mgmt_whether_allowed_to_unpin_image">圖片資料型態已釘選，是否仍要取消釘選？</string>
+<string name="file_mgmt_whether_allowed_to_unpin_video">視訊資料型態已釘選，是否仍要取消釘選？</string>
+<string name="file_mgmt_whether_allowed_to_unpin_audio">音樂資料型態已釘選，是否仍要取消釘選？</string>
+<string name="file_mgmt_internal_storage_name">內部儲存空間</string>
+<string name="file_mgmt_sdcard1_storage_name">SD卡儲存空間</string>
+<string name="file_mgmt_section_item_calculating">計算中&#8230;</string>
+<string name="file_mgmt_section_item_total_storage_space">總空間:&#160;</string>
+<string name="file_mgmt_section_item_available_storage_space">可用空間:&#160;</string>
+<string name="file_mgmt_section_item_internal_storage_space">本地空間:&#160;</string>
+<string name="file_mgmt_alert_dialog_title">提示</string>
+<string name="file_mgmt_alert_dialog_message_pin_datatype">往後新增加的檔案將自動釘選，是否將現有的檔案也一併釘選？</string>
+<string name="file_mgmt_alert_dialog_message_unpin_datatype">往後新增加的檔案將自動取消釘選，且現有的檔案將一併取消釘選</string>
+<string name="file_mgmt_date_since_pinned">自 %1$s 開始釘選</string>
+<string name="file_mgmt_cannot_unpin_files_in_android_folder">Android目錄下的檔案不可取消釘選</string>
+<string name="file_mgmt_popup_menu_pin">釘選</string>
+<string name="file_mgmt_popup_menu_unpin">取消釘選</string>
+<string name="file_mgmt_popup_menu_app_type_more_info">更多資訊</string>
+<string name="file_mgmt_dialog_app_version">版本: %s</string>
+<string name="file_mgmt_dialog_data_size">大小: %s</string>
+<string name="file_mgmt_dialog_app_package_name">套件名稱: %s</string>
+<string name="file_mgmt_dialog_local_data_ratio">本地資料比例: %s</string>
+<string name="file_mgmt_dialog_app_open">開啟</string>
+<string name="file_mgmt_dialog_app_remove">解除安裝</string>
+<string name="file_mgmt_dialog_app_cancel">取消</string>
+<string name="file_mgmt_dialog_calculating">計算中&#8230;</string>
+
+<string name="hcfs_mgmt_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
+<string name="hcfs_mgmt_service_video_failed_to_pin">視訊類型釘選失敗數量</string>
+<string name="hcfs_mgmt_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>
+<string name="hcfs_mgmt_service_image_failed_to_unpin">圖片類型取消釘選失敗數量</string>
+<string name="hcfs_mgmt_service_video_failed_to_unpin">視訊類型取消釘選失敗數量</string>
+<string name="hcfs_mgmt_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
+
+<string name="settings_title_bar">一般設定</string>
+<string name="settings_synchronization">同步設定</string>
+<string name="settings_sync_wifi_only">只有連接WIFI時才存取雲端</string>
+<string name="settings_notification">通知設定</string>
+<string name="settings_notify_conn_failed_recovery">通知連線中斷/恢復</string>
+<string name="settings_notify_upload_completed">通知上傳資料完成</string>
+<string name="settings_notify_local_storage_used_ratio_dialog_title">請選擇通知的比例</string>
+<string name="settings_notify_local_storage_used_ratio_summary">請選擇通知的比例</string>
+<string name="settings_notify_local_storage_used_ratio_title">通知本地空間使用率</string>
+<string name="settings_execute">執行</string>
+<string name="settings_execute_title">下載完成後才執行</string>
+<string name="settings_switch_account_title">轉換帳戶</string>
+<string name="settings_switch_account_warning_msg">轉換帳戶時系統會先登出您目前使用的帳戶，要繼續?</string>
+<string name="settings_local_storage_used_ratio">本地空間使用率達 <b>%s</b> 時進行通知</string>
+<string name="settings_transfer_content">轉換內容</string>
+<string name="settings_transfer_content_desc_title">Transfer contents</string>
+<string name="settings_transfer_content_desc_hint">Transfer contents may transfer all of your device and cloud contents to another device. You will need to reset this device when all contents are uploaded onto Tera Cloud.</string>
+<string name="settings_transfer_content_desc_check">I understand the risks described above</string>
+<string name="settings_transfer_content_confirm_title">Confirm Password</string>
+<string name="settings_transfer_content_confirm_message">Confirm your Google account password:</string>
+<string name="settings_transfer_content_confirm_error_message">Incorrect password, please try again.</string>
+<string name="settings_transfer_content_uploading_title">Processing&#8230;</string>
+<string name="settings_transfer_content_uploading_message">The preparation may taken some time, depending on the total file sizes.\n\nWhile this device has started transmission process, please execute factory reset on the other device, and login Tera app to wait for available backup to restore.</string>
+<string name="settings_transfer_content_waiting_title">Waiting for another device&#8230;</string>
+<string name="settings_transfer_content_waiting_message">All contents are ready to transfer. The transfer process will auto start when the backup is chosen by the other device.</string>
+<string name="settings_transfer_content_transferring_title">Transferring Contents&#8230;</string>
+<string name="settings_transfer_content_transferring_message">While transferring contents, please do not execute any other apps or actions</string>
+<string name="settings_transfer_content_done_title">Done</string>
     <string name="settings_transfer_content_done_message">Your device content have been successfully uploaded onto the cloud, and are being restored to the new device. This device will be reset in a few seconds.</string>
     <string name="settings_transfer_content_done_factory_reset">Factory Reset in %s seconds</string>
     <string name="settings_transfer_content_failed">Transfer contents failed</string>
