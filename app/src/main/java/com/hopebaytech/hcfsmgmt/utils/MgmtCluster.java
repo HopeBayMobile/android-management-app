@@ -596,10 +596,10 @@ public class MgmtCluster {
 //        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
 //        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
 //        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
-        registerResultInfo.setBackendUrl(jsonObj.getString("url"));
+//        registerResultInfo.setBackendUrl(jsonObj.getString("url"));
         registerResultInfo.setBucket(jsonObj.getString("bucket"));
 //        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
-        registerResultInfo.setProtocol(jsonObj.getString("url").split(":")[0]);
+//        registerResultInfo.setProtocol(jsonObj.getString("url").split(":")[0]);
         registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
         return registerResultInfo;
     }
