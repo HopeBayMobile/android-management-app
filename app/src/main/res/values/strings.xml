@@ -63,7 +63,7 @@
     <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
     <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
     <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達 %s%%</string>
-    <string name="notify_exceed_pin_used_ratio">釘選空間使用率已達 %s%%</string>
+    <string name="notify_exceed_pin_used_ratio">已釘選空間使用率已達 %s%%</string>
     <string name="notify_exceed_pin_max">釘選空間使用率不足</string>
     <string name="notify_pin_unpin_system_app_failed">系統應用程式釘選失敗</string>
 
@@ -77,7 +77,7 @@
     <string name="overview_space_usage_title">空間使用量</string>
     <string name="overview_used_space">已使用空間</string>
     <string name="overview_local_storage">快取空間</string>
-    <string name="overview_pinned_storage">釘選空間</string>
+    <string name="overview_pinned_storage">已釘選空間</string>
     <string name="overview_network_traffic_title">資料傳輸量</string>
     <string name="overview_data_transmission_today">本日資料傳輸</string>
     <string name="overview_data_to_be_uploaded">待上傳資料</string>
@@ -152,7 +152,7 @@
     <string name="settings_execute_title">下載完成後才執行</string>
     <string name="settings_switch_account_title">轉換帳戶</string>
     <string name="settings_switch_account_warning_msg">轉換帳戶時系統會先登出您目前使用的帳戶，要繼續?</string>
-    <string name="settings_local_storage_used_ratio">本地空間使用率達 %s 時進行通知</string>
+    <string name="settings_local_storage_used_ratio">本地空間使用率達 <b>%s</b> 時進行通知</string>
     <string name="settings_transfer_content">轉換內容</string>
     <string name="settings_transfer_content_desc_title">Transfer contents</string>
     <string name="settings_transfer_content_desc_hint">Transfer contents may transfer all of your device and cloud contents to another device. You will need to reset this device when all contents are uploaded onto Tera Cloud.</string>
