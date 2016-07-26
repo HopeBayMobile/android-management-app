@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Aaron on 2016/3/21.
+ * @author Aaron
+ *         Created by Aaron on 2016/3/21.
  */
 public class AppInfo implements Parcelable {
 

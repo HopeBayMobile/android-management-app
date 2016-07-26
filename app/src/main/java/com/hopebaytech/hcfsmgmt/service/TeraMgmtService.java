@@ -106,29 +106,56 @@ public class TeraMgmtService extends Service {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         mContext = this;
         if (intent != null) {
-            final String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
-            Logs.d(CLASSNAME, "onStartCommand", "operation=" + operation);
+//            final String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
+            final String action = intent.getAction();
+            Logs.d(CLASSNAME, "onStartCommand", "action=" + action);
             mCacheExecutor.execute(new Runnable() {
                 public void run() {
-                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
-                        addUidAndPinSystemAppWhenBootUp();
-                    } else if (operation.equals(TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
+                    if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                        addUidAndPinSysApp();
+                        HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
+                    } else if (action.equals(TeraIntent.ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP)) {
                         addUidAndUnpinUserApp(intent);
-                    } else if (operation.equals(TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP)) {
+                    } else if (action.equals(TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP)) {
                         pinUnpinAgainWhenAppUpdated(intent);
-                    } else if (operation.equals(TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE)) {
-                        removeUidFromDatabase(intent, operation);
-                    } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
+                    } else if (action.equals(TeraIntent.ACTION_REMOVE_UID_FROM_DB)) {
+                        removeUidFromDatabase(intent, action);
+                    } else if (action.equals(TeraIntent.ACTION_RESET_XFER)) {
                         HCFSMgmtUtils.resetXfer();
-                    } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+                    } else if (action.equals(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
                         notifyLocalStorageUsedRatio();
-                    } else if (operation.equals(TeraIntent.VALUE_ONGOING_NOTIFICATION)) {
+                    } else if (action.equals(TeraIntent.ACTION_ONGOING_NOTIFICATION)) {
                         startOngoingNotificationService(intent);
-                    } else if (operation.equals(TeraIntent.VALUE_CHECK_DEVICE_STATUS)) {
+                    } else if (action.equals(TeraIntent.ACTION_CHECK_DEVICE_STATUS)) {
                         checkDeviceStatus();
-                    } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
+                    } else if (action.equals(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE)) {
                         notifyInsufficientPinSpace();
+                    }  else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
+                        HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
                     }
+
+//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
+//                        addUidAndPinSysApp();
+//                    } else
+//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
+//                        addUidAndUnpinUserApp(intent);
+//                    } else if (operation.equals(TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP)) {
+//                        pinUnpinAgainWhenAppUpdated(intent);
+//                    } else if (operation.equals(TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE)) {
+//                        removeUidFromDatabase(intent, operation);
+//                    } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
+//                        HCFSMgmtUtils.resetXfer();
+//                    } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+//                        notifyLocalStorageUsedRatio();
+//                    } else if (operation.equals(TeraIntent.VALUE_ONGOING_NOTIFICATION)) {
+//                        startOngoingNotificationService(intent);
+//                    } else if (operation.equals(TeraIntent.VALUE_CHECK_DEVICE_STATUS)) {
+//                        checkDeviceStatus();
+//                    } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
+//                        notifyInsufficientPinSpace();
+//                    }  else if (operation.equals(TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR)) {
+//                        updateAppExternalDir();
+//                    }
                 }
             });
         } else {
@@ -156,7 +183,8 @@ public class TeraMgmtService extends Service {
 
         if (MgmtCluster.isNeedToRetryAgain()) {
             Intent intentService = new Intent(TeraMgmtService.this, TeraMgmtService.class);
-            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
+//            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
+            intentService.setAction(TeraIntent.ACTION_CHECK_DEVICE_STATUS);
             startService(intentService);
             Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
         } else {
@@ -744,11 +772,11 @@ public class TeraMgmtService extends Service {
     /**
      * Remove uid info of uninstalled app from database, triggered by HCFSMgmtReceiver's ACTION_PACKAGE_REMOVED
      */
-    private void removeUidFromDatabase(Intent intent, String operation) {
+    private void removeUidFromDatabase(Intent intent, String action) {
         int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) != null) {
-            String logMsg = "operation=" + operation + ", uid=" + uid + ", packageName=" + packageName;
+            String logMsg = "action=" + action + ", uid=" + uid + ", packageName=" + packageName;
             Logs.d(CLASSNAME, "onStartCommand", logMsg);
             mUidDAO.delete(packageName);
         }
@@ -818,7 +846,7 @@ public class TeraMgmtService extends Service {
      * Add NEW uid info to database when system boot up and pin /storage/emulated/0/Android folder,
      * and then pin system app, triggered by HCFSMgmtReceiver's ACTION_BOOT_COMPLETED
      */
-    private void addUidAndPinSystemAppWhenBootUp() {
+    private void addUidAndPinSysApp() {
         // Add NEW uid info to database when system boot up
         List<UidInfo> uidInfoList = mUidDAO.getAll();
         Set<String> packageNameSet = new HashSet<>();
@@ -874,5 +902,6 @@ public class TeraMgmtService extends Service {
             NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
         }
     }
+
 
 }

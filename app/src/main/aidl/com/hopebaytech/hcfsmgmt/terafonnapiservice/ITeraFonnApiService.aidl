@@ -11,13 +11,13 @@ interface ITeraFonnApiService {
 
     boolean getJWTandIMEI();
 
-    /** RegisterProxy the FetchAppData listener */
+    /** Register the FetchAppData listener */
     void setFetchAppDataListener(IFetchAppDataListener listener);
 
     /** Force system to download all data not in local of this app */
     boolean fetchAppData(String packageName);
 
-    /** RegisterProxy the FetchAppData listener */
+    /** Register the FetchAppData listener */
     void setTrackAppStatusListener(ITrackAppStatusListener listener);
 
     /**

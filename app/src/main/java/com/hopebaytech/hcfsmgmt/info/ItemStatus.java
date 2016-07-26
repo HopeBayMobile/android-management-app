@@ -1,7 +1,8 @@
 package com.hopebaytech.hcfsmgmt.info;
 
 /**
- * Created by Aaron on 2016/4/25.
+ * @author Aaron a
+ *         Created by Aaron on 2016/4/25.
  */
 public class ItemStatus {
 
