@@ -17,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AppInfo extends ItemInfo implements Cloneable {
 
@@ -25,7 +26,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     private int uid;
     private ApplicationInfo applicationInfo;
     private String packageName;
-    private ArrayList<String> externalDirList;
+    private List<String> externalDirList;
     private String[] sharedLibraryFiles;
     private int appSize;
     private boolean isSystemApp;
@@ -77,7 +78,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public String getSourceDir() {
-        /** Default sourceDir = /data/app/<package-name>-1/base.apk */
+        // Default sourceDir = /data/app/<package-name>-1/base.apk
         String sourceDir = applicationInfo.sourceDir;
         int lastIndex = sourceDir.lastIndexOf("/");
         String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
@@ -85,7 +86,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     @Nullable
-    public ArrayList<String> getExternalDirList() {
+    public List<String> getExternalDirList() {
         return externalDirList;
     }
 
@@ -93,7 +94,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
 //		this.externalDir = externalDir;
 //	}
 
-    public void setExternalDirList(ArrayList<String> externalDirList) {
+    public void setExternalDirList(List<String> externalDirList) {
         this.externalDirList = externalDirList;
     }
 
@@ -174,31 +175,6 @@ public class AppInfo extends ItemInfo implements Cloneable {
             }
         }
         return externalStatus;
-    }
-
-    public int getAppLocationStatus() {
-        int locationStatus;
-        int srcStatus = HCFSMgmtUtils.getDirLocationStatus(getSourceDir());
-        int dataStatus = HCFSMgmtUtils.getDirLocationStatus(getDataDir());
-        if (externalDirList != null) {
-            int externalStatus = getExternalLocationStatus();
-            if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL && externalStatus == LocationStatus.LOCAL) {
-                locationStatus = LocationStatus.LOCAL;
-            } else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD && externalStatus == LocationStatus.CLOUD) {
-                locationStatus = LocationStatus.CLOUD;
-            } else {
-                locationStatus = LocationStatus.HYBRID;
-            }
-        } else {
-            if (srcStatus == LocationStatus.LOCAL && dataStatus == LocationStatus.LOCAL) {
-                locationStatus = LocationStatus.LOCAL;
-            } else if (srcStatus == LocationStatus.CLOUD && dataStatus == LocationStatus.CLOUD) {
-                locationStatus = LocationStatus.CLOUD;
-            } else {
-                locationStatus = LocationStatus.HYBRID;
-            }
-        }
-        return locationStatus;
     }
 
     @Override

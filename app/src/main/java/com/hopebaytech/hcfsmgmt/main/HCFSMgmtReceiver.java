@@ -43,6 +43,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 // Start an alarm to notify insufficient pin space
                 HCFSMgmtUtils.startNotifyInsufficientPinSpaceAlarm(context);
 
+                // Start an alarm to update external app dir
+                HCFSMgmtUtils.startUpdateExternalAppDirAlarm(context);
+
                 // Set silent Google sign-in to false
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean(HCFSMgmtUtils.PREF_CHECK_DEVICE_STATUS, false);
@@ -62,7 +65,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                         editor.apply();
 
                         Intent intentService = new Intent(context, TeraMgmtService.class);
-                        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
+//                        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
+                        intentService.setAction(TeraIntent.ACTION_CHECK_DEVICE_STATUS);
                         context.startService(intentService);
                     }
                 }
@@ -99,39 +103,66 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //                    mContext.startService(intentService);
 //                }
 //            }
-            else if (action.equals(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM)) {
-                String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
-                Logs.d(CLASSNAME, "onReceive", "operation=" + operation);
+//            else if (action.equals(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM)) {
+//                String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
+//                Logs.d(CLASSNAME, "onReceive", "operation=" + operation);
+//                Intent intentService = new Intent(context, TeraMgmtService.class);
+//                if (operation.equals(TeraIntent.VALUE_NOTIFY_UPLOAD_COMPLETED)) {
+//                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_UPLOAD_COMPLETED);
+//                } else if (operation.equals(TeraIntent.VALUE_PIN_DATA_TYPE_FILE)) {
+//                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_DATA_TYPE_FILE);
+//                } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
+//                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
+//                } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+//                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+//                } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
+//                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
+//                } else {
+//                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NONE);
+//                }
+//                context.startService(intentService);
+//            }
+            else if (action.equals(TeraIntent.ACTION_PIN_DATA_TYPE_FILE)) {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
-                if (operation.equals(TeraIntent.VALUE_NOTIFY_UPLOAD_COMPLETED)) {
-                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_UPLOAD_COMPLETED);
-                } else if (operation.equals(TeraIntent.VALUE_PIN_DATA_TYPE_FILE)) {
-                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_DATA_TYPE_FILE);
-                } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
-                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
-                } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
-                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-                } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
-                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
-                } else {
-                    intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NONE);
-                }
+                intentService.setAction(TeraIntent.ACTION_PIN_DATA_TYPE_FILE);
+                context.startService(intentService);
+            } else if (action.equals(TeraIntent.ACTION_RESET_XFER)) {
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_RESET_XFER);
+                context.startService(intentService);
+            } else if (action.equals(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+                context.startService(intentService);
+            } else if (action.equals(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE)) {
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
                 context.startService(intentService);
             }
         } else {
-            Logs.d(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
+            Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
         }
 
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-            // Add uid and pin system app
-            Intent addUidAndPinSystemAppIntent = new Intent(context, TeraMgmtService.class);
-            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP);
-            context.startService(addUidAndPinSystemAppIntent);
+            // Add uid and pin system app and update app external dir list in uid.db
+            Intent bootCompletedIntent = new Intent(context, TeraMgmtService.class);
+            bootCompletedIntent.setAction(Intent.ACTION_BOOT_COMPLETED);
+            context.startService(bootCompletedIntent);
+
+//            // Add uid and pin system app
+//            Intent addUidAndPinSystemAppIntent = new Intent(context, TeraMgmtService.class);
+//            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
+//            context.startService(addUidAndPinSystemAppIntent);
+
+//            // Update app external dir list in uid.db
+//            Intent updateAppExternalDirIntent = new Intent(context, TeraMgmtService.class);
+//            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
+//                    TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR);
+//            context.startService(updateAppExternalDirIntent);
 
             // start tera api server
             Intent teraAPIServer = new Intent(context, TeraAPIServer.class);
             context.startService(teraAPIServer);
-
         } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
@@ -139,7 +170,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();
-                intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP);
+//                intent.putExtra(TeraIntent.KEY_OPERATION,
+//                        TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP);
+                intentService.setAction(TeraIntent.ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP);
                 intentService.putExtra(TeraIntent.KEY_UID, uid);
                 intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                 context.startService(intentService);
@@ -149,7 +182,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             String packageName = intent.getData().getSchemeSpecificPart();
             Intent intentService = new Intent(context, TeraMgmtService.class);
             int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP);
+            intentService.setAction(TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP);
+//            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP);
             intentService.putExtra(TeraIntent.KEY_UID, uid);
             intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
             context.startService(intentService);
@@ -161,7 +195,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();
-                intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE);
+                intentService.setAction(TeraIntent.ACTION_REMOVE_UID_FROM_DB);
+//                intentService.putExtra(TeraIntent.KEY_OPERATION,
+//                        TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE);
                 intentService.putExtra(TeraIntent.KEY_UID, uid);
                 intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                 context.startService(intentService);
