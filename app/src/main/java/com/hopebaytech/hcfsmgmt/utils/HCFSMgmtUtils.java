@@ -135,6 +135,27 @@ public class HCFSMgmtUtils {
         am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
     }
 
+    public static void startUpdateExternalAppDirAlarm(Context context) {
+        Logs.d(CLASSNAME, "startUpdateExternalAppDirAlarm", null);
+
+        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+        intent.setAction(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR);
+
+        int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        long intervalMillis = Interval.UPDATE_EXTERNAL_APP_DIR;
+        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
+    }
+
     public static void stopResetXferAlarm(Context context) {
         Logs.d(CLASSNAME, "stopResetXferAlarm", null);
 
