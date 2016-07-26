@@ -14,6 +14,7 @@ public class RequestCode {
     public static final int NOTIFY_INSUFFICIENT_PIN_SPACE = 105;
     public static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 106;
     public static final int PERMISSIONS_REQUEST_READ_PHONE_STATE = 107;
+    public static final int UPDATE_EXTERNAL_APP_DIR = 108;
 
 
 }
