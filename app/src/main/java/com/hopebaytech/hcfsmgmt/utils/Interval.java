@@ -10,9 +10,8 @@ public class Interval {
     public static final int MINUTE = 6 * TEN_SECONDS;
     public static final int HOUR = 60 * MINUTE;
     public static final int DAY = 24 * HOUR;
-    public static final int PIN_DATA_TYPE_FILE = HOUR;
     public static final int RESET_XFER = 24 * HOUR;
-    public static final int NOTIFY_UPLOAD_COMPLETED = HOUR;
+    public static final int UPDATE_EXTERNAL_APP_DIR = 24 * HOUR;
     public static final int NOTIFY_LOCAL_STORAGE_USED_RATIO = HOUR;
     public static final int NOTIFY_INSUFFICIENT_PIN_SPACE = 10 * MINUTE;
 

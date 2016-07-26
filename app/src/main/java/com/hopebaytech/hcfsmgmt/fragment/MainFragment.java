@@ -84,8 +84,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private boolean isSDCard1;
     private boolean isExitApp = false;
 
-    private Thread workThread;
-
     public static MainFragment newInstance() {
         return new MainFragment();
     }
@@ -309,7 +307,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         // Start ResetXferAlarm if it doesn't exist
         Intent intent = new Intent(mContext, HCFSMgmtReceiver.class);
-        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+        intent.setAction(TeraIntent.ACTION_RESET_XFER);
         boolean isResetXferAlarmExist = PendingIntent.getBroadcast(mContext, RequestCode.RESET_XFER,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
         if (!isResetXferAlarmExist) {
@@ -318,8 +317,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         // Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist
         intent = new Intent(mContext, HCFSMgmtReceiver.class);
-        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+//        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+        intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
         boolean isNotifyLocalStorageUsedRatioAlarmExist = PendingIntent.getBroadcast(mContext,
                 RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
@@ -329,8 +329,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
         // Start NotifyInsufficientPinSpaceAlarm if it doesn't exist
         intent = new Intent(mContext, HCFSMgmtReceiver.class);
-        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
+//        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
+        intent.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
         boolean isNotifyInsufficientPinSpaceAlarmExist = PendingIntent.getBroadcast(mContext,
                 RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
@@ -513,7 +514,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onStart() {
         super.onStart();
         Intent intentService = new Intent(mContext, TeraMgmtService.class);
-        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
+        intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
+//        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
+//        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, false);
         mContext.startService(intentService);
     }
@@ -522,7 +525,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onPause() {
         super.onPause();
         Intent intentService = new Intent(mContext, TeraMgmtService.class);
-        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
+        intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
+//        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, true);
         mContext.startService(intentService);
     }

@@ -8,7 +8,6 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
@@ -83,7 +82,6 @@ public class TeraFonnApiService extends Service {
                     }
                 }
             });
-
             return isSuccess;
         }
 
@@ -118,10 +116,8 @@ public class TeraFonnApiService extends Service {
                             } else {
                                 mFetchAppDataListener.onPostFetch(packageName);
                             }
-                        } catch (RemoteException e) {
-                            e.printStackTrace();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        } catch (Exception e) {
+                            Logs.w(CLASSNAME, "fetchAppData", "run", Log.getStackTraceString(e));
                         }
                     }
                 });
@@ -142,13 +138,13 @@ public class TeraFonnApiService extends Service {
                     isSuccess = true;
                     for (String packageName : packageNameList) {
                         if (!mPackageNameMap.containsKey(packageName)) {
-                            mPackageNameMap.put(packageName, getDefaultAppStatus(packageName));
+                            mPackageNameMap.put(packageName, getAppStatus(packageName));
                         }
                     }
                 }
             } catch (Exception e) {
                 isSuccess = false;
-                log(Log.ERROR, CLASSNAME, "addTrackAppStatus", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "addTrackAppStatus", Log.getStackTraceString(e));
             }
             return isSuccess;
         }
@@ -164,7 +160,7 @@ public class TeraFonnApiService extends Service {
                     isSuccess = true;
                 }
             } catch (Exception e) {
-                log(Log.ERROR, CLASSNAME, "removeTrackAppStatus", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "removeTrackAppStatus", Log.getStackTraceString(e));
             }
             return isSuccess;
         }
@@ -177,7 +173,7 @@ public class TeraFonnApiService extends Service {
                 isSuccess = true;
             } catch (Exception e) {
                 isSuccess = false;
-                log(Log.ERROR, CLASSNAME, "clearTrackAppStatus", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "clearTrackAppStatus", Log.getStackTraceString(e));
             }
             return isSuccess;
         }
@@ -191,7 +187,7 @@ public class TeraFonnApiService extends Service {
             } else {
                 appInfo.setResult(true);
                 for (String packageName : packageNameList) {
-                    appStatusList.add(getDefaultAppStatus(packageName));
+                    appStatusList.add(getAppStatus(packageName));
                 }
             }
             appInfo.setAppStatusList(appStatusList);
@@ -210,7 +206,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int checkAppAvailable(String packageName) throws RemoteException {
-            return getDefaultStatus(packageName);
+            return getPackageStatus(packageName);
         }
 
         @Override
@@ -220,7 +216,7 @@ public class TeraFonnApiService extends Service {
                 data = HCFSApiUtils.getHCFSStat();
             } catch (Exception e) {
                 data = "{\"result\": false}";
-                log(Log.ERROR, CLASSNAME, "getHCFSStat", e.toString());
+                Logs.e(CLASSNAME, "getHCFSStat", e.toString());
             }
 
             return data;
@@ -228,18 +224,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean hcfsEnabled() throws RemoteException {
-            boolean enabled = false;
-            String key = "swift_account";
-            try {
-                if (HCFSConfig.getHCFSConfig(key).isEmpty()) {
-                    enabled = false;
-                } else {
-                    enabled = true;
-                }
-            } catch (Exception e) {
-                Logs.e(CLASSNAME, "hcfsEnabled", Log.getStackTraceString(e));
-            }
-            return enabled;
+            return HCFSConfig.isActivated(TeraFonnApiService.this);
         }
 
         @Override
@@ -317,7 +302,7 @@ public class TeraFonnApiService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        log(Log.DEBUG, CLASSNAME, "onStartCommand", null);
+        Logs.d(CLASSNAME, "onStartCommand", null);
         Thread pollingThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -342,7 +327,7 @@ public class TeraFonnApiService extends Service {
                         mTrackAppStatusListener = null;
                         mFetchAppDataListener = null;
                         mPackageNameMap.clear();
-                        log(Log.ERROR, CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+                        Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
                         break;
                     }
                 }
@@ -350,37 +335,13 @@ public class TeraFonnApiService extends Service {
         });
         pollingThread.start();
 
-//        return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
 
-    private void log(int logLevel, String className, String funcName, String logMsg) {
-        if (logMsg == null) {
-            logMsg = "";
-        }
-
-        switch (logLevel) {
-            case Log.DEBUG:
-                Log.d(TAG, className + "(" + funcName + "): " + logMsg);
-                break;
-            case Log.INFO:
-                Log.i(TAG, className + "(" + funcName + "): " + logMsg);
-                break;
-            case Log.WARN:
-                Log.w(TAG, className + "(" + funcName + "): " + logMsg);
-                break;
-            case Log.ERROR:
-                Log.e(TAG, className + "(" + funcName + "): " + logMsg);
-                break;
-        }
-    }
-
-    private AppStatus getDefaultAppStatus(String packageName) {
+    private AppStatus getAppStatus(String packageName) {
         Random random = new Random();
         // TODO: not implemented yet
         boolean isOnFetching = random.nextBoolean();
-
-        boolean isPin = false;
 
         /*
         String dataDir = getDataDir(packageName);
@@ -397,47 +358,63 @@ public class TeraFonnApiService extends Service {
         }
         */
 
+        boolean isPinned = false;
         try {
             UidDAO uidDAO = UidDAO.getInstance(this);
             UidInfo uidInfo = uidDAO.get(packageName);
-            if (uidInfo == null) isPin = false;
-            else isPin = uidInfo.isPinned();
-
+            isPinned = uidInfo != null && uidInfo.isPinned();
         } catch (Exception e) {
-            log(Log.ERROR, CLASSNAME, "getDefaultAppStatus", e.toString());
+            Logs.e(CLASSNAME, "getAppStatus", Log.getStackTraceString(e));
         }
 
-        int status = getDefaultStatus(packageName);
+        int status = getPackageStatus(packageName);
         if (status != AppStatus.STATUS_AVAILABLE) {
             status = AppStatus.STATUS_UNAVAILABLE;
         }
 
-        return new AppStatus(packageName, isPin, isOnFetching, status);
+        return new AppStatus(packageName, isPinned, isOnFetching, status);
     }
 
-    private int getDefaultStatus(String packageName) {
-        String dataDir = getDataDir(packageName);
+    private int getPackageStatus(String packageName) {
         if (NetworkUtils.isNetworkConnected(TeraFonnApiService.this)) {
-            if (downloadToRun()) {
-                if (HCFSMgmtUtils.getDirLocationStatus(dataDir) == LocationStatus.LOCAL) {
-                    return AppStatus.STATUS_AVAILABLE;
-                } else {
-                    return AppStatus.STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD;
-                }
-            } else {
-                return AppStatus.STATUS_AVAILABLE;
-            }
+            return AppStatus.STATUS_AVAILABLE;
         } else {
-            if (getDefaultLocation(packageName) == LocationStatus.LOCAL) {
-                return AppStatus.STATUS_AVAILABLE;
-            } else {
-                return AppStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
+            try {
+                UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
+                UidInfo uidInfo = uidDAO.get(packageName);
+                uidDAO.close();
+
+                ApplicationInfo applicationInfo = getPackageManager().
+                        getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+
+                com.hopebaytech.hcfsmgmt.info.AppInfo appInfo =
+                        new com.hopebaytech.hcfsmgmt.info.AppInfo(TeraFonnApiService.this);
+                appInfo.setApplicationInfo(applicationInfo);
+                appInfo.setExternalDirList(uidInfo.getExternalDir());
+                return appInfo.getAppStatus();
+            } catch (PackageManager.NameNotFoundException e) {
+                Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));
             }
         }
-    }
-
-    private Boolean downloadToRun() {
-        return PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_download_to_run", false);
+        return AppStatus.STATUS_UNAVAILABLE;
+//        String dataDir = getDataDir(packageName);
+//        if (NetworkUtils.isNetworkConnected(TeraFonnApiService.this)) {
+//            if (downloadToRun()) {
+//                if (HCFSMgmtUtils.getDirLocationStatus(dataDir) == LocationStatus.LOCAL) {
+//                    return AppStatus.STATUS_AVAILABLE;
+//                } else {
+//                    return AppStatus.STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD;
+//                }
+//            } else {
+//                return AppStatus.STATUS_AVAILABLE;
+//            }
+//        } else {
+//            if (getDefaultLocation(packageName) == LocationStatus.LOCAL) {
+//                return AppStatus.STATUS_AVAILABLE;
+//            } else {
+//                return AppStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
+//            }
+//        }
     }
 
     private int getDefaultLocation(String packageName) {
@@ -462,16 +439,16 @@ public class TeraFonnApiService extends Service {
                 location = LocationStatus.LOCAL;
             }
 
-            log(Log.DEBUG, CLASSNAME, "getDefaultLocation", "APP Location: " + String.valueOf(location));
+            Logs.d(CLASSNAME, "getDefaultLocation", "APP Location: " + String.valueOf(location));
         } catch (Exception e) {
-            log(Log.ERROR, CLASSNAME, "getDefaultLocation", "Error: " + e.toString());
+            Logs.e(CLASSNAME, "getDefaultLocation", "Error: " + e.toString());
         }
 
         return location;
     }
 
     private int getDifferentStatus(String packageName, int currentStatus) {
-        int status = getDefaultStatus(packageName);
+        int status = getPackageStatus(packageName);
         if (status != AppStatus.STATUS_AVAILABLE) {
             status = AppStatus.STATUS_UNAVAILABLE;
         }
@@ -498,7 +475,7 @@ public class TeraFonnApiService extends Service {
 
                 String logMsg = "operation=" + OP + ", filePath=" + dataDir + ", jsonResult=" + jsonResult;
                 if (isSuccess) {
-                    log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
+                    Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
                     List<String> externalPath = getExternalDir(packageName);
 
                     if (externalPath.size() != 0) {
@@ -509,20 +486,20 @@ public class TeraFonnApiService extends Service {
 
                             logMsg = "operation=" + OP + ", filePath=" + path + ", jsonResult=" + jsonResult;
                             if (isSuccess) {
-                                log(Log.INFO, CLASSNAME, "pinFileOrDirectory", logMsg);
+                                Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
                             } else {
-                                log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", logMsg);
+                                Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
                                 break;
                             }
                         }
                     }
 
                 } else {
-                    log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", logMsg);
+                    Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
                 }
 
             } catch (JSONException e) {
-                log(Log.ERROR, CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
             }
         }
 
@@ -542,7 +519,7 @@ public class TeraFonnApiService extends Service {
                 uidDAO.insert(new UidInfo(pinOP, false, packageInfo.uid, packageName));
             }
         } catch (Exception e) {
-            log(Log.ERROR, CLASSNAME, "updateDB", e.toString());
+            Logs.e(CLASSNAME, "updateDB", e.toString());
         }
     }
 
@@ -553,9 +530,9 @@ public class TeraFonnApiService extends Service {
             PackageInfo p = m.getPackageInfo(packageName, 0);
             sourceDir = p.applicationInfo.sourceDir;
             sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
-            log(Log.INFO, CLASSNAME, "getSourceDir", sourceDir);
+            Logs.i(CLASSNAME, "getSourceDir", sourceDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getSourceDir", "Error: Package (" + packageName + ") not found ");
+            Logs.w(CLASSNAME, "getSourceDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return sourceDir;
@@ -567,9 +544,9 @@ public class TeraFonnApiService extends Service {
         try {
             PackageInfo p = m.getPackageInfo(packageName, 0);
             dataDir = p.applicationInfo.dataDir;
-            log(Log.INFO, CLASSNAME, "getDataDir", dataDir);
+            Logs.i(CLASSNAME, "getDataDir", dataDir);
         } catch (PackageManager.NameNotFoundException e) {
-            log(Log.WARN, CLASSNAME, "getDataDir", "Error: Package (" + packageName + ") not found ");
+            Logs.w(CLASSNAME, "getDataDir", "Error: Package (" + packageName + ") not found ");
         }
 
         return dataDir;
@@ -585,7 +562,7 @@ public class TeraFonnApiService extends Service {
                 for (File file : fileList) {
                     String path = file.getAbsolutePath();
                     if (path.indexOf(packageName) != -1) {
-                        log(Log.INFO, CLASSNAME, "getExternalDir", path);
+                        Logs.i(CLASSNAME, "getExternalDir", path);
                         externalDir.add(path);
                         break;
                     }
@@ -628,7 +605,7 @@ public class TeraFonnApiService extends Service {
                         int numCloud = dataObj.getInt("num_cloud");
                         appTotal = appTotal + numLocal + numHybrid + numCloud;
                         localTotal = localTotal + numLocal;
-                        log(Log.DEBUG, CLASSNAME, "getAppProgress", jsonResult);
+                        Logs.d(CLASSNAME, "getAppProgress", jsonResult);
                     } else {
                         getDirStatusResult = false;
                         break;
@@ -641,11 +618,11 @@ public class TeraFonnApiService extends Service {
                     progress = -1;
                 }
 
-                log(Log.DEBUG, CLASSNAME, "getAppProgress", String.valueOf(progress));
+                Logs.d(CLASSNAME, "getAppProgress", String.valueOf(progress));
             }
         } catch (Exception e) {
             progress = -1;
-            log(Log.ERROR, CLASSNAME, "getAppProgress", e.toString());
+            Logs.e(CLASSNAME, "getAppProgress", e.toString());
         }
 
         return progress;
