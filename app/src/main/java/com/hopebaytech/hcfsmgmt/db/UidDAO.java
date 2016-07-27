@@ -28,7 +28,7 @@ public class UidDAO {
                     PIN_STATUS_COLUMN + " INTEGER NOT NULL, " +
                     SYSTEM_APP_COLUMN + " INTEGER NOT NULL, " +
                     UID_COLUMN + " TEXT NOT NULL, " +
-                    PACKAGE_NAME_COLUMN + " TEXT NOT NULL" +
+                    PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
                     EXTERNAL_DIR_COLUMN + " TEXT)";
 
     private Context context;
@@ -69,15 +69,17 @@ public class UidDAO {
         contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
 
         List<String> externalDirList = uidInfo.getExternalDir();
-        StringBuilder sb = new StringBuilder();
-        String comma = ",";
-        for (int i = 0; i < externalDirList.size(); i++) {
-            sb.append(externalDirList.get(i));
-            if (i != externalDirList.size() - 1) {
-                sb.append(comma);
+        if (externalDirList != null) {
+            StringBuilder sb = new StringBuilder();
+            String comma = ",";
+            for (int i = 0; i < externalDirList.size(); i++) {
+                sb.append(externalDirList.get(i));
+                if (i != externalDirList.size() - 1) {
+                    sb.append(comma);
+                }
             }
+            contentValues.put(EXTERNAL_DIR_COLUMN, sb.toString());
         }
-        contentValues.put(EXTERNAL_DIR_COLUMN, sb.toString());
 
         boolean isInserted = getDataBase().insert(TABLE_NAME, null, contentValues) > -1;
         String logMsg = "isPinned=" + uidInfo.isPinned() +
@@ -85,7 +87,7 @@ public class UidDAO {
                 ", isSystemApp=" + uidInfo.isSystemApp() +
                 ", uid=" + uidInfo.getUid() +
                 ", packageName=" + uidInfo.getPackageName() +
-                ", externalDir=" + uidInfo.getExternalDir().toString();
+                ", externalDir=" + uidInfo.getExternalDir();
         if (isInserted) {
             Logs.d(CLASSNAME, "insert", logMsg);
             return true;
