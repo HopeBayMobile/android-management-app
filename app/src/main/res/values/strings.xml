@@ -51,7 +51,6 @@
     
     <string name="notify_network_connected">偵測網路連線已恢復</string>
     <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線</string>
-    <string name="notify_upload_completed">本地端資料已上傳至雲端空間</string>
     <string name="notify_pin_app_failure">釘選應用程式失敗</string>
     <string name="notify_pin_file_dir_failure">釘選檔案失敗</string>
     <string name="notify_pin_image_failure">釘選圖片失敗</string>

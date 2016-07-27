@@ -103,7 +103,7 @@
         <service
             android:name="com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService"
             android:enabled="true"
-            android:exported="true" 
+            android:exported="true"
             android:process=":remote" />
 
     </application>
