@@ -38,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -58,7 +59,7 @@ public class HCFSMgmtUtils {
     public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 1;
     public static final int NOTIFY_ID_ONGOING = 2;
     public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 3;
-    public static final int NOTIFY_ID_FAILED_SILENT_SIGN_IN = 4;
+    public static final int NOTIFY_ID_CHECK_DEVICE_STATUS = 4;
     public static final int NOTIFY_ID_INSUFFICIENT_PIN_SPACE = 5;
 
     public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
@@ -742,40 +743,6 @@ public class HCFSMgmtUtils {
         am.cancel(pi);
     }
 
-//    public static void log(int logLevel, String className, String funcName, String logMsg) {
-//        if (logLevel >= LOG_LEVEL) {
-//            if (logMsg == null) {
-//                logMsg = "";
-//            }
-//            if (logLevel == Log.DEBUG) {
-//                Log.d(TAG, className + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.INFO) {
-//                Log.i(TAG, className + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.WARN) {
-//                Log.w(TAG, className + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.ERROR) {
-//                Log.e(TAG, className + "(" + funcName + "): " + logMsg);
-//            }
-//        }
-//    }
-//
-//    public static void log(int logLevel, String className, String innerClassName, String funcName, String logMsg) {
-//        if (logLevel >= LOG_LEVEL) {
-//            if (logMsg == null) {
-//                logMsg = "";
-//            }
-//            if (logLevel == Log.DEBUG) {
-//                Log.d(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.INFO) {
-//                Log.i(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.WARN) {
-//                Log.w(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.ERROR) {
-//                Log.e(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            }
-//        }
-//    }
-
     public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
         return ContextCompat.getDrawable(context, isPinned ? R.drawable.icon_btn_app_pin : R.drawable.icon_btn_app_unpin);
     }
@@ -806,7 +773,7 @@ public class HCFSMgmtUtils {
     }
 
     public static long getOccupiedSize() {
-        /** Unpin-but-dirty size + pin size */
+        // Unpin-but-dirty size + pin size
         long occupiedSize = 0;
         try {
             String jsonResult = HCFSApiUtils.getOccupiedSize();
@@ -865,6 +832,24 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "stopUploadTeraData", Log.getStackTraceString(e));
         }
         return code;
+    }
+
+    public static boolean setSwiftToken(String url, String token) {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.setSwiftToken(url, token);
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            String logMsg = "url=" + url + ", token=" + token + ", result=" + jsonResult;
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "setSwiftToken", logMsg);
+            } else {
+                Logs.e(CLASSNAME, "setSwiftToken", logMsg);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "setSwiftToken", Log.getStackTraceString(e));
+        }
+        return isSuccess;
     }
 
 }

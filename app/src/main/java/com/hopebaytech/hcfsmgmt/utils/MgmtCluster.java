@@ -407,34 +407,35 @@ public class MgmtCluster {
     }
 
     public static String getServerClientId() {
-        IHttpProxy httpProxyImpl = null;
-        String serverClientId = null;
-        try {
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(REGISTER_AUTH_API);
-            httpProxyImpl.connect();
-
-            int responseCode = httpProxyImpl.get();
-            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String jsonResponse = httpProxyImpl.getResponseContent();
-                Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
-                if (!jsonResponse.isEmpty()) {
-                    JSONObject jObj = new JSONObject(jsonResponse);
-                    JSONObject dataObj = jObj.getJSONObject("data");
-                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
-                    serverClientId = authObj.getString("client_id");
-                    Logs.d(CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
-                }
-            }
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
-        }
-        return serverClientId;
+//        IHttpProxy httpProxyImpl = null;
+//        String serverClientId = null;
+//        try {
+//            httpProxyImpl = HttpProxy.newInstance();
+//            httpProxyImpl.setUrl(REGISTER_AUTH_API);
+//            httpProxyImpl.connect();
+//
+//            int responseCode = httpProxyImpl.get();
+//            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
+//            if (responseCode == HttpsURLConnection.HTTP_OK) {
+//                String jsonResponse = httpProxyImpl.getResponseContent();
+//                Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
+//                if (!jsonResponse.isEmpty()) {
+//                    JSONObject jObj = new JSONObject(jsonResponse);
+//                    JSONObject dataObj = jObj.getJSONObject("data");
+//                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
+//                    serverClientId = authObj.getString("client_id");
+//                    Logs.d(CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
+//                }
+//            }
+//        } catch (Exception e) {
+//            Logs.e(CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
+//        } finally {
+//            if (httpProxyImpl != null) {
+//                httpProxyImpl.disconnect();
+//            }
+//        }
+//        return serverClientId;
+        return SERVER_CLIENT_ID;
     }
 
     public static abstract class IAuthParam {
@@ -611,6 +612,7 @@ public class MgmtCluster {
 //        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
 //        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
         registerResultInfo.setBackendUrl(jsonObj.getString("url"));
+        registerResultInfo.setBucket(jsonObj.getString("bucket"));
 //        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
 //        registerResultInfo.setProtocol(jsonObj.getString("url").split(":")[0]);
         return registerResultInfo;
@@ -823,12 +825,13 @@ public class MgmtCluster {
                     convertRegisterResult(registerResultInfo, responseContent);
 
                     Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
-                    Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
-                    Logs.d(CLASSNAME, "register", "user=" + registerResultInfo.getUser());
-                    Logs.d(CLASSNAME, "register", "password=" + registerResultInfo.getPassword());
                     Logs.d(CLASSNAME, "register", "backend_url=" + registerResultInfo.getBackendUrl());
-                    Logs.d(CLASSNAME, "register", "protocol=" + registerResultInfo.getProtocol());
+                    Logs.d(CLASSNAME, "register", "bucket=" + registerResultInfo.getBucket());
                     Logs.d(CLASSNAME, "register", "storageAccessToken=" + registerResultInfo.getStorageAccessToken());
+//                    Logs.d(CLASSNAME, "register", "password=" + registerResultInfo.getPassword());
+//                    Logs.d(CLASSNAME, "register", "protocol=" + registerResultInfo.getProtocol());
+//                    Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
+//                    Logs.d(CLASSNAME, "register", "user=" + registerResultInfo.getUser());
                 } else {
                     String responseContent = httpProxyImpl.getResponseContent();
                     try {
