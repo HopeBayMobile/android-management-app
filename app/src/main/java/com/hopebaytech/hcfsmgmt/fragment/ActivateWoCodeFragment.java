@@ -308,7 +308,6 @@ public class ActivateWoCodeFragment extends Fragment {
                             @Override
                             public void run() {
                                 String serverClientId = MgmtCluster.getServerClientId();
-//                                String serverClientId = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
                                 if (serverClientId != null) {
                                     GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
                                             mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
