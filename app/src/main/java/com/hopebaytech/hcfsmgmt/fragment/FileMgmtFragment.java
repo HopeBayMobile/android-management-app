@@ -310,6 +310,7 @@ public class FileMgmtFragment extends Fragment {
                             uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
                             mMgmtService.pinOrUnpinApp(appInfo, new IPinUnpinListener() {
+                                //TODO should add OnPinUnpinSuccessful() to modify pin status in db here
                                 @Override
                                 public void OnPinUnpinFailed(final ItemInfo itemInfo) {
                                     processPinUnpinFailed(itemInfo);

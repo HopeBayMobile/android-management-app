@@ -43,6 +43,7 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
+import android.app.AppOpsManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -314,13 +315,13 @@ public class TeraMgmtService extends Service {
         if (isPinned) {
             if (!HCFSMgmtUtils.pinApp(info)) {
                 handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
-                info.setPinned(!isPinned);
+                info.setPinned(!isPinned); // TODO Remove this line, pin status should be kept after pin or unpin failed
                 listener.OnPinUnpinFailed(info);
             }
         } else {
             if (!HCFSMgmtUtils.unpinApp(info)) {
                 handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
-                info.setPinned(!isPinned);
+                info.setPinned(!isPinned); // TODO Remove this line, pin status should be kept after pin or unpin failed
                 listener.OnPinUnpinFailed(info);
             }
         }
