@@ -39,4 +39,6 @@ public class HCFSApiUtils {
 
     public static native byte[] getDecryptedJsonString(String jsonString);
 
+    public static native String setSwiftToken(String url, String token);
+
 }

@@ -49,7 +49,6 @@ public class GoogleSilentAuthProxy {
     }
 
     public void auth() {
-
         GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(mContext, mServerClientId,
                 new GoogleSignInApiClient.OnConnectionListener() {
                     @Override
@@ -99,7 +98,6 @@ public class GoogleSilentAuthProxy {
                     }
                 });
         signInApiClient.connect();
-
     }
 
 }

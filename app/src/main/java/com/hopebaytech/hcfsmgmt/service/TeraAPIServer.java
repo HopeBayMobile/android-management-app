@@ -203,10 +203,9 @@ public class TeraAPIServer extends Service {
                                 JSONObject backend = result.getJSONObject("backend");
                                 String url = backend.getString("url");
                                 String token = backend.getString("token");
-
-                                // TODO set backend token to hcfs via hcfsapid
+                                HCFSMgmtUtils.setSwiftToken(url, token);
                             } catch (JSONException e) {
-                                Logs.e(CLASSNAME, "onGetDeviceInfoFailed", Log.getStackTraceString(e));
+                                Logs.e(CLASSNAME, "onGetDeviceInfoSuccessful", Log.getStackTraceString(e));
                             }
                         }
 
