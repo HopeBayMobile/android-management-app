@@ -184,8 +184,6 @@ public class ActivateWoCodeFragment extends Fragment {
                                             mWorkHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    // TODO Set arkflex token to hcfs
-                                                    // registerResultInfo.getStorageAccessToken();
                                                     final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
                                                     if (failed) {
                                                         HCFSConfig.resetHCFSConfig();
@@ -203,8 +201,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                         editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                         editor.apply();
 
-                                                        // Start sync to cloud
-                                                        HCFSConfig.startSyncToCloud();
+                                                        String url = registerResultInfo.getBackendUrl();
+                                                        String token = registerResultInfo.getStorageAccessToken();
+                                                        HCFSMgmtUtils.setSwiftToken(url, token);
                                                     }
 
                                                     mUiHandler.post(new Runnable() {
@@ -306,7 +305,6 @@ public class ActivateWoCodeFragment extends Fragment {
                             @Override
                             public void run() {
                                 String serverClientId = MgmtCluster.getServerClientId();
-//                                String serverClientId = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
                                 if (serverClientId != null) {
                                     GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
                                             mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
@@ -537,8 +535,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                 editor.apply();
 
-                                                // Start sync to cloud
-                                                HCFSConfig.startSyncToCloud();
+                                                String url = registerResultInfo.getBackendUrl();
+                                                String token = registerResultInfo.getStorageAccessToken();
+                                                HCFSMgmtUtils.setSwiftToken(url, token);
 
                                                 final String finalPhotoUrl = photoUrl;
                                                 mUiHandler.post(new Runnable() {

@@ -36,4 +36,6 @@ public class HCFSApiUtils {
     public static native String getOccupiedSize();
 
     public static native String setNotifyServer(String pathName);
+
+    public static native String setSwiftToken(String url, String token);
 }

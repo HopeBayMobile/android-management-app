@@ -20,6 +20,8 @@ extern void HCFS_get_sync_status(const char **json_res);
 extern void HCFS_get_property(const char **json_res, const char *key);
 extern void HCFS_set_property(const char **json_res, const char *key, const char *value);
 extern void HCFS_get_occupied_size(const char **json_res);
+extern void HCFS_set_notify_server(const char **json_res, const char *pathname);
+extern void HCFS_set_swift_token(const char **json_res, const char *url, const char *token);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
@@ -217,25 +219,15 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setNo
     return result;
 }
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHCFSProperty(
-//		JNIEnv *jEnv, jobject jObject, jstring jKey, jstring jValue) {
-//	char *json_res;
-//	char *key = (*jEnv)->GetStringUTFChars(jEnv, jKey, 0);
-//	char *value = (*jEnv)->GetStringUTFChars(jEnv, jValue, 0);
-//	HCFS_set_property(&json_res, key, value);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	return result;
-//}
-
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSProperty(
-//		JNIEnv *jEnv, jobject jObject, jstring jKey) {
-//	char *json_res;
-//	char *key = (*jEnv)->GetStringUTFChars(jEnv, jKey, 0);
-//	HCFS_get_property(&json_res, key);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	free(key);
-//	return result;
-//}
-
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setSwiftToken(
+ 		JNIEnv *jEnv, jobject jObject, jstring jUrl, jstring jToken) {
+ 	const char *json_res;
+    const char *url = (*jEnv)->GetStringUTFChars(jEnv, jUrl, 0);
+    const char *token = (*jEnv)->GetStringUTFChars(jEnv, jToken, 0);
+    HCFS_set_swift_token(&json_res, url, token);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)url);
+    free((char *)token);
+    return result;
+}
