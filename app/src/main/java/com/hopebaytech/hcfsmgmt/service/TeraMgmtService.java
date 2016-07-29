@@ -15,11 +15,8 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
@@ -32,7 +29,6 @@ import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -54,6 +50,7 @@ import com.hopebaytech.hcfsmgmt.utils.PinType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -106,29 +103,56 @@ public class TeraMgmtService extends Service {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         mContext = this;
         if (intent != null) {
-            final String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
-            Logs.d(CLASSNAME, "onStartCommand", "operation=" + operation);
+//            final String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
+            final String action = intent.getAction();
+            Logs.d(CLASSNAME, "onStartCommand", "action=" + action);
             mCacheExecutor.execute(new Runnable() {
                 public void run() {
-                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
-                        addUidAndPinSystemAppWhenBootUp();
-                    } else if (operation.equals(TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
+                    if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
+                        addUidAndPinSysApp();
+                        HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
+                    } else if (action.equals(TeraIntent.ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP)) {
                         addUidAndUnpinUserApp(intent);
-                    } else if (operation.equals(TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP)) {
+                    } else if (action.equals(TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP)) {
                         pinUnpinAgainWhenAppUpdated(intent);
-                    } else if (operation.equals(TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE)) {
-                        removeUidFromDatabase(intent, operation);
-                    } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
+                    } else if (action.equals(TeraIntent.ACTION_REMOVE_UID_FROM_DB)) {
+                        removeUidFromDatabase(intent, action);
+                    } else if (action.equals(TeraIntent.ACTION_RESET_XFER)) {
                         HCFSMgmtUtils.resetXfer();
-                    } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+                    } else if (action.equals(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
                         notifyLocalStorageUsedRatio();
-                    } else if (operation.equals(TeraIntent.VALUE_ONGOING_NOTIFICATION)) {
+                    } else if (action.equals(TeraIntent.ACTION_ONGOING_NOTIFICATION)) {
                         startOngoingNotificationService(intent);
-                    } else if (operation.equals(TeraIntent.VALUE_CHECK_DEVICE_STATUS)) {
+                    } else if (action.equals(TeraIntent.ACTION_CHECK_DEVICE_STATUS)) {
                         checkDeviceStatus();
-                    } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
+                    } else if (action.equals(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE)) {
                         notifyInsufficientPinSpace();
+                    } else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
+                        HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
                     }
+
+//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
+//                        addUidAndPinSysApp();
+//                    } else
+//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
+//                        addUidAndUnpinUserApp(intent);
+//                    } else if (operation.equals(TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP)) {
+//                        pinUnpinAgainWhenAppUpdated(intent);
+//                    } else if (operation.equals(TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE)) {
+//                        removeUidFromDatabase(intent, operation);
+//                    } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
+//                        HCFSMgmtUtils.resetXfer();
+//                    } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
+//                        notifyLocalStorageUsedRatio();
+//                    } else if (operation.equals(TeraIntent.VALUE_ONGOING_NOTIFICATION)) {
+//                        startOngoingNotificationService(intent);
+//                    } else if (operation.equals(TeraIntent.VALUE_CHECK_DEVICE_STATUS)) {
+//                        checkDeviceStatus();
+//                    } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
+//                        notifyInsufficientPinSpace();
+//                    }  else if (operation.equals(TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR)) {
+//                        updateAppExternalDir();
+//                    }
                 }
             });
         } else {
@@ -151,136 +175,42 @@ public class TeraMgmtService extends Service {
         // return START_REDELIVER_INTENT;
     }
 
-    private void mgmtAuthOrRegisterFailed(GoogleApiClient googleApiClient, String failedMsg) {
-        Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
-
-        if (MgmtCluster.isNeedToRetryAgain()) {
-            Intent intentService = new Intent(TeraMgmtService.this, TeraMgmtService.class);
-            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
-            startService(intentService);
-            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
-        } else {
-            int flag = NotificationEvent.FLAG_OPEN_APP;
-            int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
-            String notify_title = getString(R.string.app_name);
-            String notify_content = failedMsg;
-            Bundle extras = new Bundle();
-            extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-            NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
-
-            Auth.GoogleSignInApi.signOut(googleApiClient)
-                    .setResultCallback(new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status status) {
-                            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "status=" + status);
-                        }
-                    });
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
-            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-            editor.apply();
-        }
-        googleApiClient.disconnect();
-        HCFSConfig.stopSyncToCloud();
-
-        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
-    }
-
-    private void googleSilentAuthFailed() {
-        Logs.e(CLASSNAME, "googleSilentAuthFailed", null);
-
-        int flag = NotificationEvent.FLAG_OPEN_APP;
-        int id_notify = HCFSMgmtUtils.NOTIFY_ID_FAILED_SILENT_SIGN_IN;
-        String notify_title = getString(R.string.app_name);
-        String notify_content = getString(R.string.auth_at_bootup_auth_failed_google_auth);
-        Bundle extras = new Bundle();
-        extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-        NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
-
-//        Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-//                .setResultCallback(new ResultCallback<Status>() {
-//                    @Override
-//                    public void onResult(Status status) {
-//                        Logs.e(CLASSNAME, "googleSilentAuthFailed", "status=" + status);
-//                    }
-//                });
-//        mGoogleApiClient.disconnect();
-        HCFSConfig.stopSyncToCloud();
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
-        editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-        editor.apply();
-
-        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
-    }
-
-    private void registerToMgmtCluster(final Context context, String serverAuthCode, final GoogleApiClient googleApiClient) {
-        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-        authParam.setAuthCode(serverAuthCode);
-        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this)));
-        authParam.setVendor(Build.BRAND);
-        authParam.setModel(Build.MODEL);
-        authParam.setAndroidVersion(Build.VERSION.RELEASE);
-        authParam.setHcfsVersion(getString(R.string.tera_version));
-
-        MgmtCluster.plusRetryCount();
-        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-            @Override
-            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                MgmtCluster.RegisterProxy mgmtRegister = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
-                mgmtRegister.setOnRegisterListener(new MgmtCluster.RegisterListener() {
-                    @Override
-                    public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
-                        mCacheExecutor.execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                // TODO Set arkflex token to hcfs
-                                // registerResultInfo.getStorageAccessToken();
-                                boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                if (failed) {
-                                    HCFSConfig.resetHCFSConfig();
-                                }
-                            }
-                        });
-
-                        googleApiClient.disconnect();
-                        MgmtCluster.resetRetryCount();
-                        HCFSConfig.startSyncToCloud();
-
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                        editor.apply();
-                    }
-
-                    @Override
-                    public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                        String authErrorMsg = "Error(" + registerResultInfo.getResponseCode() + "): " + registerResultInfo.getMessage();
-                        String failedMsg = getString(R.string.auth_at_bootup_auth_failed_mgmt_register) + authErrorMsg;
-                        mgmtAuthOrRegisterFailed(googleApiClient, failedMsg);
-                    }
-
-                });
-                mgmtRegister.register();
-            }
-
-            @Override
-            public void onAuthFailed(AuthResultInfo authResultInfo) {
-                String authErrorMsg = "Error(" + authResultInfo.getResponseCode() + "): " + authResultInfo.getMessage();
-                String failedMsg = getString(R.string.auth_at_bootup_auth_failed_mgmt_auth) + authErrorMsg;
-                mgmtAuthOrRegisterFailed(googleApiClient, failedMsg);
-            }
-
-        });
-        authProxy.auth();
-
-    }
+//    private void mgmtAuthOrRegisterFailed(GoogleApiClient googleApiClient, String failedMsg) {
+//        Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
+//
+//        if (MgmtCluster.isNeedToRetryAgain()) {
+//            Intent intentService = new Intent(TeraMgmtService.this, TeraMgmtService.class);
+//            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
+//            startService(intentService);
+//            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
+//        } else {
+//            int flag = NotificationEvent.FLAG_OPEN_APP;
+//            int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
+//            String notify_title = getString(R.string.app_name);
+//            String notify_content = failedMsg;
+//            Bundle extras = new Bundle();
+//            extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+//            NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
+//
+//            Auth.GoogleSignInApi.signOut(googleApiClient)
+//                    .setResultCallback(new ResultCallback<Status>() {
+//                        @Override
+//                        public void onResult(Status status) {
+//                            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "status=" + status);
+//                        }
+//                    });
+//
+//            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
+//            SharedPreferences.Editor editor = sharedPreferences.edit();
+//            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+//            editor.apply();
+//        }
+//        googleApiClient.disconnect();
+//        HCFSConfig.stopSyncToCloud();
+//
+//        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+//    }
 
     private void pinOrUnpinApp(AppInfo info) {
         Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
@@ -314,13 +244,13 @@ public class TeraMgmtService extends Service {
         if (isPinned) {
             if (!HCFSMgmtUtils.pinApp(info)) {
                 handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
-                info.setPinned(!isPinned); // TODO Remove this line, pin status should be kept after pin or unpin failed
+                info.setPinned(!isPinned);
                 listener.OnPinUnpinFailed(info);
             }
         } else {
             if (!HCFSMgmtUtils.unpinApp(info)) {
                 handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
-                info.setPinned(!isPinned); // TODO Remove this line, pin status should be kept after pin or unpin failed
+                info.setPinned(!isPinned);
                 listener.OnPinUnpinFailed(info);
             }
         }
@@ -536,82 +466,137 @@ public class TeraMgmtService extends Service {
         mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
     }
 
-    private void checkDeviceStatus() {
-        MgmtCluster.getJwtToken(TeraMgmtService.this, new MgmtCluster.OnFetchJwtTokenListener() {
+    private void doActionAccordingToDeviceStatus(final String jwtToken) {
+        final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
+        MgmtCluster.GetDeviceInfoProxy getDeviceInfoProxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
+        getDeviceInfoProxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
             @Override
-            public void onFetchSuccessful(final String jwtToken) {
-                final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
-                MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
-                proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
-                    @Override
-                    public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
-                        try {
-                            String responseContent = getDeviceInfo.getMessage();
-                            JSONObject result = new JSONObject(responseContent);
-                            String state = result.getString("state");
-                            if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
-                                String serverClientId = MgmtCluster.SERVER_CLIENT_ID;
-                                GoogleSilentAuthProxy silentAuthProxy = new GoogleSilentAuthProxy(
-                                        TeraMgmtService.this,
-                                        serverClientId,
-                                        new GoogleSilentAuthProxy.OnAuthListener() {
-                                            @Override
-                                            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                                                String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-                                                Logs.d(CLASSNAME, "onStartCommand", "serverAuthCode=" + serverAuthCode);
-                                                registerToMgmtCluster(TeraMgmtService.this, serverAuthCode, googleApiClient);
-                                            }
+            public void onGetDeviceInfoSuccessful(final GetDeviceInfo getDeviceInfo) {
+                try {
+                    String responseContent = getDeviceInfo.getMessage();
+                    JSONObject result = new JSONObject(responseContent);
+                    String state = result.getString("state");
+                    if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
+                        JSONObject backend = result.getJSONObject("backend");
+                        String url = backend.getString("url");
+                        String token = backend.getString("token");
+                        HCFSMgmtUtils.setSwiftToken(url, token);
+                    } else {
+                        JSONObject piggyback = result.getJSONObject("piggyback");
+                        String category = piggyback.getString("category");
+                        switch (category) {
+                            // Device is not transferred completely, revert device status to "activated" status
+                            case GetDeviceInfo.Category.TX_WAITING:
+                                MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
+                                unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
+                                    @Override
+                                    public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
+                                        Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
+                                    }
 
-                                            @Override
-                                            public void onAuthFailed() {
-                                                googleSilentAuthFailed();
-                                            }
-                                        });
-                                silentAuthProxy.auth();
-                            } else {
-                                JSONObject piggyback = result.getJSONObject("piggyback");
-                                String category = piggyback.getString("category");
-                                switch (category) {
-                                    // Device is not transferred completely, revert device status to "activated" status
-                                    case GetDeviceInfo.Category.TX_WAITING:
-                                        MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
-                                        unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
-                                            @Override
-                                            public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
-                                                Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
-                                            }
-
-                                            @Override
-                                            public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
-                                                Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
-                                            }
-                                        });
-                                        unlockDeviceProxy.unlock();
-                                        break;
-                                    // Device is already transferred, execute factory reset
-                                    case GetDeviceInfo.Category.UNREGISTERED:
-                                        FactoryResetUtils.reset(TeraMgmtService.this);
-                                        break;
-                                }
-                            }
-                        } catch (JSONException e) {
-                            Logs.e(CLASSNAME, "checkDeviceStatus", Log.getStackTraceString(e));
+                                    @Override
+                                    public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
+                                        Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
+                                    }
+                                });
+                                unlockDeviceProxy.unlock();
+                                break;
+                            // Device is already transferred, execute factory reset
+                            case GetDeviceInfo.Category.UNREGISTERED:
+                                FactoryResetUtils.reset(TeraMgmtService.this);
+                                break;
                         }
                     }
-
-                    @Override
-                    public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
-                        Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
-                    }
-                });
-                proxy.get();
+                } catch (JSONException e) {
+                    Logs.e(CLASSNAME, "checkDeviceStatus", Log.getStackTraceString(e));
+                }
             }
 
             @Override
-            public void onFetchFailed() {
-                Logs.e(CLASSNAME, "onFetchFailed", null);
+            public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+                Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
+                String notify_title = getString(R.string.app_name);
+                String notify_content = getString(R.string.auth_at_bootup_auth_get_device_info);
+                NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content);
             }
         });
+        getDeviceInfoProxy.get();
+    }
+
+    private void checkDeviceStatus() {
+        final String serverClientId = MgmtCluster.getServerClientId();
+        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(TeraMgmtService.this, serverClientId,
+                new GoogleSilentAuthProxy.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                        String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+
+                        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                        authParam.setAuthCode(serverAuthCode);
+                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this)));
+                        authParam.setVendor(Build.BRAND);
+                        authParam.setModel(Build.MODEL);
+                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                        authParam.setHcfsVersion(getString(R.string.tera_version));
+
+                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                            @Override
+                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                                String jwtToken = authResultInfo.getToken();
+                                doActionAccordingToDeviceStatus(jwtToken);
+                            }
+
+                            @Override
+                            public void onAuthFailed(AuthResultInfo authResultInfo) { // Mmgt auth failed
+                                Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
+                                if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                                    HCFSConfig.stopSyncToCloud();
+                                    NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+
+                                    int flag = NotificationEvent.FLAG_OPEN_APP;
+                                    int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
+                                    String notify_title = getString(R.string.app_name);
+                                    String notify_content = getString(R.string.auth_at_bootup_auth_failed_mgmt_auth);
+                                    Bundle extras = new Bundle();
+                                    extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+                                    NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
+
+                                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+                                    editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+                                    editor.apply();
+                                }
+                            }
+                        });
+                        authProxy.auth();
+                    }
+
+                    @Override
+                    public void onAuthFailed() { // Google silent auth failed
+                        HCFSConfig.stopSyncToCloud();
+                        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+
+                        int flag = NotificationEvent.FLAG_OPEN_APP;
+                        int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
+                        String notify_title = getString(R.string.app_name);
+                        String notify_content = getString(R.string.auth_at_bootup_auth_failed_google_auth);
+                        Bundle extras = new Bundle();
+                        extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+                        NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
+
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+                        editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
+                        editor.apply();
+                    }
+
+                });
+        googleAuthProxy.auth();
     }
 
     private void notifyInsufficientPinSpace() {
@@ -744,11 +729,11 @@ public class TeraMgmtService extends Service {
     /**
      * Remove uid info of uninstalled app from database, triggered by HCFSMgmtReceiver's ACTION_PACKAGE_REMOVED
      */
-    private void removeUidFromDatabase(Intent intent, String operation) {
+    private void removeUidFromDatabase(Intent intent, String action) {
         int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) != null) {
-            String logMsg = "operation=" + operation + ", uid=" + uid + ", packageName=" + packageName;
+            String logMsg = "action=" + action + ", uid=" + uid + ", packageName=" + packageName;
             Logs.d(CLASSNAME, "onStartCommand", logMsg);
             mUidDAO.delete(packageName);
         }
@@ -818,7 +803,7 @@ public class TeraMgmtService extends Service {
      * Add NEW uid info to database when system boot up and pin /storage/emulated/0/Android folder,
      * and then pin system app, triggered by HCFSMgmtReceiver's ACTION_BOOT_COMPLETED
      */
-    private void addUidAndPinSystemAppWhenBootUp() {
+    private void addUidAndPinSysApp() {
         // Add NEW uid info to database when system boot up
         List<UidInfo> uidInfoList = mUidDAO.getAll();
         Set<String> packageNameSet = new HashSet<>();
@@ -874,5 +859,6 @@ public class TeraMgmtService extends Service {
             NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
         }
     }
+
 
 }
