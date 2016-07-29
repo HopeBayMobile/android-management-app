@@ -18,6 +18,9 @@ import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -158,7 +161,7 @@ public class TeraAPIServer extends Service {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObj = jsonArray.getJSONObject(i);
                     int eventID = jsonObj.getInt("event_id");
-
+                    Logs.w(CLASSNAME, "MgmtApiUtils", "run", "eventID=" + eventID);
                     switch (eventID) {
                         case HCFSEventInfo.TEST:
                             Logs.d(CLASSNAME, this.getClass().getName() + ".test", jsonObj.toString());
@@ -182,39 +185,41 @@ public class TeraAPIServer extends Service {
         }
 
         private void refreshBackendToken() {
-            MgmtCluster.getJwtToken(TeraAPIServer.this, new MgmtCluster.OnFetchJwtTokenListener() {
-                @Override
-                public void onFetchSuccessful(String jwtToken) {
-                    String imei = HCFSMgmtUtils.getDeviceImei(TeraAPIServer.this);
-                    MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
-                    proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
-                        @Override
-                        public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
-                            try {
-                                String responseContent = getDeviceInfo.getMessage();
-                                JSONObject result = new JSONObject(responseContent);
-                                JSONObject backend = result.getJSONObject("backend");
-                                String url = backend.getString("url");
-                                String token = backend.getString("token");
-                                HCFSMgmtUtils.setSwiftToken(url, token);
-                            } catch (JSONException e) {
-                                Logs.e(CLASSNAME, "onGetDeviceInfoSuccessful", Log.getStackTraceString(e));
+            if (NetworkUtils.isNetworkConnected(TeraAPIServer.this)) {
+                MgmtCluster.getJwtToken(TeraAPIServer.this, new MgmtCluster.OnFetchJwtTokenListener() {
+                    @Override
+                    public void onFetchSuccessful(String jwtToken) {
+                        String imei = HCFSMgmtUtils.getDeviceImei(TeraAPIServer.this);
+                        MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
+                        proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+                            @Override
+                            public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
+                                try {
+                                    String responseContent = getDeviceInfo.getMessage();
+                                    JSONObject result = new JSONObject(responseContent);
+                                    JSONObject backend = result.getJSONObject("backend");
+                                    String url = backend.getString("url");
+                                    String token = backend.getString("token");
+                                    HCFSMgmtUtils.setSwiftToken(url, token);
+                                } catch (JSONException e) {
+                                    Logs.e(CLASSNAME, "onGetDeviceInfoSuccessful", Log.getStackTraceString(e));
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
-                            Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
-                        }
-                    });
-                    proxy.get();
-                }
+                            @Override
+                            public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+                                Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                            }
+                        });
+                        proxy.get();
+                    }
 
-                @Override
-                public void onFetchFailed() {
-                    Logs.e(CLASSNAME, "onFetchFailed", null);
-                }
-            });
+                    @Override
+                    public void onFetchFailed() {
+                        Logs.e(CLASSNAME, "onFetchFailed", null);
+                    }
+                });
+            }
         }
 
         }
