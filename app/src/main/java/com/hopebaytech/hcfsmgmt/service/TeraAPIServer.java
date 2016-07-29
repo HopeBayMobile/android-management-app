@@ -5,18 +5,15 @@ import android.content.Intent;
 import android.net.LocalServerSocket;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
-import android.os.IBinder;
-import android.util.Log;
-
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
@@ -51,7 +48,7 @@ public class TeraAPIServer extends Service {
 
         new SocketListener().start();
 
-        new Thread(new Runnable(){
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -65,7 +62,7 @@ public class TeraAPIServer extends Service {
                             Logs.e(CLASSNAME, this.getClass().getName(), jsonResult);
                         }
                     }
-                } catch(Exception e){
+                } catch (Exception e) {
                     Logs.e(CLASSNAME, this.getClass().getName(), e.toString());
                 }
             }
@@ -87,14 +84,14 @@ public class TeraAPIServer extends Service {
         super.onDestroy();
     }
 
-    private void writeSocket(int result) throws IOException {
-        Logs.i(CLASSNAME, "writeSocket", String.valueOf(result));
-        LocalSocket sender = new LocalSocket();
-        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
-        sender.getOutputStream().write(result);
-        sender.getOutputStream().close();
-        sender.close();
-    }
+//    private void writeSocket(int result) throws IOException {
+//        Logs.i(CLASSNAME, "writeSocket", String.valueOf(result));
+//        LocalSocket sender = new LocalSocket();
+//        sender.connect(new LocalSocketAddress(SOCKET_ADDRESS));
+//        sender.getOutputStream().write(result);
+//        sender.getOutputStream().close();
+//        sender.close();
+//    }
 
     class SocketListener extends Thread {
         @Override
@@ -151,6 +148,7 @@ public class TeraAPIServer extends Service {
     class mgmtApiUtils implements Runnable {
 
         JSONArray jsonArray;
+
         public mgmtApiUtils(JSONArray j) {
             this.jsonArray = j;
         }
@@ -177,7 +175,7 @@ public class TeraAPIServer extends Service {
         private void notifyUserExceedPinMax() {
             int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
             String notifyTitle = getString(R.string.app_name);
-            String notifyContent =getString(R.string.notify_exceed_pin_max);
+            String notifyContent = getString(R.string.notify_exceed_pin_max);
 
             Bundle extras = new Bundle();
             extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
@@ -222,7 +220,6 @@ public class TeraAPIServer extends Service {
             }
         }
 
-        }
     }
 
 }

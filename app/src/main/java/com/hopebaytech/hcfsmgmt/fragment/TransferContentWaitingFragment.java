@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.HBTIntent;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.service.MgmtPollingService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -45,7 +45,7 @@ public class TransferContentWaitingFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(HBTIntent.ACTION_TRANSFER_COMPLETED);
+        filter.addAction(TeraIntent.ACTION_TRANSFER_COMPLETED);
         mTransferCompletedReceiver = new TransferCompletedReceiver(getActivity());
         mTransferCompletedReceiver.registerReceiver(filter);
 
@@ -125,8 +125,8 @@ public class TransferContentWaitingFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
 
             String action = intent.getAction();
-            if (action.equals(HBTIntent.ACTION_TRANSFER_COMPLETED)) {
-                Logs.d(CLASSNAME, "onReceive", HBTIntent.ACTION_TRANSFER_COMPLETED);
+            if (action.equals(TeraIntent.ACTION_TRANSFER_COMPLETED)) {
+                Logs.d(CLASSNAME, "onReceive", TeraIntent.ACTION_TRANSFER_COMPLETED);
                 TransferContentTransferringFragment fragment = TransferContentTransferringFragment.newInstance();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.fragment_container, fragment, TransferContentTransferringFragment.TAG);

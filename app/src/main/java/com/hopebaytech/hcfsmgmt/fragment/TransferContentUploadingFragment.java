@@ -16,7 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.HBTIntent;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -47,7 +47,7 @@ public class TransferContentUploadingFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(HBTIntent.ACTION_UPLOAD_COMPLETED);
+        filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
         mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
         mUploadCompletedReceiver.registerReceiver(filter);
 

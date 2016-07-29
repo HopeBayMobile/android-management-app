@@ -74,7 +74,7 @@ import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
-import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -139,7 +139,7 @@ public class FileMgmtFragment extends Fragment {
     private boolean mRecyclerViewScrollDown;
     private boolean mCurrentVisible;
     private boolean mServiceBound;
-    private HCFSMgmtService mMgmtService;
+    private TeraMgmtService mMgmtService;
     private DISPLAY_TYPE mDisplayType;
     //    private ExternalStorageObserver mExternalStorageObserver;
 
@@ -516,7 +516,7 @@ public class FileMgmtFragment extends Fragment {
     public void onStart() {
         super.onStart();
         // Bind to HCFSMgmtService
-        Intent intent = new Intent(mContext, HCFSMgmtService.class);
+        Intent intent = new Intent(mContext, TeraMgmtService.class);
         mContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 

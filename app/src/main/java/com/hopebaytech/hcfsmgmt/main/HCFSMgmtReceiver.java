@@ -167,7 +167,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (!isReplacing) {
-                Intent intentService = new Intent(context, HCFSMgmtService.class);
+                Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();
 //                intent.putExtra(TeraIntent.KEY_OPERATION,
@@ -180,7 +180,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
         } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
             // Pin or unpin an update app according to pin_status field in uid.db
             String packageName = intent.getData().getSchemeSpecificPart();
-            Intent intentService = new Intent(context, HCFSMgmtService.class);
+            Intent intentService = new Intent(context, TeraMgmtService.class);
             int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
             intentService.setAction(TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP);
 //            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP);
@@ -192,7 +192,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             boolean isDataRemoved = intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false);
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (isDataRemoved && !isReplacing) {
-                Intent intentService = new Intent(context, HCFSMgmtService.class);
+                Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();
                 intentService.setAction(TeraIntent.ACTION_REMOVE_UID_FROM_DB);
