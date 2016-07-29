@@ -14,7 +14,6 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -183,7 +182,7 @@ public class TeraAPIServer extends Service {
         private void notifyUserExceedPinMax() {
             int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
             String notifyTitle = getString(R.string.app_name);
-            String notifyContent =getString(R.string.notify_exceed_pin_max);
+            String notifyContent = getString(R.string.notify_exceed_pin_max);
 
             Bundle extras = new Bundle();
             extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);

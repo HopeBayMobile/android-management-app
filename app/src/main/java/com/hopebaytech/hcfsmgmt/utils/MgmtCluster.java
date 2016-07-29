@@ -793,7 +793,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
+                    final RegisterResultInfo registerResultInfo = register(authParam, jwtToken);
                     Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
