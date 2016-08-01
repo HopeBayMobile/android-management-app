@@ -8,6 +8,6 @@ import com.hopebaytech.hcfsmgmt.info.ItemInfo;
  */
 public interface IPinUnpinListener {
 
-    void OnPinUnpinFailed(ItemInfo itemInfo);
+    void onPinUnpinFailed(ItemInfo itemInfo);
 
 }
