@@ -14,8 +14,10 @@ import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 
@@ -161,7 +163,7 @@ public class TeraAPIServer extends Service {
                             Logs.d(CLASSNAME, this.getClass().getName() + ".test", "run", jsonObj.toString());
                             break;
                         case HCFSEventInfo.TOKEN_EXPIRED:
-                            refreshBackendToken();
+                            checkTokenExpiredCause();
                             break;
                         case HCFSEventInfo.UPLOAD_COMPLETED:
                             sendUploadCompletedIntent();
@@ -179,14 +181,15 @@ public class TeraAPIServer extends Service {
         private void notifyUserExceedPinMax() {
             int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
             String notifyTitle = getString(R.string.app_name);
-            String notifyContent =getString(R.string.notify_exceed_pin_max);
+            String notifyContent = getString(R.string.notify_exceed_pin_max);
 
             Bundle extras = new Bundle();
             extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
             NotificationEvent.notify(TeraAPIServer.this, idNotify, notifyTitle, notifyContent, extras);
         }
 
-        private void refreshBackendToken() {
+
+        private void checkTokenExpiredCause() {
             if (NetworkUtils.isNetworkConnected(TeraAPIServer.this)) {
                 MgmtCluster.getJwtToken(TeraAPIServer.this, new MgmtCluster.OnFetchJwtTokenListener() {
                     @Override
@@ -199,10 +202,18 @@ public class TeraAPIServer extends Service {
                                 try {
                                     String responseContent = getDeviceInfo.getMessage();
                                     JSONObject result = new JSONObject(responseContent);
-                                    JSONObject backend = result.getJSONObject("backend");
-                                    String url = backend.getString("url");
-                                    String token = backend.getString("token");
-                                    HCFSMgmtUtils.setSwiftToken(url, token);
+                                    String state = result.getString("state");
+                                    if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
+                                        // Refresh backend token
+                                        JSONObject backend = result.getJSONObject("backend");
+                                        String url = backend.getString("url");
+                                        String token = backend.getString("token");
+                                        HCFSMgmtUtils.setSwiftToken(url, token);
+                                    } else {
+                                        // Other situation is passed to MgmtPollingService.
+                                        MgmtPollingUtils.startPollingService(TeraAPIServer.this,
+                                                Interval.TOKEN_EXPIRED_CHECK_STATE, MgmtPollingService.class);
+                                    }
                                 } catch (JSONException e) {
                                     Logs.e(CLASSNAME, "onGetDeviceInfoSuccessful", Log.getStackTraceString(e));
                                 }
