@@ -2,8 +2,8 @@
 
     <string name="app_name">Tera</string>
 
-    <string name="require_read_external_storage_permission">讀取檔案清單需啟用[儲存]權限。</string>
-    <string name="require_read_phone_state_permission">讀取IMEI值需啟用[電話]權限。</string>
+    <string name="require_read_external_storage_permission">Reading file list must enable the "Storage" permission.</string>
+    <string name="require_read_phone_state_permission">Reading IMEI info must enable the "Phone" permission.</string>
     <string name="go">GO</string>
     <string name="update">UPDATE</string>
 
@@ -16,12 +16,12 @@
     <string name="activate_enable">Activate</string>
     <string name="activate_forget_password"><u>Forgot password</u></string>
     <string name="activate_or">or</string>
-    <string name="activate_with_code_msg">The activation code has been used. If your old device is lost or broken, please lock it on %s before activation.</string>
+    <string name="activate_with_code_msg">The activation code has been used. If your old Tera device is lost or broken, please lock it on %s before activation.</string>
     <string name="activate_with_google_account">Use Google account for activation</string>
-    <string name="activate_get_server_client_id_failed">Getting info about Google authentication from admin server failed. </string>
+    <string name="activate_get_server_client_id_failed">Getting info on Google authentication from admin server failed.</string>
     <string name="activate_require_username_password">Enter user name &amp; password.</string>
     <string name="activate_without_google_play_services">Tera must run on Google Play services, which are missing on your phone.</string>
-    <string name="activate_update_google_play_services_required">Tera won\'t run unless you update Google Play services.</string>
+    <string name="activate_update_google_play_services_required">Tera will not run unless you update Google Play services.</string>
     <string name="activate_update_google_play_services_go">Update Google Play services.</string>
     <string name="activate_update_google_play_service_missing_permission">Missing Google Play services permissions.</string>
     <string name="activate_require_activation_code">Enter activation code.</string>
@@ -32,7 +32,7 @@
     <string name="activate_failed_device_expired">Tera expired. Activation failed.</string>
     <string name="activate_failed_gateway_timeout">Gateway Timeout: The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.</string>
     <string name="activate_device_not_registered">Tera is not activated on this device. Enter an activation code to activate Tera.</string>
-    <string name="activate_require_read_phone_state_permission">Enable "Phone" permission to activate Tera.</string>
+    <string name="activate_require_read_phone_state_permission">Enable the "Phone" permission to activate Tera.</string>
 
     <string name="nav_drawer_open">Open navigation drawer.</string>
     <string name="nav_drawer_close">Close navigation drawer.</string>
@@ -45,25 +45,25 @@
 
     <string name="notify_network_connected">Network connection restored.</string>
     <string name="notify_network_disconnected">Network connection failed. Please check.</string>
-    <string name="notify_pin_app_failure">Pinning app failed</string>
-    <string name="notify_pin_file_dir_failure">Pinning file failed</string>
-    <string name="notify_pin_image_failure">Pinning image failed</string>
-    <string name="notify_pin_video_failure">Pinning video failed</string>
-    <string name="notify_pin_audio_failure">Pinning music failed</string>
-    <string name="notify_unpin_app_failure">Canceling app pin failed</string>
-    <string name="notify_unpin_file_dir_failure">Canceling file pinning failed</string>
-    <string name="notify_unpin_image_failure">Canceling image pinning failed</string>
-    <string name="notify_unpin_video_failure">Canceling video pinning failed</string>
-    <string name="notify_unpin_audio_failure">Canceling music pinning failed</string>
+    <string name="notify_pin_app_failure">Pinning app failed.</string>
+    <string name="notify_pin_file_dir_failure">Pinning file failed.</string>
+    <string name="notify_pin_image_failure">Pinning image failed.</string>
+    <string name="notify_pin_video_failure">Pinning video failed.</string>
+    <string name="notify_pin_audio_failure">Pinning music failed.</string>
+    <string name="notify_unpin_app_failure">Unpinning app failed.</string>
+    <string name="notify_unpin_file_dir_failure">Unpinning file failed.</string>
+    <string name="notify_unpin_image_failure">Unpinning image failed.</string>
+    <string name="notify_unpin_video_failure">Unpinning video failed.</string>
+    <string name="notify_unpin_audio_failure">Unpinning music failed.</string>
     <string name="notify_exceed_local_storage_used_ratio">Local storage usage reaches %s%%</string>
-    <string name="notify_exceed_pin_used_ratio">釘選空間使用率已達 %s%%</string>
-    <string name="notify_exceed_pin_max">釘選空間使用率不足</string>
-    <string name="notify_pin_unpin_system_app_failed">Pinning system apps failed</string>
+    <string name="notify_exceed_pin_used_ratio">Pinned space usage reaches %s%%</string>
+    <string name="notify_exceed_pin_max">Insufficient pinned space</string>
+    <string name="notify_pin_unpin_system_app_failed">Pinning system apps failed.</string>
 
     <string name="active_cloud_storage_auth_fail">Account authentication failed.</string>
 
     <string name="overview_hcfs_conn_status_normal">Transmission normal</string>
-    <string name="overview_hcfs_conn_status_not_allowed">Not allowed to transmit</string>
+    <string name="overview_hcfs_conn_status_not_allowed">Cloud/network is disconnected.</string>
     <string name="overview_hcfs_conn_status_failed">Transmission failed</string>
     <string name="overview_hcfs_conn_status_in_progress">Transmitting</string>
     <string name="overview_hcfs_conn_status_slow">Transmission slow</string>
@@ -72,7 +72,7 @@
     <string name="overview_local_storage">Local space</string>
     <string name="overview_pinned_storage">Pinned space</string>
     <string name="overview_network_traffic_title">Data Transmission</string>
-    <string name="overview_data_transmission_today">Data transmission today</string>
+    <string name="overview_data_transmission_today">Data transmitted today</string>
     <string name="overview_data_to_be_uploaded">Data to be uploaded</string>
     <string name="overview_snackbar_exit_app">Tap Return key again to quit.</string>
 
@@ -87,11 +87,11 @@
     <string name="file_mgmt_popup_menu_app_type_more_info">More info</string>
     <string name="file_mgmt_dialog_app_cancel">Cancel</string>
     <string name="file_mgmt_dialog_app_open">Open</string>
-    <string name="file_mgmt_dialog_app_package_name">Package name:%s</string>
+    <string name="file_mgmt_dialog_app_package_name">Package name: %s</string>
     <string name="file_mgmt_dialog_local_data_ratio">Local data ratio: %s</string>
     <string name="file_mgmt_dialog_app_remove">Uninstall</string>
-    <string name="file_mgmt_dialog_data_size">Size: %s</string>
-    <string name="file_mgmt_dialog_app_version">Version: %s</string>
+    <string name="file_mgmt_dialog_data_size">Size: %s</string>
+    <string name="file_mgmt_dialog_app_version">Version: %s</string>
     <string name="file_mgmt_dialog_calculating">Calculating&#8230;</string>
 
     <string-array name="file_mgmt_spinner">
@@ -109,12 +109,12 @@
     </string-array>
     <string name="file_mgmt_menu_list">List</string>
     <string name="file_mgmt_menu_grid">Grid</string>
-    <string name="file_mgmt_whether_allowed_to_unpin_image">Image data type is pinned. Cancel pinning anyway?</string>
-    <string name="file_mgmt_whether_allowed_to_unpin_video">Video data type is pinned. Cancel pinning anyway?</string>
-    <string name="file_mgmt_whether_allowed_to_unpin_audio">Music data type is pinned. Cancel pinning anyway?</string>
+    <string name="file_mgmt_whether_allowed_to_unpin_image">Image data type is pinned. Unpin it anyway?</string>
+    <string name="file_mgmt_whether_allowed_to_unpin_video">Video data type is pinned. Unpin it anyway?</string>
+    <string name="file_mgmt_whether_allowed_to_unpin_audio">Music data type is pinned. Unpin it anyway?</string>
     <string name="file_mgmt_popup_menu_pin">Pin</string>
-    <string name="file_mgmt_popup_menu_unpin">Cancel pin</string>
-    <string name="file_mgmt_internal_storage_name">Device storage</string>
+    <string name="file_mgmt_popup_menu_unpin">Unpin</string>
+    <string name="file_mgmt_internal_storage_name">Storage</string>
     <string name="file_mgmt_sdcard1_storage_name">SD card storage</string>
     <string name="file_mgmt_section_item_calculating">Calculating&#8230;</string>
     <string name="file_mgmt_section_item_total_storage_space">Total space:&#160;</string>
@@ -144,28 +144,28 @@
     <string name="settings_notify_local_storage_used_ratio_title">Local space usage</string>
     <string name="settings_execute">Execute</string>
     <string name="settings_execute_title">Download to run</string>
-    <string name="settings_switch_account_title">Switch account</string>
-    <string name="settings_switch_account_warning_msg">While switching account, the system will log out your current account first. Continue?</string>
+    <string name="settings_switch_account_title">Change account</string>
+    <string name="settings_switch_account_warning_msg">To change the account, Tera will log out your current account first. Continue?</string>
     <string name="settings_local_storage_used_ratio">Send notification if local space usage reaches <b>%s</b>.</string>
-    <string name="settings_transfer_content">Transfer contents</string>
-    <string name="settings_transfer_content_desc_title">Transfer contents</string>
-    <string name="settings_transfer_content_desc_hint">Transfer contents may transfer all of your device and cloud contents to another device. You will need to reset this device when all contents are uploaded onto Tera Cloud.</string>
-    <string name="settings_transfer_content_desc_check">I understand the risks described above</string>
+    <string name="settings_transfer_content">Transfer data</string>
+    <string name="settings_transfer_content_desc_title">Transfer Data</string>
+    <string name="settings_transfer_content_desc_hint">Transferring data will transfer the data from this current device to the Tera cloud for another device. Once the data transfer is done and another device starts to restore the data from Tera, this current device will automatically perform factory reset.</string>
+    <string name="settings_transfer_content_desc_check"> I understand the above info and agree to perform related actions.</string>
     <string name="settings_transfer_content_confirm_title">Confirm Password</string>
     <string name="settings_transfer_content_confirm_message">Confirm your Google account password:</string>
-    <string name="settings_transfer_content_confirm_error_message">Incorrect password, please try again.</string>
-    <string name="settings_transfer_content_uploading_title">Processing&#8230;</string>
-    <string name="settings_transfer_content_uploading_message">The preparation may taken some time, depending on the total file sizes.\n\nWhile this device has started transmission process, please execute factory reset on the other device, and login Tera app to wait for available backup to restore.</string>
+    <string name="settings_transfer_content_confirm_error_message">Incorrect password. Please try again.</string>
+    <string name="settings_transfer_content_uploading_title">Transferring&#8230;</string>
+    <string name="settings_transfer_content_uploading_message">Data transfer may take some time, depending on the amount of data.\n\nOnce the transfer is done, log in Tera on another device and select to restore the backup from Tera. Then this current device will automatically perform factory reset.</string>
     <string name="settings_transfer_content_waiting_title">Waiting for another device&#8230;</string>
-    <string name="settings_transfer_content_waiting_message">All contents are ready to transfer. The transfer process will auto start when the backup is chosen by the other device.</string>
-    <string name="settings_transfer_content_transferring_title">Transferring Contents&#8230;</string>
-    <string name="settings_transfer_content_transferring_message">While transferring contents, please do not execute any other apps or actions</string>
+    <string name="settings_transfer_content_waiting_message">All data is ready to transfer. Once another device starts running the restoration backup, the transfer process will auto start.</string>
+    <string name="settings_transfer_content_transferring_title">Transferring data&#8230;</string>
+    <string name="settings_transfer_content_transferring_message">While data is transferring, do not run any other apps or operations.</string>
     <string name="settings_transfer_content_done_title">Done</string>
-    <string name="settings_transfer_content_done_message">Your device content have been successfully uploaded onto the cloud, and are being restored to the new device. This device will be reset in a few seconds.</string>
-    <string name="settings_transfer_content_done_factory_reset">Factory Reset in %s seconds</string>
-    <string name="settings_transfer_content_failed">Transfer contents failed</string>
+    <string name="settings_transfer_content_done_message">Data on this current device has been successfully uploaded to the Tera cloud, and is being restored to another device. This current device will be reset soon.</string>
+    <string name="settings_transfer_content_done_factory_reset">Factory reset will start in %s seconds.</string>
+    <string name="settings_transfer_content_failed">Transferring data failed.</string>
     <string name="settings_feedback">Feedback</string>
-    <string name="settings_snackbar_no_available_email_app_found">No available Email apps found or no Email accounts have been set. Please at least install an Email app, and set a valid Email account.</string>
+    <string name="settings_snackbar_no_available_email_app_found">No available email app and/or email account. Please at least install an email app and set a valid email account.</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
         <item>80%</item>
@@ -181,16 +181,15 @@
         <item>50</item>
     </string-array>
 
-    <string name="switch_account_require_new_account">Same as the current account. Switching account operation will not be performed.</string>
-    <string name="switch_account_start_to_switch">Start Switching</string>
-    <string name="switch_account_failed">Switching account failed. Please try again or tap the Return key to quit.</string>
+    <string name="switch_account_require_new_account">Same as the current account. Changing account operation will not be performed.</string>
+    <string name="switch_account_start_to_switch">Start Changing</string>
+    <string name="switch_account_failed">Changing account failed. Please try again or tap the Return key to quit.</string>
     <string name="switch_account_another_account"><u>Choose Another Account</u></string>
-    <string name="switch_account_require_read_phone_state_permission">Switching account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
+    <string name="switch_account_require_read_phone_state_permission">Changing account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
 
-    <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗導致無法存取雲端資料。</string>
-    <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗導致無法存取雲端資料。</string>
-    <string name="auth_at_bootup_auth_failed_mgmt_register">Tera 註冊失敗導致無法存取雲端資料。</string>
-    <string name="auth_at_bootup_auth_get_device_info">無法從遠端伺服器取得裝置資訊。</string>
+    <string name="auth_at_bootup_auth_failed_google_auth">Unable to access cloud data, because Google account authentication failed.</string>
+    <string name="auth_at_bootup_auth_failed_mgmt_auth">Unable to access cloud data, because Tera account authentication failed.</string>
+    <string name="auth_at_bootup_auth_failed_mgmt_register">Unable to access cloud data, because Tera registration failed.</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
     <string name="yes">Yes</string>
