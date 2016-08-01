@@ -2,6 +2,9 @@ package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,11 +19,13 @@ import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -111,6 +116,7 @@ public class FileMgmtFragment extends Fragment {
     private Context mContext;
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressCircle;
+    private ProgressDialog mProgressDialog;
     private LinearLayout mEmptyFolder;
     private Spinner mSpinner;
     private ImageView mRefresh;
@@ -212,7 +218,8 @@ public class FileMgmtFragment extends Fragment {
                                     boolean isExpectedPinned = appInfo.isPinned();
 
                                     if (isRealPinned == isExpectedPinned) {
-                                        // Remove packageName from mPinUnpinAppMap if the pin status has became what user expected
+                                        // Remove packageName from mPinUnpinAppMap if the pin status
+                                        // has became what user expected
                                         mPinUnpinAppMap.remove(packageName);
                                     }
                                 }
@@ -234,7 +241,8 @@ public class FileMgmtFragment extends Fragment {
                                     if (path.equals(mCurrentFile.getAbsolutePath()) ||
                                             path.startsWith(mCurrentFile.getAbsolutePath().concat("/"))) {
                                         if (isRealPinned == isExpectedPinned) {
-                                            // Remove pinUnpinPath from mPinUnpinFileMap if the pin status has became what user expected
+                                            // Remove pinUnpinPath from mPinUnpinFileMap if the pin
+                                            // status has became what user expected
                                             mPinUnpinFileMap.remove(path);
                                         } else {
                                             isProcessDone = false;
@@ -248,7 +256,7 @@ public class FileMgmtFragment extends Fragment {
                             if (mProgressCircle.getVisibility() == View.VISIBLE) {
                                 Logs.w(CLASSNAME, "mProcessPinRunnable", "hideProgress=" + isProcessDone);
                                 if (isProcessDone) {
-                                    hideProgressCircle();
+                                    dismissProgress();
                                     notifyRecyclerViewItemChanged();
                                 }
                             }
@@ -276,19 +284,30 @@ public class FileMgmtFragment extends Fragment {
             mUiHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    FileMgmtFileDirDialogFragment fragment = (FileMgmtFileDirDialogFragment) getFragmentManager().findFragmentByTag(FileMgmtFileDirDialogFragment.TAG);
-                    if (fragment != null) {
-                        ImageView fileDirPinIcon = (ImageView) fragment.getDialog().findViewById(R.id.file_dir_pin_icon);
-                        fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
-                        fileDirPinIcon.setContentDescription(getPinViewContentDescription(itemInfo.isPinned()));
+                    FileMgmtFileDirDialogFragment fileDialogFragment = (FileMgmtFileDirDialogFragment)
+                            getFragmentManager().findFragmentByTag(FileMgmtFileDirDialogFragment.TAG);
+                    FileMgmtAppDialogFragment appDialogFragment = (FileMgmtAppDialogFragment)
+                            getFragmentManager().findFragmentByTag(FileMgmtAppDialogFragment.TAG);
+                    if (fileDialogFragment != null || appDialogFragment != null) {
+                        ImageView pinIcon;
+                        if (fileDialogFragment != null) {
+                            pinIcon = (ImageView) fileDialogFragment.getDialog().findViewById(R.id.file_dir_pin_icon);
+                        } else {
+                            pinIcon = (ImageView) appDialogFragment.getDialog().findViewById(R.id.app_pin_icon);
+                        }
+                        boolean isPinned = itemInfo.isPinned();
+                        pinIcon.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                        pinIcon.setContentDescription(getPinViewContentDescription(isPinned));
                     } else {
                         if (itemInfo.getViewHolder() instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
-                            LinearRecyclerViewAdapter.LinearRecyclerViewHolder holder = (LinearRecyclerViewAdapter.LinearRecyclerViewHolder) itemInfo.getViewHolder();
-                            holder.pinView.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
-                            holder.pinView.setContentDescription(getPinViewContentDescription(itemInfo.isPinned()));
+                            boolean isPinned = itemInfo.isPinned();
+                            LinearRecyclerViewAdapter.LinearRecyclerViewHolder holder =
+                                    (LinearRecyclerViewAdapter.LinearRecyclerViewHolder) itemInfo.getViewHolder();
+                            holder.pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                            holder.pinView.setContentDescription(getPinViewContentDescription(isPinned));
                         }
                     }
-                    hideProgressCircle();
+                    dismissProgress();
                 }
             });
         }
@@ -303,23 +322,21 @@ public class FileMgmtFragment extends Fragment {
                         final ItemInfo itemInfo = mWaitToExecuteSparseArr.get(key);
                         long lastProcessTime = itemInfo.getLastProcessTime();
                         if (itemInfo instanceof AppInfo) {
-                            final AppInfo appInfo = (AppInfo) itemInfo;
-
                             final UidDAO uidDAO = UidDAO.getInstance(mContext);
+                            AppInfo appInfo = (AppInfo) itemInfo;
                             UidInfo uidInfo = new UidInfo(appInfo);
                             uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
-                            mMgmtService.pinOrUnpinApp(appInfo, new IPinUnpinListener() {
-                                //TODO should add OnPinUnpinSuccessful() to modify pin status in db here
+                            mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
                                 @Override
-                                public void OnPinUnpinFailed(final ItemInfo itemInfo) {
-                                    processPinUnpinFailed(itemInfo);
+                                public void onPinUnpinFailed(final ItemInfo itemInfo) {
+                                    itemInfo.setPinned(!itemInfo.isPinned());
 
                                     // Update pin status to uid.db
-                                    AppInfo info = (AppInfo) itemInfo;
-                                    info.setPinned(!info.isPinned());
-                                    UidInfo uidInfo = new UidInfo(appInfo);
+                                    UidInfo uidInfo = new UidInfo((AppInfo) itemInfo);
                                     uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
+
+                                    processPinUnpinFailed(itemInfo);
                                 }
                             });
                         } else if (itemInfo instanceof DataTypeInfo) {
@@ -329,7 +346,8 @@ public class FileMgmtFragment extends Fragment {
                             Logs.e(CLASSNAME, "run", fileDirInfo.getName() + ": " + fileDirInfo.isPinned());
                             mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
                                 @Override
-                                public void OnPinUnpinFailed(final ItemInfo itemInfo) {
+                                public void onPinUnpinFailed(final ItemInfo itemInfo) {
+                                    itemInfo.setPinned(!itemInfo.isPinned());
                                     processPinUnpinFailed(itemInfo);
                                 }
                             });
@@ -368,20 +386,53 @@ public class FileMgmtFragment extends Fragment {
         }
     };
 
-    private void showProgressCircle() {
+    private void showProgress() {
         mUiHandler.post(new Runnable() {
             @Override
             public void run() {
+                FileMgmtFileDirDialogFragment fileDialogFragment = (FileMgmtFileDirDialogFragment)
+                        getFragmentManager().findFragmentByTag(FileMgmtFileDirDialogFragment.TAG);
+                FileMgmtAppDialogFragment appDialogFragment = (FileMgmtAppDialogFragment)
+                        getFragmentManager().findFragmentByTag(FileMgmtAppDialogFragment.TAG);
+                if (fileDialogFragment != null || appDialogFragment != null) {
+                    ProgressBar progress;
+                    if (fileDialogFragment != null) {
+                        Dialog dialog = fileDialogFragment.getDialog();
+                        progress = (ProgressBar) dialog.findViewById(R.id.progress_circle);
+                    } else {
+                        Dialog dialog = appDialogFragment.getDialog();
+                        progress = (ProgressBar) dialog.findViewById(R.id.progress_circle);
+                    }
+                    progress.setVisibility(View.VISIBLE);
+                }
+                // Always show progress on the recyclerView, prevent user from not knowing whether
+                // pin/unpin process is done or not when the app/file info dialog dismiss
                 mProgressCircle.setVisibility(View.VISIBLE);
             }
         });
     }
 
-    private void hideProgressCircle() {
+    private void dismissProgress() {
         mUiHandler.post(new Runnable() {
             @Override
             public void run() {
-                mProgressCircle.setVisibility(View.GONE);
+                FileMgmtFileDirDialogFragment fileDialogFragment = (FileMgmtFileDirDialogFragment)
+                        getFragmentManager().findFragmentByTag(FileMgmtFileDirDialogFragment.TAG);
+                FileMgmtAppDialogFragment appDialogFragment = (FileMgmtAppDialogFragment)
+                        getFragmentManager().findFragmentByTag(FileMgmtAppDialogFragment.TAG);
+                if (fileDialogFragment != null || appDialogFragment != null) {
+                    ProgressBar progress;
+                    if (fileDialogFragment != null) {
+                        Dialog dialog = fileDialogFragment.getDialog();
+                        progress = (ProgressBar) dialog.findViewById(R.id.progress_circle);
+                    } else {
+                        Dialog dialog = appDialogFragment.getDialog();
+                        progress = (ProgressBar) dialog.findViewById(R.id.progress_circle);
+                    }
+                    progress.setVisibility(View.GONE);
+                } else {
+                    mProgressCircle.setVisibility(View.GONE);
+                }
             }
         });
     }
@@ -1933,13 +1984,14 @@ public class FileMgmtFragment extends Fragment {
             boolean allowPinUnpin = true;
             itemInfo.setPinned(isPinned);
             if (itemInfo instanceof AppInfo) {
-                showProgressCircle();
+                showProgress();
 
                 final AppInfo appInfo = (AppInfo) itemInfo;
                 appInfo.setLastProcessTime(System.currentTimeMillis());
 
                 mPinUnpinAppMap.put(appInfo.getPackageName(), appInfo);
                 try {
+                    // The subject to clone AppInfo is in order to keep the pin status.
                     mWaitToExecuteSparseArr.put(appInfo.hashCode(), (AppInfo) appInfo.clone());
                 } catch (CloneNotSupportedException e) {
                     Logs.e(CLASSNAME, "pinUnpinItem", Log.getStackTraceString(e));
@@ -2040,13 +2092,14 @@ public class FileMgmtFragment extends Fragment {
                 }
 
                 if (isNeedToProcess) {
-                    showProgressCircle();
+                    showProgress();
                     fileDirInfo.setLastProcessTime(System.currentTimeMillis());
 
                     Logs.d(CLASSNAME, "pinUnpinItem", "itemInfo.isPinned()=" + itemInfo.isPinned()
                             + ", fileDirInfo.isPinned()=" + fileDirInfo.isPinned() + ", isPinned=" + isPinned);
                     mPinUnpinFileMap.put(fileDirInfo.getFilePath(), isPinned);
                     try {
+                        // The subject to clone AppInfo is in order to keep the pin status.
                         mWaitToExecuteSparseArr.put(fileDirInfo.hashCode(), (FileDirInfo) fileDirInfo.clone());
                     } catch (CloneNotSupportedException e) {
                         Logs.e(CLASSNAME, "pinUnpinItem", Log.getStackTraceString(e));
@@ -2072,8 +2125,8 @@ public class FileMgmtFragment extends Fragment {
 
     }
 
-
-    private void displayItem(final int position, final RecyclerViewHolder holder, final LruCache<Integer, Bitmap> memoryCache, ThreadPoolExecutor executor) {
+    private void displayItem(final int position, final RecyclerViewHolder holder,
+                             final LruCache<Integer, Bitmap> memoryCache, ThreadPoolExecutor executor) {
 
         if (!isPositionVisible(position)) {
             return;
@@ -2089,6 +2142,8 @@ public class FileMgmtFragment extends Fragment {
                     if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
                         final int alpha = itemInfo.getIconAlpha();
                         final boolean isPinned = isItemPinned(itemInfo);
+                        // A workaround to solve the problem that pin icons refresh abnormally when
+                        // user pin/unpin items.
                         if (mWaitToExecuteSparseArr.get(itemInfo.hashCode()) != null) {
                             return;
                         }
