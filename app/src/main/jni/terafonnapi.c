@@ -183,7 +183,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
 	unsigned char encrypt_code[len];
 	const char *imei = (*jEnv)->GetStringUTFChars(jEnv, jImei, 0);
 	size_t* output_length = malloc(sizeof(size_t));
-	int ret = encryptCode(encrypt_code, imei, output_length);
+	int ret = publicEncryptCode(encrypt_code, imei, output_length);
     jbyteArray result = (*jEnv)->NewByteArray(jEnv, strlen(encrypt_code));
     (*jEnv)->SetByteArrayRegion(jEnv, result, 0, strlen(encrypt_code), encrypt_code);
     //__android_log_print(ANDROID_LOG_DEBUG, "HopeBay", "JNI: jImei=%s", (char*) imei);
