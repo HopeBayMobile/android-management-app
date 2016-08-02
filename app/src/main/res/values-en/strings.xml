@@ -55,8 +55,8 @@
     <string name="notify_unpin_image_failure">Unpinning image failed.</string>
     <string name="notify_unpin_video_failure">Unpinning video failed.</string>
     <string name="notify_unpin_audio_failure">Unpinning music failed.</string>
-    <string name="notify_exceed_local_storage_used_ratio">Local storage usage reaches %s%%</string>
-    <string name="notify_exceed_pin_used_ratio">Pinned space usage reaches %s%%</string>
+    <string name="notify_exceed_local_storage_used_ratio">Local storage usage reached %s%%</string>
+    <string name="notify_exceed_pin_used_ratio">Pinned space usage reached %s%%</string>
     <string name="notify_exceed_pin_max">Insufficient pinned space</string>
     <string name="notify_pin_unpin_system_app_failed">Pinning system apps failed.</string>
 
