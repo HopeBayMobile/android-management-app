@@ -197,6 +197,20 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
     return result;
 }
 
+JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getDecryptedJsonString(
+		JNIEnv *jEnv, jobject jObject, jstring jJsonString) {
+	int len = 4098;
+	unsigned char decrypt_code[len];
+	const char *jsonString = (*jEnv)->GetStringUTFChars(jEnv, jJsonString, 0);
+	size_t* output_length = malloc(sizeof(size_t));
+	int ret = publicDecryptCode(decrypt_code, jsonString, output_length);
+    jbyteArray result = (*jEnv)->NewByteArray(jEnv, strlen(decrypt_code));
+    (*jEnv)->SetByteArrayRegion(jEnv, result, 0, strlen(decrypt_code), decrypt_code);
+
+    free(output_length);
+    return result;
+}
+
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getOccupiedSize(
 		JNIEnv *jEnv, jobject jObject, jint jInit) {
 	const char *json_res;
