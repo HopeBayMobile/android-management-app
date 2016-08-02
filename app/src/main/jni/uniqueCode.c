@@ -108,6 +108,20 @@ int public_encrypt(unsigned char * data,int data_len,unsigned char * key, unsign
     return result;
 }
 
+int public_decrypt(unsigned char * enc_data,int data_len,unsigned char * key, unsigned char *decrypted)
+{
+    RSA * rsa = createRSA(key,1);
+    int  result = RSA_public_decrypt(data_len,enc_data,decrypted,rsa,padding);
+    return result;
+}
+
+int private_encrypt(unsigned char * data,int data_len,unsigned char * key, unsigned char *encrypted)
+{
+    RSA * rsa = createRSA(key,0);
+    int result = RSA_private_encrypt(data_len,data,encrypted,rsa,padding);
+    return result;
+}
+
 int private_decrypt(unsigned char * enc_data,int data_len,unsigned char * key, unsigned char *decrypted)
 {
     RSA * rsa = createRSA(key,0);
@@ -134,7 +148,7 @@ int getEncryptCode(unsigned char* encrypted, size_t* output_length)
     return 0;
 }
 
-int encryptCode(unsigned char* encrypted, const unsigned char* plainText, const size_t* output_length)
+int encryptCode(char* keyType, unsigned char* encrypted, const unsigned char* plainText, const size_t* output_length)
 {
     // Encrypt and base64 encode <plainText> into <encrypted> and return len of <encryted> to <output_length>
     // @unsigned char* encrypted: 4098
@@ -147,7 +161,20 @@ int encryptCode(unsigned char* encrypted, const unsigned char* plainText, const 
     unsigned char* encoded;
 
     while (strlen(encrypt_code) != encrypted_length) {
-        encrypted_length = public_encrypt(plainText,strlen(plainText),publicKey,encrypt_code);
+        if (strcmp(keyType, "public") == 0)
+        {
+            encrypted_length = public_encrypt(plainText,strlen(plainText),publicKey,encrypt_code);
+        }
+        else if (strcmp(keyType, "private") == 0)
+        {
+            encrypted_length = private_encrypt(plainText,strlen(plainText),privateKey,encrypt_code);
+        }
+        else
+        {
+            printLastError("Not supprt key type");
+            return -1;
+        }
+
         if (encrypted_length == -1) {
             printLastError("Public Encrypt failed ");
             return -1;
@@ -156,4 +183,52 @@ int encryptCode(unsigned char* encrypted, const unsigned char* plainText, const 
     encoded = base64_encode(encrypt_code, strlen(encrypt_code), output_length);
     strcpy(encrypted, encoded);
     return 0;
+}
+
+int decryptCode(char* keyType, unsigned char* decrypted, const unsigned char* encrypted, const size_t input_length)
+{
+    //
+    // base64 decode and decrypt <encrypted> into <decrypted>, length of <encrypted> is <input_length>
+    //
+    // @unsigend char* decrypted: 4098
+    // @unsigend char* encrypted: 4098
+
+    size_t* output_length = malloc(sizeof(size_t));
+    unsigned char decrypt_code[4098] = {};
+    unsigned char* decoded;
+    int decrypted_length;
+
+    decoded = base64_decode(encrypted, input_length, output_length);
+    if (strcmp(keyType, "public") == 0)
+    {
+        decrypted_length = public_decrypt(decoded, strlen(decoded), publicKey, decrypt_code);
+    }
+    else if (strcmp(keyType, "private") == 0)
+    {
+        decrypted_length = private_decrypt(decoded, strlen(decoded), privateKey, decrypt_code);
+    }
+    else
+    {
+        printLastError("Not supprt key type");
+        return -1;
+    }
+    if(decrypted_length == -1)
+    {
+        printLastError("Private Decrypt failed ");
+        return -1;
+        //exit(0);
+    }
+    strcpy(decrypted, decrypt_code);
+    free(output_length);
+    return 0;
+}
+
+int publicEncryptCode(unsigned char* encrypted, const unsigned char* plainText, const size_t* output_length)
+{
+    return encryptCode("public", encrypted, plainText, output_length);
+}
+
+int publicDecryptCode(unsigned char* decrypted, const unsigned char* encrypted, const size_t input_length)
+{
+    return decryptCode("public", decrypted, encrypted, input_length);
 }
