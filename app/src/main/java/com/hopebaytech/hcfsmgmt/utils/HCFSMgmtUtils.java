@@ -786,4 +786,48 @@ public class HCFSMgmtUtils {
         return occupiedSize;
     }
 
+    /***
+     * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
+     * <li>0 when setting sync point completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     */
+    public static int startUploadTeraData() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.startUploadTeraData();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+            } else {
+                Logs.e(CLASSNAME, "startUploadTeraData", null);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "startUploadTeraData", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
+    /***
+     * @return <li>1 if no sync point is set.</li>
+     * <li>0 when canceling the setting completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     */
+    public static int stopUploadTeraData() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.stopUploadTeraData();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+            } else {
+                Logs.e(CLASSNAME, "startUploadTeraData", null);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "startUploadTeraData", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
 }

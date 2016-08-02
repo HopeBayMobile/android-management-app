@@ -243,6 +243,16 @@ public class TeraFonnApiService extends Service {
             return enabled;
         }
 
+        @Override
+        public int startUploadTeraData() throws RemoteException {
+            return HCFSMgmtUtils.startUploadTeraData();
+        }
+
+        @Override
+        public int stopUploadTeraData() throws RemoteException {
+            return HCFSMgmtUtils.stopUploadTeraData();
+        }
+
     };
 
     @Override

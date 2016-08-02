@@ -50,4 +50,20 @@ interface ITeraFonnApiService {
     /** Check whether HCFS is enabled */
     boolean hcfsEnabled();
 
+    /** Stop to upload Tera data to cloud
+     * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
+     * <li>0 when setting sync point completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     */
+    int startUploadTeraData();
+
+    /**
+     * Start to upload Tera data to cloud
+     *
+     * @return <li>1 if no sync point is set.</li>
+     * <li>0 when canceling the setting completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     **/
+    int stopUploadTeraData();
+
 }

@@ -1,11 +1,19 @@
 package com.hopebaytech.hcfsmgmt.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Binder;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -22,11 +30,11 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
@@ -43,24 +51,15 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 
-import android.app.AppOpsManager;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.util.Log;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TeraMgmtService extends Service {
 

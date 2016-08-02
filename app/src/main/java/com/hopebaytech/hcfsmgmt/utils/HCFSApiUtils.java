@@ -36,4 +36,19 @@ public class HCFSApiUtils {
     public static native String getOccupiedSize();
 
     public static native String setNotifyServer(String pathName);
+
+    /***
+     * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
+     * <li>0 when setting sync point completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     */
+    public static native String startUploadTeraData();
+
+    /***
+     * @return <li>1 if no sync point is set.</li>
+     * <li>0 when canceling the setting completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     */
+    public static native String stopUploadTeraData();
+
 }
