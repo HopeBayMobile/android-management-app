@@ -310,17 +310,18 @@ public class TeraMgmtService extends Service {
     }
 
     public void pinOrUnpinApp(AppInfo info, @NonNull IPinUnpinListener listener) {
-//        final boolean isPinned = info.isPinned();
         if (info.isPinned()) {
-            if (!HCFSMgmtUtils.pinApp(info)) {
+            if (HCFSMgmtUtils.pinApp(info)) {
+                listener.onPinUnpinSuccessful(info);
+            } else {
                 handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
-//                info.setPinned(!isPinned); // TODO Remove this line, pin status should be kept after pin or unpin failed
                 listener.onPinUnpinFailed(info);
             }
         } else {
-            if (!HCFSMgmtUtils.unpinApp(info)) {
+            if (HCFSMgmtUtils.unpinApp(info)) {
+                listener.onPinUnpinSuccessful(info);
+            } else {
                 handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
-//                info.setPinned(!isPinned); // TODO Remove this line, pin status should be kept after pin or unpin failed
                 listener.onPinUnpinFailed(info);
             }
         }
@@ -518,8 +519,9 @@ public class TeraMgmtService extends Service {
                 String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
                 NotificationEvent.notify(this, notify_id, notify_title, notify_message);
 
-//                info.setPinned(!info.isPinned());
                 listener.onPinUnpinFailed(info);
+            } else {
+                listener.onPinUnpinSuccessful(info);
             }
         } else {
             boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
@@ -529,8 +531,9 @@ public class TeraMgmtService extends Service {
                 String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
                 NotificationEvent.notify(this, notify_id, notify_title, notify_message);
 
-//                info.setPinned(!info.isPinned());
                 listener.onPinUnpinFailed(info);
+            } else {
+                listener.onPinUnpinSuccessful(info);
             }
         }
         mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());

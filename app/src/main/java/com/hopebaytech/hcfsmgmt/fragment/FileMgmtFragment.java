@@ -38,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -67,6 +68,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.customview.CircleDisplay;
@@ -254,7 +256,7 @@ public class FileMgmtFragment extends Fragment {
                             }
 
                             if (mProgressCircle.getVisibility() == View.VISIBLE) {
-                                Logs.w(CLASSNAME, "mProcessPinRunnable", "hideProgress=" + isProcessDone);
+                                Logs.d(CLASSNAME, "mProcessPinRunnable", "hideProgress=" + isProcessDone);
                                 if (isProcessDone) {
                                     dismissProgress();
                                     notifyRecyclerViewItemChanged();
@@ -329,7 +331,14 @@ public class FileMgmtFragment extends Fragment {
 
                             mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
                                 @Override
+                                public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
+                                    showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                                }
+
+                                @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
+                                    showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
                                     itemInfo.setPinned(!itemInfo.isPinned());
 
                                     // Update pin status to uid.db
@@ -346,7 +355,14 @@ public class FileMgmtFragment extends Fragment {
                             Logs.e(CLASSNAME, "run", fileDirInfo.getName() + ": " + fileDirInfo.isPinned());
                             mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
                                 @Override
+                                public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
+                                    showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                                }
+
+                                @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
+                                    showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
                                     itemInfo.setPinned(!itemInfo.isPinned());
                                     processPinUnpinFailed(itemInfo);
                                 }
@@ -367,6 +383,30 @@ public class FileMgmtFragment extends Fragment {
             }
         }
     };
+
+    private void showPinUnpinResultToast(final boolean isSuccess, final boolean isPinned) {
+        mUiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                int message;
+                if (isSuccess) {
+                    if (isPinned) {
+                        message = R.string.toast_pin_success;
+                    } else {
+                        message = R.string.toast_unpin_success;
+                    }
+                } else {
+                    if (isPinned) {
+                        message = R.string.toast_pin_failure;
+                    } else {
+                        message = R.string.toast_unpin_failure;
+                    }
+                }
+                Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
 
     /**
      * Defines callbacks for service binding, passed to bindService()
@@ -1102,7 +1142,7 @@ public class FileMgmtFragment extends Fragment {
                 if (v.getId() == R.id.pinView) {
                     // Pin/Unpin the selected item */
                     boolean isPinned = !itemInfo.isPinned();
-                    Logs.w(CLASSNAME, "onClick", "isPinned=" + isPinned);
+                    Logs.d(CLASSNAME, "onClick", "isPinned=" + isPinned);
                     boolean allowPinUnpin = pinUnpinItem(isPinned);
                     if (allowPinUnpin) {
                         pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));

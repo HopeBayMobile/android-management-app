@@ -212,4 +212,9 @@
 
     <string name="cancel_processing_msg">取消中，請稍候&#8230;</string>
 
+    <string name="toast_pin_success">釘選成功</string>
+    <string name="toast_pin_failure">釘選失敗</string>
+    <string name="toast_unpin_success">取消釘選成功</string>
+    <string name="toast_unpin_failure">取消釘選失敗</string>
+
 </resources>
