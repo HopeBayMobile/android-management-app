@@ -144,7 +144,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
                     externalLocationStatus == LocationStatus.LOCAL) {
                 return ItemStatus.STATUS_AVAILABLE;
             } else {
-                return ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
+                return ItemStatus.STATUS_UNAVAILABLE;
             }
         }
     }
