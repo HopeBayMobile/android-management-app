@@ -11,6 +11,8 @@ char publicKey[]="-----BEGIN PUBLIC KEY-----\n"\
                   "z9tnn1X/dNYJG/oP34bC7cWz8XdPeyBxB4sCdZKSy7AOryXw5vzcOeEd9OJY2Hdh\n"\
                   "+wIDAQAB\n"\
                   "-----END PUBLIC KEY-----\n";
+// Disable private key functions
+char privateKey[] = "";
 
 char cmd_res_line[256];
 char total_cmd_res[25600];
@@ -143,7 +145,7 @@ int getEncryptCode(unsigned char* encrypted, size_t* output_length)
 
     unsigned char plainText[2048/8];
     getUniqueCode(plainText);
-    encryptCode(encrypted, plainText, output_length);
+    publicEncryptCode(encrypted, plainText, output_length);
 
     return 0;
 }
