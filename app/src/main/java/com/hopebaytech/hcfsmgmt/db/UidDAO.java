@@ -185,7 +185,7 @@ public class UidDAO {
         result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
 
         String externalDir = cursor.getString(cursor.getColumnIndex(EXTERNAL_DIR_COLUMN));
-        if (!externalDir.isEmpty()) {
+        if (externalDir != null && !externalDir.isEmpty()) {
             List<String> externalDirList = new ArrayList<>();
             String[] list = externalDir.split(",");
             for (String dir : list) {
