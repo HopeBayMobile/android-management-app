@@ -825,6 +825,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "startUploadTeraData", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "startUploadTeraData", null);
             }
@@ -847,11 +848,12 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "stopUploadTeraData", "jObject=" + jObject);
             } else {
-                Logs.e(CLASSNAME, "startUploadTeraData", null);
+                Logs.e(CLASSNAME, "stopUploadTeraData", null);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "startUploadTeraData", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "stopUploadTeraData", Log.getStackTraceString(e));
         }
         return code;
     }
