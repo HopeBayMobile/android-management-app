@@ -759,6 +759,12 @@ public class HCFSMgmtUtils {
         return encryptedIMEI;
     }
 
+    public static String getDecryptedJsonString(String jsonString) {
+        String decryptedJsonString = new String(HCFSApiUtils.getDecryptedJsonString(jsonString));
+        Logs.d(CLASSNAME, "getDecryptedJsonString", "decryptedJsonString=" + decryptedJsonString);
+        return decryptedJsonString;
+    }
+
     public static String getDeviceImei(Context context) {
         String imei = "";
         TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
