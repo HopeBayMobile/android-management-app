@@ -265,6 +265,8 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_stopU
     HCFS_clear_sync_point(&json_res);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
+    return result;
+}
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setSwiftToken(
  		JNIEnv *jEnv, jobject jObject, jstring jUrl, jstring jToken) {

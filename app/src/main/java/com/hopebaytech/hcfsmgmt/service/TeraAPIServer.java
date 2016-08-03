@@ -8,13 +8,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
-import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
-
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSEventInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
