@@ -243,7 +243,7 @@ public class TeraFonnApiService extends Service {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, final int startId) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
         Logs.d(CLASSNAME, "onStartCommand", null);
         Thread pollingThread = new Thread(new Runnable() {
             @Override
@@ -255,18 +255,14 @@ public class TeraFonnApiService extends Service {
                         if (keyList.size() != 0 && mTrackAppStatusListener != null) {
                             for (String packageName : keyList) {
                                 AppStatus appStatus = mPackageNameMap.get(packageName);
-                                int reportStatus = getPackageStatus(packageName);
-                                if (appStatus.getStatus() != reportStatus) {
+                                int reportStatus = getDifferentStatus(packageName, appStatus.getStatus());
+                                if (reportStatus != -1)
                                     mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
-                                }
-                                appStatus.setStatus(reportStatus);
-                                mPackageNameMap.put(packageName, appStatus);
-//                                int reportStatus = getDifferentStatus(packageName, appStatus.getStatus());
-//                                if (reportStatus != -1)
-//                                    mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
                             }
                         }
+
 //                        mTrackAppStatusListener.onTrackFailed();
+
                         Thread.sleep(3000);
                     } catch (Exception e) {
                         mGetJWTandIMEIListener = null;

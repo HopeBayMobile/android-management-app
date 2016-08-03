@@ -208,7 +208,7 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
             if (locationStatus == LocationStatus.LOCAL) {
                 return ItemStatus.STATUS_AVAILABLE;
             } else {
-                return ItemStatus.STATUS_UNAVAILABLE;
+                return ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
             }
         }
     }

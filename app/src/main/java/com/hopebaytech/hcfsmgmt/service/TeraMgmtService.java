@@ -127,7 +127,7 @@ public class TeraMgmtService extends Service {
                         checkDeviceStatus();
                     } else if (action.equals(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE)) {
                         notifyInsufficientPinSpace();
-                    } else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
+                    }  else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
                         HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
                     }
 

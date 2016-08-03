@@ -13,6 +13,8 @@ public class AppStatus implements Parcelable {
 
     public static final int STATUS_AVAILABLE = ItemStatus.STATUS_AVAILABLE;
     public static final int STATUS_UNAVAILABLE = ItemStatus.STATUS_UNAVAILABLE;
+    public static final int STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD = ItemStatus.STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD;
+    public static final int STATUS_UNAVAILABLE_NONE_NETWORK = ItemStatus.STATUS_UNAVAILABLE_NONE_NETWORK;
 
     private String packageName;
     private boolean isPinned;
