@@ -21,13 +21,15 @@ public class UidDAO {
     public static final String SYSTEM_APP_COLUMN = "system_app";
     public static final String UID_COLUMN = "uid";
     public static final String PACKAGE_NAME_COLUMN = "package_name";
+    public static final String EXTERNAL_DIR_COLUMN = "external_dir";
     public static final String CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     PIN_STATUS_COLUMN + " INTEGER NOT NULL, " +
                     SYSTEM_APP_COLUMN + " INTEGER NOT NULL, " +
                     UID_COLUMN + " TEXT NOT NULL, " +
-                    PACKAGE_NAME_COLUMN + " TEXT NOT NULL)";
+                    PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
+                    EXTERNAL_DIR_COLUMN + " TEXT)";
 
     private Context context;
     private static UidDAO mUidDAO;
@@ -47,7 +49,6 @@ public class UidDAO {
         return mUidDAO;
     }
 
-
     public void close() {
         getDataBase().close();
     }
@@ -66,12 +67,27 @@ public class UidDAO {
         contentValues.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
         contentValues.put(UID_COLUMN, uidInfo.getUid());
         contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
+
+        List<String> externalDirList = uidInfo.getExternalDir();
+        if (externalDirList != null) {
+            StringBuilder sb = new StringBuilder();
+            String comma = ",";
+            for (int i = 0; i < externalDirList.size(); i++) {
+                sb.append(externalDirList.get(i));
+                if (i != externalDirList.size() - 1) {
+                    sb.append(comma);
+                }
+            }
+            contentValues.put(EXTERNAL_DIR_COLUMN, sb.toString());
+        }
+
         boolean isInserted = getDataBase().insert(TABLE_NAME, null, contentValues) > -1;
         String logMsg = "isPinned=" + uidInfo.isPinned() +
                 ", pinStatus=" + pinStatus +
                 ", isSystemApp=" + uidInfo.isSystemApp() +
                 ", uid=" + uidInfo.getUid() +
-                ", packageName=" + uidInfo.getPackageName();
+                ", packageName=" + uidInfo.getPackageName() +
+                ", externalDir=" + uidInfo.getExternalDir();
         if (isInserted) {
             Logs.d(CLASSNAME, "insert", logMsg);
             return true;
@@ -98,6 +114,17 @@ public class UidDAO {
                 contentValues.put(UID_COLUMN, uidInfo.getUid());
             } else if (column.equals(PACKAGE_NAME_COLUMN)) {
                 contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
+            } else if (column.equals(EXTERNAL_DIR_COLUMN)) {
+                List<String> externalDirList = uidInfo.getExternalDir();
+                StringBuilder sb = new StringBuilder();
+                String comma = ",";
+                for (int i = 0; i < externalDirList.size(); i++) {
+                    sb.append(externalDirList.get(i));
+                    if (i != externalDirList.size() - 1) {
+                        sb.append(comma);
+                    }
+                }
+                contentValues.put(EXTERNAL_DIR_COLUMN, sb.toString());
             }
             String where = PACKAGE_NAME_COLUMN + "='" + uidInfo.getPackageName() + "'";
             boolean isSuccess;
@@ -156,6 +183,16 @@ public class UidDAO {
         result.setSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
         result.setUid(cursor.getInt(cursor.getColumnIndex(UID_COLUMN)));
         result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
+
+        String externalDir = cursor.getString(cursor.getColumnIndex(EXTERNAL_DIR_COLUMN));
+        if (externalDir != null && !externalDir.isEmpty()) {
+            List<String> externalDirList = new ArrayList<>();
+            String[] list = externalDir.split(",");
+            for (String dir : list) {
+                externalDirList.add(dir);
+            }
+            result.setExternalDir(externalDirList);
+        }
         return result;
     }
 

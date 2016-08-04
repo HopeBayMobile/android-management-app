@@ -51,7 +51,6 @@
     
     <string name="notify_network_connected">偵測網路連線已恢復</string>
     <string name="notify_network_disconnected">偵測網路連線中斷，請檢查您的網路連線</string>
-    <string name="notify_upload_completed">本地端資料已上傳至雲端空間</string>
     <string name="notify_pin_app_failure">釘選應用程式失敗</string>
     <string name="notify_pin_file_dir_failure">釘選檔案失敗</string>
     <string name="notify_pin_image_failure">釘選圖片失敗</string>
@@ -63,7 +62,7 @@
     <string name="notify_unpin_video_failure">取消釘選視訊失敗</string>
     <string name="notify_unpin_audio_failure">取消釘選音樂失敗</string>
     <string name="notify_exceed_local_storage_used_ratio">本地空間使用率已達 %s%%</string>
-    <string name="notify_exceed_pin_used_ratio">釘選空間使用率已達 %s%%</string>
+    <string name="notify_exceed_pin_used_ratio">已釘選空間使用率已達 %s%%</string>
     <string name="notify_exceed_pin_max">釘選空間使用率不足</string>
     <string name="notify_pin_unpin_system_app_failed">系統應用程式釘選失敗</string>
 
@@ -77,7 +76,7 @@
     <string name="overview_space_usage_title">空間使用量</string>
     <string name="overview_used_space">已使用空間</string>
     <string name="overview_local_storage">快取空間</string>
-    <string name="overview_pinned_storage">釘選空間</string>
+    <string name="overview_pinned_storage">已釘選空間</string>
     <string name="overview_network_traffic_title">資料傳輸量</string>
     <string name="overview_data_transmission_today">本日資料傳輸</string>
     <string name="overview_data_to_be_uploaded">待上傳資料</string>
@@ -152,7 +151,7 @@
     <string name="settings_execute_title">下載完成後才執行</string>
     <string name="settings_switch_account_title">轉換帳戶</string>
     <string name="settings_switch_account_warning_msg">轉換帳戶時系統會先登出您目前使用的帳戶，要繼續?</string>
-    <string name="settings_local_storage_used_ratio">本地空間使用率達 %s 時進行通知</string>
+    <string name="settings_local_storage_used_ratio">本地空間使用率達 <b>%s</b> 時進行通知</string>
     <string name="settings_transfer_content">轉換內容</string>
     <string name="settings_transfer_content_desc_title">Transfer contents</string>
     <string name="settings_transfer_content_desc_hint">Transfer contents may transfer all of your device and cloud contents to another device. You will need to reset this device when all contents are uploaded onto Tera Cloud.</string>
@@ -196,6 +195,7 @@
     <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗導致無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗導致無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_register">Tera 註冊失敗導致無法存取雲端資料。</string>
+    <string name="auth_at_bootup_auth_get_device_info">無法從遠端伺服器取得裝置資訊。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
     <string name="yes">是</string>

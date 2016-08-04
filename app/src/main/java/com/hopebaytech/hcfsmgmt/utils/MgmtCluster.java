@@ -403,38 +403,38 @@ public class MgmtCluster {
             }
             return transferContentInfo;
         }
-
     }
 
     public static String getServerClientId() {
-        IHttpProxy httpProxyImpl = null;
-        String serverClientId = null;
-        try {
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(REGISTER_AUTH_API);
-            httpProxyImpl.connect();
-
-            int responseCode = httpProxyImpl.get();
-            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String jsonResponse = httpProxyImpl.getResponseContent();
-                Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
-                if (!jsonResponse.isEmpty()) {
-                    JSONObject jObj = new JSONObject(jsonResponse);
-                    JSONObject dataObj = jObj.getJSONObject("data");
-                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
-                    serverClientId = authObj.getString("client_id");
-                    Logs.d(CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
-                }
-            }
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
-        }
-        return serverClientId;
+//        IHttpProxy httpProxyImpl = null;
+//        String serverClientId = null;
+//        try {
+//            httpProxyImpl = HttpProxy.newInstance();
+//            httpProxyImpl.setUrl(REGISTER_AUTH_API);
+//            httpProxyImpl.connect();
+//
+//            int responseCode = httpProxyImpl.get();
+//            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
+//            if (responseCode == HttpsURLConnection.HTTP_OK) {
+//                String jsonResponse = httpProxyImpl.getResponseContent();
+//                Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
+//                if (!jsonResponse.isEmpty()) {
+//                    JSONObject jObj = new JSONObject(jsonResponse);
+//                    JSONObject dataObj = jObj.getJSONObject("data");
+//                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
+//                    serverClientId = authObj.getString("client_id");
+//                    Logs.d(CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
+//                }
+//            }
+//        } catch (Exception e) {
+//            Logs.e(CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
+//        } finally {
+//            if (httpProxyImpl != null) {
+//                httpProxyImpl.disconnect();
+//            }
+//        }
+//        return serverClientId;
+        return SERVER_CLIENT_ID;
     }
 
     public static abstract class IAuthParam {
@@ -590,21 +590,39 @@ public class MgmtCluster {
     private static RegisterResultInfo convertRegisterResult(RegisterResultInfo registerResultInfo,
                                                             String responseContent) throws JSONException {
         JSONObject jsonObj = new JSONObject(responseContent);
-        registerResultInfo.setBackendType(jsonObj.getString("backend_type")); // swifttoken
-        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
-        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
-        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
-//        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port")); ?
-        registerResultInfo.setBackendUrl(jsonObj.getString("domain").split("://")[1] + ":" + jsonObj.getInt("port"));
+
+        String token = null;
+        try {
+            token = jsonObj.getString("token");
+        } catch (JSONException e) {
+            Logs.w(CLASSNAME, "convertRegisterResult", Log.getStackTraceString(e));
+        }
+
+//        registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+        if (token != null) {
+            registerResultInfo.setBackendType(jsonObj.getString("backend_type") + "token"); // swifttoken
+            registerResultInfo.setStorageAccessToken(token);
+        } else {
+            registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+        }
+
+//        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
+//        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
+//        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
+//        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
+        registerResultInfo.setBackendUrl(jsonObj.getString("url"));
         registerResultInfo.setBucket(jsonObj.getString("bucket"));
 //        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
-        registerResultInfo.setProtocol(jsonObj.getString("domain").split("://")[0]);
-        registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
+//        registerResultInfo.setProtocol(jsonObj.getString("url").split(":")[0]);
         return registerResultInfo;
+
     }
 
     /**
      * Listener for fetching available JWT token from MGMT server
+     *
+     * @author Aaron
+     *         Created by Aaron on 2016/4/19.
      */
     public interface OnFetchJwtTokenListener {
 
@@ -616,6 +634,22 @@ public class MgmtCluster {
         /**
          * Callback function when fetch failed
          */
+        void onFetchFailed();
+
+    }
+
+    /**
+     * Listener for fetching available JWT token from MGMT server
+     *
+     * @author Aaron
+     *         Created by Aaron on 2016/7/11.
+     */
+    public interface FetchJwtTokenListener {
+
+        /** Callback function when fetch successful */
+        void onFetchSuccessful(String jwtToken);
+
+        /** Callback function when fetch failed */
         void onFetchFailed();
 
     }
@@ -788,12 +822,13 @@ public class MgmtCluster {
                     convertRegisterResult(registerResultInfo, responseContent);
 
                     Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
-                    Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
-                    Logs.d(CLASSNAME, "register", "user=" + registerResultInfo.getUser());
-                    Logs.d(CLASSNAME, "register", "password=" + registerResultInfo.getPassword());
                     Logs.d(CLASSNAME, "register", "backend_url=" + registerResultInfo.getBackendUrl());
-                    Logs.d(CLASSNAME, "register", "protocol=" + registerResultInfo.getProtocol());
+                    Logs.d(CLASSNAME, "register", "bucket=" + registerResultInfo.getBucket());
                     Logs.d(CLASSNAME, "register", "storageAccessToken=" + registerResultInfo.getStorageAccessToken());
+//                    Logs.d(CLASSNAME, "register", "password=" + registerResultInfo.getPassword());
+//                    Logs.d(CLASSNAME, "register", "protocol=" + registerResultInfo.getProtocol());
+//                    Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
+//                    Logs.d(CLASSNAME, "register", "user=" + registerResultInfo.getUser());
                 } else {
                     String responseContent = httpProxyImpl.getResponseContent();
                     try {
@@ -857,8 +892,11 @@ public class MgmtCluster {
         return isVerified;
     }
 
+    /**
+     * Get an available JWT token from MGMT server
+     */
     public static void getJwtToken(final Context context, final OnFetchJwtTokenListener listener) {
-        new Thread(new Runnable() {
+       new Thread(new Runnable() {
             @Override
             public void run() {
                 final String serverClientId = MgmtCluster.getServerClientId();

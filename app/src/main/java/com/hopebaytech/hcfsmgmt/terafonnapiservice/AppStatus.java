@@ -3,34 +3,35 @@ package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.hopebaytech.hcfsmgmt.info.ItemStatus;
+
 /**
- * Created by Aaron on 2016/3/21.
+ * @author Aaron, Vince
+ *         Created by Aaron on 2016/3/21.
  */
 public class AppStatus implements Parcelable {
 
-    public static final int STATUS_AVAILABLE  = 0;
-    public static final int STATUS_UNAVAILABLE = 1;
-    public static final int STATUS_UNAVAILABLE_WAIT_TO_DOWNLOAD  = 1;
-    public static final int STATUS_UNAVAILABLE_NONE_NETWORK  = 2;
+    public static final int STATUS_AVAILABLE = ItemStatus.STATUS_AVAILABLE;
+    public static final int STATUS_UNAVAILABLE = ItemStatus.STATUS_UNAVAILABLE;
 
     private String packageName;
-    private boolean isPin;
+    private boolean isPinned;
     private boolean onFetching;
     private int status;
 
     protected AppStatus() {
     }
 
-    protected AppStatus(String packageName, boolean isPin, boolean onFetching, int status) {
+    protected AppStatus(String packageName, boolean isPinned, boolean onFetching, int status) {
         this.packageName = packageName;
-        this.isPin = isPin;
+        this.isPinned = isPinned;
         this.onFetching = onFetching;
         this.status = status;
     }
 
     protected AppStatus(Parcel in) {
         packageName = in.readString();
-        isPin = (in.readInt() == 1);
+        isPinned = (in.readInt() == 1);
         onFetching = (in.readInt() == 1);
         status = in.readInt();
     }
@@ -55,7 +56,7 @@ public class AppStatus implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(packageName);
-        dest.writeInt(isPin ? 1 : 0);
+        dest.writeInt(isPinned ? 1 : 0);
         dest.writeInt(onFetching ? 1 : 0);
         dest.writeInt(status);
     }
@@ -77,11 +78,11 @@ public class AppStatus implements Parcelable {
     }
 
     public boolean isPin() {
-        return isPin;
+        return isPinned;
     }
 
     public void setPin(boolean pin) {
-        this.isPin = pin;
+        this.isPinned = pin;
     }
 
     public String getPackageName() {

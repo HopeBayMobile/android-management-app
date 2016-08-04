@@ -46,10 +46,22 @@ public class TransferContentUploadingFragment extends Fragment {
 
         super.onCreate(savedInstanceState);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
-        mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
-        mUploadCompletedReceiver.registerReceiver(filter);
+        int code = HCFSMgmtUtils.startUploadTeraData();
+        if (code == 1) {
+            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
+
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
+            ft.commit();
+        } else if (code == 0) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
+            mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
+            mUploadCompletedReceiver.registerReceiver(filter);
+        } else {
+            mErrorMsg.setText(R.string.settings_transfer_content_failed);
+        }
+
 
         // Only for test
 //        new Thread(new Runnable() {
@@ -82,37 +94,41 @@ public class TransferContentUploadingFragment extends Fragment {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProgressDialog();
-                final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
-                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
-                    @Override
-                    public void onFetchSuccessful(String jwtToken) {
-                        MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
-                        unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
-                            @Override
-                            public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
-                                Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
-                                dismissProgressDialog();
-                                getActivity().finish();
-                            }
+//                showProgressDialog();
 
-                            @Override
-                            public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
-                                Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
-                                dismissProgressDialog();
-                                getActivity().finish();
-                            }
-                        });
-                        unlockDeviceProxy.unlock();
-                    }
+                HCFSMgmtUtils.stopUploadTeraData();
+                getActivity().finish();
 
-                    @Override
-                    public void onFetchFailed() {
-                        Logs.e(CLASSNAME, "onFetchFailed", null);
-                        dismissProgressDialog();
-                        getActivity().finish();
-                    }
-                });
+//                final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
+//                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
+//                    @Override
+//                    public void onFetchSuccessful(String jwtToken) {
+//                        MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
+//                        unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
+//                            @Override
+//                            public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
+//                                Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
+//                                dismissProgressDialog();
+//                                getActivity().finish();
+//                            }
+//
+//                            @Override
+//                            public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
+//                                Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
+//                                dismissProgressDialog();
+//                                getActivity().finish();
+//                            }
+//                        });
+//                        unlockDeviceProxy.unlock();
+//                    }
+//
+//                    @Override
+//                    public void onFetchFailed() {
+//                        Logs.e(CLASSNAME, "onFetchFailed", null);
+//                        dismissProgressDialog();
+//                        getActivity().finish();
+//                    }
+//                });
             }
         });
 
@@ -125,6 +141,7 @@ public class TransferContentUploadingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mUploadCompletedReceiver.unregisterReceiver();
+        HCFSMgmtUtils.stopUploadTeraData();
     }
 
     public class UploadCompletedReceiver extends BroadcastReceiver {

@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.FileObserver;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
@@ -24,6 +26,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -119,7 +122,6 @@ public class ActivateWoCodeFragment extends Fragment {
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
         mUiHandler = new Handler();
-
     }
 
     @Nullable
@@ -184,8 +186,6 @@ public class ActivateWoCodeFragment extends Fragment {
                                             mWorkHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    // TODO Set arkflex token to hcfs
-                                                    // registerResultInfo.getStorageAccessToken();
                                                     final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
                                                     if (failed) {
                                                         HCFSConfig.resetHCFSConfig();
@@ -203,8 +203,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                         editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                         editor.apply();
 
-                                                        // Start sync to cloud
-                                                        HCFSConfig.startSyncToCloud();
+                                                        String url = registerResultInfo.getBackendUrl();
+                                                        String token = registerResultInfo.getStorageAccessToken();
+                                                        HCFSMgmtUtils.setSwiftToken(url, token);
                                                     }
 
                                                     mUiHandler.post(new Runnable() {
@@ -306,7 +307,6 @@ public class ActivateWoCodeFragment extends Fragment {
                             @Override
                             public void run() {
                                 String serverClientId = MgmtCluster.getServerClientId();
-//                                String serverClientId = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
                                 if (serverClientId != null) {
                                     GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
                                             mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
@@ -537,8 +537,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                 editor.apply();
 
-                                                // Start sync to cloud
-                                                HCFSConfig.startSyncToCloud();
+                                                String url = registerResultInfo.getBackendUrl();
+                                                String token = registerResultInfo.getStorageAccessToken();
+                                                HCFSMgmtUtils.setSwiftToken(url, token);
 
                                                 final String finalPhotoUrl = photoUrl;
                                                 mUiHandler.post(new Runnable() {
@@ -687,4 +688,5 @@ public class ActivateWoCodeFragment extends Fragment {
         }
 
     }
+
 }

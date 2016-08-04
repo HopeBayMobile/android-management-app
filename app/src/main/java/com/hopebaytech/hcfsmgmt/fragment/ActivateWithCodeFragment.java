@@ -148,8 +148,6 @@ public class ActivateWithCodeFragment extends Fragment {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            // TODO Set arkflex token to hcfs
-                                            // registerResultInfo.getStorageAccessToken();
                                             final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
                                             if (failed) {
                                                 HCFSConfig.resetHCFSConfig();
@@ -162,13 +160,15 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 accountDAO.insert(accountInfo);
                                                 accountDAO.close();
 
-                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                                                SharedPreferences sharedPreferences =
+                                                        PreferenceManager.getDefaultSharedPreferences(mContext);
                                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                                 editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                 editor.apply();
 
-                                                // Start sync to cloud
-                                                HCFSConfig.startSyncToCloud();
+                                                String url = registerResultInfo.getBackendUrl();
+                                                String token = registerResultInfo.getStorageAccessToken();
+                                                HCFSMgmtUtils.setSwiftToken(url, token);
                                             }
 
                                             mUiHandler.post(new Runnable() {
