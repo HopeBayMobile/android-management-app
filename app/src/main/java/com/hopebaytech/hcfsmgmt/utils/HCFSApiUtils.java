@@ -55,5 +55,4 @@ public class HCFSApiUtils {
      */
     public static native String stopUploadTeraData();
 
-    public static native String setSwiftToken(String url, String token);
 }

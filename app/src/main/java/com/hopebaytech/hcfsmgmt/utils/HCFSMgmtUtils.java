@@ -858,22 +858,4 @@ public class HCFSMgmtUtils {
         return code;
     }
 
-    public static boolean setSwiftToken(String url, String token) {
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.setSwiftToken(url, token);
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            String logMsg = "url=" + url + ", token=" + token + ", result=" + jsonResult;
-            if (isSuccess) {
-                Logs.i(CLASSNAME, "setSwiftToken", logMsg);
-            } else {
-                Logs.e(CLASSNAME, "setSwiftToken", logMsg);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "setSwiftToken", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
-
 }

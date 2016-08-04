@@ -265,16 +265,5 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_stopU
     HCFS_clear_sync_point(&json_res);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
-
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setSwiftToken(
- 		JNIEnv *jEnv, jobject jObject, jstring jUrl, jstring jToken) {
- 	const char *json_res;
-    const char *url = (*jEnv)->GetStringUTFChars(jEnv, jUrl, 0);
-    const char *token = (*jEnv)->GetStringUTFChars(jEnv, jToken, 0);
-    HCFS_set_swift_token(&json_res, url, token);
-    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-    free((char *)json_res);
-    free((char *)url);
-    free((char *)token);
     return result;
 }
