@@ -62,7 +62,6 @@ public class TransferContentUploadingFragment extends Fragment {
             mErrorMsg.setText(R.string.settings_transfer_content_failed);
         }
 
-
         // Only for test
 //        new Thread(new Runnable() {
 //            @Override

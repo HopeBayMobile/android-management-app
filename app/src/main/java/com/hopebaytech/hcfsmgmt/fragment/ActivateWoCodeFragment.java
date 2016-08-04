@@ -605,8 +605,9 @@ public class ActivateWoCodeFragment extends Fragment {
 
                         @Override
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
-                            Logs.e(CLASSNAME, "onConnectionFailed", "authResultInfo=" + authResultInfo.toString());
-                            signOut();
+                            Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
+                            
+			    signOut();
                             dismissProgressDialog();
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }

@@ -120,7 +120,7 @@ public class HCFSMgmtUtils {
 //        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 //        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
-        int requestCode = RequestCode.RESET_XFER;
+        int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
@@ -131,7 +131,7 @@ public class HCFSMgmtUtils {
         calendar.set(Calendar.SECOND, 59);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long intervalMillis = Interval.RESET_XFER;
+        long intervalMillis = Interval.UPDATE_EXTERNAL_APP_DIR;
         am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
     }
 

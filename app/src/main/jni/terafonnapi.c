@@ -20,10 +20,10 @@ extern void HCFS_get_sync_status(const char **json_res);
 extern void HCFS_get_property(const char **json_res, const char *key);
 extern void HCFS_set_property(const char **json_res, const char *key, const char *value);
 extern void HCFS_get_occupied_size(const char **json_res);
-extern void HCFS_set_notify_server(const char **json_res, const char *pathname);
-extern void HCFS_set_swift_token(const char **json_res, const char *url, const char *token);
 extern void HCFS_set_sync_point(const char **json_res);
 extern void HCFS_clear_sync_point(const char **json_res);
+extern void HCFS_set_notify_server(const char **json_res, const char *pathname);
+extern void HCFS_set_swift_token(const char **json_res, const char *url, const char *token);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {

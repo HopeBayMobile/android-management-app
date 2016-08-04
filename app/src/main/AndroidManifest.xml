@@ -85,22 +85,6 @@
             android:process=":server" />
 
         <service
-            android:name="com.hopebaytech.hcfsmgmt.service.TeraAPIServer"
-            android:process=":server" />
-
-        <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
-
-        <service
-            android:name="com.hopebaytech.hcfsmgmt.service.TeraAPIServer"
-            android:process=":server" />
-
-        <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
-
-        <service
-            android:name="com.hopebaytech.hcfsmgmt.service.TeraAPIServer"
-            android:process=":server" />
-
-        <service
             android:name="com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService"
             android:enabled="true"
             android:exported="true"
