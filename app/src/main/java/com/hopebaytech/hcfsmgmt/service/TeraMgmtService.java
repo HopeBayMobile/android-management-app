@@ -86,7 +86,7 @@ public class TeraMgmtService extends Service {
     private Context mContext;
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
-    private ServiceFileDirDAO mServiceFileDirDAO;
+//    private ServiceFileDirDAO mServiceFileDirDAO;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -104,7 +104,7 @@ public class TeraMgmtService extends Service {
     public void onCreate() {
         super.onCreate();
         mCacheExecutor = Executors.newCachedThreadPool();
-        mServiceFileDirDAO = ServiceFileDirDAO.getInstance(this);
+//        mServiceFileDirDAO = ServiceFileDirDAO.getInstance(this);
         mUidDAO = UidDAO.getInstance(this);
         mDataTypeDAO = DataTypeDAO.getInstance(this);
     }
@@ -450,7 +450,7 @@ public class TeraMgmtService extends Service {
         ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
         serviceFileDirInfo.setPinned(info.isPinned());
         serviceFileDirInfo.setFilePath(info.getFilePath());
-        mServiceFileDirDAO.insert(serviceFileDirInfo);
+//        mServiceFileDirDAO.insert(serviceFileDirInfo);
         String filePath = info.getFilePath();
         Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory",
                 "filePath=" + filePath + ", threadName=" + Thread.currentThread().getName());
@@ -481,7 +481,7 @@ public class TeraMgmtService extends Service {
                 listener.onPinUnpinSuccessful(info);
             }
         }
-        mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
+//        mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
     }
 
     private void doActionAccordingToDeviceStatus(final String jwtToken) {
