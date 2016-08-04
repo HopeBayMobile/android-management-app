@@ -1,88 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_margin="@dimen/M4"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/app_icon"
-            android:layout_width="@dimen/icon_image_width"
-            android:layout_height="@dimen/icon_image_width"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:src="@drawable/icon_tera_app_default" />
-
-        <TextView
-            android:id="@+id/app_name"
-            style="@style/F3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toEndOf="@+id/app_icon"
-            android:layout_toStartOf="@+id/app_pin_icon"
-            tools:text="TeraFonn" />
-
-        <ImageView
-            android:id="@+id/app_pin_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:scaleType="centerInside"
-            tools:src="@drawable/icon_btn_app_pin" />
-
-    </RelativeLayout>
-
-    <View
-        style="@style/Divider"
-        android:layout_marginEnd="@dimen/M2"
-        android:layout_marginStart="@dimen/M2" />
+    android:layout_height="match_parent">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/M2"
-        android:layout_marginStart="@dimen/M2"
-        android:layout_marginTop="@dimen/M1"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/app_version"
-            style="@style/F8"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/M2"
-            tools:text="版本: 1.0.1" />
+            android:layout_margin="@dimen/M4">
 
-        <TextView
-            android:id="@+id/app_size"
-            style="@style/F8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/M2"
-            tools:text="大小: 13MB" />
+            <ImageView
+                android:id="@+id/app_icon"
+                android:layout_width="@dimen/icon_image_width"
+                android:layout_height="@dimen/icon_image_width"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/icon_tera_app_default" />
 
-        <TextView
-            android:id="@+id/app_pkg_name"
-            style="@style/F8"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/M2"
-            tools:text="套件名稱: com.hopebaytech.hcfsmgmt" />
+            <TextView
+                android:id="@+id/app_name"
+                style="@style/F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginStart="10dp"
+                android:layout_toEndOf="@+id/app_icon"
+                android:layout_toStartOf="@+id/app_pin_icon"
+                tools:text="TeraFonn" />
 
-        <TextView
-            android:id="@+id/app_local_percentage"
-            style="@style/F8"
-            android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/app_pin_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:scaleType="centerInside"
+                tools:src="@drawable/icon_btn_app_pin" />
+
+        </RelativeLayout>
+
+        <View
+            style="@style/Divider"
+            android:layout_marginEnd="@dimen/M2"
+            android:layout_marginStart="@dimen/M2" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="本地資料比例: 80%" />
+            android:layout_marginEnd="@dimen/M2"
+            android:layout_marginStart="@dimen/M2"
+            android:layout_marginTop="@dimen/M1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/app_version"
+                style="@style/F8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/M2"
+                tools:text="版本: 1.0.1" />
+
+            <TextView
+                android:id="@+id/app_size"
+                style="@style/F8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/M2"
+                tools:text="大小: 13MB" />
+
+            <TextView
+                android:id="@+id/app_pkg_name"
+                style="@style/F8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/M2"
+                tools:text="套件名稱: com.hopebaytech.hcfsmgmt" />
+
+            <TextView
+                android:id="@+id/app_local_percentage"
+                style="@style/F8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="本地資料比例: 80%" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+    <ProgressBar
+        android:id="@+id/progress_circle"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+</RelativeLayout>

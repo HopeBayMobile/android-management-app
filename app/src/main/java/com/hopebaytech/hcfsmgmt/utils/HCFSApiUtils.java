@@ -54,10 +54,5 @@ public class HCFSApiUtils {
      * <li>Negative error code in case that error occurs</li>
      */
     public static native String stopUploadTeraData();
-<<<<<<< HEAD
-=======
-   
-    public static native String setSwiftToken(String url, String token);
->>>>>>> 2cb1a8e840a31389e7b5cd7f3a043bd2d7eb9b8f
 
 }
