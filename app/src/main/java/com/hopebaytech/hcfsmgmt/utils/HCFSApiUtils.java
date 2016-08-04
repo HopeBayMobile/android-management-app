@@ -40,6 +40,7 @@ public class HCFSApiUtils {
     public static native byte[] getDecryptedJsonString(String jsonString);
 
     public static native String setSwiftToken(String url, String token);
+
     /***
      * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
      * <li>0 when setting sync point completed.</li>
@@ -54,5 +55,4 @@ public class HCFSApiUtils {
      */
     public static native String stopUploadTeraData();
 
-    public static native String setSwiftToken(String url, String token);
 }

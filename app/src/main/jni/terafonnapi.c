@@ -24,8 +24,6 @@ extern void HCFS_set_notify_server(const char **json_res, const char *pathname);
 extern void HCFS_set_swift_token(const char **json_res, const char *url, const char *token);
 extern void HCFS_set_sync_point(const char **json_res);
 extern void HCFS_clear_sync_point(const char **json_res);
-extern void HCFS_set_notify_server(const char **json_res, const char *pathname);
-extern void HCFS_set_swift_token(const char **json_res, const char *url, const char *token);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
@@ -265,18 +263,5 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_stopU
     HCFS_clear_sync_point(&json_res);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
-    return result;
-}
-
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setSwiftToken(
- 		JNIEnv *jEnv, jobject jObject, jstring jUrl, jstring jToken) {
- 	const char *json_res;
-    const char *url = (*jEnv)->GetStringUTFChars(jEnv, jUrl, 0);
-    const char *token = (*jEnv)->GetStringUTFChars(jEnv, jToken, 0);
-    HCFS_set_swift_token(&json_res, url, token);
-    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-    free((char *)json_res);
-    free((char *)url);
-    free((char *)token);
     return result;
 }
