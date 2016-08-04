@@ -329,15 +329,20 @@ public class FileMgmtFragment extends Fragment {
                             UidInfo uidInfo = new UidInfo(appInfo);
                             uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
+                            final int finalI = i;
                             mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
                                 @Override
                                 public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
-                                    showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                                    if (finalI == mWaitToExecuteSparseArr.size() - 1) {
+                                        showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                                    }
                                 }
 
                                 @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
-                                    showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+                                    if (finalI == mWaitToExecuteSparseArr.size() - 1) {
+                                        showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+                                    }
 
                                     itemInfo.setPinned(!itemInfo.isPinned());
 
