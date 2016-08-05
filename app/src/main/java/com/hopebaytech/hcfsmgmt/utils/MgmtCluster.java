@@ -8,10 +8,15 @@ import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
+import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,6 +55,8 @@ public class MgmtCluster {
     public static final String KEY_HCFS_VERSION = "HCFS_version";
 
     public static final String GOOGLE_AUTH_BACKEND = "google-oauth2";
+
+    public static final String SERVER_CLIENT_ID = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
 
     /**
      * Unknown error.
@@ -110,50 +117,6 @@ public class MgmtCluster {
     public static final int GOOGLE_AUTH = 0;
     public static final int USER_AUTH = 1;
 
-    public static AuthResultInfo auth(IAuthParam authParam) {
-
-        IHttpProxy httpProxyImpl = null;
-        AuthResultInfo authResultInfo = new AuthResultInfo();
-        try {
-            String url;
-            ContentValues data = new ContentValues();
-            if (authParam instanceof GoogleAuthParam) {
-                url = SOCIAL_AUTH_API;
-                data.put(KEY_AUTH_CODE, ((GoogleAuthParam) authParam).authCode);
-                data.put(KEY_BACKEND, ((GoogleAuthParam) authParam).authBackend);
-            } else {
-                url = USER_AUTH_API;
-                data.put(KEY_USERNAME, ((UserAuthParam) authParam).username);
-                data.put(KEY_PASSWORD, ((UserAuthParam) authParam).password);
-            }
-
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(url);
-            httpProxyImpl.setDoOutput(true);
-            httpProxyImpl.connect();
-
-            int responseCode = httpProxyImpl.post(data);
-            authResultInfo.setResponseCode(responseCode);
-            String responseContent = httpProxyImpl.getResponseContent();
-            Logs.d(CLASSNAME, "auth", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                JSONObject jsonObj = new JSONObject(responseContent);
-                String jwtToken = jsonObj.getString("token");
-                Logs.d(CLASSNAME, "auth", "jwtToken=" + jwtToken);
-                authResultInfo.setToken(jwtToken);
-            } else {
-                authResultInfo.setMessage(responseContent);
-            }
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "auth", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
-        }
-        return authResultInfo;
-    }
-
     /**
      * @param jwtToken          the token to access mgmt cluster
      * @param newServerAuthCode the auth code of google account to be switched
@@ -199,38 +162,280 @@ public class MgmtCluster {
         return registerResultInfo;
     }
 
-    public static String getServerClientId() {
+    public static class GetDeviceInfoProxy {
 
-        IHttpProxy httpProxyImpl = null;
-        String serverClientId = null;
-        try {
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(REGISTER_AUTH_API);
-            httpProxyImpl.connect();
+        private String jwtToken;
+        private String imei;
 
-            int responseCode = httpProxyImpl.get();
-            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String jsonResponse = httpProxyImpl.getResponseContent();
-                Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
-                if (!jsonResponse.isEmpty()) {
-                    JSONObject jObj = new JSONObject(jsonResponse);
-                    JSONObject dataObj = jObj.getJSONObject("data");
-                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
-                    serverClientId = authObj.getString("client_id");
-                    Logs.d(CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
+        private OnGetDeviceInfoListener listener;
+
+        public GetDeviceInfoProxy(String jwtToken, String imei) {
+            this.jwtToken = jwtToken;
+            this.imei = imei;
+        }
+
+        public void get() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final GetDeviceInfo getDeviceInfo = getDeviceInfo(jwtToken, imei);
+                    if (getDeviceInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetDeviceInfoSuccessful(getDeviceInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetDeviceInfoFailed(getDeviceInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnGetDeviceInfoListener(OnGetDeviceInfoListener listener) {
+            this.listener = listener;
+        }
+
+        public interface OnGetDeviceInfoListener {
+
+            void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo);
+
+            void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo);
+
+        }
+
+        private GetDeviceInfo getDeviceInfo(String jwtToken, String imei) {
+            IHttpProxy httpProxyImpl = null;
+            GetDeviceInfo getDeviceInfo = new GetDeviceInfo();
+            try {
+                String url = DEVICE_API + imei + "/service/";
+
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                int responseCode = httpProxyImpl.get();
+                String responseContent = httpProxyImpl.getResponseContent();
+                getDeviceInfo.setResponseCode(responseCode);
+                getDeviceInfo.setMessage(responseContent);
+                Logs.d(CLASSNAME, "getDeviceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "getDeviceInfo", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
                 }
             }
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
+            return getDeviceInfo;
         }
-        return serverClientId;
+
     }
 
+    public static class UnlockDeviceProxy {
+
+        private String jwtToken;
+        private String imei;
+
+        private OnUnlockDeviceListener listener;
+
+        public UnlockDeviceProxy(String jwtToken, String imei) {
+            this.jwtToken = jwtToken;
+            this.imei = imei;
+        }
+
+        public void unlock() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final UnlockDeviceInfo unlockDeviceInfo = unlockDevice(jwtToken, imei);
+                    if (unlockDeviceInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onUnlockDeviceSuccessful(unlockDeviceInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onUnlockDeviceFailed(unlockDeviceInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnUnlockDeviceListener(OnUnlockDeviceListener listener) {
+            this.listener = listener;
+        }
+
+        public interface OnUnlockDeviceListener {
+
+            void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo);
+
+            void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo);
+
+        }
+
+        private UnlockDeviceInfo unlockDevice(String jwtToken, String imei) {
+            IHttpProxy httpProxyImpl = null;
+            UnlockDeviceInfo unlockDeviceInfo = new UnlockDeviceInfo();
+            try {
+                String url = DEVICE_API + imei + "/unlock_device/";
+
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+                httpProxyImpl.setDoOutput(true);
+
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                ContentValues data = new ContentValues();
+                int responseCode = httpProxyImpl.post(data);
+                String responseContent = httpProxyImpl.getResponseContent();
+                unlockDeviceInfo.setResponseCode(responseCode);
+                unlockDeviceInfo.setMessage(responseContent);
+                Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+            return unlockDeviceInfo;
+        }
+
+    }
+
+    public static class TransferContentProxy {
+
+        private String jwtToken;
+        private String imei;
+
+        private OnTransferContentListener listener;
+
+        public TransferContentProxy(String jwtToken, String imei) {
+            this.jwtToken = jwtToken;
+            this.imei = imei;
+        }
+
+        public void transfer() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final TransferContentInfo transferContentInfo = transferContents(jwtToken, imei);
+                    if (transferContentInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onTransferSuccessful(transferContentInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onTransferFailed(transferContentInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnTransferContentListener(OnTransferContentListener listener) {
+            this.listener = listener;
+        }
+
+        public interface OnTransferContentListener {
+
+            void onTransferSuccessful(TransferContentInfo transferContentInfo);
+
+            void onTransferFailed(TransferContentInfo transferContentInfo);
+
+        }
+
+        public static TransferContentInfo transferContents(String jwtToken, String imei) {
+            IHttpProxy httpProxyImpl = null;
+            TransferContentInfo transferContentInfo = new TransferContentInfo();
+            try {
+                String url = DEVICE_API + imei + "/tx_ready/";
+
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+                httpProxyImpl.setDoOutput(true);
+
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                ContentValues data = new ContentValues();
+                int responseCode = httpProxyImpl.post(data);
+                String responseContent = httpProxyImpl.getResponseContent();
+                transferContentInfo.setResponseCode(responseCode);
+                transferContentInfo.setMessage(responseContent);
+                Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+            return transferContentInfo;
+        }
+    }
+
+    public static String getServerClientId() {
+//        IHttpProxy httpProxyImpl = null;
+//        String serverClientId = null;
+//        try {
+//            httpProxyImpl = HttpProxy.newInstance();
+//            httpProxyImpl.setUrl(REGISTER_AUTH_API);
+//            httpProxyImpl.connect();
+//
+//            int responseCode = httpProxyImpl.get();
+//            Logs.d(CLASSNAME, "getServerClientId", "responseCode=" + responseCode);
+//            if (responseCode == HttpsURLConnection.HTTP_OK) {
+//                String jsonResponse = httpProxyImpl.getResponseContent();
+//                Logs.d(CLASSNAME, "getServerClientId", "jsonResponse=" + jsonResponse);
+//                if (!jsonResponse.isEmpty()) {
+//                    JSONObject jObj = new JSONObject(jsonResponse);
+//                    JSONObject dataObj = jObj.getJSONObject("data");
+//                    JSONObject authObj = dataObj.getJSONObject("google-oauth2");
+//                    serverClientId = authObj.getString("client_id");
+//                    Logs.d(CLASSNAME, "getServerClientId", "server_client_id=" + serverClientId);
+//                }
+//            }
+//        } catch (Exception e) {
+//            Logs.e(CLASSNAME, "getServerClientId", Log.getStackTraceString(e));
+//        } finally {
+//            if (httpProxyImpl != null) {
+//                httpProxyImpl.disconnect();
+//            }
+//        }
+//        return serverClientId;
+        return SERVER_CLIENT_ID;
+    }
 
     public static abstract class IAuthParam {
 
@@ -385,68 +590,52 @@ public class MgmtCluster {
     private static RegisterResultInfo convertRegisterResult(RegisterResultInfo registerResultInfo,
                                                             String responseContent) throws JSONException {
         JSONObject jsonObj = new JSONObject(responseContent);
-        registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
-        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]);
-        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]);
-        registerResultInfo.setPassword(jsonObj.getString("password"));
-        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
-        registerResultInfo.setBucket(jsonObj.getString("bucket"));
-        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
-        registerResultInfo.setStorageAccessToken(jsonObj.getString("token"));
-        return registerResultInfo;
-    }
 
-    public static RegisterResultInfo register(IAuthParam authParam, String jwtToken) {
-        RegisterResultInfo registerResultInfo = new RegisterResultInfo();
-        IHttpProxy httpProxyImpl = null;
+        String token = null;
         try {
-            httpProxyImpl = HttpProxy.newInstance();
-            httpProxyImpl.setUrl(DEVICE_API);
-            httpProxyImpl.setDoOutput(true);
-            ContentValues header = new ContentValues();
-            header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
-            httpProxyImpl.setHeaders(header);
-            httpProxyImpl.connect();
-
-            int responseCode = httpProxyImpl.post(authParam.createAuthParam());
-            registerResultInfo.setResponseCode(responseCode);
-            if (responseCode == HttpsURLConnection.HTTP_OK) {
-                String responseContent = httpProxyImpl.getResponseContent();
-                Logs.d(CLASSNAME, "register", "responseContent=" + responseContent);
-
-                convertRegisterResult(registerResultInfo, responseContent);
-
-                Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
-                Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
-                Logs.d(CLASSNAME, "register", "user=" + registerResultInfo.getUser());
-                Logs.d(CLASSNAME, "register", "password=" + registerResultInfo.getPassword());
-                Logs.d(CLASSNAME, "register", "backend_url=" + registerResultInfo.getBackendUrl());
-                Logs.d(CLASSNAME, "register", "protocol=" + registerResultInfo.getProtocol());
-                Logs.d(CLASSNAME, "register", "storageAccessToken=" + registerResultInfo.getStorageAccessToken());
-            } else {
-                String responseContent = httpProxyImpl.getResponseContent();
-                try {
-                    JSONObject jsonObj = new JSONObject(responseContent);
-                    if (responseCode != HttpsURLConnection.HTTP_INTERNAL_ERROR) {
-                        String errorCode = jsonObj.getString("error_code");
-                        registerResultInfo.setErrorCode(errorCode);
-                    }
-                    String message = jsonObj.getString("detail");
-                    registerResultInfo.setMessage(message);
-                } catch (JSONException e) {
-                    Logs.e(CLASSNAME, "register", Log.getStackTraceString(e));
-                }
-            }
-        } catch (Exception e) {
-            registerResultInfo.setMessage(Log.getStackTraceString(e));
-            Logs.e(CLASSNAME, "register", Log.getStackTraceString(e));
-        } finally {
-            if (httpProxyImpl != null) {
-                httpProxyImpl.disconnect();
-            }
+            token = jsonObj.getString("token");
+        } catch (JSONException e) {
+            Logs.w(CLASSNAME, "convertRegisterResult", Log.getStackTraceString(e));
         }
 
+//        registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+        if (token != null) {
+            registerResultInfo.setBackendType(jsonObj.getString("backend_type") + "token"); // swifttoken
+            registerResultInfo.setStorageAccessToken(token);
+        } else {
+            registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
+        }
+
+//        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
+//        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
+//        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
+//        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
+        registerResultInfo.setBackendUrl(jsonObj.getString("url"));
+        registerResultInfo.setBucket(jsonObj.getString("bucket"));
+//        registerResultInfo.setProtocol(jsonObj.getBoolean("TLS") ? "https" : "http");
+//        registerResultInfo.setProtocol(jsonObj.getString("url").split(":")[0]);
         return registerResultInfo;
+
+    }
+
+    /**
+     * Listener for fetching available JWT token from MGMT server
+     *
+     * @author Aaron
+     *         Created by Aaron on 2016/4/19.
+     */
+    public interface OnFetchJwtTokenListener {
+
+        /**
+         * Callback function when fetch successful
+         */
+        void onFetchSuccessful(String jwtToken);
+
+        /**
+         * Callback function when fetch failed
+         */
+        void onFetchFailed();
+
     }
 
     /**
@@ -501,7 +690,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final AuthResultInfo authResultInfo = MgmtCluster.auth(authParam);
+                    final AuthResultInfo authResultInfo = auth(authParam);
                     if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
                             @Override
@@ -525,6 +714,50 @@ public class MgmtCluster {
             this.authListener = listener;
         }
 
+        public static AuthResultInfo auth(IAuthParam authParam) {
+
+            IHttpProxy httpProxyImpl = null;
+            AuthResultInfo authResultInfo = new AuthResultInfo();
+            try {
+                String url;
+                ContentValues data = new ContentValues();
+                if (authParam instanceof GoogleAuthParam) {
+                    url = SOCIAL_AUTH_API;
+                    data.put(KEY_AUTH_CODE, ((GoogleAuthParam) authParam).authCode);
+                    data.put(KEY_BACKEND, ((GoogleAuthParam) authParam).authBackend);
+                } else {
+                    url = USER_AUTH_API;
+                    data.put(KEY_USERNAME, ((UserAuthParam) authParam).username);
+                    data.put(KEY_PASSWORD, ((UserAuthParam) authParam).password);
+                }
+
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+                httpProxyImpl.setDoOutput(true);
+                httpProxyImpl.connect();
+
+                int responseCode = httpProxyImpl.post(data);
+                authResultInfo.setResponseCode(responseCode);
+                String responseContent = httpProxyImpl.getResponseContent();
+                Logs.d(CLASSNAME, "auth", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    JSONObject jsonObj = new JSONObject(responseContent);
+                    String jwtToken = jsonObj.getString("token");
+                    Logs.d(CLASSNAME, "auth", "jwtToken=" + jwtToken);
+                    authResultInfo.setToken(jwtToken);
+                } else {
+                    authResultInfo.setMessage(responseContent);
+                }
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "auth", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+            return authResultInfo;
+        }
+
     }
 
     public static class RegisterProxy {
@@ -543,7 +776,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final RegisterResultInfo registerResultInfo = MgmtCluster.register(authParam, jwtToken);
+                    final RegisterResultInfo registerResultInfo = register(authParam, jwtToken);
                     Logs.d(CLASSNAME, "register", "authResultInfo=" + registerResultInfo);
                     if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
@@ -566,6 +799,60 @@ public class MgmtCluster {
 
         public void setOnRegisterListener(RegisterListener listener) {
             this.registerListener = listener;
+        }
+
+        public static RegisterResultInfo register(IAuthParam authParam, String jwtToken) {
+            RegisterResultInfo registerResultInfo = new RegisterResultInfo();
+            IHttpProxy httpProxyImpl = null;
+            try {
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(DEVICE_API);
+                httpProxyImpl.setDoOutput(true);
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                int responseCode = httpProxyImpl.post(authParam.createAuthParam());
+                registerResultInfo.setResponseCode(responseCode);
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    String responseContent = httpProxyImpl.getResponseContent();
+                    Logs.d(CLASSNAME, "register", "responseContent=" + responseContent);
+
+                    convertRegisterResult(registerResultInfo, responseContent);
+
+                    Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
+                    Logs.d(CLASSNAME, "register", "backend_url=" + registerResultInfo.getBackendUrl());
+                    Logs.d(CLASSNAME, "register", "bucket=" + registerResultInfo.getBucket());
+                    Logs.d(CLASSNAME, "register", "storageAccessToken=" + registerResultInfo.getStorageAccessToken());
+//                    Logs.d(CLASSNAME, "register", "password=" + registerResultInfo.getPassword());
+//                    Logs.d(CLASSNAME, "register", "protocol=" + registerResultInfo.getProtocol());
+//                    Logs.d(CLASSNAME, "register", "account=" + registerResultInfo.getAccount());
+//                    Logs.d(CLASSNAME, "register", "user=" + registerResultInfo.getUser());
+                } else {
+                    String responseContent = httpProxyImpl.getResponseContent();
+                    try {
+                        JSONObject jsonObj = new JSONObject(responseContent);
+                        if (responseCode != HttpsURLConnection.HTTP_INTERNAL_ERROR) {
+                            String errorCode = jsonObj.getString("error_code");
+                            registerResultInfo.setErrorCode(errorCode);
+                        }
+                        String message = jsonObj.getString("detail");
+                        registerResultInfo.setMessage(message);
+                    } catch (JSONException e) {
+                        Logs.e(CLASSNAME, "register", Log.getStackTraceString(e));
+                    }
+                }
+            } catch (Exception e) {
+                registerResultInfo.setMessage(Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "register", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+
+            return registerResultInfo;
         }
 
     }
@@ -605,47 +892,51 @@ public class MgmtCluster {
         return isVerified;
     }
 
-    public static void getJwtToken(final Context context, final FetchJwtTokenListener listener) {
-        new Thread(new Runnable() {
+    /**
+     * Get an available JWT token from MGMT server
+     */
+    public static void getJwtToken(final Context context, final OnFetchJwtTokenListener listener) {
+       new Thread(new Runnable() {
             @Override
             public void run() {
                 final String serverClientId = MgmtCluster.getServerClientId();
-                GoogleAuthProxy googleAuthProxy = new GoogleAuthProxy(context, serverClientId);
-                googleAuthProxy.setOnAuthListener(new GoogleAuthProxy.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(GoogleSignInResult result) {
-                        String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-
-                        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                        authParam.setAuthCode(serverAuthCode);
-                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(context)));
-                        authParam.setVendor(Build.BRAND);
-                        authParam.setModel(Build.MODEL);
-                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                        authParam.setHcfsVersion("1.0.1");
-
-                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.AuthListener() {
+                GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(context, serverClientId,
+                        new GoogleSilentAuthProxy.OnAuthListener() {
                             @Override
-                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                                String jwtToken = authResultInfo.getToken();
-                                listener.onFetchSuccessful(jwtToken);
+                            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                                String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+
+                                final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+                                authParam.setAuthCode(serverAuthCode);
+                                authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+                                authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(context)));
+                                authParam.setVendor(Build.BRAND);
+                                authParam.setModel(Build.MODEL);
+                                authParam.setAndroidVersion(Build.VERSION.RELEASE);
+                                authParam.setHcfsVersion(context.getString(R.string.tera_version));
+
+                                MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                                authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                                    @Override
+                                    public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                                        String jwtToken = authResultInfo.getToken();
+                                        listener.onFetchSuccessful(jwtToken);
+                                    }
+
+                                    @Override
+                                    public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                        listener.onFetchFailed();
+                                    }
+                                });
+                                authProxy.auth();
                             }
 
                             @Override
-                            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                            public void onAuthFailed() {
                                 listener.onFetchFailed();
                             }
-                        });
-                        authProxy.auth();
-                    }
 
-                    @Override
-                    public void onAuthFailed() {
-                        listener.onFetchFailed();
-                    }
-                });
+                        });
                 googleAuthProxy.auth();
             }
         }).start();

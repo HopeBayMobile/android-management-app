@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentResolver;
@@ -7,10 +8,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
@@ -25,6 +28,7 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -34,14 +38,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class HCFSMgmtUtils {
 
     public static final String TAG = "HopeBay";
     public static final String CLASSNAME = "HCFSMgmtUtils";
-    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
+//    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
     public static final String NOTIFY_INSUFFICIENT_PIN_PACE_RATIO = "80";
 
@@ -51,54 +59,16 @@ public class HCFSMgmtUtils {
     public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 1;
     public static final int NOTIFY_ID_ONGOING = 2;
     public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 3;
-    public static final int NOTIFY_ID_FAILED_SILENT_SIGN_IN = 4;
+    public static final int NOTIFY_ID_CHECK_DEVICE_STATUS = 4;
     public static final int NOTIFY_ID_INSUFFICIENT_PIN_SPACE = 5;
-
-    public static final String DATA_STATUS_CLOUD = "cloud";
-    public static final String DATA_STATUS_HYBRID = "hybrid";
-    public static final String DATA_STATUS_LOCAL = "local";
-
-    public static final String INTENT_KEY_OPERATION = "intent_key_action";
-    public static final String INTENT_KEY_PIN_FILE_DIR_FILEAPTH = "intent_key_pin_firdir_filepath";
-    public static final String INTENT_KEY_PIN_FILE_DIR_PIN_STATUS = "intent_key_pin_firdir_pin_status";
-    public static final String INTENT_KEY_PIN_APP_DATA_DIR = "intent_key_pin_app_data_dir";
-    public static final String INTENT_KEY_PIN_APP_SOURCE_DIR = "intent_key_pin_app_source_dir";
-    public static final String INTENT_KEY_PIN_APP_EXTERNAL_DIR = "intent_key_pin_app_external_dir";
-    public static final String INTENT_KEY_PIN_APP_PIN_STATUS = "intent_key_pin_app_pin_status";
-    public static final String INTENT_KEY_PIN_APP_NAME = "intent_key_pin_app_name";
-    public static final String INTENT_KEY_PIN_PACKAGE_NAME = "intent_key_pin_package_name";
-    public static final String INTENT_KEY_SERVER_CLIENT_ID = "server_client_id";
-    public static final String INTENT_KEY_UID = "intent_key_uid";
-    public static final String INTENT_KEY_PACKAGE_NAME = "intent_key_package_name";
-    public static final String INTENT_KEY_ONGOING = "intent_key_ongoing";
-    public static final String INTENT_KEY_SILENT_SIGN_IN = "intent_key_silent_sign_in";
-
-    public static final String INTENT_VALUE_NONE = "intent_value_none";
-    public static final String INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED = "intent_value_notify_upload_complete";
-    public static final String INTENT_VALUE_PIN_DATA_TYPE_FILE = "intent_value_pin_data_type_file";
-    public static final String INTENT_VALUE_PIN_APP = "intent_value_pin_app";
-    public static final String INTENT_VALUE_PIN_FILE_DIRECTORY = "intent_value_pin_file_directory";
-    public static final String INTENT_VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP = "intent_value_add_uid_and_pin_system_app_when_boot_up";
-    public static final String INTENT_VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP = "intent_value_add_uid_to_database_and_unpin_user_app";
-    public static final String INTENT_VALUE_REMOVE_UID_FROM_DATABASE = "intent_value_remove_uid_from_database";
-    public static final String INTENT_VALUE_RESET_XFER = "intent_value_reset_xfer";
-    public static final String INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO = "intent_value_notify_local_storage_used_ratio";
-    public static final String INTENT_VALUE_ONGOING_NOTIFICATION = "intent_value_ongoing_notification";
-    public static final String INTENT_VALUE_PIN_UNPIN_UDPATE_APP = "intent_value_pin_unpin_update_app";
-    public static final String INTENT_VALUE_SILENT_SIGN_IN = "intent_value_silent_sign_in";
-    public static final String INTENT_VALUE_INSUFFICIENT_PIN_SPACE = "intent_value_insufficient_pin_space";
 
     public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
 
-    public static final String PREF_SILENT_SIGN_IN = "pref_silent_sign_in";
+    public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
     public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
-
-    public static final String ITENT_GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
-    public static final String ITENT_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
-    public static final String ITENT_GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
 
     // public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
@@ -129,8 +99,9 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "stopPinDataTypeFileAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
+        intent.setAction(TeraIntent.ACTION_PIN_DATA_TYPE_FILE);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_DATA_TYPE_FILE);
 
         int requestCode = RequestCode.PIN_DATA_TYPE_FILE;
         int flags = PendingIntent.FLAG_CANCEL_CURRENT;
@@ -141,31 +112,15 @@ public class HCFSMgmtUtils {
         am.cancel(pi);
     }
 
-//    public static void startPinDataTypeFileAlarm(Context context) {
-//        log(Log.DEBUG, CLASSNAME, "startPinDataTypeFileAlarm", null);
-//
-//        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_PIN_DATA_TYPE_FILE);
-//
-//        int requestCode = REQUEST_CODE_PIN_DATA_TYPE_FILE;
-//        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-//        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-//
-//        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//        long triggerAtMillis = SystemClock.elapsedRealtime();
-//        long intervalMillis = Interval.PIN_DATA_TYPE_FILE;
-//        am.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtMillis, intervalMillis, pi);
-//    }
-
     public static void startResetXferAlarm(Context context) {
         Logs.d(CLASSNAME, "startResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
+        intent.setAction(TeraIntent.ACTION_RESET_XFER);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
-        int requestCode = RequestCode.RESET_XFER;
+        int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
@@ -176,7 +131,28 @@ public class HCFSMgmtUtils {
         calendar.set(Calendar.SECOND, 59);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long intervalMillis = Interval.RESET_XFER;
+        long intervalMillis = Interval.UPDATE_EXTERNAL_APP_DIR;
+        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
+    }
+
+    public static void startUpdateExternalAppDirAlarm(Context context) {
+        Logs.d(CLASSNAME, "startUpdateExternalAppDirAlarm", null);
+
+        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
+        intent.setAction(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR);
+
+        int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        long intervalMillis = Interval.UPDATE_EXTERNAL_APP_DIR;
         am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
     }
 
@@ -184,44 +160,12 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "stopResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_RESET_XFER);
+        intent.setAction(TeraIntent.ACTION_RESET_XFER);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
         int requestCode = RequestCode.RESET_XFER;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-        pi.cancel();
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(pi);
-    }
-
-//    public static void startNotifyUploadCompletedAlarm(Context context) {
-//        log(Log.DEBUG, CLASSNAME, "startNotifyUploadCompletedAlarm", null);
-//
-//        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
-//
-//        int requestCode = REQUEST_CODE_NOTIFY_UPLOAD_COMPLETED;
-//        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-//        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-//
-//        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-//        long triggerAtMillis = SystemClock.elapsedRealtime();
-//        long intervalMillis = Interval.NOTIFY_UPLOAD_COMPLETED;
-//        am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
-//    }
-
-    public static void stopNotifyUploadCompletedAlarm(Context context) {
-        Logs.d(CLASSNAME, "stopNotifyUploadCompletedAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_UPLOAD_COMPLETED);
-
-        int requestCode = RequestCode.NOTIFY_UPLOAD_COMPLETED;
-        int flags = PendingIntent.FLAG_CANCEL_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
         pi.cancel();
 
@@ -349,7 +293,7 @@ public class HCFSMgmtUtils {
             cursor.close();
         }
 
-		// Internal storage
+        // Internal storage
         // cursor = resolver.query(MediaStore.Images.Media.INTERNAL_CONTENT_URI,
         // projection, null, null, MediaStore.Images.Media._ID);
         // cursor.moveToFirst();
@@ -426,7 +370,7 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "pinApp", "AppName=" + info.getName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
-        ArrayList<String> externalDirList = info.getExternalDirList();
+        List<String> externalDirList = info.getExternalDirList();
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             Logs.d(CLASSNAME, "pinApp", "sourceDir=" + sourceDir);
@@ -451,13 +395,11 @@ public class HCFSMgmtUtils {
         return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
-//    public static boolean unpinApp(ServiceAppInfo info) {
     public static boolean unpinApp(AppInfo info) {
         Logs.i(CLASSNAME, "unpinApp", "appName=" + info.getName());
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
-//        String externalDir = info.getExternalDir();
-        ArrayList<String> externalDirList = info.getExternalDirList();
+        List<String> externalDirList = info.getExternalDirList();
 
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
@@ -484,14 +426,14 @@ public class HCFSMgmtUtils {
 
     /**
      * @return 0 if pin file or directory is successful, error otherwise.
-     * */
+     */
     public static int pinFileOrDirectory(String filePath) {
         return pinFileOrDirectory(filePath, PinType.NORMAL);
     }
 
     /**
      * @return 0 if pin file or directory is successful, error otherwise.
-     * */
+     */
     public static int pinFileOrDirectory(String filePath, int pinType) {
         int code = DEFAULT_PINNED_STATUS ? 0 : -1;
         try {
@@ -514,7 +456,7 @@ public class HCFSMgmtUtils {
 
     /**
      * @return 0 if unpin file or directory is successful, error otherwise.
-     * */
+     */
     public static int unpinFileOrDirectory(String filePath) {
         int code = DEFAULT_PINNED_STATUS ? 0 : -1;
         try {
@@ -540,11 +482,9 @@ public class HCFSMgmtUtils {
     public static int getDirLocationStatus(String pathName) {
         int locationStatus = LocationStatus.LOCAL;
         try {
-            // String logMsg = "pathName=" + pathName + ", startTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirLocationStatus", logMsg);
+            long start = System.currentTimeMillis();
             String jsonResult = HCFSApiUtils.getDirStatus(pathName);
-            // logMsg = "pathName=" + pathName + ", endTime=" + System.currentTimeMillis();
-            // HCFSMgmtUtils.log(Log.WARN, CLASSNAME, "getDirLocationStatus", logMsg);
+            long end = System.currentTimeMillis();
             String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
@@ -644,6 +584,9 @@ public class HCFSMgmtUtils {
         return (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
+    /**
+     * Reset xfer at 23:59:59 everyday
+     */
     public static boolean resetXfer() {
         boolean isSuccess = false;
         try {
@@ -660,6 +603,42 @@ public class HCFSMgmtUtils {
         }
         return isSuccess;
     }
+
+    public static void updateAppExternalDir(Context context) {
+        Logs.d(CLASSNAME, "updateAppExternalDir", null);
+        Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
+        if (ContextCompat.checkSelfPermission(context,
+                Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+            File externalAndroidFile = new File(externalPath);
+            if (externalAndroidFile.exists()) {
+                for (File type : externalAndroidFile.listFiles()) {
+                    File[] fileList = type.listFiles();
+                    for (File file : fileList) {
+                        String path = file.getAbsolutePath();
+                        String[] splitPath = path.split("/");
+                        String pkgName = splitPath[splitPath.length - 1];
+
+                        ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+                        if (externalPathList == null) {
+                            externalPathList = new ArrayList<>();
+                        }
+                        externalPathList.add(path);
+                        externalPkgNameMap.put(pkgName, externalPathList);
+                    }
+                }
+
+                UidDAO uidDAO = UidDAO.getInstance(context);
+                for (String pkgName: externalPkgNameMap.keySet()) {
+                    UidInfo uidInfo = uidDAO.get(pkgName);
+                    ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+                    uidInfo.setExternalDir(externalPathList);
+                    uidDAO.update(uidInfo, UidDAO.EXTERNAL_DIR_COLUMN);
+                }
+            }
+        }
+    }
+
 
     public static void changeCloudSyncStatus(Context context, boolean syncWifiOnly) {
         Logs.d(CLASSNAME, "changeCloudSyncStatus", null);
@@ -697,8 +676,9 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "startNotifyInsufficientPinSpaceAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+        intent.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
 
         int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -714,8 +694,9 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "stopNotifyInsufficientPinSpaceAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_INSUFFICIENT_PIN_SPACE);
+        intent.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
 
         int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -730,8 +711,9 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "startNotifyLocalStorageUsedRatioAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+        intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
         int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -747,8 +729,9 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "stopNotifyLocalStorageUsedRatioAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.putExtra(INTENT_KEY_OPERATION, INTENT_VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+        intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
+//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
+//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
         int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -758,40 +741,6 @@ public class HCFSMgmtUtils {
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         am.cancel(pi);
     }
-
-//    public static void log(int logLevel, String className, String funcName, String logMsg) {
-//        if (logLevel >= LOG_LEVEL) {
-//            if (logMsg == null) {
-//                logMsg = "";
-//            }
-//            if (logLevel == Log.DEBUG) {
-//                Log.d(TAG, className + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.INFO) {
-//                Log.i(TAG, className + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.WARN) {
-//                Log.w(TAG, className + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.ERROR) {
-//                Log.e(TAG, className + "(" + funcName + "): " + logMsg);
-//            }
-//        }
-//    }
-//
-//    public static void log(int logLevel, String className, String innerClassName, String funcName, String logMsg) {
-//        if (logLevel >= LOG_LEVEL) {
-//            if (logMsg == null) {
-//                logMsg = "";
-//            }
-//            if (logLevel == Log.DEBUG) {
-//                Log.d(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.INFO) {
-//                Log.i(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.WARN) {
-//                Log.w(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            } else if (logLevel == Log.ERROR) {
-//                Log.e(TAG, className + "->" + innerClassName + "(" + funcName + "): " + logMsg);
-//            }
-//        }
-//    }
 
     public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
         return ContextCompat.getDrawable(context, isPinned ? R.drawable.icon_btn_app_pin : R.drawable.icon_btn_app_unpin);
@@ -811,6 +760,12 @@ public class HCFSMgmtUtils {
         return encryptedIMEI;
     }
 
+    public static String getDecryptedJsonString(String jsonString) {
+        String decryptedJsonString = new String(HCFSApiUtils.getDecryptedJsonString(jsonString));
+        Logs.d(CLASSNAME, "getDecryptedJsonString", "decryptedJsonString=" + decryptedJsonString);
+        return decryptedJsonString;
+    }
+
     public static String getDeviceImei(Context context) {
         String imei = "";
         TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -823,7 +778,7 @@ public class HCFSMgmtUtils {
     }
 
     public static long getOccupiedSize() {
-        /** Unpin-but-dirty size + pin size */
+        // Unpin-but-dirty size + pin size
         long occupiedSize = 0;
         try {
             String jsonResult = HCFSApiUtils.getOccupiedSize();
@@ -836,6 +791,70 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "getOccupiedSize", Log.getStackTraceString(e));
         }
         return occupiedSize;
+    }
+
+    public static boolean setSwiftToken(String url, String token) {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.setSwiftToken(url, token);
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            String logMsg = "url=" + url + ", token=" + token + ", result=" + jsonResult;
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "setSwiftToken", logMsg);
+            } else {
+                Logs.e(CLASSNAME, "setSwiftToken", logMsg);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "setSwiftToken", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+     }
+    
+    /***
+     * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
+     * <li>0 when setting sync point completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     */
+    public static int startUploadTeraData() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.startUploadTeraData();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "startUploadTeraData", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "startUploadTeraData", null);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "startUploadTeraData", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
+    /***
+     * @return <li>1 if no sync point is set.</li>
+     * <li>0 when canceling the setting completed.</li>
+     * <li>Negative error code in case that error occurs</li>
+     */
+    public static int stopUploadTeraData() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.stopUploadTeraData();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "stopUploadTeraData", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "stopUploadTeraData", null);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "stopUploadTeraData", Log.getStackTraceString(e));
+        }
+        return code;
     }
 
 }

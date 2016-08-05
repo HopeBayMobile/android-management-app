@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,7 +11,9 @@ import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.text.Html;
+import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -26,36 +27,11 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.plus.Plus;
-import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.main.LoadingActivity;
-import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-
-import java.net.HttpURLConnection;
-import java.util.Locale;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-
-import java.net.HttpURLConnection;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import java.net.HttpURLConnection;
 import java.util.Locale;
@@ -94,7 +70,7 @@ public class ActivateWithCodeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mHandlerThread = new HandlerThread(LoadingActivity.class.getSimpleName());
+        mHandlerThread = new HandlerThread(CLASSNAME);
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
         mUiHandler = new Handler();
@@ -122,6 +98,7 @@ public class ActivateWithCodeFragment extends Fragment {
 
         final String username = getArguments().getString(ActivateWoCodeFragment.KEY_USERNAME);
         mUsername.setText(username);
+        mActivateCode.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         mActivateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -160,7 +137,7 @@ public class ActivateWithCodeFragment extends Fragment {
                             authParam.setVendor(Build.BRAND);
                             authParam.setModel(Build.MODEL);
                             authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                            authParam.setHcfsVersion("1.0.1");
+                            authParam.setHcfsVersion(getString(R.string.tera_version));
                             authParam.setActivateCode(activateCode);
 
                             String jwtToken = getArguments().getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
@@ -171,8 +148,6 @@ public class ActivateWithCodeFragment extends Fragment {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            // TODO Set arkflex token to hcfs
-                                            // registerResultInfo.getStorageAccessToken();
                                             final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
                                             if (failed) {
                                                 HCFSConfig.resetHCFSConfig();
@@ -185,25 +160,27 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 accountDAO.insert(accountInfo);
                                                 accountDAO.close();
 
-                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                                                SharedPreferences sharedPreferences =
+                                                        PreferenceManager.getDefaultSharedPreferences(mContext);
                                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                                 editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
                                                 editor.apply();
 
-                                                // Start sync to cloud
-                                                HCFSConfig.startSyncToCloud();
+                                                String url = registerResultInfo.getBackendUrl();
+                                                String token = registerResultInfo.getStorageAccessToken();
+                                                HCFSMgmtUtils.setSwiftToken(url, token);
                                             }
 
                                             mUiHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    hideProgressDialog();
+                                                    dismissProgressDialog();
                                                     if (failed) {
                                                         mErrorMessage.setText(R.string.activate_failed);
                                                     } else {
-                                                        Intent intent = new Intent(mContext, MainActivity.class);
-                                                        startActivity(intent);
-                                                        ((Activity) mContext).finish();
+                                                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                                        ft.replace(R.id.fragment_container, MainFragment.newInstance(), MainFragment.TAG);
+                                                        ft.commit();
                                                     }
                                                 }
                                             });
@@ -215,7 +192,7 @@ public class ActivateWithCodeFragment extends Fragment {
                                 public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
                                     Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
 
-                                    hideProgressDialog();
+                                    dismissProgressDialog();
 
                                     int errorMsgResId = R.string.activate_incorrect_activation_code;
                                     if (registerResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
@@ -265,9 +242,9 @@ public class ActivateWithCodeFragment extends Fragment {
         mProgressDialog.show();
     }
 
-    private void hideProgressDialog() {
+    private void dismissProgressDialog() {
         if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.hide();
+            mProgressDialog.dismiss();
         }
     }
 

@@ -87,6 +87,15 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         return accountInfoList;
     }
 
+    public AccountInfo getFirst() {
+        AccountInfo accountInfo = null;
+        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            accountInfo = getRecord(cursor);
+        }
+        return accountInfo;
+    }
+
     @Override
     public boolean insert(AccountInfo info) {
 
@@ -152,7 +161,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
         Logs.d(CLASSNAME, "update",
                 "id=" + info.getId() +
-                        "name=" + info.getName() +
+                        ", name=" + info.getName() +
                         ", email=" + info.getEmail() +
                         ", imgUrl=" + info.getImgUrl() +
                         ", imgBase64=" + info.getImgBase64() +

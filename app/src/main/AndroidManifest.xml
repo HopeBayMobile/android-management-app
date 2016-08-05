@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.MASTER_CLEAR" />
 
     <application
         android:allowBackup="true"
@@ -21,7 +22,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name="com.hopebaytech.hcfsmgmt.main.LoadingActivity"
+            android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
             android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait">
@@ -31,19 +32,27 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.ActivateActivity"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
-        <activity
-            android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait" />
+
         <activity
             android:name=".main.SwitchAccountActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:launchMode="singleInstance" />
+
+        <activity
+            android:name=".main.TransferContentActivity"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait" />
+
         <activity android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" />
+
+        <activity
+            android:name=".main.LockDeviceActivity"
+            android:screenOrientation="portrait" />
 
         <receiver
             android:name="com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver"
@@ -67,12 +76,19 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.hopebaytech.hcfsmgmt.service.HCFSMgmtService" />
+        <service android:name=".service.TeraMgmtService" />
+
+        <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
+
+        <service
+            android:name="com.hopebaytech.hcfsmgmt.service.TeraAPIServer"
+            android:process=":server" />
 
         <service
             android:name="com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            android:process=":remote" />
 
     </application>
 </manifest>

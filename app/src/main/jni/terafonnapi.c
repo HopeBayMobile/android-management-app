@@ -20,6 +20,10 @@ extern void HCFS_get_sync_status(const char **json_res);
 extern void HCFS_get_property(const char **json_res, const char *key);
 extern void HCFS_set_property(const char **json_res, const char *key, const char *value);
 extern void HCFS_get_occupied_size(const char **json_res);
+extern void HCFS_set_sync_point(const char **json_res);
+extern void HCFS_clear_sync_point(const char **json_res);
+extern void HCFS_set_notify_server(const char **json_res, const char *pathname);
+extern void HCFS_set_swift_token(const char **json_res, const char *url, const char *token);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
@@ -183,7 +187,7 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
 	unsigned char encrypt_code[len];
 	const char *imei = (*jEnv)->GetStringUTFChars(jEnv, jImei, 0);
 	size_t* output_length = malloc(sizeof(size_t));
-	int ret = encryptCode(encrypt_code, imei, output_length);
+	int ret = publicEncryptCode(encrypt_code, imei, output_length);
     jbyteArray result = (*jEnv)->NewByteArray(jEnv, strlen(encrypt_code));
     (*jEnv)->SetByteArrayRegion(jEnv, result, 0, strlen(encrypt_code), encrypt_code);
     //__android_log_print(ANDROID_LOG_DEBUG, "HopeBay", "JNI: jImei=%s", (char*) imei);
@@ -192,6 +196,20 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
     //unsigned char decrypt_code[len];
     //decryptCode(decrypt_code, encrypt_code, output_length);
     //__android_log_print(ANDROID_LOG_ERROR, "HopeBay", "JNI: decrypt_code=%s", (unsigned char*) decrypt_code);
+
+    free(output_length);
+    return result;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getDecryptedJsonString(
+		JNIEnv *jEnv, jobject jObject, jstring jJsonString) {
+	int len = 4098;
+	unsigned char decrypt_code[len];
+	const char *jsonString = (*jEnv)->GetStringUTFChars(jEnv, jJsonString, 0);
+	size_t* output_length = malloc(sizeof(size_t));
+	int ret = publicDecryptCode(decrypt_code, jsonString, output_length);
+    jbyteArray result = (*jEnv)->NewByteArray(jEnv, strlen(decrypt_code));
+    (*jEnv)->SetByteArrayRegion(jEnv, result, 0, strlen(decrypt_code), decrypt_code);
 
     free(output_length);
     return result;
@@ -206,25 +224,44 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getOc
 	return result;
 }
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setHCFSProperty(
-//		JNIEnv *jEnv, jobject jObject, jstring jKey, jstring jValue) {
-//	char *json_res;
-//	char *key = (*jEnv)->GetStringUTFChars(jEnv, jKey, 0);
-//	char *value = (*jEnv)->GetStringUTFChars(jEnv, jValue, 0);
-//	HCFS_set_property(&json_res, key, value);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	return result;
-//}
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setNotifyServer(
+		JNIEnv *jEnv, jobject jObject, jstring jString) {
+	const char *json_res;
+    const char *pathname = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
+    HCFS_set_notify_server(&json_res, pathname);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pathname);
+    return result;
+}
 
-//JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getHCFSProperty(
-//		JNIEnv *jEnv, jobject jObject, jstring jKey) {
-//	char *json_res;
-//	char *key = (*jEnv)->GetStringUTFChars(jEnv, jKey, 0);
-//	HCFS_get_property(&json_res, key);
-//	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-//	free(json_res);
-//	free(key);
-//	return result;
-//}
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setSwiftToken(
+ 		JNIEnv *jEnv, jobject jObject, jstring jUrl, jstring jToken) {
+ 	const char *json_res;
+    const char *url = (*jEnv)->GetStringUTFChars(jEnv, jUrl, 0);
+    const char *token = (*jEnv)->GetStringUTFChars(jEnv, jToken, 0);
+    HCFS_set_swift_token(&json_res, url, token);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)url);
+    free((char *)token);
+    return result;
+}
 
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_startUploadTeraData(
+		JNIEnv *jEnv, jobject jObject) {
+	const char *json_res;
+    HCFS_set_sync_point(&json_res);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_stopUploadTeraData(
+		JNIEnv *jEnv, jobject jObject) {
+	const char *json_res;
+    HCFS_clear_sync_point(&json_res);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    return result;
+}

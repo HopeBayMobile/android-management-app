@@ -1,6 +1,6 @@
 package com.hopebaytech.hcfsmgmt.interfaces;
 
-import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 
 /**
  * @author Aaron
@@ -8,6 +8,6 @@ import com.hopebaytech.hcfsmgmt.service.HCFSMgmtService;
  */
 public interface IMgmtBinder {
 
-    HCFSMgmtService getService();
+    TeraMgmtService getService();
 
 }

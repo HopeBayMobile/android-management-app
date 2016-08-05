@@ -1,13 +1,17 @@
 package com.hopebaytech.hcfsmgmt.info;
 
+import java.util.List;
+
 public class UidInfo {
 
     private boolean isPinned;
+    private boolean isSystemApp;
     private int uid;
     private String packageName;
-    private boolean isSystemApp;
+    private List<String> externalDir;
 
-    public UidInfo() {}
+    public UidInfo() {
+    }
 
     public UidInfo(AppInfo appInfo) {
         setUid(appInfo.getUid());
@@ -53,6 +57,14 @@ public class UidInfo {
 
     public void setPinned(boolean isPinned) {
         this.isPinned = isPinned;
+    }
+
+    public List<String> getExternalDir() {
+        return externalDir;
+    }
+
+    public void setExternalDir(List<String> externalDir) {
+        this.externalDir = externalDir;
     }
 
     @Override
