@@ -485,7 +485,6 @@ public class HCFSMgmtUtils {
             long start = System.currentTimeMillis();
             String jsonResult = HCFSApiUtils.getDirStatus(pathName);
             long end = System.currentTimeMillis();
-            Logs.w(CLASSNAME, "getDirLocationStatus", pathName + ": " + (end - start));
             String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");

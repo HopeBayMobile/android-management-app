@@ -191,6 +191,7 @@
     <string name="auth_at_bootup_auth_failed_google_auth">Unable to access cloud data, because Google account authentication failed.</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Unable to access cloud data, because Tera account authentication failed.</string>
     <string name="auth_at_bootup_auth_failed_mgmt_register">Unable to access cloud data, because Tera registration failed.</string>
+    <string name="auth_at_bootup_auth_get_device_info">Unable to get device status from management server.</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
     <string name="yes">Yes</string>

@@ -199,6 +199,7 @@
     <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗， 無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗，無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_register">Tera 註冊失敗，無法存取雲端資料。</string>
+    <string name="auth_at_bootup_auth_get_device_info">無法從管理伺服器取得裝置狀態。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
     <string name="yes">是</string>

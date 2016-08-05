@@ -4,9 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -122,6 +124,7 @@ public class ActivateWoCodeFragment extends Fragment {
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
         mUiHandler = new Handler();
+
     }
 
     @Nullable
