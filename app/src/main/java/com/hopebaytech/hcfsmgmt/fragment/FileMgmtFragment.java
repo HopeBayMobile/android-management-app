@@ -41,6 +41,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -120,6 +121,7 @@ public class FileMgmtFragment extends Fragment {
     private ImageView mRefresh;
     private ImageView mLayoutType;
     private Snackbar mSnackbar;
+    private Toast mToast;
 
     private AddRemovePackageBroadcastReceiver mAddRemovePackageStatusReceiver;
     private SectionedRecyclerViewAdapter mSectionedRecyclerViewAdapter;
@@ -329,16 +331,12 @@ public class FileMgmtFragment extends Fragment {
                             mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
                                 @Override
                                 public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
-                                    if (finalI == mWaitToExecuteSparseArr.size() - 1) {
-                                        showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
-                                    }
+                                    showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
                                 }
 
                                 @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
-                                    if (finalI == mWaitToExecuteSparseArr.size() - 1) {
-                                        showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
-                                    }
+                                    showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
                                     itemInfo.setPinned(!itemInfo.isPinned());
 
                                     // Update pin status to uid.db
@@ -401,7 +399,18 @@ public class FileMgmtFragment extends Fragment {
                         message = R.string.toast_unpin_failure;
                     }
                 }
-                Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+
+                if (mToast == null) {
+                    mToast = Toast.makeText(mContext, null, Toast.LENGTH_LONG);
+                }
+                mToast.setText(message);
+                mToast.cancel();
+                mUiHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mToast.show();
+                    }
+                }, 50);
             }
         });
 

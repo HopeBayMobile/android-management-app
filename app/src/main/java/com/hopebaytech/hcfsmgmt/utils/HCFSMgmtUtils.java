@@ -537,7 +537,7 @@ public class HCFSMgmtUtils {
                         status = LocationStatus.HYBRID;
                         break;
                 }
-                Logs.i(CLASSNAME, "getFileLocationStatus", logMsg);
+//                Logs.i(CLASSNAME, "getFileLocationStatus", logMsg);
             } else {
                 Logs.e(CLASSNAME, "getFileLocationStatus", logMsg);
             }

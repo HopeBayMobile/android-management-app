@@ -10,10 +10,13 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -211,9 +214,9 @@ public class TeraMgmtService extends Service {
 //        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 //    }
 
-    private void pinOrUnpinApp(AppInfo info) {
+    private boolean pinOrUnpinApp(AppInfo info) {
         Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
-        pinOrUnpinApp(info, PinType.NORMAL);
+        return pinOrUnpinApp(info, PinType.NORMAL);
     }
 
     private boolean pinOrUnpinApp(AppInfo info, int pinType) {
@@ -224,14 +227,14 @@ public class TeraMgmtService extends Service {
             if (!HCFSMgmtUtils.pinApp(info, pinType)) {
                 isSuccess = false;
                 if (pinType != PinType.PRIORITY) {
-                    handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
+                    revertPinStatus(info, getString(R.string.notify_pin_app_failure));
                 }
             }
         } else {
             if (!HCFSMgmtUtils.unpinApp(info)) {
                 isSuccess = false;
                 if (pinType != PinType.PRIORITY) {
-                    handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
+                    revertPinStatus(info, getString(R.string.notify_unpin_app_failure));
                 }
             }
         }
@@ -243,21 +246,21 @@ public class TeraMgmtService extends Service {
             if (HCFSMgmtUtils.pinApp(info)) {
                 listener.onPinUnpinSuccessful(info);
             } else {
-                handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
+                revertPinStatus(info, getString(R.string.notify_pin_app_failure));
                 listener.onPinUnpinFailed(info);
             }
         } else {
             if (HCFSMgmtUtils.unpinApp(info)) {
                 listener.onPinUnpinSuccessful(info);
             } else {
-                handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
+                revertPinStatus(info, getString(R.string.notify_unpin_app_failure));
                 listener.onPinUnpinFailed(info);
             }
         }
     }
 
-    private void handleAppFailureOfPinOrUnpin(AppInfo info, String notifyMsg) {
-        Logs.d(CLASSNAME, "pinOrUnpinFailure", info.getName());
+    private void revertPinStatus(AppInfo info, String notifyMsg) {
+        Logs.d(CLASSNAME, "revertPinStatus", info.getName());
 
         // Pin/Unpin failed, reset to original status.
         if (info.isPinned()) {
@@ -271,6 +274,7 @@ public class TeraMgmtService extends Service {
 //        String notify_title = getString(R.string.app_name);
 //        String notify_message = notifyMsg + ": " + info.getName();
 //        NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+
     }
 
     private void pinOrUnpinDataTypeFile() {
@@ -406,29 +410,29 @@ public class TeraMgmtService extends Service {
         }
     }
 
-    private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
-        String filePath = info.getFilePath();
-        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
-        boolean isPinned = info.isPinned();
-        if (isPinned) {
-            int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
-            boolean isSuccess = (code == 0);
-            if (!isSuccess) {
-                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                String notify_title = getString(R.string.app_name);
-                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-            }
-        } else {
-            boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
-            if (!isSuccess) {
-                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                String notify_title = getString(R.string.app_name);
-                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-            }
-        }
-    }
+//    private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
+//        String filePath = info.getFilePath();
+//        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
+//        boolean isPinned = info.isPinned();
+//        if (isPinned) {
+//            int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
+//            boolean isSuccess = (code == 0);
+//            if (!isSuccess) {
+//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//                String notify_title = getString(R.string.app_name);
+//                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
+//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+//            }
+//        } else {
+//            boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
+//            if (!isSuccess) {
+//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//                String notify_title = getString(R.string.app_name);
+//                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
+//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+//            }
+//        }
+//    }
 
     public void pinOrUnpinFileDirectory(FileDirInfo info, IPinUnpinListener listener) {
         ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
@@ -852,12 +856,21 @@ public class TeraMgmtService extends Service {
                 isSuccess = false;
             }
         }
+
         if (!isSuccess) {
             // Notify user pin/unpin system app failed
-            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-            String notify_title = getString(R.string.app_name);
-            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
-            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
+            Handler uiHandler = new Handler(Looper.getMainLooper());
+            uiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(mContext, R.string.notify_pin_unpin_system_app_failed, Toast.LENGTH_LONG).show();
+                }
+            });
+
+//            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//            String notify_title = getString(R.string.app_name);
+//            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
+//            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
         }
     }
 
