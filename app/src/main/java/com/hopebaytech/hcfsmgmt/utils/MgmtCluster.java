@@ -606,7 +606,7 @@ public class MgmtCluster {
             registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
         }
 
-        registerResultInfo.setBackendUrl(jsonObj.getString("account").split(":")[0]); // - ignore
+        registerResultInfo.setBackendUser(jsonObj.getString("account").split(":")[0]);
 //        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
 //        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
 //        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));

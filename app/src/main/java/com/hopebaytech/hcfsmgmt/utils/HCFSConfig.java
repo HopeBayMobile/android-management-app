@@ -122,7 +122,7 @@ public class HCFSConfig {
         if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, registerResultInfo.getBucket())) {
+        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, registerResultInfo.getBackendUser())) {
             isFailed = true;
         }
         if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
