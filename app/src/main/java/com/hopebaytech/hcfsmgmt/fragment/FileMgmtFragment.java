@@ -1949,7 +1949,8 @@ public class FileMgmtFragment extends Fragment {
 
         } else if (itemInfo instanceof FileDirInfo) {
             final FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
-            if (fileDirInfo.getCurrentFile().isDirectory()) {
+//            if (fileDirInfo.getCurrentFile().isDirectory()) {
+            if (fileDirInfo.isDirectory()) {
                 // Set the first visible item position to previous FilePathNavigationView when navigating to next directory level
                 LinearLayoutManager linearLayoutManager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
                 int firstVisibleItemPosition = linearLayoutManager.findFirstCompletelyVisibleItemPosition();
@@ -1959,7 +1960,8 @@ public class FileMgmtFragment extends Fragment {
                 filePathNavigationViewPrev.setFirstVisibleItemPosition(firstVisibleItemPosition);
 
                 // Add the current FilePathNavigationView to navigation layout
-                mCurrentFile = fileDirInfo.getCurrentFile();
+//                mCurrentFile = fileDirInfo.getCurrentFile();
+                mCurrentFile = new File(fileDirInfo.getFilePath());
                 FilePathNavigationView filePathNavigationView = new FilePathNavigationView(mContext);
                 String currentPath = mCurrentFile.getAbsolutePath();
                 String navigationText = currentPath.substring(currentPath.lastIndexOf("/") + 1) + "/";
@@ -1978,10 +1980,14 @@ public class FileMgmtFragment extends Fragment {
                 // Build the intent
                 String mimeType = fileDirInfo.getMimeType();
                 Intent intent = new Intent(Intent.ACTION_VIEW);
+                File file = new File(fileDirInfo.getFilePath());
+                Logs.d(CLASSNAME, "onItemClick", "Uri.fromFile(file)=" + Uri.fromFile(file));
                 if (mimeType != null) {
-                    intent.setDataAndType(Uri.fromFile(fileDirInfo.getCurrentFile()), mimeType);
+//                    intent.setDataAndType(Uri.fromFile(fileDirInfo.getCurrentFile()), mimeType);
+                    intent.setDataAndType(Uri.fromFile(file), mimeType);
                 } else {
-                    intent.setData(Uri.fromFile(fileDirInfo.getCurrentFile()));
+//                    intent.setData(Uri.fromFile(fileDirInfo.getCurrentFile()));
+                    intent.setData(Uri.fromFile(file));
                 }
 
                 // Verify it resolves
@@ -2193,17 +2199,26 @@ public class FileMgmtFragment extends Fragment {
                             return;
                         }
                         itemInfo.setPinned(isPinned);
+
                         mUiHandler.post(new Runnable() {
                             @Override
                             public void run() {
                                 holder.setIconAlpha(alpha);
-
-                                // Display pinned/unpinned item image
                                 if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
-                                    ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
-                                    ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setContentDescription(getPinViewContentDescription(isPinned));
+                                    boolean isDirectory = false;
+                                    if (itemInfo instanceof FileDirInfo) {
+                                        isDirectory = ((FileDirInfo) itemInfo).isDirectory();
+                                    }
+
+                                    ImageView pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
+                                    if (isDirectory) {
+                                        pinView.setVisibility(View.GONE);
+                                    } else {
+                                        // Display pinned/unpinned item image
+                                        pinView.setVisibility(View.VISIBLE);
+                                        pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                                        pinView.setContentDescription(getPinViewContentDescription(isPinned));
+                                    }
                                 }
                             }
                         });
@@ -2248,11 +2263,20 @@ public class FileMgmtFragment extends Fragment {
                             mUiHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
-                                    ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder)
-                                            .pinView.setContentDescription(getPinViewContentDescription(isPinned));
+                                    boolean isDirectory = false;
+                                    if (itemInfo instanceof FileDirInfo) {
+                                        isDirectory = ((FileDirInfo) itemInfo).isDirectory();
+                                    }
 
+                                    ImageView pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
+                                    if (isDirectory) {
+                                        pinView.setVisibility(View.GONE);
+                                    } else {
+                                        // Display pinned/unpinned item image
+                                        pinView.setVisibility(View.VISIBLE);
+                                        pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                                        pinView.setContentDescription(getPinViewContentDescription(isPinned));
+                                    }
                                 }
                             });
                         }
