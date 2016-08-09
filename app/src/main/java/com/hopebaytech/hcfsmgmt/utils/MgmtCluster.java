@@ -227,8 +227,9 @@ public class MgmtCluster {
 
                 int responseCode = httpProxyImpl.get();
                 String responseContent = httpProxyImpl.getResponseContent();
+                String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
                 getDeviceInfo.setResponseCode(responseCode);
-                getDeviceInfo.setMessage(responseContent);
+                getDeviceInfo.setMessage(decryptResponseContent);
                 Logs.d(CLASSNAME, "getDeviceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceInfo", Log.getStackTraceString(e));
