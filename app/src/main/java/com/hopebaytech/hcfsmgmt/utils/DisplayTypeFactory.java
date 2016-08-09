@@ -124,10 +124,12 @@ public class DisplayTypeFactory {
 			File[] fileList = currentFile.listFiles();
 			Arrays.sort(fileList);
 			for (int i = 0; i < fileList.length; i++) {
-				FileDirInfo fileDirInfo = new FileDirInfo(context);
 				File file = fileList[i];
+				FileDirInfo fileDirInfo = new FileDirInfo(context);
 				fileDirInfo.setName(file.getName());
-				fileDirInfo.setCurrentFile(file);
+				fileDirInfo.setDirectory(file.isDirectory());
+				fileDirInfo.setFilePath(file.getAbsolutePath());
+//				fileDirInfo.setCurrentFile(file);
 				itemInfoList.add(fileDirInfo);
 			}
 		}
