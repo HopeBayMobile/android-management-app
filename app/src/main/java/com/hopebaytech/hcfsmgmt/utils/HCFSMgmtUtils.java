@@ -482,15 +482,15 @@ public class HCFSMgmtUtils {
     public static int getDirLocationStatus(String pathName) {
         int locationStatus = LocationStatus.LOCAL;
         try {
-            long start = System.currentTimeMillis();
             String jsonResult = HCFSApiUtils.getDirStatus(pathName);
-            long end = System.currentTimeMillis();
             String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 int code = jObject.getInt("code");
                 if (code == 0) {
+                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
+
                     JSONObject dataObj = jObject.getJSONObject("data");
                     int num_local = dataObj.getInt("num_local");
                     int num_hybrid = dataObj.getInt("num_hybrid");
@@ -505,7 +505,6 @@ public class HCFSMgmtUtils {
                     } else {
                         locationStatus = LocationStatus.HYBRID;
                     }
-//                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
                 } else {
                     Logs.e(CLASSNAME, "getDirLocationStatus", logMsg);
                 }
@@ -629,7 +628,7 @@ public class HCFSMgmtUtils {
                 }
 
                 UidDAO uidDAO = UidDAO.getInstance(context);
-                for (String pkgName: externalPkgNameMap.keySet()) {
+                for (String pkgName : externalPkgNameMap.keySet()) {
                     UidInfo uidInfo = uidDAO.get(pkgName);
                     ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
                     uidInfo.setExternalDir(externalPathList);
@@ -809,8 +808,8 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "setSwiftToken", Log.getStackTraceString(e));
         }
         return isSuccess;
-     }
-    
+    }
+
     /***
      * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
      * <li>0 when setting sync point completed.</li>

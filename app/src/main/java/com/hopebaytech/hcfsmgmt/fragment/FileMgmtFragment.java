@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -19,13 +18,11 @@ import android.content.pm.ResolveInfo;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -38,13 +35,13 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -124,6 +121,7 @@ public class FileMgmtFragment extends Fragment {
     private ImageView mRefresh;
     private ImageView mLayoutType;
     private Snackbar mSnackbar;
+    private Toast mToast;
 
     private AddRemovePackageBroadcastReceiver mAddRemovePackageStatusReceiver;
     private SectionedRecyclerViewAdapter mSectionedRecyclerViewAdapter;
@@ -333,17 +331,12 @@ public class FileMgmtFragment extends Fragment {
                             mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
                                 @Override
                                 public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
-                                    if (finalI == mWaitToExecuteSparseArr.size() - 1) {
-                                        showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
-                                    }
+                                    showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
                                 }
 
                                 @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
-                                    if (finalI == mWaitToExecuteSparseArr.size() - 1) {
-                                        showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
-                                    }
-
+                                    showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
                                     itemInfo.setPinned(!itemInfo.isPinned());
 
                                     // Update pin status to uid.db
@@ -357,7 +350,6 @@ public class FileMgmtFragment extends Fragment {
                             // Nothing to do here
                         } else if (itemInfo instanceof FileDirInfo) {
                             FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
-                            Logs.e(CLASSNAME, "run", fileDirInfo.getName() + ": " + fileDirInfo.isPinned());
                             mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
                                 @Override
                                 public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
@@ -407,7 +399,18 @@ public class FileMgmtFragment extends Fragment {
                         message = R.string.toast_unpin_failure;
                     }
                 }
-                Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+
+                if (mToast == null) {
+                    mToast = Toast.makeText(mContext, null, Toast.LENGTH_LONG);
+                }
+                mToast.setText(message);
+                mToast.cancel();
+                mUiHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mToast.show();
+                    }
+                }, 50);
             }
         });
 
