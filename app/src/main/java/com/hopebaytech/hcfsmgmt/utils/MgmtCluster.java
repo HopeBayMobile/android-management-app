@@ -606,7 +606,7 @@ public class MgmtCluster {
             registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
         }
 
-//        registerResultInfo.setAccount(jsonObj.getString("account").split(":")[0]); // - ignore
+        registerResultInfo.setBackendUrl(jsonObj.getString("account").split(":")[0]); // - ignore
 //        registerResultInfo.setUser(jsonObj.getString("account").split(":")[1]); // - ignore
 //        registerResultInfo.setPassword(jsonObj.getString("password")); // - ignore
 //        registerResultInfo.setBackendUrl(jsonObj.getString("domain") + ":" + jsonObj.getInt("port"));
@@ -823,6 +823,7 @@ public class MgmtCluster {
 
                     Logs.d(CLASSNAME, "register", "backend_type=" + registerResultInfo.getBackendType());
                     Logs.d(CLASSNAME, "register", "backend_url=" + registerResultInfo.getBackendUrl());
+                    Logs.d(CLASSNAME, "register", "backend_user=" + registerResultInfo.getBackendUser());
                     Logs.d(CLASSNAME, "register", "bucket=" + registerResultInfo.getBucket());
                     Logs.d(CLASSNAME, "register", "storageAccessToken=" + registerResultInfo.getStorageAccessToken());
 //                    Logs.d(CLASSNAME, "register", "password=" + registerResultInfo.getPassword());

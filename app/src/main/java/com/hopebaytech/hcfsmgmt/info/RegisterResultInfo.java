@@ -15,6 +15,7 @@ public class RegisterResultInfo {
     private String backend_type;
     private String backend_url;
     private String bucket;
+    private String backend_user;
     private String message;
     private String errorCode;
     private String storageAccessToken;
@@ -57,9 +58,18 @@ public class RegisterResultInfo {
         return bucket;
     }
 
+    public String getBackendUser() {
+        return backend_user;
+    }
+
+    public void setBackendUser(String backend_user) {
+        this.backend_user = backend_user;
+    }
+
     public void setBucket(String bucket) {
         this.bucket = bucket;
     }
+
     public String getStorageAccessToken() {
         return storageAccessToken;
     }
@@ -83,6 +93,7 @@ public class RegisterResultInfo {
             jsonObject.put("backendType", backend_type);
             jsonObject.put("backendUrl", backend_url);
             jsonObject.put("bucket", bucket);
+            jsonObject.put("backend_user", backend_user);
             jsonObject.put("message", message);
             jsonObject.put("storageAccessToken", storageAccessToken);
             jsonObject.put("responseCode", responseCode);
