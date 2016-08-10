@@ -20,8 +20,8 @@ public class UnitConverter {
 		String[] unit = new String[] { "Byte", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 		int unitIndex = 0;
 		while (true) {
-				float tmp = result / 1024f;
-				if (result >= 1000) {
+			float tmp = result / 1024f;
+			if (result >= 1000) {
 				if (tmp > 0) {
 					result = tmp;
 					unitIndex++;

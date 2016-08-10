@@ -66,4 +66,9 @@ interface ITeraFonnApiService {
      **/
     int stopUploadTeraData();
 
+    /** Get Tera free space size **/
+    long getTeraFreeSpace();
+
+    /** Get Tera total space size **/
+    long getTeraTotalSpace();
 }

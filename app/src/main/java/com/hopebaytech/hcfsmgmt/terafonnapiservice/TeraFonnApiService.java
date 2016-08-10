@@ -10,8 +10,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -22,6 +20,7 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
+import com.hopebaytech.hcfsmgmt.utils.StorageUsage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -240,6 +239,15 @@ public class TeraFonnApiService extends Service {
             return HCFSMgmtUtils.stopUploadTeraData();
         }
 
+        @Override
+        public long getTeraFreeSpace() {
+            return StorageUsage.getFreeSpace();
+        }
+
+        @Override
+        public long getTeraTotalSpace() {
+            return StorageUsage.getTotalSpace();
+        }
     };
 
     @Override
