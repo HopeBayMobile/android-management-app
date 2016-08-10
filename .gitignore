@@ -2,6 +2,7 @@
 *.apk
 /app/src/main/libs
 /app/src/main/obj
+/app/app.iml
 
 # Built application files
 /build
@@ -23,6 +24,7 @@ local.properties
 
 # User-specific configurations
 .idea/
+.idea/misc.xml
 *.iml
 
 # OS-specific files

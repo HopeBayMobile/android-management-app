@@ -5,9 +5,16 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by daniel on 2016/8/9.
+ * Utility for getting the free space and total space of Tera. The total space and free space are
+ * the sum of /system, /cache, /data and /data/data.
+ *
+ * @author Daniel
+ *         Created by daniel on 2016/8/9.
  */
 public class StorageUsage {
+
+    private static final String CLASSNAME = StorageUsage.class.getSimpleName();
+
     private static final String system_path = "/system";
     private static final String cache_path = "/cache";
     private static final String data_path = "/data";
@@ -17,7 +24,7 @@ public class StorageUsage {
     public static long getFreeSpace() {
         File path;
         long freeSpace = 0;
-        for(int i=0;i<paths.size();i++){
+        for (int i = 0; i < paths.size(); i++) {
             path = new File(paths.get(i));
             freeSpace += path.getFreeSpace();
         }
@@ -27,7 +34,7 @@ public class StorageUsage {
     public static long getTotalSpace() {
         File path;
         long totalSpace = 0;
-        for(int i=0;i<paths.size();i++){
+        for (int i = 0; i < paths.size(); i++) {
             path = new File(paths.get(i));
             totalSpace += path.getTotalSpace();
         }

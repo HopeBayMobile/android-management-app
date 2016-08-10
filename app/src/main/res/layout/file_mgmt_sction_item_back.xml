@@ -63,7 +63,7 @@
                     android:text="@string/file_mgmt_section_item_total_storage_space" />
 
                 <TextView
-                	android:id="@+id/total_storage_space"
+                	android:id="@+id/total_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_mgmt_section_item_calculating" />
@@ -81,7 +81,7 @@
                     android:text="@string/file_mgmt_section_item_available_storage_space" />
 
                 <TextView
-                    android:id="@+id/available_storage_space"
+                    android:id="@+id/free_space"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/file_mgmt_section_item_calculating" />
