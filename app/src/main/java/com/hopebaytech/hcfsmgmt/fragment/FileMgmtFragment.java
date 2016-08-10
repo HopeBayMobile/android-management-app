@@ -30,7 +30,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.StatFs;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -85,6 +84,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.StorageUsage;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import java.io.File;
@@ -1211,8 +1211,8 @@ public class FileMgmtFragment extends Fragment {
         @SuppressWarnings("rawtypes")
         private RecyclerView.Adapter mBaseAdapter;
         private SparseArray<Section> mSections = new SparseArray<>();
-        private long totalStorageSpace;
-        private long availableStorageSpace;
+//        private long totalSpace;
+//        private long freeSpace;
         public boolean isFirstCircleAnimated = true;
 
         @SuppressWarnings("rawtypes")
@@ -1319,17 +1319,17 @@ public class FileMgmtFragment extends Fragment {
             return (mValid ? mSections.size() + mBaseAdapter.getItemCount() : 0);
         }
 
-        public void updateSection(SectionedViewHolder sectionViewHolder, long totalStorageSpace, long availableStorageSpace, boolean showAnimation) {
-            float toShowValue = ((totalStorageSpace - availableStorageSpace) * 1f / totalStorageSpace) * 100f;
+        public void updateSection(SectionedViewHolder sectionViewHolder, long totalSpace, long freeSpace, boolean showAnimation) {
+            float toShowValue = ((totalSpace - freeSpace) * 1f / totalSpace) * 100f;
             CircleDisplay cd = sectionViewHolder.circleDisplay;
-            cd.showValue(toShowValue, 100f, totalStorageSpace, showAnimation);
+            cd.showValue(toShowValue, 100f, totalSpace, showAnimation);
 
             if (isSDCard1) {
-                sectionViewHolder.totalStorageSpace.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
-                sectionViewHolder.availableStorageSpace.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
+                sectionViewHolder.totalSpace.setText(UnitConverter.convertByteToProperUnit(totalSpace));
+                sectionViewHolder.freeSpace.setText(UnitConverter.convertByteToProperUnit(freeSpace));
             } else {
-                sectionViewHolder.totalStorageSpace.setText(UnitConverter.convertByteToProperUnit(totalStorageSpace));
-                sectionViewHolder.availableStorageSpace.setText(UnitConverter.convertByteToProperUnit(availableStorageSpace));
+                sectionViewHolder.totalSpace.setText(UnitConverter.convertByteToProperUnit(totalSpace));
+                sectionViewHolder.freeSpace.setText(UnitConverter.convertByteToProperUnit(freeSpace));
             }
         }
 
@@ -1353,18 +1353,20 @@ public class FileMgmtFragment extends Fragment {
                                     storageType = mContext.getString(R.string.file_mgmt_internal_storage_name);
                                 }
                                 sectionViewHolder.storageType.setText(storageType);
-                                sectionViewHolder.totalStorageSpace.setText(calculatingText);
-                                sectionViewHolder.availableStorageSpace.setText(calculatingText);
+                                sectionViewHolder.totalSpace.setText(calculatingText);
+                                sectionViewHolder.freeSpace.setText(calculatingText);
                             }
                         });
 
-                        StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
-                        totalStorageSpace = statFs.getTotalBytes();
-                        availableStorageSpace = statFs.getAvailableBytes();
+//                        StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
+//                        totalSpace = statFs.getTotalBytes();
+//                        freeSpace = statFs.getAvailableBytes();
+                        final long totalSpace = StorageUsage.getTotalSpace();
+                        final long freeSpace = StorageUsage.getFreeSpace();
                         ((Activity) mContext).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateSection(sectionViewHolder, totalStorageSpace, availableStorageSpace, isFirstCircleAnimated);
+                                updateSection(sectionViewHolder, totalSpace, freeSpace, isFirstCircleAnimated);
                                 if (isFirstCircleAnimated) {
                                     isFirstCircleAnimated = false;
                                 }
@@ -1453,16 +1455,16 @@ public class FileMgmtFragment extends Fragment {
             public View rootView;
             public CircleDisplay circleDisplay;
             public TextView storageType;
-            public TextView totalStorageSpace;
-            public TextView availableStorageSpace;
+            public TextView totalSpace;
+            public TextView freeSpace;
 
             public SectionedViewHolder(View itemView) {
                 super(itemView);
                 rootView = itemView;
                 circleDisplay = (CircleDisplay) itemView.findViewById(R.id.circle_display_view);
                 storageType = (TextView) itemView.findViewById(R.id.storage_type);
-                totalStorageSpace = (TextView) itemView.findViewById(R.id.total_storage_space);
-                availableStorageSpace = (TextView) itemView.findViewById(R.id.available_storage_space);
+                totalSpace = (TextView) itemView.findViewById(R.id.total_space);
+                freeSpace = (TextView) itemView.findViewById(R.id.free_space);
             }
 
         }

@@ -14,13 +14,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import java.util.Locale;
 
@@ -88,9 +85,9 @@ public class OverviewFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
         if (mStatInfo != null) {
-            String cloudStorageUsage = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatVolUsed(), mStatInfo.getFormatCloudTotal());
+            String cloudStorageUsage = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatTeraUsed(), mStatInfo.getFormatTeraTotal());
             outState.putString(KEY_CLOUD_STORAGE_USAGE, cloudStorageUsage);
-            outState.putInt(KEY_CLOUD_STORAGE_USAGE_PROGRESS, mStatInfo.getCloudUsedPercentage());
+            outState.putInt(KEY_CLOUD_STORAGE_USAGE_PROGRESS, mStatInfo.getTeraUsedPercentage());
             outState.putInt(KEY_CLOUD_STORAGE_USAGE_SECONDARY_PROGRESS, 0);
 
             outState.putString(KEY_PINNED_STORAGE_USAGE, mStatInfo.getFormatPinTotal());
@@ -200,9 +197,9 @@ public class OverviewFragment extends Fragment {
                                 if (mStatInfo != null) {
                                     displayNetworkStatus(HCFSConnStatus.getConnStatus(mContext, mStatInfo));
 
-                                    String storageUsageText = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatVolUsed(), mStatInfo.getFormatCloudTotal());
+                                    String storageUsageText = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatTeraUsed(), mStatInfo.getFormatTeraTotal());
                                     mCloudStorageUsage.setText(storageUsageText);
-                                    mCloudStorageProgressBar.setProgress(mStatInfo.getCloudUsedPercentage());
+                                    mCloudStorageProgressBar.setProgress(mStatInfo.getTeraUsedPercentage());
                                     mCloudStorageProgressBar.setSecondaryProgress(0);
 
                                     mPinnedStorageUsage.setText(mStatInfo.getFormatPinTotal());
