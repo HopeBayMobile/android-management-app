@@ -6,7 +6,6 @@
 #include <openssl/err.h>
 #include <string.h>
 #include <stdio.h>
-#include "base64.h"
 
 int getUniqueCode(unsigned char*);
 int getEncryptCode(unsigned char* encrypt_code, size_t* output_length);
