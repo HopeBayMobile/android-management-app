@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -154,20 +155,26 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
 
     private String getFileDirDataRatio(FileDirInfo fileDirInfo) {
         FileDirStatusInfo fileDirStatusInfo;
-//        if (fileDirInfo.getCurrentFile().isDirectory()) {
         if (fileDirInfo.isDirectory()) {
             fileDirStatusInfo = getDirStatusInfo(fileDirInfo.getFilePath());
         } else {
             fileDirStatusInfo = getFileStatusInfo(fileDirInfo.getFilePath());
         }
-        int numLocal = fileDirStatusInfo.getNumLocal();
-        int numHybrid = fileDirStatusInfo.getNumHybrid();
-        int numCloud = fileDirStatusInfo.getNumCloud();
+
+        int numLocal = 0;
+        int numHybrid = 0;
+        int numCloud = 0;
+        if (fileDirStatusInfo != null) {
+            numLocal = fileDirStatusInfo.getNumLocal();
+            numHybrid = fileDirStatusInfo.getNumHybrid();
+            numCloud = fileDirStatusInfo.getNumCloud();
+        }
         int numTotal = numLocal + numHybrid + numCloud;
         String ratio = numLocal + "/" + numTotal + " (local/total)";
         return String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), ratio);
     }
 
+    @Nullable
     private FileDirStatusInfo getDirStatusInfo(String dirPath) {
         if (dirPath == null) {
             return null;
@@ -198,6 +205,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         return fileDirStatusInfo;
     }
 
+    @Nullable
     private FileDirStatusInfo getFileStatusInfo(String filePath) {
         if (filePath == null) {
             return null;
