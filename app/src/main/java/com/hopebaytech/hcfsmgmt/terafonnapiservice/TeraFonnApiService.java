@@ -348,15 +348,15 @@ public class TeraFonnApiService extends Service {
             try {
                 UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
                 UidInfo uidInfo = uidDAO.get(packageName);
-                uidDAO.close();
 
                 ApplicationInfo applicationInfo = getPackageManager().
                         getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-
                 com.hopebaytech.hcfsmgmt.info.AppInfo appInfo =
                         new com.hopebaytech.hcfsmgmt.info.AppInfo(TeraFonnApiService.this);
                 appInfo.setApplicationInfo(applicationInfo);
-                appInfo.setExternalDirList(uidInfo.getExternalDir());
+                if (uidInfo != null) {
+                    appInfo.setExternalDirList(uidInfo.getExternalDir());
+                }
                 return appInfo.getAppStatus();
             } catch (PackageManager.NameNotFoundException e) {
                 Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));
