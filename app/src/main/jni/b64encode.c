@@ -171,14 +171,14 @@ int b64decode_str(char *inputstr, unsigned char *outputstr, int *outlen,
 	if (group_count == 3) {
 		outputstr[out_index++] = (buf[0] << 2) + ((buf[1] & 0x30) >> 4);
 		outputstr[out_index++] = (buf[1] << 4) + (buf[2] >> 2);
-		outputstr[out_index++] = buf[2] << 6;
+		outputstr[out_index] = buf[2] << 6;
 	} else if (group_count == 2) {
 		outputstr[out_index++] = (buf[0] << 2) + ((buf[1] & 0x30) >> 4);
-		outputstr[out_index++] = (buf[1] << 4);
+		outputstr[out_index] = (buf[1] << 4);
 	} else if (group_count != 0) {
 		/* impossible situation */
 		return -2;
 	}
-	*outlen = out_index - 1;
+	*outlen = out_index;
 	return 0;
 }

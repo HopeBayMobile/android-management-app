@@ -8,8 +8,8 @@
  */
 int teraPublicDecrypt(unsigned char* output, unsigned char* input)
 {
-    int decoded_length = 0;
     int input_length = strlen(input);
+    int decoded_length;
 
     unsigned char decoded[input_length];
 
@@ -17,7 +17,6 @@ int teraPublicDecrypt(unsigned char* output, unsigned char* input)
     if (b64decode_str(input, decoded, &decoded_length, input_length) != 0)
         return -1;
 
-    decoded_length++;
     int encrypted_length = decoded_length - ENCRYPTED_KEY_SIZE;
     unsigned char key[KEY_SIZE];
     unsigned char encrypted[encrypted_length];
@@ -36,12 +35,12 @@ int teraPublicDecrypt(unsigned char* output, unsigned char* input)
 
 #ifdef DEBUG
     printf("\n");
-    printf("[DEC key]"); hex_print(key, sizeof(key));
-    printf("[DEC encrypted key]"); hex_print(encrypted_key, sizeof(encrypted_key));
-    printf("[DEC encrypted]"); hex_print(encrypted, sizeof(encrypted));
+    printf("[DEC key]"); hex_print(key, KEY_SIZE);
+    printf("[DEC encrypted key]"); hex_print(encrypted_key, ENCRYPTED_KEY_SIZE);
+    printf("[DEC encrypted]"); hex_print(encrypted, encrypted_length);
 #endif
     // Start to decrypt
-    if (aes_gcm_decrypt_fix_iv(output, encrypted, sizeof(encrypted), key) != 0) {
+    if (aes_gcm_decrypt_fix_iv(output, encrypted, encrypted_length, key) != 0) {
         printf("error\n");
         return -1;
     }
