@@ -230,7 +230,7 @@ public class MgmtCluster {
                 String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
                 getDeviceInfo.setResponseCode(responseCode);
                 getDeviceInfo.setMessage(decryptResponseContent);
-                Logs.d(CLASSNAME, "getDeviceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                Logs.d(CLASSNAME, "getDeviceInfo", "responseCode=" + responseCode + ", decryptResponseContent=" + decryptResponseContent);
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceInfo", Log.getStackTraceString(e));
             } finally {
