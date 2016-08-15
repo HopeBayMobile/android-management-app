@@ -15,8 +15,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="65dp"
-        android:layout_marginTop="132dp"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="100dp"
         android:src="@drawable/icon_tera_logo_l_login" />
 
     <LinearLayout
@@ -37,8 +37,8 @@
         <FrameLayout
             android:layout_width="76dp"
             android:layout_height="76dp"
-            android:layout_marginBottom="@dimen/M1"
             android:layout_marginTop="7dp"
+            android:layout_marginBottom="92dp"
             android:background="@drawable/white_background_gray_border"
             android:clickable="true">
 
@@ -56,6 +56,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
         android:layout_below="@+id/switch_account_layout_icon"
         android:gravity="center">
 

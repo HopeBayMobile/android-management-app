@@ -13,6 +13,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.LoadingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestorationFragment;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
