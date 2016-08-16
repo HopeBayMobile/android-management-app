@@ -51,6 +51,7 @@ import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 import java.util.List;
@@ -139,8 +140,8 @@ public class SwitchAccountActivity extends AppCompatActivity {
             mSwitchAccount.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (ContextCompat.checkSelfPermission(SwitchAccountActivity.this, Manifest.permission.READ_PHONE_STATE)
-                            == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(SwitchAccountActivity.this,
+                            Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                         showProgressDialog();
 
                         MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
@@ -159,8 +160,10 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                 new Thread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        boolean isSuccess = false;
                                         String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
-                                        final RegisterResultInfo registerResultInfo = MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
+                                        final RegisterResultInfo registerResultInfo =
+                                                MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
                                         if (registerResultInfo != null) {
                                             AccountInfo accountInfo = new AccountInfo();
                                             accountInfo.setName(mAccountName);
@@ -181,10 +184,12 @@ public class SwitchAccountActivity extends AppCompatActivity {
 //                                            editor.apply();
                                         }
 
+                                        final boolean isSuccessful = isSuccess;
                                         runOnUiThread(new Runnable() {
                                             @Override
                                             public void run() {
-                                                if (registerResultInfo != null) {
+//                                                if (registerResultInfo != null) {
+                                                if (isSuccessful) {
                                                     Intent intent = new Intent(SwitchAccountActivity.this, MainActivity.class);
                                                     startActivity(intent);
                                                     finish();
@@ -201,7 +206,12 @@ public class SwitchAccountActivity extends AppCompatActivity {
 
                             @Override
                             public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                Logs.e(CLASSNAME, "onAuthFailed",
+                                        "responseCode=" + authResultInfo.getResponseCode() +
+                                                "responseContent=" + authResultInfo.getMessage());
                                 mErrorMsg.setText(R.string.switch_account_failed);
+                                dismissProgressDialog();
+
                             }
                         });
                         authProxy.auth();
@@ -364,7 +374,8 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                                     @Override
                                     public void onConnected(@Nullable Bundle bundle) {
-                                        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+                                        OptionalPendingResult<GoogleSignInResult> opr =
+                                                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
                                         if (opr.isDone()) {
                                             GoogleSignInResult result = opr.get();
                                             final String currentAuthCode = getServerAuthCode(result);
@@ -375,7 +386,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onResult(@NonNull GoogleSignInResult result) {
                                                     final String currentAuthCode = getServerAuthCode(result);
-                                                    Logs.w(CLASSNAME, "onCreate", "currentAuthCode=" + currentAuthCode);
+                                                    Logs.w(CLASSNAME, "onResult", "currentAuthCode=" + currentAuthCode);
                                                     mOldServerAuthCode = currentAuthCode;
                                                 }
                                             });
@@ -420,7 +431,6 @@ public class SwitchAccountActivity extends AppCompatActivity {
     }
 
     private void showProgressDialog() {
-        dismissProgressDialog();
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setIndeterminate(true);
@@ -462,11 +472,13 @@ public class SwitchAccountActivity extends AppCompatActivity {
                     String currentAccount = mCurrentAccount.getText().toString();
                     mTargetAccount.setText(mAccountEmail);
                     if (currentAccount.equals(mAccountEmail)) {
-                        ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(ContextCompat.getColor(SwitchAccountActivity.this, android.R.color.darker_gray));
+                        ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(
+                                ContextCompat.getColor(SwitchAccountActivity.this, android.R.color.darker_gray));
                         mSwitchAccount.setEnabled(false);
                         mErrorMsg.setText(R.string.switch_account_require_new_account);
                     } else {
-                        ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(ContextCompat.getColor(SwitchAccountActivity.this, R.color.colorAccent));
+                        ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(
+                                ContextCompat.getColor(SwitchAccountActivity.this, R.color.colorAccent));
                         mSwitchAccount.setEnabled(true);
                         mErrorMsg.setText("");
                     }

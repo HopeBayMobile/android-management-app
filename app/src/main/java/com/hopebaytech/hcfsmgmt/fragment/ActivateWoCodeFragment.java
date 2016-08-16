@@ -185,9 +185,11 @@ public class ActivateWoCodeFragment extends Fragment {
                                             mWorkHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    final boolean failed = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
-                                                    if (failed) {
-                                                        TeraCloudConfig.resetHCFSConfig();
+//                                                    final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                                    final boolean isSuccess = HCFSConfig.storeHCFSConfig(registerResultInfo);
+//                                                    if (failed) {
+                                                    if (!isSuccess) {
+                                                        HCFSConfig.resetHCFSConfig();
                                                     } else {
                                                         AccountInfo accountInfo = new AccountInfo();
                                                         accountInfo.setName(username);
@@ -222,7 +224,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                                         @Override
                                                         public void run() {
                                                             dismissProgressDialog();
-                                                            if (failed) {
+//                                                            if (failed) {
+                                                            if (!isSuccess) {
                                                                 mErrorMessage.setText(R.string.activate_failed);
                                                             } else {
                                                                 FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -513,8 +516,10 @@ public class ActivateWoCodeFragment extends Fragment {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            boolean isFailed = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
-                                            if (isFailed) {
+//                                            boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            boolean isSuccess = HCFSConfig.storeHCFSConfig(registerResultInfo);
+//                                            if (isFailed) {
+                                            if (!isSuccess) {
                                                 signOut();
                                                 TeraCloudConfig.resetHCFSConfig();
                                                 mUiHandler.post(new Runnable() {
