@@ -14,7 +14,7 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -226,7 +226,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean hcfsEnabled() throws RemoteException {
-            return HCFSConfig.isActivated(TeraFonnApiService.this);
+            return TeraCloudConfig.isTeraCloudActivated(TeraFonnApiService.this);
         }
 
         @Override

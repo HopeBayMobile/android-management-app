@@ -1,12 +1,12 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.TeraStatDAO;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraStatInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,9 +15,9 @@ import org.json.JSONObject;
  * @author Aaron
  *         Created by Aaron on 2016/3/31.
  */
-public class HCFSConfig {
+public class TeraCloudConfig {
 
-    public static final String CLASSNAME = HCFSConfig.class.getSimpleName();
+    public static final String CLASSNAME = TeraCloudConfig.class.getSimpleName();
     public static final String TAG = HCFSMgmtUtils.TAG;
 
     public static final String HCFS_CONFIG_CURRENT_BACKEND = "current_backend";
@@ -28,9 +28,30 @@ public class HCFSConfig {
     public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
     public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
 
-    public static boolean isActivated(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//    public static boolean isTeraAppLogin(Context context) {
+//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+//        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
+//    }
+
+    public static void activateTeraCloud(Context context) {
+        TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(context);
+        TeraStatInfo teraStatInfo = new TeraStatInfo();
+        teraStatInfo.setEnabled(true);
+        if (teraStatDAO.getCount() == 0) {
+            teraStatDAO.insert(teraStatInfo);
+        } else {
+            teraStatDAO.update(teraStatInfo);
+        }
+    }
+
+    public static boolean isTeraCloudActivated(Context context) {
+        TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(context);
+        TeraStatInfo teraStatInfo = teraStatDAO.getFirst();
+        if (teraStatInfo != null) {
+            return teraStatInfo.isEnabled();
+        } else {
+            return false;
+        }
     }
 
     public static boolean setHCFSConfig(String key, String value) {
@@ -119,13 +140,13 @@ public class HCFSConfig {
 
     public static boolean storeHCFSConfig(RegisterResultInfo registerResultInfo) {
         boolean isFailed = false;
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
+        if (!setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, registerResultInfo.getBackendUser())) {
+        if (!setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_USER, registerResultInfo.getBackendUser())) {
             isFailed = true;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
+        if (!setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
             isFailed = true;
         }
         if (!reloadConfig()) {
@@ -135,13 +156,13 @@ public class HCFSConfig {
     }
 
     public static void resetHCFSConfig() {
-        setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
-        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_ACCOUNT, "");
-        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, "");
-        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PASS, "");
-        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_URL, "");
-        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, "");
-        setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_PROTOCOL, "");
+        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
+        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_ACCOUNT, "");
+        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_USER, "");
+        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_PASS, "");
+        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_URL, "");
+        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_CONTAINER, "");
+        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_PROTOCOL, "");
     }
 
 }

@@ -40,7 +40,8 @@ import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -204,12 +205,12 @@ public class TeraMgmtService extends Service {
 //
 //            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
 //            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
 //            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
 //            editor.apply();
 //        }
 //        googleApiClient.disconnect();
-//        HCFSConfig.stopSyncToCloud();
+//        TeraCloudConfig.stopSyncToCloud();
 //
 //        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 //    }
@@ -558,7 +559,7 @@ public class TeraMgmtService extends Service {
                             public void onAuthFailed(AuthResultInfo authResultInfo) { // Mmgt auth failed
                                 Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
                                 if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                                    HCFSConfig.stopSyncToCloud();
+                                    TeraCloudConfig.stopSyncToCloud();
                                     NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
                                     int flag = NotificationEvent.FLAG_OPEN_APP;
@@ -569,9 +570,11 @@ public class TeraMgmtService extends Service {
                                     extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
+                                    TeraAppConfig.disableApp(TeraMgmtService.this);
+
                                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                                    editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//                                    editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                                     editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     editor.apply();
                                 }
@@ -582,7 +585,7 @@ public class TeraMgmtService extends Service {
 
                     @Override
                     public void onAuthFailed() { // Google silent auth failed
-                        HCFSConfig.stopSyncToCloud();
+                        TeraCloudConfig.stopSyncToCloud();
                         NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
                         int flag = NotificationEvent.FLAG_OPEN_APP;
@@ -593,9 +596,11 @@ public class TeraMgmtService extends Service {
                         extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
+                        TeraAppConfig.disableApp(TeraMgmtService.this);
+
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//                        editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                         editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         editor.apply();
                     }

@@ -4,18 +4,14 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.FileObserver;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
@@ -28,7 +24,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,12 +47,13 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -189,9 +185,9 @@ public class ActivateWoCodeFragment extends Fragment {
                                             mWorkHandler.post(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                                    final boolean failed = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
                                                     if (failed) {
-                                                        HCFSConfig.resetHCFSConfig();
+                                                        TeraCloudConfig.resetHCFSConfig();
                                                     } else {
                                                         AccountInfo accountInfo = new AccountInfo();
                                                         accountInfo.setName(username);
@@ -201,10 +197,21 @@ public class ActivateWoCodeFragment extends Fragment {
                                                         accountDAO.insert(accountInfo);
                                                         accountDAO.close();
 
-                                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                                        editor.apply();
+                                                        TeraAppConfig.enableApp(mContext);
+//                                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+//                                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+//                                                        editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
+//                                                        editor.apply();
+
+                                                        TeraCloudConfig.activateTeraCloud(mContext);
+//                                                        TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(mContext);
+//                                                        TeraStatInfo teraStatInfo = new TeraStatInfo();
+//                                                        teraStatInfo.setEnabled(true);
+//                                                        if (teraStatDAO.getCount() == 0) {
+//                                                            teraStatDAO.insert(teraStatInfo);
+//                                                        } else {
+//                                                            teraStatDAO.update(teraStatInfo);
+//                                                        }
 
                                                         String url = registerResultInfo.getBackendUrl();
                                                         String token = registerResultInfo.getStorageAccessToken();
@@ -506,10 +513,10 @@ public class ActivateWoCodeFragment extends Fragment {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            boolean isFailed = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
                                             if (isFailed) {
                                                 signOut();
-                                                HCFSConfig.resetHCFSConfig();
+                                                TeraCloudConfig.resetHCFSConfig();
                                                 mUiHandler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
@@ -535,10 +542,21 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 accountDAO.insert(accountInfo);
                                                 accountDAO.close();
 
-                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                                editor.apply();
+                                                TeraAppConfig.enableApp(mContext);
+//                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+//                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+//                                                editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
+//                                                editor.apply();
+
+                                                TeraCloudConfig.activateTeraCloud(mContext);
+//                                                TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(mContext);
+//                                                TeraStatInfo teraStatInfo = new TeraStatInfo();
+//                                                teraStatInfo.setEnabled(true);
+//                                                if (teraStatDAO.getCount() == 0) {
+//                                                    teraStatDAO.insert(teraStatInfo);
+//                                                } else {
+//                                                    teraStatDAO.update(teraStatInfo);
+//                                                }
 
                                                 String url = registerResultInfo.getBackendUrl();
                                                 String token = registerResultInfo.getStorageAccessToken();
