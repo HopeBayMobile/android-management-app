@@ -7,16 +7,16 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
-public class HCFSDBHelper extends SQLiteOpenHelper {
+public class TeraDBHelper extends SQLiteOpenHelper {
 
     public static final String DATABASE_NAME = "hopebay.db";
     public static final int VERSION = 1;
     private final String CLASSNAME = getClass().getSimpleName();
     private static SQLiteDatabase mDatabase;
-    private static HCFSDBHelper mHCFSDBHelper;
+    private static TeraDBHelper mTeraDBHelper;
     private static int mOpenCounter;
 
-    public HCFSDBHelper(Context context, String name, CursorFactory factory, int version) {
+    public TeraDBHelper(Context context, String name, CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 
@@ -38,11 +38,11 @@ public class HCFSDBHelper extends SQLiteOpenHelper {
 
     public static synchronized SQLiteDatabase getDataBase(Context context) {
         mOpenCounter++;
-        if (mHCFSDBHelper == null) {
-            mHCFSDBHelper = new HCFSDBHelper(context, DATABASE_NAME, null, VERSION);
+        if (mTeraDBHelper == null) {
+            mTeraDBHelper = new TeraDBHelper(context, DATABASE_NAME, null, VERSION);
         }
         if (mDatabase == null || !mDatabase.isOpen()) {
-            mDatabase = mHCFSDBHelper.getWritableDatabase();
+            mDatabase = mTeraDBHelper.getWritableDatabase();
         }
         return mDatabase;
     }

@@ -265,7 +265,6 @@ public class RestorationFragment extends Fragment {
             TextView imei = (TextView) convertView.findViewById(R.id.imei);
             imei.setText(childInfo.getImei());
 
-
             ImageView radioBtn = (ImageView) convertView.findViewById(R.id.radio_btn);
             if (childInfo.isChecked()) {
                 radioBtn.setImageResource(R.drawable.icon_btn_selected);

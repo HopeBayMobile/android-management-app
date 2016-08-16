@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/login_bkg" />
 
     <RelativeLayout
         android:id="@+id/top_layout"
@@ -35,9 +40,12 @@
     <ExpandableListView
         android:id="@+id/expanded_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@+id/progress_circle"
-        android:layout_below="@+id/top_layout" />
+        android:layout_below="@+id/top_layout"
+        android:layout_marginEnd="@dimen/M2"
+        android:layout_marginStart="@dimen/M2"
+        android:overScrollMode="never" />
 
     <ProgressBar
         android:id="@+id/progress_circle"
@@ -46,10 +54,13 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/search_backup"
         android:layout_centerInParent="true"
+        android:layout_marginBottom="@dimen/M2"
+        android:layout_marginTop="@dimen/M2"
         android:indeterminate="true" />
 
-    <TextView
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/search_backup"
+        style="@style/F6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/button_layout"
@@ -61,42 +72,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="27dp"
         android:gravity="center"
         android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/M1"
+            android:layout_width="100dp"
+            android:layout_height="36dp"
+            android:layout_marginEnd="17dp"
             android:background="@android:color/darker_gray">
 
             <TextView
                 android:id="@+id/back_btn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingBottom="@dimen/M6"
-                android:paddingEnd="@dimen/M1"
-                android:paddingStart="@dimen/M1"
-                android:paddingTop="@dimen/M6"
+                android:gravity="center"
                 android:text="Back"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/M1"
+            android:layout_width="100dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="17dp"
             android:background="@color/colorAccent">
 
             <TextView
                 android:id="@+id/next_btn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingBottom="@dimen/M6"
-                android:paddingEnd="@dimen/M1"
-                android:paddingStart="@dimen/M1"
-                android:paddingTop="@dimen/M6"
+                android:gravity="center"
                 android:text="Next"
                 android:textColor="@android:color/white" />
 
