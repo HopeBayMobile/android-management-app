@@ -64,7 +64,7 @@ public class HCFSMgmtUtils {
     public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
-    public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
+    public static final String PREF_TERA_APP_LOGIN = "pref_tera_app_login";
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
@@ -650,18 +650,18 @@ public class HCFSMgmtUtils {
         if (syncWifiOnly) {
             if (netInfo != null && netInfo.isConnected() && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 String logMsg = "Wifi is connected";
-                HCFSConfig.startSyncToCloud(context, logMsg);
+                TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi is not connected";
-                HCFSConfig.stopSyncToCloud(context, logMsg);
+                TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         } else {
             if (netInfo != null && netInfo.isConnected()) {
                 String logMsg = "Wifi or Mobile network is connected";
-                HCFSConfig.startSyncToCloud(context, logMsg);
+                TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi or Mobile network is not connected";
-                HCFSConfig.stopSyncToCloud(context, logMsg);
+                TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         }
     }

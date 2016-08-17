@@ -46,7 +46,8 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -171,12 +172,13 @@ public class SwitchAccountActivity extends AppCompatActivity {
                                             accountDAO.insert(accountInfo);
                                             accountDAO.close();
 
-                                            HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            TeraCloudConfig.storeHCFSConfig(registerResultInfo);
 
-                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
-                                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                                            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                            editor.apply();
+                                            TeraAppConfig.enableApp(SwitchAccountActivity.this);
+//                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
+//                                            SharedPreferences.Editor editor = sharedPreferences.edit();
+//                                            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
+//                                            editor.apply();
                                         }
 
                                         runOnUiThread(new Runnable() {

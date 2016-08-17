@@ -26,9 +26,12 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
+import com.hopebaytech.hcfsmgmt.db.TeraStatDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.info.TeraStatInfo;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -148,9 +151,9 @@ public class ActivateWithCodeFragment extends Fragment {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            final boolean failed = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
                                             if (failed) {
-                                                HCFSConfig.resetHCFSConfig();
+                                                TeraCloudConfig.resetHCFSConfig();
                                             } else {
                                                 AccountInfo accountInfo = new AccountInfo();
                                                 accountInfo.setName(username);
@@ -160,11 +163,22 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 accountDAO.insert(accountInfo);
                                                 accountDAO.close();
 
-                                                SharedPreferences sharedPreferences =
-                                                        PreferenceManager.getDefaultSharedPreferences(mContext);
-                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                                editor.apply();
+                                                TeraAppConfig.enableApp(mContext);
+//                                                SharedPreferences sharedPreferences =
+//                                                        PreferenceManager.getDefaultSharedPreferences(mContext);
+//                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+//                                                editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
+//                                                editor.apply();
+
+                                                TeraCloudConfig.activateTeraCloud(mContext);
+//                                                TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(mContext);
+//                                                TeraStatInfo teraStatInfo = new TeraStatInfo();
+//                                                teraStatInfo.setEnabled(true);
+//                                                if (teraStatDAO.getCount() == 0) {
+//                                                    teraStatDAO.insert(teraStatInfo);
+//                                                } else {
+//                                                    teraStatDAO.update(teraStatInfo);
+//                                                }
 
                                                 String url = registerResultInfo.getBackendUrl();
                                                 String token = registerResultInfo.getStorageAccessToken();

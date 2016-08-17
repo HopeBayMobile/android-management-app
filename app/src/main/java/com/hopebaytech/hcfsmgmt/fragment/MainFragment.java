@@ -234,16 +234,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     private Bitmap downloadUserIcon(String iconUrl) {
         Bitmap bitmap = null;
-        try {
-            URL urlConnection = new URL(iconUrl);
-            HttpsURLConnection conn = (HttpsURLConnection) urlConnection.openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
+        if (iconUrl != null) {
+            try {
+                URL urlConnection = new URL(iconUrl);
+                HttpsURLConnection conn = (HttpsURLConnection) urlConnection.openConnection();
+                conn.setRequestMethod("GET");
+                conn.connect();
 
-            BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
-            bitmap = BitmapFactory.decodeStream(bInputStream);
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "run", Log.getStackTraceString(e));
+                BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
+                bitmap = BitmapFactory.decodeStream(bInputStream);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "run", Log.getStackTraceString(e));
+            }
         }
         return bitmap;
     }

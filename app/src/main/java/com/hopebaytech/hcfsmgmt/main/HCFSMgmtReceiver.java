@@ -11,10 +11,10 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.service.TeraAPIServer;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 public class HCFSMgmtReceiver extends BroadcastReceiver {
 
@@ -26,9 +26,10 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String action = intent.getAction();
         Logs.d(CLASSNAME, "onReceive", "action=" + action);
-        boolean isHCFSActivated = HCFSConfig.isActivated(context);
-        if (isHCFSActivated) {
-            Logs.d(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
+//        boolean isHCFSActivated = TeraCloudConfig.isTeraAppLogin(context);
+        boolean isTeraAppLogin = TeraAppConfig.isTeraAppLogin(context);
+        if (isTeraAppLogin) {
+            Logs.d(CLASSNAME, "onReceive", "isTeraAppLogin=" + isTeraAppLogin);
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 // Detect network status and determine whether sync data to cloud
                 boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
@@ -140,7 +141,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 context.startService(intentService);
             }
         } else {
-            Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
+            Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isTeraAppLogin);
         }
 
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
