@@ -151,8 +151,9 @@ public class ActivateWithCodeFragment extends Fragment {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            final boolean failed = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
-                                            if (failed) {
+//                                            final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            final boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
+                                            if (!isSuccess) {
                                                 TeraCloudConfig.resetHCFSConfig();
                                             } else {
                                                 AccountInfo accountInfo = new AccountInfo();
@@ -189,7 +190,8 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 @Override
                                                 public void run() {
                                                     dismissProgressDialog();
-                                                    if (failed) {
+//                                                    if (failed) {
+                                                    if (!isSuccess) {
                                                         mErrorMessage.setText(R.string.activate_failed);
                                                     } else {
                                                         FragmentTransaction ft = getFragmentManager().beginTransaction();
