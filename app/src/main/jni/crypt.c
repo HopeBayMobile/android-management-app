@@ -1,7 +1,8 @@
-#include "uniqueCode.h"
-#include <sys/system_properties.h>
+#include "crypt.h"
 
 int padding = RSA_PKCS1_PADDING;
+
+// TODO move to safety place
 char publicKey[]="-----BEGIN PUBLIC KEY-----\n"\
                   "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAx6Kp1jzh9wVZ4BiwnW2G\n"\
                   "fhmMiZk1138w8RwmViZCqWmL0Pj9SPR6w2XMx1bVDkohVWgs4kjPrE44349QiAmp\n"\
@@ -11,6 +12,35 @@ char publicKey[]="-----BEGIN PUBLIC KEY-----\n"\
                   "z9tnn1X/dNYJG/oP34bC7cWz8XdPeyBxB4sCdZKSy7AOryXw5vzcOeEd9OJY2Hdh\n"\
                   "+wIDAQAB\n"\
                   "-----END PUBLIC KEY-----\n";
+#ifndef CLIENT_SIDE
+char privateKey[] = "-----BEGIN RSA PRIVATE KEY-----\n"\
+                     "MIIEowIBAAKCAQEAx6Kp1jzh9wVZ4BiwnW2GfhmMiZk1138w8RwmViZCqWmL0Pj9\n"\
+                     "SPR6w2XMx1bVDkohVWgs4kjPrE44349QiAmpLb9o8mSrQxGkJCKGAE+xYE5n1QO+\n"\
+                     "4zPzs0eWJyXLJ8Pn4tvk7+qbK/Ybv06/8a8BzAhQObaPbS0hSwjqMR8kcy7OMFL/\n"\
+                     "S5UxQ/Td41tDbqXYe/6MAF17jtJMRVv40nTXjdDh77Q5u7gK79HtYZPEsKO72CfA\n"\
+                     "IxLU1f1hXqgtgXS3iSVFg6H4PFpDph889GsJz9tnn1X/dNYJG/oP34bC7cWz8XdP\n"\
+                     "eyBxB4sCdZKSy7AOryXw5vzcOeEd9OJY2Hdh+wIDAQABAoIBADDH8JQnAFgp+JIn\n"\
+                     "tlBhiPGbMJoW0+86Zy0jYcK/Sp626bFAhjOjebPxVh6HezwopQiHkiAhBo3l90O5\n"\
+                     "c0YqhiplkTFZo/eZgfBKd0/wKTmNLxX/+k7uTOhL38blF0U6O5lVfhWZ0Bzn4FPY\n"\
+                     "3FIkH15J0cCoeVeGJZJ+NSuXnoJ+SNml84CslBEKEYf7OKBeljk6V4C6mGcraPVB\n"\
+                     "5TszW8Ccv7B+ICEnDK54jupC21ZUtkSAGrvacQUwHojyxkeboO5EMk8eEHDkCklM\n"\
+                     "Kjz5sF1a/EouM8fca5JO8Y5DULd9hWxg6lF8u/e67fLXm6yG3GA2dqLDCDJcECJH\n"\
+                     "9HwGGUECgYEA6n443SYC3K7kKHhV200masJoTyCD+Tlavfk57hA4644VI5NPvHe8\n"\
+                     "TvVMkGaVh4ggFuR0PkgOzY1DG/HIg3TCd5lhD5tSfAZnGe2AVJB5IKoQYQsA3Z07\n"\
+                     "yUHtprXmLY2HyvxUiTUAKQKzn+rPYsGWU7U5IklG/dq1GWp+D4PlNnECgYEA2fIA\n"\
+                     "WHUNgbufEisId2NXOvTSbe8x1Gjos+r002XLJCydNJsHWEkUe7j1XvtI1geM3+vE\n"\
+                     "JRr5FH6VD2hQDupLvSQFztczEbJYZklqMX4A2isD0E3j630eVb2uWey05ux3owlO\n"\
+                     "BYIWuvueetgsfsjOGiPLgroTLf3orUBgBZ0rjSsCgYBotf6MelnS0+IcVEf6isP5\n"\
+                     "7mAH3XwxQTRNGsqMjP/t5992qGR1w336QD11SenBwL6bml5yJVk+3rK1+szQLsZc\n"\
+                     "A8i84F3/9hf6Ev04Rd9g/7AatYAodfrpjyAhTp6/frDBqtXRAzLUHVm6sm7zKYEI\n"\
+                     "VidyMQibeRtfgxdRtFMZcQKBgFXEzewBzJn0eypMMx3Aw3BZLoLC8io0SvebDFQx\n"\
+                     "KBuJTyiHpgFRaTUzWaTSYRyRhhgNEXjEv6cYFZMlqvPjsoCxr3Nx7xAUzoMaeycU\n"\
+                     "/kLdULfmHz7qU0jMx9Ntutdx0bcgj0rNoiJdqUWQ0xnl7m4NDibZEXk1Bh9ASUmM\n"\
+                     "S7pXAoGBAJvrIN8OB9iz5f0EoXhe0WuWYhK7ydEVUr7Mwq9dV/bT/H8n6c2zKVql\n"\
+                     "BQB9LzicBLuuvftWxO5r65x0NfT7oBDMq/wqWdgfipfyl5E9f+7FchSX/WPOQ8xe\n"\
+                     "ozxqvnQleBB/gg0o02FIG9+cMD5EnGju8DS+KyTLwngZSkgvCcdz\n"\
+                     "-----END RSA PRIVATE KEY-----\n";
+#else
 // Disable private key functions
 char privateKey[] = "";
 
@@ -77,6 +107,19 @@ int getUniqueCode(unsigned char *code)
     return 0;
 }
 
+int getEncryptCode(unsigned char* encrypted, size_t* output_length)
+{
+
+    unsigned char plainText[2048/8];
+    getUniqueCode(plainText);
+    publicEncryptCode(encrypted, plainText, output_length);
+
+    return 0;
+}
+
+#endif
+
+
 RSA * createRSA(unsigned char * key,int public)
 {
     RSA *rsa= NULL;
@@ -138,16 +181,6 @@ void printLastError(char *msg)
     ERR_error_string(ERR_get_error(), err);
     printf("%s ERROR: %s\n",msg, err);
     free(err);
-}
-
-int getEncryptCode(unsigned char* encrypted, size_t* output_length)
-{
-
-    unsigned char plainText[2048/8];
-    getUniqueCode(plainText);
-    publicEncryptCode(encrypted, plainText, output_length);
-
-    return 0;
 }
 
 int encryptCode(char* keyType, unsigned char* encrypted, const unsigned char* plainText, const size_t* output_length)
@@ -239,3 +272,15 @@ int publicDecryptCode(unsigned char* decrypted, const unsigned char* encrypted, 
 {
     return decryptCode("public", decrypted, encrypted, input_length);
 }
+
+#ifndef CLIENT_SIDE
+int privateEncryptCode(unsigned char* encrypted, const unsigned char* plainText, const size_t* output_length)
+{
+    return encryptCode("private", encrypted, plainText, output_length);
+}
+
+int privateDecryptCode(unsigned char* decrypted, const unsigned char* encrypted, const size_t input_length)
+{
+    return decryptCode("private", decrypted, encrypted, input_length);
+}
+#endif

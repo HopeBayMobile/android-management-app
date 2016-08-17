@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <sys/system_properties.h>
 #include <android/log.h>
-#include "uniqueCode.h"
+#include "crypt.h"
 
 extern void HCFS_file_status(const char **json_res, const char *pathname);
 extern void HCFS_dir_status(const char **json_res, const char *pathname);

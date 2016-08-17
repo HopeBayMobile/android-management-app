@@ -14,7 +14,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/err.h>
-// #include "params.h"
+#include "params.h"
 #include "b64encode.h"
 // #include "logger.h"
 // #include "compress.h"
