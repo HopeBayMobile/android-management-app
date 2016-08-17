@@ -182,7 +182,7 @@ int aes_gcm_decrypt_core(unsigned char *output, unsigned char *input,
 		retcode = 1;
 		goto decrypt_final;
 	}
-	if (!EVP_DecryptFinal(&ctx, tag, &output_length)) {
+	if (!EVP_DecryptFinal_ex(&ctx, tag, &output_length)) {
 		retcode = 2;
 		goto decrypt_final;
 	}
