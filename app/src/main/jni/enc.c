@@ -123,7 +123,7 @@ int aes_gcm_encrypt_core(unsigned char *output, unsigned char *input,
 		retcode = 1;
 		goto final;
 	}
-	if (!EVP_EncryptFinal(&ctx, output + output_preserve_size + tmp_length,
+	if (!EVP_EncryptFinal_ex(&ctx, output + output_preserve_size + tmp_length,
 			      &output_length)) {
 		retcode = 2;
 		goto final;
