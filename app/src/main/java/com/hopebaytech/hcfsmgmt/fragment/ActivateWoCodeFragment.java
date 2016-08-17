@@ -186,10 +186,10 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 @Override
                                                 public void run() {
 //                                                    final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                                    final boolean isSuccess = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                                    final boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
 //                                                    if (failed) {
                                                     if (!isSuccess) {
-                                                        HCFSConfig.resetHCFSConfig();
+                                                        TeraCloudConfig.resetHCFSConfig();
                                                     } else {
                                                         AccountInfo accountInfo = new AccountInfo();
                                                         accountInfo.setName(username);
@@ -517,7 +517,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                         @Override
                                         public void run() {
 //                                            boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                            boolean isSuccess = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
 //                                            if (isFailed) {
                                             if (!isSuccess) {
                                                 signOut();

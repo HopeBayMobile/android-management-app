@@ -152,9 +152,9 @@ public class ActivateWithCodeFragment extends Fragment {
                                         @Override
                                         public void run() {
 //                                            final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                            final boolean isSuccess = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            final boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
                                             if (!isSuccess) {
-                                                HCFSConfig.resetHCFSConfig();
+                                                TeraCloudConfig.resetHCFSConfig();
                                             } else {
                                                 AccountInfo accountInfo = new AccountInfo();
                                                 accountInfo.setName(username);

@@ -141,15 +141,15 @@ public class TeraCloudConfig {
     public static boolean storeHCFSConfig(RegisterResultInfo registerResultInfo) {
 //        boolean isFailed = false;
         boolean isSuccess = true;
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
+        if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
 //            isFailed = true;
             isSuccess = false;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_USER, registerResultInfo.getBackendUser())) {
+        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, registerResultInfo.getBackendUser())) {
 //            isFailed = true;
             isSuccess = false;
         }
-        if (!setHCFSConfig(HCFSConfig.HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
+        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
 //            isFailed = true;
             isSuccess = false;
         }
@@ -162,13 +162,13 @@ public class TeraCloudConfig {
     }
 
     public static void resetHCFSConfig() {
-        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_CURRENT_BACKEND, "NONE");
-        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_ACCOUNT, "");
-        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_USER, "");
-        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_PASS, "");
-        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_URL, "");
-        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_CONTAINER, "");
-        setHCFSConfig(TeraCloudConfig.HCFS_CONFIG_SWIFT_PROTOCOL, "");
+        setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, "NONE");
+        setHCFSConfig(HCFS_CONFIG_SWIFT_ACCOUNT, "");
+        setHCFSConfig(HCFS_CONFIG_SWIFT_USER, "");
+        setHCFSConfig(HCFS_CONFIG_SWIFT_PASS, "");
+        setHCFSConfig(HCFS_CONFIG_SWIFT_URL, "");
+        setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, "");
+        setHCFSConfig(HCFS_CONFIG_SWIFT_PROTOCOL, "");
     }
 
 }
