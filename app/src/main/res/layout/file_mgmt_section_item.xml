@@ -38,7 +38,7 @@
                 android:text="@string/file_mgmt_section_item_total_storage_space" />
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/total_storage_space"
+                android:id="@+id/total_space"
                 style="@style/F8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
                 android:text="@string/file_mgmt_section_item_available_storage_space" />
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/available_storage_space"
+                android:id="@+id/free_space"
                 style="@style/F7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

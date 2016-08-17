@@ -14,6 +14,7 @@ import android.support.v7.preference.PreferenceManager;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.main.SwitchAccountActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 /**
  * @author Aaron
@@ -44,10 +45,11 @@ public class SwitchAccountDialogFragment extends DialogFragment {
         builder.setPositiveButton(getString(R.string._continue), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
-                editor.apply();
+                TeraAppConfig.disableApp(mActivity);
+//                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
+//                SharedPreferences.Editor editor = sharedPreferences.edit();
+//                editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
+//                editor.apply();
 
                 Intent intent = new Intent(mActivity, SwitchAccountActivity.class);
                 mActivity.startActivity(intent);

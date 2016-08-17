@@ -10,16 +10,18 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
-import com.hopebaytech.hcfsmgmt.db.ServiceFileDirDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
@@ -38,7 +40,8 @@ import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -46,21 +49,6 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
-
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Binder;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -217,19 +205,19 @@ public class TeraMgmtService extends Service {
 //
 //            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
 //            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
 //            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
 //            editor.apply();
 //        }
 //        googleApiClient.disconnect();
-//        HCFSConfig.stopSyncToCloud();
+//        TeraCloudConfig.stopSyncToCloud();
 //
 //        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 //    }
 
-    private void pinOrUnpinApp(AppInfo info) {
+    private boolean pinOrUnpinApp(AppInfo info) {
         Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
-        pinOrUnpinApp(info, PinType.NORMAL);
+        return pinOrUnpinApp(info, PinType.NORMAL);
     }
 
     private boolean pinOrUnpinApp(AppInfo info, int pinType) {
@@ -240,14 +228,14 @@ public class TeraMgmtService extends Service {
             if (!HCFSMgmtUtils.pinApp(info, pinType)) {
                 isSuccess = false;
                 if (pinType != PinType.PRIORITY) {
-                    handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
+                    revertPinStatus(info, getString(R.string.notify_pin_app_failure));
                 }
             }
         } else {
             if (!HCFSMgmtUtils.unpinApp(info)) {
                 isSuccess = false;
                 if (pinType != PinType.PRIORITY) {
-                    handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
+                    revertPinStatus(info, getString(R.string.notify_unpin_app_failure));
                 }
             }
         }
@@ -259,21 +247,21 @@ public class TeraMgmtService extends Service {
             if (HCFSMgmtUtils.pinApp(info)) {
                 listener.onPinUnpinSuccessful(info);
             } else {
-                handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_pin_app_failure));
+                revertPinStatus(info, getString(R.string.notify_pin_app_failure));
                 listener.onPinUnpinFailed(info);
             }
         } else {
             if (HCFSMgmtUtils.unpinApp(info)) {
                 listener.onPinUnpinSuccessful(info);
             } else {
-                handleAppFailureOfPinOrUnpin(info, getString(R.string.notify_unpin_app_failure));
+                revertPinStatus(info, getString(R.string.notify_unpin_app_failure));
                 listener.onPinUnpinFailed(info);
             }
         }
     }
 
-    private void handleAppFailureOfPinOrUnpin(AppInfo info, String notifyMsg) {
-        Logs.d(CLASSNAME, "pinOrUnpinFailure", info.getName());
+    private void revertPinStatus(AppInfo info, String notifyMsg) {
+        Logs.d(CLASSNAME, "revertPinStatus", info.getName());
 
         // Pin/Unpin failed, reset to original status.
         if (info.isPinned()) {
@@ -282,11 +270,12 @@ public class TeraMgmtService extends Service {
             HCFSMgmtUtils.pinApp(info);
         }
 
-        // Notify user pin/unpin failed
-        int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-        String notify_title = getString(R.string.app_name);
-        String notify_message = notifyMsg + ": " + info.getName();
-        NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+//        // Notify user pin/unpin failed
+//        int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//        String notify_title = getString(R.string.app_name);
+//        String notify_message = notifyMsg + ": " + info.getName();
+//        NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+
     }
 
     private void pinOrUnpinDataTypeFile() {
@@ -422,29 +411,29 @@ public class TeraMgmtService extends Service {
         }
     }
 
-    private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
-        String filePath = info.getFilePath();
-        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
-        boolean isPinned = info.isPinned();
-        if (isPinned) {
-            int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
-            boolean isSuccess = (code == 0);
-            if (!isSuccess) {
-                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                String notify_title = getString(R.string.app_name);
-                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-            }
-        } else {
-            boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
-            if (!isSuccess) {
-                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                String notify_title = getString(R.string.app_name);
-                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-            }
-        }
-    }
+//    private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
+//        String filePath = info.getFilePath();
+//        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
+//        boolean isPinned = info.isPinned();
+//        if (isPinned) {
+//            int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
+//            boolean isSuccess = (code == 0);
+//            if (!isSuccess) {
+//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//                String notify_title = getString(R.string.app_name);
+//                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
+//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+//            }
+//        } else {
+//            boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
+//            if (!isSuccess) {
+//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//                String notify_title = getString(R.string.app_name);
+//                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
+//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+//            }
+//        }
+//    }
 
     public void pinOrUnpinFileDirectory(FileDirInfo info, IPinUnpinListener listener) {
         ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
@@ -452,17 +441,16 @@ public class TeraMgmtService extends Service {
         serviceFileDirInfo.setFilePath(info.getFilePath());
 //        mServiceFileDirDAO.insert(serviceFileDirInfo);
         String filePath = info.getFilePath();
-        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory",
-                "filePath=" + filePath + ", threadName=" + Thread.currentThread().getName());
+        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
         boolean isPinned = info.isPinned();
         if (isPinned) {
             int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
             boolean isSuccess = (code == 0);
             if (!isSuccess) {
-                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                String notify_title = getString(R.string.app_name);
-                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//                String notify_title = getString(R.string.app_name);
+//                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
+//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
 
                 listener.onPinUnpinFailed(info);
             } else {
@@ -471,10 +459,10 @@ public class TeraMgmtService extends Service {
         } else {
             boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
             if (!isSuccess) {
-                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-                String notify_title = getString(R.string.app_name);
-                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
+//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//                String notify_title = getString(R.string.app_name);
+//                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
+//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
 
                 listener.onPinUnpinFailed(info);
             } else {
@@ -571,7 +559,7 @@ public class TeraMgmtService extends Service {
                             public void onAuthFailed(AuthResultInfo authResultInfo) { // Mmgt auth failed
                                 Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
                                 if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                                    HCFSConfig.stopSyncToCloud();
+                                    TeraCloudConfig.stopSyncToCloud();
                                     NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
                                     int flag = NotificationEvent.FLAG_OPEN_APP;
@@ -582,9 +570,11 @@ public class TeraMgmtService extends Service {
                                     extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
+                                    TeraAppConfig.disableApp(TeraMgmtService.this);
+
                                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                                    editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//                                    editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                                     editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     editor.apply();
                                 }
@@ -595,7 +585,7 @@ public class TeraMgmtService extends Service {
 
                     @Override
                     public void onAuthFailed() { // Google silent auth failed
-                        HCFSConfig.stopSyncToCloud();
+                        TeraCloudConfig.stopSyncToCloud();
                         NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
                         int flag = NotificationEvent.FLAG_OPEN_APP;
@@ -606,9 +596,11 @@ public class TeraMgmtService extends Service {
                         extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
+                        TeraAppConfig.disableApp(TeraMgmtService.this);
+
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//                        editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                         editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         editor.apply();
                     }
@@ -685,7 +677,7 @@ public class TeraMgmtService extends Service {
                                         default:
                                             notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                                     }
-                                    String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatVolUsed() + " / " + statInfo.getFormatCloudTotal();
+                                    String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatTeraUsed() + " / " + statInfo.getFormatTeraTotal();
                                     int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
                                     NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
                                 }
@@ -869,12 +861,21 @@ public class TeraMgmtService extends Service {
                 isSuccess = false;
             }
         }
+
         if (!isSuccess) {
             // Notify user pin/unpin system app failed
-            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-            String notify_title = getString(R.string.app_name);
-            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
-            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
+            Handler uiHandler = new Handler(Looper.getMainLooper());
+            uiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(mContext, R.string.notify_pin_unpin_system_app_failed, Toast.LENGTH_LONG).show();
+                }
+            });
+
+//            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
+//            String notify_title = getString(R.string.app_name);
+//            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
+//            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
         }
     }
 

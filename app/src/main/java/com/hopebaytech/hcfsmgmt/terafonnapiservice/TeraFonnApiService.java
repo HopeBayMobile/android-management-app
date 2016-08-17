@@ -10,18 +10,17 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
+import com.hopebaytech.hcfsmgmt.utils.StorageUsage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -227,7 +226,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean hcfsEnabled() throws RemoteException {
-            return HCFSConfig.isActivated(TeraFonnApiService.this);
+            return TeraCloudConfig.isTeraCloudActivated(TeraFonnApiService.this);
         }
 
         @Override
@@ -240,6 +239,15 @@ public class TeraFonnApiService extends Service {
             return HCFSMgmtUtils.stopUploadTeraData();
         }
 
+        @Override
+        public long getTeraFreeSpace() {
+            return StorageUsage.getFreeSpace();
+        }
+
+        @Override
+        public long getTeraTotalSpace() {
+            return StorageUsage.getTotalSpace();
+        }
     };
 
     @Override
@@ -340,15 +348,15 @@ public class TeraFonnApiService extends Service {
             try {
                 UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
                 UidInfo uidInfo = uidDAO.get(packageName);
-                uidDAO.close();
 
                 ApplicationInfo applicationInfo = getPackageManager().
                         getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-
                 com.hopebaytech.hcfsmgmt.info.AppInfo appInfo =
                         new com.hopebaytech.hcfsmgmt.info.AppInfo(TeraFonnApiService.this);
                 appInfo.setApplicationInfo(applicationInfo);
-                appInfo.setExternalDirList(uidInfo.getExternalDir());
+                if (uidInfo != null) {
+                    appInfo.setExternalDirList(uidInfo.getExternalDir());
+                }
                 return appInfo.getAppStatus();
             } catch (PackageManager.NameNotFoundException e) {
                 Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));

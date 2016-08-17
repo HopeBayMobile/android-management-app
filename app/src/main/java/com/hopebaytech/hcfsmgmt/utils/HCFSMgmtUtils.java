@@ -28,9 +28,9 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 
@@ -38,7 +38,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -65,7 +64,7 @@ public class HCFSMgmtUtils {
     public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
-    public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
+    public static final String PREF_TERA_APP_LOGIN = "pref_tera_app_login";
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
@@ -342,6 +341,11 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo = new HCFSStatInfo();
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
+                // Add the Tera storage scope.
+                long totalSpace = StorageUsage.getTotalSpace();
+                long freeSpace = StorageUsage.getFreeSpace();
+                hcfsStatInfo.setTeraTotal(totalSpace);
+                hcfsStatInfo.setTeraUsed(totalSpace - freeSpace);
                 hcfsStatInfo.setVolUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_VOL_USED));
                 hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
                 hcfsStatInfo.setCacheUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_USED));
@@ -482,15 +486,15 @@ public class HCFSMgmtUtils {
     public static int getDirLocationStatus(String pathName) {
         int locationStatus = LocationStatus.LOCAL;
         try {
-            long start = System.currentTimeMillis();
             String jsonResult = HCFSApiUtils.getDirStatus(pathName);
-            long end = System.currentTimeMillis();
             String logMsg = "pathName=" + pathName + ", jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 int code = jObject.getInt("code");
                 if (code == 0) {
+                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
+
                     JSONObject dataObj = jObject.getJSONObject("data");
                     int num_local = dataObj.getInt("num_local");
                     int num_hybrid = dataObj.getInt("num_hybrid");
@@ -505,7 +509,6 @@ public class HCFSMgmtUtils {
                     } else {
                         locationStatus = LocationStatus.HYBRID;
                     }
-//                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
                 } else {
                     Logs.e(CLASSNAME, "getDirLocationStatus", logMsg);
                 }
@@ -629,7 +632,7 @@ public class HCFSMgmtUtils {
                 }
 
                 UidDAO uidDAO = UidDAO.getInstance(context);
-                for (String pkgName: externalPkgNameMap.keySet()) {
+                for (String pkgName : externalPkgNameMap.keySet()) {
                     UidInfo uidInfo = uidDAO.get(pkgName);
                     ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
                     uidInfo.setExternalDir(externalPathList);
@@ -647,18 +650,18 @@ public class HCFSMgmtUtils {
         if (syncWifiOnly) {
             if (netInfo != null && netInfo.isConnected() && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 String logMsg = "Wifi is connected";
-                HCFSConfig.startSyncToCloud(context, logMsg);
+                TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi is not connected";
-                HCFSConfig.stopSyncToCloud(context, logMsg);
+                TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         } else {
             if (netInfo != null && netInfo.isConnected()) {
                 String logMsg = "Wifi or Mobile network is connected";
-                HCFSConfig.startSyncToCloud(context, logMsg);
+                TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi or Mobile network is not connected";
-                HCFSConfig.stopSyncToCloud(context, logMsg);
+                TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         }
     }
@@ -809,8 +812,8 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "setSwiftToken", Log.getStackTraceString(e));
         }
         return isSuccess;
-     }
-    
+    }
+
     /***
      * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
      * <li>0 when setting sync point completed.</li>

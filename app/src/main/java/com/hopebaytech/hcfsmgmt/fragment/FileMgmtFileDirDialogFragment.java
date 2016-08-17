@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -70,17 +71,22 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         fileDirName.setText(itemInfo.getName());
 
         final ImageView fileDirPinIcon = (ImageView) view.findViewById(R.id.file_dir_pin_icon);
-        fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
-        fileDirPinIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean isPinned = !itemInfo.isPinned();
-                boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
-                if (allowPinUnpin) {
-                    fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+        if (itemInfo instanceof FileDirInfo && ((FileDirInfo) itemInfo).isDirectory()) {
+            fileDirPinIcon.setVisibility(View.GONE);
+        } else {
+            fileDirPinIcon.setVisibility(View.VISIBLE);
+            fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
+            fileDirPinIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean isPinned = !itemInfo.isPinned();
+                    boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
+                    if (allowPinUnpin) {
+                        fileDirPinIcon.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                    }
                 }
-            }
-        });
+            });
+        }
 
         final TextView fileDirSize = (TextView) view.findViewById(R.id.file_dir_size);
         String size = String.format(getString(R.string.file_mgmt_dialog_data_size), getString(R.string.file_mgmt_dialog_calculating));
@@ -89,7 +95,9 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
             @Override
             public void run() {
                 FileDirInfo fileDirInfo = ((FileDirInfo) itemInfo);
-                long dirSize = getDirectorySize(fileDirInfo.getCurrentFile());
+//                long dirSize = getDirectorySize(fileDirInfo.getCurrentFile());
+                File file = new File(fileDirInfo.getFilePath());
+                long dirSize = getDirectorySize(file);
                 final String formatSize = UnitConverter.convertByteToProperUnit(dirSize);
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -147,19 +155,26 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
 
     private String getFileDirDataRatio(FileDirInfo fileDirInfo) {
         FileDirStatusInfo fileDirStatusInfo;
-        if (fileDirInfo.getCurrentFile().isDirectory()) {
+        if (fileDirInfo.isDirectory()) {
             fileDirStatusInfo = getDirStatusInfo(fileDirInfo.getFilePath());
         } else {
             fileDirStatusInfo = getFileStatusInfo(fileDirInfo.getFilePath());
         }
-        int numLocal = fileDirStatusInfo.getNumLocal();
-        int numHybrid = fileDirStatusInfo.getNumHybrid();
-        int numCloud = fileDirStatusInfo.getNumCloud();
+
+        int numLocal = 0;
+        int numHybrid = 0;
+        int numCloud = 0;
+        if (fileDirStatusInfo != null) {
+            numLocal = fileDirStatusInfo.getNumLocal();
+            numHybrid = fileDirStatusInfo.getNumHybrid();
+            numCloud = fileDirStatusInfo.getNumCloud();
+        }
         int numTotal = numLocal + numHybrid + numCloud;
         String ratio = numLocal + "/" + numTotal + " (local/total)";
         return String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), ratio);
     }
 
+    @Nullable
     private FileDirStatusInfo getDirStatusInfo(String dirPath) {
         if (dirPath == null) {
             return null;
@@ -190,6 +205,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         return fileDirStatusInfo;
     }
 
+    @Nullable
     private FileDirStatusInfo getFileStatusInfo(String filePath) {
         if (filePath == null) {
             return null;

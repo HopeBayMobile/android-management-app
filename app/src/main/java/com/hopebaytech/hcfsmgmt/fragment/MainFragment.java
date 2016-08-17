@@ -31,6 +31,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -97,9 +98,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mUiHandler = new Handler();
-
-
     }
 
     @Nullable
@@ -234,16 +234,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     private Bitmap downloadUserIcon(String iconUrl) {
         Bitmap bitmap = null;
-        try {
-            URL urlConnection = new URL(iconUrl);
-            HttpsURLConnection conn = (HttpsURLConnection) urlConnection.openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
+        if (iconUrl != null) {
+            try {
+                URL urlConnection = new URL(iconUrl);
+                HttpsURLConnection conn = (HttpsURLConnection) urlConnection.openConnection();
+                conn.setRequestMethod("GET");
+                conn.connect();
 
-            BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
-            bitmap = BitmapFactory.decodeStream(bInputStream);
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "run", Log.getStackTraceString(e));
+                BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
+                bitmap = BitmapFactory.decodeStream(bInputStream);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "run", Log.getStackTraceString(e));
+            }
         }
         return bitmap;
     }

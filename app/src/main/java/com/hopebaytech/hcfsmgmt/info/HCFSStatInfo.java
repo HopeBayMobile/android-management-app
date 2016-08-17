@@ -31,6 +31,16 @@ public class HCFSStatInfo {
     /**
      * unit: bytes
      */
+    private long teraTotal;
+
+    /**
+     * unit: bytes
+     */
+    private long teraUsed;
+
+    /**
+     * unit: bytes
+     */
     private long volUsed;
 
     /**
@@ -112,6 +122,24 @@ public class HCFSStatInfo {
     public void setCloudUsed(long cloudUsed) {
         this.cloudUsed = cloudUsed;
     }
+
+    /* Tera Storage usage */
+    public String getFormatTeraTotal() {
+        return UnitConverter.convertByteToProperUnit(teraTotal);
+    }
+
+    public void setTeraTotal(long teraTotal) {
+        this.teraTotal = teraTotal;
+    }
+
+    public String getFormatTeraUsed() {
+        return UnitConverter.convertByteToProperUnit(teraUsed);
+    }
+
+    public void setTeraUsed(long teraUsed) {
+        this.teraUsed = teraUsed;
+    }
+
 
     public String getFormatCacheTotal() {
         return UnitConverter.convertByteToProperUnit(cacheTotal);
@@ -196,6 +224,17 @@ public class HCFSStatInfo {
         return percentage;
     }
 
+    public int getTeraUsedPercentage() {
+        int percentage;
+        float tmp = ((float) teraUsed / teraTotal * 100);
+        if (tmp > 0 && tmp < 1) {
+            percentage = 1;
+        } else {
+            percentage = (int) ((float) teraUsed / teraTotal * 100);
+        }
+        return percentage;
+    }
+
     public int getCacheUsedPercentage() {
         int percentage;
         float tmp = ((float) cacheUsed / cloudTotal * 100);
@@ -254,6 +293,14 @@ public class HCFSStatInfo {
 
     public long getCloudUsed() {
         return cloudUsed;
+    }
+
+    public long getTeraTotal() {
+        return teraTotal;
+    }
+
+    public long getTeraUsed() {
+        return teraUsed;
     }
 
     public long getVolUsed() {
