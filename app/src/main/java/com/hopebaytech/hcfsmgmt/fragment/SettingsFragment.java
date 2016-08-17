@@ -179,7 +179,7 @@ public class SettingsFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 requestPermissions(
                                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                                        RequestCode.PERMISSIONS_REQUEST_WRITE_PHONE_STATE);
+                                        RequestCode.PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                             }
                         });
                         builder.setCancelable(false);
