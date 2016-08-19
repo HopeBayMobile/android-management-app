@@ -29,6 +29,7 @@
     <string name="activate_incorrect_activation_code">Incorrect activation code.</string>
     <string name="activate_auth_failed">Account authentication failed.</string>
     <string name="activate_failed">Activation failed.</string>
+    <string name="activate_failed_device_in_use">此裝置已經被註冊，啟動失敗。</string>
     <string name="activate_failed_not_supported_device">This device is not supported. Activation failed.</string>
     <string name="activate_failed_device_expired">Tera expired. Activation failed.</string>
     <string name="activate_failed_gateway_timeout">Gateway Timeout: The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.</string>
@@ -186,11 +187,20 @@
     <string name="auth_at_bootup_auth_failed_mgmt_register">Unable to access cloud data, because Tera registration failed.</string>
     <string name="auth_at_bootup_auth_get_device_info">Unable to get device status from management server.</string>
 
-    <string name="alert_dialog_title_warning">Warning</string>
+    <string name="restore_content_desc_title">Restore Contents</string>
+    <string name="restore_content_desc_setup_as_new_device">If you choose \"Setup as a new device\", the previous backup of this device will be removed.</string>
+    <string name="restore_content_desc_non_lock_device">If you choose this backup, all the contents will be transferred from the previous device to this one. The previous device will also be factory reset.</string>
+    <string name="restore_content_desc_lock_device">This backup belongs to a locked device, so it might contain incomplete contents.</string>
+    <string name="restore_item_setup_new_device">Setup as a new devices</string>
+    <string name="restore_item_my_tera">Restore from myTera</string>
+    <string name="restore_item_backup">Restore from backup</string>
+    <string name="restore_search_for_backup"><u>Search for backup</u></string>
+    <string name="restore_back">Back</string>
+    <string name="restore_next">Next</string>
 
-    <!-- Button text for dialog -->
-    <string name="yes">YES</string>
-    <string name="no">NO</string>
+    <string name="alert_dialog_title_warning">Alert</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">CANCEL</string>
     <string name="ok">OK</string>

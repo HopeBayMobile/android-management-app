@@ -29,7 +29,6 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
-import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
@@ -484,8 +483,8 @@ public class TeraMgmtService extends Service {
 
     private void doActionAccordingToDeviceStatus(final String jwtToken) {
         final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
-        MgmtCluster.GetDeviceServiceInfoProxy getDeviceInfoProxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
-        getDeviceInfoProxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
+        MgmtCluster.GetDeviceServiceInfoProxy getDeviceServiceInfoProxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
+        getDeviceServiceInfoProxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
             @Override
             public void onGetDeviceServiceInfoSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 String state = deviceServiceInfo.getState();
@@ -524,14 +523,14 @@ public class TeraMgmtService extends Service {
 
             @Override
             public void onGetDeviceServiceInfoFailed(DeviceServiceInfo deviceServiceInfo) {
-                Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                Logs.e(CLASSNAME, "onGetDeviceServiceInfoFailed", null);
                 int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
                 String notify_title = getString(R.string.app_name);
                 String notify_content = getString(R.string.auth_at_bootup_auth_get_device_info);
                 NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content);
             }
         });
-        getDeviceInfoProxy.get();
+        getDeviceServiceInfoProxy.get();
     }
 
     private void checkDeviceStatus() {

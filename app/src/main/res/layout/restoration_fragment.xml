@@ -54,6 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/search_backup"
         android:layout_centerInParent="true"
+        android:visibility="invisible"
         android:layout_marginBottom="@dimen/M2"
         android:layout_marginTop="@dimen/M2"
         android:indeterminate="true" />
@@ -65,7 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/button_layout"
         android:layout_centerHorizontal="true"
-        android:text="Search for backup" />
+        android:text="@string/restore_search_for_backup" />
 
     <LinearLayout
         android:id="@+id/button_layout"
@@ -87,6 +88,7 @@
                 android:id="@+id/back_btn"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="Back"
                 android:textColor="@android:color/white" />

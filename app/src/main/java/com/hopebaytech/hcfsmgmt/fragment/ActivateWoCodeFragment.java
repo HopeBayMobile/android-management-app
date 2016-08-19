@@ -26,7 +26,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -41,7 +41,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
-import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
+import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -92,7 +93,7 @@ public class ActivateWoCodeFragment extends Fragment {
     private View mView;
     private Context mContext;
     private ProgressDialog mProgressDialog;
-    private ImageView mGoogleActivate;
+    private LinearLayout mGoogleActivate;
     private TextView mErrorMessage;
 
     public static ActivateWoCodeFragment newInstance() {
@@ -128,7 +129,7 @@ public class ActivateWoCodeFragment extends Fragment {
 
         mView = view;
 
-        mGoogleActivate = (ImageView) view.findViewById(R.id.google_activate);
+        mGoogleActivate = (LinearLayout) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
@@ -145,9 +146,15 @@ public class ActivateWoCodeFragment extends Fragment {
                     return;
                 }
 
-                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
+                if (ContextCompat.checkSelfPermission(mContext,
+                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
                     if (NetworkUtils.isNetworkConnected(mContext)) {
                         showProgressDialog();
+                        // It needs to sign out first in order to show oogle account chooser as user
+                        // want to choose another Google account.
+                        if (mGoogleApiClient != null) {
+                            signOut();
+                        }
                         mWorkHandler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -155,6 +162,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                 if (serverClientId != null) {
                                     GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
                                             mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
+
                                         @Override
                                         public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
                                             Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
@@ -319,163 +327,113 @@ public class ActivateWoCodeFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
-        if (requestCode == RequestCode.GOOGLE_SIGN_IN) {
-            if (resultCode == Activity.RESULT_OK) {
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-                final GoogleSignInAccount acct = result.getSignInAccount();
-                if (acct != null) {
-                    final String serverAuthCode = acct.getServerAuthCode();
-                    final String email = acct.getEmail();
-//                    final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-//                    authParam.setAuthCode(serverAuthCode);
-//                    authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-//                    authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
-//                    authParam.setVendor(Build.BRAND);
-//                    authParam.setModel(Build.MODEL);
-//                    authParam.setAndroidVersion(Build.VERSION.RELEASE);
-//                    authParam.setHcfsVersion(getString(R.string.tera_version));
 
-                    MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
-                    MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                    authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                        @Override
-                        public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
-                            MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
-                            MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(registerParam, authResultInfo.getToken());
-                            registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
-                                @Override
-                                public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                                    mWorkHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-//                                            boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                            boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
-//                                            if (isFailed) {
-                                            if (!isSuccess) {
-                                                signOut();
-                                                TeraCloudConfig.resetHCFSConfig();
-                                                mUiHandler.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        dismissProgressDialog();
-                                                        mErrorMessage.setText(R.string.activate_failed);
-                                                    }
-                                                });
-                                            } else {
-                                                final String name = acct.getDisplayName();
-                                                final String email = acct.getEmail();
-                                                String photoUrl = null;
-                                                if (acct.getPhotoUrl() != null) {
-                                                    photoUrl = acct.getPhotoUrl().toString();
-                                                }
-
-                                                AccountInfo accountInfo = new AccountInfo();
-                                                accountInfo.setName(name);
-                                                accountInfo.setEmail(email);
-                                                accountInfo.setImgUrl(photoUrl);
-
-                                                AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-                                                accountDAO.clear();
-                                                accountDAO.insert(accountInfo);
-
-                                                TeraAppConfig.enableApp(mContext);
-//                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-//                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                                editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
-//                                                editor.apply();
-
-                                                TeraCloudConfig.activateTeraCloud(mContext);
-//                                                TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(mContext);
-//                                                TeraStatInfo teraStatInfo = new TeraStatInfo();
-//                                                teraStatInfo.setEnabled(true);
-//                                                if (teraStatDAO.getCount() == 0) {
-//                                                    teraStatDAO.insert(teraStatInfo);
-//                                                } else {
-//                                                    teraStatDAO.update(teraStatInfo);
-//                                                }
-
-                                                String url = deviceServiceInfo.getBackend().getUrl();
-                                                String token = deviceServiceInfo.getBackend().getToken();
-                                                HCFSMgmtUtils.setSwiftToken(url, token);
-
-                                                final String finalPhotoUrl = photoUrl;
-                                                mUiHandler.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        Bundle args = new Bundle();
-                                                        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-                                                        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
-                                                        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, finalPhotoUrl);
-
-                                                        MainFragment mainFragment = MainFragment.newInstance();
-                                                        mainFragment.setArguments(args);
-
-                                                        FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                                        ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
-                                                        ft.commit();
-
-                                                        dismissProgressDialog();
-                                                    }
-                                                });
-
-                                            }
-                                        }
-                                    });
-                                }
-
-                                @Override
-                                public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "deviceServiceInfo=" + deviceServiceInfo);
-
-                                    signOut();
-                                    dismissProgressDialog();
-                                    if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                                        String errorCode = deviceServiceInfo.getErrorCode();
-                                        if (errorCode != null && errorCode.equals(MgmtCluster.IMEI_NOT_FOUND)) {
-                                            Bundle bundle = new Bundle();
-                                            bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
-                                            bundle.putString(KEY_USERNAME, email);
-                                            bundle.putString(KEY_AUTH_CODE, serverAuthCode);
-                                            bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
-
-                                            ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                            fragment.setArguments(bundle);
-
-                                            FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                            ft.replace(R.id.fragment_container, fragment);
-                                            ft.commit();
-                                        }
-                                    }
-                                    mErrorMessage.setText(deviceServiceInfo.getMessage(R.string.activate_failed));
-                                }
-                            });
-                            registerProxy.register();
-                        }
-
-                        @Override
-                        public void onAuthFailed(AuthResultInfo authResultInfo) {
-                            Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
-
-                            signOut();
-                            dismissProgressDialog();
-                            mErrorMessage.setText(R.string.activate_auth_failed);
-                        }
-                    });
-                    authProxy.auth();
-
-                } else {
-                    String failedMsg = "acct is null";
-                    googleAuthFailed(failedMsg);
-                }
-            } else {
-                dismissProgressDialog();
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != RequestCode.GOOGLE_SIGN_IN && resultCode != Activity.RESULT_OK) {
+            dismissProgressDialog();
+            return;
         }
 
+        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+        final GoogleSignInAccount acct = result.getSignInAccount();
+        if (acct == null) {
+            String failedMsg = "acct is null";
+            googleAuthFailed(failedMsg);
+            dismissProgressDialog();
+            return;
+        }
+
+        final String serverAuthCode = acct.getServerAuthCode();
+        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+            @Override
+            public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
+                if (TeraCloudConfig.isTeraCloudActivated(mContext)) {
+                    boolean isAllowEnabled = false;
+                    AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+                    if (accountDAO.getCount() != 0) {
+                        AccountInfo accountInfo = accountDAO.getFirst();
+                        if (accountInfo.getEmail().equals(acct.getEmail())) {
+                            isAllowEnabled = true;
+                        }
+                    }
+
+                    if (isAllowEnabled) {
+                        TeraAppConfig.enableApp(mContext);
+
+                        MainFragment mainFragment = MainFragment.newInstance();
+                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                        ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
+                        ft.commit();
+                    } else {
+                        mErrorMessage.setText(R.string.activate_failed_device_in_use);
+                    }
+
+                    dismissProgressDialog();
+                    return;
+                }
+
+                String jwtToken = authResultInfo.getToken();
+                String imei = HCFSMgmtUtils.getDeviceImei(mContext);
+                MgmtCluster.GetDeviceListProxy proxy = new MgmtCluster.GetDeviceListProxy(jwtToken, imei);
+                proxy.setOnGetDeviceListListener(new MgmtCluster.GetDeviceListProxy.OnGetDeviceListListener() {
+                    @Override
+                    public void onGetDeviceListSuccessful(DeviceListInfo deviceListInfo) {
+                        Logs.d(CLASSNAME, "onGetDeviceListSuccessful", "deviceListInfo=" + deviceListInfo);
+
+                        // No any device backup can be restored, directly register to Tera
+                        if (deviceListInfo.getDeviceStatusInfoList().size() == 0) {
+                            registerTera(authParam, authResultInfo.getToken(), acct);
+                            return;
+                        }
+
+                        Bundle args = new Bundle();
+                        args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, deviceListInfo);
+                        args.putString(KEY_JWT_TOKEN, jwtToken);
+                        args.putString(KEY_GOOGLE_NAME, acct.getDisplayName());
+                        args.putString(KEY_GOOGLE_EMAIL, acct.getEmail());
+                        String photoUrl = null;
+                        if (acct.getPhotoUrl() != null) {
+                            photoUrl = acct.getPhotoUrl().toString();
+                        }
+                        args.putString(KEY_GOOGLE_PHOTO_URL, photoUrl);
+
+                        Fragment restorationFragment = RestorationFragment.newInstance();
+                        restorationFragment.setArguments(args);
+
+                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                        ft.replace(R.id.fragment_container, restorationFragment, RestorationFragment.TAG);
+                        ft.addToBackStack(null);
+                        ft.commit();
+
+                        dismissProgressDialog();
+                    }
+
+                    @Override
+                    public void onGetDeviceListFailed(DeviceListInfo deviceListInfo) {
+                        Logs.e(CLASSNAME, "onGetDeviceListFailed", "deviceListInfo=" + deviceListInfo);
+                        if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                            mErrorMessage.setText(R.string.activate_failed_device_in_use);
+                        } else {
+                            mErrorMessage.setText(R.string.activate_auth_failed);
+                        }
+                        dismissProgressDialog();
+                    }
+                });
+                proxy.get();
+            }
+
+            @Override
+            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
+
+                signOut();
+                mErrorMessage.setText(R.string.activate_auth_failed);
+                dismissProgressDialog();
+            }
+        });
+        authProxy.auth();
     }
 
     @Override
@@ -520,14 +478,17 @@ public class ActivateWoCodeFragment extends Fragment {
         switch (requestCode) {
             case RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE:
                 if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext,
+                            Manifest.permission.READ_PHONE_STATE)) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                         builder.setTitle(R.string.alert_dialog_title_warning);
                         builder.setMessage(R.string.activate_require_read_phone_state_permission);
                         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                                ActivityCompat.requestPermissions((Activity) mContext,
+                                        new String[]{Manifest.permission.READ_PHONE_STATE},
+                                        RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
                             }
                         });
                         builder.setNegativeButton(R.string.cancel, null);
@@ -539,6 +500,110 @@ public class ActivateWoCodeFragment extends Fragment {
                 break;
         }
 
+    }
+
+    private void registerTera(MgmtCluster.GoogleAuthParam authParam, final String jwtToken, final GoogleSignInAccount acct) {
+        MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, jwtToken);
+        registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
+            @Override
+            public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+                mWorkHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
+                        if (!isSuccess) {
+                            signOut();
+                            TeraCloudConfig.resetHCFSConfig();
+                            mUiHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dismissProgressDialog();
+                                    mErrorMessage.setText(R.string.activate_failed);
+                                }
+                            });
+                        } else {
+                            final String name = acct.getDisplayName();
+                            final String email = acct.getEmail();
+                            String photoUrl = null;
+                            if (acct.getPhotoUrl() != null) {
+                                photoUrl = acct.getPhotoUrl().toString();
+                            }
+
+                            AccountInfo accountInfo = new AccountInfo();
+                            accountInfo.setName(name);
+                            accountInfo.setEmail(email);
+                            accountInfo.setImgUrl(photoUrl);
+
+                            AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+                            accountDAO.clear();
+                            accountDAO.insert(accountInfo);
+
+                            TeraAppConfig.enableApp(mContext);
+                            TeraCloudConfig.activateTeraCloud(mContext);
+
+                            String url = registerResultInfo.getBackendUrl();
+                            String token = registerResultInfo.getStorageAccessToken();
+                            HCFSMgmtUtils.setSwiftToken(url, token);
+
+                            final String finalPhotoUrl = photoUrl;
+                            mUiHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Bundle args = new Bundle();
+                                    args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+                                    args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
+                                    args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, finalPhotoUrl);
+
+                                    MainFragment mainFragment = MainFragment.newInstance();
+                                    mainFragment.setArguments(args);
+
+                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                    ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
+                                    ft.commit();
+
+                                    dismissProgressDialog();
+                                }
+                            });
+
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+                Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+
+                signOut();
+                dismissProgressDialog();
+
+                int errorMsgResId = R.string.activate_failed;
+                if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                    if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
+                        bundle.putString(KEY_USERNAME, acct.getEmail());
+                        bundle.putString(KEY_AUTH_CODE, acct.getServerAuthCode());
+                        bundle.putString(KEY_JWT_TOKEN, jwtToken);
+
+                        ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                        fragment.setArguments(bundle);
+
+                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                        ft.replace(R.id.fragment_container, fragment);
+                        ft.commit();
+                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                            registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                        errorMsgResId = R.string.activate_failed_not_supported_device;
+                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                        errorMsgResId = R.string.activate_failed_device_expired;
+                    }
+                }
+                mErrorMessage.setText(errorMsgResId);
+            }
+
+        });
+        registerProxy.register();
     }
 
 }

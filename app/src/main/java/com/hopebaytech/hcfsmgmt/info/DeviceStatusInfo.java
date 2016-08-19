@@ -18,8 +18,7 @@ public class DeviceStatusInfo implements Parcelable {
     private String serviceStatus;
     private String model;
 
-    public DeviceStatusInfo() {
-    }
+    public DeviceStatusInfo() {}
 
     protected DeviceStatusInfo(Parcel in) {
         id = in.readInt();

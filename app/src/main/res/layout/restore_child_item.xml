@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:gravity="center_vertical">
 
     <RelativeLayout
@@ -20,8 +21,7 @@
                 style="@style/F6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Nexus 5X" />
-
+                tools:text="Nexus 5X" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -40,20 +40,20 @@
                     style="@style/F11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="123-456-789"
+                    tools:text="123-456-789"
                     android:textColor="@android:color/darker_gray" />
             </LinearLayout>
 
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/lock_img"
+            android:id="@+id/locked_img"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/M4"
             android:layout_toStartOf="@+id/radio_btn"
-            android:src="@drawable/icon_tera_logo_setting" />
+            android:src="@drawable/icon_locked_device" />
 
         <ImageView
             android:id="@+id/radio_btn"

@@ -9,7 +9,6 @@ import android.os.Message;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -133,7 +132,7 @@ public class MgmtPollingService extends Service {
                 try {
                     Thread.sleep(interval * 1000);
                 } catch (InterruptedException e) {
-                    Logs.e(CLASSNAME, "onGetDeviceInfoFailed", Log.getStackTraceString(e));
+                    Logs.e(CLASSNAME, "onGetDeviceServiceInfoFailed", Log.getStackTraceString(e));
                 }
             }
 

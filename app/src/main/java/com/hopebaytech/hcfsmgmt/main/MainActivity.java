@@ -41,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
         if (TeraAppConfig.isTeraAppLogin(this)) {
             fragment = MainFragment.newInstance();
             TAG = MainFragment.TAG;
-            fragment = RestorationFragment.newInstance();
-            TAG = RestorationFragment.TAG;
         } else {
             fragment = LoadingFragment.newInstance();
             TAG = LoadingFragment.TAG;

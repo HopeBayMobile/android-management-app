@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +32,14 @@ public class RestorationFragment extends Fragment {
     public static final String TAG = RestorationFragment.class.getSimpleName();
 
     private final String CLASSNAME = TAG;
+
+    public static final String KEY_DEVICE_LIST = "key_device_list";
+    public static final String KEY_RESTORE_TYPE = "key_restore_type";
+
+    public static final int RESTORE_TYPE_NEW_DEVICE = 1;
+    public static final int RESTORE_TYPE_MY_TERA = 2;
+    public static final int RESTORE_TYPE_LOCK_DEVICE = 3;
+    public static final int RESTORE_TYPE_NON_LOCK_DEVICE = 4;
 
     private Context mContext;
     private ExpandableListView mExpandableListView;
@@ -75,32 +87,52 @@ public class RestorationFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        List<GroupInfo> groupList = new ArrayList<>();
-
-        GroupInfo groupInfo1 = new GroupInfo();
-        groupInfo1.setCheckable(true);
-        groupInfo1.setTitle("Setup as a new devices");
-
-        GroupInfo groupInfo2 = new GroupInfo();
-        groupInfo2.setCheckable(true);
-        groupInfo2.setTitle("Restore from myTera");
-
-        List<ChildInfo> childList = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            ChildInfo childInfo = new ChildInfo();
-            childInfo.setModel("Nexus 5X -" + i);
-            childInfo.setImei("123-456-789");
-            childList.add(childInfo);
+        DeviceListInfo deviceListInfo = null;
+        Bundle args = getArguments();
+        if (args != null) {
+            deviceListInfo = args.getParcelable(KEY_DEVICE_LIST);
         }
 
-        GroupInfo groupInfo3 = new GroupInfo();
-        groupInfo3.setCheckable(false);
-        groupInfo3.setTitle("Restore from backup");
-        groupInfo3.setChildList(childList);
+        if (deviceListInfo == null) {
+            Logs.e(CLASSNAME, "onActivityCreated", "deviceListInfo == null");
+            return;
+        }
 
-        groupList.add(groupInfo1);
-//        groupList.add(groupInfo2);
-        groupList.add(groupInfo3);
+        List<GroupInfo> groupList = new ArrayList<>();
+        GroupInfo setupNewDevice = new GroupInfo();
+        setupNewDevice.setCheckable(true);
+        setupNewDevice.setTitle(getString(R.string.restore_item_setup_new_device));
+        setupNewDevice.setRestoreType(RESTORE_TYPE_NEW_DEVICE);
+        groupList.add(setupNewDevice);
+
+        if (deviceListInfo.getType() == DeviceListInfo.TYPE_RESTORE_FROM_MY_TERA) {
+            GroupInfo restoreFromMyTera = new GroupInfo();
+            restoreFromMyTera.setCheckable(true);
+            restoreFromMyTera.setTitle(getString(R.string.restore_item_my_tera));
+            restoreFromMyTera.setRestoreType(RESTORE_TYPE_MY_TERA);
+            groupList.add(restoreFromMyTera);
+        } else { // DeviceListInfo.TYPE_RESTORE_FROM_BACKUP
+            List<ChildInfo> childList = new ArrayList<>();
+            List<DeviceStatusInfo> deviceStatusInfoList = deviceListInfo.getDeviceStatusInfoList();
+            for (DeviceStatusInfo info : deviceStatusInfoList) {
+                ChildInfo childInfo = new ChildInfo();
+                childInfo.setModel(info.getModel());
+                childInfo.setImei(info.getImei());
+                if (info.getServiceStatus().equals(MgmtCluster.ServiceState.DISABLED)) { // locked state
+                    childInfo.setRestoreType(RESTORE_TYPE_LOCK_DEVICE);
+                } else {
+                    childInfo.setRestoreType(RESTORE_TYPE_NON_LOCK_DEVICE);
+                }
+                childList.add(childInfo);
+            }
+
+            GroupInfo restoreFromBackup = new GroupInfo();
+            restoreFromBackup.setCheckable(false);
+            restoreFromBackup.setTitle(getString(R.string.restore_item_backup));
+            restoreFromBackup.setChildList(childList);
+
+            groupList.add(restoreFromBackup);
+        }
 
         mRestoreListAdapter = new RestoreListAdapter(groupList);
         mExpandableListView.setGroupIndicator(null);
@@ -119,6 +151,8 @@ public class RestorationFragment extends Fragment {
                 }
                 mRestoreListAdapter.notifyDataSetChanged();
                 mPrevCheckableInfo = childInfo;
+
+                showDialog(childInfo.getRestoreType());
                 return true;
             }
         });
@@ -136,6 +170,11 @@ public class RestorationFragment extends Fragment {
                     }
                     mRestoreListAdapter.notifyDataSetChanged();
                     mPrevCheckableInfo = groupInfo;
+
+                    int restoreType = groupInfo.getRestoreType();
+                    if (restoreType != RESTORE_TYPE_MY_TERA) {
+                        showDialog(groupInfo.getRestoreType());
+                    }
                 }
                 return false;
             }
@@ -158,8 +197,18 @@ public class RestorationFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Logs.d(CLASSNAME, "onClick", "BackButton");
+                ((AppCompatActivity) mContext).onBackPressed();
             }
         });
+    }
+
+    private void showDialog(int deviceType) {
+        Bundle args = new Bundle();
+        args.putInt(KEY_RESTORE_TYPE, deviceType);
+
+        RestoreDialogFragment dialogFragment = RestoreDialogFragment.newInstance();
+        dialogFragment.setArguments(args);
+        dialogFragment.show(getFragmentManager(), RestoreDialogFragment.TAG);
     }
 
     public class RestoreListAdapter extends BaseExpandableListAdapter {
@@ -265,6 +314,13 @@ public class RestorationFragment extends Fragment {
             TextView imei = (TextView) convertView.findViewById(R.id.imei);
             imei.setText(childInfo.getImei());
 
+            ImageView lockedImg = (ImageView) convertView.findViewById(R.id.locked_img);
+            if (childInfo.getRestoreType() == RESTORE_TYPE_LOCK_DEVICE) {
+                lockedImg.setVisibility(View.VISIBLE);
+            } else {
+                lockedImg.setVisibility(View.GONE);
+            }
+
             ImageView radioBtn = (ImageView) convertView.findViewById(R.id.radio_btn);
             if (childInfo.isChecked()) {
                 radioBtn.setImageResource(R.drawable.icon_btn_selected);
@@ -296,6 +352,7 @@ public class RestorationFragment extends Fragment {
 
         private boolean isChecked;
         private boolean isCheckable;
+        private int restoreType;
 
         private List<ChildInfo> childList;
 
@@ -332,6 +389,14 @@ public class RestorationFragment extends Fragment {
         public boolean isCheckable() {
             return isCheckable;
         }
+
+        public int getRestoreType() {
+            return restoreType;
+        }
+
+        public void setRestoreType(int restoreType) {
+            this.restoreType = restoreType;
+        }
     }
 
     public class ChildInfo implements Checkable {
@@ -340,6 +405,7 @@ public class RestorationFragment extends Fragment {
         private String imei;
 
         private boolean isChecked;
+        private int restoreType;
 
         public String getModel() {
             return model;
@@ -365,6 +431,14 @@ public class RestorationFragment extends Fragment {
         @Override
         public void setChecked(boolean checked) {
             isChecked = checked;
+        }
+
+        public int getRestoreType() {
+            return restoreType;
+        }
+
+        public void setRestoreType(int restoreType) {
+            this.restoreType = restoreType;
         }
     }
 
