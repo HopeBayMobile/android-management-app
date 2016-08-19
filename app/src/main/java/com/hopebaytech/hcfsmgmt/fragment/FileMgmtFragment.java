@@ -337,6 +337,12 @@ public class FileMgmtFragment extends Fragment {
                                 @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
                                     showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
+                                    mSectionedRecyclerViewAdapter.
+                                            getSubAdapterItemInfoList().
+                                            get(itemInfo.getPosition()).
+                                            setPinned(!itemInfo.isPinned());
+
                                     itemInfo.setPinned(!itemInfo.isPinned());
 
                                     // Update pin status to uid.db
@@ -359,6 +365,11 @@ public class FileMgmtFragment extends Fragment {
                                 @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
                                     showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
+                                    mSectionedRecyclerViewAdapter.
+                                            getSubAdapterItemInfoList().
+                                            get(itemInfo.getPosition()).
+                                            setPinned(!itemInfo.isPinned());
 
                                     itemInfo.setPinned(!itemInfo.isPinned());
                                     processPinUnpinFailed(itemInfo);
@@ -2204,6 +2215,7 @@ public class FileMgmtFragment extends Fragment {
                             return;
                         }
                         itemInfo.setPinned(isPinned);
+                        itemInfo.setPosition(position);
 
                         mUiHandler.post(new Runnable() {
                             @Override
@@ -2238,6 +2250,8 @@ public class FileMgmtFragment extends Fragment {
                     if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
                         final boolean isPinned = isItemPinned(itemInfo);
                         itemInfo.setPinned(isPinned);
+                        itemInfo.setPosition(position);
+
                         final int alpha = itemInfo.getIconAlpha();
                         mUiHandler.post(new Runnable() {
                             @Override
