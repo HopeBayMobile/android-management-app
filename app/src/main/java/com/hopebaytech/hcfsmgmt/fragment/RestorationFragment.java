@@ -2,8 +2,11 @@ package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,17 +14,31 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.AccountDAO;
+import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
+import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtil;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
@@ -45,11 +62,20 @@ public class RestorationFragment extends Fragment {
     private ExpandableListView mExpandableListView;
     private TextView mBackButton;
     private TextView mNextButton;
-    private ProgressBar mProgressCircle;
     private TextView mSearchBackup;
+    private TextView mErrorMessage;
 
     private RestoreListAdapter mRestoreListAdapter;
     private Checkable mPrevCheckableInfo;
+    private ProgressDialogUtil mProgressDialogUtil;
+    private Handler mUiHandler;
+    private Handler mWorkHandler;
+    private HandlerThread mHandlerThread;
+
+    private String mJwtToken;
+    private String mAccountEmail;
+    private String mAccountName;
+    private String mPhotoUrl;
 
     public static RestorationFragment newInstance() {
         return new RestorationFragment();
@@ -64,6 +90,18 @@ public class RestorationFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mProgressDialogUtil = new ProgressDialogUtil(mContext);
+        mHandlerThread = new HandlerThread(CLASSNAME);
+        mHandlerThread.start();
+        mWorkHandler = new Handler(mHandlerThread.getLooper());
+        mUiHandler = new Handler();
+
+        Bundle extras = getArguments();
+        mJwtToken = extras.getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
+        mAccountEmail = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_EMAIL);
+        mAccountName = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_NAME);
+        mPhotoUrl = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_PHOTO_URL);
     }
 
     @Nullable
@@ -79,8 +117,8 @@ public class RestorationFragment extends Fragment {
         mExpandableListView = (ExpandableListView) view.findViewById(R.id.expanded_list);
         mBackButton = (TextView) view.findViewById(R.id.back_btn);
         mNextButton = (TextView) view.findViewById(R.id.next_btn);
-        mProgressCircle = (ProgressBar) view.findViewById(R.id.progress_circle);
         mSearchBackup = (TextView) view.findViewById(R.id.search_backup);
+        mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
     @Override
@@ -110,14 +148,14 @@ public class RestorationFragment extends Fragment {
             restoreFromMyTera.setCheckable(true);
             restoreFromMyTera.setTitle(getString(R.string.restore_item_my_tera));
             restoreFromMyTera.setRestoreType(RESTORE_TYPE_MY_TERA);
+            restoreFromMyTera.setDeviceStatusInfo(deviceListInfo.getDeviceStatusInfoList().get(0));
             groupList.add(restoreFromMyTera);
         } else { // DeviceListInfo.TYPE_RESTORE_FROM_BACKUP
             List<ChildInfo> childList = new ArrayList<>();
             List<DeviceStatusInfo> deviceStatusInfoList = deviceListInfo.getDeviceStatusInfoList();
             for (DeviceStatusInfo info : deviceStatusInfoList) {
                 ChildInfo childInfo = new ChildInfo();
-                childInfo.setModel(info.getModel());
-                childInfo.setImei(info.getImei());
+                childInfo.setDeviceStatusInfo(info);
                 if (info.getServiceStatus().equals(MgmtCluster.ServiceState.DISABLED)) { // locked state
                     childInfo.setRestoreType(RESTORE_TYPE_LOCK_DEVICE);
                 } else {
@@ -183,12 +221,20 @@ public class RestorationFragment extends Fragment {
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPrevCheckableInfo instanceof GroupInfo) {
-                    String title = ((GroupInfo) mPrevCheckableInfo).getTitle();
-                    Logs.d(CLASSNAME, "onClick", "title=" + title);
-                } else { // ChildInfo
-                    String model = ((ChildInfo) mPrevCheckableInfo).getModel();
-                    Logs.d(CLASSNAME, "onClick", "model=" + model);
+                if (mPrevCheckableInfo != null) {
+                    DeviceStatusInfo deviceStatusInfo = mPrevCheckableInfo.getDeviceStatusInfo();
+
+                    // Setup as new device
+                    if (mPrevCheckableInfo instanceof GroupInfo) {
+                        if (deviceStatusInfo == null) {
+                            registerTera();
+                            return;
+                        }
+                    }
+
+                    // Restore from myTera or backups
+                    String imei = deviceStatusInfo.getImei();
+                    Logs.w(CLASSNAME, "onClick", "imei=" + imei);
                 }
             }
         });
@@ -196,7 +242,6 @@ public class RestorationFragment extends Fragment {
         mBackButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Logs.d(CLASSNAME, "onClick", "BackButton");
                 ((AppCompatActivity) mContext).onBackPressed();
             }
         });
@@ -338,11 +383,19 @@ public class RestorationFragment extends Fragment {
         }
     }
 
-    private interface Checkable {
+    private interface Checkable extends DeviceStatusGetterSetter {
 
         boolean isChecked();
 
         void setChecked(boolean isChecked);
+
+    }
+
+    private interface DeviceStatusGetterSetter {
+
+        DeviceStatusInfo getDeviceStatusInfo();
+
+        void setDeviceStatusInfo(DeviceStatusInfo deviceStatusInfo);
 
     }
 
@@ -355,6 +408,8 @@ public class RestorationFragment extends Fragment {
         private int restoreType;
 
         private List<ChildInfo> childList;
+
+        private DeviceStatusInfo deviceStatusInfo;
 
         public void setCheckable(boolean checkable) {
             isCheckable = checkable;
@@ -397,30 +452,31 @@ public class RestorationFragment extends Fragment {
         public void setRestoreType(int restoreType) {
             this.restoreType = restoreType;
         }
+
+        @Override
+        public DeviceStatusInfo getDeviceStatusInfo() {
+            return deviceStatusInfo;
+        }
+
+        @Override
+        public void setDeviceStatusInfo(DeviceStatusInfo deviceStatusInfo) {
+            this.deviceStatusInfo = deviceStatusInfo;
+        }
     }
 
     public class ChildInfo implements Checkable {
 
-        private String model;
-        private String imei;
-
         private boolean isChecked;
         private int restoreType;
 
-        public String getModel() {
-            return model;
-        }
+        private DeviceStatusInfo deviceStatusInfo;
 
-        public void setModel(String model) {
-            this.model = model;
+        public String getModel() {
+            return deviceStatusInfo.getModel();
         }
 
         public String getImei() {
-            return imei;
-        }
-
-        public void setImei(String imei) {
-            this.imei = imei;
+            return deviceStatusInfo.getImei();
         }
 
         @Override
@@ -433,6 +489,16 @@ public class RestorationFragment extends Fragment {
             isChecked = checked;
         }
 
+        @Override
+        public DeviceStatusInfo getDeviceStatusInfo() {
+            return deviceStatusInfo;
+        }
+
+        @Override
+        public void setDeviceStatusInfo(DeviceStatusInfo deviceStatusInfo) {
+            this.deviceStatusInfo = deviceStatusInfo;
+        }
+
         public int getRestoreType() {
             return restoreType;
         }
@@ -442,4 +508,174 @@ public class RestorationFragment extends Fragment {
         }
     }
 
+    private void registerTera() {
+        if (mJwtToken != null) {
+            registerWithJwtToken(mJwtToken);
+        } else {
+            registerWithoutJwtToken();
+        }
+    }
+
+    private void registerWithJwtToken(final String jwtToken) {
+        mProgressDialogUtil.show(getString(R.string.activate_processing_msg));
+
+        MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
+        registerParam.closeOldCloudSpace();
+
+        MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(registerParam, jwtToken);
+        registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
+            @Override
+            public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+                mWorkHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
+                        if (!isSuccess) {
+                            TeraCloudConfig.resetHCFSConfig();
+                            mUiHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mProgressDialogUtil.dismiss();
+                                    mErrorMessage.setText(R.string.activate_failed);
+                                }
+                            });
+                            return;
+                        }
+
+                        AccountInfo accountInfo = new AccountInfo();
+                        accountInfo.setName(mAccountName);
+                        accountInfo.setEmail(mAccountEmail);
+                        if (mPhotoUrl != null) {
+                            accountInfo.setImgUrl(mPhotoUrl);
+                        }
+
+                        AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+                        accountDAO.clear();
+                        accountDAO.insert(accountInfo);
+
+                        TeraAppConfig.enableApp(mContext);
+                        TeraCloudConfig.activateTeraCloud(mContext);
+
+                        String url = registerResultInfo.getBackendUrl();
+                        String token = registerResultInfo.getStorageAccessToken();
+                        HCFSMgmtUtils.setSwiftToken(url, token);
+
+                        mUiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                Bundle args = new Bundle();
+                                args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, mAccountName);
+                                args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, mAccountEmail);
+                                args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, mPhotoUrl);
+
+                                MainFragment mainFragment = MainFragment.newInstance();
+                                mainFragment.setArguments(args);
+
+                                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
+                                ft.commit();
+
+                                mProgressDialogUtil.dismiss();
+                            }
+                        });
+
+                    }
+                });
+            }
+
+            @Override
+            public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+                Logs.e(CLASSNAME, "registerWithJwtToken", "onRegisterFailed",
+                        "registerResultInfo=" + registerResultInfo);
+
+                int errorMsgResId = R.string.activate_failed;
+                if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                    mProgressDialogUtil.dismiss();
+                    if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(ActivateWoCodeFragment.KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
+                        bundle.putString(ActivateWoCodeFragment.KEY_USERNAME, mAccountEmail);
+                        bundle.putString(ActivateWoCodeFragment.KEY_JWT_TOKEN, jwtToken);
+
+                        ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                        fragment.setArguments(bundle);
+
+                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                        ft.replace(R.id.fragment_container, fragment);
+                        ft.commit();
+                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                            registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                        errorMsgResId = R.string.activate_failed_not_supported_device;
+                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                        errorMsgResId = R.string.activate_failed_device_expired;
+                    }
+                    mErrorMessage.setText(errorMsgResId);
+                } else if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                    registerWithoutJwtToken();
+                } else {
+                    mErrorMessage.setText(errorMsgResId);
+                }
+            }
+
+        });
+        registerProxy.register();
+    }
+
+    /**
+     * Without jwtToken, register Tera with jwtToken from authenticating with Google to get
+     * serverAuthCode and then authenticating with mgmt server to get jwtToken.
+     */
+    private void registerWithoutJwtToken() {
+        mProgressDialogUtil.show(getString(R.string.activate_processing_msg));
+
+        String serverClientId = MgmtCluster.getServerClientId();
+        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
+                new GoogleSilentAuthProxy.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                        String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+
+                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                            @Override
+                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                                String jwtToken = authResultInfo.getToken();
+                                registerWithJwtToken(jwtToken);
+                            }
+
+                            @Override
+                            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed",
+                                        "authResultInfo=" + authResultInfo);
+                                int responseCode = authResultInfo.getResponseCode();
+                                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                                    registerWithoutJwtToken();
+                                } else {
+                                    mErrorMessage.setText(R.string.activate_failed);
+                                }
+                            }
+                        });
+                        authProxy.auth();
+                    }
+
+                    @Override
+                    public void onAuthFailed() {
+                        Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed", null);
+                        mProgressDialogUtil.dismiss();
+                    }
+
+                });
+        googleAuthProxy.auth();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+        }
+
+    }
 }
