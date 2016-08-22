@@ -1,14 +1,13 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.preference.PreferenceManager;
 
-import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 
 /**
  * @author Aaron
@@ -27,9 +26,12 @@ public class HCFSConnStatus {
     public static final int DATA_TRANSFER_SLOW = 2;
 
     public static int getConnStatus(Context context, HCFSStatInfo statInfo) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(context.getString(R.string.pref_sync_wifi_only), true);
-        boolean syncWifiOnlyPref = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
+        boolean syncWifiOnlyPref = true;
+        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(context);
+        SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+        if (settingsInfo != null) {
+            syncWifiOnlyPref = Boolean.valueOf(settingsInfo.getValue());
+        }
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (netInfo == null) {

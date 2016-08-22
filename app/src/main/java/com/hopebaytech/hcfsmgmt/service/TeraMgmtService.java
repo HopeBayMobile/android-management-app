@@ -22,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
@@ -32,6 +33,7 @@ import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
@@ -40,8 +42,6 @@ import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
-import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
-import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -49,6 +49,8 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +76,7 @@ public class TeraMgmtService extends Service {
     private Context mContext;
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
+    private SettingsDAO mSettingsDAO;
 //    private ServiceFileDirDAO mServiceFileDirDAO;
 
     /**
@@ -95,6 +98,7 @@ public class TeraMgmtService extends Service {
 //        mServiceFileDirDAO = ServiceFileDirDAO.getInstance(this);
         mUidDAO = UidDAO.getInstance(this);
         mDataTypeDAO = DataTypeDAO.getInstance(this);
+        mSettingsDAO = SettingsDAO.getInstance(this);
     }
 
     @Override
@@ -706,9 +710,14 @@ public class TeraMgmtService extends Service {
         HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
         if (statInfo != null) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
             String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-            String key = SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO;
-            String storageUsedRatio = sharedPreferences.getString(key, defaultValue);
+            String storageUsedRatio = defaultValue;
+
+            SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+            if (settingsInfo != null) {
+                storageUsedRatio = settingsInfo.getValue();
+            }
 
             long occupiedSize = HCFSMgmtUtils.getOccupiedSize();
             long rawCacheTotal = statInfo.getRawCacheTotal();

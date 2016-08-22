@@ -10,17 +10,19 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
-import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.StorageUsage;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -44,6 +46,7 @@ public class TeraFonnApiService extends Service {
     private ITrackAppStatusListener mTrackAppStatusListener;
     private Map<String, AppStatus> mPackageNameMap;
     private ExecutorService mCacheExecutor;
+    public static final String PREF_SYNC_WIFI_ONLY = "pref_sync_wifi_only";
 
     private final ITeraFonnApiService.Stub mBinder = new ITeraFonnApiService.Stub() {
 
@@ -247,6 +250,17 @@ public class TeraFonnApiService extends Service {
         @Override
         public long getTeraTotalSpace() {
             return StorageUsage.getTotalSpace();
+        }
+
+        @Override
+        public boolean isWifiOnly() {
+            boolean wifiOnly = true;
+            SettingsDAO mSettingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
+            SettingsInfo settingsInfo = mSettingsDAO.get(PREF_SYNC_WIFI_ONLY);
+            if (settingsInfo != null) {
+                wifiOnly = Boolean.valueOf(settingsInfo.getValue());
+            }
+            return wifiOnly;
         }
     };
 
