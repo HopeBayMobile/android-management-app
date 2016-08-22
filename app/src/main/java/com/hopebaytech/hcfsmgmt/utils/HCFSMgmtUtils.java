@@ -861,4 +861,48 @@ public class HCFSMgmtUtils {
         }
         return isSuccess;
     }
+    
+    public static int triggerRestore() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.triggerRestore();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "triggerRestore", "jsonResult=" + jsonResult);
+            } else {
+                code = -(jObject.getInt("code"));
+                Logs.e(CLASSNAME, "triggerRestore", "jsonResult=" + jsonResult);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "triggerRestore", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
+    /***
+    * @return <li>0 if not being restored</li>
+    * <li>1 if in stage 1 of restoration process</li>
+    * <li>2 if in stage 2 of restoration process</li>
+    */
+    public static int checkRestoreStatus() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.checkRestoreStatus();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "checkRestoreStatus", "jObject=" + jObject);
+            } else {
+                code = -(jObject.getInt("code"));
+                Logs.i(CLASSNAME, "checkRestoreStatus", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "checkRestoreStatus", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
 }
