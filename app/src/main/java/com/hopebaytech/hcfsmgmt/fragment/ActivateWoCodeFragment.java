@@ -148,7 +148,7 @@ public class ActivateWoCodeFragment extends Fragment {
                 if (ContextCompat.checkSelfPermission(mContext,
                         Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
                     if (NetworkUtils.isNetworkConnected(mContext)) {
-                        mProgressDialogUtil.show(getString(R.string.activate_processing_msg));
+                        mProgressDialogUtil.show(getString(R.string.processing_msg));
                         // It needs to sign out first in order to show oogle account chooser as user
                         // want to choose another Google account.
                         if (mGoogleApiClient != null) {

@@ -17,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.SwitchDeviceBackendInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 
@@ -666,7 +667,6 @@ public class MgmtCluster {
 
             return cv;
         }
-
     }
 
     public static class RegisterParam implements IParam {

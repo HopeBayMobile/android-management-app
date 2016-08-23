@@ -16,6 +16,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
@@ -25,6 +26,7 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.SwitchDeviceBackendInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -233,8 +235,8 @@ public class RestorationFragment extends Fragment {
                     }
 
                     // Restore from myTera or backups
-                    String imei = deviceStatusInfo.getImei();
-                    Logs.w(CLASSNAME, "onClick", "imei=" + imei);
+                    String sourceImei = deviceStatusInfo.getImei();
+                    restoreDevice(sourceImei);
                 }
             }
         });
@@ -517,7 +519,7 @@ public class RestorationFragment extends Fragment {
     }
 
     private void registerWithJwtToken(final String jwtToken) {
-        mProgressDialogUtil.show(getString(R.string.activate_processing_msg));
+        mProgressDialogUtil.show(getString(R.string.processing_msg));
 
         MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
         registerParam.closeOldCloudSpace();
@@ -626,15 +628,19 @@ public class RestorationFragment extends Fragment {
      * serverAuthCode and then authenticating with mgmt server to get jwtToken.
      */
     private void registerWithoutJwtToken() {
-        mProgressDialogUtil.show(getString(R.string.activate_processing_msg));
+        mProgressDialogUtil.show(getString(R.string.processing_msg));
 
         String serverClientId = MgmtCluster.getServerClientId();
         GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
                 new GoogleSilentAuthProxy.OnAuthListener() {
                     @Override
                     public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                        String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-
+                        GoogleSignInAccount acct = result.getSignInAccount();
+                        if (acct == null) {
+                            registerWithoutJwtToken();
+                            return;
+                        }
+                        String serverAuthCode = acct.getServerAuthCode();
                         MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
                         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                         authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
@@ -662,6 +668,101 @@ public class RestorationFragment extends Fragment {
                     @Override
                     public void onAuthFailed() {
                         Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed", null);
+                        mProgressDialogUtil.dismiss();
+                    }
+
+                });
+        googleAuthProxy.auth();
+    }
+
+    private void restoreDevice(String sourceImei) {
+        Logs.d(CLASSNAME, "restoreDevice", "imei=" + sourceImei);
+        if (mJwtToken != null) {
+            restoreDeviceWithJwtToken(mJwtToken, sourceImei);
+        } else {
+            restoreDeviceWithoutJwtToken(sourceImei);
+        }
+    }
+
+    private void restoreDeviceWithJwtToken(String jwtToken, final String sourceImei) {
+        mProgressDialogUtil.show(getString(R.string.processing_msg));
+
+        MgmtCluster.SwitchDeviceBackendParam param =
+                new MgmtCluster.SwitchDeviceBackendParam(mContext);
+        param.setSourceImei(sourceImei);
+        MgmtCluster.SwitchDeviceBackendProxy proxy =
+                new MgmtCluster.SwitchDeviceBackendProxy(param, jwtToken);
+        proxy.setOnSwitchDeviceBackendListener(new MgmtCluster.SwitchDeviceBackendProxy.
+                OnSwitchDeviceBackendListener() {
+            @Override
+            public void onSwitchSuccessful(SwitchDeviceBackendInfo info) {
+                Logs.w(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "info=" + info);
+                mProgressDialogUtil.dismiss();
+            }
+
+            @Override
+            public void onSwitchFailed(SwitchDeviceBackendInfo info) {
+                mProgressDialogUtil.dismiss();
+
+                if (info.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    restoreDeviceWithoutJwtToken(sourceImei);
+                } else {
+                    mErrorMessage.setText(R.string.restore_failed);
+                }
+            }
+        });
+        proxy.switchBackend();
+    }
+
+    /**
+     * Without jwtToken, switch device backend with jwtToken from authenticating with Google to get
+     * serverAuthCode and then authenticating with mgmt server to get jwtToken.
+     */
+    private void restoreDeviceWithoutJwtToken(final String sourceImei) {
+        mProgressDialogUtil.show(getString(R.string.processing_msg));
+
+        String serverClientId = MgmtCluster.getServerClientId();
+        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
+                new GoogleSilentAuthProxy.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                        GoogleSignInAccount acct = result.getSignInAccount();
+                        if (acct == null) {
+                            restoreDeviceWithoutJwtToken(sourceImei);
+                            return;
+                        }
+                        String serverAuthCode = acct.getServerAuthCode();
+                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                            @Override
+                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                                mProgressDialogUtil.dismiss();
+
+                                String jwtToken = authResultInfo.getToken();
+                                restoreDeviceWithJwtToken(jwtToken, sourceImei);
+                            }
+
+                            @Override
+                            public void onAuthFailed(AuthResultInfo authResultInfo) {
+                                Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken", "onAuthFailed",
+                                        "authResultInfo=" + authResultInfo);
+                                mProgressDialogUtil.dismiss();
+
+                                int responseCode = authResultInfo.getResponseCode();
+                                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                                    restoreDeviceWithoutJwtToken(sourceImei);
+                                } else {
+                                    mErrorMessage.setText(R.string.restore_failed);
+                                }
+                            }
+                        });
+                        authProxy.auth();
+                    }
+
+                    @Override
+                    public void onAuthFailed() {
+                        Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken", "onAuthFailed", null);
                         mProgressDialogUtil.dismiss();
                     }
 

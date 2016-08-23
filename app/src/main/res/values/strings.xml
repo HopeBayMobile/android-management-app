@@ -9,7 +9,7 @@
     <string name="update">更新</string>
 
     <string name="activate_alert_dialog_message">網路連線失敗，請稍候再重試。</string>
-    <string name="activate_processing_msg">處理中，請稍候&#8230;</string>
+    <string name="processing_msg">處理中，請稍候&#8230;</string>
     <string name="activate_signin_google_account_failed">Google 帳號認證失敗</string>
     <string name="activate_hint_username">使用者名稱</string>
     <string name="activate_hint_password">密碼</string>
@@ -187,16 +187,18 @@
     <string name="auth_at_bootup_auth_failed_mgmt_register">Tera 註冊失敗，無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_get_device_info">無法從管理伺服器取得裝置狀態。</string>
 
-    <string name="restore_content_desc_title">Restore Contents</string>
-    <string name="restore_content_desc_setup_as_new_device">If you choose \"Setup as a new device\", the previous backup of this device will be removed.</string>
-    <string name="restore_content_desc_non_lock_device">If you choose this backup, all the contents will be transferred from the previous device to this one. The previous device will also be factory reset.</string>
-    <string name="restore_content_desc_lock_device">This backup belongs to a locked device, so it might contain incomplete contents.</string>
-    <string name="restore_item_setup_new_device">Setup as a new devices</string>
-    <string name="restore_item_my_tera">Restore from myTera</string>
-    <string name="restore_item_backup">Restore from backup</string>
+    <string name="restore_content_desc_title">還原資料</string>
+    <string name="restore_content_desc_setup_as_new_device">選擇 \"設定為新裝置\" 將會移除位於目前裝置上的舊備份資料。</string>
+    <string name="restore_content_desc_non_lock_device">選擇 \"還原備份\" 將會把所有資料從舊的裝置轉移到目前裝置，然後目前裝置就會重設為原廠設定。</string>
+    <string name="restore_content_desc_lock_device">這個備份屬於一個被上鎖的裝置，因此此備份可能包含不完整的資料。</string>
+    <string name="restore_title">還原/設定為新裝置</string>
+    <string name="restore_item_setup_new_device">設定為新裝置</string>
+    <string name="restore_item_my_tera">從 Tera 還原</string>
+    <string name="restore_item_backup">還原備份</string>
     <string name="restore_search_for_backup"><u>Search for backup</u></string>
     <string name="restore_back">返回</string>
     <string name="restore_next">下一步</string>
+    <string name="restore_failed">還原失敗。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
 

@@ -9,7 +9,7 @@
     <string name="update">UPDATE</string>
 
     <string name="activate_alert_dialog_message">Network connection failed. Please try again later.</string>
-    <string name="activate_processing_msg">Processing&#8230; Please wait.</string>
+    <string name="processing_msg">Processing&#8230; Please wait.</string>
     <string name="activate_signin_google_account_failed">Google account authentication failed.</string>
     <string name="activate_hint_username">User name</string>
     <string name="activate_hint_password">Password</string>
@@ -191,12 +191,14 @@
     <string name="restore_content_desc_setup_as_new_device">If you choose \"Setup as a new device\", the previous backup of this device will be removed.</string>
     <string name="restore_content_desc_non_lock_device">If you choose this backup, all the contents will be transferred from the previous device to this one. The previous device will also be factory reset.</string>
     <string name="restore_content_desc_lock_device">This backup belongs to a locked device, so it might contain incomplete contents.</string>
+    <string name="restore_title">Restore or setup as new device</string>
     <string name="restore_item_setup_new_device">Setup as a new devices</string>
     <string name="restore_item_my_tera">Restore from myTera</string>
     <string name="restore_item_backup">Restore from backup</string>
     <string name="restore_search_for_backup"><u>Search for backup</u></string>
     <string name="restore_back">Back</string>
     <string name="restore_next">Next</string>
+    <string name="restore_failed">Restore failed.</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
     <string name="yes">Yes</string>

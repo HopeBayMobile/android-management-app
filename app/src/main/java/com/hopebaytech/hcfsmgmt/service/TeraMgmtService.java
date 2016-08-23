@@ -96,7 +96,6 @@ public class TeraMgmtService extends Service {
     public void onCreate() {
         super.onCreate();
         mCacheExecutor = Executors.newCachedThreadPool();
-//        mServiceFileDirDAO = ServiceFileDirDAO.getInstance(this);
         mUidDAO = UidDAO.getInstance(this);
         mDataTypeDAO = DataTypeDAO.getInstance(this);
         mSettingsDAO = SettingsDAO.getInstance(this);
@@ -111,7 +110,6 @@ public class TeraMgmtService extends Service {
     public int onStartCommand(final Intent intent, int flags, int startId) {
         mContext = this;
         if (intent != null) {
-//            final String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
             final String action = intent.getAction();
             Logs.d(CLASSNAME, "onStartCommand", "action=" + action);
             mCacheExecutor.execute(new Runnable() {
@@ -142,87 +140,12 @@ public class TeraMgmtService extends Service {
                     } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
                         notifyUserExceedPinMax();
                     }
-
-//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
-//                        addUidAndPinSysApp();
-//                    } else
-//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
-//                        addUidAndUnpinUserApp(intent);
-//                    } else if (operation.equals(TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP)) {
-//                        pinUnpinAgainWhenAppUpdated(intent);
-//                    } else if (operation.equals(TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE)) {
-//                        removeUidFromDatabase(intent, operation);
-//                    } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
-//                        HCFSMgmtUtils.resetXfer();
-//                    } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
-//                        notifyLocalStorageUsedRatio();
-//                    } else if (operation.equals(TeraIntent.VALUE_ONGOING_NOTIFICATION)) {
-//                        startOngoingNotificationService(intent);
-//                    } else if (operation.equals(TeraIntent.VALUE_CHECK_DEVICE_STATUS)) {
-//                        checkDeviceStatus();
-//                    } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
-//                        notifyInsufficientPinSpace();
-//                    }  else if (operation.equals(TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR)) {
-//                        updateAppExternalDir();
-//                    }
                 }
             });
-        } else {
-            // Service is restarted and then execute the uncompleted pin/unpin operation when user
-            // manually close app and removes it from background.
-//            mCacheExecutor.execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (mServiceFileDirDAO.getCount() > 0) {
-//                        List<ServiceFileDirInfo> infoList = mServiceFileDirDAO.getAll();
-//                        for (final ServiceFileDirInfo info : infoList) {
-//                            pinOrUnpinFileOrDirectory(info);
-//                            mServiceFileDirDAO.delete(info.getFilePath());
-//                        }
-//                    }
-//                }
-//            });
         }
         return super.onStartCommand(intent, flags, startId);
         // return START_REDELIVER_INTENT;
     }
-
-//    private void mgmtAuthOrRegisterFailed(GoogleApiClient googleApiClient, String failedMsg) {
-//        Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
-//
-//        if (MgmtCluster.isNeedToRetryAgain()) {
-//            Intent intentService = new Intent(TeraMgmtService.this, TeraMgmtService.class);
-//            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
-//            startService(intentService);
-//            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
-//        } else {
-//            int flag = NotificationEvent.FLAG_OPEN_APP;
-//            int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
-//            String notify_title = getString(R.string.app_name);
-//            String notify_content = failedMsg;
-//            Bundle extras = new Bundle();
-//            extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-//            NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
-//
-//            Auth.GoogleSignInApi.signOut(googleApiClient)
-//                    .setResultCallback(new ResultCallback<Status>() {
-//                        @Override
-//                        public void onResult(Status status) {
-//                            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "status=" + status);
-//                        }
-//                    });
-//
-//            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
-//            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-//            editor.apply();
-//        }
-//        googleApiClient.disconnect();
-//        TeraCloudConfig.stopSyncToCloud();
-//
-//        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
-//    }
 
     private boolean pinOrUnpinApp(AppInfo info) {
         Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
@@ -278,13 +201,6 @@ public class TeraMgmtService extends Service {
         } else {
             HCFSMgmtUtils.pinApp(info);
         }
-
-//        // Notify user pin/unpin failed
-//        int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//        String notify_title = getString(R.string.app_name);
-//        String notify_message = notifyMsg + ": " + info.getName();
-//        NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-
     }
 
     private void pinOrUnpinDataTypeFile() {
@@ -420,35 +336,10 @@ public class TeraMgmtService extends Service {
         }
     }
 
-//    private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
-//        String filePath = info.getFilePath();
-//        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
-//        boolean isPinned = info.isPinned();
-//        if (isPinned) {
-//            int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
-//            boolean isSuccess = (code == 0);
-//            if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-//            }
-//        } else {
-//            boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
-//            if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-//            }
-//        }
-//    }
-
     public void pinOrUnpinFileDirectory(FileDirInfo info, IPinUnpinListener listener) {
         ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
         serviceFileDirInfo.setPinned(info.isPinned());
         serviceFileDirInfo.setFilePath(info.getFilePath());
-//        mServiceFileDirDAO.insert(serviceFileDirInfo);
         String filePath = info.getFilePath();
         Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
         boolean isPinned = info.isPinned();
@@ -456,11 +347,6 @@ public class TeraMgmtService extends Service {
             int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
             boolean isSuccess = (code == 0);
             if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-
                 listener.onPinUnpinFailed(info);
             } else {
                 listener.onPinUnpinSuccessful(info);
@@ -468,17 +354,11 @@ public class TeraMgmtService extends Service {
         } else {
             boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
             if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-
                 listener.onPinUnpinFailed(info);
             } else {
                 listener.onPinUnpinSuccessful(info);
             }
         }
-//        mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
     }
 
     private void doActionAccordingToDeviceStatus(final String jwtToken) {

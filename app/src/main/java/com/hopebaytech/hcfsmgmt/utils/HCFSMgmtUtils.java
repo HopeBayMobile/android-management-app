@@ -699,8 +699,6 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
         int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;

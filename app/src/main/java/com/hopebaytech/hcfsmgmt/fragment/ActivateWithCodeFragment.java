@@ -208,7 +208,7 @@ public class ActivateWithCodeFragment extends Fragment {
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setCancelable(false);
         }
-        mProgressDialog.setMessage(getString(R.string.activate_processing_msg));
+        mProgressDialog.setMessage(getString(R.string.processing_msg));
         mProgressDialog.show();
     }
 
