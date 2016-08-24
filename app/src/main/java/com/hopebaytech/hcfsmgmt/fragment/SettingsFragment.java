@@ -156,7 +156,7 @@ public class SettingsFragment extends Fragment {
         mFeedback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri uri = Uri.parse("mailto:cs@tera.mobi");
+                Uri uri = Uri.parse("mailto:cs@hbmobile.com");
                 Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
                 PackageManager manager = mContext.getPackageManager();
                 List<ResolveInfo> infoList = manager.queryIntentActivities(intent, 0);
