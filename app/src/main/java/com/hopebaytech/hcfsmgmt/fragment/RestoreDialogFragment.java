@@ -37,16 +37,16 @@ public class RestoreDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
-        int restoreType = args.getInt(RestorationFragment.KEY_RESTORE_TYPE);
+        int restoreType = args.getInt(RestoreFragment.KEY_RESTORE_TYPE);
         int resId;
         switch (restoreType) {
-            case RestorationFragment.RESTORE_TYPE_NEW_DEVICE:
+            case RestoreFragment.RESTORE_TYPE_NEW_DEVICE:
                 resId = R.string.restore_content_desc_setup_as_new_device;
                 break;
-            case RestorationFragment.RESTORE_TYPE_LOCK_DEVICE:
+            case RestoreFragment.RESTORE_TYPE_LOCK_DEVICE:
                 resId = R.string.restore_content_desc_lock_device;
                 break;
-            case RestorationFragment.RESTORE_TYPE_NON_LOCK_DEVICE:
+            case RestoreFragment.RESTORE_TYPE_NON_LOCK_DEVICE:
                 resId = R.string.restore_content_desc_non_lock_device;
                 break;
             default:
@@ -54,7 +54,7 @@ public class RestoreDialogFragment extends DialogFragment {
         }
 
         LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-        View view = inflater.inflate(R.layout.restoration_dialog_fragment, null);
+        View view = inflater.inflate(R.layout.restore_dialog_fragment, null);
         TextView message = (TextView) view.findViewById(R.id.message);
         message.setText(resId);
 

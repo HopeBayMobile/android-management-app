@@ -31,7 +31,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/M4"
         android:gravity="center"
-        android:text="@string/settings_transfer_content_waiting_title" />
+        android:text="@string/restore_restoring_title" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/message"
@@ -43,56 +43,17 @@
         android:layout_marginEnd="30dp"
         android:layout_marginStart="30dp"
         android:gravity="center_horizontal"
-        android:text="@string/settings_transfer_content_waiting_message" />
+        android:text="@string/restore_restoring_message" />
 
-    <RelativeLayout
-        android:id="@+id/uploading_layout"
-        android:layout_width="match_parent"
+    <pl.droidsonroids.gif.GifImageView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/cancel_layout"
-        android:layout_gravity="center_horizontal">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/icon_transfer_transferring_left" />
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <ProgressBar
-                    style="?android:attr/progressBarStyleLarge"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_centerInParent="true"
-                    android:indeterminate="true"
-                    android:indeterminateTint="@color/C4" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/icon_transfer_transferring_right" />
-            </RelativeLayout>
-
-        </LinearLayout>
-
-        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            android:id="@+id/error_msg"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
-
-    </RelativeLayout>
+        android:layout_above="@+id/ok_layout"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/icon_transfer_transferring" />
 
     <FrameLayout
-        android:id="@+id/cancel_layout"
+        android:id="@+id/ok_layout"
         android:layout_width="100dp"
         android:layout_height="36dp"
         android:layout_alignParentBottom="true"
@@ -104,14 +65,14 @@
         android:clickable="true">
 
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            android:id="@+id/cancel"
+            android:id="@+id/ok"
             style="@style/F2"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
-            android:text="@string/cancel" />
+            android:text="@string/ok" />
 
     </FrameLayout>
 

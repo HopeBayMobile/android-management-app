@@ -183,7 +183,6 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onActivityCreated", null);
 
         mUiRefreshRunnable = new Runnable() {
             @Override

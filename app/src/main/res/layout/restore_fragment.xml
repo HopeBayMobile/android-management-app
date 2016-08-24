@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     android:orientation="vertical">
 
     <FrameLayout
@@ -14,33 +15,23 @@
         android:id="@+id/top_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent">
+        android:background="@drawable/img_toolbar_bkg">
 
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:padding="@dimen/M3"
-            android:text="@string/restore_title"
-            android:textColor="@android:color/white" />
+            android:text="@string/restore_title" />
 
-        <ImageView
-            android:id="@+id/refresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="?android:attr/selectableItemBackground"
-            android:clickable="true"
-            android:padding="@dimen/M3"
-            android:src="@drawable/icon_btn_tab_refresh_light" />
     </RelativeLayout>
 
     <ExpandableListView
         android:id="@+id/expanded_list"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="280dp"
         android:layout_below="@+id/top_layout"
         android:layout_marginEnd="@dimen/M2"
         android:layout_marginStart="@dimen/M2"
@@ -94,7 +85,7 @@
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackground"
                 android:gravity="center"
-                android:text="Back"
+                android:text="@string/restore_back"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>
@@ -111,12 +102,10 @@
                 android:layout_height="match_parent"
                 android:background="?android:attr/selectableItemBackground"
                 android:gravity="center"
-                android:text="Next"
+                android:text="@string/restore_next"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>
-
     </LinearLayout>
-
 
 </RelativeLayout>

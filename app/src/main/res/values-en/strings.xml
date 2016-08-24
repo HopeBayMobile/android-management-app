@@ -196,6 +196,10 @@
     <string name="restore_item_my_tera">Restore from myTera</string>
     <string name="restore_item_backup">Restore from backup</string>
     <string name="restore_search_for_backup"><u>Search for backup</u></string>
+    <string name="restore_preparing_title">Preparing&#8230;</string>
+    <string name="restore_preparing_message">Preparing for restoration process. During the restoration, all changes you have made won\'t be saved after reboot.</string>
+    <string name="restore_restoring_title">Restoring&#8230;</string>
+    <string name="restore_restoring_message">While restoring contents, please keep the network connected.</string>
     <string name="restore_back">Back</string>
     <string name="restore_next">Next</string>
     <string name="restore_failed">Restore failed.</string>

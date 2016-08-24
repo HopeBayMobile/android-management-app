@@ -196,6 +196,10 @@
     <string name="restore_item_my_tera">從 Tera 還原</string>
     <string name="restore_item_backup">還原備份</string>
     <string name="restore_search_for_backup"><u>Search for backup</u></string>
+    <string name="restore_preparing_title">正在準備&#8230;</string>
+    <string name="restore_preparing_message">正在準備還原。在還原過程中，如果您有進行任何變更，這些變更於重新啟動後並不會被儲存。</string>
+    <string name="restore_restoring_title">正在還原&#8230;</string>
+    <string name="restore_restoring_message">在還原過程中，請保持網路的連線。</string>
     <string name="restore_back">返回</string>
     <string name="restore_next">下一步</string>
     <string name="restore_failed">還原失敗。</string>

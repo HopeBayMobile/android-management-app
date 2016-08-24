@@ -41,7 +41,7 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -389,7 +389,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         }
 
                         Bundle args = new Bundle();
-                        args.putParcelable(RestorationFragment.KEY_DEVICE_LIST, deviceListInfo);
+                        args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, deviceListInfo);
                         args.putString(KEY_JWT_TOKEN, jwtToken);
                         args.putString(KEY_GOOGLE_NAME, acct.getDisplayName());
                         args.putString(KEY_GOOGLE_EMAIL, acct.getEmail());
@@ -399,11 +399,11 @@ public class ActivateWoCodeFragment extends Fragment {
                         }
                         args.putString(KEY_GOOGLE_PHOTO_URL, photoUrl);
 
-                        Fragment restorationFragment = RestorationFragment.newInstance();
+                        Fragment restorationFragment = RestoreFragment.newInstance();
                         restorationFragment.setArguments(args);
 
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
-                        ft.replace(R.id.fragment_container, restorationFragment, RestorationFragment.TAG);
+                        ft.replace(R.id.fragment_container, restorationFragment, RestoreFragment.TAG);
                         ft.addToBackStack(null);
                         ft.commit();
 
@@ -489,11 +489,11 @@ public class ActivateWoCodeFragment extends Fragment {
         MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, jwtToken);
         registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
             @Override
-            public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+            public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
+                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
                         if (!isSuccess) {
                             signOut();
                             TeraCloudConfig.resetHCFSConfig();
@@ -524,8 +524,8 @@ public class ActivateWoCodeFragment extends Fragment {
                             TeraAppConfig.enableApp(mContext);
                             TeraCloudConfig.activateTeraCloud(mContext);
 
-                            String url = registerResultInfo.getBackendUrl();
-                            String token = registerResultInfo.getStorageAccessToken();
+                            String url = deviceServiceInfo.getBackend().getUrl();
+                            String token = deviceServiceInfo.getBackend().getToken();
                             HCFSMgmtUtils.setSwiftToken(url, token);
 
                             final String finalPhotoUrl = photoUrl;
@@ -554,15 +554,15 @@ public class ActivateWoCodeFragment extends Fragment {
             }
 
             @Override
-            public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+            public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
+                Logs.e(CLASSNAME, "onRegisterFailed", "deviceServiceInfo=" + deviceServiceInfo.toString());
 
                 signOut();
                 mProgressDialogUtil.dismiss();
 
                 int errorMsgResId = R.string.activate_failed;
-                if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
                         Bundle bundle = new Bundle();
                         bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
                         bundle.putString(KEY_USERNAME, acct.getEmail());
@@ -575,10 +575,10 @@ public class ActivateWoCodeFragment extends Fragment {
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, fragment);
                         ft.commit();
-                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                            registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                            deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
                         errorMsgResId = R.string.activate_failed_not_supported_device;
-                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
                         errorMsgResId = R.string.activate_failed_device_expired;
                     }
                 }

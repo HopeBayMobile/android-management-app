@@ -24,9 +24,8 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.info.SwitchDeviceBackendInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -46,9 +45,9 @@ import javax.net.ssl.HttpsURLConnection;
  * @author Aaron
  *         Created by Aaron on 2016/8/12.
  */
-public class RestorationFragment extends Fragment {
+public class RestoreFragment extends Fragment {
 
-    public static final String TAG = RestorationFragment.class.getSimpleName();
+    public static final String TAG = RestoreFragment.class.getSimpleName();
 
     private final String CLASSNAME = TAG;
 
@@ -79,8 +78,8 @@ public class RestorationFragment extends Fragment {
     private String mAccountName;
     private String mPhotoUrl;
 
-    public static RestorationFragment newInstance() {
-        return new RestorationFragment();
+    public static RestoreFragment newInstance() {
+        return new RestoreFragment();
     }
 
     @Override
@@ -109,7 +108,7 @@ public class RestorationFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.restoration_fragment, container, false);
+        return inflater.inflate(R.layout.restore_fragment, container, false);
     }
 
     @Override
@@ -527,11 +526,11 @@ public class RestorationFragment extends Fragment {
         MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(registerParam, jwtToken);
         registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
             @Override
-            public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+            public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
+                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
                         if (!isSuccess) {
                             TeraCloudConfig.resetHCFSConfig();
                             mUiHandler.post(new Runnable() {
@@ -558,8 +557,8 @@ public class RestorationFragment extends Fragment {
                         TeraAppConfig.enableApp(mContext);
                         TeraCloudConfig.activateTeraCloud(mContext);
 
-                        String url = registerResultInfo.getBackendUrl();
-                        String token = registerResultInfo.getStorageAccessToken();
+                        String url = deviceServiceInfo.getBackend().getUrl();
+                        String token = deviceServiceInfo.getBackend().getToken();
                         HCFSMgmtUtils.setSwiftToken(url, token);
 
                         mUiHandler.post(new Runnable() {
@@ -586,14 +585,14 @@ public class RestorationFragment extends Fragment {
             }
 
             @Override
-            public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
+            public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
                 Logs.e(CLASSNAME, "registerWithJwtToken", "onRegisterFailed",
-                        "registerResultInfo=" + registerResultInfo);
+                        "deviceServiceInfo=" + deviceServiceInfo);
 
                 int errorMsgResId = R.string.activate_failed;
-                if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
                     mProgressDialogUtil.dismiss();
-                    if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
                         Bundle bundle = new Bundle();
                         bundle.putInt(ActivateWoCodeFragment.KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
                         bundle.putString(ActivateWoCodeFragment.KEY_USERNAME, mAccountEmail);
@@ -605,14 +604,14 @@ public class RestorationFragment extends Fragment {
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, fragment);
                         ft.commit();
-                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                            registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                            deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
                         errorMsgResId = R.string.activate_failed_not_supported_device;
-                    } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
                         errorMsgResId = R.string.activate_failed_device_expired;
                     }
                     mErrorMessage.setText(errorMsgResId);
-                } else if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_UNAUTHORIZED) {
+                } else if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
                     registerWithoutJwtToken();
                 } else {
                     mErrorMessage.setText(errorMsgResId);
@@ -655,7 +654,7 @@ public class RestorationFragment extends Fragment {
                                 Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed",
                                         "authResultInfo=" + authResultInfo);
                                 int responseCode = authResultInfo.getResponseCode();
-                                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                                if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
                                     registerWithoutJwtToken();
                                 } else {
                                     mErrorMessage.setText(R.string.activate_failed);
@@ -695,16 +694,27 @@ public class RestorationFragment extends Fragment {
         proxy.setOnSwitchDeviceBackendListener(new MgmtCluster.SwitchDeviceBackendProxy.
                 OnSwitchDeviceBackendListener() {
             @Override
-            public void onSwitchSuccessful(SwitchDeviceBackendInfo info) {
-                Logs.w(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "info=" + info);
+            public void onSwitchSuccessful(DeviceServiceInfo deviceServiceInfo) {
+                Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
                 mProgressDialogUtil.dismiss();
+
+                mWorkHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        HCFSMgmtUtils.triggerRestore();
+                    }
+                });
+
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.fragment_container, RestorePreparingFragment.newInstance());
+                ft.commit();
             }
 
             @Override
-            public void onSwitchFailed(SwitchDeviceBackendInfo info) {
+            public void onSwitchFailed(DeviceServiceInfo deviceServiceInfo) {
                 mProgressDialogUtil.dismiss();
 
-                if (info.getResponseCode() == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                     restoreDeviceWithoutJwtToken(sourceImei);
                 } else {
                     mErrorMessage.setText(R.string.restore_failed);
@@ -750,7 +760,7 @@ public class RestorationFragment extends Fragment {
                                 mProgressDialogUtil.dismiss();
 
                                 int responseCode = authResultInfo.getResponseCode();
-                                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                                if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
                                     restoreDeviceWithoutJwtToken(sourceImei);
                                 } else {
                                     mErrorMessage.setText(R.string.restore_failed);
