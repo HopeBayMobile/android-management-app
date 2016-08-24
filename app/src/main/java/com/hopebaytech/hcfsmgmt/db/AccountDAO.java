@@ -64,7 +64,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         accountInfo.setEmail(cursor.getString(cursor.getColumnIndex(EMAIL_COLUMN)));
         accountInfo.setImgUrl(cursor.getString(cursor.getColumnIndex(IMG_URL_COLUMN)));
         accountInfo.setImgBase64(cursor.getString(cursor.getColumnIndex(IMG_BASE64_COLUMN)));
-        accountInfo.setImgExpringTime(Long.parseLong(cursor.getString(cursor.getColumnIndex(IMG_EXPIRED_TIME_COLUMN))));
+        accountInfo.setImgExpiringTime(Long.parseLong(cursor.getString(cursor.getColumnIndex(IMG_EXPIRED_TIME_COLUMN))));
         return accountInfo;
     }
 
@@ -113,7 +113,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         if (base64 != null) {
             cv.put(IMG_BASE64_COLUMN, base64);
         }
-        cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpringTime());
+        cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpiringTime());
 
         boolean isSuccess = mDataBase.insert(TABLE_NAME, null, cv) != -1;
         if (isSuccess) {
@@ -122,7 +122,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
                             ", email=" + email +
                             ", imgUrl=" + imgUrl +
                             ", imgBase64=" + base64 +
-                            ", imgExpiringTime=" + info.getImgExpringTime());
+                            ", imgExpiringTime=" + info.getImgExpiringTime());
         } else {
             Logs.e(CLASSNAME, "insert",
                     "name=" + info.getName() +
@@ -155,7 +155,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         cv.put(EMAIL_COLUMN, info.getEmail());
         cv.put(IMG_URL_COLUMN, info.getImgUrl());
         cv.put(IMG_BASE64_COLUMN, info.getImgBase64());
-        cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpringTime());
+        cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpiringTime());
 
         String where = KEY_ID + "=" + info.getId();
         boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
@@ -165,7 +165,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
                         ", email=" + info.getEmail() +
                         ", imgUrl=" + info.getImgUrl() +
                         ", imgBase64=" + info.getImgBase64() +
-                        ", imgExpiringTime=" + info.getImgExpringTime() +
+                        ", imgExpiringTime=" + info.getImgExpiringTime() +
                         ", isSuccess=" + isSuccess);
 
         return isSuccess;

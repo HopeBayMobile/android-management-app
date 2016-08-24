@@ -7,10 +7,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -20,7 +18,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -45,24 +42,28 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
-import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
+import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
+import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
+import java.net.HttpURLConnection;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
  *         Created by Aaron on 2016/4/18.
  */
-public class SwitchAccountActivity extends AppCompatActivity {
+public class ChangeAccountActivity extends AppCompatActivity {
 
-    public static final String CLASSNAME = SwitchAccountActivity.class.getSimpleName();
+    public static final String CLASSNAME = ChangeAccountActivity.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
     private TextView mCurrentAccount;
     private LinearLayout mTargetAccountLayout;
@@ -80,6 +81,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
     private String mAccountEmail;
     private String mAccountName;
     private String mAccountPhotoUrl;
+    private String mJwtToken;
 
     /**
      * Bool to track whether the app is already resolving an error
@@ -102,11 +104,11 @@ public class SwitchAccountActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.switch_account_activity);
+        setContentView(R.layout.change_account_activity);
 
         View contentView = findViewById(android.R.id.content);
         if (contentView != null) {
-            mSnackbar = Snackbar.make(contentView, R.string.switch_account_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE);
+            mSnackbar = Snackbar.make(contentView, R.string.change_account_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE);
             mSnackbar.setAction(R.string.go, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -140,90 +142,83 @@ public class SwitchAccountActivity extends AppCompatActivity {
             mSwitchAccount.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (ContextCompat.checkSelfPermission(SwitchAccountActivity.this,
+                    if (ContextCompat.checkSelfPermission(ChangeAccountActivity.this,
                             Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                         showProgressDialog();
 
-                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                        authParam.setAuthCode(mOldServerAuthCode);
-                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this)));
-                        authParam.setVendor(Build.BRAND);
-                        authParam.setModel(Build.MODEL);
-                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                        authParam.setHcfsVersion(getString(R.string.tera_version));
-
+                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(mOldServerAuthCode);
                         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                         authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                             @Override
                             public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        boolean isSuccess = false;
-                                        String imei = HCFSMgmtUtils.getDeviceImei(SwitchAccountActivity.this);
-                                        final RegisterResultInfo registerResultInfo =
-                                                MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
-                                        if (registerResultInfo != null) {
-                                            AccountInfo accountInfo = new AccountInfo();
-                                            accountInfo.setName(mAccountName);
-                                            accountInfo.setEmail(mAccountEmail);
-                                            accountInfo.setImgUrl(mAccountPhotoUrl);
+                                changeAccount(authResultInfo.getToken());
 
-                                            AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
-                                            accountDAO.clear();
-                                            accountDAO.insert(accountInfo);
-                                            accountDAO.close();
-
-                                            TeraCloudConfig.storeHCFSConfig(registerResultInfo);
-
-                                            TeraAppConfig.enableApp(SwitchAccountActivity.this);
-//                                            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(SwitchAccountActivity.this);
-//                                            SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
-//                                            editor.apply();
-                                        }
-
-                                        final boolean isSuccessful = isSuccess;
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-//                                                if (registerResultInfo != null) {
-                                                if (isSuccessful) {
-                                                    Intent intent = new Intent(SwitchAccountActivity.this, MainActivity.class);
-                                                    startActivity(intent);
-                                                    finish();
-                                                } else {
-                                                    signOut();
-                                                    mErrorMsg.setText(R.string.switch_account_failed);
-                                                }
-                                                dismissProgressDialog();
-                                            }
-                                        });
-                                    }
-                                }).start();
+//                                new Thread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        boolean isSuccess = false;
+//                                        String imei = HCFSMgmtUtils.getDeviceImei(ChangeAccountActivity.this);
+//                                        final DeviceServiceInfo deviceServiceInfo =
+//                                                MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
+//                                        if (deviceServiceInfo != null) {
+//                                            AccountInfo accountInfo = new AccountInfo();
+//                                            accountInfo.setName(mAccountName);
+//                                            accountInfo.setEmail(mAccountEmail);
+//                                            accountInfo.setImgUrl(mAccountPhotoUrl);
+//
+//                                            AccountDAO accountDAO = AccountDAO.getInstance(ChangeAccountActivity.this);
+//                                            accountDAO.clear();
+//                                            accountDAO.insert(accountInfo);
+//
+//                                            TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+//                                            TeraAppConfig.enableApp(ChangeAccountActivity.this);
+//
+//                                            String url = deviceServiceInfo.getBackend().getUrl();
+//                                            String token = deviceServiceInfo.getBackend().getToken();
+//                                            HCFSMgmtUtils.setSwiftToken(url, token);
+//
+//                                            isSuccess = true;
+//                                        }
+//
+//                                        final boolean isSuccessful = isSuccess;
+//                                        runOnUiThread(new Runnable() {
+//                                            @Override
+//                                            public void run() {
+//                                                if (isSuccessful) {
+//                                                    Intent intent = new Intent(ChangeAccountActivity.this, MainActivity.class);
+//                                                    startActivity(intent);
+//                                                    finish();
+//                                                } else {
+//                                                    signOut();
+//                                                    mErrorMsg.setText(R.string.change_account_failed);
+//                                                }
+//                                                dismissProgressDialog();
+//                                            }
+//                                        });
+//                                    }
+//                                }).start();
                             }
 
                             @Override
                             public void onAuthFailed(AuthResultInfo authResultInfo) {
                                 Logs.e(CLASSNAME, "onAuthFailed",
                                         "responseCode=" + authResultInfo.getResponseCode() +
-                                                "responseContent=" + authResultInfo.getMessage());
-                                mErrorMsg.setText(R.string.switch_account_failed);
+                                                ", responseContent=" + authResultInfo.getMessage());
+                                mErrorMsg.setText(R.string.change_account_failed);
                                 dismissProgressDialog();
 
                             }
                         });
                         authProxy.auth();
                     } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ChangeAccountActivity.this);
                         builder.setTitle(R.string.alert_dialog_title_warning);
-                        builder.setMessage(R.string.switch_account_require_read_phone_state_permission);
+                        builder.setMessage(R.string.change_account_require_read_phone_state_permission);
                         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if (ActivityCompat.shouldShowRequestPermissionRationale(SwitchAccountActivity.this, Manifest.permission.READ_PHONE_STATE)) {
-                                    ActivityCompat.requestPermissions(SwitchAccountActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                                if (ActivityCompat.shouldShowRequestPermissionRationale(ChangeAccountActivity.this, Manifest.permission.READ_PHONE_STATE)) {
+                                    ActivityCompat.requestPermissions(ChangeAccountActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
                                 } else {
                                     View contentView = findViewById(android.R.id.content);
                                     if (contentView != null) {
@@ -262,7 +257,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mGoogleApiClient = new GoogleApiClient.Builder(SwitchAccountActivity.this)
+                                    mGoogleApiClient = new GoogleApiClient.Builder(ChangeAccountActivity.this)
                                             .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                                                 @Override
                                                 public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -292,7 +287,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(SwitchAccountActivity.this);
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(ChangeAccountActivity.this);
                                     builder.setTitle(R.string.alert_dialog_title_warning);
                                     builder.setMessage(R.string.activate_get_server_client_id_failed);
                                     builder.setPositiveButton(R.string.confirm, null);
@@ -314,12 +309,16 @@ public class SwitchAccountActivity extends AppCompatActivity {
             chooseAccountText.setOnClickListener(chooseAccountListener);
         }
 
+        init();
+    }
+
+    private void init() {
         showProgressDialog();
+
         new Thread(new Runnable() {
             @Override
             public void run() {
-
-                AccountDAO accountDAO = AccountDAO.getInstance(SwitchAccountActivity.this);
+                AccountDAO accountDAO = AccountDAO.getInstance(ChangeAccountActivity.this);
                 List<AccountInfo> accountInfoList = accountDAO.getAll();
                 if (accountInfoList.size() != 0) {
                     AccountInfo info = accountInfoList.get(0);
@@ -331,88 +330,71 @@ public class SwitchAccountActivity extends AppCompatActivity {
                         }
                     });
                 }
-                accountDAO.close();
-
-                if (mServerClientId == null) {
-                    mServerClientId = MgmtCluster.getServerClientId();
-                }
-
-                if (mGoogleSignInOptions == null) {
-                    mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestScopes(new Scope(Scopes.PLUS_LOGIN))
-                            .requestServerAuthCode(mServerClientId, false)
-                            .requestEmail()
-                            .build();
-                }
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mGoogleApiClient = new GoogleApiClient.Builder(SwitchAccountActivity.this)
-                                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                                    @Override
-                                    public void onConnectionFailed(@NonNull ConnectionResult result) {
-                                        Logs.d(CLASSNAME, "onConnectionFailed", "");
-                                        if (!mResolvingError) {
-                                            if (result.hasResolution()) {
-                                                try {
-                                                    mResolvingError = true;
-                                                    result.startResolutionForResult(SwitchAccountActivity.this, REQUEST_RESOLVE_ERROR);
-                                                } catch (IntentSender.SendIntentException e) {
-                                                    // There was an error with the resolution intent. Try again.
-                                                    mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
-                                                }
-                                            } else {
-                                                // Show dialog using GoogleApiAvailability.getErrorDialog()
-                                                showErrorDialog(result.getErrorCode());
-                                                mResolvingError = true;
-                                                dismissProgressDialog();
-                                            }
-                                        }
-                                    }
-                                })
-                                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                                    @Override
-                                    public void onConnected(@Nullable Bundle bundle) {
-                                        OptionalPendingResult<GoogleSignInResult> opr =
-                                                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-                                        if (opr.isDone()) {
-                                            GoogleSignInResult result = opr.get();
-                                            final String currentAuthCode = getServerAuthCode(result);
-                                            Logs.w(CLASSNAME, "onConnected", "currentAuthCode=" + currentAuthCode);
-                                            mOldServerAuthCode = currentAuthCode;
-                                        } else {
-                                            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                                                @Override
-                                                public void onResult(@NonNull GoogleSignInResult result) {
-                                                    final String currentAuthCode = getServerAuthCode(result);
-                                                    Logs.w(CLASSNAME, "onResult", "currentAuthCode=" + currentAuthCode);
-                                                    mOldServerAuthCode = currentAuthCode;
-                                                }
-                                            });
-                                        }
-
-                                        // Sign out previous account first
-                                        signOut();
-                                    }
-
-                                    @Override
-                                    public void onConnectionSuspended(int cause) {
-
-                                    }
-                                })
-                                .addApi(Auth.GOOGLE_SIGN_IN_API, mGoogleSignInOptions)
-                                .build();
-                        mGoogleApiClient.disconnect();
-                        mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
-
-                        dismissProgressDialog();
-                    }
-                });
-
             }
         }).start();
 
+        mServerClientId = MgmtCluster.getServerClientId();
+        GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
+                ChangeAccountActivity.this,
+                mServerClientId,
+                new GoogleSignInApiClient.OnConnectionListener() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
+                        mGoogleApiClient = googleApiClient;
+
+                        OptionalPendingResult<GoogleSignInResult> opr =
+                                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+                        if (opr.isDone()) {
+                            GoogleSignInResult result = opr.get();
+                            final String currentAuthCode = getServerAuthCode(result);
+                            Logs.d(CLASSNAME, "onConnected", "currentAuthCode=" + currentAuthCode);
+                            mOldServerAuthCode = currentAuthCode;
+                        } else {
+                            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                                @Override
+                                public void onResult(@NonNull GoogleSignInResult result) {
+                                    final String currentAuthCode = getServerAuthCode(result);
+                                    Logs.d(CLASSNAME, "onResult", "currentAuthCode=" + currentAuthCode);
+                                    mOldServerAuthCode = currentAuthCode;
+                                }
+                            });
+                        }
+
+                        // Sign out previous account first
+//                        signOut();
+
+                        dismissProgressDialog();
+                    }
+
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult result) {
+                        Logs.d(CLASSNAME, "onConnectionFailed", "");
+                        if (!mResolvingError) {
+                            if (result.hasResolution()) {
+                                try {
+                                    mResolvingError = true;
+                                    result.startResolutionForResult(ChangeAccountActivity.this, REQUEST_RESOLVE_ERROR);
+                                } catch (IntentSender.SendIntentException e) {
+                                    // There was an error with the resolution intent. Try again.
+                                    mGoogleApiClient.connect(GoogleApiClient.SIGN_IN_MODE_OPTIONAL);
+                                }
+                            } else {
+                                // Show dialog using GoogleApiAvailability.getErrorDialog()
+                                showErrorDialog(result.getErrorCode());
+                                mResolvingError = true;
+                                dismissProgressDialog();
+                            }
+                        }
+
+                        dismissProgressDialog();
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int cause) {
+                        dismissProgressDialog();
+                    }
+                });
+        signInApiClient.connect();
     }
 
     private void signOut() {
@@ -455,7 +437,6 @@ public class SwitchAccountActivity extends AppCompatActivity {
 
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result != null && result.isSuccess()) {
-                Logs.w(CLASSNAME, "onActivityResult", "result.isSuccess()=" + result.isSuccess());
                 GoogleSignInAccount acct = result.getSignInAccount();
                 if (acct != null) {
                     mAccountEmail = acct.getEmail();
@@ -473,12 +454,12 @@ public class SwitchAccountActivity extends AppCompatActivity {
                     mTargetAccount.setText(mAccountEmail);
                     if (currentAccount.equals(mAccountEmail)) {
                         ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(
-                                ContextCompat.getColor(SwitchAccountActivity.this, android.R.color.darker_gray));
+                                ContextCompat.getColor(ChangeAccountActivity.this, android.R.color.darker_gray));
                         mSwitchAccount.setEnabled(false);
-                        mErrorMsg.setText(R.string.switch_account_require_new_account);
+                        mErrorMsg.setText(R.string.change_account_require_new_account);
                     } else {
                         ((FrameLayout) mSwitchAccount.getParent()).setBackgroundColor(
-                                ContextCompat.getColor(SwitchAccountActivity.this, R.color.colorAccent));
+                                ContextCompat.getColor(ChangeAccountActivity.this, R.color.colorAccent));
                         mSwitchAccount.setEnabled(true);
                         mErrorMsg.setText("");
                     }
@@ -508,6 +489,104 @@ public class SwitchAccountActivity extends AppCompatActivity {
             }
         }
         return serverAuthCode;
+    }
+
+    private void changeAccount(String jwtToken) {
+        if (jwtToken != null) {
+            changeAccountWithJwtToken(jwtToken);
+        } else {
+            changeAccountWithoutJwtToken();
+        }
+    }
+
+    private void changeAccountWithJwtToken(String jwtToken) {
+        Logs.d(CLASSNAME, "changeAccountWithJwtToken", "jwtToken=" + jwtToken);
+
+        String imei = HCFSMgmtUtils.getDeviceImei(ChangeAccountActivity.this);
+        MgmtCluster.ChangeAccountProxy proxy =
+                new MgmtCluster.ChangeAccountProxy(jwtToken, imei, mNewServerAuthCode);
+        proxy.setOnChangeAccountListener(new MgmtCluster.ChangeAccountProxy.OnChangeAccountListener() {
+            @Override
+            public void onChangeAccountSuccessful(DeviceServiceInfo deviceServiceInfo) {
+                AccountInfo accountInfo = new AccountInfo();
+                accountInfo.setName(mAccountName);
+                accountInfo.setEmail(mAccountEmail);
+                accountInfo.setImgUrl(mAccountPhotoUrl);
+
+                AccountDAO accountDAO = AccountDAO.getInstance(ChangeAccountActivity.this);
+                accountDAO.clear();
+                accountDAO.insert(accountInfo);
+
+                TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+                TeraAppConfig.enableApp(ChangeAccountActivity.this);
+
+                String url = deviceServiceInfo.getBackend().getUrl();
+                String token = deviceServiceInfo.getBackend().getToken();
+                HCFSMgmtUtils.setSwiftToken(url, token);
+
+                Intent intent = new Intent(ChangeAccountActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+
+            @Override
+            public void onChangeAccountFailed(DeviceServiceInfo deviceServiceInfo) {
+                if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
+                    changeAccountWithoutJwtToken();
+                } else {
+                    signOut();
+                    mErrorMsg.setText(R.string.change_account_failed);
+                }
+            }
+        });
+        proxy.change();
+    }
+
+    private void changeAccountWithoutJwtToken() {
+        Logs.d(CLASSNAME, "changeAccountWithoutJwtToken", null);
+        String serverClientId = MgmtCluster.getServerClientId();
+        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(ChangeAccountActivity.this,
+                serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
+            @Override
+            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                GoogleSignInAccount acct = result.getSignInAccount();
+                if (acct == null) {
+                    changeAccountWithoutJwtToken();
+                    return;
+                }
+                String serverAuthCode = acct.getServerAuthCode();
+                MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+                MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                        String jwtToken = authResultInfo.getToken();
+                        changeAccountWithJwtToken(jwtToken);
+                    }
+
+                    @Override
+                    public void onAuthFailed(AuthResultInfo authResultInfo) {
+                        Logs.e(CLASSNAME, "changeAccountWithoutJwtToken", "onAuthFailed",
+                                "authResultInfo=" + authResultInfo);
+                        int responseCode = authResultInfo.getResponseCode();
+                        if (responseCode == HttpsURLConnection.HTTP_FORBIDDEN) {
+                            changeAccountWithoutJwtToken();
+                        } else {
+                            mErrorMsg.setText(R.string.change_account_failed);
+                        }
+                    }
+                });
+                authProxy.auth();
+            }
+
+            @Override
+            public void onAuthFailed() {
+                Logs.e(CLASSNAME, "changeAccountWithoutJwtToken", "onAuthFailed", null);
+                dismissProgressDialog();
+            }
+
+        });
+        googleAuthProxy.auth();
     }
 
     /**
@@ -549,7 +628,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
 
         @Override
         public void onDismiss(DialogInterface dialog) {
-            ((SwitchAccountActivity) getActivity()).onDialogDismissed();
+            ((ChangeAccountActivity) getActivity()).onDialogDismissed();
         }
     }
 
@@ -572,19 +651,14 @@ public class SwitchAccountActivity extends AppCompatActivity {
         super.onResume();
 
         if (mSnackbar != null) {
-            if (ContextCompat.checkSelfPermission(SwitchAccountActivity.this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(ChangeAccountActivity.this,
+                    Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
                 mSnackbar.dismiss();
             } else {
                 mSnackbar.show();
             }
         }
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        signOut();
     }
 
 }

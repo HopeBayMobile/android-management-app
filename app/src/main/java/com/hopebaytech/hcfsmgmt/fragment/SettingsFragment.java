@@ -49,7 +49,7 @@ public class SettingsFragment extends Fragment {
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
     private LinearLayout mNotifyLocalStorageUsedRatio;
-    private LinearLayout mSwitchAccount;
+    private LinearLayout mChangeAccount;
     private LinearLayout mTransferContent;
     private LinearLayout mFeedback;
 
@@ -84,7 +84,7 @@ public class SettingsFragment extends Fragment {
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
-        mSwitchAccount = (LinearLayout) view.findViewById(R.id.switch_account);
+        mChangeAccount = (LinearLayout) view.findViewById(R.id.switch_account);
         mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
         mFeedback = (LinearLayout) view.findViewById(R.id.feedback);
     }
@@ -134,14 +134,11 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        mSwitchAccount.setOnClickListener(new View.OnClickListener() {
+        mChangeAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SwitchAccountDialogFragment dialogFragment = SwitchAccountDialogFragment.newInstance();
-                dialogFragment.show(getFragmentManager(), SwitchAccountDialogFragment.TAG);
-
-                // Unknown cause results in that dialog show twice, thus we manually dismiss one of them
-                dialogFragment.dismiss();
+                ChangeAccountDialogFragment dialogFragment = ChangeAccountDialogFragment.newInstance();
+                dialogFragment.show(getFragmentManager(), ChangeAccountDialogFragment.TAG);
             }
         });
 

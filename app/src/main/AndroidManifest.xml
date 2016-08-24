@@ -39,9 +39,9 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".main.SwitchAccountActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:launchMode="singleInstance" />
+            android:name=".main.ChangeAccountActivity"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".main.TransferContentActivity"

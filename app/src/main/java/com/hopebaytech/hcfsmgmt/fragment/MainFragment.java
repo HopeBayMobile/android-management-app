@@ -155,7 +155,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                         // Icon expiring time doesn't reach, use cache icon base64 instead of download
                         // the latest icon
                         final ImageView iconImage = (ImageView) mNavigationView.findViewById(R.id.icon);
-                        if (System.currentTimeMillis() <= accountInfo.getImgExpringTime()) {
+                        if (System.currentTimeMillis() <= accountInfo.getImgExpiringTime()) {
                             String imgBase64 = accountInfo.getImgBase64();
                             if (imgBase64 != null) {
                                 iconImage.setImageBitmap(BitmapBase64Factory.decodeBase64(imgBase64));
@@ -172,11 +172,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                         serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
                                     @Override
                                     public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+
                                         if (result == null || !result.isSuccess()) {
                                             return;
                                         }
 
                                         GoogleSignInAccount acct = result.getSignInAccount();
+                                        Logs.w(CLASSNAME, "onAuthSuccessful", "acct=" + acct);
                                         if (acct == null) {
                                             return;
                                         }
@@ -209,7 +211,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                                             Bitmap.CompressFormat.PNG,
                                                             100);
                                                     accountInfo.setImgBase64(imgBase64);
-                                                    accountInfo.setImgExpringTime(System.currentTimeMillis() + Interval.DAY);
+                                                    accountInfo.setImgExpiringTime(System.currentTimeMillis() + Interval.DAY);
                                                     accountDAO.update(accountInfo);
                                                 }
                                             }
@@ -218,7 +220,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
                                     @Override
                                     public void onAuthFailed() {
-
+                                        Logs.e(CLASSNAME, "onAuthFailed", null);
                                     }
                                 });
                                 silentAuthProxy.auth();
