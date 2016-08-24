@@ -4,6 +4,7 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -16,6 +17,8 @@ import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 /**
  * @author Aaron
@@ -68,8 +71,11 @@ public class TransferContentDescDialogFragment extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        TransferContentConfirmDialogFragment dialogFragment = TransferContentConfirmDialogFragment.newInstance();
-                        dialogFragment.show(getFragmentManager(), TransferContentConfirmDialogFragment.TAG);
+//                        TransferContentConfirmDialogFragment dialogFragment = TransferContentConfirmDialogFragment.newInstance();
+//                        dialogFragment.show(getFragmentManager(), TransferContentConfirmDialogFragment.TAG);
+
+                        Intent intent = new Intent(getActivity(), TransferContentActivity.class);
+                        startActivity(intent);
 
                         dismiss();
                     }

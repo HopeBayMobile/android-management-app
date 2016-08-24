@@ -11,7 +11,7 @@ public class AccountInfo {
     private String email;
     private String imgUrl;
     private String imgBase64;
-    private long imgExpringTime;
+    private long imgExpiringTime;
 
     public int getId() {
         return id;
@@ -53,11 +53,11 @@ public class AccountInfo {
         this.imgBase64 = imgBase64;
     }
 
-    public long getImgExpringTime() {
-        return imgExpringTime;
+    public long getImgExpiringTime() {
+        return imgExpiringTime;
     }
 
-    public void setImgExpringTime(long imgExpringTime) {
-        this.imgExpringTime = imgExpringTime;
+    public void setImgExpiringTime(long imgExpiringTime) {
+        this.imgExpiringTime = imgExpiringTime;
     }
 }

@@ -28,6 +28,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
@@ -478,12 +479,12 @@ public class TeraMgmtService extends Service {
 
     private void doActionAccordingToDeviceStatus(final String jwtToken) {
         final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
-        MgmtCluster.GetDeviceInfoProxy getDeviceInfoProxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
-        getDeviceInfoProxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+        MgmtCluster.GetDeviceServiceInfoProxy getDeviceInfoProxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
+        getDeviceInfoProxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
             @Override
-            public void onGetDeviceInfoSuccessful(final GetDeviceInfo getDeviceInfo) {
+            public void onGetDeviceServiceInfoSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 try {
-                    String responseContent = getDeviceInfo.getMessage();
+                    String responseContent = deviceServiceInfo.getMessage();
                     JSONObject result = new JSONObject(responseContent);
                     String state = result.getString("state");
                     if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
@@ -523,7 +524,7 @@ public class TeraMgmtService extends Service {
             }
 
             @Override
-            public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+            public void onGetDeviceServiceInfoFailed(DeviceServiceInfo deviceServiceInfo) {
                 Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
                 int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
                 String notify_title = getString(R.string.app_name);
@@ -541,16 +542,7 @@ public class TeraMgmtService extends Service {
                     @Override
                     public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
                         String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-
-                        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                        authParam.setAuthCode(serverAuthCode);
-                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this)));
-                        authParam.setVendor(Build.BRAND);
-                        authParam.setModel(Build.MODEL);
-                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                        authParam.setHcfsVersion(getString(R.string.tera_version));
-
+                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
                         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                         authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                             @Override

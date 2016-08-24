@@ -40,7 +40,7 @@ public class GoogleSignInApiClient {
         this.mOnAuthListener = listener;
     }
 
-    public interface  OnConnectionListener {
+    public interface OnConnectionListener {
 
         void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient);
 
