@@ -62,7 +62,6 @@ public class OverviewFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onAttach", null);
         super.onAttach(context);
         mContext = context;
     }

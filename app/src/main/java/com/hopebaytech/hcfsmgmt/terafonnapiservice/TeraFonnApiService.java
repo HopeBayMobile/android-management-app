@@ -12,6 +12,7 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -21,7 +22,6 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
-import com.hopebaytech.hcfsmgmt.utils.StorageUsage;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import org.json.JSONException;
@@ -244,12 +244,22 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public long getTeraFreeSpace() {
-            return StorageUsage.getFreeSpace();
+            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+            if (hcfsStatInfo != null) {
+                return hcfsStatInfo.getTeraTotal() - hcfsStatInfo.getTeraUsed();
+            }
+            return 0;
+//            return PhoneStorageUsage.getFreeSpace();
         }
 
         @Override
         public long getTeraTotalSpace() {
-            return StorageUsage.getTotalSpace();
+            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+            if (hcfsStatInfo != null) {
+                return hcfsStatInfo.getTeraTotal();
+            }
+            return 0;
+//            return PhoneStorageUsage.getTotalSpace();
         }
 
         @Override
