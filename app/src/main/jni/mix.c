@@ -10,7 +10,7 @@ int teraPrivateEncrypt(unsigned char* output, unsigned char* input)
 {
     int input_length = strlen(input);
     int output_length = 0;
-	size_t* length = malloc(sizeof(size_t));
+    size_t* length = malloc(sizeof(size_t));
     int encrypted_length = input_length + TAG_SIZE;
 
     unsigned char key[KEY_SIZE];
@@ -111,7 +111,10 @@ int hex_print(unsigned char* input, int size) {
         sprintf(&converted[i*2], "%02X", input[i]);
         i++;
     }
-    printf("%lu %s\n", size, converted);
+    printf(" %d ", size);
+#ifdef DETAIL_DEBUG
+    printf("%s\n", converted);
+#endif
 
     return 0;
 }

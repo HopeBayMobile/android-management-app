@@ -213,8 +213,7 @@ int encryptCode(char* keyType, unsigned char* encrypted, const unsigned char* pl
     }
 
     // Base64 encode
-    int ret = b64encode_str(encrypt_code, encrypted, output_length, encrypted_length);
-    if (ret != 0) {
+    if (b64encode_str(encrypt_code, encrypted, output_length, encrypted_length) != 0) {
         printLastError("Base64 encode failed ");
         return -1;
     }
