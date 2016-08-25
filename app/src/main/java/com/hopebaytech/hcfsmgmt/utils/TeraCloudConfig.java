@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.TeraStatDAO;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraStatInfo;
 
 import org.json.JSONException;
@@ -27,11 +27,6 @@ public class TeraCloudConfig {
     public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
     public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
     public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
-
-//    public static boolean isTeraAppLogin(Context context) {
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-//        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
-//    }
 
     public static void activateTeraCloud(Context context) {
         TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(context);
@@ -138,26 +133,20 @@ public class TeraCloudConfig {
         stopSyncToCloud();
     }
 
-    public static boolean storeHCFSConfig(RegisterResultInfo registerResultInfo) {
-//        boolean isFailed = false;
+    public static boolean storeHCFSConfig(DeviceServiceInfo deviceServiceInfo) {
         boolean isSuccess = true;
-        if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, registerResultInfo.getBackendType())) {
-//            isFailed = true;
+        if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, deviceServiceInfo.getBackend().getBackendType())) {
             isSuccess = false;
         }
-        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, registerResultInfo.getBackendUser())) {
-//            isFailed = true;
+        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, deviceServiceInfo.getBackend().getUser())) {
             isSuccess = false;
         }
-        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, registerResultInfo.getBucket())) {
-//            isFailed = true;
+        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, deviceServiceInfo.getBackend().getBucket())) {
             isSuccess = false;
         }
         if (!reloadConfig()) {
-//            isFailed = true;
             isSuccess = false;
         }
-//        return isFailed;
         return isSuccess;
     }
 
@@ -168,7 +157,7 @@ public class TeraCloudConfig {
         setHCFSConfig(HCFS_CONFIG_SWIFT_PASS, "");
         setHCFSConfig(HCFS_CONFIG_SWIFT_URL, "");
         setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, "");
-        setHCFSConfig(HCFS_CONFIG_SWIFT_PROTOCOL, "");
+//        setHCFSConfig(HCFS_CONFIG_SWIFT_PROTOCOL, "");
     }
 
 }

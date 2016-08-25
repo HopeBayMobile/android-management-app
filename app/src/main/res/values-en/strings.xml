@@ -31,6 +31,7 @@
     <string name="activate_failed_not_supported_device">This device is not supported. Activation failed.</string>
     <string name="activate_failed_device_expired">Tera expired. Activation failed.</string>
     <string name="activate_failed_gateway_timeout">Gateway Timeout: The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.</string>
+    <string name="activate_failed_device_in_use">The device has been registered.</string>
     <string name="activate_device_not_registered">Tera is not activated on this device. Enter an activation code to activate Tera.</string>
     <string name="activate_require_read_phone_state_permission">Enable the "Phone" permission to activate Tera.</string>
 
@@ -145,8 +146,8 @@
     <string name="settings_notify_local_storage_used_ratio_title">Local space usage</string>
     <string name="settings_execute">Execute</string>
     <string name="settings_execute_title">Download to run</string>
-    <string name="settings_switch_account_title">Change account</string>
-    <string name="settings_switch_account_warning_msg">To change the account, Tera will log out your current account first. Continue?</string>
+    <string name="settings_change_account_title">Change account</string>
+    <string name="settings_change_account_warning_msg">To change the account, Tera will log out your current account first. Continue?</string>
     <string name="settings_local_storage_used_ratio">Send notification if local space usage reaches <b>%s</b>.</string>
     <string name="settings_transfer_content">Transfer data</string>
     <string name="settings_transfer_content_desc_title">Transfer Data</string>
@@ -182,22 +183,21 @@
         <item>50</item>
     </string-array>
 
-    <string name="switch_account_require_new_account">Same as the current account. Changing account operation will not be performed.</string>
-    <string name="switch_account_start_to_switch">Start Changing</string>
-    <string name="switch_account_failed">Changing account failed. Please try again or tap the Return key to quit.</string>
-    <string name="switch_account_another_account"><u>Choose Another Account</u></string>
-    <string name="switch_account_require_read_phone_state_permission">Changing account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
+    <string name="change_account_require_new_account">Same as the current account. Changing account operation will not be performed.</string>
+    <string name="change_account_start_to_change">Change</string>
+    <string name="change_account_failed">Changing account failed. Please try again or tap the Return key to quit.</string>
+    <string name="change_account_another_account"><u>Choose Another Account</u></string>
+    <string name="change_account_require_read_phone_state_permission">Changing account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
 
     <string name="auth_at_bootup_auth_failed_google_auth">Unable to access cloud data, because Google account authentication failed.</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Unable to access cloud data, because Tera account authentication failed.</string>
     <string name="auth_at_bootup_auth_failed_mgmt_register">Unable to access cloud data, because Tera registration failed.</string>
     <string name="auth_at_bootup_auth_get_device_info">Unable to get device status from management server.</string>
 
-    <string name="alert_dialog_title_warning">Alert</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
+    <string name="alert_dialog_title_warning">Warning</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
     <string name="confirm">Confirm</string>
-    <string name="_continue">Continue</string>
     <string name="cancel">CANCEL</string>
     <string name="ok">OK</string>
     <string name="next">NEXT</string>
