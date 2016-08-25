@@ -31,7 +31,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/M4"
         android:gravity="center"
-        android:text="@string/restore_preparing_title" />
+        android:text="@string/restore_ready_title" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/message"
@@ -43,45 +43,30 @@
         android:layout_marginEnd="30dp"
         android:layout_marginStart="30dp"
         android:gravity="center_horizontal"
-        android:text="@string/restore_preparing_message" />
+        android:text="@string/restore_ready_message" />
 
-    <RelativeLayout
-        android:id="@+id/processing_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="192dp"
+    <FrameLayout
+        android:id="@+id/cancel_layout"
+        android:layout_width="200dp"
+        android:layout_height="36dp"
         android:layout_alignParentBottom="true"
-        android:layout_gravity="center_horizontal">
-
-        <RelativeLayout
-            android:id="@+id/progressbar_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:gravity="center" />
-
-            <ProgressBar
-                android:id="@+id/progress_circle"
-                style="?android:attr/progressBarStyleLarge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:indeterminate="true" />
-
-        </RelativeLayout>
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="76dp"
+        android:background="@color/colorAccent"
+        android:clickable="true">
 
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            android:id="@+id/error_msg"
+            android:id="@+id/cancel"
+            style="@style/F2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackground"
             android:gravity="center"
-            android:textColor="@android:color/black" />
-    </RelativeLayout>
+            android:text="@string/restore_system_reboot" />
+
+    </FrameLayout>
 
 </RelativeLayout>

@@ -42,13 +42,13 @@ import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtil;
+import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
@@ -91,7 +91,7 @@ public class ActivateWoCodeFragment extends Fragment {
 
     private View mView;
     private Context mContext;
-    private ProgressDialogUtil mProgressDialogUtil;
+    private ProgressDialogUtils mProgressDialogUtils;
     private LinearLayout mGoogleActivate;
     private TextView mErrorMessage;
 
@@ -109,7 +109,7 @@ public class ActivateWoCodeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mProgressDialogUtil = new ProgressDialogUtil(mContext);
+        mProgressDialogUtils = new ProgressDialogUtils(mContext);
         mHandlerThread = new HandlerThread(CLASSNAME);
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
@@ -148,7 +148,7 @@ public class ActivateWoCodeFragment extends Fragment {
                 if (ContextCompat.checkSelfPermission(mContext,
                         Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
                     if (NetworkUtils.isNetworkConnected(mContext)) {
-                        mProgressDialogUtil.show(getString(R.string.processing_msg));
+                        mProgressDialogUtils.show(getString(R.string.processing_msg));
                         // It needs to sign out first in order to show oogle account chooser as user
                         // want to choose another Google account.
                         if (mGoogleApiClient != null) {
@@ -188,7 +188,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 mErrorMessage.setText(R.string.activate_signin_google_account_failed);
                                             }
 
-                                            mProgressDialogUtil.dismiss();
+                                            mProgressDialogUtils.dismiss();
                                         }
 
                                         @Override
@@ -201,7 +201,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                     mUiHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            mProgressDialogUtil.dismiss();
+                                            mProgressDialogUtils.dismiss();
                                             mErrorMessage.setText(R.string.activate_get_server_client_id_failed);
                                         }
                                     });
@@ -300,7 +300,7 @@ public class ActivateWoCodeFragment extends Fragment {
     private void googleAuthFailed(String failedMsg) {
         Logs.e(CLASSNAME, "googleAuthFailed", "failedMsg=" + failedMsg);
 
-        mProgressDialogUtil.dismiss();
+        mProgressDialogUtils.dismiss();
 
         signOut();
 
@@ -329,7 +329,7 @@ public class ActivateWoCodeFragment extends Fragment {
         Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
 
         if (requestCode != RequestCode.GOOGLE_SIGN_IN && resultCode != Activity.RESULT_OK) {
-            mProgressDialogUtil.dismiss();
+            mProgressDialogUtils.dismiss();
             return;
         }
 
@@ -338,7 +338,7 @@ public class ActivateWoCodeFragment extends Fragment {
         if (acct == null) {
             String failedMsg = "acct is null";
             googleAuthFailed(failedMsg);
-            mProgressDialogUtil.dismiss();
+            mProgressDialogUtils.dismiss();
             return;
         }
 
@@ -369,7 +369,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         mErrorMessage.setText(R.string.activate_failed_device_in_use);
                     }
 
-                    mProgressDialogUtil.dismiss();
+                    mProgressDialogUtils.dismiss();
                     return;
                 }
 
@@ -407,7 +407,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         ft.addToBackStack(null);
                         ft.commit();
 
-                        mProgressDialogUtil.dismiss();
+                        mProgressDialogUtils.dismiss();
                     }
 
                     @Override
@@ -418,7 +418,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         } else {
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }
-                        mProgressDialogUtil.dismiss();
+                        mProgressDialogUtils.dismiss();
                     }
                 });
                 proxy.get();
@@ -430,7 +430,7 @@ public class ActivateWoCodeFragment extends Fragment {
 
                 signOut();
                 mErrorMessage.setText(R.string.activate_auth_failed);
-                mProgressDialogUtil.dismiss();
+                mProgressDialogUtils.dismiss();
             }
         });
         authProxy.auth();
@@ -500,7 +500,7 @@ public class ActivateWoCodeFragment extends Fragment {
                             mUiHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mProgressDialogUtil.dismiss();
+                                    mProgressDialogUtils.dismiss();
                                     mErrorMessage.setText(R.string.activate_failed);
                                 }
                             });
@@ -544,7 +544,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                     ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
                                     ft.commit();
 
-                                    mProgressDialogUtil.dismiss();
+                                    mProgressDialogUtils.dismiss();
                                 }
                             });
 
@@ -558,7 +558,7 @@ public class ActivateWoCodeFragment extends Fragment {
                 Logs.e(CLASSNAME, "onRegisterFailed", "deviceServiceInfo=" + deviceServiceInfo.toString());
 
                 signOut();
-                mProgressDialogUtil.dismiss();
+                mProgressDialogUtils.dismiss();
 
                 int errorMsgResId = R.string.activate_failed;
                 if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {

@@ -26,12 +26,12 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtil;
+import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
@@ -68,7 +68,7 @@ public class RestoreFragment extends Fragment {
 
     private RestoreListAdapter mRestoreListAdapter;
     private Checkable mPrevCheckableInfo;
-    private ProgressDialogUtil mProgressDialogUtil;
+    private ProgressDialogUtils mProgressDialogUtils;
     private Handler mUiHandler;
     private Handler mWorkHandler;
     private HandlerThread mHandlerThread;
@@ -92,7 +92,7 @@ public class RestoreFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mProgressDialogUtil = new ProgressDialogUtil(mContext);
+        mProgressDialogUtils = new ProgressDialogUtils(mContext);
         mHandlerThread = new HandlerThread(CLASSNAME);
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
@@ -518,7 +518,7 @@ public class RestoreFragment extends Fragment {
     }
 
     private void registerWithJwtToken(final String jwtToken) {
-        mProgressDialogUtil.show(getString(R.string.processing_msg));
+        mProgressDialogUtils.show(getString(R.string.processing_msg));
 
         MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
         registerParam.closeOldCloudSpace();
@@ -536,7 +536,7 @@ public class RestoreFragment extends Fragment {
                             mUiHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mProgressDialogUtil.dismiss();
+                                    mProgressDialogUtils.dismiss();
                                     mErrorMessage.setText(R.string.activate_failed);
                                 }
                             });
@@ -576,7 +576,7 @@ public class RestoreFragment extends Fragment {
                                 ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
                                 ft.commit();
 
-                                mProgressDialogUtil.dismiss();
+                                mProgressDialogUtils.dismiss();
                             }
                         });
 
@@ -591,7 +591,7 @@ public class RestoreFragment extends Fragment {
 
                 int errorMsgResId = R.string.activate_failed;
                 if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    mProgressDialogUtil.dismiss();
+                    mProgressDialogUtils.dismiss();
                     if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
                         Bundle bundle = new Bundle();
                         bundle.putInt(ActivateWoCodeFragment.KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
@@ -627,7 +627,7 @@ public class RestoreFragment extends Fragment {
      * serverAuthCode and then authenticating with mgmt server to get jwtToken.
      */
     private void registerWithoutJwtToken() {
-        mProgressDialogUtil.show(getString(R.string.processing_msg));
+        mProgressDialogUtils.show(getString(R.string.processing_msg));
 
         String serverClientId = MgmtCluster.getServerClientId();
         GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
@@ -667,7 +667,7 @@ public class RestoreFragment extends Fragment {
                     @Override
                     public void onAuthFailed() {
                         Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed", null);
-                        mProgressDialogUtil.dismiss();
+                        mProgressDialogUtils.dismiss();
                     }
 
                 });
@@ -684,7 +684,7 @@ public class RestoreFragment extends Fragment {
     }
 
     private void restoreDeviceWithJwtToken(String jwtToken, final String sourceImei) {
-        mProgressDialogUtil.show(getString(R.string.processing_msg));
+        mProgressDialogUtils.show(getString(R.string.processing_msg));
 
         MgmtCluster.SwitchDeviceBackendParam param =
                 new MgmtCluster.SwitchDeviceBackendParam(mContext);
@@ -696,7 +696,7 @@ public class RestoreFragment extends Fragment {
             @Override
             public void onSwitchSuccessful(DeviceServiceInfo deviceServiceInfo) {
                 Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
-                mProgressDialogUtil.dismiss();
+                mProgressDialogUtils.dismiss();
 
                 mWorkHandler.post(new Runnable() {
                     @Override
@@ -712,7 +712,7 @@ public class RestoreFragment extends Fragment {
 
             @Override
             public void onSwitchFailed(DeviceServiceInfo deviceServiceInfo) {
-                mProgressDialogUtil.dismiss();
+                mProgressDialogUtils.dismiss();
 
                 if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
                     restoreDeviceWithoutJwtToken(sourceImei);
@@ -729,7 +729,7 @@ public class RestoreFragment extends Fragment {
      * serverAuthCode and then authenticating with mgmt server to get jwtToken.
      */
     private void restoreDeviceWithoutJwtToken(final String sourceImei) {
-        mProgressDialogUtil.show(getString(R.string.processing_msg));
+        mProgressDialogUtils.show(getString(R.string.processing_msg));
 
         String serverClientId = MgmtCluster.getServerClientId();
         GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
@@ -747,7 +747,7 @@ public class RestoreFragment extends Fragment {
                         authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                             @Override
                             public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                                mProgressDialogUtil.dismiss();
+                                mProgressDialogUtils.dismiss();
 
                                 String jwtToken = authResultInfo.getToken();
                                 restoreDeviceWithJwtToken(jwtToken, sourceImei);
@@ -757,7 +757,7 @@ public class RestoreFragment extends Fragment {
                             public void onAuthFailed(AuthResultInfo authResultInfo) {
                                 Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken", "onAuthFailed",
                                         "authResultInfo=" + authResultInfo);
-                                mProgressDialogUtil.dismiss();
+                                mProgressDialogUtils.dismiss();
 
                                 int responseCode = authResultInfo.getResponseCode();
                                 if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
@@ -773,7 +773,7 @@ public class RestoreFragment extends Fragment {
                     @Override
                     public void onAuthFailed() {
                         Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken", "onAuthFailed", null);
-                        mProgressDialogUtil.dismiss();
+                        mProgressDialogUtils.dismiss();
                     }
 
                 });

@@ -200,9 +200,12 @@
     <string name="restore_preparing_message">正在準備還原。在還原過程中，如果您有進行任何變更，這些變更於重新啟動後並不會被儲存。</string>
     <string name="restore_restoring_title">正在還原&#8230;</string>
     <string name="restore_restoring_message">在還原過程中，請保持網路的連線。</string>
+    <string name="restore_ready_title">Ready for restoration</string>
+    <string name="restore_ready_message">This restoration is ready, please tap "System reboot" to continue the process.</string>
     <string name="restore_back">返回</string>
     <string name="restore_next">下一步</string>
     <string name="restore_failed">還原失敗。</string>
+    <string name="restore_system_reboot">System Reboot</string>
 
     <string name="alert_dialog_title_warning">警告</string>
 

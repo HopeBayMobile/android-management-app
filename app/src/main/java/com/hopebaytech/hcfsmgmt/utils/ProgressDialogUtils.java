@@ -6,13 +6,13 @@ import android.content.Context;
  * @author Aaron
  *         Created by Aaron on 2016/8/19.
  */
-public class ProgressDialogUtil {
+public class ProgressDialogUtils {
 
-    private final String CLASSNAME = ProgressDialogUtil.class.getSimpleName();
+    private final String CLASSNAME = ProgressDialogUtils.class.getSimpleName();
 
     private android.app.ProgressDialog mProgressDialog;
 
-    public ProgressDialogUtil(Context context) {
+    public ProgressDialogUtils(Context context) {
         mProgressDialog = new android.app.ProgressDialog(context);
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(false);

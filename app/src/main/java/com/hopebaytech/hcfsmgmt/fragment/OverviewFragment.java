@@ -76,12 +76,10 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onViewStateRestored(Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewStateRestored", null);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onSaveInstanceState", null);
         super.onSaveInstanceState(outState);
 
         if (mStatInfo != null) {
@@ -108,14 +106,12 @@ public class OverviewFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onCreateView", null);
         return inflater.inflate(R.layout.overview_fragment, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        HCFSMgmtUtils.log(Log.DEBUG, CLASSNAME, "onViewCreated", null);
 
         mNetworkConnStatusImage = (ImageView) view.findViewById(R.id.network_conn_status_icon);
         mNetworkConnStatusText = (TextView) view.findViewById(R.id.network_conn_status);

@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +17,14 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 /**
  * @author Aaron
- *         Created by Aaron on 2016/8/23.
+ *         Created by Aaron on 2016/8/25.
  */
-public class RestorePreparingFragment extends Fragment {
+public class RestoreReadyFragment extends Fragment {
 
-    public static final String TAG = RestorePreparingFragment.class.getSimpleName();
+    private FullRestoreDoneReceiver mReceiver;
 
-    private MiniRestoreCompletedReceiver mReceiver;
-
-    public static RestorePreparingFragment newInstance() {
-        return new RestorePreparingFragment();
+    public static RestoreReadyFragment newInstance() {
+        return new RestoreReadyFragment();
     }
 
     @Override
@@ -34,16 +32,16 @@ public class RestorePreparingFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(TeraIntent.ACTION_MINI_RESTORE_COMPLETED);
+        intentFilter.addAction(TeraIntent.ACTION_FULL_RESTORE_DONE);
 
-        mReceiver = new MiniRestoreCompletedReceiver();
+        mReceiver = new FullRestoreDoneReceiver();
         mReceiver.registerReceiver(getActivity(), intentFilter);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.restore_preparing_fragment, container, false);
+        return inflater.inflate(R.layout.restore_ready_fragment, container, false);
     }
 
     @Override
@@ -52,15 +50,14 @@ public class RestorePreparingFragment extends Fragment {
         mReceiver.unregisterReceiver(getActivity());
     }
 
-    public class MiniRestoreCompletedReceiver extends BroadcastReceiver {
+    public class FullRestoreDoneReceiver extends BroadcastReceiver {
 
         private boolean isRegister;
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.replace(R.id.fragment_container, RestoreReadyFragment.newInstance());
-            ft.commit();
+            PowerManager powerManager = (PowerManager) getActivity().getSystemService(Context.POWER_SERVICE);
+            powerManager.reboot(null);
         }
 
         public void registerReceiver(Context context, IntentFilter intentFilter) {
@@ -82,5 +79,6 @@ public class RestorePreparingFragment extends Fragment {
         }
 
     }
+
 
 }

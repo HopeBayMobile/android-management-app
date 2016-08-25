@@ -9,7 +9,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;

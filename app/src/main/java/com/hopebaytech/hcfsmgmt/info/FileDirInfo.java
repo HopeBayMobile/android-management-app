@@ -14,7 +14,6 @@ import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -22,6 +21,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
+import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 public class FileDirInfo extends ItemInfo implements Cloneable {

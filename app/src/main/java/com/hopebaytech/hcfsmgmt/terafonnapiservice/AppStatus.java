@@ -3,7 +3,7 @@ package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.hopebaytech.hcfsmgmt.info.ItemStatus;
+import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
 
 /**
  * @author Aaron, Vince
