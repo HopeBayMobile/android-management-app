@@ -75,6 +75,7 @@ public class TeraAPIServer extends Service {
             }
         }).start();
 
+        startForeground(0, null);
         return START_REDELIVER_INTENT;
         //return START_STICKY;
     }
@@ -88,6 +89,7 @@ public class TeraAPIServer extends Service {
     public void onDestroy() {
         stopped = true;
         pool.shutdown();
+        startService(new Intent(TeraAPIServer.this, TeraAPIServer.class));
         super.onDestroy();
     }
 
