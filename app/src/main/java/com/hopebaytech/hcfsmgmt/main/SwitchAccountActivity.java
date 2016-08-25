@@ -7,7 +7,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -20,7 +19,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceManager;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -46,13 +44,12 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
-import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import java.util.List;
 
@@ -182,6 +179,7 @@ public class SwitchAccountActivity extends AppCompatActivity {
 //                                            SharedPreferences.Editor editor = sharedPreferences.edit();
 //                                            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
 //                                            editor.apply();
+                                            isSuccess = true;
                                         }
 
                                         final boolean isSuccessful = isSuccess;
