@@ -11,15 +11,16 @@ import java.util.List;
  * @author Daniel
  *         Created by daniel on 2016/8/9.
  */
-public class StorageUsage {
+public class PhoneStorageUsage {
 
-    private static final String CLASSNAME = StorageUsage.class.getSimpleName();
+    private static final String CLASSNAME = PhoneStorageUsage.class.getSimpleName();
 
     private static final String system_path = "/system";
     private static final String cache_path = "/cache";
     private static final String data_path = "/data";
-    private static final String tera_path = "/data/data";
-    static List<String> paths = Arrays.asList(system_path, cache_path, data_path, tera_path);
+//    private static final String tera_path = "/data/data";
+//    static List<String> paths = Arrays.asList(system_path, cache_path, data_path, tera_path);
+    static List<String> paths = Arrays.asList(system_path, cache_path, data_path);
 
     public static long getFreeSpace() {
         File path;

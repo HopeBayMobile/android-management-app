@@ -342,8 +342,9 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
                 // Add the Tera storage scope.
-                long totalSpace = StorageUsage.getTotalSpace();
-                long freeSpace = StorageUsage.getFreeSpace();
+                long totalSpace = PhoneStorageUsage.getTotalSpace() + hcfsStatInfo.getCacheTotal();
+                long freeSpace = PhoneStorageUsage.getFreeSpace() +
+                        (hcfsStatInfo.getCacheTotal() - hcfsStatInfo.getCloudUsed());
                 hcfsStatInfo.setTeraTotal(totalSpace);
                 hcfsStatInfo.setTeraUsed(totalSpace - freeSpace);
                 hcfsStatInfo.setVolUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_VOL_USED));
