@@ -555,7 +555,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 //        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, true);
         mContext.startService(intentService);
-        mContext.
     }
 
     @Override
