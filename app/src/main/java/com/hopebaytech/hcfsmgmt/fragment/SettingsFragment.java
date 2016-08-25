@@ -52,8 +52,6 @@ public class SettingsFragment extends Fragment {
     private LinearLayout mSwitchAccount;
     private LinearLayout mTransferContent;
     private LinearLayout mFeedback;
-    private SettingsDAO mSettingsDAO;
-    private SettingsInfo settingsInfo;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -68,7 +66,6 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSettingsDAO = SettingsDAO.getInstance(getContext());
     }
 
     @Nullable
@@ -196,6 +193,7 @@ public class SettingsFragment extends Fragment {
 
         if (requestCode == REQUEST_CODE_RATIO) {
             if (resultCode == Activity.RESULT_OK) {
+                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
                 HCFSMgmtUtils.stopNotifyLocalStorageUsedRatioAlarm(mContext);
                 HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
 

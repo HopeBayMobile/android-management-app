@@ -26,7 +26,6 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
     public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private Context mContext;
-    private SettingsDAO mSettingsDAO;
 
     public static LocalSpaceUsageRatioDialogFragment newInstance() {
         return new LocalSpaceUsageRatioDialogFragment();
@@ -41,7 +40,6 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mSettingsDAO = SettingsDAO.getInstance(mContext);
         return inflater.inflate(R.layout.settings_usage_ratio_selection_dialog, container, false);
     }
 
@@ -52,6 +50,7 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
         String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
         String getRatio = defaultValue.concat("%");
 
+        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(mContext);
         SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
         if (settingsInfo != null) {
             getRatio = settingsInfo.getValue().concat("%");
