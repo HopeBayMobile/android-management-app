@@ -74,4 +74,7 @@ interface ITeraFonnApiService {
 
     /** Get Tera settings is wifi only **/
     boolean isWifiOnly();
+
+    /** Get connection status **/
+    int getConnStatus();
 }

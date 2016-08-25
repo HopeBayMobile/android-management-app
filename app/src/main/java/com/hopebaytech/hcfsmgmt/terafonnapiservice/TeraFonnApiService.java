@@ -12,10 +12,12 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -261,6 +263,11 @@ public class TeraFonnApiService extends Service {
                 wifiOnly = Boolean.valueOf(settingsInfo.getValue());
             }
             return wifiOnly;
+        }
+
+        public int getConnStatus() throws RemoteException {
+            HCFSStatInfo info = HCFSMgmtUtils.getHCFSStatInfo();
+            return HCFSConnStatus.getConnStatus(TeraFonnApiService.this, info);
         }
     };
 
