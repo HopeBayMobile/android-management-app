@@ -7,10 +7,12 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
-import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.service.TeraAPIServer;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
@@ -32,7 +34,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             Logs.d(CLASSNAME, "onReceive", "isTeraAppLogin=" + isTeraAppLogin);
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 // Detect network status and determine whether sync data to cloud
-                boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
+                boolean syncWifiOnly = true;
+                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(context);
+                SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                if (settingsInfo != null) {
+                    syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
+                }
                 HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
                 // Start an alarm to reset xfer
@@ -53,7 +60,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 editor.apply();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 // Detect network status changed and enable/disable data sync to cloud
-                boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
+                boolean syncWifiOnly = true;
+                SettingsDAO mSettingsDAO = new SettingsDAO();
+                SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                if (settingsInfo != null) {
+                    syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
+                }
                 HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
                 // Only execute once after system boot-up. Check the device status and execute the corresponding actions

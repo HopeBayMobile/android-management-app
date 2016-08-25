@@ -84,6 +84,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private String sdcard1_path;
     private boolean isSDCard1;
     private boolean isExitApp = false;
+    private String toViewPagerIndex = "ViewPagerIndex";
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -365,6 +366,27 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                 if (fragment != null && fragment.isVisible()) {
                                     Thread.sleep(500);
                                     mViewPager.setCurrentItem(1, true);
+                                    break;
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
+            }
+            final int toViewPager = args.getInt(toViewPagerIndex, -1);
+            if (toViewPager > -1 && toViewPager < mPagerAdapter.getCount()) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            try {
+                                Thread.sleep(500);
+                                Fragment fragment = mPagerAdapter.getFragment(0);
+                                if (fragment != null && fragment.isVisible()) {
+                                    Thread.sleep(500);
+                                    mViewPager.setCurrentItem(toViewPager, true);
                                     break;
                                 }
                             } catch (InterruptedException e) {

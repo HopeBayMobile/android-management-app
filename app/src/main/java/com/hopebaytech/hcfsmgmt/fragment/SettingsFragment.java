@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
@@ -93,35 +93,50 @@ public class SettingsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        boolean isChecked = sharedPreferences.getBoolean(PREF_SYNC_WIFI_ONLY, true);
+        boolean isChecked = true;
+        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
+        SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+        if (settingsInfo != null) {
+            isChecked = Boolean.valueOf(settingsInfo.getValue());
+        }
         mSyncWifiOnly.setChecked(isChecked);
         mSyncWifiOnly.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 HCFSMgmtUtils.changeCloudSyncStatus(mContext, isChecked);
-
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(PREF_SYNC_WIFI_ONLY, isChecked);
-                editor.apply();
+                SettingsInfo settingsInfo = new SettingsInfo();
+                settingsInfo.setKey(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                settingsInfo.setValue(String.valueOf(isChecked));
+                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
+                mSettingsDAO.update(settingsInfo);
             }
         });
 
-        isChecked = sharedPreferences.getBoolean(PREF_NOTIFY_CONN_FAILED_RECOVERY, false);
+        isChecked = false;
+        settingsInfo = mSettingsDAO.get(PREF_NOTIFY_CONN_FAILED_RECOVERY);
+        if (settingsInfo != null) {
+            isChecked = Boolean.valueOf(settingsInfo.getValue());
+        }
         mNotifyConnFailedRecovery.setChecked(isChecked);
         mNotifyConnFailedRecovery.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(PREF_NOTIFY_CONN_FAILED_RECOVERY, isChecked);
-                editor.apply();
+                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(mContext);
+                SettingsInfo settingsInfo = new SettingsInfo();
+                settingsInfo.setKey(PREF_NOTIFY_CONN_FAILED_RECOVERY);
+                settingsInfo.setValue(String.valueOf(isChecked));
+                mSettingsDAO.update(settingsInfo);
             }
         });
 
         String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-        final String ratio = sharedPreferences.getString(PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO, defaultValue).concat("%");
+        String getRatio = defaultValue.concat("%");
+
+        settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+        if (settingsInfo != null) {
+            getRatio = settingsInfo.getValue().concat("%");
+        }
+        final String ratio = getRatio;
         String summary = getString(R.string.settings_local_storage_used_ratio, ratio);
         TextView summaryText = (TextView) mNotifyLocalStorageUsedRatio.findViewById(R.id.notify_local_storage_used_ratio_summary);
         summaryText.setText(summary);
@@ -178,6 +193,7 @@ public class SettingsFragment extends Fragment {
 
         if (requestCode == REQUEST_CODE_RATIO) {
             if (resultCode == Activity.RESULT_OK) {
+                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
                 HCFSMgmtUtils.stopNotifyLocalStorageUsedRatioAlarm(mContext);
                 HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
 
@@ -186,10 +202,10 @@ public class SettingsFragment extends Fragment {
                 TextView summaryText = (TextView) mNotifyLocalStorageUsedRatio.findViewById(R.id.notify_local_storage_used_ratio_summary);
                 summaryText.setText(summary);
 
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO, ratio.replace("%", ""));
-                editor.apply();
+                SettingsInfo settingsInfo = new SettingsInfo();
+                settingsInfo.setKey(PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+                settingsInfo.setValue(String.valueOf(ratio.replace("%", "")));
+                mSettingsDAO.update(settingsInfo);
             }
         }
 
