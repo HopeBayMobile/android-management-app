@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.support.v7.app.NotificationCompat;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
@@ -39,7 +40,9 @@ public class MgmtPollingService extends Service {
 
     @Override
     public void onCreate() {
-        Logs.i(CLASSNAME, this.getClass().getName(), "onCreate");
+        super.onCreate();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        startForeground(1001, builder.build());
     }
 
     @Override
