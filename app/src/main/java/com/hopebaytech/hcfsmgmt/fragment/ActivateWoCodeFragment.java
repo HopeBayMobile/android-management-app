@@ -4,18 +4,14 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.FileObserver;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
@@ -28,13 +24,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -49,15 +42,17 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -98,12 +93,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
     private View mView;
     private Context mContext;
-    private LinearLayout mActivateButton;
     private ProgressDialog mProgressDialog;
-    private EditText mUsername;
-    private EditText mPassword;
-    private TextView mForgotPassword;
-    private TextView mGoogleActivate;
+    private ImageView mGoogleActivate;
     private TextView mErrorMessage;
 
     public static ActivateWoCodeFragment newInstance() {
@@ -139,160 +130,13 @@ public class ActivateWoCodeFragment extends Fragment {
 
         mView = view;
 
-        mActivateButton = (LinearLayout) view.findViewById(R.id.activate);
-        mUsername = ((EditText) view.findViewById(R.id.username));
-        mPassword = ((EditText) view.findViewById(R.id.password));
-        mForgotPassword = (TextView) view.findViewById(R.id.forget_password);
-        mGoogleActivate = (TextView) view.findViewById(R.id.google_activate);
+        mGoogleActivate = (ImageView) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        mActivateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                View currentFocusView = ((Activity) mContext).getCurrentFocus();
-                if (currentFocusView != null) {
-                    InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(currentFocusView.getWindowToken(), 0);
-                }
-
-                final String username = mUsername.getText().toString();
-                final String password = mPassword.getText().toString();
-                if (username.isEmpty() || password.isEmpty()) {
-                    mErrorMessage.setText(R.string.activate_require_username_password);
-                } else {
-                    if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                        if (NetworkUtils.isNetworkConnected(mContext)) {
-                            showProgressDialog();
-
-                            final MgmtCluster.UserAuthParam authParam = new MgmtCluster.UserAuthParam();
-                            authParam.setUsername(username);
-                            authParam.setPassword(password);
-                            authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
-                            authParam.setVendor(Build.BRAND);
-                            authParam.setModel(Build.MODEL);
-                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                            authParam.setHcfsVersion(getString(R.string.tera_version));
-
-                            MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                            authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                                @Override
-                                public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
-                                    MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
-                                    registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
-                                        @Override
-                                        public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
-                                            mWorkHandler.post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                                    if (failed) {
-                                                        HCFSConfig.resetHCFSConfig();
-                                                    } else {
-                                                        AccountInfo accountInfo = new AccountInfo();
-                                                        accountInfo.setName(username);
-
-                                                        AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-                                                        accountDAO.clear();
-                                                        accountDAO.insert(accountInfo);
-                                                        accountDAO.close();
-
-                                                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                                        editor.apply();
-
-                                                        String url = registerResultInfo.getBackendUrl();
-                                                        String token = registerResultInfo.getStorageAccessToken();
-                                                        HCFSMgmtUtils.setSwiftToken(url, token);
-                                                    }
-
-                                                    mUiHandler.post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            dismissProgressDialog();
-                                                            if (failed) {
-                                                                mErrorMessage.setText(R.string.activate_failed);
-                                                            } else {
-                                                                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                                                ft.replace(R.id.fragment_container, MainFragment.newInstance(), MainFragment.TAG);
-                                                                ft.commit();
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            });
-                                        }
-
-                                        @Override
-                                        public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                                            Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
-
-                                            dismissProgressDialog();
-
-                                            int errorMsgResId = R.string.activate_failed;
-                                            if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                                                if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
-                                                    Bundle bundle = new Bundle();
-                                                    bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.USER_AUTH);
-                                                    bundle.putString(KEY_USERNAME, username);
-                                                    bundle.putString(KEY_PASSWORD, password);
-                                                    bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
-
-                                                    ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                                    fragment.setArguments(bundle);
-
-                                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                                    ft.replace(R.id.fragment_container, fragment, ActivateWithCodeFragment.TAG);
-                                                    ft.commit();
-                                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                                                        registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                                                    errorMsgResId = R.string.activate_failed_not_supported_device;
-                                                } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
-                                                    errorMsgResId = R.string.activate_failed_device_expired;
-                                                }
-                                            } else if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_GATEWAY_TIMEOUT) {
-                                                errorMsgResId = R.string.activate_failed_gateway_timeout;
-                                            }
-                                            mErrorMessage.setText(errorMsgResId);
-                                        }
-
-                                    });
-                                    registerProxy.register();
-                                }
-
-                                @Override
-                                public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                    Logs.e(CLASSNAME, "onConnectionFailed", "authResultInfo=" + authResultInfo.toString());
-
-                                    dismissProgressDialog();
-                                    mErrorMessage.setText(R.string.activate_auth_failed);
-                                }
-                            });
-                            authProxy.auth();
-                        } else {
-                            mErrorMessage.setText(R.string.activate_alert_dialog_message);
-                        }
-                    } else {
-                        ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-                    }
-                }
-            }
-        });
-
-        mForgotPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                View contentView = ((Activity) mContext).findViewById(android.R.id.content);
-                if (contentView != null) {
-                    Snackbar.make(contentView, "忘記密碼", Snackbar.LENGTH_SHORT).show();
-                }
-            }
-        });
 
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -486,30 +330,34 @@ public class ActivateWoCodeFragment extends Fragment {
                 if (acct != null) {
                     final String serverAuthCode = acct.getServerAuthCode();
                     final String email = acct.getEmail();
-                    final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                    authParam.setAuthCode(serverAuthCode);
-                    authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                    authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
-                    authParam.setVendor(Build.BRAND);
-                    authParam.setModel(Build.MODEL);
-                    authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                    authParam.setHcfsVersion(getString(R.string.tera_version));
+//                    final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
+//                    authParam.setAuthCode(serverAuthCode);
+//                    authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+//                    authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext)));
+//                    authParam.setVendor(Build.BRAND);
+//                    authParam.setModel(Build.MODEL);
+//                    authParam.setAndroidVersion(Build.VERSION.RELEASE);
+//                    authParam.setHcfsVersion(getString(R.string.tera_version));
 
+                    MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
                     MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                     authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                         @Override
                         public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
-                            MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, authResultInfo.getToken());
+                            MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
+                            MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(registerParam, authResultInfo.getToken());
                             registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
                                 @Override
-                                public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+                                public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                            if (isFailed) {
+//                                            boolean isFailed = HCFSConfig.storeHCFSConfig(registerResultInfo);
+                                            boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+//                                            if (isFailed) {
+                                            if (!isSuccess) {
                                                 signOut();
-                                                HCFSConfig.resetHCFSConfig();
+                                                TeraCloudConfig.resetHCFSConfig();
                                                 mUiHandler.post(new Runnable() {
                                                     @Override
                                                     public void run() {
@@ -533,15 +381,25 @@ public class ActivateWoCodeFragment extends Fragment {
                                                 AccountDAO accountDAO = AccountDAO.getInstance(mContext);
                                                 accountDAO.clear();
                                                 accountDAO.insert(accountInfo);
-                                                accountDAO.close();
 
-                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-                                                editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, true);
-                                                editor.apply();
+                                                TeraAppConfig.enableApp(mContext);
+//                                                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+//                                                SharedPreferences.Editor editor = sharedPreferences.edit();
+//                                                editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
+//                                                editor.apply();
 
-                                                String url = registerResultInfo.getBackendUrl();
-                                                String token = registerResultInfo.getStorageAccessToken();
+                                                TeraCloudConfig.activateTeraCloud(mContext);
+//                                                TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(mContext);
+//                                                TeraStatInfo teraStatInfo = new TeraStatInfo();
+//                                                teraStatInfo.setEnabled(true);
+//                                                if (teraStatDAO.getCount() == 0) {
+//                                                    teraStatDAO.insert(teraStatInfo);
+//                                                } else {
+//                                                    teraStatDAO.update(teraStatInfo);
+//                                                }
+
+                                                String url = deviceServiceInfo.getBackend().getUrl();
+                                                String token = deviceServiceInfo.getBackend().getToken();
                                                 HCFSMgmtUtils.setSwiftToken(url, token);
 
                                                 final String finalPhotoUrl = photoUrl;
@@ -570,15 +428,15 @@ public class ActivateWoCodeFragment extends Fragment {
                                 }
 
                                 @Override
-                                public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+                                public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "deviceServiceInfo=" + deviceServiceInfo.toString());
 
                                     signOut();
                                     dismissProgressDialog();
 
                                     int errorMsgResId = R.string.activate_failed;
-                                    if (registerResultInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                                        if (registerResultInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                                    if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                                        if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
                                             Bundle bundle = new Bundle();
                                             bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
                                             bundle.putString(KEY_USERNAME, email);
@@ -591,11 +449,13 @@ public class ActivateWoCodeFragment extends Fragment {
                                             FragmentTransaction ft = getFragmentManager().beginTransaction();
                                             ft.replace(R.id.fragment_container, fragment);
                                             ft.commit();
-                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                                                registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                                                deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
                                             errorMsgResId = R.string.activate_failed_not_supported_device;
-                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
                                             errorMsgResId = R.string.activate_failed_device_expired;
+                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.MAPPING_EXISTED)) {
+                                            errorMsgResId = R.string.activate_failed_device_in_use;
                                         }
                                     }
                                     mErrorMessage.setText(errorMsgResId);
@@ -609,8 +469,8 @@ public class ActivateWoCodeFragment extends Fragment {
                         @Override
                         public void onAuthFailed(AuthResultInfo authResultInfo) {
                             Logs.e(CLASSNAME, "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
-                            
-			    signOut();
+
+                            signOut();
                             dismissProgressDialog();
                             mErrorMessage.setText(R.string.activate_auth_failed);
                         }

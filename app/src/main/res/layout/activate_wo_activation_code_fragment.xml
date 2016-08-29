@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,133 +10,62 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/login_bkg" />
 
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="65dp"
+        android:layout_marginTop="132dp"
+        android:src="@drawable/icon_tera_logo_l_login" />
+
     <LinearLayout
+        android:id="@+id/switch_account_layout_icon"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center_horizontal"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo"
+        android:layout_gravity="center"
+        android:gravity="center"
         android:orientation="vertical">
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="26dp"
-            android:layout_marginTop="132dp"
-            android:src="@drawable/icon_tera_logo_l_login" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/white_background_gray_border"
-            android:orientation="vertical">
-
-            <com.hopebaytech.hcfsmgmt.customview.FontEditText
-                android:id="@+id/username"
-                style="@style/F12"
-                android:layout_width="244dp"
-                android:layout_height="36dp"
-                android:background="@android:color/transparent"
-                android:gravity="center_vertical"
-                android:hint="@string/activate_hint_username"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:singleLine="true" />
-
-            <View
-                style="@style/Divider"
-                android:layout_width="match_parent" />
-
-            <com.hopebaytech.hcfsmgmt.customview.FontEditText
-                android:id="@+id/password"
-                style="@style/F6"
-                android:layout_width="244dp"
-                android:layout_height="36dp"
-                android:background="@android:color/transparent"
-                android:gravity="center_vertical"
-                android:hint="@string/activate_hint_password"
-                android:inputType="textPassword"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:singleLine="true" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/activate"
-            android:layout_width="244dp"
-            android:layout_height="36dp"
-            android:layout_marginBottom="@dimen/M1"
-            android:layout_marginTop="@dimen/M1"
-            android:background="@color/colorAccent"
-            android:clickable="true"
-            android:gravity="center">
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                style="@style/F2"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center"
-                android:text="@string/activate_enable" />
-        </LinearLayout>
-
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            android:id="@+id/forget_password"
-            style="@style/F11"
+            style="@style/F8"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/activate_forget_password" />
+            android:text="@string/activate_with_google_account" />
 
-        <RelativeLayout
-            android:layout_width="244dp"
-            android:layout_height="wrap_content">
-
-            <View
-                style="@style/Divider"
-                android:layout_width="match_parent"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@+id/or" />
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/or"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_marginBottom="@dimen/M2"
-                android:layout_marginLeft="@dimen/M7"
-                android:layout_marginRight="@dimen/M7"
-                android:layout_marginTop="@dimen/M2"
-                android:gravity="center"
-                android:text="@string/activate_or" />
-
-            <View
-                style="@style/Divider"
-                android:layout_width="match_parent"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@+id/or" />
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <FrameLayout
+            android:layout_width="76dp"
+            android:layout_height="76dp"
+            android:layout_marginBottom="@dimen/M1"
+            android:layout_marginTop="7dp"
             android:background="@drawable/white_background_gray_border"
             android:clickable="true">
 
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            <ImageView
                 android:id="@+id/google_activate"
-                style="@style/F9"
-                android:layout_width="244dp"
-                android:layout_height="36dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:gravity="center"
-                android:text="@string/activate_with_google_account"
-                android:textColor="@color/colorAccent" />
-        </LinearLayout>
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="?attr/selectableItemBackground"
+                android:src="@drawable/icon_btn_google_account" />
 
-        <TextView
-            android:id="@+id/error_msg"
-            android:layout_marginTop="@dimen/M1"
-            android:layout_width="244dp"
-            android:layout_height="wrap_content"
-            android:gravity="center" />
-
+        </FrameLayout>
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/switch_account_layout_icon"
+        android:gravity="center">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/error_msg"
+            style="@style/F8"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="Error message" />
+    </LinearLayout>
+
 </RelativeLayout>

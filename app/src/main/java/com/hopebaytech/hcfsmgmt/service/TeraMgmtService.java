@@ -22,16 +22,19 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
@@ -40,7 +43,6 @@ import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -48,6 +50,8 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,6 +77,7 @@ public class TeraMgmtService extends Service {
     private Context mContext;
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
+    private SettingsDAO mSettingsDAO;
 //    private ServiceFileDirDAO mServiceFileDirDAO;
 
     /**
@@ -94,6 +99,7 @@ public class TeraMgmtService extends Service {
 //        mServiceFileDirDAO = ServiceFileDirDAO.getInstance(this);
         mUidDAO = UidDAO.getInstance(this);
         mDataTypeDAO = DataTypeDAO.getInstance(this);
+        mSettingsDAO = SettingsDAO.getInstance(this);
     }
 
     @Override
@@ -204,12 +210,12 @@ public class TeraMgmtService extends Service {
 //
 //            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
 //            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
 //            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
 //            editor.apply();
 //        }
 //        googleApiClient.disconnect();
-//        HCFSConfig.stopSyncToCloud();
+//        TeraCloudConfig.stopSyncToCloud();
 //
 //        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 //    }
@@ -473,12 +479,12 @@ public class TeraMgmtService extends Service {
 
     private void doActionAccordingToDeviceStatus(final String jwtToken) {
         final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
-        MgmtCluster.GetDeviceInfoProxy getDeviceInfoProxy = new MgmtCluster.GetDeviceInfoProxy(jwtToken, imei);
-        getDeviceInfoProxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+        MgmtCluster.GetDeviceServiceInfoProxy getDeviceInfoProxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
+        getDeviceInfoProxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
             @Override
-            public void onGetDeviceInfoSuccessful(final GetDeviceInfo getDeviceInfo) {
+            public void onGetDeviceServiceInfoSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 try {
-                    String responseContent = getDeviceInfo.getMessage();
+                    String responseContent = deviceServiceInfo.getMessage();
                     JSONObject result = new JSONObject(responseContent);
                     String state = result.getString("state");
                     if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
@@ -518,7 +524,7 @@ public class TeraMgmtService extends Service {
             }
 
             @Override
-            public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
+            public void onGetDeviceServiceInfoFailed(DeviceServiceInfo deviceServiceInfo) {
                 Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
                 int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
                 String notify_title = getString(R.string.app_name);
@@ -536,16 +542,7 @@ public class TeraMgmtService extends Service {
                     @Override
                     public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
                         String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-
-                        final MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam();
-                        authParam.setAuthCode(serverAuthCode);
-                        authParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                        authParam.setImei(HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this)));
-                        authParam.setVendor(Build.BRAND);
-                        authParam.setModel(Build.MODEL);
-                        authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                        authParam.setHcfsVersion(getString(R.string.tera_version));
-
+                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
                         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
                         authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
                             @Override
@@ -558,7 +555,7 @@ public class TeraMgmtService extends Service {
                             public void onAuthFailed(AuthResultInfo authResultInfo) { // Mmgt auth failed
                                 Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
                                 if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                                    HCFSConfig.stopSyncToCloud();
+                                    TeraCloudConfig.stopSyncToCloud();
                                     NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
                                     int flag = NotificationEvent.FLAG_OPEN_APP;
@@ -569,9 +566,11 @@ public class TeraMgmtService extends Service {
                                     extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
+                                    TeraAppConfig.disableApp(TeraMgmtService.this);
+
                                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                                    editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//                                    editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                                     editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     editor.apply();
                                 }
@@ -582,7 +581,7 @@ public class TeraMgmtService extends Service {
 
                     @Override
                     public void onAuthFailed() { // Google silent auth failed
-                        HCFSConfig.stopSyncToCloud();
+                        TeraCloudConfig.stopSyncToCloud();
                         NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
                         int flag = NotificationEvent.FLAG_OPEN_APP;
@@ -593,9 +592,11 @@ public class TeraMgmtService extends Service {
                         extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
 
+                        TeraAppConfig.disableApp(TeraMgmtService.this);
+
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putBoolean(HCFSMgmtUtils.PREF_HCFS_ACTIVATED, false);
+//                        editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                         editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         editor.apply();
                     }
@@ -701,9 +702,14 @@ public class TeraMgmtService extends Service {
         HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
         if (statInfo != null) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
             String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-            String key = SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO;
-            String storageUsedRatio = sharedPreferences.getString(key, defaultValue);
+            String storageUsedRatio = defaultValue;
+
+            SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+            if (settingsInfo != null) {
+                storageUsedRatio = settingsInfo.getValue();
+            }
 
             long occupiedSize = HCFSMgmtUtils.getOccupiedSize();
             long rawCacheTotal = statInfo.getRawCacheTotal();

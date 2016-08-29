@@ -13,8 +13,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.LoadingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 /**
  * @author Aaron
@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         String TAG;
         Fragment fragment;
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        if (HCFSConfig.isActivated(this)) {
+        if (TeraAppConfig.isTeraAppLogin(this)) {
             fragment = MainFragment.newInstance();
             TAG = MainFragment.TAG;
         } else {

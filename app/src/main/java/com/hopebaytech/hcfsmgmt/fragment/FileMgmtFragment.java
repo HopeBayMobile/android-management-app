@@ -40,7 +40,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.NotificationCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -72,6 +71,7 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -84,7 +84,6 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
-import com.hopebaytech.hcfsmgmt.utils.StorageUsage;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import java.io.File;
@@ -337,6 +336,12 @@ public class FileMgmtFragment extends Fragment {
                                 @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
                                     showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
+                                    mSectionedRecyclerViewAdapter.
+                                            getSubAdapterItemInfoList().
+                                            get(itemInfo.getPosition()).
+                                            setPinned(!itemInfo.isPinned());
+
                                     itemInfo.setPinned(!itemInfo.isPinned());
 
                                     // Update pin status to uid.db
@@ -359,6 +364,11 @@ public class FileMgmtFragment extends Fragment {
                                 @Override
                                 public void onPinUnpinFailed(final ItemInfo itemInfo) {
                                     showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
+                                    mSectionedRecyclerViewAdapter.
+                                            getSubAdapterItemInfoList().
+                                            get(itemInfo.getPosition()).
+                                            setPinned(!itemInfo.isPinned());
 
                                     itemInfo.setPinned(!itemInfo.isPinned());
                                     processPinUnpinFailed(itemInfo);
@@ -1361,12 +1371,17 @@ public class FileMgmtFragment extends Fragment {
 //                        StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
 //                        totalSpace = statFs.getTotalBytes();
 //                        freeSpace = statFs.getAvailableBytes();
-                        final long totalSpace = StorageUsage.getTotalSpace();
-                        final long freeSpace = StorageUsage.getFreeSpace();
+//                        final long totalSpace = PhoneStorageUsage.getTotalSpace();
+//                        final long freeSpace = PhoneStorageUsage.getFreeSpace();
+                        final HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
                         ((Activity) mContext).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                updateSection(sectionViewHolder, totalSpace, freeSpace, isFirstCircleAnimated);
+                                if (hcfsStatInfo != null) {
+                                    long totalSpace = hcfsStatInfo.getTeraTotal();
+                                    long freeSpace = totalSpace -  hcfsStatInfo.getTeraUsed();
+                                    updateSection(sectionViewHolder, totalSpace, freeSpace, isFirstCircleAnimated);
+                                }
                                 if (isFirstCircleAnimated) {
                                     isFirstCircleAnimated = false;
                                 }
@@ -2204,6 +2219,7 @@ public class FileMgmtFragment extends Fragment {
                             return;
                         }
                         itemInfo.setPinned(isPinned);
+                        itemInfo.setPosition(position);
 
                         mUiHandler.post(new Runnable() {
                             @Override
@@ -2238,6 +2254,8 @@ public class FileMgmtFragment extends Fragment {
                     if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
                         final boolean isPinned = isItemPinned(itemInfo);
                         itemInfo.setPinned(isPinned);
+                        itemInfo.setPosition(position);
+
                         final int alpha = itemInfo.getIconAlpha();
                         mUiHandler.post(new Runnable() {
                             @Override

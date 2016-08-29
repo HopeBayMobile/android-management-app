@@ -64,7 +64,7 @@ public class HCFSMgmtUtils {
     public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
-    public static final String PREF_HCFS_ACTIVATED = "pref_hcfs_activated";
+    public static final String PREF_TERA_APP_LOGIN = "pref_tera_app_login";
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
@@ -342,10 +342,6 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
                 // Add the Tera storage scope.
-                long totalSpace = StorageUsage.getTotalSpace();
-                long freeSpace = StorageUsage.getFreeSpace();
-                hcfsStatInfo.setTeraTotal(totalSpace);
-                hcfsStatInfo.setTeraUsed(totalSpace - freeSpace);
                 hcfsStatInfo.setVolUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_VOL_USED));
                 hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
                 hcfsStatInfo.setCacheUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_USED));
@@ -356,6 +352,11 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
                 hcfsStatInfo.setCloudConn(dataObj.getBoolean(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
                 hcfsStatInfo.setDataTransfer(dataObj.getInt(HCFSStatInfo.STAT_DATA_DATA_TRANSFER));
+                long totalSpace = PhoneStorageUsage.getTotalSpace() + hcfsStatInfo.getCloudTotal();
+                long freeSpace = PhoneStorageUsage.getFreeSpace() +
+                        (hcfsStatInfo.getCloudTotal() - hcfsStatInfo.getCloudUsed());
+                hcfsStatInfo.setTeraTotal(totalSpace);
+                hcfsStatInfo.setTeraUsed(totalSpace - freeSpace);
             } else {
                 Logs.e(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
             }
@@ -650,18 +651,18 @@ public class HCFSMgmtUtils {
         if (syncWifiOnly) {
             if (netInfo != null && netInfo.isConnected() && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 String logMsg = "Wifi is connected";
-                HCFSConfig.startSyncToCloud(context, logMsg);
+                TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi is not connected";
-                HCFSConfig.stopSyncToCloud(context, logMsg);
+                TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         } else {
             if (netInfo != null && netInfo.isConnected()) {
                 String logMsg = "Wifi or Mobile network is connected";
-                HCFSConfig.startSyncToCloud(context, logMsg);
+                TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "Wifi or Mobile network is not connected";
-                HCFSConfig.stopSyncToCloud(context, logMsg);
+                TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         }
     }

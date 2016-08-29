@@ -7,14 +7,16 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
-import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.service.TeraAPIServer;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 public class HCFSMgmtReceiver extends BroadcastReceiver {
 
@@ -26,12 +28,18 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         final String action = intent.getAction();
         Logs.d(CLASSNAME, "onReceive", "action=" + action);
-        boolean isHCFSActivated = HCFSConfig.isActivated(context);
-        if (isHCFSActivated) {
-            Logs.d(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
+//        boolean isHCFSActivated = TeraCloudConfig.isTeraAppLogin(context);
+        boolean isTeraAppLogin = TeraAppConfig.isTeraAppLogin(context);
+        if (isTeraAppLogin) {
+            Logs.d(CLASSNAME, "onReceive", "isTeraAppLogin=" + isTeraAppLogin);
             if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                 // Detect network status and determine whether sync data to cloud
-                boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
+                boolean syncWifiOnly = true;
+                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(context);
+                SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                if (settingsInfo != null) {
+                    syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
+                }
                 HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
                 // Start an alarm to reset xfer
@@ -52,7 +60,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 editor.apply();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 // Detect network status changed and enable/disable data sync to cloud
-                boolean syncWifiOnly = sharedPreferences.getBoolean(SettingsFragment.PREF_SYNC_WIFI_ONLY, true);
+                boolean syncWifiOnly = true;
+                SettingsDAO mSettingsDAO = new SettingsDAO();
+                SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                if (settingsInfo != null) {
+                    syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
+                }
                 HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
 
                 // Only execute once after system boot-up. Check the device status and execute the corresponding actions
@@ -140,7 +153,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 context.startService(intentService);
             }
         } else {
-            Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isHCFSActivated);
+            Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isTeraAppLogin);
         }
 
         if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {

@@ -123,7 +123,7 @@ public class HCFSStatInfo {
         this.cloudUsed = cloudUsed;
     }
 
-    /* Tera Storage usage */
+    /** Tera Storage usage */
     public String getFormatTeraTotal() {
         return UnitConverter.convertByteToProperUnit(teraTotal);
     }
