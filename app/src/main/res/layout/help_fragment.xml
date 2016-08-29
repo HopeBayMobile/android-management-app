@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fragment_title_bar_height"
+        android:background="@color/colorAccent"
+        android:orientation="horizontal"
+        android:paddingBottom="@dimen/fragment_title_bar_padding_bottom"
+        android:paddingEnd="@dimen/fragment_title_bar_padding_right"
+        android:paddingStart="@dimen/fragment_title_bar_padding_left"
+        android:paddingTop="@dimen/fragment_title_bar_padding_top">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/help_title_bar"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/colorWhite" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingEnd="@dimen/M2"
+        android:paddingStart="@dimen/M2"
+        android:paddingTop="@dimen/M3">
+
+        <LinearLayout
+            android:id="@+id/user_manual"
+            android:layout_width="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_height="56dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                style="@style/F6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/help_user_manual_title" />
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:id="@+id/faq"
+            android:layout_width="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_height="56dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                style="@style/F6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/help_faq_title" />
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:id="@+id/quick_tour"
+            android:layout_width="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_height="56dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                style="@style/F6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/quick_tour_title" />
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:id="@+id/customer_center"
+            android:layout_width="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_height="56dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                style="@style/F6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/help_customer_center_title" />
+        </LinearLayout>
+
+        <View style="@style/Divider" />
+
+        <LinearLayout
+            android:id="@+id/email_feedback"
+            android:layout_width="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_height="56dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                style="@style/F6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/help_email_feedback_title" />
+        </LinearLayout>
+        
+    </LinearLayout>
+</LinearLayout>

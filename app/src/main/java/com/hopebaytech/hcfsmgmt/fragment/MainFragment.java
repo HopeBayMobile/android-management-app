@@ -137,7 +137,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             mNavigationView.findViewById(R.id.nav_dashboard).setOnClickListener(this);
             mNavigationView.findViewById(R.id.nav_app_file).setOnClickListener(this);
             mNavigationView.findViewById(R.id.nav_settings).setOnClickListener(this);
-            mNavigationView.findViewById(R.id.nav_about).setOnClickListener(this);
+            mNavigationView.findViewById(R.id.nav_help).setOnClickListener(this);
             final AccountDAO accountDAO = AccountDAO.getInstance(mContext);
             if (accountDAO.getCount() != 0) {
                 mNavigationView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
@@ -413,7 +413,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             mViewPager.setCurrentItem(1, true);
         } else if (id == R.id.nav_settings) {
             mViewPager.setCurrentItem(2, true);
-        } else if (id == R.id.nav_about) {
+        } else if (id == R.id.nav_help) {
             mViewPager.setCurrentItem(3, true);
         } else if (id == NAV_MENU_SDCARD1_ID) {
             isSDCard1 = true;
@@ -442,8 +442,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                 fragment = FileMgmtFragment.newInstance(false);
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
-            } else if (title.equals(getString(R.string.nav_about))) {
-                fragment = AboutFragment.newInstance();
+            } else if (title.equals(getString(R.string.nav_help))) {
+                fragment = HelpFragment.newInstance();
             } else {
                 fragment = new Fragment();
             }

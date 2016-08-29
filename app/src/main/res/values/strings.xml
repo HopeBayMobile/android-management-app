@@ -46,11 +46,12 @@
     <string name="nav_add_mountpoint">新增共用空間</string>
     <string name="nav_settings">設定</string>
     <string name="nav_about">關於</string>
+    <string name="nav_help">幫助</string>
     <string-array name="nav_title">
         <item>@string/nav_overview</item>
         <item>@string/nav_app_file</item>
         <item>@string/nav_settings</item>
-        <item>@string/nav_about</item>
+        <item>@string/nav_help</item>
     </string-array>
 
     <string name="notify_network_connected">網路連線已恢復</string>
@@ -220,5 +221,13 @@
     <string name="toast_pin_failure">釘選應用程式/檔案失敗，因為可用釘選空間不足。請取消釘選一些應用程式或檔案。</string>
     <string name="toast_unpin_success">取消釘選成功</string>
     <string name="toast_unpin_failure">取消釘選失敗</string>
+
+    <string name="help_title_bar">說明中心</string>
+    <string name="help_faq_title">常見問題與解答</string>
+    <string name="help_user_manual_title">使用手冊</string>
+    <string name="help_customer_center_title">客戶服務</string>
+    <string name="help_email_feedback_title">意見回饋</string>
+    <string name="faq_url">http://tera.mobi/faq-ch.html</string>
+    <string name="quick_tour_title">Quick Tour</string>
 
 </resources>

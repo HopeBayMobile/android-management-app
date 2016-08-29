@@ -43,6 +43,7 @@
     <string name="nav_add_mountpoint">Add Shared Space</string>
     <string name="nav_settings">SETTINGS</string>
     <string name="nav_about">ABOUT</string>
+    <string name="nav_help">HELP</string>
 
     <string name="notify_network_connected">Network connection restored.</string>
     <string name="notify_network_disconnected">Network connection failed. Please check.</string>
@@ -212,5 +213,13 @@
     <string name="toast_pin_failure">Pinning app/file failed due to insufficient space for pinning. Please unpin some apps/files.</string>
     <string name="toast_unpin_success">Unpinning successful</string>
     <string name="toast_unpin_failure">Unpinning failed</string>
+
+    <string name="help_title_bar">Help Center</string>
+    <string name="help_faq_title">FAQs</string>
+    <string name="help_user_manual_title">User manual</string>
+    <string name="help_customer_center_title">Custromer Center</string>
+    <string name="help_email_feedback_title">User Feedback</string>
+    <string name="faq_url">http://tera.mobi/faq.html</string>
+    <string name="quick_tour_title">Quick Tour</string>
 
 </resources>
