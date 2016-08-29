@@ -66,4 +66,5 @@ public class HCFSApiUtils {
      */
     public static native String checkRestoreStatus();
 
+    public static native String notifyApplistChange();
 }

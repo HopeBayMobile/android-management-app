@@ -127,6 +127,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (!isReplacing) {
+                HCFSMgmtUtils.notifyApplistChange();
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();
@@ -149,6 +150,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             boolean isDataRemoved = intent.getBooleanExtra(Intent.EXTRA_DATA_REMOVED, false);
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
             if (isDataRemoved && !isReplacing) {
+                HCFSMgmtUtils.notifyApplistChange();
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 String packageName = intent.getData().getSchemeSpecificPart();

@@ -903,4 +903,21 @@ public class HCFSMgmtUtils {
         return code;
     }
 
+    public static boolean notifyApplistChange() {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.notifyApplistChange();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "notifyApplistChange", "jObject=" + jObject);
+            } else {
+                Logs.i(CLASSNAME, "notifyApplistChange", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "notifyApplistChange", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
 }
