@@ -247,7 +247,7 @@ public class SettingsFragment extends Fragment {
                             .append("<p><b>" + getString(R.string.settings_feedback_content_mail_phone) + "</b></p>")
                             .toString())
                     );
-                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"cs@tera.mobi"});
+                    intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"cs@hbmobile.com"});
 
                     PackageManager manager = mContext.getPackageManager();
                     List<ResolveInfo> infoList = manager.queryIntentActivities(intent, 0);
