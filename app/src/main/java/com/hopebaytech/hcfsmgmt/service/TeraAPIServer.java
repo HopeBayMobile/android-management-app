@@ -8,10 +8,7 @@ import android.net.LocalSocketAddress;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-
-import android.os.Bundle;
-import android.os.IBinder;
-import android.util.Log;
+import android.support.v7.app.NotificationCompat;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
@@ -50,6 +47,13 @@ public class TeraAPIServer extends Service {
     private ExecutorService pool = Executors.newFixedThreadPool(3);
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        startForeground(1000, builder.build());
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Logs.d(CLASSNAME, this.getClass().getName(), "onStartCommand");
 
@@ -75,7 +79,6 @@ public class TeraAPIServer extends Service {
             }
         }).start();
 
-        startForeground(0, null);
         return START_REDELIVER_INTENT;
         //return START_STICKY;
     }
