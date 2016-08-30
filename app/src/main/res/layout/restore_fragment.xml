@@ -61,6 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/button_layout"
         android:layout_centerHorizontal="true"
+        android:background="?android:attr/selectableItemBackground"
         android:text="@string/restore_search_for_backup" />
 
     <LinearLayout

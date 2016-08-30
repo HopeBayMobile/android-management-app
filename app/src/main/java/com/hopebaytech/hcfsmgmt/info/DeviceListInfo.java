@@ -17,19 +17,21 @@ import java.util.List;
  */
 public class DeviceListInfo implements Parcelable {
 
+    public static final int TYPE_RESTORE_NONE = 0;
     public static final int TYPE_RESTORE_FROM_MY_TERA = 1;
     public static final int TYPE_RESTORE_FROM_BACKUP = 2;
 
     /**
      * {@link #TYPE_RESTORE_FROM_MY_TERA}, {@link #TYPE_RESTORE_FROM_BACKUP}
-     * */
+     */
     private int type;
     private String message;
     private int responseCode;
     private String responseContent;
     private List<DeviceStatusInfo> deviceStatusInfoList = new ArrayList<>();
 
-    public DeviceListInfo() {}
+    public DeviceListInfo() {
+    }
 
     protected DeviceListInfo(Parcel in) {
         message = in.readString();

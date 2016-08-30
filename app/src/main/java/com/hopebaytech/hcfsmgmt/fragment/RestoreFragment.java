@@ -29,6 +29,7 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
@@ -141,43 +142,7 @@ public class RestoreFragment extends Fragment {
             return;
         }
 
-        List<GroupInfo> groupList = new ArrayList<>();
-        GroupInfo setupNewDevice = new GroupInfo();
-        setupNewDevice.setCheckable(true);
-        setupNewDevice.setTitle(getString(R.string.restore_item_setup_new_device));
-        setupNewDevice.setRestoreType(RESTORE_TYPE_NEW_DEVICE);
-        groupList.add(setupNewDevice);
-
-        if (deviceListInfo.getType() == DeviceListInfo.TYPE_RESTORE_FROM_MY_TERA) {
-            GroupInfo restoreFromMyTera = new GroupInfo();
-            restoreFromMyTera.setCheckable(true);
-            restoreFromMyTera.setTitle(getString(R.string.restore_item_my_tera));
-            restoreFromMyTera.setRestoreType(RESTORE_TYPE_MY_TERA);
-            restoreFromMyTera.setDeviceStatusInfo(deviceListInfo.getDeviceStatusInfoList().get(0));
-            groupList.add(restoreFromMyTera);
-        } else { // DeviceListInfo.TYPE_RESTORE_FROM_BACKUP
-            List<ChildInfo> childList = new ArrayList<>();
-            List<DeviceStatusInfo> deviceStatusInfoList = deviceListInfo.getDeviceStatusInfoList();
-            for (DeviceStatusInfo info : deviceStatusInfoList) {
-                ChildInfo childInfo = new ChildInfo();
-                childInfo.setDeviceStatusInfo(info);
-                if (info.getServiceStatus().equals(MgmtCluster.ServiceState.DISABLED)) { // locked state
-                    childInfo.setRestoreType(RESTORE_TYPE_LOCK_DEVICE);
-                } else {
-                    childInfo.setRestoreType(RESTORE_TYPE_NON_LOCK_DEVICE);
-                }
-                childList.add(childInfo);
-            }
-
-            GroupInfo restoreFromBackup = new GroupInfo();
-            restoreFromBackup.setCheckable(false);
-            restoreFromBackup.setTitle(getString(R.string.restore_item_backup));
-            restoreFromBackup.setChildList(childList);
-
-            groupList.add(restoreFromBackup);
-        }
-
-        mRestoreListAdapter = new RestoreListAdapter(groupList);
+        mRestoreListAdapter = new RestoreListAdapter(createRestoreList(deviceListInfo));
         mExpandableListView.setGroupIndicator(null);
         mExpandableListView.setAdapter(mRestoreListAdapter);
         mExpandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
@@ -248,6 +213,13 @@ public class RestoreFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 ((AppCompatActivity) mContext).onBackPressed();
+            }
+        });
+
+        mSearchBackup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshDeviceList(mJwtToken);
             }
         });
     }
@@ -798,6 +770,132 @@ public class RestoreFragment extends Fragment {
         if (mHandlerThread != null) {
             mHandlerThread.quit();
         }
-
     }
+
+    private void refreshDeviceList(String jwtToken) {
+        mProgressDialogUtils.show(R.string.processing_msg);
+        if (jwtToken == null) {
+            refreshDeviceListWithoutJwtToken();
+        } else {
+            refreshDeviceListWithJwtToken(jwtToken);
+        }
+    }
+
+    private void refreshDeviceListWithJwtToken(final String jwtToken) {
+        String imei = HCFSMgmtUtils.getDeviceImei(mContext);
+        MgmtCluster.GetDeviceListProxy proxy = new MgmtCluster.GetDeviceListProxy(jwtToken, imei);
+        proxy.setOnGetDeviceListListener(new MgmtCluster.GetDeviceListProxy.OnGetDeviceListListener() {
+            @Override
+            public void onGetDeviceListSuccessful(DeviceListInfo deviceListInfo) {
+                Logs.d(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListSuccessful",
+                        "deviceListInfo=" + deviceListInfo);
+
+                // No any device backup can be restored, directly register to Tera
+                if (deviceListInfo.getDeviceStatusInfoList().size() == 0) {
+                    Logs.d(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListSuccessful",
+                            "No any device backup can be restored, directly register to Tera");
+                    deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_NONE);
+                }
+
+                mRestoreListAdapter.setGroupList(createRestoreList(deviceListInfo));
+                mRestoreListAdapter.notifyDataSetChanged();
+
+                mProgressDialogUtils.dismiss();
+            }
+
+            @Override
+            public void onGetDeviceListFailed(DeviceListInfo deviceListInfo) {
+                Logs.e(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListFailed",
+                        "deviceListInfo=" + deviceListInfo);
+
+                if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                    mErrorMessage.setText(R.string.activate_failed_device_in_use);
+                    mProgressDialogUtils.dismiss();
+                } else if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
+                    refreshDeviceListWithoutJwtToken();
+                } else {
+                    mErrorMessage.setText(R.string.activate_auth_failed);
+                    mProgressDialogUtils.dismiss();
+                }
+            }
+        });
+        proxy.get();
+    }
+
+    private void refreshDeviceListWithoutJwtToken() {
+        String serverClientId = MgmtCluster.getServerClientId();
+        GoogleSilentAuthProxy proxy = new GoogleSilentAuthProxy(mContext, serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
+            @Override
+            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+                String serverAuthCode = result.getSignInAccount().getServerAuthCode();
+                MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
+                MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                    @Override
+                    public void onAuthSuccessful(AuthResultInfo authResultInfo) {
+                        String jwtToken = authResultInfo.getToken();
+                        refreshDeviceListWithJwtToken(jwtToken);
+                    }
+
+                    @Override
+                    public void onAuthFailed(AuthResultInfo authResultInfo) {
+                        Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
+                        if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+                            refreshDeviceListWithoutJwtToken();
+                        } else {
+                            mErrorMessage.setText(R.string.activate_auth_failed);
+                        }
+                    }
+                });
+                authProxy.auth();
+            }
+
+            @Override
+            public void onAuthFailed() {
+
+            }
+        });
+        proxy.auth();
+    }
+
+
+    private List<GroupInfo> createRestoreList(DeviceListInfo deviceListInfo) {
+        List<GroupInfo> groupList = new ArrayList<>();
+        GroupInfo setupNewDevice = new GroupInfo();
+        setupNewDevice.setCheckable(true);
+        setupNewDevice.setTitle(getString(R.string.restore_item_setup_new_device));
+        setupNewDevice.setRestoreType(RESTORE_TYPE_NEW_DEVICE);
+        groupList.add(setupNewDevice);
+
+        if (deviceListInfo.getType() == DeviceListInfo.TYPE_RESTORE_FROM_MY_TERA) {
+            GroupInfo restoreFromMyTera = new GroupInfo();
+            restoreFromMyTera.setCheckable(true);
+            restoreFromMyTera.setTitle(getString(R.string.restore_item_my_tera));
+            restoreFromMyTera.setRestoreType(RESTORE_TYPE_MY_TERA);
+            restoreFromMyTera.setDeviceStatusInfo(deviceListInfo.getDeviceStatusInfoList().get(0));
+            groupList.add(restoreFromMyTera);
+        } else if (deviceListInfo.getType() == DeviceListInfo.TYPE_RESTORE_FROM_BACKUP) {
+            List<ChildInfo> childList = new ArrayList<>();
+            List<DeviceStatusInfo> deviceStatusInfoList = deviceListInfo.getDeviceStatusInfoList();
+            for (DeviceStatusInfo info : deviceStatusInfoList) {
+                ChildInfo childInfo = new ChildInfo();
+                childInfo.setDeviceStatusInfo(info);
+                if (info.getServiceStatus().equals(MgmtCluster.ServiceState.DISABLED)) { // locked state
+                    childInfo.setRestoreType(RESTORE_TYPE_LOCK_DEVICE);
+                } else {
+                    childInfo.setRestoreType(RESTORE_TYPE_NON_LOCK_DEVICE);
+                }
+                childList.add(childInfo);
+            }
+
+            GroupInfo restoreFromBackup = new GroupInfo();
+            restoreFromBackup.setCheckable(false);
+            restoreFromBackup.setTitle(getString(R.string.restore_item_backup));
+            restoreFromBackup.setChildList(childList);
+
+            groupList.add(restoreFromBackup);
+        }
+        return groupList;
+    }
+
 }

@@ -12,17 +12,26 @@ public class ProgressDialogUtils {
 
     private final String CLASSNAME = ProgressDialogUtils.class.getSimpleName();
 
+    private Context mContext;
     private android.app.ProgressDialog mProgressDialog;
 
     public ProgressDialogUtils(Context context) {
+        mContext = context;
         mProgressDialog = new android.app.ProgressDialog(context);
         mProgressDialog.setIndeterminate(true);
-//        mProgressDialog.setIndeterminateDrawable(context.getDrawable(R.drawable.icon_loading_default));
         mProgressDialog.setCancelable(false);
     }
 
     public void show(String message) {
         if (!mProgressDialog.isShowing()) {
+            mProgressDialog.setMessage(message);
+            mProgressDialog.show();
+        }
+    }
+
+    public void show(int resId) {
+        if (!mProgressDialog.isShowing()) {
+            String message = mContext.getString(resId);
             mProgressDialog.setMessage(message);
             mProgressDialog.show();
         }

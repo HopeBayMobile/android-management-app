@@ -140,8 +140,6 @@ public class TeraMgmtService extends Service {
                         checkTokenExpiredCause();
                     } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
                         notifyUserExceedPinMax();
-                    } else if (action.equals(TeraIntent.ACTION_RESTORE_NOTIFICATION)) {
-                        listenMiniRestoreCompletedEvent(intent);
                     } else if (action.equals(TeraIntent.ACTION_REBOOT_SYSETM)) {
                         PowerUtils.rebootSystem(TeraMgmtService.this);
                     }
@@ -478,7 +476,6 @@ public class TeraMgmtService extends Service {
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-//                        editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                         editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         editor.apply();
                     }
@@ -766,11 +763,6 @@ public class TeraMgmtService extends Service {
                     Toast.makeText(mContext, R.string.notify_pin_unpin_system_app_failed, Toast.LENGTH_LONG).show();
                 }
             });
-
-//            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//            String notify_title = getString(R.string.app_name);
-//            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
-//            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
         }
     }
 
