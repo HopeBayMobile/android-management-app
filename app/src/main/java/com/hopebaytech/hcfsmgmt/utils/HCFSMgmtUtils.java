@@ -70,6 +70,7 @@ public class HCFSMgmtUtils {
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
+    public static final String PREF_RESTORE_STATUS = "pref_restore_status";
 
     // public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";

@@ -206,6 +206,7 @@
     <string name="restore_next">Next</string>
     <string name="restore_failed">Restore failed.</string>
     <string name="restore_system_reboot">System Reboot</string>
+    <string name="restore_notification_title">Restoring Tera</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
     <string name="yes">Yes</string>

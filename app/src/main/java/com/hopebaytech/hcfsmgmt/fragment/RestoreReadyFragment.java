@@ -1,18 +1,25 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import android.content.BroadcastReceiver;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
+import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 /**
@@ -21,7 +28,9 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
  */
 public class RestoreReadyFragment extends Fragment {
 
-    private FullRestoreDoneReceiver mReceiver;
+    public static final String TAG = RestoreReadyFragment.class.getSimpleName();
+
+    private Context mContext;
 
     public static RestoreReadyFragment newInstance() {
         return new RestoreReadyFragment();
@@ -30,12 +39,7 @@ public class RestoreReadyFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(TeraIntent.ACTION_FULL_RESTORE_DONE);
-
-        mReceiver = new FullRestoreDoneReceiver();
-        mReceiver.registerReceiver(getActivity(), intentFilter);
+        mContext = getActivity();
     }
 
     @Nullable
@@ -45,40 +49,45 @@ public class RestoreReadyFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mReceiver.unregisterReceiver(getActivity());
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        TextView systemReboot = (TextView) view.findViewById(R.id.system_reboot);
+        systemReboot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.remove(HCFSMgmtUtils.PREF_RESTORE_STATUS);
+                editor.apply();
+
+                PowerUtils.rebootSystem(mContext);
+            }
+        });
     }
 
-    public class FullRestoreDoneReceiver extends BroadcastReceiver {
+    @Override
+    public void onResume() {
+        super.onResume();
 
-        private boolean isRegister;
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            PowerManager powerManager = (PowerManager) getActivity().getSystemService(Context.POWER_SERVICE);
-            powerManager.reboot(null);
-        }
-
-        public void registerReceiver(Context context, IntentFilter intentFilter) {
-            if (!isRegister) {
-                if (context != null) {
-                    context.registerReceiver(this, intentFilter);
-                }
-                isRegister = true;
-            }
-        }
-
-        public void unregisterReceiver(Context context) {
-            if (isRegister) {
-                if (context != null) {
-                    context.unregisterReceiver(this);
-                    isRegister = false;
-                }
-            }
-        }
-
+        NotificationEvent.cancel(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        String rebootAction = getString(R.string.restore_system_reboot);
+        Intent rebootIntent = new Intent(mContext, TeraMgmtService.class);
+        rebootIntent.setAction(TeraIntent.ACTION_REBOOT_SYSETM);
+        PendingIntent pendingIntent = PendingIntent.getService(mContext, 0, rebootIntent, 0);
+        NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
+
+        int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+        int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_HEADS_UP;
+        String title = getString(R.string.restore_ready_title);
+        String message = getString(R.string.restore_ready_message);
+        NotificationEvent.notify(mContext, notifyId, title, message, action, flag);
+    }
 
 }

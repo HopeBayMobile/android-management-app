@@ -1,8 +1,11 @@
 package com.hopebaytech.hcfsmgmt.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -14,6 +17,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -34,6 +38,9 @@ import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
@@ -69,16 +76,18 @@ public class TeraMgmtService extends Service {
     private final String CLASSNAME = getClass().getSimpleName();
 
     private final IBinder mBinder = new MgmtServiceBinder();
+    private final int START_FOREGROUND_ID = 1000;
 
     private ExecutorService mCacheExecutor;
-
     private Thread mOngoingThread;
-
-    private Context mContext;
+    private Thread mNotifyRestoreThread;
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
     private SettingsDAO mSettingsDAO;
 //    private ServiceFileDirDAO mServiceFileDirDAO;
+    private BroadcastReceiver mRestoreReceiver;
+
+    private Context mContext;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -95,6 +104,7 @@ public class TeraMgmtService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mContext = this;
         mCacheExecutor = Executors.newCachedThreadPool();
         mUidDAO = UidDAO.getInstance(this);
         mDataTypeDAO = DataTypeDAO.getInstance(this);
@@ -108,7 +118,6 @@ public class TeraMgmtService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        mContext = this;
         if (intent != null) {
             final String action = intent.getAction();
             Logs.d(CLASSNAME, "onStartCommand", "action=" + action);
@@ -139,12 +148,15 @@ public class TeraMgmtService extends Service {
                         checkTokenExpiredCause();
                     } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
                         notifyUserExceedPinMax();
+                    } else if (action.equals(TeraIntent.ACTION_RESTORE_NOTIFICATION)) {
+                        listenMiniRestoreCompletedEvent(intent);
+                    } else if (action.equals(TeraIntent.ACTION_REBOOT_SYSETM)) {
+                        PowerUtils.rebootSystem(TeraMgmtService.this);
                     }
                 }
             });
         }
-        return super.onStartCommand(intent, flags, startId);
-        // return START_REDELIVER_INTENT;
+        return START_REDELIVER_INTENT;
     }
 
     private boolean pinOrUnpinApp(AppInfo info) {

@@ -1,7 +1,9 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,10 +15,11 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.LoadingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
-import com.hopebaytech.hcfsmgmt.fragment.RestorationFragment;
-import com.hopebaytech.hcfsmgmt.utils.HCFSConfig;
+import com.hopebaytech.hcfsmgmt.fragment.RestorePreparingFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 
 /**
  * @author Aaron
@@ -38,9 +41,14 @@ public class MainActivity extends AppCompatActivity {
         String TAG;
         Fragment fragment;
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        if (TeraAppConfig.isTeraAppLogin(this)) {
-            fragment = MainFragment.newInstance();
-            TAG = MainFragment.TAG;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_NONE);
+        if (status == RestoreStatus.MINI_RESTORE_ING) {
+            fragment = RestorePreparingFragment.newInstance();
+            TAG = RestorePreparingFragment.TAG;
+        } else if (status == RestoreStatus.MINI_RESTORE_DONE) {
+            fragment = RestoreReadyFragment.newInstance();
+            TAG = RestoreReadyFragment.TAG;
         } else {
             fragment = LoadingFragment.newInstance();
             TAG = LoadingFragment.TAG;

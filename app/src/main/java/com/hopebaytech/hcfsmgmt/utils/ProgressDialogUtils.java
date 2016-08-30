@@ -2,6 +2,8 @@ package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.Context;
 
+import com.hopebaytech.hcfsmgmt.R;
+
 /**
  * @author Aaron
  *         Created by Aaron on 2016/8/19.
@@ -15,6 +17,7 @@ public class ProgressDialogUtils {
     public ProgressDialogUtils(Context context) {
         mProgressDialog = new android.app.ProgressDialog(context);
         mProgressDialog.setIndeterminate(true);
+//        mProgressDialog.setIndeterminateDrawable(context.getDrawable(R.drawable.icon_loading_default));
         mProgressDialog.setCancelable(false);
     }
 
