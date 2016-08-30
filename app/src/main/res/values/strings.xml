@@ -3,6 +3,7 @@
     <string name="app_name">Tera</string>
 
     <string name="require_read_external_storage_permission">讀取檔案清單需啟用 "儲存" 權限。</string>
+    <string name="require_write_external_storage_permission">產生日誌需啟用 "儲存" 權限。</string>
     <string name="require_read_phone_state_permission">讀取 IMEI 值需啟用 "電話" 權限。</string>
     <string name="go">前往</string>
     <string name="update">更新</string>
@@ -176,6 +177,13 @@
     <string name="settings_transfer_content_done_factory_reset">回復到原廠初始狀態程序將會在 %s 秒內開始。</string>
     <string name="settings_transfer_content_failed">資料移轉失敗</string>
     <string name="settings_feedback">意見回饋</string>
+    <string name="settings_feedback_log_collecting_title">日誌收集中</string>
+    <string name="settings_feedback_log_collecting_message">收集日誌需要一點時間，取決於資料量的多寡</string>
+    <string name="settings_feedback_content_mail_time">障礙發生日期/時間：</string>
+    <string name="settings_feedback_content_mail_opinions">障礙狀況/意見說明：</string>
+    <string name="settings_feedback_content_mail_description">若障礙狀況特殊，或許我們需要進一步向您瞭解詳情，請留下您方便聯絡的資料，請放心，我們會妥善保管，非必要，我們將不會隨意打擾您。</string>
+    <string name="settings_feedback_content_mail_contact">聯絡人：</string>
+    <string name="settings_feedback_content_mail_phone">聯絡電話：</string>
     <string name="settings_snackbar_no_available_email_app_found">無可用的 email 應用程式和/或設定好的 email 帳戶。請至少安裝一個 email 應用程式，並且設定一組可用的 email 帳戶。</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
