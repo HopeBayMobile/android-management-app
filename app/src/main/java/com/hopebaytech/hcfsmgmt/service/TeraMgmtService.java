@@ -1,11 +1,9 @@
 package com.hopebaytech.hcfsmgmt.service;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -17,7 +15,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,10 +34,6 @@ import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
-import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
-import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
@@ -57,11 +50,10 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
+import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
