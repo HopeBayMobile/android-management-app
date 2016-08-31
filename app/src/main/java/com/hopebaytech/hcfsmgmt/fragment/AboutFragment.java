@@ -205,9 +205,6 @@ public class AboutFragment extends DialogFragment {
                     }
                     denyGrandPermission = true;
                 } else {
-//                    AboutFragment fragment = AboutFragment.newInstance();
-//                    fragment.setTargetFragment(this, 0);
-//                    fragment.show(getFragmentManager(), AboutFragment.TAG);
                     showImei();
                 }
                 break;
