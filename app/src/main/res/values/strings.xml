@@ -146,9 +146,9 @@
     <string name="hcfs_mgmt_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
 
     <string name="settings_title_bar">一般設定</string>
-    <string name="settings_synchronization">同步設定</string>
+    <string name="settings_synchronization">同步</string>
     <string name="settings_sync_wifi_only">只有連接 Wi-Fi 時才存取雲端</string>
-    <string name="settings_notification">通知設定</string>
+    <string name="settings_notification">通知</string>
     <string name="settings_notify_conn_failed_recovery">中斷/恢復連線</string>
     <string name="settings_notify_upload_completed">資料上傳完成</string>
     <string name="settings_notify_local_storage_used_ratio_dialog_title">選擇已使用率以便傳送通知。</string>

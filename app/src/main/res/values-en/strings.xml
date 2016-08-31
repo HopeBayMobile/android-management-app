@@ -137,9 +137,9 @@
     <string name="hcfs_mgmt_service_audio_failed_to_unpin">Number of failed unpinned music files</string>
 
     <string name="settings_title_bar">General Settings</string>
-    <string name="settings_synchronization">Sync settings</string>
+    <string name="settings_synchronization">Sync</string>
     <string name="settings_sync_wifi_only">Access cloud only when using Wi-Fi.</string>
-    <string name="settings_notification">Notification settings</string>
+    <string name="settings_notification">Notification</string>
     <string name="settings_notify_conn_failed_recovery">Failed/Restored connection</string>
     <string name="settings_notify_upload_completed">Data upload complete.</string>
     <string name="settings_notify_local_storage_used_ratio_dialog_title">Select usage ratio to send notification.</string>
