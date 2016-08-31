@@ -352,54 +352,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(mContext, R.color.C2));
             mViewPager.setAdapter(mPagerAdapter);
         }
-
-        // Jump to App/File page if app is launched from insufficient notification
-        Bundle args = getArguments();
-        if (args != null) {
-            boolean insufficientPinSpace = args.getBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, false);
-            if (insufficientPinSpace) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                Thread.sleep(500);
-                                Fragment fragment = mPagerAdapter.getFragment(0);
-                                if (fragment != null && fragment.isVisible()) {
-                                    Thread.sleep(500);
-                                    mViewPager.setCurrentItem(1, true);
-                                    break;
-                                }
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }).start();
-            }
-            final int toViewPager = args.getInt(toViewPagerIndex, -1);
-            if (toViewPager > -1 && toViewPager < mPagerAdapter.getCount()) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                Thread.sleep(500);
-                                Fragment fragment = mPagerAdapter.getFragment(0);
-                                if (fragment != null && fragment.isVisible()) {
-                                    Thread.sleep(500);
-                                    mViewPager.setCurrentItem(toViewPager, true);
-                                    break;
-                                }
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }).start();
-            }
-        }
-
     }
 
     @Override
@@ -544,6 +496,55 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 //        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
 //        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, false);
+
+        // Jump to App/File page if app is launched from insufficient notification
+        Bundle args = getArguments();
+        if (args != null) {
+            boolean insufficientPinSpace = args.getBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, false);
+            if (insufficientPinSpace) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            try {
+                                Thread.sleep(500);
+                                Fragment fragment = mPagerAdapter.getFragment(0);
+                                if (fragment != null && fragment.isVisible()) {
+                                    Thread.sleep(500);
+                                    mViewPager.setCurrentItem(1, true);
+                                    break;
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
+            }
+            // Jump to specific page
+            final int toViewPager = args.getInt(toViewPagerIndex, -1);
+            if (toViewPager > -1 && toViewPager < mPagerAdapter.getCount()) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            try {
+                                Thread.sleep(500);
+                                Fragment fragment = mPagerAdapter.getFragment(0);
+                                if (fragment != null && fragment.isVisible()) {
+                                    Thread.sleep(500);
+                                    mViewPager.setCurrentItem(toViewPager, true);
+                                    break;
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
+            }
+        }
+
         mContext.startService(intentService);
     }
 
