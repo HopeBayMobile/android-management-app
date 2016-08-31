@@ -112,6 +112,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/help_email_feedback_title" />
         </LinearLayout>
-        
+
     </LinearLayout>
 </LinearLayout>

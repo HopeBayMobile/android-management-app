@@ -6,21 +6,19 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-<<<<<<< HEAD
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.preference.PreferenceManager;
 import android.text.Html;
-=======
->>>>>>> b33bcfaccd6e73a29e7acc5f504945c6131bf684
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,10 +51,12 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO = "pref_notify_local_storage_usage_ratio";
     public static final String PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED = "pref_local_storage_usage_ratio_notified";
     public static final String PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED = "pref_insufficient_pin_space_notified";
+    public static final String PREF_SHOW_BA_LOGGING_OPTION = "pref_show_ba_logging_option";
 
     public static final String KEY_RATIO = "ratio";
 
     public static final int REQUEST_CODE_RATIO = 0;
+    public static final int REQUEST_ABOUT_FRAGMENT = 1;
 
     private Context mContext;
     private View mView;
@@ -69,6 +69,8 @@ public class SettingsFragment extends Fragment {
     private Snackbar mSnackbar;
 
     private boolean cancelAttachLog = false;
+    private LinearLayout mAbout;
+    private LinearLayout mBa;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -104,6 +106,8 @@ public class SettingsFragment extends Fragment {
         mChangeAccount = (LinearLayout) view.findViewById(R.id.switch_account);
         mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
         mFeedback = (LinearLayout) view.findViewById(R.id.feedback);
+        mAbout = (LinearLayout) view.findViewById(R.id.about);
+        mBa = (LinearLayout) view.findViewById(R.id.extra_log_for_ba_layout);
     }
 
     @Override
@@ -185,7 +189,6 @@ public class SettingsFragment extends Fragment {
         mFeedback.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-<<<<<<< HEAD
                 if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -204,17 +207,18 @@ public class SettingsFragment extends Fragment {
                     } else {
                         attachLogInMail();
                     }
-=======
-                Uri uri = Uri.parse("mailto:cs@hbmobile.com");
-                Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
-                PackageManager manager = mContext.getPackageManager();
-                List<ResolveInfo> infoList = manager.queryIntentActivities(intent, 0);
-                if (infoList.size() != 0) {
-                    startActivity(intent);
->>>>>>> b33bcfaccd6e73a29e7acc5f504945c6131bf684
                 } else {
                     attachLogInMail();
                 }
+            }
+        });
+
+        mAbout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AboutFragment fragment = AboutFragment.newInstance();
+                fragment.setTargetFragment(SettingsFragment.this, REQUEST_ABOUT_FRAGMENT);
+                fragment.show(getFragmentManager(), AboutFragment.TAG);
             }
         });
     }
@@ -228,7 +232,6 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == REQUEST_CODE_RATIO) {
             if (resultCode == Activity.RESULT_OK) {
                 SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
@@ -244,6 +247,15 @@ public class SettingsFragment extends Fragment {
                 settingsInfo.setKey(PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
                 settingsInfo.setValue(String.valueOf(ratio.replace("%", "")));
                 mSettingsDAO.update(settingsInfo);
+            }
+        } else if (requestCode == REQUEST_ABOUT_FRAGMENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                Boolean show = sharedPreferences.getBoolean(PREF_SHOW_BA_LOGGING_OPTION, false);
+                if (show)
+                    mBa.setVisibility(View.VISIBLE);
+                else
+                    mBa.setVisibility(View.GONE);
             }
         }
 
@@ -339,4 +351,14 @@ public class SettingsFragment extends Fragment {
         attachLogInMail();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        Boolean show = sharedPreferences.getBoolean(PREF_SHOW_BA_LOGGING_OPTION, false);
+        if (show)
+            mBa.setVisibility(View.VISIBLE);
+        else
+            mBa.setVisibility(View.GONE);
+    }
 }
