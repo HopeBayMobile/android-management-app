@@ -84,6 +84,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private String sdcard1_path;
     private boolean isSDCard1;
     private boolean isExitApp = false;
+    private String toViewPagerIndex = "ViewPagerIndex";
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -155,7 +156,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                         // Icon expiring time doesn't reach, use cache icon base64 instead of download
                         // the latest icon
                         final ImageView iconImage = (ImageView) mNavigationView.findViewById(R.id.icon);
-                        if (System.currentTimeMillis() <= accountInfo.getImgExpringTime()) {
+                        if (System.currentTimeMillis() <= accountInfo.getImgExpiringTime()) {
                             String imgBase64 = accountInfo.getImgBase64();
                             if (imgBase64 != null) {
                                 iconImage.setImageBitmap(BitmapBase64Factory.decodeBase64(imgBase64));
@@ -172,11 +173,13 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                         serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
                                     @Override
                                     public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
+
                                         if (result == null || !result.isSuccess()) {
                                             return;
                                         }
 
                                         GoogleSignInAccount acct = result.getSignInAccount();
+                                        Logs.w(CLASSNAME, "onAuthSuccessful", "acct=" + acct);
                                         if (acct == null) {
                                             return;
                                         }
@@ -209,7 +212,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                                             Bitmap.CompressFormat.PNG,
                                                             100);
                                                     accountInfo.setImgBase64(imgBase64);
-                                                    accountInfo.setImgExpringTime(System.currentTimeMillis() + Interval.DAY);
+                                                    accountInfo.setImgExpiringTime(System.currentTimeMillis() + Interval.DAY);
                                                     accountDAO.update(accountInfo);
                                                 }
                                             }
@@ -218,7 +221,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
                                     @Override
                                     public void onAuthFailed() {
-
+                                        Logs.e(CLASSNAME, "onAuthFailed", null);
                                     }
                                 });
                                 silentAuthProxy.auth();
@@ -365,6 +368,27 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                 if (fragment != null && fragment.isVisible()) {
                                     Thread.sleep(500);
                                     mViewPager.setCurrentItem(1, true);
+                                    break;
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }).start();
+            }
+            final int toViewPager = args.getInt(toViewPagerIndex, -1);
+            if (toViewPager > -1 && toViewPager < mPagerAdapter.getCount()) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        while (true) {
+                            try {
+                                Thread.sleep(500);
+                                Fragment fragment = mPagerAdapter.getFragment(0);
+                                if (fragment != null && fragment.isVisible()) {
+                                    Thread.sleep(500);
+                                    mViewPager.setCurrentItem(toViewPager, true);
                                     break;
                                 }
                             } catch (InterruptedException e) {

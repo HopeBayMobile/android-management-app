@@ -342,10 +342,6 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
                 // Add the Tera storage scope.
-                long totalSpace = StorageUsage.getTotalSpace();
-                long freeSpace = StorageUsage.getFreeSpace();
-                hcfsStatInfo.setTeraTotal(totalSpace);
-                hcfsStatInfo.setTeraUsed(totalSpace - freeSpace);
                 hcfsStatInfo.setVolUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_VOL_USED));
                 hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
                 hcfsStatInfo.setCacheUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_USED));
@@ -356,6 +352,11 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
                 hcfsStatInfo.setCloudConn(dataObj.getBoolean(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
                 hcfsStatInfo.setDataTransfer(dataObj.getInt(HCFSStatInfo.STAT_DATA_DATA_TRANSFER));
+                long totalSpace = PhoneStorageUsage.getTotalSpace() + hcfsStatInfo.getCloudTotal();
+                long freeSpace = PhoneStorageUsage.getFreeSpace() +
+                        (hcfsStatInfo.getCloudTotal() - hcfsStatInfo.getCloudUsed());
+                hcfsStatInfo.setTeraTotal(totalSpace);
+                hcfsStatInfo.setTeraUsed(totalSpace - freeSpace);
             } else {
                 Logs.e(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
             }

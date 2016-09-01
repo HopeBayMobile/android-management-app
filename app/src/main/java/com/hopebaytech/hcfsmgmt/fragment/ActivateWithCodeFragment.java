@@ -3,12 +3,9 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -26,15 +23,13 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
-import com.hopebaytech.hcfsmgmt.db.TeraStatDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraStatInfo;
-import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
-import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import java.net.HttpURLConnection;
 import java.util.Locale;
@@ -121,38 +116,39 @@ public class ActivateWithCodeFragment extends Fragment {
                     mWorkHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            final int authType = getArguments().getInt(ActivateWoCodeFragment.KEY_AUTH_TYPE);
-                            String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext));
-                            final MgmtCluster.IAuthParam authParam;
-                            if (authType == MgmtCluster.GOOGLE_AUTH) {
-                                String authCode = getArguments().getString(ActivateWoCodeFragment.KEY_AUTH_CODE);
-                                MgmtCluster.GoogleAuthParam googleAuthParam = new MgmtCluster.GoogleAuthParam();
-                                googleAuthParam.setAuthCode(authCode);
-                                googleAuthParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-                                authParam = googleAuthParam;
-                            } else {
-                                MgmtCluster.UserAuthParam userAuthParam = new MgmtCluster.UserAuthParam();
-                                userAuthParam.setUsername(username);
-                                userAuthParam.setPassword(getArguments().getString(ActivateWoCodeFragment.KEY_PASSWORD));
-                                authParam = userAuthParam;
-                            }
-                            authParam.setImei(imei);
-                            authParam.setVendor(Build.BRAND);
-                            authParam.setModel(Build.MODEL);
-                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
-                            authParam.setHcfsVersion(getString(R.string.tera_version));
-                            authParam.setActivateCode(activateCode);
+//                            final int authType = getArguments().getInt(ActivateWoCodeFragment.KEY_AUTH_TYPE);
+//                            String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext));
+//                            final MgmtCluster.IAuthParam authParam;
+//                            if (authType == MgmtCluster.GOOGLE_AUTH) {
+//                                String authCode = getArguments().getString(ActivateWoCodeFragment.KEY_AUTH_CODE);
+//                                MgmtCluster.GoogleAuthParam googleAuthParam = new MgmtCluster.GoogleAuthParam();
+//                                googleAuthParam.setAuthCode(authCode);
+//                                googleAuthParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
+//                                authParam = googleAuthParam;
+//                            } else {
+//                                MgmtCluster.UserAuthParam userAuthParam = new MgmtCluster.UserAuthParam();
+//                                userAuthParam.setUsername(username);
+//                                userAuthParam.setPassword(getArguments().getString(ActivateWoCodeFragment.KEY_PASSWORD));
+//                                authParam = userAuthParam;
+//                            }
+//                            authParam.setImei(imei);
+//                            authParam.setVendor(Build.BRAND);
+//                            authParam.setModel(Build.MODEL);
+//                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
+//                            authParam.setHcfsVersion(getString(R.string.tera_version));
+//                            authParam.setActivateCode(activateCode);
+                            MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
+                            registerParam.setActivateCode(activateCode);
 
                             String jwtToken = getArguments().getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
-                            MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(authParam, jwtToken);
+                            MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(registerParam, jwtToken);
                             registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
                                 @Override
-                                public void onRegisterSuccessful(final RegisterResultInfo registerResultInfo) {
+                                public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-//                                            final boolean failed = HCFSConfig.storeHCFSConfig(registerResultInfo);
-                                            final boolean isSuccess = TeraCloudConfig.storeHCFSConfig(registerResultInfo);
+                                            final boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
                                             if (!isSuccess) {
                                                 TeraCloudConfig.resetHCFSConfig();
                                             } else {
@@ -162,27 +158,12 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 AccountDAO accountDAO = AccountDAO.getInstance(mContext);
                                                 accountDAO.clear();
                                                 accountDAO.insert(accountInfo);
-                                                accountDAO.close();
 
                                                 TeraAppConfig.enableApp(mContext);
-//                                                SharedPreferences sharedPreferences =
-//                                                        PreferenceManager.getDefaultSharedPreferences(mContext);
-//                                                SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                                editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
-//                                                editor.apply();
-
                                                 TeraCloudConfig.activateTeraCloud(mContext);
-//                                                TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(mContext);
-//                                                TeraStatInfo teraStatInfo = new TeraStatInfo();
-//                                                teraStatInfo.setEnabled(true);
-//                                                if (teraStatDAO.getCount() == 0) {
-//                                                    teraStatDAO.insert(teraStatInfo);
-//                                                } else {
-//                                                    teraStatDAO.update(teraStatInfo);
-//                                                }
 
-                                                String url = registerResultInfo.getBackendUrl();
-                                                String token = registerResultInfo.getStorageAccessToken();
+                                                String url = deviceServiceInfo.getBackend().getUrl();
+                                                String token = deviceServiceInfo.getBackend().getToken();
                                                 HCFSMgmtUtils.setSwiftToken(url, token);
                                             }
 
@@ -205,23 +186,23 @@ public class ActivateWithCodeFragment extends Fragment {
                                 }
 
                                 @Override
-                                public void onRegisterFailed(RegisterResultInfo registerResultInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + registerResultInfo.toString());
+                                public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + deviceServiceInfo.toString());
 
                                     dismissProgressDialog();
 
                                     int errorMsgResId = R.string.activate_incorrect_activation_code;
-                                    if (registerResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                                        if (registerResultInfo.getErrorCode().equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
+                                    if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                                        if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
                                             String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
                                             Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(), getString(R.string.activate_with_code_msg), hyperLink));
                                             mErrorMessage.setMovementMethod(LinkMovementMethod.getInstance());
                                             mErrorMessage.setText(errorMsg);
                                             return;
-                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                                                registerResultInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
+                                                deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
                                             errorMsgResId = R.string.activate_failed_not_supported_device;
-                                        } else if (registerResultInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
                                             errorMsgResId = R.string.activate_failed_device_expired;
                                         }
                                     }

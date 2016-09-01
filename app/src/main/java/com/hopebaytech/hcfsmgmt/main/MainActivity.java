@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
         String TAG;
         Fragment fragment;
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//        if (TeraCloudConfig.isTeraAppLogin(this)) {
         if (TeraAppConfig.isTeraAppLogin(this)) {
             fragment = MainFragment.newInstance();
             TAG = MainFragment.TAG;

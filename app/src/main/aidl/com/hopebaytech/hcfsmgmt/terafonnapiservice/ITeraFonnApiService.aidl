@@ -71,4 +71,10 @@ interface ITeraFonnApiService {
 
     /** Get Tera total space size **/
     long getTeraTotalSpace();
+
+    /** Get Tera settings is wifi only **/
+    boolean isWifiOnly();
+
+    /** Get connection status **/
+    int getConnStatus();
 }

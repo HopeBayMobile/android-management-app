@@ -3,11 +3,9 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 
 /**
  * @author Aaron
@@ -50,10 +47,15 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-        final String ratio = sharedPreferences.getString(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO, defaultValue).concat("%");
+        String getRatio = defaultValue.concat("%");
 
+        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(mContext);
+        SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+        if (settingsInfo != null) {
+            getRatio = settingsInfo.getValue().concat("%");
+        }
+        final String ratio = getRatio;
 //        final List<LinearLayout> radioButtonLayoutList = new ArrayList<>();
         View.OnClickListener listener = new View.OnClickListener() {
             @Override

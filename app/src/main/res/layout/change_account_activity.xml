@@ -125,7 +125,7 @@
                 android:layout_marginBottom="16dp"
                 android:layout_marginTop="35dp"
                 android:gravity="center"
-                android:text="@string/switch_account_another_account"
+                android:text="@string/change_account_another_account"
                 android:textColor="@color/colorAccent"
                 android:textStyle="bold" />
 
@@ -146,7 +146,7 @@
                 android:layout_gravity="center"
                 android:background="?attr/selectableItemBackground"
                 android:gravity="center"
-                android:text="@string/switch_account_start_to_switch" />
+                android:text="@string/change_account_start_to_change" />
 
         </FrameLayout>
 

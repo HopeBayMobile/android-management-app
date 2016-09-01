@@ -7,7 +7,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
+import android.support.v7.app.NotificationCompat;
 
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
@@ -38,7 +40,9 @@ public class MgmtPollingService extends Service {
 
     @Override
     public void onCreate() {
-        Logs.i(CLASSNAME, this.getClass().getName(), "onCreate");
+        super.onCreate();
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        startForeground(1001, builder.build());
     }
 
     @Override
@@ -83,12 +87,13 @@ public class MgmtPollingService extends Service {
                             @Override
                             public void onFetchSuccessful(String jwt) {
                                 String imei = HCFSMgmtUtils.getDeviceImei(MgmtPollingService.this);
-                                MgmtCluster.GetDeviceInfoProxy proxy = new MgmtCluster.GetDeviceInfoProxy(jwt, imei);
-                                proxy.setOnGetDeviceInfoListener(new MgmtCluster.GetDeviceInfoProxy.OnGetDeviceInfoListener() {
+                                MgmtCluster.GetDeviceServiceInfoProxy proxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwt, imei);
+                                proxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.
+                                        GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
                                     @Override
-                                    public void onGetDeviceInfoSuccessful(GetDeviceInfo getDeviceInfo) {
+                                    public void onGetDeviceServiceInfoSuccessful(DeviceServiceInfo deviceServiceInfo) {
                                         try {
-                                            String responseContent = getDeviceInfo.getMessage();
+                                            String responseContent = deviceServiceInfo.getMessage();
                                             JSONObject result = new JSONObject(responseContent);
                                             JSONObject piggyback = result.getJSONObject("piggyback");
                                             String category = piggyback.getString("category");
@@ -117,8 +122,8 @@ public class MgmtPollingService extends Service {
                                     }
 
                                     @Override
-                                    public void onGetDeviceInfoFailed(GetDeviceInfo getDeviceInfo) {
-                                        Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                                    public void onGetDeviceServiceInfoFailed(DeviceServiceInfo  deviceServiceInfo) {
+                                        Logs.e(CLASSNAME, "onGetDeviceServiceInfoFailed", null);
                                     }
                                 });
                                 proxy.get();
