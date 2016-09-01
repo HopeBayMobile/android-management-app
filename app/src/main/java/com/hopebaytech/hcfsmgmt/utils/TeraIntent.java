@@ -31,22 +31,11 @@ public class TeraIntent {
     public static final String ACTION_REBOOT_SYSETM = "hbt.intent.action.REBOOT_SYSTEM";
 
     // Intent key
-    public static final String KEY_OPERATION = "intent_key_action";
-    public static final String KEY_PIN_FILE_DIR_FILEAPTH = "intent_key_pin_firdir_filepath";
-    public static final String KEY_PIN_FILE_DIR_PIN_STATUS = "intent_key_pin_firdir_pin_status";
-    public static final String KEY_PIN_APP_DATA_DIR = "intent_key_pin_app_data_dir";
-    public static final String KEY_PIN_APP_SOURCE_DIR = "intent_key_pin_app_source_dir";
-    public static final String KEY_PIN_APP_EXTERNAL_DIR = "intent_key_pin_app_external_dir";
-    public static final String KEY_PIN_APP_PIN_STATUS = "intent_key_pin_app_pin_status";
-    public static final String KEY_PIN_APP_NAME = "intent_key_pin_app_name";
-    public static final String KEY_PIN_PACKAGE_NAME = "intent_key_pin_package_name";
-    public static final String KEY_SERVER_CLIENT_ID = "server_client_id";
     public static final String KEY_UID = "intent_key_uid";
     public static final String KEY_PACKAGE_NAME = "intent_key_package_name";
     public static final String KEY_ONGOING = "intent_key_ongoing";
-    public static final String KEY_SILENT_SIGN_IN = "intent_key_silent_sign_in";
-    public static final String KEY_GOOGLE_SIGN_IN_DISPLAY_NAME = "google_sign_in_display_name";
-    public static final String KEY_GOOGLE_SIGN_IN_EMAIL = "google_sign_in_email";
-    public static final String KEY_GOOGLE_SIGN_IN_PHOTO_URI = "google_sign_in_photo_uri";
+    public static final String KEY_GOOGLE_SIGN_IN_DISPLAY_NAME = "intent_key_google_sign_in_display_name";
+    public static final String KEY_GOOGLE_SIGN_IN_EMAIL = "intent_key_google_sign_in_email";
+    public static final String KEY_GOOGLE_SIGN_IN_PHOTO_URI = "intent_key_google_sign_in_photo_uri";
 
 }

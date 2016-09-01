@@ -6,10 +6,10 @@ package com.hopebaytech.hcfsmgmt.utils;
  */
 public class RestoreStatus {
 
-    public static int MINI_RESTORE_NONE = 0;
-    public static int MINI_RESTORE_ING = 1;
-    public static int MINI_RESTORE_DONE = 2;
-    public static int FULL_RESTORE_ING = 3;
-    public static int FULL_RESTORE_DONE = 4;
+    public static int NONE = 0;
+    public static int MINI_RESTORE_IN_PROGRESS = 1;
+    public static int MINI_RESTORE_COMPLETED = 2;
+    public static int FULL_RESTORE_IN_PROGRESS = 3;
+    public static int FULL_RESTORE_COMPLETED = 4;
 
 }

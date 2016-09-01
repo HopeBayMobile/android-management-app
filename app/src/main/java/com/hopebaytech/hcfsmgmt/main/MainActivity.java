@@ -15,6 +15,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.LoadingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreMajorInstallFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestorePreparingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -42,13 +43,16 @@ public class MainActivity extends AppCompatActivity {
         Fragment fragment;
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_NONE);
-        if (status == RestoreStatus.MINI_RESTORE_ING) {
+        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
+        if (status == RestoreStatus.MINI_RESTORE_IN_PROGRESS) {
             fragment = RestorePreparingFragment.newInstance();
             TAG = RestorePreparingFragment.TAG;
-        } else if (status == RestoreStatus.MINI_RESTORE_DONE) {
+        } else if (status == RestoreStatus.MINI_RESTORE_COMPLETED) {
             fragment = RestoreReadyFragment.newInstance();
             TAG = RestoreReadyFragment.TAG;
+        } else if (status == RestoreStatus.FULL_RESTORE_IN_PROGRESS) {
+            fragment = RestoreMajorInstallFragment.newInstance();
+            TAG = RestoreMajorInstallFragment.TAG;
         } else {
             fragment = LoadingFragment.newInstance();
             TAG = LoadingFragment.TAG;

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,6 +19,7 @@ import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 /**
@@ -58,7 +58,7 @@ public class RestoreReadyFragment extends Fragment {
             public void onClick(View v) {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.remove(HCFSMgmtUtils.PREF_RESTORE_STATUS);
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
                 editor.apply();
 
                 PowerUtils.rebootSystem(mContext);
@@ -79,7 +79,7 @@ public class RestoreReadyFragment extends Fragment {
 
         String rebootAction = getString(R.string.restore_system_reboot);
         Intent rebootIntent = new Intent(mContext, TeraMgmtService.class);
-        rebootIntent.setAction(TeraIntent.ACTION_REBOOT_SYSETM);
+        rebootIntent.setAction(TeraIntent.ACTION_REBOOT_SYSTEM);
         PendingIntent pendingIntent = PendingIntent.getService(mContext, 0, rebootIntent, 0);
         NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
 

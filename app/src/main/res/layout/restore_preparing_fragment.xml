@@ -40,6 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
         android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="76dp"
         android:layout_marginEnd="30dp"
         android:layout_marginStart="30dp"
         android:gravity="center_horizontal"
@@ -49,8 +50,7 @@
         android:id="@+id/processing_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="192dp"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/message"
         android:layout_gravity="center_horizontal">
 
         <RelativeLayout

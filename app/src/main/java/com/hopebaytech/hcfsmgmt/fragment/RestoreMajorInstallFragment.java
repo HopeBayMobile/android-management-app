@@ -10,11 +10,14 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
@@ -22,49 +25,54 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 /**
  * @author Aaron
- *         Created by Aaron on 2016/8/23.
+ *         Created by Aaron on 2016/8/25.
  */
-public class RestorePreparingFragment extends Fragment {
+public class RestoreMajorInstallFragment extends Fragment {
 
-    public static final String TAG = RestorePreparingFragment.class.getSimpleName();
-    private final String CLASSNAME = TAG;
-
-    private MiniRestoreCompletedReceiver mReceiver;
+    public static final String TAG = RestoreMajorInstallFragment.class.getSimpleName();
 
     private Context mContext;
+    private FullRestoreCompletedReceiver mReceiver;
 
-    public static RestorePreparingFragment newInstance() {
-        return new RestorePreparingFragment();
+    public static RestoreMajorInstallFragment newInstance() {
+        return new RestoreMajorInstallFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mContext = getActivity();
-        mReceiver = new MiniRestoreCompletedReceiver();
+        mReceiver = new FullRestoreCompletedReceiver();
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.restore_preparing_fragment, container, false);
+        return inflater.inflate(R.layout.restore_major_install_fragment, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        TextView ok = (TextView) view.findViewById(R.id.ok);
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((AppCompatActivity) mContext).finish();
+            }
+        });
     }
 
     @Override
     public void onResume() {
         super.onResume();
-
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
-        if (status == RestoreStatus.MINI_RESTORE_COMPLETED) {
-            gotoRestoreReadyPage();
-        } else {
+        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
+        if (status == RestoreStatus.FULL_RESTORE_IN_PROGRESS) {
             cancelInProgressNotification();
-
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(TeraIntent.ACTION_MINI_RESTORE_COMPLETED);
-
+            intentFilter.addAction(TeraIntent.ACTION_FULL_RESTORE_COMPLETED);
             mReceiver.registerReceiver(mContext, intentFilter);
         }
     }
@@ -74,8 +82,8 @@ public class RestorePreparingFragment extends Fragment {
         super.onStop();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
-        if (status == RestoreStatus.MINI_RESTORE_IN_PROGRESS) {
+        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
+        if (status == RestoreStatus.FULL_RESTORE_IN_PROGRESS) {
             startInProgressNotification();
             mReceiver.unregisterReceiver(mContext);
         }
@@ -100,7 +108,7 @@ public class RestorePreparingFragment extends Fragment {
         NotificationEvent.cancel(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
     }
 
-    public class MiniRestoreCompletedReceiver extends BroadcastReceiver {
+    public class FullRestoreCompletedReceiver extends BroadcastReceiver {
 
         private boolean isRegister;
 
@@ -108,10 +116,10 @@ public class RestorePreparingFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_COMPLETED);
             editor.apply();
 
-            gotoRestoreReadyPage();
+            gotoRestoreDonePage();
         }
 
         public void registerReceiver(Context context, IntentFilter intentFilter) {
@@ -134,9 +142,9 @@ public class RestorePreparingFragment extends Fragment {
 
     }
 
-    private void gotoRestoreReadyPage() {
+    private void gotoRestoreDonePage() {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment_container, RestoreReadyFragment.newInstance());
+        ft.replace(R.id.fragment_container, RestoreDoneFragment.newInstance());
         ft.commit();
     }
 

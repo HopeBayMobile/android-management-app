@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.service;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,6 +37,7 @@ import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
+import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
@@ -68,15 +68,12 @@ public class TeraMgmtService extends Service {
     private final String CLASSNAME = getClass().getSimpleName();
 
     private final IBinder mBinder = new MgmtServiceBinder();
-    private final int START_FOREGROUND_ID = 1000;
 
     private ExecutorService mCacheExecutor;
     private Thread mOngoingThread;
-    private Thread mNotifyRestoreThread;
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
     private SettingsDAO mSettingsDAO;
-//    private ServiceFileDirDAO mServiceFileDirDAO;
     private BroadcastReceiver mRestoreReceiver;
 
     private Context mContext;
@@ -146,6 +143,7 @@ public class TeraMgmtService extends Service {
                 }
             });
         }
+
         return START_REDELIVER_INTENT;
     }
 
@@ -450,7 +448,6 @@ public class TeraMgmtService extends Service {
 
                                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                    editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                                     editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     editor.apply();
                                 }

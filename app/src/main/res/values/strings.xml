@@ -202,11 +202,16 @@
     <string name="restore_restoring_message">在還原過程中，請保持網路的連線。</string>
     <string name="restore_ready_title">Ready for restoration</string>
     <string name="restore_ready_message">This restoration is ready, please tap "System reboot" to continue the process.</string>
+    <string name="restore_major_install_title">Restoring&#8230;</string>
+    <string name="restore_major_install_message">During restoration, please keep the network connected.</string>
+    <string name="restore_done_title">Done</string>
+    <string name="restore_done_message">The restoration has been completed. You can start using Tera service now.</string>
     <string name="restore_back">返回</string>
     <string name="restore_next">下一步</string>
     <string name="restore_failed">還原失敗。</string>
     <string name="restore_system_reboot">System Reboot</string>
     <string name="restore_notification_title">Restoring Tera</string>
+    <string name="restore_exit">離開</string>
 
     <string name="alert_dialog_title_warning">警告</string>
 

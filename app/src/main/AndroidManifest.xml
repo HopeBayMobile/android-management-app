@@ -72,6 +72,8 @@
                 <action android:name="hbt.intent.action.EXCEED_PIN_MAX" />
                 <action android:name="hbt.intent.action.RESTORE_STAGE_1" />
                 <action android:name="hbt.intent.action.RESTORE_STAGE_2" />
+                <action android:name="hbt.intent.action.MINI_RESTORE_COMPLETED" />
+                <action android:name="hbt.intent.action.FULL_RESTORE_COMPLETED" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

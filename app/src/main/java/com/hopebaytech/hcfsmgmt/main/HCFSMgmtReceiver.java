@@ -15,6 +15,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 public class HCFSMgmtReceiver extends BroadcastReceiver {
 
@@ -159,7 +160,16 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                 context.startService(intentService);
             }
+        } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_COMPLETED)) {
+            Intent intentService = new Intent(context, TeraMgmtService.class);
+            intentService.setAction(TeraIntent.ACTION_MINI_RESTORE_COMPLETED);
+            context.startService(intentService);
+        } else if (action.equals(TeraIntent.ACTION_FULL_RESTORE_COMPLETED)) {
+            Intent intentService = new Intent(context, TeraMgmtService.class);
+            intentService.setAction(TeraIntent.ACTION_FULL_RESTORE_COMPLETED);
+            context.startService(intentService);
         }
+
     }
 
 }

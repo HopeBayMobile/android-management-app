@@ -81,6 +81,7 @@ public class NotificationEvent {
                               android.support.v4.app.NotificationCompat.Action action,
                               int flag,
                               Bundle extras) {
+
         boolean onGoing = (flag & FLAG_ON_GOING) != 0;
         boolean openApp = (flag & FLAG_OPEN_APP) != 0;
         boolean headsUp = (flag & FLAG_HEADS_UP) != 0;
