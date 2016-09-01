@@ -677,6 +677,7 @@ public class RestoreFragment extends Fragment {
                     @Override
                     public void run() {
                         HCFSMgmtUtils.triggerRestore();
+                        TeraCloudConfig.reloadConfig();
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
