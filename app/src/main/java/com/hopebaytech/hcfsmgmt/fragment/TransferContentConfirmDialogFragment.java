@@ -1,12 +1,15 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
@@ -32,31 +35,39 @@ import java.util.List;
 public class TransferContentConfirmDialogFragment extends DialogFragment {
 
     public static final String TAG = TransferContentConfirmDialogFragment.class.getSimpleName();
-    private final String CLASSNAME = TransferContentConfirmDialogFragment.class.getSimpleName();
+    private final String CLASSNAME = TAG;
+
+    private Context mContext;
 
     public static TransferContentConfirmDialogFragment newInstance() {
         return new TransferContentConfirmDialogFragment();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mContext = getActivity();
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
         final View view = inflater.inflate(R.layout.settings_transfer_content_confirm_dialog, null);
         TextView username = (TextView) view.findViewById(R.id.username);
 
         final TextView errorMsg = (TextView) view.findViewById(R.id.error_msg);
         errorMsg.setVisibility(View.GONE);
 
-        AccountDAO accountDAO = AccountDAO.getInstance(getActivity());
+        AccountDAO accountDAO = AccountDAO.getInstance(mContext);
         List<AccountInfo> accountInfoList = accountDAO.getAll();
         if (accountInfoList.size() != 0) {
             AccountInfo info = accountInfoList.get(0);
             username.setText(info.getEmail());
         }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setView(view)
                 .setPositiveButton(R.string.transfer, null)
                 .setNegativeButton(R.string.cancel, null);
@@ -73,11 +84,11 @@ public class TransferContentConfirmDialogFragment extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        boolean isConnected = NetworkUtils.isNetworkConnected(getActivity());
+                        boolean isConnected = NetworkUtils.isNetworkConnected(mContext);
                         if (isConnected) {
                             errorMsg.setVisibility(View.GONE);
 
-                            Intent intent = new Intent(getActivity(), TransferContentActivity.class);
+                            Intent intent = new Intent(mContext, TransferContentActivity.class);
                             startActivity(intent);
                             dismiss();
                         } else {
@@ -104,10 +115,10 @@ public class TransferContentConfirmDialogFragment extends DialogFragment {
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (s.length() != 0) {
                             positiveButton.setEnabled(true);
-                            positiveButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
+                            positiveButton.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
                         } else {
                             positiveButton.setEnabled(false);
-                            positiveButton.setTextColor(ContextCompat.getColor(getActivity(), R.color.C5));
+                            positiveButton.setTextColor(ContextCompat.getColor(mContext, R.color.C5));
                         }
                     }
 

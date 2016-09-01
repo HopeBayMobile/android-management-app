@@ -1,9 +1,11 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -616,19 +618,27 @@ public class ChangeAccountActivity extends AppCompatActivity {
 
         public static final String TAG = ErrorDialogFragment.class.getSimpleName();
 
+        private Context mContext;
+
         public ErrorDialogFragment() {
+        }
+
+        @Override
+        public void onCreate(@Nullable Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            mContext = getActivity();
         }
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Get the error code and retrieve the appropriate dialog
             int errorCode = getArguments().getInt(DIALOG_ERROR);
-            return GoogleApiAvailability.getInstance().getErrorDialog(getActivity(), errorCode, REQUEST_RESOLVE_ERROR);
+            return GoogleApiAvailability.getInstance().getErrorDialog((Activity) mContext, errorCode, REQUEST_RESOLVE_ERROR);
         }
 
         @Override
         public void onDismiss(DialogInterface dialog) {
-            ((ChangeAccountActivity) getActivity()).onDialogDismissed();
+            ((ChangeAccountActivity) mContext).onDialogDismissed();
         }
     }
 
