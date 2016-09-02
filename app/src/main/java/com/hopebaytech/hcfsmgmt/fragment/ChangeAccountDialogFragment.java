@@ -38,7 +38,7 @@ public class ChangeAccountDialogFragment extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = mActivity.getLayoutInflater();
         View view = inflater.inflate(R.layout.settings_change_account_desc_dialog, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
