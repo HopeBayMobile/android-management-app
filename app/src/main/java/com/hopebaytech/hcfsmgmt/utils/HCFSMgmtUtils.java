@@ -24,12 +24,14 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.LocationStatus;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
@@ -668,9 +670,9 @@ public class HCFSMgmtUtils {
     }
 
     public static void notifyNetworkStatus(Context context, int notify_id, String notify_title, String notify_content) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String key = SettingsFragment.PREF_NOTIFY_CONN_FAILED_RECOVERY;
-        boolean notifyConnFailedRecoveryPref = sharedPreferences.getBoolean(key, false);
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_CONN_FAILED_RECOVERY);
+        boolean notifyConnFailedRecoveryPref = Boolean.valueOf(settingsInfo.getValue());
         if (notifyConnFailedRecoveryPref) {
             NotificationEvent.notify(context, notify_id, notify_title, notify_content);
         }
