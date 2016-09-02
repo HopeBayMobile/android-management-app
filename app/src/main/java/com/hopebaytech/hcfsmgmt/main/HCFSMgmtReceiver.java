@@ -58,6 +58,10 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putBoolean(HCFSMgmtUtils.PREF_CHECK_DEVICE_STATUS, false);
                 editor.apply();
+
+                // Reset BA logging option to invisible
+                editor.putBoolean(SettingsFragment.PREF_SHOW_BA_LOGGING_OPTION, false);
+                editor.apply();
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 // Detect network status changed and enable/disable data sync to cloud
                 boolean syncWifiOnly = true;

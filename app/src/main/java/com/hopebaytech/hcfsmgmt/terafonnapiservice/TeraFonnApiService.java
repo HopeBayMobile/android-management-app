@@ -418,6 +418,7 @@ public class TeraFonnApiService extends Service {
             try {
                 UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
                 UidInfo uidInfo = uidDAO.get(packageName);
+                //uidDAO.close();
 
                 ApplicationInfo applicationInfo = getPackageManager().
                         getApplicationInfo(packageName, PackageManager.GET_META_DATA);

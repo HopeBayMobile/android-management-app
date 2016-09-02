@@ -863,4 +863,15 @@ public class HCFSMgmtUtils {
         return code;
     }
 
+    public static boolean collectSysLogs() {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.collectSysLogs();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "collectSysLogs", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
 }

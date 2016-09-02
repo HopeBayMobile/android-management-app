@@ -2,32 +2,36 @@ package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
-public class AboutFragment extends Fragment {
+public class AboutFragment extends DialogFragment {
 
     public static final String TAG = AboutFragment.class.getSimpleName();
     private final String CLASSNAME = AboutFragment.class.getSimpleName();
@@ -37,6 +41,12 @@ public class AboutFragment extends Fragment {
     private TextView mImeiTwo;
     private LinearLayout mImeiTwoLayout;
     private Snackbar mSnackbar;
+    private LinearLayout mTeraVersionLayout;
+    LinearLayout mClose;
+    private boolean denyGrandPermission = false;
+    private final int CLICK_COUNT_FOR_BA = 7;
+    private int clickCount = CLICK_COUNT_FOR_BA;
+    private Handler mHandler;
 
     private View.OnClickListener listener = new View.OnClickListener() {
         @Override
@@ -60,6 +70,12 @@ public class AboutFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mSnackbar = Snackbar.make(getView(), "", Snackbar.LENGTH_INDEFINITE);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.about_fragment, container, false);
     }
@@ -67,26 +83,72 @@ public class AboutFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        mSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_INDEFINITE);
-
+        mHandler = new Handler();
         mImeiOne = (TextView) view.findViewById(R.id.device_imei_1);
         mImeiTwo = (TextView) view.findViewById(R.id.device_imei_2);
         mImeiTwoLayout = (LinearLayout) view.findViewById(R.id.device_imei_2_layout);
+        mTeraVersionLayout = (LinearLayout) view.findViewById(R.id.tera_version_layout);
+        mClose = (LinearLayout) view.findViewById(R.id.close);
 
         TextView teraVersion = (TextView) view.findViewById(R.id.terafonn_version);
         teraVersion.setText(getString(R.string.tera_version));
+
+        mTeraVersionLayout.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                Boolean shown = sharedPreferences.getBoolean(SettingsFragment.PREF_SHOW_BA_LOGGING_OPTION, false);
+                if (!shown) {
+                    clickCount -= 1;
+                    if (clickCount <= 0) {
+                        // Show enable BA logging option
+
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(SettingsFragment.PREF_SHOW_BA_LOGGING_OPTION, true);
+                        editor.apply();
+                        Toast.makeText(mContext, R.string.settings_extra_log_for_ba_enabled, Toast.LENGTH_LONG).show();
+                    }
+                    startTimer();
+                }
+            }
+        });
+
+        mClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent data = new Intent();
+                getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
+                dismiss();
+            }
+        });
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        Intent data = new Intent();
+        getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, data);
+    }
+
+    final Runnable resetCounter = new Runnable() {
+        @Override
+        public void run() {
+            clickCount = CLICK_COUNT_FOR_BA;
+        }
+    };
+
+    public void startTimer() {
+        mHandler.removeCallbacks(resetCounter);
+        mHandler.postDelayed(resetCounter, 10000);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-            showImei();
-            if (mSnackbar != null) {
-                mSnackbar.dismiss();
-            }
-        }
+        if (!denyGrandPermission)
+            this.setMenuVisibility(true);
+        else
+            dismiss();
     }
 
     @Override
@@ -104,7 +166,7 @@ public class AboutFragment extends Fragment {
                         builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                                requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
                             }
                         });
                         builder.setCancelable(false);
@@ -141,7 +203,7 @@ public class AboutFragment extends Fragment {
                         mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
                         mSnackbar.setAction(R.string.go, listener);
                     }
-                    mSnackbar.show();
+                    denyGrandPermission = true;
                 } else {
                     showImei();
                 }

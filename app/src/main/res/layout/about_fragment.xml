@@ -1,115 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingStart="@dimen/M2"
+    android:paddingTop="@dimen/M2"
+    android:paddingEnd="@dimen/M2"
+    android:paddingBottom="@dimen/M2"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/fragment_title_bar_height"
-        android:background="@color/colorAccent"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/fragment_title_bar_padding_bottom"
-        android:paddingEnd="@dimen/fragment_title_bar_padding_right"
-        android:paddingStart="@dimen/fragment_title_bar_padding_left"
-        android:paddingTop="@dimen/fragment_title_bar_padding_top">
+        android:layout_height="wrap_content"
+        android:id="@+id/tera_version_layout"
+        android:clickable="true"
+        android:onClick="onClick"
+        android:orientation="vertical">
 
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:text="About"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/colorWhite" />
+            android:text="@string/tera_version_title" />
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/terafonn_version"
+            style="@style/F6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="2.0.6.0513" />
+
+        <View
+            style="@style/Divider"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingEnd="@dimen/M2"
-        android:paddingStart="@dimen/M2"
-        android:paddingTop="@dimen/M3">
+        android:layout_height="wrap_content"
+        android:id="@+id/device_imei_1_layout"
+        android:layout_below="@+id/tera_version_layout"
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F4"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:text="@string/tera_imei_1" />
 
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                style="@style/F4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tera_version_title" />
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/terafonn_version"
-                style="@style/F6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="2.0.6.0513" />
-
-            <View
-                style="@style/Divider"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/device_imei_1"
+            style="@style/F6"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            tools:text="7947584920752" />
 
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                style="@style/F4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tera_imei_1" />
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/device_imei_1"
-                style="@style/F6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="7947584920752" />
-
-            <View
-                style="@style/Divider"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/device_imei_2_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                style="@style/F4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/tera_imei_2" />
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/device_imei_2"
-                style="@style/F6"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="7947584920753" />
-
-            <View
-                style="@style/Divider"
-                android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp" />
-
-        </LinearLayout>
+        <View
+            style="@style/Divider"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp" />
 
     </LinearLayout>
-</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/device_imei_2_layout"
+        android:layout_below="@+id/device_imei_1_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tera_imei_2" />
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/device_imei_2"
+            style="@style/F6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="7947584920753" />
+
+        <View
+            style="@style/Divider"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/device_imei_2_layout">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/close" />
+    </LinearLayout>
+</RelativeLayout>
