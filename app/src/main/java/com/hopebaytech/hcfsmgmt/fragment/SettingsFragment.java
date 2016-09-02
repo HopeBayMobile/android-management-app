@@ -37,6 +37,7 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED = "pref_local_storage_usage_ratio_notified";
     public static final String PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED = "pref_insufficient_pin_space_notified";
     public static final String PREF_SHOW_BA_LOGGING_OPTION = "pref_show_ba_logging_option";
+    public static final String PREF_ASK_MOBILE_WITHOUT_WIFI_ONLY = "pref_ask_mobile_without_wifi_only";
 
     public static final String KEY_RATIO = "ratio";
 

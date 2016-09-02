@@ -127,7 +127,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
         return isSuccess;
     }
 
-
+    @Nullable
     public SettingsInfo get(String key) {
         SettingsInfo settingsInfo = null;
         String where = KEY + "='" + key + "'";

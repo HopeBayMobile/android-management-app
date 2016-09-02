@@ -176,6 +176,11 @@
     <string name="settings_transfer_content_done_message">目前裝置的資料已經成功轉移到 Tera 雲端，同時這些資料也正在進行還原到另一台裝置的程序。目前裝置稍候將會重設。</string>
     <string name="settings_transfer_content_done_factory_reset">回復到原廠初始狀態程序將會在 %s 秒內開始。</string>
     <string name="settings_transfer_content_failed">資料移轉失敗</string>
+    <string name="settings_transfer_content_syc_data_stopped_title">Sync Data Stopped</string>
+    <string name="settings_transfer_content_syc_data_stopped_message">This action cannot be executed because sync data is set to Wi-Fi only mode. Please tap "Sync Settings" to turn off Wi-Fi only or connect to available Wi-Fi network to continue.</string>
+    <string name="settings_transfer_content_use_mobile_network_title">Use your mobile data plan to sync data?</string>
+    <string name="settings_transfer_content_use_mobile_network_message">This action may incur additional costs, depending on your mobile data plan. You can also turn on Wi-Fi in settings page.</string>
+    <string name="settings_transfer_content_do_not_ask_again">Do not ask me again.</string>
     <string name="settings_feedback">意見回饋</string>
     <string name="settings_feedback_log_collecting_title">日誌收集中</string>
     <string name="settings_feedback_log_collecting_message">收集日誌需要一點時間，取決於資料量的多寡</string>
@@ -215,6 +220,8 @@
     <string name="auth_at_bootup_auth_get_device_info">無法從管理伺服器取得裝置狀態。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
+
+    <!-- Button text for dialog -->
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="confirm">確定</string>
@@ -223,6 +230,10 @@
     <string name="close">關閉</string>
     <string name="next">下一步</string>
     <string name="transfer">轉換</string>
+    <string name="connect_to_wifi">CONNECT TO WI-FI</string>
+    <string name="sync_settings">SYNC SETTINGS</string>
+    <string name="settings">SETTINGS</string>
+    <string name="_continue">CONTINUE</string>
 
     <string name="pref_download_to_run">pref_download_to_run</string>
     <string name="tera_version_title">Tera 版本</string>
