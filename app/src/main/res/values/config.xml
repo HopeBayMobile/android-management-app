@@ -3,6 +3,6 @@
     <string name="tera_version" translatable="false">-</string>
     <string name="tera_imei_1" translatable="false">IMEI 1</string>
     <string name="tera_imei_2" translatable="false">IMEI 2</string>
-    <string name="zip_source_path" translatable="false">/sdcard/TeraLog/log</string>
-    <string name="zip_target_path" translatable="false">/sdcard/TeraLog/log.zip</string>
+    <string name="zip_source_path" translatable="false">/sdcard/TeraLog</string>
+    <string name="zip_target_path" translatable="false">/sdcard/log.zip</string>
 </resources>

@@ -265,3 +265,12 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_stopU
     free((char *)json_res);
     return result;
 }
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_collectSysLogs(
+        JNIEnv *jEnv, jobject jObject) {
+    const char *json_res;
+    HCFS_collect_sys_logs(&json_res);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    return result;
+}

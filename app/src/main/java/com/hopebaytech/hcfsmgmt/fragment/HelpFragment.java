@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.ZipUtils;
@@ -159,6 +160,8 @@ public class HelpFragment extends Fragment {
             @Override
             public void run() {
                 try {
+                    boolean collectLogSuccess = HCFSMgmtUtils.collectSysLogs();
+
                     Intent intent = new Intent(Intent.ACTION_SEND);
                     intent.setType("text/plain");
                     intent.putExtra(Intent.EXTRA_SUBJECT, "");
@@ -176,13 +179,15 @@ public class HelpFragment extends Fragment {
                     PackageManager manager = mContext.getPackageManager();
                     List<ResolveInfo> infoList = manager.queryIntentActivities(intent, 0);
                     if (infoList.size() != 0) {
-                        final String source = getString(R.string.zip_source_path);
-                        final String target = getString(R.string.zip_target_path);
-                        boolean isSuccess = ZipUtils.zip(source, target);
-                        File file = new File(target);
-                        if (file.exists() && isSuccess) {
-                            intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-                            intent.setType("application/zip");
+                        if (collectLogSuccess) {
+                            final String source = getString(R.string.zip_source_path);
+                            final String target = getString(R.string.zip_target_path);
+                            boolean isSuccess = ZipUtils.zip(source, target);
+                            File file = new File(target);
+                            if (file.exists() && isSuccess) {
+                                intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+                                intent.setType("application/zip");
+                            }
                         }
                         if (!cancelAttachLog) {
                             getActivity().runOnUiThread(new Runnable() {
