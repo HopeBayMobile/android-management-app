@@ -49,6 +49,7 @@ public class TeraFonnApiService extends Service {
     private ITrackAppStatusListener mTrackAppStatusListener;
     private Map<String, AppStatus> mPackageNameMap = new ConcurrentHashMap<>();
     private ExecutorService mCacheExecutor = Executors.newCachedThreadPool();
+    private Thread mTrackAppStatusThread;
 
     private boolean isServiceRunning;
 
@@ -314,6 +315,10 @@ public class TeraFonnApiService extends Service {
             mCacheExecutor.shutdownNow();
             mCacheExecutor = null;
         }
+        if (mTrackAppStatusThread != null) {
+            mTrackAppStatusThread.interrupt();
+            mTrackAppStatusThread = null;
+        }
     }
 
     @Override
@@ -326,47 +331,46 @@ public class TeraFonnApiService extends Service {
         }
 
         isServiceRunning = true;
-        mCacheExecutor.execute(new Runnable() {
+        mTrackAppStatusThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    Set<String> packageNameSet = mPackageNameMap.keySet();
-                    if (mTrackAppStatusListener != null) {
-                        for (String packageName : packageNameSet) {
-                            try {
-                                AppStatus appStatus = mPackageNameMap.get(packageName);
-                                if (appStatus != null) {
-                                    int reportStatus = getPackageStatus(packageName);
-                                    if (appStatus.getStatus() != reportStatus) {
-                                        mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
-                                    }
-                                    appStatus.setStatus(reportStatus);
-                                    mPackageNameMap.put(packageName, appStatus);
-                                }
-                            } catch (Exception e) {
-                                Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+                try {
+                    while (true) {
+                        Set<String> packageNameSet = mPackageNameMap.keySet();
+                        if (mTrackAppStatusListener != null) {
+                            for (String packageName : packageNameSet) {
                                 try {
-                                    mTrackAppStatusListener.onTrackFailed(packageName);
-                                } catch (Exception e1) {
-                                    Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e1));
+                                    AppStatus appStatus = mPackageNameMap.get(packageName);
+                                    if (appStatus != null) {
+                                        int reportStatus = getPackageStatus(packageName);
+                                        if (appStatus.getStatus() != reportStatus) {
+                                            mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
+                                        }
+                                        appStatus.setStatus(reportStatus);
+                                        mPackageNameMap.put(packageName, appStatus);
+                                    }
+                                } catch (Exception e) {
+                                    Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+                                    try {
+                                        mTrackAppStatusListener.onTrackFailed(packageName);
+                                    } catch (Exception e1) {
+                                        Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e1));
+                                    }
                                 }
                             }
+                        } else {
+                            Logs.w(CLASSNAME, "onStartCommand", "TrackAppStatusListener is null");
                         }
-                    } else {
-                        Logs.w(CLASSNAME, "onStartCommand", "TrackAppStatusListener is null");
-                    }
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        Logs.w(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
-                    }
 
-                    if (!isServiceRunning) {
-                        break;
+                        Thread.sleep(3000);
                     }
+                } catch (InterruptedException e) {
+                    Logs.w(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
                 }
             }
         });
+        mTrackAppStatusThread.start();
+
         return START_STICKY;
     }
 
