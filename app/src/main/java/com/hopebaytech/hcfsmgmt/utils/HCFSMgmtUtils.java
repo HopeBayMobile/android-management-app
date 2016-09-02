@@ -672,9 +672,12 @@ public class HCFSMgmtUtils {
     public static void notifyNetworkStatus(Context context, int notify_id, String notify_title, String notify_content) {
         SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
         SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_CONN_FAILED_RECOVERY);
-        boolean notifyConnFailedRecoveryPref = Boolean.valueOf(settingsInfo.getValue());
-        if (notifyConnFailedRecoveryPref) {
-            NotificationEvent.notify(context, notify_id, notify_title, notify_content);
+        boolean notifyConnFailedRecoveryPref;
+        if (settingsInfo != null) {
+            notifyConnFailedRecoveryPref = Boolean.valueOf(settingsInfo.getValue());
+            if (notifyConnFailedRecoveryPref) {
+                NotificationEvent.notify(context, notify_id, notify_title, notify_content);
+            }
         }
     }
 
