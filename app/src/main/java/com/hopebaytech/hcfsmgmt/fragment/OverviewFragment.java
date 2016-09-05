@@ -288,7 +288,6 @@ public class OverviewFragment extends Fragment {
             }
         }
     }
-
     private void displayNetworkStatus(int connStatus) {
         switch (connStatus) {
             case HCFSConnStatus.TRANS_FAILED:
@@ -313,5 +312,6 @@ public class OverviewFragment extends Fragment {
                 break;
         }
     }
+
 
 }

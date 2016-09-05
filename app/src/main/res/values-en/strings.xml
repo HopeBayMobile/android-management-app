@@ -158,7 +158,7 @@
     <string name="settings_transfer_content_confirm_message">Confirm your Google account password:</string>
     <string name="settings_transfer_content_confirm_error_message">Incorrect password. Please try again.</string>
     <string name="settings_transfer_content_uploading_title">Transferring&#8230;</string>
-    <string name="settings_transfer_content_uploading_message">Data transfer may take some time, depending on the amount of data.\n\nOnce the transfer is done, log in Tera on another device and select to restore the backup from Tera. Then this current device will automatically perform factory reset.</string>
+    <string name="settings_transfer_content_uploading_message">Data transfer may take some time, depending on the amount of data. Once the transfer is done, log in Tera on another device and select to restore the backup from Tera. Then this current device will automatically perform factory reset.</string>
     <string name="settings_transfer_content_waiting_title">Waiting for another device&#8230;</string>
     <string name="settings_transfer_content_waiting_message">All data is ready to transfer. Once another device starts running the restoration backup, the transfer process will auto start.</string>
     <string name="settings_transfer_content_transferring_title">Transferring data&#8230;</string>
