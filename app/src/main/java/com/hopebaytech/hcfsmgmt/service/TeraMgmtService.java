@@ -139,6 +139,14 @@ public class TeraMgmtService extends Service {
                         notifyUserExceedPinMax();
                     } else if (action.equals(TeraIntent.ACTION_REBOOT_SYSETM)) {
                         PowerUtils.rebootSystem(TeraMgmtService.this);
+                    } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_COMPLETED)) {
+                        handleMiniRestoreCompleted();
+                    } else if (action.equals(TeraIntent.ACTION_FULL_RESTORE_COMPLETED)) {
+                        handleFullRestoreCompleted();
+                    } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM)) {
+                        handleMiniRestoreBootSystem();
+                    } else if (action.equals(TeraIntent.ACTION_CHECK_RESTORE_STATUS)) {
+                        checkRestoreStatus();
                     }
                 }
             });
@@ -815,9 +823,21 @@ public class TeraMgmtService extends Service {
         String notifyTitle = getString(R.string.app_name);
         String notifyContent = getString(R.string.notify_exceed_pin_max);
 
+
         int flag = NotificationEvent.FLAG_OPEN_APP;
         Bundle extras = new Bundle();
         extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
         NotificationEvent.notify(this, idNotify, notifyTitle, notifyContent, flag, extras);
     }
+
+    private void checkRestoreStatus() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
+        if (status == RestoreStatus.MINI_RESTORE_COMPLETED) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
+            editor.apply();
+        }
+    }
+
 }

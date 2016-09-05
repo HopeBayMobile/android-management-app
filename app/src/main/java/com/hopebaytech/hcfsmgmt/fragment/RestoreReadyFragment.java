@@ -79,7 +79,7 @@ public class RestoreReadyFragment extends Fragment {
 
         String rebootAction = getString(R.string.restore_system_reboot);
         Intent rebootIntent = new Intent(mContext, TeraMgmtService.class);
-        rebootIntent.setAction(TeraIntent.ACTION_REBOOT_SYSTEM);
+        rebootIntent.setAction(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM);
         PendingIntent pendingIntent = PendingIntent.getService(mContext, 0, rebootIntent, 0);
         NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
 

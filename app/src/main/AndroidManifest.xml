@@ -74,6 +74,7 @@
                 <action android:name="hbt.intent.action.RESTORE_STAGE_2" />
                 <action android:name="hbt.intent.action.MINI_RESTORE_COMPLETED" />
                 <action android:name="hbt.intent.action.FULL_RESTORE_COMPLETED" />
+                <action android:name="hbt.intent.action.CHECK_RESTORE_STATUS" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
