@@ -165,7 +165,7 @@
     <string name="settings_transfer_content_confirm_message">確認您的 Google 帳戶密碼:</string>
     <string name="settings_transfer_content_confirm_error_message">密碼錯誤，請重試。</string>
     <string name="settings_transfer_content_uploading_title">轉移中&#8230;</string>
-    <string name="settings_transfer_content_uploading_message">資料移轉所需要的時間長短會依資料量大小而定。\n\n一旦移轉完成，請在另一台裝置登入 Tera 並且選擇從 Tera 還原備份，然後目前裝置將會自動回復到原廠初始狀態。</string>
+    <string name="settings_transfer_content_uploading_message">資料移轉所需要的時間長短會依資料量大小而定。一旦移轉完成，請在另一台裝置登入 Tera 並且選擇從 Tera 還原備份，然後目前裝置將會自動回復到原廠初始狀態。</string>
     <string name="settings_transfer_content_waiting_title">等待另一台裝置&#8230;</string>
     <string name="settings_transfer_content_waiting_message">所有資料已經準備好移轉。一旦另一台裝置開始執行復原備份，移轉程序會自動開始。</string>
     <string name="settings_transfer_content_transferring_title">轉移資料中&#8230;</string>

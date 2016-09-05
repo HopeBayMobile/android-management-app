@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +18,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -30,12 +34,17 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 public class TransferContentUploadingFragment extends Fragment {
 
     public static final String TAG = TransferContentUploadingFragment.class.getSimpleName();
-    private final String CLASSNAME = TransferContentUploadingFragment.class.getSimpleName();
+    private final String CLASSNAME = TAG;
 
-    private TextView mErrorMsg;
-    private RelativeLayout mProgressLayout;
+    private final int INTERVAL_TERA_CONN_STATUS = 5000;
+
     private UploadCompletedReceiver mUploadCompletedReceiver;
-    private ProgressDialog mProgressDialog;
+    private Thread mTeraConnStatusThread;
+
+    private Context mContext;
+    private TextView mErrorMsg;
+    private TextView mTeraConnStatus;
+    private RelativeLayout mProgressLayout;
 
     public static TransferContentUploadingFragment newInstance() {
         return new TransferContentUploadingFragment();
@@ -43,8 +52,9 @@ public class TransferContentUploadingFragment extends Fragment {
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
+
+        mContext = getActivity();
 
         int code = HCFSMgmtUtils.startUploadTeraData();
         if (code == 1) {
@@ -56,27 +66,14 @@ public class TransferContentUploadingFragment extends Fragment {
         } else if (code == 0) {
             IntentFilter filter = new IntentFilter();
             filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
-            mUploadCompletedReceiver = new UploadCompletedReceiver(getActivity());
+            mUploadCompletedReceiver = new UploadCompletedReceiver(mContext);
             mUploadCompletedReceiver.registerReceiver(filter);
         } else {
             mErrorMsg.setText(R.string.settings_transfer_content_failed);
+            mTeraConnStatus.setVisibility(View.GONE);
+            mProgressLayout.setVisibility(View.GONE);
         }
 
-        // Only for test
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    Thread.sleep(5000);
-//
-//                    Intent intent = new Intent();
-//                    intent.setAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
-//                    getActivity().sendBroadcast(intent);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).start();
     }
 
     @Nullable
@@ -93,47 +90,53 @@ public class TransferContentUploadingFragment extends Fragment {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                showProgressDialog();
-
                 HCFSMgmtUtils.stopUploadTeraData();
-                getActivity().finish();
-
-//                final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
-//                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
-//                    @Override
-//                    public void onFetchSuccessful(String jwtToken) {
-//                        MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
-//                        unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
-//                            @Override
-//                            public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
-//                                Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
-//                                dismissProgressDialog();
-//                                getActivity().finish();
-//                            }
-//
-//                            @Override
-//                            public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
-//                                Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
-//                                dismissProgressDialog();
-//                                getActivity().finish();
-//                            }
-//                        });
-//                        unlockDeviceProxy.unlock();
-//                    }
-//
-//                    @Override
-//                    public void onFetchFailed() {
-//                        Logs.e(CLASSNAME, "onFetchFailed", null);
-//                        dismissProgressDialog();
-//                        getActivity().finish();
-//                    }
-//                });
+                ((Activity) mContext).finish();
             }
         });
 
         mErrorMsg = (TextView) view.findViewById(R.id.error_msg);
+        mTeraConnStatus = (TextView) view.findViewById(R.id.tera_conn_status);
         mProgressLayout = (RelativeLayout) view.findViewById(R.id.progressbar_layout);
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (mTeraConnStatusThread == null) {
+            mTeraConnStatusThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                            final int connStatus = HCFSConnStatus.getConnStatus(mContext, hcfsStatInfo);
+                            ((Activity)mContext).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    displayNetworkStatus(connStatus);
+                                }
+                            });
+                            Thread.sleep(INTERVAL_TERA_CONN_STATUS);
+                        }
+                    } catch (InterruptedException e) {
+                        Logs.w(CLASSNAME, "onStart", Log.getStackTraceString(e));
+                    }
+                }
+            });
+            mTeraConnStatusThread.start();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (mTeraConnStatusThread != null) {
+            mTeraConnStatusThread.interrupt();
+            mTeraConnStatusThread = null;
+        }
     }
 
     @Override
@@ -159,10 +162,10 @@ public class TransferContentUploadingFragment extends Fragment {
             String action = intent.getAction();
             if (action.equals(TeraIntent.ACTION_UPLOAD_COMPLETED)) {
                 Logs.d(CLASSNAME, "onReceive", TeraIntent.ACTION_UPLOAD_COMPLETED);
-                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
+                MgmtCluster.getJwtToken(mContext, new MgmtCluster.OnFetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {
-                        String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
+                        String imei = HCFSMgmtUtils.getDeviceImei(mContext);
                         MgmtCluster.TransferContentProxy transferProxy = new MgmtCluster.TransferContentProxy(jwtToken, imei);
                         transferProxy.setOnTransferContentListener(new MgmtCluster.TransferContentProxy.OnTransferContentListener() {
                             @Override
@@ -177,6 +180,7 @@ public class TransferContentUploadingFragment extends Fragment {
                             @Override
                             public void onTransferFailed(TransferContentInfo transferContentInfo) {
                                 mErrorMsg.setText(R.string.settings_transfer_content_failed);
+                                mTeraConnStatus.setVisibility(View.GONE);
                                 mProgressLayout.setVisibility(View.GONE);
                             }
                         });
@@ -186,6 +190,7 @@ public class TransferContentUploadingFragment extends Fragment {
                     @Override
                     public void onFetchFailed() {
                         mErrorMsg.setText(R.string.settings_transfer_content_failed);
+                        mTeraConnStatus.setVisibility(View.GONE);
                         mProgressLayout.setVisibility(View.GONE);
                     }
                 });
@@ -209,20 +214,25 @@ public class TransferContentUploadingFragment extends Fragment {
 
     }
 
-    private void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(getActivity());
-            mProgressDialog.setIndeterminate(true);
-            mProgressDialog.setCancelable(false);
+    private void displayNetworkStatus(int connStatus) {
+        switch (connStatus) {
+            case HCFSConnStatus.TRANS_FAILED:
+                mTeraConnStatus.setText(mContext.getString(R.string.overview_hcfs_conn_status_failed));
+                break;
+            case HCFSConnStatus.TRANS_NOT_ALLOWED:
+                mTeraConnStatus.setText(mContext.getString(R.string.overview_hcfs_conn_status_not_allowed));
+                break;
+            case HCFSConnStatus.TRANS_NORMAL:
+                mTeraConnStatus.setText(mContext.getString(R.string.overview_hcfs_conn_status_normal));
+                break;
+            case HCFSConnStatus.TRANS_IN_PROGRESS:
+                mTeraConnStatus.setText(mContext.getString(R.string.overview_hcfs_conn_status_in_progress));
+                break;
+            case HCFSConnStatus.TRANS_SLOW:
+                mTeraConnStatus.setText(mContext.getString(R.string.overview_hcfs_conn_status_slow));
+                break;
         }
-        mProgressDialog.setMessage(getString(R.string.cancel_processing_msg));
-        mProgressDialog.show();
     }
 
-    private void dismissProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.dismiss();
-        }
-    }
 
 }
