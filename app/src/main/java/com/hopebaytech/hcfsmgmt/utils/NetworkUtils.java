@@ -6,6 +6,9 @@ import android.net.NetworkInfo;
 
 public class NetworkUtils {
 
+    /**
+     * @return true if network status is connected, false otherwise.
+     */
     public static boolean isNetworkConnected(Context context) {
         boolean isConnected;
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -18,24 +21,14 @@ public class NetworkUtils {
         return isConnected;
     }
 
-    public static boolean isMobileNetworkConnected(Context context) {
-        boolean isConnected = false;
+    public static int getNetworkType(Context context) {
+        int type = -1;
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-        if (netInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-            isConnected = true;
+        if (netInfo != null) {
+            type = netInfo.getType();
         }
-        return isConnected;
-    }
-
-    public static boolean isWifiNetworkConnected(Context context) {
-        boolean isConnected = false;
-        ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
-        if (netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-            isConnected = true;
-        }
-        return isConnected;
+        return type;
     }
 
 }

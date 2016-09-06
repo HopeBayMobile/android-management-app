@@ -53,27 +53,7 @@ public class TransferContentUploadingFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mContext = getActivity();
-
-        int code = HCFSMgmtUtils.startUploadTeraData();
-        if (code == 1) {
-            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
-
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
-            ft.commit();
-        } else if (code == 0) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
-            mUploadCompletedReceiver = new UploadCompletedReceiver(mContext);
-            mUploadCompletedReceiver.registerReceiver(filter);
-        } else {
-            mErrorMsg.setText(R.string.settings_transfer_content_failed);
-            mTeraConnStatus.setVisibility(View.GONE);
-            mProgressLayout.setVisibility(View.GONE);
-        }
-
     }
 
     @Nullable
@@ -98,6 +78,29 @@ public class TransferContentUploadingFragment extends Fragment {
         mErrorMsg = (TextView) view.findViewById(R.id.error_msg);
         mTeraConnStatus = (TextView) view.findViewById(R.id.tera_conn_status);
         mProgressLayout = (RelativeLayout) view.findViewById(R.id.progressbar_layout);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        int code = HCFSMgmtUtils.startUploadTeraData();
+        if (code == 1) {
+            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
+
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
+            ft.commit();
+        } else if (code == 0) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
+            mUploadCompletedReceiver = new UploadCompletedReceiver(mContext);
+            mUploadCompletedReceiver.registerReceiver(filter);
+        } else {
+            mErrorMsg.setText(R.string.settings_transfer_content_failed);
+            mTeraConnStatus.setVisibility(View.GONE);
+            mProgressLayout.setVisibility(View.GONE);
+        }
     }
 
     @Override

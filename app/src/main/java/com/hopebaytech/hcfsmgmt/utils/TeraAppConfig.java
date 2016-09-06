@@ -11,8 +11,9 @@ import android.preference.PreferenceManager;
 public class TeraAppConfig {
 
     public static boolean isTeraAppLogin(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
+//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+//        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
+        return true;
     }
 
     public static void enableApp(Context context) {

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -99,13 +100,20 @@ public class TransferContentDescDialogFragment extends DialogFragment {
                             wifiOnlyEnabled = Boolean.valueOf(settingsInfo.getValue());
                         }
 
-                        if (NetworkUtils.isMobileNetworkConnected(mContext)) {
+                        if (!NetworkUtils.isNetworkConnected(mContext)) {
+                            String message = getString(R.string.notify_network_disconnected);
+                            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+                            dismiss();
+                            return;
+                        }
+
+                        int type = NetworkUtils.getNetworkType(mContext);
+                        if (type == ConnectivityManager.TYPE_MOBILE) {
                             if (wifiOnlyEnabled) {
                                 networkCond = TransContentNetworkDialogFragment.COND_MOBILE_WITH_WIFI_ONLY;
                             } else {
                                 SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
                                 boolean isAsked = settings.getBoolean(SettingsFragment.PREF_ASK_MOBILE_WITHOUT_WIFI_ONLY, false);
-                                Logs.w(CLASSNAME, "onCheckedChanged", "isAsked=" + isAsked);
                                 if (isAsked) {
                                     showNetworkDialog = false;
                                 } else {
