@@ -155,6 +155,14 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 intentService.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
                 context.startService(intentService);
+            } else if (action.equals(TeraIntent.ACTION_TOKEN_EXPIRED)) {
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_TOKEN_EXPIRED);
+                context.startService(intentService);
+            } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_EXCEED_PIN_MAX);
+                context.startService(intentService);
             }
         } else {
             Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isTeraAppLogin);
@@ -176,10 +184,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
 //                    TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR);
 //            context.startService(updateAppExternalDirIntent);
-
-            // start tera api server
-            Intent teraAPIServer = new Intent(context, TeraAPIServer.class);
-            context.startService(teraAPIServer);
         } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);

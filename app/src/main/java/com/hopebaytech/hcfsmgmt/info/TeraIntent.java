@@ -9,6 +9,8 @@ public class TeraIntent {
     // Intent action
     public static final String ACTION_UPLOAD_COMPLETED = "hbt.intent.action.UPLOAD_COMPLETED";
     public static final String ACTION_TRANSFER_COMPLETED = "hbt.intent.action.TRANSFER_COMPLETED";
+    public static final String ACTION_TOKEN_EXPIRED = "hbt.intent.action.TOKEN_EXPIRED";
+    public static final String ACTION_EXCEED_PIN_MAX = "hbt.intent.action.EXCEED_PIN_MAX";
 //    public static final String ACTION_NOTIFY_UPLOAD_COMPLETED = "hbt.intent.action.NOTIFY_UPLOAD_COMPLETED";
     public static final String ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO = "hbt.intent.action.NOTIFY_LOCAL_STORAGE_USED_RATIO";
     public static final String ACTION_PIN_DATA_TYPE_FILE = "hbt.intent.action.PIN_DATA_TYPE_FILE";
