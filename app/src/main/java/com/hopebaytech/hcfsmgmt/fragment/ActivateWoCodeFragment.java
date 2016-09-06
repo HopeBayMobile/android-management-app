@@ -42,7 +42,6 @@ import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -52,6 +51,7 @@ import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -64,16 +64,24 @@ public class ActivateWoCodeFragment extends Fragment {
     public static final String TAG = ActivateWoCodeFragment.class.getSimpleName();
     private final String CLASSNAME = ActivateWoCodeFragment.class.getSimpleName();
 
-    /** Google auth and User auth */
+    /**
+     * Google auth and User auth
+     */
     public static final String KEY_AUTH_TYPE = "auth_type";
 
-    /** Only for User authentication */
+    /**
+     * Only for User authentication
+     */
     public static final String KEY_PASSWORD = "password";
 
-    /** Only for User authentication */
+    /**
+     * Only for User authentication
+     */
     public static final String KEY_USERNAME = "username";
 
-    /** Only for Google authentication */
+    /**
+     * Only for Google authentication
+     */
     public static final String KEY_AUTH_CODE = "auth_code";
 
     public static final String KEY_JWT_TOKEN = "jwt_token";

@@ -1,6 +1,5 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import android.content.ContentValues;
 import android.util.Log;
 
 import org.json.JSONException;

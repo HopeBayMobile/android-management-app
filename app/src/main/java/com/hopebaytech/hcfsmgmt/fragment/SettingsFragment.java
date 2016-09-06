@@ -45,14 +45,11 @@ public class SettingsFragment extends Fragment {
     public static final int REQUEST_ABOUT_FRAGMENT = 1;
 
     private Context mContext;
-    private View mView;
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
     private LinearLayout mNotifyLocalStorageUsedRatio;
     private LinearLayout mChangeAccount;
     private LinearLayout mTransferContent;
-    private Snackbar mSnackbar;
-
     private LinearLayout mAbout;
     private LinearLayout mBa;
 
@@ -80,9 +77,7 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         Logs.d(CLASSNAME, "onViewCreated", null);
-        mView = view;
 
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
@@ -172,9 +167,9 @@ public class SettingsFragment extends Fragment {
         mAbout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AboutFragment fragment = AboutFragment.newInstance();
+                AboutDialogFragment fragment = AboutDialogFragment.newInstance();
                 fragment.setTargetFragment(SettingsFragment.this, REQUEST_ABOUT_FRAGMENT);
-                fragment.show(getFragmentManager(), AboutFragment.TAG);
+                fragment.show(getFragmentManager(), AboutDialogFragment.TAG);
             }
         });
     }

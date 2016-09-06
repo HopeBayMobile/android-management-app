@@ -28,9 +28,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 
@@ -651,12 +649,12 @@ public class HCFSMgmtUtils {
     public static void notifyNetworkStatus(Context context, int notify_id, String notify_title, String notify_content) {
         SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
         SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_CONN_FAILED_RECOVERY);
-        boolean notifyConnFailedRecoveryPref;
+        boolean notifyConnFailedRecoveryPref = false;
         if (settingsInfo != null) {
             notifyConnFailedRecoveryPref = Boolean.valueOf(settingsInfo.getValue());
-            if (notifyConnFailedRecoveryPref) {
-                NotificationEvent.notify(context, notify_id, notify_title, notify_content);
-            }
+        }
+        if (notifyConnFailedRecoveryPref) {
+            NotificationEvent.notify(context, notify_id, notify_title, notify_content);
         }
     }
 
@@ -860,7 +858,7 @@ public class HCFSMgmtUtils {
         }
         return isSuccess;
     }
-    
+
     public static int triggerRestore() {
         int code = -1;
         try {
@@ -881,10 +879,10 @@ public class HCFSMgmtUtils {
     }
 
     /***
-    * @return <li>0 if not being restored</li>
-    * <li>1 if in stage 1 of restoration process</li>
-    * <li>2 if in stage 2 of restoration process</li>
-    */
+     * @return <li>0 if not being restored</li>
+     * <li>1 if in stage 1 of restoration process</li>
+     * <li>2 if in stage 2 of restoration process</li>
+     */
     public static int checkRestoreStatus() {
         int code = -1;
         try {

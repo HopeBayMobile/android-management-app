@@ -141,10 +141,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 //            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
 //                    TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR);
 //            context.startService(updateAppExternalDirIntent);
-
-            // start tera api server
-            Intent teraAPIServer = new Intent(context, TeraAPIServer.class);
-            context.startService(teraAPIServer);
         } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);

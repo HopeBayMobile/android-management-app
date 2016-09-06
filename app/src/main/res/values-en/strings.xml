@@ -29,11 +29,10 @@
     <string name="activate_incorrect_activation_code">Incorrect activation code.</string>
     <string name="activate_auth_failed">Account authentication failed.</string>
     <string name="activate_failed">Activation failed.</string>
-    <string name="activate_failed_device_in_use">此裝置已經被註冊，啟動失敗。</string>
+    <string name="activate_failed_device_in_use">The device has been registered.</string>
     <string name="activate_failed_not_supported_device">This device is not supported. Activation failed.</string>
     <string name="activate_failed_device_expired">Tera expired. Activation failed.</string>
     <string name="activate_failed_gateway_timeout">Gateway Timeout: The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.</string>
-    <string name="activate_failed_device_in_use">The device has been registered.</string>
     <string name="activate_device_not_registered">Tera is not activated on this device. Enter an activation code to activate Tera.</string>
     <string name="activate_require_read_phone_state_permission">Enable the "Phone" permission to activate Tera.</string>
 

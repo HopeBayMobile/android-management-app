@@ -37,7 +37,6 @@ import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
-import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
@@ -51,6 +50,7 @@ import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
@@ -74,7 +74,6 @@ public class TeraMgmtService extends Service {
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
     private SettingsDAO mSettingsDAO;
-    private BroadcastReceiver mRestoreReceiver;
 
     private Context mContext;
 

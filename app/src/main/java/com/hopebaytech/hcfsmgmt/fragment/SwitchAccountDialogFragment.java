@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.main.SwitchAccountActivity;
+import com.hopebaytech.hcfsmgmt.main.ChangeAccountActivity;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 /**
@@ -20,7 +20,7 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 public class SwitchAccountDialogFragment extends DialogFragment {
 
     public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
-    private final String CLASSNAME = getClass().getSimpleName();
+    private final String CLASSNAME = TAG;
     private Activity mActivity;
 
     public static SwitchAccountDialogFragment newInstance() {
@@ -38,17 +38,13 @@ public class SwitchAccountDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
         builder.setTitle(getString(R.string.alert_dialog_title_warning));
-        builder.setMessage(getString(R.string.settings_switch_account_warning_msg));
+        builder.setMessage(getString(R.string.settings_change_account_warning_msg));
         builder.setPositiveButton(getString(R.string._continue), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 TeraAppConfig.disableApp(mActivity);
-//                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-//                SharedPreferences.Editor editor = sharedPreferences.edit();
-//                editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
-//                editor.apply();
 
-                Intent intent = new Intent(mActivity, SwitchAccountActivity.class);
+                Intent intent = new Intent(mActivity, ChangeAccountActivity.class);
                 mActivity.startActivity(intent);
                 mActivity.finish();
             }

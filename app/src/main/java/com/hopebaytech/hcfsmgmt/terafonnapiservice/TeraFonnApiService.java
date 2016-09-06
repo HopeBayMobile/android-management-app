@@ -20,6 +20,7 @@ import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
