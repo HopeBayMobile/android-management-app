@@ -11,7 +11,6 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
-import com.hopebaytech.hcfsmgmt.service.TeraAPIServer;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
