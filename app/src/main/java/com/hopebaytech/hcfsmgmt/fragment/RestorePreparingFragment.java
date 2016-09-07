@@ -13,8 +13,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
@@ -32,6 +35,8 @@ public class RestorePreparingFragment extends Fragment {
     private MiniRestoreCompletedReceiver mReceiver;
 
     private Context mContext;
+    private TextView mErrorMsg;
+    private ProgressBar mProgressDialog;
 
     public static RestorePreparingFragment newInstance() {
         return new RestorePreparingFragment();
@@ -52,6 +57,13 @@ public class RestorePreparingFragment extends Fragment {
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mErrorMsg = (TextView) view.findViewById(R.id.error_msg);
+        mProgressDialog = (ProgressBar) view.findViewById(R.id.progress_circle);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
 
@@ -63,7 +75,7 @@ public class RestorePreparingFragment extends Fragment {
             cancelInProgressNotification();
 
             IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(TeraIntent.ACTION_MINI_RESTORE_COMPLETED);
+            intentFilter.addAction(TeraIntent.ACTION_RESTORE_STAGE_1);
 
             mReceiver.registerReceiver(mContext, intentFilter);
         }
@@ -91,7 +103,7 @@ public class RestorePreparingFragment extends Fragment {
 
         // Show normal notification (previous heads-up notification will disappear)
         flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_IN_PROGRESS;
-        int restoreIconId = R.drawable.resotre_icon_anim;
+        int restoreIconId = R.drawable.restore_icon_anim;
         NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title,
                 null /* message*/, restoreIconId, null /* action */, flag, null /* extras */);
     }
@@ -106,12 +118,32 @@ public class RestorePreparingFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
-            editor.apply();
+            int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, 0);
+            switch (errorCode) {
+                case 0: // Success
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
+                    editor.apply();
 
-            gotoRestoreReadyPage();
+                    gotoRestoreReadyPage();
+                    break;
+                case HCFSEvent.ErrorCode.ENOENT: // No such file or directory
+                    mProgressDialog.setVisibility(View.GONE);
+                    mErrorMsg.setVisibility(View.VISIBLE);
+                    mErrorMsg.setText(R.string.restore_no_such_file_or_directory);
+                    break;
+                case HCFSEvent.ErrorCode.ENOSPC: // No space left on device
+                    mProgressDialog.setVisibility(View.GONE);
+                    mErrorMsg.setVisibility(View.VISIBLE);
+                    mErrorMsg.setText(R.string.restore_stage_1_no_space_left);
+                    break;
+                case HCFSEvent.ErrorCode.ENETDOWN: // Network is down
+                    mProgressDialog.setVisibility(View.GONE);
+                    mErrorMsg.setVisibility(View.VISIBLE);
+                    mErrorMsg.setText(R.string.restore_no_network_connected);
+                    break;
+            }
         }
 
         public void registerReceiver(Context context, IntentFilter intentFilter) {

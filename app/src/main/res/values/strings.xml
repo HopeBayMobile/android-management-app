@@ -211,6 +211,10 @@
     <string name="restore_system_reboot">System Reboot</string>
     <string name="restore_notification_title">Restoring Tera</string>
     <string name="restore_exit">離開</string>
+    <string name="restore_no_such_file_or_directory">部分資料備份失敗，導致系統無法還原。請恢復原廠設定重新選擇其他備份還原，或者將此裝置當作新的使用。</string>
+    <string name="restore_stage_1_no_space_left">可用空間不足，還原失敗。請刪除部分應用程式或者檔案後，重新開機以繼續還原流程。</string>
+    <string name="restore_stage_2_no_space_left">可用空間不足，還原失敗。請刪除部分應用程式或者檔案後，重新開機以繼續還原流程。</string>
+    <string name="restore_no_network_connected">目前網路連線失敗，請檢查網路通訊。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
 

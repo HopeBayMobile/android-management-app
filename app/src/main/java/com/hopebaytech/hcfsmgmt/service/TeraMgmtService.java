@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -37,10 +39,12 @@ import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
+import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
+import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -49,7 +53,6 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
-import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
@@ -132,16 +135,10 @@ public class TeraMgmtService extends Service {
                         notifyInsufficientPinSpace();
                     } else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
                         HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
-                    } else if (action.equals(TeraIntent.ACTION_TOKEN_EXPIRED)) {
-                        checkTokenExpiredCause();
-                    } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
-                        notifyUserExceedPinMax();
-                    } else if (action.equals(TeraIntent.ACTION_REBOOT_SYSETM)) {
-                        PowerUtils.rebootSystem(TeraMgmtService.this);
-                    } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_COMPLETED)) {
-                        handleMiniRestoreCompleted();
-                    } else if (action.equals(TeraIntent.ACTION_FULL_RESTORE_COMPLETED)) {
-                        handleFullRestoreCompleted();
+                    } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_1)) {
+                        handleStage1RestoreEvent(intent);
+                    } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_2)) {
+                        handleStage2RestoreEvent(intent);
                     } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM)) {
                         handleMiniRestoreBootSystem();
                     } else if (action.equals(TeraIntent.ACTION_CHECK_RESTORE_STATUS)) {
@@ -815,6 +812,92 @@ public class TeraMgmtService extends Service {
                 Logs.e(CLASSNAME, "onFetchFailed", null);
             }
         });
+
+    private void handleStage1RestoreEvent(Intent intent) {
+        int flag;
+        String title;
+        String message;
+        int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+        int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+        switch (errorCode) {
+            case 0:
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
+                if (!MainApplication.Foreground.get().isForeground()) {
+                    String rebootAction = getString(R.string.restore_system_reboot);
+                    Intent rebootIntent = new Intent(TeraMgmtService.this, TeraMgmtService.class);
+                    rebootIntent.setAction(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM);
+                    PendingIntent pendingIntent = PendingIntent.getService(TeraMgmtService.this, 0, rebootIntent, 0);
+                    NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
+
+                    flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_HEADS_UP;
+                    title = getString(R.string.restore_ready_title);
+                    message = getString(R.string.restore_ready_message);
+                    NotificationEvent.notify(mContext, notifyId, title, message, action, flag);
+                }
+                editor.apply();
+                break;
+            case HCFSEvent.ErrorCode.ENOENT:
+                flag = NotificationEvent.FLAG_HEADS_UP;
+                title = getString(R.string.app_name);
+                message = getString(R.string.restore_no_such_file_or_directory);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENOSPC:
+                flag = NotificationEvent.FLAG_HEADS_UP;
+                title = getString(R.string.app_name);
+                message = getString(R.string.restore_stage_1_no_space_left);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENETDOWN:
+                flag = NotificationEvent.FLAG_HEADS_UP;
+                title = getString(R.string.app_name);
+                message = getString(R.string.restore_no_network_connected);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                break;
+        }
+    }
+
+    private void handleStage2RestoreEvent(Intent intent) {
+        Logs.d(CLASSNAME, "handleStage2RestoreEvent", null);
+        int flag;
+        String title;
+        String message;
+        int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+        int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+        switch (errorCode) {
+            case 0:
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_COMPLETED);
+                if (!MainApplication.Foreground.get().isForeground()) {
+                    flag = NotificationEvent.FLAG_HEADS_UP;
+                    title = getString(R.string.restore_done_title);
+                    message = getString(R.string.restore_done_message);
+                    NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                }
+                editor.apply();
+                break;
+            case HCFSEvent.ErrorCode.ENOENT:
+                flag = NotificationEvent.FLAG_HEADS_UP;
+                title = getString(R.string.app_name);
+                message = getString(R.string.restore_no_such_file_or_directory);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENOSPC:
+                flag = NotificationEvent.FLAG_HEADS_UP;
+                title = getString(R.string.app_name);
+                message = getString(R.string.restore_stage_2_no_space_left);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENETDOWN:
+                flag = NotificationEvent.FLAG_HEADS_UP;
+                title = getString(R.string.app_name);
+                message = getString(R.string.restore_no_network_connected);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                break;
+        }
     }
 
     private void notifyUserExceedPinMax() {

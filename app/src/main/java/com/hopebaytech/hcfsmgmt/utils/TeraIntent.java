@@ -41,5 +41,6 @@ public class TeraIntent {
     public static final String KEY_GOOGLE_SIGN_IN_DISPLAY_NAME = "intent_key_google_sign_in_display_name";
     public static final String KEY_GOOGLE_SIGN_IN_EMAIL = "intent_key_google_sign_in_email";
     public static final String KEY_GOOGLE_SIGN_IN_PHOTO_URI = "intent_key_google_sign_in_photo_uri";
+    public static final String KEY_RESTORE_ERROR_CODE = "intent_key_restore_error_code";
 
 }
