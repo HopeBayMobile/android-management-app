@@ -174,7 +174,7 @@ public class DeviceServiceInfo {
 
         public String getBackendType() {
             if (token != null) {
-                backendType += "token";
+                return backendType + "token";
             }
             return backendType;
         }
