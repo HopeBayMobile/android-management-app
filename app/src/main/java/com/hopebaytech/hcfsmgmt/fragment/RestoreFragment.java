@@ -669,13 +669,15 @@ public class RestoreFragment extends Fragment {
         proxy.setOnSwitchDeviceBackendListener(new MgmtCluster.SwitchDeviceBackendProxy.
                 OnSwitchDeviceBackendListener() {
             @Override
-            public void onSwitchSuccessful(DeviceServiceInfo deviceServiceInfo) {
+            public void onSwitchSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
+
                 mProgressDialogUtils.dismiss();
 
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
                         HCFSMgmtUtils.triggerRestore();
                         TeraCloudConfig.reloadConfig();
 
