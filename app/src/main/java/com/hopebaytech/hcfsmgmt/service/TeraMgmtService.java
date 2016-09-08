@@ -815,6 +815,12 @@ public class TeraMgmtService extends Service {
         });
 
     private void handleStage1RestoreEvent(Intent intent) {
+        Logs.d(CLASSNAME, "handleStage2RestoreEvent", null);
+
+        if (MainApplication.Foreground.get().isForeground()) {
+            return;
+        }
+
         int flag;
         String title;
         String message;
@@ -825,19 +831,18 @@ public class TeraMgmtService extends Service {
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
-                if (!MainApplication.Foreground.get().isForeground()) {
-                    String rebootAction = getString(R.string.restore_system_reboot);
-                    Intent rebootIntent = new Intent(TeraMgmtService.this, TeraMgmtService.class);
-                    rebootIntent.setAction(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM);
-                    PendingIntent pendingIntent = PendingIntent.getService(TeraMgmtService.this, 0, rebootIntent, 0);
-                    NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
-
-                    flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_HEADS_UP;
-                    title = getString(R.string.restore_ready_title);
-                    message = getString(R.string.restore_ready_message);
-                    NotificationEvent.notify(mContext, notifyId, title, message, action, flag);
-                }
                 editor.apply();
+
+                String rebootAction = getString(R.string.restore_system_reboot);
+                Intent rebootIntent = new Intent(TeraMgmtService.this, TeraMgmtService.class);
+                rebootIntent.setAction(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM);
+                PendingIntent pendingIntent = PendingIntent.getService(TeraMgmtService.this, 0, rebootIntent, 0);
+                NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
+
+                flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_HEADS_UP;
+                title = getString(R.string.restore_ready_title);
+                message = getString(R.string.restore_ready_message);
+                NotificationEvent.notify(mContext, notifyId, title, message, action, flag);
                 break;
             case HCFSEvent.ErrorCode.ENOENT:
                 flag = NotificationEvent.FLAG_HEADS_UP;

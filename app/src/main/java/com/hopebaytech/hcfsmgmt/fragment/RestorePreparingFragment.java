@@ -116,6 +116,7 @@ public class RestorePreparingFragment extends Fragment {
     public class MiniRestoreCompletedReceiver extends BroadcastReceiver {
 
         private boolean isRegister;
+        private int ENETDOWNCount;
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -141,9 +142,12 @@ public class RestorePreparingFragment extends Fragment {
                     mErrorMsg.setText(R.string.restore_stage_1_no_space_left);
                     break;
                 case HCFSEvent.ErrorCode.ENETDOWN: // Network is down
-                    mProgressDialog.setVisibility(View.GONE);
-                    mErrorMsg.setVisibility(View.VISIBLE);
-                    mErrorMsg.setText(R.string.restore_no_network_connected);
+                    if (ENETDOWNCount > 0) { // Ignore the event first time
+                        mProgressDialog.setVisibility(View.GONE);
+                        mErrorMsg.setVisibility(View.VISIBLE);
+                        mErrorMsg.setText(R.string.restore_no_network_connected);
+                    }
+                    ENETDOWNCount++;
                     break;
             }
         }
@@ -164,6 +168,7 @@ public class RestorePreparingFragment extends Fragment {
                     isRegister = false;
                 }
             }
+            ENETDOWNCount = 0;
         }
 
     }
