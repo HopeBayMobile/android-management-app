@@ -1,7 +1,9 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.IPackageStatsObserver;
@@ -12,6 +14,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,11 +43,20 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
 
     public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
+
     private FileMgmtFragment.RecyclerViewHolder mViewHolder;
     private Thread mCalculateAppDataRatioThread;
 
+    private Context mContext;
+
     public static FileMgmtAppDialogFragment newInstance() {
         return new FileMgmtAppDialogFragment();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mContext = getActivity();
     }
 
     @NonNull
@@ -54,7 +66,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
         if (itemInfo instanceof AppInfo) {
             final AppInfo appInfo = (AppInfo) itemInfo;
 
-            LayoutInflater inflater = getActivity().getLayoutInflater();
+            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
             final View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_app_info, null);
 
             ImageView appIcon = (ImageView) view.findViewById(R.id.app_icon);
@@ -77,7 +89,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
             });
 
             try {
-                PackageInfo packageInfo = getActivity().getPackageManager().getPackageInfo(appInfo.getPackageName(), 0);
+                PackageInfo packageInfo = mContext.getPackageManager().getPackageInfo(appInfo.getPackageName(), 0);
                 TextView appVersion = (TextView) view.findViewById(R.id.app_version);
                 String version = String.format(getString(R.string.file_mgmt_dialog_app_version), packageInfo.versionName);
                 appVersion.setText(version);
@@ -89,7 +101,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
             String size = String.format(getString(R.string.file_mgmt_dialog_data_size), getString(R.string.file_mgmt_dialog_calculating));
             appSize.setText(size);
             try {
-                PackageManager pm = getActivity().getPackageManager();
+                PackageManager pm = mContext.getPackageManager();
                 Method getPackageSizeInfo = pm.getClass().getMethod("getPackageSizeInfo", String.class, IPackageStatsObserver.class);
                 getPackageSizeInfo.invoke(pm, appInfo.getPackageName(), new IPackageStatsObserver.Stub() {
                     @Override
@@ -112,7 +124,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                         Logs.d(CLASSNAME, "onCreateDialog", "externalMediaSize=" + UnitConverter.convertByteToProperUnit(pStats.externalMediaSize));
                         Logs.d(CLASSNAME, "onCreateDialog", "externalObbSize=" + UnitConverter.convertByteToProperUnit(pStats.externalObbSize));
 
-                        getActivity().runOnUiThread(new Runnable() {
+                        ((Activity) mContext).runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 String formatSize = UnitConverter.convertByteToProperUnit(totalSize);
@@ -136,7 +148,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
             mCalculateAppDataRatioThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    getActivity().runOnUiThread(new Runnable() {
+                    ((Activity) mContext).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             String ratio = getAppDataRatio(appInfo);
@@ -147,12 +159,12 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
             });
             mCalculateAppDataRatioThread.start();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
             builder.setView(view)
                     .setPositiveButton(R.string.file_mgmt_dialog_app_open, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Intent launchIntent = getActivity().getPackageManager().getLaunchIntentForPackage(appInfo.getPackageName());
+                            Intent launchIntent = mContext.getPackageManager().getLaunchIntentForPackage(appInfo.getPackageName());
                             startActivity(launchIntent);
                         }
                     })

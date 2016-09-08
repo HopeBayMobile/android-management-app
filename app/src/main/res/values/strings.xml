@@ -3,6 +3,7 @@
     <string name="app_name">Tera</string>
 
     <string name="require_read_external_storage_permission">讀取檔案清單需啟用 "儲存" 權限。</string>
+    <string name="require_write_external_storage_permission">產生日誌需啟用 "儲存" 權限。</string>
     <string name="require_read_phone_state_permission">讀取 IMEI 值需啟用 "電話" 權限。</string>
     <string name="go">前往</string>
     <string name="update">更新</string>
@@ -46,11 +47,12 @@
     <string name="nav_add_mountpoint">新增共用空間</string>
     <string name="nav_settings">設定</string>
     <string name="nav_about">關於</string>
+    <string name="nav_help">幫助</string>
     <string-array name="nav_title">
         <item>@string/nav_overview</item>
         <item>@string/nav_app_file</item>
         <item>@string/nav_settings</item>
-        <item>@string/nav_about</item>
+        <item>@string/nav_help</item>
     </string-array>
 
     <string name="notify_network_connected">網路連線已恢復</string>
@@ -144,9 +146,9 @@
     <string name="hcfs_mgmt_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
 
     <string name="settings_title_bar">一般設定</string>
-    <string name="settings_synchronization">同步設定</string>
+    <string name="settings_synchronization">同步</string>
     <string name="settings_sync_wifi_only">只有連接 Wi-Fi 時才存取雲端</string>
-    <string name="settings_notification">通知設定</string>
+    <string name="settings_notification">通知</string>
     <string name="settings_notify_conn_failed_recovery">中斷/恢復連線</string>
     <string name="settings_notify_upload_completed">資料上傳完成</string>
     <string name="settings_notify_local_storage_used_ratio_dialog_title">選擇已使用率以便傳送通知。</string>
@@ -165,7 +167,7 @@
     <string name="settings_transfer_content_confirm_message">確認您的 Google 帳戶密碼:</string>
     <string name="settings_transfer_content_confirm_error_message">密碼錯誤，請重試。</string>
     <string name="settings_transfer_content_uploading_title">轉移中&#8230;</string>
-    <string name="settings_transfer_content_uploading_message">資料移轉所需要的時間長短會依資料量大小而定。\n\n一旦移轉完成，請在另一台裝置登入 Tera 並且選擇從 Tera 還原備份，然後目前裝置將會自動回復到原廠初始狀態。</string>
+    <string name="settings_transfer_content_uploading_message">資料移轉所需要的時間長短會依資料量大小而定。一旦移轉完成，請在另一台裝置登入 Tera 並且選擇從 Tera 還原備份，然後目前裝置將會自動回復到原廠初始狀態。</string>
     <string name="settings_transfer_content_waiting_title">等待另一台裝置&#8230;</string>
     <string name="settings_transfer_content_waiting_message">所有資料已經準備好移轉。一旦另一台裝置開始執行復原備份，移轉程序會自動開始。</string>
     <string name="settings_transfer_content_transferring_title">轉移資料中&#8230;</string>
@@ -174,7 +176,22 @@
     <string name="settings_transfer_content_done_message">目前裝置的資料已經成功轉移到 Tera 雲端，同時這些資料也正在進行還原到另一台裝置的程序。目前裝置稍候將會重設。</string>
     <string name="settings_transfer_content_done_factory_reset">回復到原廠初始狀態程序將會在 %s 秒內開始。</string>
     <string name="settings_transfer_content_failed">資料移轉失敗</string>
+    <string name="settings_transfer_content_syc_data_stopped_title">Sync Data Stopped</string>
+    <string name="settings_transfer_content_syc_data_stopped_message">This action cannot be executed because sync data is set to Wi-Fi only mode. Please tap "Sync Settings" to turn off Wi-Fi only or connect to available Wi-Fi network to continue.</string>
+    <string name="settings_transfer_content_use_mobile_network_title">Use your mobile data plan to sync data?</string>
+    <string name="settings_transfer_content_use_mobile_network_message">This action may incur additional costs, depending on your mobile data plan. You can also turn on Wi-Fi in settings page.</string>
+    <string name="settings_transfer_content_do_not_ask_again">Do not ask me again.</string>
     <string name="settings_feedback">意見回饋</string>
+    <string name="settings_feedback_log_collecting_title">日誌收集中</string>
+    <string name="settings_feedback_log_collecting_message">收集日誌需要一點時間，取決於資料量的多寡</string>
+    <string name="settings_feedback_content_mail_time">障礙發生日期/時間：</string>
+    <string name="settings_feedback_content_mail_opinions">障礙狀況/意見說明：</string>
+    <string name="settings_feedback_content_mail_description">若障礙狀況特殊，或許我們需要進一步向您瞭解詳情，請留下您方便聯絡的資料，請放心，我們會妥善保管，非必要，我們將不會隨意打擾您。</string>
+    <string name="settings_feedback_content_mail_contact">聯絡人：</string>
+    <string name="settings_feedback_content_mail_phone">聯絡電話：</string>
+    <string name="settings_about">關於</string>
+    <string name="settings_extra_log_for_ba">Extra log for BA</string>
+    <string name="settings_extra_log_for_ba_enabled">Extra log for BA has been enabled.</string>
     <string name="settings_snackbar_no_available_email_app_found">無可用的 email 應用程式和/或設定好的 email 帳戶。請至少安裝一個 email 應用程式，並且設定一組可用的 email 帳戶。</string>
     <string-array name="pref_notify_local_storage_used_ratio_name">
         <item>90%</item>
@@ -203,13 +220,20 @@
     <string name="auth_at_bootup_auth_get_device_info">無法從管理伺服器取得裝置狀態。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
+
+    <!-- Button text for dialog -->
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="confirm">確定</string>
     <string name="cancel">取消</string>
     <string name="ok">確定</string>
+    <string name="close">關閉</string>
     <string name="next">下一步</string>
     <string name="transfer">轉換</string>
+    <string name="connect_to_wifi">CONNECT TO WI-FI</string>
+    <string name="sync_settings">SYNC SETTINGS</string>
+    <string name="settings">SETTINGS</string>
+    <string name="_continue">CONTINUE</string>
 
     <string name="pref_download_to_run">pref_download_to_run</string>
     <string name="tera_version_title">Tera 版本</string>
@@ -220,5 +244,13 @@
     <string name="toast_pin_failure">釘選應用程式/檔案失敗，因為可用釘選空間不足。請取消釘選一些應用程式或檔案。</string>
     <string name="toast_unpin_success">取消釘選成功</string>
     <string name="toast_unpin_failure">取消釘選失敗</string>
+
+    <string name="help_title_bar">說明中心</string>
+    <string name="help_faq_title">常見問題與解答</string>
+    <string name="help_user_manual_title">使用手冊</string>
+    <string name="help_customer_center_title">客戶服務</string>
+    <string name="help_email_feedback_title">意見回饋</string>
+    <string name="faq_url">http://tera.mobi/faq-ch.html</string>
+    <string name="quick_tour_title">Quick Tour</string>
 
 </resources>
