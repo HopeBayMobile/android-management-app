@@ -150,6 +150,20 @@ public class TeraCloudConfig {
         return isSuccess;
     }
 
+    public static boolean storeHCFSConfigWithoutReload(DeviceServiceInfo deviceServiceInfo) {
+        boolean isSuccess = true;
+        if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, deviceServiceInfo.getBackend().getBackendType())) {
+            isSuccess = false;
+        }
+        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, deviceServiceInfo.getBackend().getUser())) {
+            isSuccess = false;
+        }
+        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, deviceServiceInfo.getBackend().getBucket())) {
+            isSuccess = false;
+        }
+        return isSuccess;
+    }
+
     public static void resetHCFSConfig() {
         setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, "NONE");
         setHCFSConfig(HCFS_CONFIG_SWIFT_ACCOUNT, "");

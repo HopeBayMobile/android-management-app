@@ -677,7 +677,7 @@ public class RestoreFragment extends Fragment {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+                        TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo);
                         HCFSMgmtUtils.triggerRestore();
                         TeraCloudConfig.reloadConfig();
 
