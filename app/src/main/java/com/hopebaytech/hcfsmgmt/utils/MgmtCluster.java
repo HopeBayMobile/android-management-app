@@ -37,7 +37,7 @@ public class MgmtCluster {
     public static final String REGISTER_AUTH_API = "https://" + DOMAIN_NAME + "/api/register/auth/";
     public static final String SOCIAL_AUTH_API = "https://" + DOMAIN_NAME + "/api/social-auth/";
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
-    public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
+    public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/v1/devices/";
 
     public static final String KEY_AUTH_CODE = "code";
     public static final String KEY_ERROR_CODE = "error_code";
