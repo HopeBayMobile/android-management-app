@@ -35,13 +35,13 @@ int teraPrivateEncrypt(unsigned char* output, unsigned char* input)
     // Encrypt plain text
 #ifdef DEBUG
     printf("\n");
-    printf("[ENC key]"); hex_print(key, sizeof(key));
-    printf("[ENC encrypted key]"); hex_print(encrypted_key, sizeof(encrypted_key));
+    hex_print("ENC key", key, sizeof(key));
+    hex_print("ENC encrypted key", encrypted_key, sizeof(encrypted_key));
 #endif
     if (aes_gcm_encrypt_fix_iv(encrypted, input, input_length, key) != 0)
         return -1;
 #ifdef DEBUG
-    printf("[ENC encrypted]"); hex_print(encrypted, sizeof(encrypted));
+    hex_print("ENC encrypted", encrypted, sizeof(encrypted));
 #endif
 
     memset(enc_with_key, 0, ENCRYPTED_KEY_SIZE+encrypted_length);
@@ -61,6 +61,8 @@ int teraPrivateEncrypt(unsigned char* output, unsigned char* input)
  */
 int teraPublicDecrypt(unsigned char* output, unsigned char* input)
 {
+    // Elimiate " from input string (not in base64 charactors)
+    eliminate_str(input, '"');
     int input_length = strlen(input);
     int decoded_length;
 
@@ -88,9 +90,9 @@ int teraPublicDecrypt(unsigned char* output, unsigned char* input)
 
 #ifdef DEBUG
     printf("\n");
-    printf("[DEC key]"); hex_print(key, KEY_SIZE);
-    printf("[DEC encrypted key]"); hex_print(encrypted_key, ENCRYPTED_KEY_SIZE);
-    printf("[DEC encrypted]"); hex_print(encrypted, encrypted_length);
+    hex_print("DEC key", key, KEY_SIZE);
+    hex_print("DEC encrypted key", encrypted_key, ENCRYPTED_KEY_SIZE);
+    hex_print("DEC encrypted", encrypted, encrypted_length);
 #endif
     // Start to decrypt
     if (aes_gcm_decrypt_fix_iv(output, encrypted, encrypted_length, key) != 0) {
@@ -102,7 +104,8 @@ int teraPublicDecrypt(unsigned char* output, unsigned char* input)
     return 0;
 }
 
-int hex_print(unsigned char* input, int size) {
+int hex_print(char* title, unsigned char* input, int size)
+{
     int i = 0;
     char converted[size*2 + 1];
 
@@ -111,10 +114,28 @@ int hex_print(unsigned char* input, int size) {
         sprintf(&converted[i*2], "%02X", input[i]);
         i++;
     }
-    printf(" %d ", size);
+#ifdef CLIENT_SIDE
+    __android_log_print(ANDROID_LOG_DEBUG, ANDROID_LOG_TAG, "[%s] %d", title, size);
+#else
+    printf("[%s] %d ", title, size);
+#endif
 #ifdef DETAIL_DEBUG
     printf("%s\n", converted);
 #endif
 
     return 0;
+}
+
+void eliminate_str(char* target, char eliminator)
+{
+    int i=0, j=0;
+    while (j < strlen(target)) {
+        if (target[j] == eliminator) {}
+        else {
+            target[i] = target[j];
+            i++;
+        }
+        j++;
+    }
+    target[i] = '\0';
 }
