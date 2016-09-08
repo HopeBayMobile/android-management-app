@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
@@ -30,7 +31,7 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 public class RestorePreparingFragment extends Fragment {
 
     public static final String TAG = RestorePreparingFragment.class.getSimpleName();
-    private final String CLASSNAME = TAG;
+    private static final String CLASSNAME = TAG;
 
     private MiniRestoreCompletedReceiver mReceiver;
 
@@ -118,7 +119,8 @@ public class RestorePreparingFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, 0);
+            int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+            Logs.w(CLASSNAME, "onReceive", "errorCode=" + errorCode);
             switch (errorCode) {
                 case 0: // Success
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);

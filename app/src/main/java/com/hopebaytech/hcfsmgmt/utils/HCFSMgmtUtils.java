@@ -878,8 +878,9 @@ public class HCFSMgmtUtils {
         return code;
     }
 
-    /***
-     * @return <li>0 if not being restored</li>
+    /**
+     * @return <li>-1 if error occurs</li>
+     * <li>0 if not being restored</li>
      * <li>1 if in stage 1 of restoration process</li>
      * <li>2 if in stage 2 of restoration process</li>
      */
@@ -894,7 +895,7 @@ public class HCFSMgmtUtils {
                 Logs.i(CLASSNAME, "checkRestoreStatus", "jObject=" + jObject);
             } else {
                 code = -(jObject.getInt("code"));
-                Logs.i(CLASSNAME, "checkRestoreStatus", "jObject=" + jObject);
+                Logs.e(CLASSNAME, "checkRestoreStatus", "jObject=" + jObject);
             }
         } catch (JSONException e) {
             Logs.e(CLASSNAME, "checkRestoreStatus", Log.getStackTraceString(e));
@@ -902,19 +903,19 @@ public class HCFSMgmtUtils {
         return code;
     }
 
-    public static boolean notifyApplistChange() {
+    public static boolean notifyAppListChange() {
         boolean isSuccess = false;
         try {
             String jsonResult = HCFSApiUtils.notifyApplistChange();
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "notifyApplistChange", "jObject=" + jObject);
+                Logs.i(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
             } else {
-                Logs.i(CLASSNAME, "notifyApplistChange", "jObject=" + jObject);
+                Logs.e(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "notifyApplistChange", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "notifyAppListChange", Log.getStackTraceString(e));
         }
         return isSuccess;
     }

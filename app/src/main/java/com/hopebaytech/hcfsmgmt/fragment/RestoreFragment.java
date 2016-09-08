@@ -658,7 +658,7 @@ public class RestoreFragment extends Fragment {
         }
     }
 
-    private void restoreDeviceWithJwtToken(String jwtToken, final String sourceImei) {
+    private void restoreDeviceWithJwtToken(final String jwtToken, final String sourceImei) {
         mProgressDialogUtils.show(getString(R.string.processing_msg));
 
         MgmtCluster.SwitchDeviceBackendParam param =
@@ -671,7 +671,6 @@ public class RestoreFragment extends Fragment {
             @Override
             public void onSwitchSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
-
                 mProgressDialogUtils.dismiss();
 
                 mWorkHandler.post(new Runnable() {
@@ -680,6 +679,8 @@ public class RestoreFragment extends Fragment {
                         TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo);
                         HCFSMgmtUtils.triggerRestore();
                         TeraCloudConfig.reloadConfig();
+                        HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
+                                deviceServiceInfo.getBackend().getToken());
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                         SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -914,13 +914,21 @@ public class TeraMgmtService extends Service {
     }
 
     private void checkRestoreStatus() {
+        int status = HCFSMgmtUtils.checkRestoreStatus();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
-        if (status == RestoreStatus.MINI_RESTORE_COMPLETED) {
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
-            editor.apply();
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        switch (status) {
+            case 0:
+                break;
+            case 1:
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                break;
+            case 2:
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
+                break;
+            default:
         }
+        editor.apply();
     }
 
 }

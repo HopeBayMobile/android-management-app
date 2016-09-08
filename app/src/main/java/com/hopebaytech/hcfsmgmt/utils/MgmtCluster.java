@@ -317,6 +317,7 @@ public class MgmtCluster {
                 }
                 deviceServiceInfo.setResponseContent(responseContent);
                 Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                // TODO can use parseDeviceServiceInfo(deviceServiceInfo, deviceServiceInfo.getResponseContent());
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceServiceInfo", Log.getStackTraceString(e));
             } finally {

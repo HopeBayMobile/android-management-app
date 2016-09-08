@@ -56,13 +56,22 @@ public class HCFSApiUtils {
     public static native String stopUploadTeraData();
 
     public static native String collectSysLogs();
-    
+
     public static native String triggerRestore();
 
-    /***
-     * @return <li>0 if not being restored</li>
+    /**
+     * Check the restoration status, the return json string contains two keys, "result" and "code".
+     * <p>
+     * result: true if success, false otherwise.
+     * </p>
+     * <p>
+     * code:
+     * <li>0 if not being restored</li>
      * <li>1 if in stage 1 of restoration process</li>
      * <li>2 if in stage 2 of restoration process</li>
+     * </p>
+     *
+     * @return a json string contains .
      */
     public static native String checkRestoreStatus();
 
