@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -48,6 +47,8 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
@@ -137,6 +138,10 @@ public class TeraMgmtService extends Service {
                         notifyInsufficientPinSpace();
                     } else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
                         HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
+                    } else if (action.equals(TeraIntent.ACTION_TOKEN_EXPIRED)) {
+                        checkTokenExpiredCause();
+                    } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
+                        notifyUserExceedPinMax();
                     }
 
 //                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
@@ -880,5 +885,63 @@ public class TeraMgmtService extends Service {
         }
     }
 
+    private void checkTokenExpiredCause() {
+        if (!NetworkUtils.isNetworkConnected(this)) {
+            return;
+        }
 
+        MgmtCluster.getJwtToken(this, new MgmtCluster.OnFetchJwtTokenListener() {
+            @Override
+            public void onFetchSuccessful(String jwtToken) {
+                String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
+                MgmtCluster.GetDeviceServiceInfoProxy proxy =
+                        new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
+                proxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.
+                        OnGetDeviceServiceInfoListener() {
+                    @Override
+                    public void onGetDeviceServiceInfoSuccessful(DeviceServiceInfo deviceServiceInfo) {
+                        try {
+                            String responseContent = deviceServiceInfo.getMessage();
+                            JSONObject result = new JSONObject(responseContent);
+                            String state = result.getString("state");
+                            if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
+                                // Refresh backend token
+                                JSONObject backend = result.getJSONObject("backend");
+                                String url = backend.getString("url");
+                                String token = backend.getString("token");
+                                HCFSMgmtUtils.setSwiftToken(url, token);
+                            } else {
+                                // Other situation is passed to MgmtPollingService.
+                                MgmtPollingUtils.startPollingService(TeraMgmtService.this,
+                                        Interval.TOKEN_EXPIRED_CHECK_STATE, MgmtPollingService.class);
+                            }
+                        } catch (JSONException e) {
+                            Logs.e(CLASSNAME, "onGetDeviceInfoSuccessful", Log.getStackTraceString(e));
+                        }
+                    }
+
+                    @Override
+                    public void onGetDeviceServiceInfoFailed(DeviceServiceInfo deviceServiceInfo) {
+                        Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                    }
+                });
+                proxy.get();
+            }
+
+            @Override
+            public void onFetchFailed() {
+                Logs.e(CLASSNAME, "onFetchFailed", null);
+            }
+        });
+    }
+
+    private void notifyUserExceedPinMax() {
+        int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+        String notifyTitle = getString(R.string.app_name);
+        String notifyContent = getString(R.string.notify_exceed_pin_max);
+
+        Bundle extras = new Bundle();
+        extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
+        NotificationEvent.notify(this, idNotify, notifyTitle, notifyContent, extras);
+    }
 }

@@ -7,13 +7,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
-import android.support.v7.app.NotificationCompat;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
-import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -41,8 +39,6 @@ public class MgmtPollingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        startForeground(1001, builder.build());
     }
 
     @Override
