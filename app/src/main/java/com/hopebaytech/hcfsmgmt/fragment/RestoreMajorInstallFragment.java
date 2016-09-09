@@ -213,7 +213,7 @@ public class RestoreMajorInstallFragment extends Fragment {
 
     /**
      * The HomeKeyEventReceiver only works when home key is pressed. If the restore status is
-     * MINI_RESTORE_IN_PROGRESS, start restore in progress notification.
+     * FULL_RESTORE_IN_PROGRESS, start restore in progress notification.
      */
     public class HomeKeyEventReceiver extends BroadcastReceiver {
 
@@ -256,7 +256,7 @@ public class RestoreMajorInstallFragment extends Fragment {
     }
 
     /**
-     * The ScreenOffEventReceiver only works when this RestorePreparingFragment is visible.
+     * The ScreenOffEventReceiver only works when this RestoreMajorInstallFragment is visible.
      * <p/>
      * If the screen is off, show normal notification instead of heads-up notification. The heads-up
      * notification will trigger the system to open Tera app continually when the screen is off.

@@ -146,8 +146,7 @@ public class RestoreReadyFragment extends Fragment {
     }
 
     /**
-     * The HomeKeyEventReceiver only works when home key is pressed. If the restore status is
-     * MINI_RESTORE_IN_PROGRESS, start restore in progress notification.
+     * The HomeKeyEventReceiver only works when home key is pressed. 
      */
     public class HomeKeyEventReceiver extends BroadcastReceiver {
 
