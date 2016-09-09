@@ -31,9 +31,11 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 public class RestorePreparingFragment extends Fragment {
 
     public static final String TAG = RestorePreparingFragment.class.getSimpleName();
-    private static final String CLASSNAME = TAG;
+    private final String CLASSNAME = TAG;
 
-    private MiniRestoreCompletedReceiver mReceiver;
+    private MiniRestoreCompletedReceiver mRestoreReceiver;
+    private HomeKeyEventReceiver mHomeKeyEventReceiver;
+    private ScreenOffEventReceiver mScreenOffEventReceiver;
 
     private Context mContext;
     private TextView mErrorMsg;
@@ -48,7 +50,9 @@ public class RestorePreparingFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mContext = getActivity();
-        mReceiver = new MiniRestoreCompletedReceiver();
+        mRestoreReceiver = new MiniRestoreCompletedReceiver();
+        mHomeKeyEventReceiver = new HomeKeyEventReceiver();
+        mScreenOffEventReceiver = new ScreenOffEventReceiver();
     }
 
     @Nullable
@@ -65,8 +69,8 @@ public class RestorePreparingFragment extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
@@ -77,40 +81,128 @@ public class RestorePreparingFragment extends Fragment {
 
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(TeraIntent.ACTION_RESTORE_STAGE_1);
+            mRestoreReceiver.registerReceiver(mContext, intentFilter);
 
-            mReceiver.registerReceiver(mContext, intentFilter);
+            intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            mHomeKeyEventReceiver.registerReceiver(mContext, intentFilter);
+
+            intentFilter = new IntentFilter();
+            intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+            mScreenOffEventReceiver.registerReceiver(mContext, intentFilter);
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        // Cannot show on-going notification in onStop() or onPause(). If the screen is off, the
+        // notification will continuously be triggered by system when user press power key to open
+        // screen on.
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // If the restore status is MINI_RESTORE_IN_PROGRESS, start restore in progress notification.
+        // This only works when user press back key to leave app or remove app from recent app list.
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
         if (status == RestoreStatus.MINI_RESTORE_IN_PROGRESS) {
             startInProgressNotification();
-            mReceiver.unregisterReceiver(mContext);
+            mRestoreReceiver.unregisterReceiver(mContext);
         }
+
+        mScreenOffEventReceiver.unregisterReceiver(mContext);
     }
 
     private void startInProgressNotification() {
-        // Show heads-up notification
-        int flag = NotificationEvent.FLAG_ON_GOING
-                | NotificationEvent.FLAG_HEADS_UP
-                | NotificationEvent.FLAG_IN_PROGRESS;
-        String title = getString(R.string.restore_notification_title);
-        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, null, flag);
-
-        // Show normal notification (previous heads-up notification will disappear)
-        flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_IN_PROGRESS;
-        int restoreIconId = R.drawable.restore_icon_anim;
-        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title,
-                null /* message*/, restoreIconId, null /* action */, flag, null /* extras */);
+        showHeadsUpNotification();
+        showNormalNotification();
     }
 
     private void cancelInProgressNotification() {
         NotificationEvent.cancel(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+    }
+
+    /**
+     * The HomeKeyEventReceiver only works when home key is pressed. If the restore status is
+     * MINI_RESTORE_IN_PROGRESS, start restore in progress notification.
+     */
+    public class HomeKeyEventReceiver extends BroadcastReceiver {
+
+        private boolean isRegister;
+        private String SYSTEM_DIALOG_REASON_KEY = "reason";
+        private String SYSTEM_DIALOG_REASON_HOME_KEY = "homekey";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+            if (SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)) {
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                if (status == RestoreStatus.MINI_RESTORE_IN_PROGRESS) {
+                    startInProgressNotification();
+                    mRestoreReceiver.unregisterReceiver(mContext);
+                }
+                mHomeKeyEventReceiver.unregisterReceiver(mContext);
+            }
+        }
+
+        public void registerReceiver(Context context, IntentFilter intentFilter) {
+            if (!isRegister) {
+                if (context != null) {
+                    context.registerReceiver(this, intentFilter);
+                }
+                isRegister = true;
+            }
+        }
+
+        public void unregisterReceiver(Context context) {
+            if (isRegister) {
+                if (context != null) {
+                    context.unregisterReceiver(this);
+                    isRegister = false;
+                }
+            }
+        }
+
+    }
+
+    /**
+     * The ScreenOffEventReceiver only works when this RestorePreparingFragment is visible.
+     * <p/>
+     * If the screen is off, show normal notification instead of heads-up notification. The heads-up
+     * notification will trigger the system to open Tera app continually when the screen is off.
+     */
+    public class ScreenOffEventReceiver extends BroadcastReceiver {
+
+        private boolean isRegister;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            showNormalNotification();
+        }
+
+        public void registerReceiver(Context context, IntentFilter intentFilter) {
+            if (!isRegister) {
+                if (context != null) {
+                    context.registerReceiver(this, intentFilter);
+                }
+                isRegister = true;
+            }
+        }
+
+        public void unregisterReceiver(Context context) {
+            if (isRegister) {
+                if (context != null) {
+                    context.unregisterReceiver(this);
+                    isRegister = false;
+                }
+            }
+        }
+
     }
 
     public class MiniRestoreCompletedReceiver extends BroadcastReceiver {
@@ -121,7 +213,7 @@ public class RestorePreparingFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
-            Logs.w(CLASSNAME, "onReceive", "errorCode=" + errorCode);
+            Logs.d(CLASSNAME, "onReceive", "errorCode=" + errorCode);
             switch (errorCode) {
                 case 0: // Success
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -177,6 +269,27 @@ public class RestorePreparingFragment extends Fragment {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, RestoreReadyFragment.newInstance());
         ft.commit();
+    }
+
+    private void showHeadsUpNotification() {
+        // Show heads-up notification
+        int flag = NotificationEvent.FLAG_ON_GOING
+                | NotificationEvent.FLAG_HEADS_UP
+                | NotificationEvent.FLAG_OPEN_APP
+                | NotificationEvent.FLAG_IN_PROGRESS;
+        String title = getString(R.string.restore_notification_title);
+        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, null, flag);
+    }
+
+    private void showNormalNotification() {
+        // Show normal notification (previous heads-up notification will disappear)
+        int flag = NotificationEvent.FLAG_ON_GOING
+                | NotificationEvent.FLAG_OPEN_APP
+                | NotificationEvent.FLAG_IN_PROGRESS;
+        int restoreIconId = R.drawable.restore_icon_anim;
+        String title = getString(R.string.restore_notification_title);
+        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title,
+                null /* message*/, restoreIconId, null /* action */, flag, null /* extras */);
     }
 
 }
