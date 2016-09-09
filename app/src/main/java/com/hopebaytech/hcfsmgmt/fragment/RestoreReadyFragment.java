@@ -146,7 +146,7 @@ public class RestoreReadyFragment extends Fragment {
     }
 
     /**
-     * The HomeKeyEventReceiver only works when home key is pressed. 
+     * The HomeKeyEventReceiver only works when home key is pressed.
      */
     public class HomeKeyEventReceiver extends BroadcastReceiver {
 

@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -33,6 +34,11 @@ public class RestoreDoneFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = getActivity();
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(HCFSMgmtUtils.PREF_RESTORE_STATUS);
+        editor.apply();
     }
 
     @Nullable
@@ -49,12 +55,7 @@ public class RestoreDoneFragment extends Fragment {
         exit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.remove(HCFSMgmtUtils.PREF_RESTORE_STATUS);
-                editor.apply();
-
-                ((MainActivity) mContext).finish();
+                ((Activity) mContext).finish();
             }
         });
     }
