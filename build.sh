@@ -66,17 +66,18 @@ function publish_apk() {
 	APP_DIR=${PUBLISH_DIR}/${JOB_NAME}
 	echo APP_NAME=${APP_NAME} >> export_props.properties
 	echo APP_DIR=${APP_DIR} >> export_props.properties
+	umask 0022
 	mkdir -p ${PUBLISH_DIR}/${JOB_NAME}
 	rm -rf ${PUBLISH_DIR}/${JOB_NAME}/*
 	if [ -f app/build/outputs/apk/app-release.apk ]; then
-		rsync -arcv --no-owner --no-group --no-times \
+		rsync -arcv --chmod=a+rX --no-owner --no-group --no-times \
 			app/build/outputs/apk/app-release.apk ${PUBLISH_DIR}/${JOB_NAME}/${APP_NAME}.apk
 	fi
 	if [ -f app/build/outputs/apk/app-release-unsigned.apk ]; then
-		rsync -arcv --no-owner --no-group --no-times \
+		rsync -arcv --chmod=a+rX --no-owner --no-group --no-times \
 			app/build/outputs/apk/app-release-unsigned.apk ${PUBLISH_DIR}/${JOB_NAME}/${APP_NAME}.apk
 	fi
-	rsync -arcv --no-owner --no-group --no-times \
+	rsync -arcv --chmod=a+rX --no-owner --no-group --no-times \
 		app/src/main/libs/arm64-v8a/libterafonnapi.so ${PUBLISH_DIR}/${JOB_NAME}/arm64-v8a/
 }
 function mount_nas() {
