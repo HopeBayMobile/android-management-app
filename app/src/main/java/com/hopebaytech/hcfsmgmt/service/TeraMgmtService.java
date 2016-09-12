@@ -40,6 +40,7 @@ import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
@@ -919,21 +920,31 @@ public class TeraMgmtService extends Service {
     }
 
     private void checkRestoreStatus() {
+        boolean startActivity = false;
         int status = HCFSMgmtUtils.checkRestoreStatus();
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         switch (status) {
-            case 0:
+            case 0: // Not being restored
                 break;
-            case 1:
+            case 1: // In stage 1 of restoration process
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                startActivity = true;
                 break;
-            case 2:
+            case 2: // In stage 2 of restoration process
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
+                startActivity = true;
                 break;
             default:
         }
         editor.apply();
+
+        if (startActivity) {
+            Intent intent = new Intent(mContext, MainActivity.class);
+            // Need to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
 
 }

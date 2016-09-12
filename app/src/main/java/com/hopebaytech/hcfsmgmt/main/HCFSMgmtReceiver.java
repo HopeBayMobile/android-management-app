@@ -126,7 +126,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             context.startService(bootCompletedIntent);
 
             // Check restore status, if restore status is MINI_RESTORE_COMPLETED, change it to
-            // FULL_RESTORE_IN_PROGRESS
+            // FULL_RESTORE_IN_PROGRESS. Then, start Tera app.
             Intent checkRestoreStatusIntent = new Intent(context, TeraMgmtService.class);
             checkRestoreStatusIntent.setAction(TeraIntent.ACTION_CHECK_RESTORE_STATUS);
             context.startService(checkRestoreStatusIntent);
