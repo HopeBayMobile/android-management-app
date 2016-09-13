@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <sys/system_properties.h>
 #include <android/log.h>
-#include "uniqueCode.h"
+#include "crypt.h"
 
 extern void HCFS_file_status(const char **json_res, const char *pathname);
 extern void HCFS_dir_status(const char **json_res, const char *pathname);
@@ -206,12 +206,10 @@ JNIEXPORT jbyteArray JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_ge
 	int len = 4098;
 	unsigned char decrypt_code[len];
 	const char *jsonString = (*jEnv)->GetStringUTFChars(jEnv, jJsonString, 0);
-	size_t* output_length = malloc(sizeof(size_t));
-	int ret = publicDecryptCode(decrypt_code, jsonString, output_length);
+	int ret = teraPublicDecrypt(decrypt_code, jsonString);
     jbyteArray result = (*jEnv)->NewByteArray(jEnv, strlen(decrypt_code));
     (*jEnv)->SetByteArrayRegion(jEnv, result, 0, strlen(decrypt_code), decrypt_code);
 
-    free(output_length);
     return result;
 }
 

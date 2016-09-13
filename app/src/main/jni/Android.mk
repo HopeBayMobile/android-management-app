@@ -16,8 +16,9 @@ LOCAL_SRC_FILES := mylibs/$(TARGET_ARCH_ABI)/libcrypto.so
 include $(PREBUILT_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
+OCAL_CFLAGS     += CLIENT_SIDE
 LOCAL_MODULE    := terafonnapi
-LOCAL_SRC_FILES := terafonnapi.c uniqueCode.c base64.c
+LOCAL_SRC_FILES := terafonnapi.c crypt.c b64encode.c enc.c mix.c
 LOCAL_SHARED_LIBRARIES := libhcfsapi libjansson libcrypto
 LOCAL_LDLIBS := -llog
 include $(BUILD_SHARED_LIBRARY)

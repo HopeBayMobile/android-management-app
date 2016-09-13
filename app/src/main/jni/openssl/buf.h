@@ -1,5 +1,4 @@
-/* crypto/rc2/rc2.h */
-/* Copyright (C) 1995-1997 Eric Young (eay@cryptsoft.com)
+/* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
  * This package is an SSL implementation written
@@ -53,51 +52,72 @@
  * The licence and distribution terms for any publically available version or
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
- * [including the GNU Public Licence.]
- */
+ * [including the GNU Public Licence.] */
 
-#ifndef HEADER_RC2_H
-# define HEADER_RC2_H
+#ifndef OPENSSL_HEADER_BUFFER_H
+#define OPENSSL_HEADER_BUFFER_H
 
-# include <openssl/opensslconf.h>/* OPENSSL_NO_RC2, RC2_INT */
-# ifdef OPENSSL_NO_RC2
-#  error RC2 is disabled.
-# endif
+#include <openssl/base.h>
 
-# define RC2_ENCRYPT     1
-# define RC2_DECRYPT     0
-
-# define RC2_BLOCK       8
-# define RC2_KEY_LENGTH  16
-
-#ifdef  __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-typedef struct rc2_key_st {
-    RC2_INT data[64];
-} RC2_KEY;
 
-# ifdef OPENSSL_FIPS
-void private_RC2_set_key(RC2_KEY *key, int len, const unsigned char *data,
-                         int bits);
-# endif
-void RC2_set_key(RC2_KEY *key, int len, const unsigned char *data, int bits);
-void RC2_ecb_encrypt(const unsigned char *in, unsigned char *out,
-                     RC2_KEY *key, int enc);
-void RC2_encrypt(unsigned long *data, RC2_KEY *key);
-void RC2_decrypt(unsigned long *data, RC2_KEY *key);
-void RC2_cbc_encrypt(const unsigned char *in, unsigned char *out, long length,
-                     RC2_KEY *ks, unsigned char *iv, int enc);
-void RC2_cfb64_encrypt(const unsigned char *in, unsigned char *out,
-                       long length, RC2_KEY *schedule, unsigned char *ivec,
-                       int *num, int enc);
-void RC2_ofb64_encrypt(const unsigned char *in, unsigned char *out,
-                       long length, RC2_KEY *schedule, unsigned char *ivec,
-                       int *num);
+/* Memory and string functions, see also mem.h. */
 
-#ifdef  __cplusplus
-}
+
+/* BUF_MEM is a generic buffer object used by OpenSSL. */
+struct buf_mem_st {
+  size_t length; /* current number of bytes */
+  char *data;
+  size_t max; /* size of buffer */
+};
+
+/* BUF_MEM_new creates a new BUF_MEM which has no allocated data buffer. */
+OPENSSL_EXPORT BUF_MEM *BUF_MEM_new(void);
+
+/* BUF_MEM_free frees |buf->data| if needed and then frees |buf| itself. */
+OPENSSL_EXPORT void BUF_MEM_free(BUF_MEM *buf);
+
+/* BUF_MEM_grow ensures that |buf| has length |len| and allocates memory if
+ * needed. If the length of |buf| increased, the new bytes are filled with
+ * zeros. It returns the length of |buf|, or zero if there's an error. */
+OPENSSL_EXPORT size_t BUF_MEM_grow(BUF_MEM *buf, size_t len);
+
+/* BUF_MEM_grow_clean acts the same as |BUF_MEM_grow|, but clears the previous
+ * contents of memory if reallocing. */
+OPENSSL_EXPORT size_t BUF_MEM_grow_clean(BUF_MEM *str, size_t len);
+
+/* BUF_strdup returns an allocated, duplicate of |str|. */
+OPENSSL_EXPORT char *BUF_strdup(const char *str);
+
+/* BUF_strnlen returns the number of characters in |str|, excluding the NUL
+ * byte, but at most |max_len|. This function never reads more than |max_len|
+ * bytes from |str|. */
+OPENSSL_EXPORT size_t BUF_strnlen(const char *str, size_t max_len);
+
+/* BUF_strndup returns an allocated, duplicate of |str|, which is, at most,
+ * |size| bytes. The result is always NUL terminated. */
+OPENSSL_EXPORT char *BUF_strndup(const char *str, size_t size);
+
+/* BUF_memdup returns an allocated, duplicate of |size| bytes from |data|. */
+OPENSSL_EXPORT void *BUF_memdup(const void *data, size_t size);
+
+/* BUF_strlcpy acts like strlcpy(3). */
+OPENSSL_EXPORT size_t BUF_strlcpy(char *dst, const char *src, size_t dst_size);
+
+/* BUF_strlcat acts like strlcat(3). */
+OPENSSL_EXPORT size_t BUF_strlcat(char *dst, const char *src, size_t size);
+
+
+#if defined(__cplusplus)
+}  /* extern C */
 #endif
 
-#endif
+#define BUF_F_BUF_MEM_new 100
+#define BUF_F_BUF_memdup 101
+#define BUF_F_BUF_strndup 102
+#define BUF_F_buf_mem_grow 103
+
+#endif  /* OPENSSL_HEADER_BUFFER_H */

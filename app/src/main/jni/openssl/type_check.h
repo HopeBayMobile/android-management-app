@@ -1,4 +1,3 @@
-/* crypto/mdc2/mdc2.h */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -53,42 +52,40 @@
  * The licence and distribution terms for any publically available version or
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
- * [including the GNU Public Licence.]
- */
+ * [including the GNU Public Licence.] */
 
-#ifndef HEADER_MDC2_H
-# define HEADER_MDC2_H
+#ifndef OPENSSL_HEADER_TYPE_CHECK_H
+#define OPENSSL_HEADER_TYPE_CHECK_H
 
-# include <openssl/des.h>
+#include <openssl/base.h>
 
-#ifdef  __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-# ifdef OPENSSL_NO_MDC2
-#  error MDC2 is disabled.
-# endif
 
-# define MDC2_BLOCK              8
-# define MDC2_DIGEST_LENGTH      16
+/* This header file contains some common macros for enforcing type checking.
+ * Several, common OpenSSL structures (i.e. stack and lhash) operate on void
+ * pointers, but we wish to have type checking when they are used with a
+ * specific type. */
 
-typedef struct mdc2_ctx_st {
-    unsigned int num;
-    unsigned char data[MDC2_BLOCK];
-    DES_cblock h, hh;
-    int pad_type;               /* either 1 or 2, default 1 */
-} MDC2_CTX;
+/* CHECKED_CAST casts |p| from type |from| to type |to|. */
+#define CHECKED_CAST(to, from, p) ((to) (1 ? (p) : (from)0))
 
-# ifdef OPENSSL_FIPS
-int private_MDC2_Init(MDC2_CTX *c);
-# endif
-int MDC2_Init(MDC2_CTX *c);
-int MDC2_Update(MDC2_CTX *c, const unsigned char *data, size_t len);
-int MDC2_Final(unsigned char *md, MDC2_CTX *c);
-unsigned char *MDC2(const unsigned char *d, size_t n, unsigned char *md);
+/* CHECKED_PTR_OF casts a given pointer to void* and statically checks that it
+ * was a pointer to |type|. */
+#define CHECKED_PTR_OF(type, p) CHECKED_CAST(void*, type*, (p))
 
-#ifdef  __cplusplus
-}
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#define OPENSSL_COMPILE_ASSERT(cond, msg) _Static_assert(cond, #msg)
+#else
+#define OPENSSL_COMPILE_ASSERT(cond, msg) \
+  typedef char OPENSSL_COMPILE_ASSERT_##msg[((cond) ? 1 : -1)]
 #endif
 
+
+#if defined(__cplusplus)
+}  /* extern C */
 #endif
+
+#endif  /* OPENSSL_HEADER_TYPE_CHECK_H */

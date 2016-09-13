@@ -1,4 +1,3 @@
-/* crypto/ripemd/ripemd.h */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -54,52 +53,69 @@
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
  * [including the GNU Public Licence.]
- */
+ *
+ * This product includes cryptographic software written by Eric Young
+ * (eay@cryptsoft.com).  This product includes software written by Tim
+ * Hudson (tjh@cryptsoft.com). */
 
-#ifndef HEADER_RIPEMD_H
-# define HEADER_RIPEMD_H
+#ifndef OPENSSL_HEADER_CPU_H
+#define OPENSSL_HEADER_CPU_H
 
-# include <openssl/e_os2.h>
-# include <stddef.h>
+#include <openssl/base.h>
 
-#ifdef  __cplusplus
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
-# ifdef OPENSSL_NO_RIPEMD
-#  error RIPEMD is disabled.
-# endif
 
-# if defined(__LP32__)
-#  define RIPEMD160_LONG unsigned long
-# elif defined(OPENSSL_SYS_CRAY) || defined(__ILP64__)
-#  define RIPEMD160_LONG unsigned long
-#  define RIPEMD160_LONG_LOG2 3
-# else
-#  define RIPEMD160_LONG unsigned int
-# endif
+/* Runtime CPU feature support */
 
-# define RIPEMD160_CBLOCK        64
-# define RIPEMD160_LBLOCK        (RIPEMD160_CBLOCK/4)
-# define RIPEMD160_DIGEST_LENGTH 20
 
-typedef struct RIPEMD160state_st {
-    RIPEMD160_LONG A, B, C, D, E;
-    RIPEMD160_LONG Nl, Nh;
-    RIPEMD160_LONG data[RIPEMD160_LBLOCK];
-    unsigned int num;
-} RIPEMD160_CTX;
-
-# ifdef OPENSSL_FIPS
-int private_RIPEMD160_Init(RIPEMD160_CTX *c);
-# endif
-int RIPEMD160_Init(RIPEMD160_CTX *c);
-int RIPEMD160_Update(RIPEMD160_CTX *c, const void *data, size_t len);
-int RIPEMD160_Final(unsigned char *md, RIPEMD160_CTX *c);
-unsigned char *RIPEMD160(const unsigned char *d, size_t n, unsigned char *md);
-void RIPEMD160_Transform(RIPEMD160_CTX *c, const unsigned char *b);
-#ifdef  __cplusplus
-}
+#if defined(OPENSSL_X86) || defined(OPENSSL_X86_64)
+/* OPENSSL_ia32cap_P contains the Intel CPUID bits when running on an x86 or
+ * x86-64 system.
+ *
+ *   Index 0:
+ *     EDX for CPUID where EAX = 1
+ *     Bit 30 is used to indicate an Intel CPU
+ *   Index 1:
+ *     ECX for CPUID where EAX = 1
+ *   Index 2:
+ *     EBX for CPUID where EAX = 7
+ *
+ * Note: the CPUID bits are pre-adjusted for the OSXSAVE bit and the YMM and XMM
+ * bits in XCR0, so it is not necessary to check those. */
+extern uint32_t OPENSSL_ia32cap_P[4];
 #endif
 
+#if defined(OPENSSL_ARM) || defined(OPENSSL_AARCH64)
+/* CRYPTO_is_NEON_capable returns true if the current CPU has a NEON unit. Note
+ * that |OPENSSL_armcap_P| also exists and contains the same information in a
+ * form that's easier for assembly to use. */
+OPENSSL_EXPORT char CRYPTO_is_NEON_capable(void);
+
+/* CRYPTO_set_NEON_capable sets the return value of |CRYPTO_is_NEON_capable|.
+ * By default, unless the code was compiled with |-mfpu=neon|, NEON is assumed
+ * not to be present. It is not autodetected. Calling this with a zero
+ * argument also causes |CRYPTO_is_NEON_functional| to return false. */
+OPENSSL_EXPORT void CRYPTO_set_NEON_capable(char neon_capable);
+
+/* CRYPTO_is_NEON_functional returns true if the current CPU has a /working/
+ * NEON unit. Some phones have a NEON unit, but the Poly1305 NEON code causes
+ * it to fail. See https://code.google.com/p/chromium/issues/detail?id=341598 */
+OPENSSL_EXPORT char CRYPTO_is_NEON_functional(void);
+
+/* CRYPTO_set_NEON_functional sets the "NEON functional" flag. For
+ * |CRYPTO_is_NEON_functional| to return true, both this flag and the NEON flag
+ * must be true. By default NEON is assumed to be functional if the code was
+ * compiled with |-mfpu=neon| or if |CRYPTO_set_NEON_capable| has been called
+ * with a non-zero argument. */
+OPENSSL_EXPORT void CRYPTO_set_NEON_functional(char neon_functional);
+#endif  /* OPENSSL_ARM */
+
+
+#if defined(__cplusplus)
+}  /* extern C */
 #endif
+
+#endif  /* OPENSSL_HEADER_CPU_H */

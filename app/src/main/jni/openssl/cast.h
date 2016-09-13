@@ -1,4 +1,3 @@
-/* crypto/txt_db/txt_db.h */
 /* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
  * All rights reserved.
  *
@@ -53,60 +52,45 @@
  * The licence and distribution terms for any publically available version or
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
- * [including the GNU Public Licence.]
- */
+ * [including the GNU Public Licence.] */
 
-#ifndef HEADER_TXT_DB_H
-# define HEADER_TXT_DB_H
+#ifndef OPENSSL_HEADER_CAST_H
+#define OPENSSL_HEADER_CAST_H
 
-# include <openssl/opensslconf.h>
-# ifndef OPENSSL_NO_BIO
-#  include <openssl/bio.h>
-# endif
-# include <openssl/stack.h>
-# include <openssl/lhash.h>
-
-# define DB_ERROR_OK                     0
-# define DB_ERROR_MALLOC                 1
-# define DB_ERROR_INDEX_CLASH            2
-# define DB_ERROR_INDEX_OUT_OF_RANGE     3
-# define DB_ERROR_NO_INDEX               4
-# define DB_ERROR_INSERT_INDEX_CLASH     5
+#include <openssl/base.h>
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-typedef OPENSSL_STRING *OPENSSL_PSTRING;
-DECLARE_SPECIAL_STACK_OF(OPENSSL_PSTRING, OPENSSL_STRING)
 
-typedef struct txt_db_st {
-    int num_fields;
-    STACK_OF(OPENSSL_PSTRING) *data;
-    LHASH_OF(OPENSSL_STRING) **index;
-    int (**qual) (OPENSSL_STRING *);
-    long error;
-    long arg1;
-    long arg2;
-    OPENSSL_STRING *arg_row;
-} TXT_DB;
+#define CAST_ENCRYPT 1
+#define CAST_DECRYPT 0
 
-# ifndef OPENSSL_NO_BIO
-TXT_DB *TXT_DB_read(BIO *in, int num);
-long TXT_DB_write(BIO *out, TXT_DB *db);
-# else
-TXT_DB *TXT_DB_read(char *in, int num);
-long TXT_DB_write(char *out, TXT_DB *db);
-# endif
-int TXT_DB_create_index(TXT_DB *db, int field, int (*qual) (OPENSSL_STRING *),
-                        LHASH_HASH_FN_TYPE hash, LHASH_COMP_FN_TYPE cmp);
-void TXT_DB_free(TXT_DB *db);
-OPENSSL_STRING *TXT_DB_get_by_index(TXT_DB *db, int idx,
-                                    OPENSSL_STRING *value);
-int TXT_DB_insert(TXT_DB *db, OPENSSL_STRING *value);
+#define CAST_BLOCK 8
+#define CAST_KEY_LENGTH 16
+
+typedef struct cast_key_st {
+  uint32_t data[32];
+  int short_key; /* Use reduced rounds for short key */
+} CAST_KEY;
+
+OPENSSL_EXPORT void CAST_set_key(CAST_KEY *key, size_t len,
+                                 const uint8_t *data);
+OPENSSL_EXPORT void CAST_ecb_encrypt(const uint8_t *in, uint8_t *out,
+                                     const CAST_KEY *key, int enc);
+OPENSSL_EXPORT void CAST_encrypt(uint32_t *data, const CAST_KEY *key);
+OPENSSL_EXPORT void CAST_decrypt(uint32_t *data, const CAST_KEY *key);
+OPENSSL_EXPORT void CAST_cbc_encrypt(const uint8_t *in, uint8_t *out,
+                                     long length, const CAST_KEY *ks,
+                                     uint8_t *iv, int enc);
+
+OPENSSL_EXPORT void CAST_cfb64_encrypt(const uint8_t *in, uint8_t *out,
+                                       long length, const CAST_KEY *schedule,
+                                       uint8_t *ivec, int *num, int enc);
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif
+#endif  /* OPENSSL_HEADER_CAST_H */

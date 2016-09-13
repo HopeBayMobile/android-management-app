@@ -37,7 +37,7 @@ public class MgmtCluster {
     public static final String REGISTER_AUTH_API = "https://" + DOMAIN_NAME + "/api/register/auth/";
     public static final String SOCIAL_AUTH_API = "https://" + DOMAIN_NAME + "/api/social-auth/";
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
-    public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/devices/";
+    public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/v1/devices/";
 
     public static final String KEY_AUTH_CODE = "code";
     public static final String KEY_ERROR_CODE = "error_code";
@@ -213,11 +213,12 @@ public class MgmtCluster {
                     data.put(KEY_NEW_AUTH_CODE, newServerAuthCode);
                     int responseCode = httpProxyImpl.post(data);
                     String responseContent = httpProxyImpl.getResponseContent();
+                    String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
 
                     deviceServiceInfo.setResponseCode(responseCode);
-                    deviceServiceInfo.setResponseContent(responseContent);
+                    deviceServiceInfo.setResponseContent(decryptResponseContent);
                     Logs.d(CLASSNAME, "ChangeAccountProxy", "changeAccount",
-                            "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                            "responseCode=" + responseCode + ", responseContent=" + decryptResponseContent);
                     parseDeviceServiceInfo(deviceServiceInfo, deviceServiceInfo.getResponseContent());
                 } catch (Exception e) {
                     Logs.e(CLASSNAME, "ChangeAccountProxy", "change", Log.getStackTraceString(e));
@@ -305,9 +306,11 @@ public class MgmtCluster {
 
                 int responseCode = httpProxyImpl.get();
                 String responseContent = httpProxyImpl.getResponseContent();
+                String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
+
                 deviceServiceInfo.setResponseCode(responseCode);
-                deviceServiceInfo.setMessage(responseContent);
-                Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                deviceServiceInfo.setMessage(decryptResponseContent);
+                Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode + ", responseContent=" + decryptResponseContent);
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceServiceInfo", Log.getStackTraceString(e));
             } finally {
@@ -548,11 +551,11 @@ public class MgmtCluster {
                 httpProxyImpl.connect();
 
                 int responseCode = httpProxyImpl.post(params.createParams());
-                String responseContent = httpProxyImpl.getResponseContent();
-                Logs.d(CLASSNAME, "switchDeviceBackend", "responseCode=" + responseCode +
-                        ", responseContent=" + responseContent);
                 deviceServiceInfo.setResponseCode(responseCode);
-                deviceServiceInfo.setMessage(responseContent);
+                String responseContent = httpProxyImpl.getResponseContent();
+                String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
+                deviceServiceInfo.setMessage(decryptResponseContent);
+                Logs.d(CLASSNAME, "switchDeviceBackend", "responseCode=" + responseCode + ", rsponseContent=" + decryptResponseContent);
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     parseDeviceServiceInfo(deviceServiceInfo, responseContent);
                 }
@@ -980,9 +983,11 @@ public class MgmtCluster {
                 deviceServiceInfo.setResponseCode(responseCode);
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     String responseContent = httpProxyImpl.getResponseContent();
-                    Logs.d(CLASSNAME, "register", "responseContent=" + responseContent);
+                    String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
+                    deviceServiceInfo.setMessage(decryptResponseContent);
+                    Logs.d(CLASSNAME, "register", "responseCode=" + responseCode + ", responseContent=" + decryptResponseContent);
 
-                    parseDeviceServiceInfo(deviceServiceInfo, responseContent);
+                    parseDeviceServiceInfo(deviceServiceInfo, decryptResponseContent);
 
                     Logs.d(CLASSNAME, "register", "backend_type=" + deviceServiceInfo.getBackend().getBackendType());
                     Logs.d(CLASSNAME, "register", "backend_url=" + deviceServiceInfo.getBackend().getUrl());
@@ -991,8 +996,9 @@ public class MgmtCluster {
                     Logs.d(CLASSNAME, "register", "token=" + deviceServiceInfo.getBackend().getToken());
                 } else {
                     String responseContent = httpProxyImpl.getResponseContent();
+                    String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
                     try {
-                        JSONObject jsonObj = new JSONObject(responseContent);
+                        JSONObject jsonObj = new JSONObject(decryptResponseContent);
                         if (responseCode != HttpsURLConnection.HTTP_INTERNAL_ERROR) {
                             String errorCode = jsonObj.getString("error_code");
                             deviceServiceInfo.setErrorCode(errorCode);
