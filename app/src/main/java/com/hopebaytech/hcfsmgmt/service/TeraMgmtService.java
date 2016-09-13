@@ -648,56 +648,63 @@ public class TeraMgmtService extends Service {
      */
     private void startOngoingNotificationService(Intent intent) {
         boolean isOnGoing = intent.getBooleanExtra(TeraIntent.KEY_ONGOING, false);
-        if (isOnGoing) {
-            if (mOngoingThread == null) {
-                mOngoingThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-                                if (statInfo != null) {
-                                    int connStatus = HCFSConnStatus.getConnStatus(TeraMgmtService.this, statInfo);
-                                    String notifyTitle;
-                                    switch (connStatus) {
-                                        case HCFSConnStatus.TRANS_FAILED:
-                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
-                                            break;
-                                        case HCFSConnStatus.TRANS_NOT_ALLOWED:
-                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
-                                            break;
-                                        case HCFSConnStatus.TRANS_NORMAL:
-                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
-                                            break;
-                                        case HCFSConnStatus.TRANS_IN_PROGRESS:
-                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
-                                            break;
-                                        case HCFSConnStatus.TRANS_SLOW:
-                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
-                                            break;
-                                        default:
-                                            notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
-                                    }
-                                    String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatTeraUsed() + " / " + statInfo.getFormatTeraTotal();
-                                    int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
-                                    NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
-                                }
-                                Thread.sleep(Interval.UPDATE_NOTIFICATION_INFO);
-                            } catch (InterruptedException e) {
-                                break;
-                            }
-                        }
-                    }
-                });
-                mOngoingThread.start();
-            }
-        } else {
+        if (!isOnGoing) {
             if (mOngoingThread != null) {
                 mOngoingThread.interrupt();
                 mOngoingThread = null;
             }
             NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+            return;
         }
+
+        if (mOngoingThread != null) {
+            return;
+        }
+        mOngoingThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final long FIVE_MINUTES_IN_MILLISECONDS = Interval.MINUTE * 5;
+                while (true) {
+                    try {
+                        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                        if (statInfo == null) {
+                            Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
+                            continue;
+                        }
+
+                        int connStatus = HCFSConnStatus.getConnStatus(TeraMgmtService.this, statInfo);
+                        String notifyTitle;
+                        switch (connStatus) {
+                            case HCFSConnStatus.TRANS_FAILED:
+                                notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
+                                break;
+                            case HCFSConnStatus.TRANS_NOT_ALLOWED:
+                                notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
+                                break;
+                            case HCFSConnStatus.TRANS_NORMAL:
+                                notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
+                                break;
+                            case HCFSConnStatus.TRANS_IN_PROGRESS:
+                                notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
+                                break;
+                            case HCFSConnStatus.TRANS_SLOW:
+                                notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
+                                break;
+                            default:
+                                notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
+                        }
+                        String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatTeraUsed() + " / " + statInfo.getFormatTeraTotal();
+                        int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
+                        NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
+
+                        Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+                }
+            }
+        });
+        mOngoingThread.start();
     }
 
     /**
