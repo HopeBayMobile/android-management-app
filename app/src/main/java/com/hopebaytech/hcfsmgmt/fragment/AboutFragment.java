@@ -81,6 +81,8 @@ public class AboutFragment extends DialogFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mView = view;
         mHandler = new Handler();
         mImeiOne = (TextView) view.findViewById(R.id.device_imei_1);
         mImeiTwo = (TextView) view.findViewById(R.id.device_imei_2);
