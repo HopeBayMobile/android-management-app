@@ -111,6 +111,7 @@ public class FileMgmtFragment extends Fragment {
     private final int INTERVAL_EXECUTE_API = 1000;
     private final int INTERVAL_REFRESH = 2000;
 
+    private View mView;
     private Context mContext;
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressCircle;
@@ -710,7 +711,7 @@ public class FileMgmtFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_INDEFINITE);
+        mView = view;
         mEmptyFolder = (LinearLayout) view.findViewById(R.id.no_file_layout);
         mProgressCircle = (ProgressBar) view.findViewById(R.id.progress_circle);
         mFilePathNavigationLayout = (LinearLayout) view.findViewById(R.id.file_path_layout);
@@ -725,6 +726,8 @@ public class FileMgmtFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        mSnackbar = Snackbar.make(mView, "", Snackbar.LENGTH_INDEFINITE);
 
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setHasFixedSize(true);
