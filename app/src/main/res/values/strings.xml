@@ -215,6 +215,14 @@
     <string name="restore_stage_1_no_space_left">可用空間不足，還原失敗。請刪除部分應用程式或者檔案後，重新開機以繼續還原流程。</string>
     <string name="restore_stage_2_no_space_left">可用空間不足，還原失敗。請刪除部分應用程式或者檔案後，重新開機以繼續還原流程。</string>
     <string name="restore_no_network_connected">目前網路連線失敗，請檢查網路通訊。</string>
+    <string name="restore_failed_title">Restoration failed</string>
+    <string name="restore_failed_out_of_space">Device storage space is not enough. Please delete some apps or files, and then restart the device to resume restoration.</string>
+    <string name="restore_failed_out_of_space_btn">Exit</string>
+    <string name="restore_failed_damaged_backup">Some critical data was not backed up successfully. So, you must do a factory reset and then choose a different backup or set up as a new device.</string>
+    <string name="restore_failed_damaged_backup_btn">Factory Reset</string>
+    <string name="restore_failed_conn_failed">Possible reasons may be an unstable/interrupted Internet connection, low battery, device issues, etc. If the problem persists, please contact %1$s.</string>
+    <string name="restore_failed_conn_failed_btn">Retry</string>
+    <string name="restore_failed_contact">Tera customer service</string>
 
     <string name="alert_dialog_title_warning">警告</string>
 

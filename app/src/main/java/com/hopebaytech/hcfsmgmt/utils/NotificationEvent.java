@@ -48,7 +48,7 @@ public class NotificationEvent {
                               int notifyId,
                               String notifyTitle,
                               String notifyMessage,
-                              android.support.v4.app.NotificationCompat.Action action,
+                              NotificationCompat.Action action,
                               int flag) {
         notify(context, notifyId, notifyTitle, notifyMessage, R.drawable.icon_tera_logo_status_bar,
                 action, flag, null);
@@ -78,7 +78,7 @@ public class NotificationEvent {
                               String notifyTitle,
                               String notifyMessage,
                               int iconDrawableId,
-                              android.support.v4.app.NotificationCompat.Action action,
+                              NotificationCompat.Action action,
                               int flag,
                               Bundle extras) {
 

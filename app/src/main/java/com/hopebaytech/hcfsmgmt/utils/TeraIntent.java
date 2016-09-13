@@ -33,6 +33,8 @@ public class TeraIntent {
     public static final String ACTION_FULL_RESTORE_COMPLETED = "hbt.intent.action.FULL_RESTORE_COMPLETED";
     public static final String ACTION_MINI_RESTORE_REBOOT_SYSTEM = "hbt.intent.action.REBOOT_SYSTEM";
     public static final String ACTION_CHECK_RESTORE_STATUS = "hbt.intent.action.CHECK_RESTORE_STATUS";
+    public static final String ACTION_FACTORY_RESET = "hbt.intent.action.FACTORY_RESET";
+    public static final String ACTION_RETRY_RESTORE_WHEN_CONN_FAILED = "hbt.intent.action.RETRY_RESTORE_WHEN_CONN_FAILED";
 
     // Intent key
     public static final String KEY_UID = "intent_key_uid";

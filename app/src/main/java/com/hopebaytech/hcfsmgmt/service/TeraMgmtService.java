@@ -2,7 +2,6 @@ package com.hopebaytech.hcfsmgmt.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -145,7 +144,12 @@ public class TeraMgmtService extends Service {
                         handleMiniRestoreBootSystem();
                     } else if (action.equals(TeraIntent.ACTION_CHECK_RESTORE_STATUS)) {
                         checkRestoreStatus();
+                    } else if (action.equals(TeraIntent.ACTION_FACTORY_RESET)) {
+                        FactoryResetUtils.reset(mContext);
+                    } else if (action.equals(TeraIntent.ACTION_RETRY_RESTORE_WHEN_CONN_FAILED)) {
+                        openPreparingPage();
                     }
+
                 }
             });
         }
@@ -945,6 +949,18 @@ public class TeraMgmtService extends Service {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
+    }
+
+    private void openPreparingPage() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+        editor.apply();
+
+        Intent intent = new Intent(mContext, MainActivity.class);
+        // Need to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
 }

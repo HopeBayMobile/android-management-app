@@ -6,10 +6,16 @@ package com.hopebaytech.hcfsmgmt.utils;
  */
 public class RestoreStatus {
 
-    public static int NONE = 0;
-    public static int MINI_RESTORE_IN_PROGRESS = 1;
-    public static int MINI_RESTORE_COMPLETED = 2;
-    public static int FULL_RESTORE_IN_PROGRESS = 3;
-    public static int FULL_RESTORE_COMPLETED = 4;
+    public static final int NONE = 0;
+    public static final int MINI_RESTORE_IN_PROGRESS = 1;
+    public static final int MINI_RESTORE_COMPLETED = 2;
+    public static final int FULL_RESTORE_IN_PROGRESS = 3;
+    public static final int FULL_RESTORE_COMPLETED = 4;
+
+    public static class Error {
+        public static final int DAMAGED_BACKUP = HCFSEvent.ErrorCode.ENOENT;
+        public static final int OUT_OF_SPACE = HCFSEvent.ErrorCode.ENOSPC;
+        public static final int CONN_FAILED = HCFSEvent.ErrorCode.ENETDOWN;
+    }
 
 }

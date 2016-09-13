@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
@@ -31,28 +32,41 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="@dimen/M4"
         android:gravity="center"
-        android:text="@string/restore_preparing_title" />
+        android:text="@string/restore_failed_title" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/message"
         style="@style/F6"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="76dp"
         android:layout_marginEnd="30dp"
         android:layout_marginStart="30dp"
         android:gravity="center_horizontal"
-        android:text="@string/restore_preparing_message" />
+        tools:text="@string/restore_failed_out_of_space" />
 
-    <ProgressBar
-        android:id="@+id/progress_circle"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/message"
+    <FrameLayout
+        android:id="@+id/ok_layout"
+        android:layout_width="200dp"
+        android:layout_height="36dp"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:indeterminate="true" />
+        android:layout_gravity="center"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="40dp"
+        android:background="@color/colorAccent"
+        android:clickable="true">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/action_btn"
+            style="@style/F2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            tools:text="@string/restore_failed_out_of_space_btn" />
+
+    </FrameLayout>
 
 </RelativeLayout>
