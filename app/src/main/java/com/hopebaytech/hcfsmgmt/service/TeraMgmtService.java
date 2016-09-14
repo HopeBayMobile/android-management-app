@@ -25,6 +25,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
@@ -136,18 +138,22 @@ public class TeraMgmtService extends Service {
                         notifyInsufficientPinSpace();
                     } else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
                         HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
+                    } else if (action.equals(TeraIntent.ACTION_TOKEN_EXPIRED)) {
+                        checkTokenExpiredCause();
+                    } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
+                        notifyUserExceedPinMax();
                     } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_1)) {
                         handleStage1RestoreEvent(intent);
                     } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_2)) {
                         handleStage2RestoreEvent(intent);
                     } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM)) {
-                        handleMiniRestoreBootSystem();
+                        RestoreReadyFragment.rebootSystemForStage2(mContext);
                     } else if (action.equals(TeraIntent.ACTION_CHECK_RESTORE_STATUS)) {
                         checkRestoreStatus();
                     } else if (action.equals(TeraIntent.ACTION_FACTORY_RESET)) {
                         FactoryResetUtils.reset(mContext);
                     } else if (action.equals(TeraIntent.ACTION_RETRY_RESTORE_WHEN_CONN_FAILED)) {
-                        openPreparingPage();
+                        openPreparingOrRestoringPage();
                     }
 
                 }
@@ -820,23 +826,21 @@ public class TeraMgmtService extends Service {
         });
 
     private void handleStage1RestoreEvent(Intent intent) {
-        Logs.d(CLASSNAME, "handleStage2RestoreEvent", null);
+        Logs.d(CLASSNAME, "handleStage1RestoreEvent", null);
 
         if (MainApplication.Foreground.get().isForeground()) {
+            Logs.d(CLASSNAME, "handleStage1RestoreEvent", "Application is not in foreground.");
             return;
         }
 
-        int flag;
-        String title;
-        String message;
-        int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+        int status = RestoreStatus.NONE;
         int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+        Logs.d(CLASSNAME, "handleStage1RestoreEvent", "errorCode=" + errorCode);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         switch (errorCode) {
             case 0:
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
-                editor.apply();
 
                 String rebootAction = getString(R.string.restore_system_reboot);
                 Intent rebootIntent = new Intent(TeraMgmtService.this, TeraMgmtService.class);
@@ -844,71 +848,69 @@ public class TeraMgmtService extends Service {
                 PendingIntent pendingIntent = PendingIntent.getService(TeraMgmtService.this, 0, rebootIntent, 0);
                 NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
 
-                flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_HEADS_UP;
-                title = getString(R.string.restore_ready_title);
-                message = getString(R.string.restore_ready_message);
+                int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+                int flag = NotificationEvent.FLAG_ON_GOING
+                        | NotificationEvent.FLAG_HEADS_UP
+                        | NotificationEvent.FLAG_OPEN_APP;
+                String title = getString(R.string.restore_ready_title);
+                String message = getString(R.string.restore_ready_message);
                 NotificationEvent.notify(mContext, notifyId, title, message, action, flag);
                 break;
             case HCFSEvent.ErrorCode.ENOENT:
-                flag = NotificationEvent.FLAG_HEADS_UP;
-                title = getString(R.string.app_name);
-                message = getString(R.string.restore_no_such_file_or_directory);
-                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                status = RestoreStatus.Error.DAMAGED_BACKUP;
                 break;
             case HCFSEvent.ErrorCode.ENOSPC:
-                flag = NotificationEvent.FLAG_HEADS_UP;
-                title = getString(R.string.app_name);
-                message = getString(R.string.restore_stage_1_no_space_left);
-                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                status = RestoreStatus.Error.OUT_OF_SPACE;
                 break;
             case HCFSEvent.ErrorCode.ENETDOWN:
-                flag = NotificationEvent.FLAG_HEADS_UP;
-                title = getString(R.string.app_name);
-                message = getString(R.string.restore_no_network_connected);
-                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                status = RestoreStatus.Error.CONN_FAILED;
                 break;
         }
+        if (errorCode != 0) {
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, status);
+            RestoreFailedFragment.startFailedNotification(mContext, status);
+        }
+        editor.apply();
+
     }
 
     private void handleStage2RestoreEvent(Intent intent) {
         Logs.d(CLASSNAME, "handleStage2RestoreEvent", null);
-        int flag;
-        String title;
-        String message;
-        int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+
+        if (MainApplication.Foreground.get().isForeground()) {
+            Logs.d(CLASSNAME, "handleStage2RestoreEvent", "Application is not in foreground.");
+            return;
+        }
+
+        int status = RestoreStatus.NONE;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
         switch (errorCode) {
             case 0:
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_COMPLETED);
-                if (!MainApplication.Foreground.get().isForeground()) {
-                    flag = NotificationEvent.FLAG_HEADS_UP;
-                    title = getString(R.string.restore_done_title);
-                    message = getString(R.string.restore_done_message);
-                    NotificationEvent.notify(mContext, notifyId, title, message, flag);
-                }
-                editor.apply();
+
+                int flag = NotificationEvent.FLAG_HEADS_UP;
+                int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+                String title = getString(R.string.restore_done_title);
+                String message = getString(R.string.restore_done_message);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
                 break;
             case HCFSEvent.ErrorCode.ENOENT:
-                flag = NotificationEvent.FLAG_HEADS_UP;
-                title = getString(R.string.app_name);
-                message = getString(R.string.restore_no_such_file_or_directory);
-                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                status = RestoreStatus.Error.DAMAGED_BACKUP;
                 break;
             case HCFSEvent.ErrorCode.ENOSPC:
-                flag = NotificationEvent.FLAG_HEADS_UP;
-                title = getString(R.string.app_name);
-                message = getString(R.string.restore_stage_2_no_space_left);
-                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                status = RestoreStatus.Error.OUT_OF_SPACE;
                 break;
             case HCFSEvent.ErrorCode.ENETDOWN:
-                flag = NotificationEvent.FLAG_HEADS_UP;
-                title = getString(R.string.app_name);
-                message = getString(R.string.restore_no_network_connected);
-                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                status = RestoreStatus.Error.CONN_FAILED;
                 break;
         }
+        if (errorCode != 0) {
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, status);
+            RestoreFailedFragment.startFailedNotification(mContext, status);
+        }
+        editor.apply();
     }
 
     private void notifyUserExceedPinMax() {
@@ -951,16 +953,8 @@ public class TeraMgmtService extends Service {
         }
     }
 
-    private void openPreparingPage() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
-        editor.apply();
-
-        Intent intent = new Intent(mContext, MainActivity.class);
-        // Need to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+    private void openPreparingOrRestoringPage() {
+        checkRestoreStatus();
     }
 
 }

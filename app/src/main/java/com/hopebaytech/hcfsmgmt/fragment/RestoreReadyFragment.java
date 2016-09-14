@@ -66,14 +66,18 @@ public class RestoreReadyFragment extends Fragment {
         systemReboot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
-                editor.apply();
-
-                PowerUtils.rebootSystem(mContext);
+                rebootSystemForStage2(mContext);
             }
         });
+    }
+
+    public static void rebootSystemForStage2(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
+        editor.apply();
+
+        PowerUtils.rebootSystem(context);
     }
 
     @Override

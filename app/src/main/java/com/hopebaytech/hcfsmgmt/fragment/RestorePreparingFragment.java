@@ -39,7 +39,6 @@ public class RestorePreparingFragment extends Fragment {
     private ScreenOffEventReceiver mScreenOffEventReceiver;
 
     private Context mContext;
-    private ProgressBar mProgressDialog;
 
     public static RestorePreparingFragment newInstance() {
         return new RestorePreparingFragment();
@@ -59,12 +58,6 @@ public class RestorePreparingFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.restore_preparing_fragment, container, false);
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mProgressDialog = (ProgressBar) view.findViewById(R.id.progress_circle);
     }
 
     @Override
@@ -265,7 +258,7 @@ public class RestorePreparingFragment extends Fragment {
     }
 
     private void gotoRestoreFailedPage(int errorCode) {
-        Logs.w(CLASSNAME, "gotoRestoreFailedPage", "errorCode=" + errorCode);
+        Logs.d(CLASSNAME, "gotoRestoreFailedPage", "errorCode=" + errorCode);
         int status = RestoreStatus.Error.CONN_FAILED;
         switch (errorCode) {
             case HCFSEvent.ErrorCode.ENETDOWN:

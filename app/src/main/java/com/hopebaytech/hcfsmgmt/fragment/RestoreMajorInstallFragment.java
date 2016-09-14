@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -38,8 +39,6 @@ public class RestoreMajorInstallFragment extends Fragment {
     private ScreenOffEventReceiver mScreenOffEventReceiver;
 
     private Context mContext;
-    private TextView mErrorMsg;
-    private pl.droidsonroids.gif.GifImageView mGifImage;
 
     public static RestoreMajorInstallFragment newInstance() {
         return new RestoreMajorInstallFragment();
@@ -71,9 +70,6 @@ public class RestoreMajorInstallFragment extends Fragment {
                 ((AppCompatActivity) mContext).finish();
             }
         });
-
-        mErrorMsg = (TextView) view.findViewById(R.id.error_msg);
-        mGifImage = (pl.droidsonroids.gif.GifImageView) view.findViewById(R.id.gif_img);
     }
 
     @Override
@@ -110,13 +106,15 @@ public class RestoreMajorInstallFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
 
+        // If the restore status is FULL_RESTORE_IN_PROGRESS, start restore in progress notification.
+        // This only works when user press back key to leave app or remove app from recent app list.
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
         if (status == RestoreStatus.FULL_RESTORE_IN_PROGRESS) {
             startInProgressNotification();
-            mRestoreReceiver.unregisterReceiver(mContext);
         }
 
+        mRestoreReceiver.unregisterReceiver(mContext);
         mScreenOffEventReceiver.unregisterReceiver(mContext);
     }
 
@@ -153,11 +151,12 @@ public class RestoreMajorInstallFragment extends Fragment {
     public class FullRestoreCompletedReceiver extends BroadcastReceiver {
 
         private boolean isRegister;
+        private int ENETDOWNCount;
 
         @Override
         public void onReceive(Context context, Intent intent) {
             int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
-            Logs.w(CLASSNAME, "onReceive", "errorCode=" + errorCode);
+            Logs.d(CLASSNAME, "onReceive", "errorCode=" + errorCode);
             switch (errorCode) {
                 case 0: // Success
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -168,19 +167,16 @@ public class RestoreMajorInstallFragment extends Fragment {
                     gotoRestoreDonePage();
                     break;
                 case HCFSEvent.ErrorCode.ENOENT: // No such file or directory
-                    mGifImage.setVisibility(View.GONE);
-                    mErrorMsg.setVisibility(View.VISIBLE);
-                    mErrorMsg.setText(R.string.restore_no_such_file_or_directory);
+                    gotoRestoreFailedPage(HCFSEvent.ErrorCode.ENOENT);
                     break;
                 case HCFSEvent.ErrorCode.ENOSPC: // No space left on device
-                    mGifImage.setVisibility(View.GONE);
-                    mErrorMsg.setVisibility(View.VISIBLE);
-                    mErrorMsg.setText(R.string.restore_stage_2_no_space_left);
+                    gotoRestoreFailedPage(HCFSEvent.ErrorCode.ENOSPC);
                     break;
                 case HCFSEvent.ErrorCode.ENETDOWN: // Network is down
-                    mGifImage.setVisibility(View.GONE);
-                    mErrorMsg.setVisibility(View.VISIBLE);
-                    mErrorMsg.setText(R.string.restore_no_network_connected);
+                    if (ENETDOWNCount > 0) { // Ignore the event first time
+                        gotoRestoreFailedPage(HCFSEvent.ErrorCode.ENETDOWN);
+                    }
+                    ENETDOWNCount++;
                     break;
             }
         }
@@ -201,6 +197,7 @@ public class RestoreMajorInstallFragment extends Fragment {
                     isRegister = false;
                 }
             }
+            ENETDOWNCount = 0;
         }
 
     }
@@ -208,6 +205,37 @@ public class RestoreMajorInstallFragment extends Fragment {
     private void gotoRestoreDonePage() {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, RestoreDoneFragment.newInstance());
+        ft.commit();
+    }
+
+    private void gotoRestoreFailedPage(int errorCode) {
+        Logs.d(CLASSNAME, "gotoRestoreFailedPage", "errorCode=" + errorCode);
+        int status = RestoreStatus.Error.CONN_FAILED;
+        switch (errorCode) {
+            case HCFSEvent.ErrorCode.ENETDOWN:
+                status = RestoreStatus.Error.CONN_FAILED;
+                break;
+            case HCFSEvent.ErrorCode.ENOENT:
+                status = RestoreStatus.Error.DAMAGED_BACKUP;
+                break;
+            case HCFSEvent.ErrorCode.ENOSPC:
+                status = RestoreStatus.Error.OUT_OF_SPACE;
+                break;
+        }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, status);
+        editor.apply();
+
+        Bundle args = new Bundle();
+        args.putInt(RestoreFailedFragment.KEY_ERROR_CODE, errorCode);
+
+        Fragment fragment = RestoreFailedFragment.newInstance();
+        fragment.setArguments(args);
+
+        FragmentTransaction ft = ((MainActivity) mContext).getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fragment_container, fragment);
         ft.commit();
     }
 

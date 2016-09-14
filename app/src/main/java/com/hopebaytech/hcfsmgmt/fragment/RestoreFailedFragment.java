@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.text.Html;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -121,9 +120,20 @@ public class RestoreFailedFragment extends Fragment {
                         FactoryResetUtils.reset(mContext);
                         break;
                     case RestoreStatus.Error.CONN_FAILED:
+                        int status = HCFSMgmtUtils.checkRestoreStatus();
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                        switch (status) {
+                            case 0: // Not being restored
+                                break;
+                            case 1: // In stage 1 of restoration process
+                                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                                break;
+                            case 2: // In stage 2 of restoration process
+                                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
+                                break;
+                            default:
+                        }
                         editor.apply();
 
                         Intent intent = new Intent(mContext, MainActivity.class);
@@ -167,16 +177,16 @@ public class RestoreFailedFragment extends Fragment {
             case RestoreStatus.Error.CONN_FAILED:
             case RestoreStatus.Error.DAMAGED_BACKUP:
             case RestoreStatus.Error.OUT_OF_SPACE:
-                startFailedNotification();
+                startFailedNotification(mContext, status);
                 break;
         }
 
         mScreenOffEventReceiver.unregisterReceiver(mContext);
     }
 
-    private void startFailedNotification() {
-        showHeadsUpNotification();
-        showNormalNotification();
+    public static void startFailedNotification(Context context, int status) {
+        showHeadsUpNotification(context, status);
+        showNormalNotification(context, status);
     }
 
     private void cancelInProgressNotification() {
@@ -197,7 +207,7 @@ public class RestoreFailedFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
             if (SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)) {
-                startFailedNotification();
+                startFailedNotification(mContext, mErrorCode);
                 mHomeKeyEventReceiver.unregisterReceiver(mContext);
             }
         }
@@ -224,7 +234,7 @@ public class RestoreFailedFragment extends Fragment {
 
     /**
      * The ScreenOffEventReceiver only works when this RestoreFailedFragment is visible.
-     * <p>
+     * <p/>
      * If the screen is off, show normal notification instead of heads-up notification. The heads-up
      * notification will trigger the system to open Tera app continually when the screen is off.
      */
@@ -234,7 +244,7 @@ public class RestoreFailedFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            showNormalNotification();
+            showNormalNotification(context, mErrorCode);
         }
 
         public void registerReceiver(Context context, IntentFilter intentFilter) {
@@ -257,67 +267,69 @@ public class RestoreFailedFragment extends Fragment {
 
     }
 
-    private NotificationCompat.Action getNotificationAction() {
+    private static NotificationCompat.Action getNotificationAction(Context context, int status) {
         String actionText;
         NotificationCompat.Action action = null;
         PendingIntent pendingIntent;
-        switch (mErrorCode) {
+        switch (status) {
             case RestoreStatus.Error.DAMAGED_BACKUP:
-                actionText = getString(R.string.restore_failed_damaged_backup_btn);
+                actionText = context.getString(R.string.restore_failed_damaged_backup_btn);
 
-                Intent factoryResetIntent = new Intent(mContext, TeraMgmtService.class);
+                Intent factoryResetIntent = new Intent(context, TeraMgmtService.class);
                 factoryResetIntent.setAction(TeraIntent.ACTION_FACTORY_RESET);
-                pendingIntent = PendingIntent.getService(mContext, 0, factoryResetIntent, PendingIntent.FLAG_ONE_SHOT);
+                pendingIntent = PendingIntent.getService(context, 0, factoryResetIntent, PendingIntent.FLAG_ONE_SHOT);
                 action = new NotificationCompat.Action(0, actionText, pendingIntent);
                 break;
             case RestoreStatus.Error.CONN_FAILED:
-                actionText = getString(R.string.restore_failed_conn_failed_btn);
+                actionText = context.getString(R.string.restore_failed_conn_failed_btn);
 
-                Intent retryIntent = new Intent(mContext, TeraMgmtService.class);
+                Intent retryIntent = new Intent(context, TeraMgmtService.class);
                 retryIntent.setAction(TeraIntent.ACTION_RETRY_RESTORE_WHEN_CONN_FAILED);
 
-                pendingIntent = PendingIntent.getService(mContext, 0, retryIntent, PendingIntent.FLAG_ONE_SHOT);
+                pendingIntent = PendingIntent.getService(context, 0, retryIntent, PendingIntent.FLAG_ONE_SHOT);
                 action = new NotificationCompat.Action(0, actionText, pendingIntent);
                 break;
         }
         return action;
     }
 
-    private String getRestorationFailedMessage() {
+    private static String getRestorationFailedMessage(Context context, int status) {
         String message = null;
-        switch (mErrorCode) {
+        switch (status) {
             case RestoreStatus.Error.OUT_OF_SPACE:
-                message = getString(R.string.restore_failed_out_of_space);
+                message = context.getString(R.string.restore_failed_out_of_space);
                 break;
             case RestoreStatus.Error.DAMAGED_BACKUP:
-                message = getString(R.string.restore_failed_damaged_backup);
+                message = context.getString(R.string.restore_failed_damaged_backup);
                 break;
             case RestoreStatus.Error.CONN_FAILED:
-                message = getString(R.string.restore_failed_conn_failed);
+                message = String.format(Locale.getDefault(),
+                        context.getString(R.string.restore_failed_conn_failed),
+                        context.getString(R.string.restore_failed_contact));
                 break;
         }
         return message;
     }
 
-    private void showHeadsUpNotification() {
+    private static void showHeadsUpNotification(Context context, int status) {
         // Show heads-up notification
         int flag = NotificationEvent.FLAG_ON_GOING
                 | NotificationEvent.FLAG_HEADS_UP
                 | NotificationEvent.FLAG_OPEN_APP;
-        String title = getString(R.string.restore_failed_title);
-        String message = getRestorationFailedMessage();
-        NotificationCompat.Action action = getNotificationAction();
-        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, message, action, flag);
+        String title = context.getString(R.string.restore_failed_title);
+        String message = getRestorationFailedMessage(context, status);
+        NotificationCompat.Action action = getNotificationAction(context, status);
+        NotificationEvent.notify(context, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, message, action, flag);
     }
 
-    private void showNormalNotification() {
+    private static void showNormalNotification(Context context, int status) {
         // Show normal notification (previous heads-up notification will disappear)
         int flag = NotificationEvent.FLAG_ON_GOING
                 | NotificationEvent.FLAG_OPEN_APP;
-        String title = getString(R.string.restore_failed_title);
-        String message = getRestorationFailedMessage();
-        NotificationCompat.Action action = getNotificationAction();
-        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, message, action, flag);
+        String title = context.getString(R.string.restore_failed_title);
+        String message = getRestorationFailedMessage(context, status);
+        NotificationCompat.Action action = getNotificationAction(context, status);
+        NotificationEvent.notify(context, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, message, action, flag);
     }
 
 }

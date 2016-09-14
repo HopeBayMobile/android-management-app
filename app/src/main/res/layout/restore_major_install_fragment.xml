@@ -44,25 +44,14 @@
         android:gravity="center_horizontal"
         android:text="@string/restore_major_install_message" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
+    <pl.droidsonroids.gif.GifImageView
+        android:id="@+id/gif_img"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/ok_layout">
-
-        <pl.droidsonroids.gif.GifImageView
-            android:id="@+id/gif_img"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:foregroundGravity="center"
-            android:src="@drawable/icon_transfer_transferring" />
-
-        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            android:id="@+id/error_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-    </RelativeLayout>
+        android:layout_above="@+id/ok_layout"
+        android:layout_centerHorizontal="true"
+        android:foregroundGravity="center"
+        android:src="@drawable/icon_transfer_transferring" />
 
     <FrameLayout
         android:id="@+id/ok_layout"
