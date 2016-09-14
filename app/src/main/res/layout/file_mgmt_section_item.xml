@@ -42,7 +42,7 @@
                 style="@style/F8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="@string/file_mgmt_section_item_calculating" />
+                android:text="@string/file_mgmt_section_item_calculating" />
         </LinearLayout>
 
         <LinearLayout
@@ -64,7 +64,7 @@
                 style="@style/F7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="@string/file_mgmt_section_item_calculating" />
+                android:text="@string/file_mgmt_section_item_calculating" />
         </LinearLayout>
     </LinearLayout>
 

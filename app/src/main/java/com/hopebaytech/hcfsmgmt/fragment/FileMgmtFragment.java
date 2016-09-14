@@ -1348,7 +1348,6 @@ public class FileMgmtFragment extends Fragment {
         public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int position) {
             if (isSectionHeaderPosition(position)) {
                 final SectionedViewHolder sectionViewHolder = (SectionedViewHolder) viewHolder;
-                final String calculatingText = mContext.getString(R.string.file_mgmt_section_item_calculating);
                 mSections.get(position).viewHolder = sectionViewHolder;
                 mWorkerHandler.post(new Runnable() {
                     @Override
@@ -1363,16 +1362,9 @@ public class FileMgmtFragment extends Fragment {
                                     storageType = mContext.getString(R.string.file_mgmt_internal_storage_name);
                                 }
                                 sectionViewHolder.storageType.setText(storageType);
-                                sectionViewHolder.totalSpace.setText(calculatingText);
-                                sectionViewHolder.freeSpace.setText(calculatingText);
                             }
                         });
 
-//                        StatFs statFs = new StatFs(FILE_ROOT_DIR_PATH);
-//                        totalSpace = statFs.getTotalBytes();
-//                        freeSpace = statFs.getAvailableBytes();
-//                        final long totalSpace = PhoneStorageUsage.getTotalSpace();
-//                        final long freeSpace = PhoneStorageUsage.getFreeSpace();
                         final HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
                         ((Activity) mContext).runOnUiThread(new Runnable() {
                             @Override
