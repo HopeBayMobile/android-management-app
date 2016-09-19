@@ -2,7 +2,6 @@ package com.hopebaytech.hcfsmgmt.info;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -15,8 +14,6 @@ import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.preference.PreferenceManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -25,12 +22,11 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
-import java.io.File;
-import java.util.regex.Pattern;
+import java.util.Locale;
 
 public class FileDirInfo extends ItemInfo implements Cloneable {
 
-    private final String CLASS_NAME = this.getClass().getSimpleName();
+    private final String CLASSNAME = this.getClass().getSimpleName();
 
     public static final String MIME_TYPE_IMAGE = "image";
     public static final String MIME_TYPE_VIDEO = "video";
@@ -41,7 +37,6 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
     public static final String MIME_SUBTYPE_PNG = "png";
     public static final String MIME_SUBTYPE_SVG = "svg";
 
-    //    private File currentFile;
     private boolean mIsDirectory;
     private String mFilePath;
 
@@ -60,23 +55,20 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
     @Nullable
     public Bitmap getIconImage() {
         Bitmap iconImage = null;
-//        if (currentFile.isDirectory()) {
         if (mIsDirectory) {
             Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_folder_default);
             iconImage = ((BitmapDrawable) drawable).getBitmap();
         } else {
-//            String filePath = currentFile.getAbsolutePath();
             String filePath = mFilePath;
             String mimeType = getMimeType();
-            String logMsg = "filePath=" + filePath + ", mimeType=" + mimeType;
-            Logs.d(CLASS_NAME, "getIconImage", logMsg);
+            Logs.d(CLASSNAME, "getIconImage", "filePath=" + filePath + ", mimeType=" + mimeType);
             if (mimeType != null) {
                 int width, height;
                 width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
                 try {
                     if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
                         if (mimeType.contains(MIME_SUBTYPE_PNG)) {
-                            /** Show PNG file with alpha supported */
+                            // Show PNG file with alpha supported
                             Bitmap image = BitmapFactory.decodeFile(filePath);
                             iconImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                         } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
@@ -121,12 +113,12 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 //                    iconImage = ((BitmapDrawable) drawable).getBitmap();
                     // return ContextCompat.getDrawable(mContext, R.drawable.ic_file_black);
                 } catch (Exception e) {
-                    Logs.e(CLASS_NAME, "getIconImage", Log.getStackTraceString(e));
+                    Logs.e(CLASSNAME, "getIconImage", Log.getStackTraceString(e));
                 }
             }
         }
 
-        /** Unknown file type */
+        // Unknown file type
         if (iconImage == null) {
             Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
             iconImage = ((BitmapDrawable) drawable).getBitmap();
@@ -166,58 +158,27 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
         return thumbnail;
     }
 
-//    public File getCurrentFile() {
-//        return currentFile;
-//    }
-//
-//    public void setCurrentFile(File currentFile) {
-//        this.currentFile = currentFile;
-//    }
-
     public String getFilePath() {
-//        return currentFile.getAbsolutePath();
         return mFilePath;
     }
 
     public String getFileName() {
-//        return currentFile.getName();
         return getName();
     }
 
     public String getMimeType() {
-//        return getMimeType(currentFile.getAbsolutePath());
         return getMimeType(mFilePath);
     }
 
     @Nullable
-    public static String getMimeType(String url) {
-        String type = null;
-        String extension = getFileExtensionFromUrl(url);
-        if (extension != null) {
-            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
-        }
-        return type;
-    }
-
-    private static String getFileExtensionFromUrl(String url) {
-        if (!TextUtils.isEmpty(url)) {
-            int filenamePos = url.lastIndexOf('/');
-            String filename = 0 <= filenamePos ? url.substring(filenamePos + 1) : url;
-
-            /** if the filename contains special characters, we don't consider it valid for our matching purposes */
-            if (!filename.isEmpty() && Pattern.matches("^[^\\/:?\"<>|]+$", filename)) {
-                int dotPos = filename.lastIndexOf('.');
-                if (0 <= dotPos) {
-                    return filename.substring(dotPos + 1);
-                }
-            }
-        }
-        return "";
+    public String getMimeType(String path) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(path);
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
     }
 
     public int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
-//        Logs.d(CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
+//        Logs.d(CLASSNAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
         if (NetworkUtils.isNetworkConnected(mContext)) {
             return ItemStatus.STATUS_AVAILABLE;
         } else {
@@ -231,7 +192,6 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     private int getFileDirLocationStatus() {
         int locationStatus;
-//        if (currentFile.isDirectory()) {
         if (mIsDirectory) {
             locationStatus = HCFSMgmtUtils.getDirLocationStatus(getFilePath());
         } else {
