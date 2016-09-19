@@ -35,18 +35,22 @@ public class AboutFragment extends DialogFragment {
 
     public static final String TAG = AboutFragment.class.getSimpleName();
     private final String CLASSNAME = AboutFragment.class.getSimpleName();
+
     private boolean isImeiShown = false;
+    private boolean denyGrandPermission = false;
+    private final int CLICK_COUNT_FOR_BA = 7;
+    private int clickCount = CLICK_COUNT_FOR_BA;
+
+    private Handler mHandler;
+
+    private View mView;
     private Context mContext;
     private TextView mImeiOne;
     private TextView mImeiTwo;
     private LinearLayout mImeiTwoLayout;
     private Snackbar mSnackbar;
     private LinearLayout mTeraVersionLayout;
-    LinearLayout mClose;
-    private boolean denyGrandPermission = false;
-    private final int CLICK_COUNT_FOR_BA = 7;
-    private int clickCount = CLICK_COUNT_FOR_BA;
-    private Handler mHandler;
+    private LinearLayout mClose;
 
     private View.OnClickListener listener = new View.OnClickListener() {
         @Override
@@ -70,12 +74,6 @@ public class AboutFragment extends DialogFragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mSnackbar = Snackbar.make(getView(), "", Snackbar.LENGTH_INDEFINITE);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.about_fragment, container, false);
     }
@@ -83,6 +81,8 @@ public class AboutFragment extends DialogFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        mView = view;
         mHandler = new Handler();
         mImeiOne = (TextView) view.findViewById(R.id.device_imei_1);
         mImeiTwo = (TextView) view.findViewById(R.id.device_imei_2);
@@ -122,6 +122,12 @@ public class AboutFragment extends DialogFragment {
                 dismiss();
             }
         });
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mSnackbar = Snackbar.make(mView, "", Snackbar.LENGTH_INDEFINITE);
     }
 
     @Override
