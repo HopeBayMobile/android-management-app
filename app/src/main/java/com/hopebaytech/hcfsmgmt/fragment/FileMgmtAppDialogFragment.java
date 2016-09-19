@@ -128,7 +128,7 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                             @Override
                             public void run() {
                                 String formatSize = UnitConverter.convertByteToProperUnit(totalSize);
-                                appSize.setText(String.format(getString(R.string.file_mgmt_dialog_data_size), formatSize));
+                                appSize.setText(String.format(mContext.getString(R.string.file_mgmt_dialog_data_size), formatSize));
                             }
                         });
 

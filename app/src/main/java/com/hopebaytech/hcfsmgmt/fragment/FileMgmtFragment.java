@@ -269,6 +269,8 @@ public class FileMgmtFragment extends Fragment {
 
     private Runnable mApiExecutorRunnable = new Runnable() {
 
+        private boolean isProcessing;
+
         private void processPinUnpinFailed(final ItemInfo itemInfo) {
             if (itemInfo instanceof AppInfo) {
                 mPinUnpinAppMap.remove(((AppInfo) itemInfo).getPackageName());
@@ -307,79 +309,99 @@ public class FileMgmtFragment extends Fragment {
             });
         }
 
+        private void processRequests() {
+            List<Integer> removeList = new ArrayList<>();
+            for (int i = 0; i < mWaitToExecuteSparseArr.size(); i++) {
+                int key = mWaitToExecuteSparseArr.keyAt(i);
+                final ItemInfo itemInfo = mWaitToExecuteSparseArr.get(key);
+                long lastProcessTime = itemInfo.getLastProcessTime();
+                if (itemInfo instanceof AppInfo) {
+                    final UidDAO uidDAO = UidDAO.getInstance(mContext);
+                    AppInfo appInfo = (AppInfo) itemInfo;
+                    UidInfo uidInfo = new UidInfo(appInfo);
+                    uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
+
+                    mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
+                        @Override
+                        public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
+                            showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                        }
+
+                        @Override
+                        public void onPinUnpinFailed(final ItemInfo itemInfo) {
+                            showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
+                            mSectionedRecyclerViewAdapter.
+                                    getSubAdapterItemInfoList().
+                                    get(itemInfo.getPosition()).
+                                    setPinned(!itemInfo.isPinned());
+
+                            itemInfo.setPinned(!itemInfo.isPinned());
+
+                            // Update pin status to uid.db
+                            UidInfo uidInfo = new UidInfo((AppInfo) itemInfo);
+                            uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
+
+                            processPinUnpinFailed(itemInfo);
+                        }
+                    });
+                } else if (itemInfo instanceof DataTypeInfo) {
+                    // Nothing to do here
+                } else if (itemInfo instanceof FileDirInfo) {
+                    FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
+                    mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
+                        @Override
+                        public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
+                            showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                        }
+
+                        @Override
+                        public void onPinUnpinFailed(final ItemInfo itemInfo) {
+                            showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+
+                            mSectionedRecyclerViewAdapter.
+                                    getSubAdapterItemInfoList().
+                                    get(itemInfo.getPosition()).
+                                    setPinned(!itemInfo.isPinned());
+
+                            itemInfo.setPinned(!itemInfo.isPinned());
+                            processPinUnpinFailed(itemInfo);
+                        }
+                    });
+                }
+                if (mWaitToExecuteSparseArr.get(key).getLastProcessTime() == lastProcessTime) {
+                    removeList.add(key);
+                }
+            }
+            for (int key: removeList) {
+                mWaitToExecuteSparseArr.remove(key);
+            }
+        }
+
         @Override
         public void run() {
             // Process user requests every one second
             while (true) {
                 try {
-                    for (int i = 0; i < mWaitToExecuteSparseArr.size(); i++) {
-                        int key = mWaitToExecuteSparseArr.keyAt(i);
-                        final ItemInfo itemInfo = mWaitToExecuteSparseArr.get(key);
-                        long lastProcessTime = itemInfo.getLastProcessTime();
-                        if (itemInfo instanceof AppInfo) {
-                            final UidDAO uidDAO = UidDAO.getInstance(mContext);
-                            AppInfo appInfo = (AppInfo) itemInfo;
-                            UidInfo uidInfo = new UidInfo(appInfo);
-                            uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
-
-                            mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
-                                @Override
-                                public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
-                                    showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
-                                }
-
-                                @Override
-                                public void onPinUnpinFailed(final ItemInfo itemInfo) {
-                                    showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
-
-                                    mSectionedRecyclerViewAdapter.
-                                            getSubAdapterItemInfoList().
-                                            get(itemInfo.getPosition()).
-                                            setPinned(!itemInfo.isPinned());
-
-                                    itemInfo.setPinned(!itemInfo.isPinned());
-
-                                    // Update pin status to uid.db
-                                    UidInfo uidInfo = new UidInfo((AppInfo) itemInfo);
-                                    uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
-
-                                    processPinUnpinFailed(itemInfo);
-                                }
-                            });
-                        } else if (itemInfo instanceof DataTypeInfo) {
-                            // Nothing to do here
-                        } else if (itemInfo instanceof FileDirInfo) {
-                            FileDirInfo fileDirInfo = (FileDirInfo) itemInfo;
-                            mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
-                                @Override
-                                public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
-                                    showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
-                                }
-
-                                @Override
-                                public void onPinUnpinFailed(final ItemInfo itemInfo) {
-                                    showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
-
-                                    mSectionedRecyclerViewAdapter.
-                                            getSubAdapterItemInfoList().
-                                            get(itemInfo.getPosition()).
-                                            setPinned(!itemInfo.isPinned());
-
-                                    itemInfo.setPinned(!itemInfo.isPinned());
-                                    processPinUnpinFailed(itemInfo);
-                                }
-                            });
-                        }
-                        if (mWaitToExecuteSparseArr.get(key).getLastProcessTime() == lastProcessTime) {
-                            mWaitToExecuteSparseArr.remove(key);
-                        }
+                    if (!isProcessing) {
+                        isProcessing = true;
+                        processRequests();
+                        isProcessing = false;
                     }
                     Thread.sleep(Interval.EXECUTE_PIN_API);
                 } catch (InterruptedException e) {
                     Logs.d(CLASSNAME, "onCreate", "mApiExecutorThread is interrupted");
+                    // Process the remaining user requests
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            processRequests();
+                        }
+                    }).start();
                     break;
                 } catch (NullPointerException e) {
-                    Logs.e(CLASSNAME, "onCreate", "mApiExecutorThread is interrupted");
+                    Logs.e(CLASSNAME, "onCreate", Log.getStackTraceString(e));
+                    isProcessing = false;
                     break;
                 }
             }
