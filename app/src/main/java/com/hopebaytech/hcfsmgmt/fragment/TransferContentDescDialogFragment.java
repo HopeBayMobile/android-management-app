@@ -26,7 +26,6 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
-import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 /**
@@ -101,7 +100,7 @@ public class TransferContentDescDialogFragment extends DialogFragment {
                         }
 
                         if (!NetworkUtils.isNetworkConnected(mContext)) {
-                            String message = getString(R.string.notify_network_disconnected);
+                            String message = getString(R.string.notify_cloud_disconnected);
                             Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
                             dismiss();
                             return;

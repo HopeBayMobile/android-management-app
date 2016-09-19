@@ -55,8 +55,8 @@
         <item>@string/nav_help</item>
     </string-array>
 
-    <string name="notify_network_connected">網路連線已恢復</string>
-    <string name="notify_network_disconnected">網路連線失敗，請檢查。</string>
+    <string name="notify_cloud_connected">雲端連線已恢復</string>
+    <string name="notify_cloud_disconnected">雲端連線中斷，請檢查。</string>
     <string name="notify_upload_completed">本地端資料已上傳至雲端空間。</string>
     <string name="notify_pin_app_failure">釘選應用程式失敗，因為可用釘選空間不足。請取消釘選一些應用程式。</string>
     <string name="notify_pin_file_dir_failure">釘選檔案失敗，因為可用釘選空間不足。請取消釘選一些檔案。</string>
@@ -76,8 +76,8 @@
     <string name="active_cloud_storage_auth_fail">帳戶驗證失敗。</string>
 
     <string name="overview_hcfs_conn_status_normal">連線正常</string>
-    <string name="overview_hcfs_conn_status_not_allowed">雲端/網路未連接</string>
-    <string name="overview_hcfs_conn_status_failed">傳輸失敗</string>
+    <string name="overview_hcfs_conn_status_not_allowed">未連接雲端</string>
+    <string name="overview_hcfs_conn_status_failed">傳輸中斷</string>
     <string name="overview_hcfs_conn_status_slow">傳輸緩慢</string>
     <string name="overview_hcfs_conn_status_in_progress">傳輸中</string>
     <string name="overview_space_usage_title">空間使用量</string>

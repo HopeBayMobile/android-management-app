@@ -114,7 +114,7 @@ public class TeraCloudConfig {
         Logs.d(CLASSNAME, "startSyncToCloud", logMsg);
         int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
         String notify_title = context.getString(R.string.app_name);
-        String notify_content = context.getString(R.string.notify_network_connected);
+        String notify_content = context.getString(R.string.notify_cloud_connected);
         HCFSMgmtUtils.notifyNetworkStatus(context, notify_id, notify_title, notify_content);
         startSyncToCloud();
     }
@@ -128,7 +128,7 @@ public class TeraCloudConfig {
         Logs.d(CLASSNAME, "stopSyncToCloud", logMsg);
         int notify_id = HCFSMgmtUtils.NOTIFY_ID_NETWORK_STATUS_CHANGED;
         String notify_title = context.getString(R.string.app_name);
-        String notify_content = context.getString(R.string.notify_network_disconnected);
+        String notify_content = context.getString(R.string.notify_cloud_disconnected);
         HCFSMgmtUtils.notifyNetworkStatus(context, notify_id, notify_title, notify_content);
         stopSyncToCloud();
     }
