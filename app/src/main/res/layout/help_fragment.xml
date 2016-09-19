@@ -29,11 +29,10 @@
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingEnd="@dimen/M2"
-        android:paddingStart="@dimen/M2"
-        android:paddingTop="@dimen/M3">
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/M2"
+        android:layout_marginStart="@dimen/M2"
+        android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/user_manual"
@@ -112,6 +111,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/help_email_feedback_title" />
         </LinearLayout>
+        <View style="@style/Divider" />
 
     </LinearLayout>
 </LinearLayout>
