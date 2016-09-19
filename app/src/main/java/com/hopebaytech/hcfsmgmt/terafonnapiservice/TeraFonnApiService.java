@@ -22,7 +22,6 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
@@ -412,7 +411,11 @@ public class TeraFonnApiService extends Service {
     }
 
     private int getPackageStatus(String packageName) {
-        if (NetworkUtils.isNetworkConnected(TeraFonnApiService.this)) {
+        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+        int connStatus = HCFSConnStatus.getConnStatus(TeraFonnApiService.this, statInfo);
+        if (connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
+                connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
+                connStatus == HCFSConnStatus.TRANS_NORMAL) {
             return AppStatus.STATUS_AVAILABLE;
         } else {
             try {
@@ -595,7 +598,11 @@ public class TeraFonnApiService extends Service {
         try {
             Boolean cloudConn = new JSONObject(HCFSApiUtils.getHCFSStat()).getJSONObject("data").getBoolean("cloud_conn");
             //log(Log.DEBUG, CLASSNAME, "getAppProgress", String.valueOf(cloudConn));
-            if (NetworkUtils.isNetworkConnected(TeraFonnApiService.this) && cloudConn) {
+            HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+            int connStatus = HCFSConnStatus.getConnStatus(TeraFonnApiService.this, statInfo);
+            if ((connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
+                    connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
+                    connStatus == HCFSConnStatus.TRANS_NORMAL) && cloudConn) {
                 String dataDir = getDataDir(packageName);
                 if (dataDir.equals("")) return -1;
 

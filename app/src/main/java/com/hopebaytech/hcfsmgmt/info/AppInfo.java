@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.info;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -9,14 +8,12 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.preference.PreferenceManager;
-import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppStatus;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AppInfo extends ItemInfo implements Cloneable {
@@ -135,8 +132,12 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public int getAppStatus() {
-        if (NetworkUtils.isNetworkConnected(mContext)) {
-            return ItemStatus.STATUS_AVAILABLE;
+        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+        int connStatus = HCFSConnStatus.getConnStatus(mContext, statInfo);
+        if (connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
+                connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
+                connStatus == HCFSConnStatus.TRANS_NORMAL) {
+            return AppStatus.STATUS_AVAILABLE;
         } else {
             int externalLocationStatus = getExternalLocationStatus();
             if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&

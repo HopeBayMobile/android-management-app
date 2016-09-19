@@ -14,15 +14,18 @@ import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppStatus;
+import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class FileDirInfo extends ItemInfo implements Cloneable {
 
@@ -178,9 +181,13 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     public int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
-//        Logs.d(CLASSNAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
-        if (NetworkUtils.isNetworkConnected(mContext)) {
-            return ItemStatus.STATUS_AVAILABLE;
+//        Logs.d(CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
+        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
+        int connStatus = HCFSConnStatus.getConnStatus(mContext, statInfo);
+        if (connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
+                connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
+                connStatus == HCFSConnStatus.TRANS_NORMAL) {
+            return AppStatus.STATUS_AVAILABLE;
         } else {
             if (locationStatus == LocationStatus.LOCAL) {
                 return ItemStatus.STATUS_AVAILABLE;
