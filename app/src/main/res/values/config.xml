@@ -5,4 +5,5 @@
     <string name="tera_imei_2" translatable="false">IMEI 2</string>
     <string name="zip_source_path" translatable="false">/sdcard/TeraLog</string>
     <string name="zip_target_path" translatable="false">/sdcard/log.zip</string>
+    <string name="faq_url" translatable="false">http://tera.mobi/faq.html</string>
 </resources>

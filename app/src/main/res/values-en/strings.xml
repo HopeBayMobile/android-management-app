@@ -231,10 +231,11 @@
     <string name="help_title_bar">Help Center</string>
     <string name="help_faq_title">FAQs</string>
     <string name="help_user_manual_title">User manual</string>
-    <string name="help_customer_center_title">Custromer Center</string>
+    <string name="help_customer_center_title">Customer Center</string>
     <string name="help_email_feedback_title">User Feedback</string>
-    <string name="faq_url">http://tera.mobi/faq.html</string>
+
     <string name="quick_tour_title">Quick Tour</string>
+
     <string name="settings_feedback_content_mail_contact">Contact:</string>
     <string name="settings_feedback_content_mail_description">Description</string>
     <string name="settings_feedback_content_mail_opinions">Opinions:</string>
@@ -243,5 +244,9 @@
     <string name="settings_feedback_log_collecting_message">Collecting message</string>
     <string name="settings_feedback_log_collecting_title">Log collecting</string>
     <string name="require_write_external_storage_permission">Collecting log must enable the "Storage" permission.</string>
+
+    <string name="http_gateway_timeout">Gateway Timeout: The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.</string>
+    <string name="http_internal_error">Internal server error.</string>
+    <string name="http_unknown_error">Unknown error.</string>
 
 </resources>
