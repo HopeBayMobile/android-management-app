@@ -13,7 +13,9 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.LoadingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 /**
@@ -29,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_container);
 
+        init(getIntent());
+        Logs.w(CLASSNAME, "onCreate", null);
+    }
+
+    private void init(Intent intent) {
         String TAG;
         Fragment fragment;
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -39,12 +46,20 @@ public class MainActivity extends AppCompatActivity {
             fragment = LoadingFragment.newInstance();
             TAG = LoadingFragment.TAG;
         }
-        Intent intent = getIntent();
         if (intent != null) {
             fragment.setArguments(intent.getExtras());
         }
         ft.replace(R.id.fragment_container, fragment, TAG);
         ft.commit();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        MainFragment mainFragment = (MainFragment) getSupportFragmentManager().findFragmentByTag(MainFragment.TAG);
+        if (mainFragment != null) {
+            mainFragment.changeArguments(intent.getExtras());
+        }
     }
 
     @Override

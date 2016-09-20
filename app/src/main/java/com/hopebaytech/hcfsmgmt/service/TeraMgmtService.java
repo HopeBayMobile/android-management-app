@@ -624,12 +624,13 @@ public class TeraMgmtService extends Service {
             Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio + ", ratio=" + ratio);
             if (ratio >= Integer.valueOf(notifyRatio)) {
                 if (!isNotified) {
+                    int flag = NotificationEvent.FLAG_OPEN_APP;
                     int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
                     String notifyTitle = getString(R.string.app_name);
                     String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
                     Bundle extras = new Bundle();
-                    extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
-                    NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, extras);
+                    extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
+                    NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, flag, extras);
 
                     editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
                 }
@@ -940,8 +941,9 @@ public class TeraMgmtService extends Service {
         String notifyTitle = getString(R.string.app_name);
         String notifyContent = getString(R.string.notify_exceed_pin_max);
 
+        int flag = NotificationEvent.FLAG_OPEN_APP;
         Bundle extras = new Bundle();
-        extras.putBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, true);
-        NotificationEvent.notify(this, idNotify, notifyTitle, notifyContent, extras);
+        extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
+        NotificationEvent.notify(this, idNotify, notifyTitle, notifyContent, flag, extras);
     }
 }
