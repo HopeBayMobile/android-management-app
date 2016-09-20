@@ -488,9 +488,8 @@ public class FileMgmtFragment extends Fragment {
                         progress = (ProgressBar) dialog.findViewById(R.id.progress_circle);
                     }
                     progress.setVisibility(View.GONE);
-                } else {
-                    mProgressCircle.setVisibility(View.GONE);
                 }
+                mProgressCircle.setVisibility(View.GONE);
             }
         });
     }
@@ -1221,7 +1220,7 @@ public class FileMgmtFragment extends Fragment {
         @SuppressWarnings("rawtypes")
         private RecyclerView.Adapter mBaseAdapter;
         private SparseArray<Section> mSections = new SparseArray<>();
-//        private long totalSpace;
+        //        private long totalSpace;
 //        private long freeSpace;
         public boolean isFirstCircleAnimated = true;
 
@@ -1379,7 +1378,7 @@ public class FileMgmtFragment extends Fragment {
                             public void run() {
                                 if (hcfsStatInfo != null) {
                                     long totalSpace = hcfsStatInfo.getTeraTotal();
-                                    long freeSpace = totalSpace -  hcfsStatInfo.getTeraUsed();
+                                    long freeSpace = totalSpace - hcfsStatInfo.getTeraUsed();
                                     updateSection(sectionViewHolder, totalSpace, freeSpace, isFirstCircleAnimated);
                                 }
                                 if (isFirstCircleAnimated) {
