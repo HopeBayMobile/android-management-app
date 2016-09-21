@@ -15,6 +15,7 @@ import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 import org.json.JSONException;
@@ -44,7 +45,7 @@ public class MgmtPollingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        int interval = intent.getIntExtra("interval", -1);
+        int interval = intent.getIntExtra(MgmtPollingUtils.KEY_INTERVAL, -1);
         Logs.i(CLASSNAME, this.getClass().getName(), String.valueOf(interval));
 
         new PollingThread(interval).start();

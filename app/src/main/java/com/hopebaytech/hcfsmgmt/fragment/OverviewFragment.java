@@ -17,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.Locale;
@@ -232,7 +233,7 @@ public class OverviewFragment extends Fragment {
                                 }
                             }
                         });
-                        Thread.sleep(3000);
+                        Thread.sleep(Interval.UPDATE_OVERVIEW_INFO);
                     } catch (InterruptedException e) {
                         Logs.d(CLASSNAME, "Runnable", "run", "UiRefreshThread is interrupted");
                         break;

@@ -19,7 +19,7 @@ public class TeraIntent {
     public static final String ACTION_ADD_UID_AND_PIN_SYS_APP_WHEN_BOOT_UP = "hbt.intent.action.ADD_UID_AND_PIN_SYS_APP_WHEN_BOOT_UP";
     public static final String ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP = "hbt.intent.action.ADD_UID_TO_DB_AND_UNPIN_USER_APP";
     public static final String ACTION_REMOVE_UID_FROM_DB = "hbt.intent.action.REMOVE_UID_FROM_DB";
-    public static final String ACTION_RESET_XFER = "hbt.intent.action.RESET_XFER";
+    public static final String ACTION_RESET_XFER = "hbt.intent.action.RESET_DATA_XFER";
     public static final String ACTION_ONGOING_NOTIFICATION = "hbt.intent.action.ONGOING_NOTIFICATION";
     public static final String ACTION_PIN_UNPIN_UDPATED_APP = "hbt.intent.action.PIN_UNPIN_UPDATED_APP";
     public static final String ACTION_CHECK_DEVICE_STATUS = "hbt.intent.action.CHECK_DEVICE_STATUS";

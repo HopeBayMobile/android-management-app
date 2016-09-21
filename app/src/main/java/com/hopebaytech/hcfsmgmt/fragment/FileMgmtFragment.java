@@ -81,6 +81,7 @@ import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
@@ -106,10 +107,6 @@ public class FileMgmtFragment extends Fragment {
     private final String CLASSNAME = getClass().getSimpleName();
     private final String EXTERNAL_ANDROID_PATH = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
     private final int GRID_LAYOUT_SPAN_COUNT = 3;
-    private final int INTERVAL_AUTO_REFRESH_UI = 3000;
-    private final int INTERVAL_PROCESS_PIN = 1000;
-    private final int INTERVAL_EXECUTE_API = 1000;
-    private final int INTERVAL_REFRESH = 2000;
 
     private View mView;
     private Context mContext;
@@ -183,7 +180,7 @@ public class FileMgmtFragment extends Fragment {
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(INTERVAL_AUTO_REFRESH_UI);
+                    Thread.sleep(Interval.AUTO_REFRESH_UI);
                     if (mProgressCircle.getVisibility() == View.GONE &&
                             mRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
                             mWaitToExecuteSparseArr.size() == 0 &&
@@ -199,13 +196,13 @@ public class FileMgmtFragment extends Fragment {
         }
     };
 
-    private Runnable mProcessPinRunnable = new Runnable() {
+    private Runnable mCheckPinStatusRunnable = new Runnable() {
 
         @Override
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(INTERVAL_PROCESS_PIN);
+                    Thread.sleep(Interval.CHECK_PIN_STATUS);
                     if (mSectionedRecyclerViewAdapter != null && mWaitToExecuteSparseArr.size() == 0) {
                         try {
                             boolean isProcessDone = true;
@@ -254,18 +251,18 @@ public class FileMgmtFragment extends Fragment {
                             }
 
                             if (mProgressCircle.getVisibility() == View.VISIBLE) {
-                                Logs.d(CLASSNAME, "mProcessPinRunnable", "hideProgress=" + isProcessDone);
+                                Logs.d(CLASSNAME, "mCheckPinStatusRunnable", "hideProgress=" + isProcessDone);
                                 if (isProcessDone) {
                                     dismissProgress();
                                     notifyRecyclerViewItemChanged();
                                 }
                             }
                         } catch (NullPointerException e) {
-                            Logs.e(CLASSNAME, "mProcessPinRunnable", Log.getStackTraceString(e));
+                            Logs.e(CLASSNAME, "mCheckPinStatusRunnable", Log.getStackTraceString(e));
                         }
                     }
                 } catch (InterruptedException e) {
-                    Logs.d(CLASSNAME, "mProcessPinRunnable", "mProcessPinRunnable is interrupted");
+                    Logs.d(CLASSNAME, "mCheckPinStatusRunnable", "mCheckPinStatusRunnable is interrupted");
                     break;
                 }
             }
@@ -327,7 +324,6 @@ public class FileMgmtFragment extends Fragment {
                             UidInfo uidInfo = new UidInfo(appInfo);
                             uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
-                            final int finalI = i;
                             mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
                                 @Override
                                 public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
@@ -380,7 +376,7 @@ public class FileMgmtFragment extends Fragment {
                             mWaitToExecuteSparseArr.remove(key);
                         }
                     }
-                    Thread.sleep(INTERVAL_EXECUTE_API);
+                    Thread.sleep(Interval.EXECUTE_PIN_API);
                 } catch (InterruptedException e) {
                     Logs.d(CLASSNAME, "onCreate", "mApiExecutorThread is interrupted");
                     break;
@@ -663,9 +659,9 @@ public class FileMgmtFragment extends Fragment {
 
         // Start mProcessPinThread
         if (mProcessPinThread == null) {
-            if (mProcessPinRunnable != null) {
+            if (mCheckPinStatusRunnable != null) {
                 if (mCurrentVisible) {
-                    mProcessPinThread = new Thread(mProcessPinRunnable);
+                    mProcessPinThread = new Thread(mCheckPinStatusRunnable);
                     mProcessPinThread.start();
                 }
             }
@@ -811,7 +807,7 @@ public class FileMgmtFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 long currentTime = System.currentTimeMillis();
-                if ((currentTime - lastClickTime) > INTERVAL_REFRESH) {
+                if ((currentTime - lastClickTime) > Interval.NOT_ALLOW_REFRESH) {
                     mSectionedRecyclerViewAdapter.init();
                     if (!isSDCard1) {
                         String itemName = mSpinner.getSelectedItem().toString();
@@ -1788,7 +1784,7 @@ public class FileMgmtFragment extends Fragment {
             }
 
             if (mProcessPinThread == null) {
-                mProcessPinThread = new Thread(mProcessPinRunnable);
+                mProcessPinThread = new Thread(mCheckPinStatusRunnable);
                 mProcessPinThread.start();
             }
 
