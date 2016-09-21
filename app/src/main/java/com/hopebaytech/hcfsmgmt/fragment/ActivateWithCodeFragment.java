@@ -26,6 +26,7 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
@@ -116,27 +117,6 @@ public class ActivateWithCodeFragment extends Fragment {
                     mWorkHandler.post(new Runnable() {
                         @Override
                         public void run() {
-//                            final int authType = getArguments().getInt(ActivateWoCodeFragment.KEY_AUTH_TYPE);
-//                            String imei = HCFSMgmtUtils.getEncryptedDeviceImei(HCFSMgmtUtils.getDeviceImei(mContext));
-//                            final MgmtCluster.IAuthParam authParam;
-//                            if (authType == MgmtCluster.GOOGLE_AUTH) {
-//                                String authCode = getArguments().getString(ActivateWoCodeFragment.KEY_AUTH_CODE);
-//                                MgmtCluster.GoogleAuthParam googleAuthParam = new MgmtCluster.GoogleAuthParam();
-//                                googleAuthParam.setAuthCode(authCode);
-//                                googleAuthParam.setAuthBackend(MgmtCluster.GOOGLE_AUTH_BACKEND);
-//                                authParam = googleAuthParam;
-//                            } else {
-//                                MgmtCluster.UserAuthParam userAuthParam = new MgmtCluster.UserAuthParam();
-//                                userAuthParam.setUsername(username);
-//                                userAuthParam.setPassword(getArguments().getString(ActivateWoCodeFragment.KEY_PASSWORD));
-//                                authParam = userAuthParam;
-//                            }
-//                            authParam.setImei(imei);
-//                            authParam.setVendor(Build.BRAND);
-//                            authParam.setModel(Build.MODEL);
-//                            authParam.setAndroidVersion(Build.VERSION.RELEASE);
-//                            authParam.setHcfsVersion(getString(R.string.tera_version));
-//                            authParam.setActivateCode(activateCode);
                             MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
                             registerParam.setActivateCode(activateCode);
 
@@ -171,7 +151,6 @@ public class ActivateWithCodeFragment extends Fragment {
                                                 @Override
                                                 public void run() {
                                                     dismissProgressDialog();
-//                                                    if (failed) {
                                                     if (!isSuccess) {
                                                         mErrorMessage.setText(R.string.activate_failed);
                                                     } else {
@@ -191,7 +170,7 @@ public class ActivateWithCodeFragment extends Fragment {
 
                                     dismissProgressDialog();
 
-                                    int errorMsgResId = R.string.activate_incorrect_activation_code;
+                                    int errorMsgResId = R.string.activate_failed;
                                     if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
                                         if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
                                             String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
@@ -204,7 +183,11 @@ public class ActivateWithCodeFragment extends Fragment {
                                             errorMsgResId = R.string.activate_failed_not_supported_device;
                                         } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
                                             errorMsgResId = R.string.activate_failed_device_expired;
+                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.MAPPING_EXISTED)) {
+                                            errorMsgResId = R.string.activate_failed_device_in_use;
                                         }
+                                    } else {
+                                        errorMsgResId = HTTPErrorMessage.getErrorMessageResId(deviceServiceInfo.getResponseCode());
                                     }
                                     mErrorMessage.setText(errorMsgResId);
                                 }

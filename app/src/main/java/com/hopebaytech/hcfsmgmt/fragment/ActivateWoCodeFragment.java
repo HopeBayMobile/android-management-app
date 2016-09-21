@@ -47,6 +47,7 @@ import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
@@ -457,6 +458,8 @@ public class ActivateWoCodeFragment extends Fragment {
                                         } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.MAPPING_EXISTED)) {
                                             errorMsgResId = R.string.activate_failed_device_in_use;
                                         }
+                                    } else {
+                                        errorMsgResId = HTTPErrorMessage.getErrorMessageResId(deviceServiceInfo.getResponseCode());
                                     }
                                     mErrorMessage.setText(errorMsgResId);
 
