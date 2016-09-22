@@ -83,7 +83,6 @@ public class ChangeAccountActivity extends AppCompatActivity {
     private String mAccountEmail;
     private String mAccountName;
     private String mAccountPhotoUrl;
-    private String mJwtToken;
 
     /**
      * Bool to track whether the app is already resolving an error
@@ -154,51 +153,6 @@ public class ChangeAccountActivity extends AppCompatActivity {
                             @Override
                             public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
                                 changeAccount(authResultInfo.getToken());
-
-//                                new Thread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        boolean isSuccess = false;
-//                                        String imei = HCFSMgmtUtils.getDeviceImei(ChangeAccountActivity.this);
-//                                        final DeviceServiceInfo deviceServiceInfo =
-//                                                MgmtCluster.switchAccount(authResultInfo.getToken(), mNewServerAuthCode, imei);
-//                                        if (deviceServiceInfo != null) {
-//                                            AccountInfo accountInfo = new AccountInfo();
-//                                            accountInfo.setName(mAccountName);
-//                                            accountInfo.setEmail(mAccountEmail);
-//                                            accountInfo.setImgUrl(mAccountPhotoUrl);
-//
-//                                            AccountDAO accountDAO = AccountDAO.getInstance(ChangeAccountActivity.this);
-//                                            accountDAO.clear();
-//                                            accountDAO.insert(accountInfo);
-//
-//                                            TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
-//                                            TeraAppConfig.enableApp(ChangeAccountActivity.this);
-//
-//                                            String url = deviceServiceInfo.getBackend().getUrl();
-//                                            String token = deviceServiceInfo.getBackend().getToken();
-//                                            HCFSMgmtUtils.setSwiftToken(url, token);
-//
-//                                            isSuccess = true;
-//                                        }
-//
-//                                        final boolean isSuccessful = isSuccess;
-//                                        runOnUiThread(new Runnable() {
-//                                            @Override
-//                                            public void run() {
-//                                                if (isSuccessful) {
-//                                                    Intent intent = new Intent(ChangeAccountActivity.this, MainActivity.class);
-//                                                    startActivity(intent);
-//                                                    finish();
-//                                                } else {
-//                                                    signOut();
-//                                                    mErrorMsg.setText(R.string.change_account_failed);
-//                                                }
-//                                                dismissProgressDialog();
-//                                            }
-//                                        });
-//                                    }
-//                                }).start();
                             }
 
                             @Override
@@ -206,9 +160,9 @@ public class ChangeAccountActivity extends AppCompatActivity {
                                 Logs.e(CLASSNAME, "onAuthFailed",
                                         "responseCode=" + authResultInfo.getResponseCode() +
                                                 ", responseContent=" + authResultInfo.getMessage());
+                                signOut();
                                 mErrorMsg.setText(R.string.change_account_failed);
                                 dismissProgressDialog();
-
                             }
                         });
                         authProxy.auth();
@@ -362,15 +316,12 @@ public class ChangeAccountActivity extends AppCompatActivity {
                             });
                         }
 
-                        // Sign out previous account first
-//                        signOut();
-
                         dismissProgressDialog();
                     }
 
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult result) {
-                        Logs.d(CLASSNAME, "onConnectionFailed", "");
+                        Logs.d(CLASSNAME, "onConnectionFailed", null);
                         if (!mResolvingError) {
                             if (result.hasResolution()) {
                                 try {
@@ -668,7 +619,11 @@ public class ChangeAccountActivity extends AppCompatActivity {
                 mSnackbar.show();
             }
         }
-
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        signOut();
+    }
 }
