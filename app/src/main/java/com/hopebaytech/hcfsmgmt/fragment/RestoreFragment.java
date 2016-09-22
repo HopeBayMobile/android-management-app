@@ -650,7 +650,7 @@ public class RestoreFragment extends Fragment {
     }
 
     private void restoreDevice(String sourceImei) {
-        Logs.d(CLASSNAME, "restoreDevice", "imei=" + sourceImei);
+        Logs.d(CLASSNAME, "restoreDevice", "sourceImei=" + sourceImei);
         if (mJwtToken != null) {
             restoreDeviceWithJwtToken(mJwtToken, sourceImei);
         } else {
@@ -661,11 +661,12 @@ public class RestoreFragment extends Fragment {
     private void restoreDeviceWithJwtToken(final String jwtToken, final String sourceImei) {
         mProgressDialogUtils.show(getString(R.string.processing_msg));
 
+        String currentImei = HCFSMgmtUtils.getDeviceImei(mContext);
         MgmtCluster.SwitchDeviceBackendParam param =
                 new MgmtCluster.SwitchDeviceBackendParam(mContext);
         param.setSourceImei(sourceImei);
         MgmtCluster.SwitchDeviceBackendProxy proxy =
-                new MgmtCluster.SwitchDeviceBackendProxy(param, jwtToken);
+                new MgmtCluster.SwitchDeviceBackendProxy(param, currentImei, jwtToken);
         proxy.setOnSwitchDeviceBackendListener(new MgmtCluster.SwitchDeviceBackendProxy.
                 OnSwitchDeviceBackendListener() {
             @Override

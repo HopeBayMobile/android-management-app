@@ -497,9 +497,11 @@ public class MgmtCluster {
 
         private OnSwitchDeviceBackendListener listener;
         private SwitchDeviceBackendParam params;
+        private String currentImei;
         private String jwtToken;
 
-        public SwitchDeviceBackendProxy(SwitchDeviceBackendParam params, String jwtToken) {
+        public SwitchDeviceBackendProxy(SwitchDeviceBackendParam params, String currentImei, String jwtToken) {
+            this.currentImei = currentImei;
             this.params = params;
             this.jwtToken = jwtToken;
         }
@@ -521,7 +523,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final DeviceServiceInfo info = switchDeviceBackend(params);
+                    final DeviceServiceInfo info = switchDeviceBackend();
                     if (info.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
                             @Override
@@ -541,12 +543,11 @@ public class MgmtCluster {
             }).start();
         }
 
-        private DeviceServiceInfo switchDeviceBackend(SwitchDeviceBackendParam params) {
+        private DeviceServiceInfo switchDeviceBackend() {
             IHttpProxy httpProxyImpl = null;
             DeviceServiceInfo deviceServiceInfo = new DeviceServiceInfo();
             try {
-                String imei = this.params.sourceImei;
-                String url = DEVICE_API + imei + "/switch_device_backend/";
+                String url = DEVICE_API + currentImei + "/switch_device_backend/";
 
                 httpProxyImpl = HttpProxy.newInstance();
                 httpProxyImpl.setUrl(url);
