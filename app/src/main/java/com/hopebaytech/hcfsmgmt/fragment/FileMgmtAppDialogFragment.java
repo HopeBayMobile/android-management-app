@@ -75,15 +75,15 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
             TextView appName = (TextView) view.findViewById(R.id.app_name);
             appName.setText(appInfo.getName());
 
-            final ImageView fileDirPinIcon = (ImageView) view.findViewById(R.id.app_pin_icon);
-            fileDirPinIcon.setImageDrawable(appInfo.getPinUnpinImage(itemInfo.isPinned()));
-            fileDirPinIcon.setOnClickListener(new View.OnClickListener() {
+            final ImageView appPinIcon = (ImageView) view.findViewById(R.id.app_pin_icon);
+            appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(itemInfo.isPinned()));
+            appPinIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     boolean isPinned = !itemInfo.isPinned();
                     boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
                     if (allowPinUnpin) {
-                        fileDirPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
+                        appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
                     }
                 }
             });
@@ -221,13 +221,6 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
                 numCloud += externalDirInfo.getNumCloud();
             }
         }
-
-//        FileDirStatusInfo externalDirInfo = getDirStatusInfo(appInfo.getExternalDirList());
-//        if (externalDirInfo != null) {
-//            numLocal += externalDirInfo.getNumLocal();
-//            numHybrid += externalDirInfo.getNumHybrid();
-//            numCloud += externalDirInfo.getNumCloud();
-//        }
 
         int numTotal = numLocal + numHybrid + numCloud;
         String ratio = numLocal + "/" + numTotal + " (local/total)";
