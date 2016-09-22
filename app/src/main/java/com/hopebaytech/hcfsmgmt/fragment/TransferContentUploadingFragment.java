@@ -115,7 +115,7 @@ public class TransferContentUploadingFragment extends Fragment {
                         while (true) {
                             HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
                             final int connStatus = HCFSConnStatus.getConnStatus(mContext, hcfsStatInfo);
-                            ((Activity)mContext).runOnUiThread(new Runnable() {
+                            ((Activity) mContext).runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     displayNetworkStatus(connStatus);
