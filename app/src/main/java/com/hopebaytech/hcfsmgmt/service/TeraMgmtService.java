@@ -643,7 +643,8 @@ public class TeraMgmtService extends Service {
     }
 
     /**
-     * Send an ongoing notification to show HCFS network status and storage usage
+     * Send an ongoing notification to show Tera connection status and used space, then continually
+     * update the notification information util Tera app is back to foreground.
      */
     private void startOngoingNotificationService(Intent intent) {
         boolean isOnGoing = intent.getBooleanExtra(TeraIntent.KEY_ONGOING, false);
@@ -652,7 +653,6 @@ public class TeraMgmtService extends Service {
                 mOngoingThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        final long FIVE_MINUTES_IN_MILLISECONDS = Interval.MINUTE * 5;
                         while (true) {
                             try {
                                 HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
@@ -682,7 +682,7 @@ public class TeraMgmtService extends Service {
                                     int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
                                     NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
                                 }
-                                Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
+                                Thread.sleep(Interval.UPDATE_NOTIFICATION_INFO);
                             } catch (InterruptedException e) {
                                 break;
                             }
@@ -910,10 +910,13 @@ public class TeraMgmtService extends Service {
                                 String url = backend.getString("url");
                                 String token = backend.getString("token");
                                 HCFSMgmtUtils.setSwiftToken(url, token);
-                            } else {
-                                // Other situation is passed to MgmtPollingService.
+                            } else { // Other situation is handled by MgmtPollingService.
+                                // Stop the the running service if exists.
+                                MgmtPollingUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
+
+                                // Start a new polling service
                                 MgmtPollingUtils.startPollingService(TeraMgmtService.this,
-                                        Interval.TOKEN_EXPIRED_CHECK_STATE, MgmtPollingService.class);
+                                        Interval.CHECK_DEVICE_SERVICE_WHEN_TOKEN_EXPIRED, MgmtPollingService.class);
                             }
                         } catch (JSONException e) {
                             Logs.e(CLASSNAME, "onGetDeviceInfoSuccessful", Log.getStackTraceString(e));

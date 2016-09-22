@@ -19,6 +19,7 @@ import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.service.MgmtPollingService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
@@ -51,7 +52,9 @@ public class TransferContentWaitingFragment extends Fragment {
 
         // Start polling service to check device status (need to register a BroadcastReceiver for
         // receiving intent with TeraIntent.ACTION_TRANSFER_COMPLETED action.)
-        MgmtPollingUtils.startPollingService(getActivity(), 10, MgmtPollingService.class);
+        MgmtPollingUtils.startPollingService(getActivity(),
+                Interval.WAIT_RESTORE_AFTER_TRANSFER_DEVICE,
+                MgmtPollingService.class);
     }
 
     @Nullable

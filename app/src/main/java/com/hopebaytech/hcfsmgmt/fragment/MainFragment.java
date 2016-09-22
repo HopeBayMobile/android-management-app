@@ -564,7 +564,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         super.onPause();
         Intent intentService = new Intent(mContext, TeraMgmtService.class);
         intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
-//        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, true);
         mContext.startService(intentService);
     }
