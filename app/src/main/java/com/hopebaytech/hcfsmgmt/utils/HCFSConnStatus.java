@@ -11,7 +11,7 @@ import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 
 /**
  * @author Aaron
- * Created by Aaron on 2016/5/4.
+ *         Created by Aaron on 2016/5/4.
  */
 public class HCFSConnStatus {
 
@@ -21,9 +21,9 @@ public class HCFSConnStatus {
     public static final int TRANS_IN_PROGRESS = 2;
     public static final int TRANS_SLOW = 3;
 
-    public static final int DATA_TRANSFER_NONE = 0;
-    public static final int DATA_TRANSFER_IN_PROGRESS = 1;
-    public static final int DATA_TRANSFER_SLOW = 2;
+    private static final int DATA_TRANSFER_NONE = 0;
+    private static final int DATA_TRANSFER_IN_PROGRESS = 1;
+    private static final int DATA_TRANSFER_SLOW = 2;
 
     public static int getConnStatus(Context context, HCFSStatInfo statInfo) {
         boolean syncWifiOnlyPref = true;
@@ -71,6 +71,13 @@ public class HCFSConnStatus {
                 }
             }
         }
+    }
+
+    public static boolean isAvailable(Context context, HCFSStatInfo statInfo) {
+        int connStatus = getConnStatus(context, statInfo);
+        return connStatus == HCFSConnStatus.TRANS_NORMAL ||
+                connStatus == HCFSConnStatus.TRANS_IN_PROGRESS ||
+                connStatus == HCFSConnStatus.TRANS_SLOW;
     }
 
 }

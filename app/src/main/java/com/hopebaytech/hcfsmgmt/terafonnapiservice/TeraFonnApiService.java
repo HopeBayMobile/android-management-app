@@ -411,17 +411,12 @@ public class TeraFonnApiService extends Service {
     }
 
     private int getPackageStatus(String packageName) {
-        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-        int connStatus = HCFSConnStatus.getConnStatus(TeraFonnApiService.this, statInfo);
-        if (connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
-                connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
-                connStatus == HCFSConnStatus.TRANS_NORMAL) {
+        if (HCFSConnStatus.isAvailable(TeraFonnApiService.this, HCFSMgmtUtils.getHCFSStatInfo())) {
             return AppStatus.STATUS_AVAILABLE;
         } else {
             try {
                 UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
                 UidInfo uidInfo = uidDAO.get(packageName);
-                //uidDAO.close();
 
                 ApplicationInfo applicationInfo = getPackageManager().
                         getApplicationInfo(packageName, PackageManager.GET_META_DATA);
@@ -596,13 +591,7 @@ public class TeraFonnApiService extends Service {
         int progress = -1;
 
         try {
-            Boolean cloudConn = new JSONObject(HCFSApiUtils.getHCFSStat()).getJSONObject("data").getBoolean("cloud_conn");
-            //log(Log.DEBUG, CLASSNAME, "getAppProgress", String.valueOf(cloudConn));
-            HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-            int connStatus = HCFSConnStatus.getConnStatus(TeraFonnApiService.this, statInfo);
-            if ((connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
-                    connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
-                    connStatus == HCFSConnStatus.TRANS_NORMAL) && cloudConn) {
+            if (HCFSConnStatus.isAvailable(TeraFonnApiService.this, HCFSMgmtUtils.getHCFSStatInfo())) {
                 String dataDir = getDataDir(packageName);
                 if (dataDir.equals("")) return -1;
 

@@ -132,11 +132,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public int getAppStatus() {
-        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-        int connStatus = HCFSConnStatus.getConnStatus(mContext, statInfo);
-        if (connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
-                connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
-                connStatus == HCFSConnStatus.TRANS_NORMAL) {
+        if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
             return AppStatus.STATUS_AVAILABLE;
         } else {
             int externalLocationStatus = getExternalLocationStatus();

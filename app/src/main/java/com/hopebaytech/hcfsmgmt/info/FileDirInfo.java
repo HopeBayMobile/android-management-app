@@ -181,12 +181,7 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     public int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
-//        Logs.d(CLASS_NAME, "getFileDirStatus", "itemName=" + getName() + ", locationStatus=" + locationStatus);
-        HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-        int connStatus = HCFSConnStatus.getConnStatus(mContext, statInfo);
-        if (connStatus == HCFSConnStatus.DATA_TRANSFER_IN_PROGRESS ||
-                connStatus == HCFSConnStatus.DATA_TRANSFER_SLOW ||
-                connStatus == HCFSConnStatus.TRANS_NORMAL) {
+        if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
             return AppStatus.STATUS_AVAILABLE;
         } else {
             if (locationStatus == LocationStatus.LOCAL) {
