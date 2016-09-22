@@ -198,7 +198,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                         mWorkHandler.post(new Runnable() {
                                             @Override
                                             public void run() {
-                                                final Bitmap iconBitmap = downloadUserIcon(finalIconUrl);
+                                                final Bitmap iconBitmap = downloadUserIconWithRetry(finalIconUrl);
                                                 if (iconBitmap != null) {
                                                     mUiHandler.post(new Runnable() {
                                                         @Override
@@ -233,6 +233,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             }
 
         }
+    }
+
+    private Bitmap downloadUserIconWithRetry(String iconUrl) {
+        Bitmap bitmap = null;
+        for (int i = 0; i < 3; i++) {
+            bitmap = downloadUserIcon(iconUrl);
+            if (bitmap != null) {
+                break;
+            }
+        }
+        return bitmap;
     }
 
     private Bitmap downloadUserIcon(String iconUrl) {
