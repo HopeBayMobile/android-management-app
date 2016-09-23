@@ -720,12 +720,12 @@ public class FileMgmtFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mSectionedRecyclerViewAdapter.init();
+                mFilePathNavigationLayout.removeAllViews();
+
                 String itemName = parent.getSelectedItem().toString();
                 if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_apps))) {
-//                    mFilePathNavigationLayout.setVisibility(View.GONE);
                     showTypeContent(R.string.file_mgmt_spinner_apps);
                 } else if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_data_type))) {
-                    mFilePathNavigationLayout.setVisibility(View.GONE);
                     showTypeContent(R.string.file_mgmt_spinner_data_type);
                 } else if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_files))) {
                     String logMsg = "FILE_ROOT_DIR_PATH=" + FILE_ROOT_DIR_PATH;
@@ -743,12 +743,10 @@ public class FileMgmtFragment extends Fragment {
 //                    });
 
                     mCurrentFile = new File(FILE_ROOT_DIR_PATH);
-                    mFilePathNavigationLayout.removeAllViews();
                     FilePathNavigationView currentPathView = new FilePathNavigationView(mContext);
                     currentPathView.setText(Html.fromHtml("<u>" + mFileRootDirName + "</u>"));
                     currentPathView.setCurrentFilePath(mCurrentFile.getAbsolutePath());
                     mFilePathNavigationLayout.addView(currentPathView);
-                    mFilePathNavigationLayout.setVisibility(View.VISIBLE);
                     showTypeContent(R.string.file_mgmt_spinner_files);
                 }
             }
@@ -853,7 +851,8 @@ public class FileMgmtFragment extends Fragment {
                     public void run() {
                         Logs.w(CLASSNAME, "showTypeContent", "itemInfoList.size()=" + itemInfoList.size());
                         mSectionedRecyclerViewAdapter.setSubAdapterItems(itemInfoList);
-                        mSectionedRecyclerViewAdapter.mBaseAdapter.notifyDataSetChanged();
+//                        mSectionedRecyclerViewAdapter.mBaseAdapter.notifyDataSetChanged();
+                        mSectionedRecyclerViewAdapter.notifyDataSetChanged();
                     }
                 });
 
@@ -863,17 +862,17 @@ public class FileMgmtFragment extends Fragment {
 
     public class GridRecyclerViewAdapter extends RecyclerView.Adapter<GridRecyclerViewAdapter.GridRecyclerViewHolder> {
 
-        private ArrayList<ItemInfo> itemInfoList;
+        private ArrayList<ItemInfo> mItemInfoList;
         private LruCache<Integer, Bitmap> mMemoryCache;
         private ThreadPoolExecutor mExecutor;
 
-        public GridRecyclerViewAdapter() {
-            itemInfoList = new ArrayList<>();
+        private GridRecyclerViewAdapter() {
+            mItemInfoList = new ArrayList<>();
             init();
         }
 
-        public GridRecyclerViewAdapter(@Nullable ArrayList<ItemInfo> items) {
-            this.itemInfoList = (items == null) ? new ArrayList<ItemInfo>() : items;
+        private GridRecyclerViewAdapter(@Nullable ArrayList<ItemInfo> items) {
+            this.mItemInfoList = (items == null) ? new ArrayList<ItemInfo>() : items;
             init();
         }
 
@@ -882,17 +881,17 @@ public class FileMgmtFragment extends Fragment {
             mMemoryCache = MemoryCacheFactory.createMemoryCache();
         }
 
-        public void shutdownExecutor() {
+        private void shutdownExecutor() {
             mExecutor.shutdownNow();
         }
 
-        public ArrayList<ItemInfo> getItemInfoList() {
-            return itemInfoList;
+        private ArrayList<ItemInfo> getItemInfoList() {
+            return mItemInfoList;
         }
 
         private void clear() {
-            if (itemInfoList != null) {
-                itemInfoList.clear();
+            if (mItemInfoList != null) {
+                mItemInfoList.clear();
             }
 
             if (mMemoryCache != null) {
@@ -900,19 +899,20 @@ public class FileMgmtFragment extends Fragment {
             }
         }
 
-        public void setItemData(@Nullable ArrayList<ItemInfo> items) {
-            this.itemInfoList = (items == null) ? new ArrayList<ItemInfo>() : items;
+        private void setItemData(@Nullable ArrayList<ItemInfo> items) {
+            this.mItemInfoList = (items == null) ? new ArrayList<ItemInfo>() : items;
         }
 
         @Override
         public int getItemCount() {
-            return itemInfoList.size();
+            Logs.d(CLASSNAME, "GridRecyclerViewAdapter", "getItemCount", "itemInfoList.size()=" + mItemInfoList.size());
+            return mItemInfoList.size();
         }
 
         @Override
         public void onBindViewHolder(GridRecyclerViewHolder holder, int position) {
 
-            final ItemInfo itemInfo = itemInfoList.get(position);
+            final ItemInfo itemInfo = mItemInfoList.get(position);
             itemInfo.setViewHolder(holder);
             holder.setItemInfo(itemInfo);
             holder.itemName.setText(itemInfo.getName());
@@ -928,13 +928,13 @@ public class FileMgmtFragment extends Fragment {
             return new GridRecyclerViewHolder(view);
         }
 
-        public class GridRecyclerViewHolder extends RecyclerViewHolder implements OnClickListener, OnLongClickListener {
+        class GridRecyclerViewHolder extends RecyclerViewHolder implements OnClickListener, OnLongClickListener {
 
-            protected View rootView;
-            protected TextView itemName;
-            protected ImageView iconView;
+            private View rootView;
+            private TextView itemName;
+            private ImageView iconView;
 
-            public GridRecyclerViewHolder(View itemView) {
+            private GridRecyclerViewHolder(View itemView) {
                 super(itemView);
                 rootView = itemView;
                 iconView = (ImageView) itemView.findViewById(R.id.iconView);
@@ -996,12 +996,12 @@ public class FileMgmtFragment extends Fragment {
         private ThreadPoolExecutor mExecutor;
         private LruCache<Integer, Bitmap> mMemoryCache;
 
-        public LinearRecyclerViewAdapter() {
+        private LinearRecyclerViewAdapter() {
             mItemInfoList = new ArrayList<>();
             init();
         }
 
-        public LinearRecyclerViewAdapter(@Nullable ArrayList<ItemInfo> items) {
+        private LinearRecyclerViewAdapter(@Nullable ArrayList<ItemInfo> items) {
             this.mItemInfoList = (items == null) ? new ArrayList<ItemInfo>() : items;
             init();
         }
@@ -1011,16 +1011,17 @@ public class FileMgmtFragment extends Fragment {
             mMemoryCache = MemoryCacheFactory.createMemoryCache();
         }
 
-        public void shutdownExecutor() {
+        private void shutdownExecutor() {
             mExecutor.shutdownNow();
         }
 
         @Override
         public int getItemCount() {
+            Logs.d(CLASSNAME, "LinearRecyclerViewAdapter", "getItemCount", "mItemInfoList.size()=" + mItemInfoList.size());
             return mItemInfoList.size();
         }
 
-        public ArrayList<ItemInfo> getItemInfoList() {
+        private ArrayList<ItemInfo> getItemInfoList() {
             return mItemInfoList;
         }
 
@@ -1074,15 +1075,15 @@ public class FileMgmtFragment extends Fragment {
             }
         }
 
-        public class LinearRecyclerViewHolder extends RecyclerViewHolder implements OnClickListener, OnLongClickListener {
+        class LinearRecyclerViewHolder extends RecyclerViewHolder implements OnClickListener, OnLongClickListener {
 
-            protected View rootView;
-            protected TextView itemName;
-            protected ImageView iconView;
-            protected ImageView pinView;
-            protected TextView datePinnedTextView;
+            private View rootView;
+            private TextView itemName;
+            private ImageView iconView;
+            private ImageView pinView;
+            private TextView datePinnedTextView;
 
-            public LinearRecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
+            private LinearRecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
                 super(itemView, executor);
                 rootView = itemView;
                 itemName = (TextView) itemView.findViewById(R.id.itemName);
@@ -1160,40 +1161,43 @@ public class FileMgmtFragment extends Fragment {
         private static final int SECTION_TYPE = 0;
         private RecyclerView.Adapter mBaseAdapter;
         private SparseArray<Section> mSections = new SparseArray<>();
-        public boolean isFirstCircleAnimated = true;
+        private boolean isFirstCircleAnimated = true;
 
-        public SectionedRecyclerViewAdapter(final RecyclerView.Adapter mBaseAdapter) {
+        private boolean isDataObserverRegistered;
+        private RecyclerView.AdapterDataObserver mDataObserver = new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                hasChildItem = mBaseAdapter.getItemCount() > 0;
+                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onChanged", "mBaseAdapter.getItemCount()=" + mBaseAdapter.getItemCount());
+                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onChanged", "hasChildItem=" + hasChildItem);
+                checkSubAdapterItem();
+            }
+
+            @Override
+            public void onItemRangeChanged(int positionStart, int itemCount) {
+                hasChildItem = mBaseAdapter.getItemCount() > 0;
+                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeChanged", "hasChildItem=" + hasChildItem);
+                checkSubAdapterItem();
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                hasChildItem = mBaseAdapter.getItemCount() > 0;
+                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeInserted", "hasChildItem=" + hasChildItem);
+                checkSubAdapterItem();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                hasChildItem = mBaseAdapter.getItemCount() > 0;
+                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeRemoved", "hasChildItem=" + hasChildItem);
+                checkSubAdapterItem();
+            }
+        };
+
+        private SectionedRecyclerViewAdapter(final RecyclerView.Adapter mBaseAdapter) {
             this.mBaseAdapter = mBaseAdapter;
-            registerSubAdapterDataObserver(mBaseAdapter);
-            registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                @Override
-                public void onChanged() {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
-                    Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onChanged", "hasChildItem=" + hasChildItem);
-                    checkSubAdapterItem();
-                }
-
-                @Override
-                public void onItemRangeChanged(int positionStart, int itemCount) {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
-                    Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeChanged", "hasChildItem=" + hasChildItem);
-                    checkSubAdapterItem();
-                }
-
-                @Override
-                public void onItemRangeInserted(int positionStart, int itemCount) {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
-                    Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeInserted", "hasChildItem=" + hasChildItem);
-                    checkSubAdapterItem();
-                }
-
-                @Override
-                public void onItemRangeRemoved(int positionStart, int itemCount) {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
-                    Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeRemoved", "hasChildItem=" + hasChildItem);
-                    checkSubAdapterItem();
-                }
-            });
+            registerAdapterDataObserver();
         }
 
         private void init() {
@@ -1201,6 +1205,15 @@ public class FileMgmtFragment extends Fragment {
             isFirstCircleAnimated = true;
             shutdownSubAdapterExecutor();
             subAdapterInit();
+        }
+
+        private void registerAdapterDataObserver() {
+            if (isDataObserverRegistered) {
+                unregisterAdapterDataObserver(mDataObserver);
+                isDataObserverRegistered = false;
+            }
+            registerAdapterDataObserver(mDataObserver);
+            isDataObserverRegistered = true;
         }
 
         private void subAdapterInit() {
@@ -1252,34 +1265,9 @@ public class FileMgmtFragment extends Fragment {
             } else {
                 ((LinearRecyclerViewAdapter) mBaseAdapter).clear();
             }
-
         }
 
-        private void registerSubAdapterDataObserver(final RecyclerView.Adapter mBaseAdapter) {
-            mBaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                @Override
-                public void onChanged() {
-                    notifyDataSetChanged();
-                }
-
-                @Override
-                public void onItemRangeChanged(int positionStart, int itemCount) {
-                    notifyItemRangeChanged(positionStart, itemCount);
-                }
-
-                @Override
-                public void onItemRangeInserted(int positionStart, int itemCount) {
-                    notifyItemRangeInserted(positionStart, itemCount);
-                }
-
-                @Override
-                public void onItemRangeRemoved(int positionStart, int itemCount) {
-                    notifyItemRangeRemoved(positionStart, itemCount);
-                }
-            });
-        }
-
-        public void setGridLayoutManagerSpanSize() {
+        private void setGridLayoutManagerSpanSize() {
             final GridLayoutManager gridLayoutManager = (GridLayoutManager) (mRecyclerView.getLayoutManager());
             gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
@@ -1294,7 +1282,7 @@ public class FileMgmtFragment extends Fragment {
             return (hasChildItem ? mSections.size() + mBaseAdapter.getItemCount() : 0);
         }
 
-        public void updateSection(SectionedViewHolder sectionViewHolder, long totalSpace, long freeSpace, boolean showAnimation) {
+        private void updateSection(SectionedViewHolder sectionViewHolder, long totalSpace, long freeSpace, boolean showAnimation) {
             float toShowValue = ((totalSpace - freeSpace) * 1f / totalSpace) * 100f;
             CircleDisplay cd = sectionViewHolder.circleDisplay;
             cd.showValue(toShowValue, 100f, totalSpace, showAnimation);
@@ -1372,16 +1360,16 @@ public class FileMgmtFragment extends Fragment {
                     : mBaseAdapter.getItemId(sectionedPositionToPosition(position));
         }
 
-        public void setBaseAdapter(RecyclerView.Adapter mBaseAdapter) {
+        private void setBaseAdapter(RecyclerView.Adapter mBaseAdapter) {
             this.mBaseAdapter = mBaseAdapter;
-            registerSubAdapterDataObserver(mBaseAdapter);
+            registerAdapterDataObserver();
         }
 
         public SparseArray<Section> getSections() {
             return mSections;
         }
 
-        public void setSections(Section[] sections) {
+        private void setSections(Section[] sections) {
             mSections.clear();
 
             Arrays.sort(sections, new Comparator<Section>() {
@@ -1401,11 +1389,11 @@ public class FileMgmtFragment extends Fragment {
 
         }
 
-        public boolean isSectionHeaderPosition(int position) {
+        private boolean isSectionHeaderPosition(int position) {
             return mSections.get(position) != null;
         }
 
-        public int sectionedPositionToPosition(int sectionedPosition) {
+        private int sectionedPositionToPosition(int sectionedPosition) {
             if (isSectionHeaderPosition(sectionedPosition)) {
                 return RecyclerView.NO_POSITION;
             }
@@ -1421,15 +1409,15 @@ public class FileMgmtFragment extends Fragment {
             return sectionedPosition + offset;
         }
 
-        public class SectionedViewHolder extends RecyclerView.ViewHolder {
+        private class SectionedViewHolder extends RecyclerView.ViewHolder {
 
-            public View rootView;
-            public CircleDisplay circleDisplay;
-            public TextView storageType;
-            public TextView totalSpace;
-            public TextView freeSpace;
+            private View rootView;
+            private CircleDisplay circleDisplay;
+            private TextView storageType;
+            private TextView totalSpace;
+            private TextView freeSpace;
 
-            public SectionedViewHolder(View itemView) {
+            private SectionedViewHolder(View itemView) {
                 super(itemView);
                 rootView = itemView;
                 circleDisplay = (CircleDisplay) itemView.findViewById(R.id.circle_display_view);
@@ -1443,9 +1431,9 @@ public class FileMgmtFragment extends Fragment {
     }
 
     public class Section {
-        public int firstPosition;
-        public int sectionedPosition;
-        public SectionedRecyclerViewAdapter.SectionedViewHolder viewHolder;
+        private int firstPosition;
+        private int sectionedPosition;
+        private SectionedRecyclerViewAdapter.SectionedViewHolder viewHolder;
 
         public Section(int firstPosition) {
             this.firstPosition = firstPosition;
@@ -1456,12 +1444,12 @@ public class FileMgmtFragment extends Fragment {
     public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
         private final int[] ATTRS = new int[]{android.R.attr.listDivider};
-        public static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
-        public static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
+        private static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
+        private static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
         private Drawable mDivider;
         private int mOrientation;
 
-        public DividerItemDecoration(Context context, int orientation) {
+        private DividerItemDecoration(Context context, int orientation) {
             final TypedArray typedArray = context.obtainStyledAttributes(ATTRS);
             mDivider = typedArray.getDrawable(0);
             typedArray.recycle();
@@ -1484,7 +1472,7 @@ public class FileMgmtFragment extends Fragment {
             }
         }
 
-        public void drawVertical(Canvas c, RecyclerView parent) {
+        private void drawVertical(Canvas c, RecyclerView parent) {
             final int left = parent.getPaddingLeft();
             final int right = parent.getWidth() - parent.getPaddingRight();
 
@@ -1499,7 +1487,7 @@ public class FileMgmtFragment extends Fragment {
             }
         }
 
-        public void drawHorizontal(Canvas c, RecyclerView parent) {
+        private void drawHorizontal(Canvas c, RecyclerView parent) {
             final int top = parent.getPaddingTop();
             final int bottom = parent.getHeight() - parent.getPaddingBottom();
 
@@ -1980,27 +1968,27 @@ public class FileMgmtFragment extends Fragment {
 
     public abstract class RecyclerViewHolder extends RecyclerView.ViewHolder {
 
-        protected ItemInfo itemInfo;
+        ItemInfo itemInfo;
         private ThreadPoolExecutor executor;
 
-        public RecyclerViewHolder(View itemView) {
+        private RecyclerViewHolder(View itemView) {
             super(itemView);
         }
 
-        public RecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
+        private RecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
             this(itemView);
             this.executor = executor;
         }
 
-        public void setItemInfo(ItemInfo itemInfo) {
+        void setItemInfo(ItemInfo itemInfo) {
             this.itemInfo = itemInfo;
         }
 
-        public ItemInfo getItemInfo() {
+        ItemInfo getItemInfo() {
             return this.itemInfo;
         }
 
-        public boolean pinUnpinItem(final boolean isPinned) {
+        boolean pinUnpinItem(final boolean isPinned) {
             boolean allowPinUnpin = true;
             itemInfo.setPinned(isPinned);
             if (itemInfo instanceof AppInfo) {
