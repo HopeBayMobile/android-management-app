@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -38,11 +40,15 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED = "pref_insufficient_pin_space_notified";
     public static final String PREF_SHOW_BA_LOGGING_OPTION = "pref_show_ba_logging_option";
     public static final String PREF_ASK_MOBILE_WITHOUT_WIFI_ONLY = "pref_ask_mobile_without_wifi_only";
+    public static final String PREF_ASK_CONFIRM_TURN_OFF_WIFI_ONLY = "pref_ask_confirm_turn_off_wifi_only";
 
     public static final String KEY_RATIO = "ratio";
 
     public static final int REQUEST_CODE_RATIO = 0;
     public static final int REQUEST_ABOUT_FRAGMENT = 1;
+    public static final int REQUEST_CANCEL_WIFI_ONLY = 2;
+
+    private Handler mWorkHandler;
 
     private Context mContext;
     private CheckBox mSyncWifiOnly;
@@ -66,6 +72,10 @@ public class SettingsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        HandlerThread handlerThread = new HandlerThread(CLASSNAME);
+        handlerThread.start();
+        mWorkHandler = new Handler(handlerThread.getLooper());
     }
 
     @Nullable
@@ -102,12 +112,17 @@ public class SettingsFragment extends Fragment {
         mSyncWifiOnly.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                HCFSMgmtUtils.changeCloudSyncStatus(mContext, isChecked);
-                SettingsInfo settingsInfo = new SettingsInfo();
-                settingsInfo.setKey(SettingsFragment.PREF_SYNC_WIFI_ONLY);
-                settingsInfo.setValue(String.valueOf(isChecked));
-                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
-                mSettingsDAO.update(settingsInfo);
+                setSyncWifiOnly(isChecked);
+
+                if (!isChecked) {
+                    SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(mContext);
+                    boolean isAsked = settings.getBoolean(SettingsFragment.PREF_ASK_CONFIRM_TURN_OFF_WIFI_ONLY, false);
+                    if (!isAsked) {
+                        ConfirmWhenTurnOffWifiOnlyDialogFragment fragment = ConfirmWhenTurnOffWifiOnlyDialogFragment.newInstance();
+                        fragment.setTargetFragment(SettingsFragment.this, REQUEST_CANCEL_WIFI_ONLY);
+                        fragment.show(getFragmentManager(), ConfirmWhenTurnOffWifiOnlyDialogFragment.TAG);
+                    }
+                }
             }
         });
 
@@ -120,11 +135,17 @@ public class SettingsFragment extends Fragment {
         mNotifyConnFailedRecovery.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(mContext);
-                SettingsInfo settingsInfo = new SettingsInfo();
+                final SettingsInfo settingsInfo = new SettingsInfo();
                 settingsInfo.setKey(PREF_NOTIFY_CONN_FAILED_RECOVERY);
                 settingsInfo.setValue(String.valueOf(isChecked));
-                mSettingsDAO.update(settingsInfo);
+
+                mWorkHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(mContext);
+                        mSettingsDAO.update(settingsInfo);
+                    }
+                });
             }
         });
 
@@ -184,19 +205,24 @@ public class SettingsFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_RATIO) {
             if (resultCode == Activity.RESULT_OK) {
-                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
                 HCFSMgmtUtils.stopNotifyLocalStorageUsedRatioAlarm(mContext);
                 HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
 
-                String ratio = data.getStringExtra(KEY_RATIO);
+                final String ratio = data.getStringExtra(KEY_RATIO);
                 String summary = getString(R.string.settings_local_storage_used_ratio, ratio);
                 TextView summaryText = (TextView) mNotifyLocalStorageUsedRatio.findViewById(R.id.notify_local_storage_used_ratio_summary);
                 summaryText.setText(summary);
 
-                SettingsInfo settingsInfo = new SettingsInfo();
-                settingsInfo.setKey(PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
-                settingsInfo.setValue(String.valueOf(ratio.replace("%", "")));
-                mSettingsDAO.update(settingsInfo);
+                mWorkHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
+                        SettingsInfo settingsInfo = new SettingsInfo();
+                        settingsInfo.setKey(PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+                        settingsInfo.setValue(String.valueOf(ratio.replace("%", "")));
+                        mSettingsDAO.update(settingsInfo);
+                    }
+                });
             }
         } else if (requestCode == REQUEST_ABOUT_FRAGMENT) {
             if (resultCode == Activity.RESULT_OK) {
@@ -207,7 +233,28 @@ public class SettingsFragment extends Fragment {
                 else
                     mBa.setVisibility(View.GONE);
             }
+        } else if (requestCode == REQUEST_CANCEL_WIFI_ONLY) {
+            if (resultCode == Activity.RESULT_CANCELED) {
+                setSyncWifiOnly(true);
+            }
         }
+    }
+
+    private void setSyncWifiOnly(boolean isChecked) {
+        mSyncWifiOnly.setChecked(isChecked);
+
+        HCFSMgmtUtils.changeCloudSyncStatus(mContext, isChecked);
+        final SettingsInfo settingsInfo = new SettingsInfo();
+        settingsInfo.setKey(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+        settingsInfo.setValue(String.valueOf(isChecked));
+
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
+                mSettingsDAO.update(settingsInfo);
+            }
+        });
     }
 
     @Override

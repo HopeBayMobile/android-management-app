@@ -174,6 +174,8 @@
     <string name="settings_extra_log_for_ba">Extra log for BA</string>
     <string name="settings_extra_log_for_ba_enabled">Extra log for BA has been enabled.</string>
     <string name="settings_snackbar_no_available_email_app_found">No available email app and/or email account. Please at least install an email app and set a valid email account.</string>
+    <string name="settings_confirm_when_turn_off_wifi_only_title">Turn on mobile data for transferring data?</string>
+    <string name="settings_confirm_when_turn_off_wifi_only_message">Using mobile data connection while transferring data can result in additional charges. Please check your data plan with mobile carrier.</string>
 
     <string name="change_account_require_new_account">Same as the current account. Changing account operation will not be performed.</string>
     <string name="change_account_start_to_change">Change</string>

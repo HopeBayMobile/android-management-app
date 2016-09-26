@@ -33,7 +33,7 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
  */
 public class TransContentNetworkDialogFragment extends DialogFragment {
 
-    public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
+    public static final String TAG = TransContentNetworkDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private Context mContext;
 

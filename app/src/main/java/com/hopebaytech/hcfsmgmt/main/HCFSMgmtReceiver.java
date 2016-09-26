@@ -133,7 +133,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 }
             }
         } else {
-            Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isTeraAppLogin);
+            Logs.i(CLASSNAME, "onReceive", "isTeraAppLogin=" + isTeraAppLogin);
         }
 
         switch (action) {
