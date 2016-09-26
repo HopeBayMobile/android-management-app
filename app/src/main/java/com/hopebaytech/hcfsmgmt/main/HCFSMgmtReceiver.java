@@ -156,6 +156,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             }
         } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
             // Pin or unpin an update app according to pin_status field in uid.db
+            HCFSMgmtUtils.notifyAppListChange();
             String packageName = intent.getData().getSchemeSpecificPart();
             Intent intentService = new Intent(context, TeraMgmtService.class);
             int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
