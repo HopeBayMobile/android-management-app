@@ -60,6 +60,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 // Reset BA logging option to invisible
                 editor.putBoolean(SettingsFragment.PREF_SHOW_BA_LOGGING_OPTION, false);
                 editor.apply();
+
+                // Show Tera ongoing notification on system boot-up
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
+                intentService.putExtra(TeraIntent.KEY_ONGOING, true);
+                context.startService(intentService);
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 // Detect network status changed and enable/disable data sync to cloud
                 boolean syncWifiOnly = true;
@@ -84,7 +90,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                         context.startService(intentService);
                     }
                 }
-            }  else if (action.equals(TeraIntent.ACTION_PIN_DATA_TYPE_FILE)) {
+            } else if (action.equals(TeraIntent.ACTION_PIN_DATA_TYPE_FILE)) {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 intentService.setAction(TeraIntent.ACTION_PIN_DATA_TYPE_FILE);
                 context.startService(intentService);
@@ -122,17 +128,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             Intent bootCompletedIntent = new Intent(context, TeraMgmtService.class);
             bootCompletedIntent.setAction(Intent.ACTION_BOOT_COMPLETED);
             context.startService(bootCompletedIntent);
-
-//            // Add uid and pin system app
-//            Intent addUidAndPinSystemAppIntent = new Intent(context, TeraMgmtService.class);
-//            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
-//            context.startService(addUidAndPinSystemAppIntent);
-
-//            // Update app external dir list in uid.db
-//            Intent updateAppExternalDirIntent = new Intent(context, TeraMgmtService.class);
-//            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
-//                    TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR);
-//            context.startService(updateAppExternalDirIntent);
         } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
