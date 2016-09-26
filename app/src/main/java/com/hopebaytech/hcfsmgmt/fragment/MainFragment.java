@@ -84,7 +84,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private String sdcard1_path;
     private boolean isSDCard1;
     private boolean isExitApp = false;
-    private String toViewPagerIndex = "ViewPagerIndex";
+    private Bundle mArguments;
 
     public static MainFragment newInstance() {
         return new MainFragment();
@@ -101,6 +101,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         mUiHandler = new Handler();
+
+        mArguments = getArguments();
     }
 
     @Nullable
@@ -500,59 +502,44 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         Intent intentService = new Intent(mContext, TeraMgmtService.class);
         intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
-//        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
-//        intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, false);
 
-        // Jump to App/File page if app is launched from insufficient notification
-        Bundle args = getArguments();
-        if (args != null) {
-            boolean insufficientPinSpace = args.getBoolean(HCFSMgmtUtils.BUNDLE_KEY_INSUFFICIENT_PIN_SPACE, false);
-            if (insufficientPinSpace) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                Thread.sleep(500);
-                                Fragment fragment = mPagerAdapter.getFragment(0);
-                                if (fragment != null && fragment.isVisible()) {
-                                    Thread.sleep(500);
-                                    mViewPager.setCurrentItem(1, true);
-                                    break;
-                                }
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }).start();
-            }
-            // Jump to specific page
-            final int toViewPager = args.getInt(toViewPagerIndex, -1);
+        // Jump to specific page, 0 Overview, 1 FILE/APP, 2 SETTINGS, 3 HELP.
+        if (mArguments != null) {
+            final int toViewPager = mArguments.getInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, -1);
             if (toViewPager > -1 && toViewPager < mPagerAdapter.getCount()) {
-                new Thread(new Runnable() {
+                mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         while (true) {
                             try {
                                 Thread.sleep(500);
-                                Fragment fragment = mPagerAdapter.getFragment(0);
-                                if (fragment != null && fragment.isVisible()) {
+
+                                boolean hasFragmentVisible = false;
+                                for (int i = 0; i < mPagerAdapter.getCount(); i++) {
+                                    Fragment fragment = mPagerAdapter.getFragment(i);
+                                    if (fragment != null && fragment.isVisible()) {
+                                        hasFragmentVisible = true;
+                                        break;
+                                    }
+                                }
+
+                                if (hasFragmentVisible) {
                                     Thread.sleep(500);
                                     mViewPager.setCurrentItem(toViewPager, true);
+                                    mArguments = null;
                                     break;
                                 }
                             } catch (InterruptedException e) {
-                                e.printStackTrace();
+                                Logs.e(CLASSNAME, "onResume", Log.getStackTraceString(e));
                             }
                         }
                     }
-                }).start();
+                });
             }
         }
 
@@ -593,6 +580,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         if (fragment != null) {
             fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+    }
+
+    public void changeArguments(Bundle args) {
+        mArguments = args;
     }
 
 }

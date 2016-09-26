@@ -61,7 +61,7 @@ public class HCFSMgmtUtils {
     public static final int NOTIFY_ID_CHECK_DEVICE_STATUS = 4;
     public static final int NOTIFY_ID_INSUFFICIENT_PIN_SPACE = 5;
 
-    public static final String BUNDLE_KEY_INSUFFICIENT_PIN_SPACE = "bundle_key_insufficient_pin_space";
+    public static final String BUNDLE_KEY_VIEW_PAGER_INDEX = "ViewPagerIndex"; // ViewPagerIndex cannot be renamed.
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
     public static final String PREF_TERA_APP_LOGIN = "pref_tera_app_login";
