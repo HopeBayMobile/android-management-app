@@ -46,6 +46,9 @@
     <string name="nav_about">關於</string>
     <string name="nav_help">幫助</string>
 
+    <string name="user_info_current_account">Current account:</string>
+    <string name="user_info_change_account_button">Change Account</string>
+
     <string name="notify_cloud_connected">雲端連線已恢復</string>
     <string name="notify_cloud_disconnected">雲端連線中斷，請檢查。</string>
     <string name="notify_upload_completed">本地端資料已上傳至雲端空間。</string>

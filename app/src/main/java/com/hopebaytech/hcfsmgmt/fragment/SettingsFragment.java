@@ -54,7 +54,6 @@ public class SettingsFragment extends Fragment {
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
     private LinearLayout mNotifyLocalStorageUsedRatio;
-    private LinearLayout mChangeAccount;
     private LinearLayout mTransferContent;
     private LinearLayout mAbout;
     private LinearLayout mBa;
@@ -92,7 +91,6 @@ public class SettingsFragment extends Fragment {
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
-        mChangeAccount = (LinearLayout) view.findViewById(R.id.switch_account);
         mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
         mAbout = (LinearLayout) view.findViewById(R.id.about);
         mBa = (LinearLayout) view.findViewById(R.id.extra_log_for_ba_layout);
@@ -166,14 +164,6 @@ public class SettingsFragment extends Fragment {
                 LocalSpaceUsageRatioDialogFragment fragment = LocalSpaceUsageRatioDialogFragment.newInstance();
                 fragment.setTargetFragment(SettingsFragment.this, REQUEST_CODE_RATIO);
                 fragment.show(getFragmentManager(), LocalSpaceUsageRatioDialogFragment.TAG);
-            }
-        });
-
-        mChangeAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ChangeAccountDialogFragment dialogFragment = ChangeAccountDialogFragment.newInstance();
-                dialogFragment.show(getFragmentManager(), ChangeAccountDialogFragment.TAG);
             }
         });
 

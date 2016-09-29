@@ -46,6 +46,9 @@
     <string name="nav_about">ABOUT</string>
     <string name="nav_help">HELP</string>
 
+    <string name="user_info_current_account">Current account:</string>
+    <string name="user_info_change_account_button">Change Account</string>
+
     <string name="notify_cloud_connected">Cloud connection restored</string>
     <string name="notify_cloud_disconnected">Cloud connection interrupted. Please check.</string>
     <string name="notify_upload_completed">Upload local data to cloud completed.</string>
@@ -137,7 +140,7 @@
     <string name="settings_notify_local_storage_used_ratio_title">Local space usage</string>
     <string name="settings_execute">Execute</string>
     <string name="settings_execute_title">Download to run</string>
-    <string name="settings_change_account_title">Change account</string>
+    <string name="settings_change_account_title">Change Account</string>
     <string name="settings_change_account_warning_msg">To change the account, Tera will log out your current account first. Continue?</string>
     <string name="settings_local_storage_used_ratio">Send notification if local space usage reaches <b>%s</b>.</string>
     <string name="settings_transfer_content">Transfer data</string>

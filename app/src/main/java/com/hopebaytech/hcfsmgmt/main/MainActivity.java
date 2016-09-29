@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Logs.d(CLASSNAME, "onCreate", null);
         setContentView(R.layout.main_container);
         switchFragment();
     }

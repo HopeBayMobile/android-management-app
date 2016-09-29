@@ -615,6 +615,9 @@ public class HCFSMgmtUtils {
                         continue;
                     }
                     ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+                    if (uidInfo == null) {
+                        continue;
+                    }
                     uidInfo.setExternalDir(externalPathList);
                     uidDAO.update(uidInfo, UidDAO.EXTERNAL_DIR_COLUMN);
                 }
