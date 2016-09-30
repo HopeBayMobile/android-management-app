@@ -23,7 +23,7 @@ import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
  */
 public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
 
-    public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
+    public static final String TAG = AppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private Context mContext;
 

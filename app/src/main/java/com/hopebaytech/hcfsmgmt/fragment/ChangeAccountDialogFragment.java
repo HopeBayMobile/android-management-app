@@ -21,7 +21,7 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
  */
 public class ChangeAccountDialogFragment extends DialogFragment {
 
-    public static final String TAG = FileMgmtAppDialogFragment.class.getSimpleName();
+    public static final String TAG = AppDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
     private Activity mActivity;
 

@@ -31,6 +31,11 @@ public class AppInfo extends ItemInfo implements Cloneable {
     private boolean isSystemApp;
     private Context context;
 
+    /**
+     * None real time data status of this app, only be updated when getAppStatus() is called.
+     */
+    private int dataStatus;
+
     public AppInfo(Context context) {
         super(context);
         this.context = context;
@@ -116,12 +121,29 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public int getAppStatus() {
-        if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
-                HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
-                getExternalDirLocationStatus() == LocationStatus.LOCAL) {
-            return ItemStatus.AVAILABLE;
+        int dataStatus;
+        if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
+            dataStatus = DataStatus.AVAILABLE;
+        } else {
+            int externalLocationStatus = getExternalDirLocationStatus();
+            if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
+                    HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
+                    externalLocationStatus == LocationStatus.LOCAL) {
+                dataStatus = DataStatus.AVAILABLE;
+            } else {
+                dataStatus = DataStatus.UNAVAILABLE;
+            }
         }
-        return ItemStatus.UNAVAILABLE;
+        this.dataStatus = dataStatus;
+        return dataStatus;
+    }
+
+    /**
+     * @return The data status of this app, but the data status is not guaranteed to be correct.
+     * @see AppInfo#dataStatus
+     */
+    public int getLazyAppStatus() {
+        return dataStatus;
     }
 
     private int getExternalDirLocationStatus() {

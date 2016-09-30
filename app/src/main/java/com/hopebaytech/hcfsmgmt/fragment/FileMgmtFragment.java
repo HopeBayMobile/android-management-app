@@ -112,8 +112,8 @@ public class FileMgmtFragment extends Fragment {
     private Context mContext;
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressCircle;
-    private LinearLayout mEmptyFolder;
     private ProgressDialog mProgressDialog;
+//    private LinearLayout mEmptyFolder;
     private TextView mNoDataMsg;
     private Spinner mSpinner;
     private ImageView mRefresh;
@@ -767,9 +767,9 @@ public class FileMgmtFragment extends Fragment {
 
                 String itemName = parent.getSelectedItem().toString();
                 if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_apps))) {
-                    showTypeContent(R.string.file_mgmt_spinner_apps);
+                    showContent(R.string.file_mgmt_spinner_apps);
                 } else if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_data_type))) {
-                    showTypeContent(R.string.file_mgmt_spinner_data_type);
+                    showContent(R.string.file_mgmt_spinner_data_type);
                 } else if (itemName.equals(mContext.getString(R.string.file_mgmt_spinner_files))) {
                     String logMsg = "FILE_ROOT_DIR_PATH=" + FILE_ROOT_DIR_PATH;
                     Logs.d(CLASSNAME, "onActivityCreated", logMsg);
@@ -790,7 +790,7 @@ public class FileMgmtFragment extends Fragment {
                     currentPathView.setText(Html.fromHtml("<u>" + mFileRootDirName + "</u>"));
                     currentPathView.setCurrentFilePath(mCurrentFile.getAbsolutePath());
                     mFilePathNavigationLayout.addView(currentPathView);
-                    showTypeContent(R.string.file_mgmt_spinner_files);
+                    showContent(R.string.file_mgmt_spinner_files);
                 }
             }
 
@@ -865,7 +865,7 @@ public class FileMgmtFragment extends Fragment {
     }
 
     public void showContent(final int stringResId) {
-        Logs.d(CLASSNAME, "showTypeContent", null);
+        Logs.d(CLASSNAME, "showContent", null);
 
         mWorkerHandler.post(new Runnable() {
             @Override
@@ -885,11 +885,10 @@ public class FileMgmtFragment extends Fragment {
                         itemInfoList = new ArrayList<>();
                 }
 
-                if (!isRunOnCorrectDisplayType(resourceStringId)) {
+                if (!isRunOnCorrectDisplayType(stringResId)) {
                     return;
                 }
 
-                final ArrayList<ItemInfo> finalItemInfoList = itemInfoList;
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {

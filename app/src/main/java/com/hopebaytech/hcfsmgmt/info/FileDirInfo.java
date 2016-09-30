@@ -19,10 +19,8 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
@@ -193,12 +191,12 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
     private int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
         if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return AppStatus.AVAILABLE;
+            return DataStatus.AVAILABLE;
         } else {
             if (locationStatus == LocationStatus.LOCAL) {
-                return ItemStatus.AVAILABLE;
+                return DataStatus.AVAILABLE;
             } else {
-                return ItemStatus.UNAVAILABLE;
+                return DataStatus.UNAVAILABLE;
             }
         }
     }
@@ -225,7 +223,7 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     @Override
     public int getIconAlpha() {
-        return getFileDirStatus() == ItemStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
+        return getFileDirStatus() == DataStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
     public boolean isDirectory() {

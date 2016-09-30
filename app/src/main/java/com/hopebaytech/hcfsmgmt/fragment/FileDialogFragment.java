@@ -34,9 +34,9 @@ import java.io.File;
  * @author Aaron
  *         Created by Aaron on 2016/3/30.
  */
-public class FileMgmtFileDirDialogFragment extends DialogFragment {
+public class FileDialogFragment extends DialogFragment {
 
-    public static final String TAG = FileMgmtFileDirDialogFragment.class.getSimpleName();
+    public static final String TAG = FileDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
 
     private FileMgmtFragment.RecyclerViewHolder mViewHolder;
@@ -46,8 +46,8 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
 
     private Context mContext;
 
-    public static FileMgmtFileDirDialogFragment newInstance() {
-        return new FileMgmtFileDirDialogFragment();
+    public static FileDialogFragment newInstance() {
+        return new FileDialogFragment();
     }
 
     @Override
