@@ -27,14 +27,14 @@
         <item>@string/nav_help</item>
     </string-array>
     <string-array name="file_mgmt_spinner">
-        <item>@string/file_mgmt_spinner_apps</item>
+        <item>@string/app_file_spinner_apps</item>
         <!--<item>@string/file_mgmt_spinner_data_type</item>-->
-        <item>@string/file_mgmt_spinner_files</item>
+        <item>@string/app_file_spinner_files</item>
     </string-array>
     <string-array name="file_mgmt_list_data_types">
-        <item>@string/file_mgmt_list_data_type_image</item>
-        <item>@string/file_mgmt_list_data_type_video</item>
-        <item>@string/file_mgmt_list_data_type_audio</item>
+        <item>@string/app_file_list_data_type_image</item>
+        <item>@string/app_file_list_data_type_video</item>
+        <item>@string/app_file_list_data_type_audio</item>
     </string-array>
 
     <!-- Link is not defined. -->

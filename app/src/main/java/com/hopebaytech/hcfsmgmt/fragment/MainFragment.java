@@ -252,8 +252,8 @@ public class MainFragment extends Fragment {
     public void onBackPressed() {
         int position = mViewPager.getCurrentItem();
         Fragment fragment = mPagerAdapter.getFragment(position);
-        if (fragment instanceof FileMgmtFragment) {
-            boolean isProcessed = ((FileMgmtFragment) fragment).onBackPressed();
+        if (fragment instanceof AppFileFragment) {
+            boolean isProcessed = ((AppFileFragment) fragment).onBackPressed();
             if (!isProcessed) {
                 exitApp();
             }

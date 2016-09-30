@@ -106,7 +106,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         }
 
         final TextView fileDirSize = (TextView) view.findViewById(R.id.file_dir_size);
-        String size = String.format(getString(R.string.file_mgmt_dialog_data_size), getString(R.string.file_mgmt_dialog_calculating));
+        String size = String.format(getString(R.string.app_file_dialog_data_size), getString(R.string.app_file_dialog_calculating));
         fileDirSize.setText(size);
         mCalculateFileDirSizeThread = new Thread(new Runnable() {
             @Override
@@ -119,7 +119,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
                     ((Activity) mContext).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            fileDirSize.setText(String.format(getString(R.string.file_mgmt_dialog_data_size), formatSize));
+                            fileDirSize.setText(String.format(getString(R.string.app_file_dialog_data_size), formatSize));
                         }
                     });
                     Thread.sleep(0);
@@ -131,7 +131,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         mCalculateFileDirSizeThread.start();
 
         final TextView fileDirDataRatio = (TextView) view.findViewById(R.id.file_dir_data_ratio);
-        String ratio = String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), getString(R.string.file_mgmt_dialog_calculating));
+        String ratio = String.format(getString(R.string.app_file_dialog_local_data_ratio), getString(R.string.app_file_dialog_calculating));
         fileDirDataRatio.setText(ratio);
         mCalculateFileDirDataRatioThread = new Thread(new Runnable() {
             @Override
@@ -197,7 +197,7 @@ public class FileMgmtFileDirDialogFragment extends DialogFragment {
         }
         int numTotal = numLocal + numHybrid + numCloud;
         String ratio = numLocal + "/" + numTotal + " (local/total)";
-        return String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), ratio);
+        return String.format(getString(R.string.app_file_dialog_local_data_ratio), ratio);
     }
 
     @Nullable
