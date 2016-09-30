@@ -3,6 +3,7 @@
 /app/src/main/libs
 /app/src/main/obj
 /app/app.iml
+app/app.iml
 
 # Built application files
 /build

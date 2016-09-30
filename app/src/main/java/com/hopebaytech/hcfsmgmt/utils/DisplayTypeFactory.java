@@ -51,7 +51,6 @@ public class DisplayTypeFactory {
 							}
 							externalPathList.add(path);
 							externalPkgNameMap.put(pkgName, externalPathList);
-//					externalPkgNameMap.put(pkgName, path);
 						}
 					}
 				}
@@ -77,13 +76,9 @@ public class DisplayTypeFactory {
 				appInfo.setApplicationInfo(applicationInfo);
 				appInfo.setName(applicationInfo.loadLabel(pm).toString());
 				if (externalPkgNameMap.containsKey(applicationInfo.packageName)) {
-//					appInfo.setExternalDir(externalPkgNameMap.get(applicationInfo.packageName));
 					appInfo.setExternalDirList(externalPkgNameMap.get(applicationInfo.packageName));
 				}
 
-//                UidDAO uidDAO = new UidDAO(mContext);
-//                boolean isAppPinned = HCFSMgmtUtils.isAppPinned(appInfo, uidDAO);
-//				appInfo.setPinned(isAppPinned);
 				itemInfoList.add(appInfo);
 			}
 		}

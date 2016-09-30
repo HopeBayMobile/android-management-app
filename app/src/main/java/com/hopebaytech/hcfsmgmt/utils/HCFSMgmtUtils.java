@@ -635,6 +635,9 @@ public class HCFSMgmtUtils {
                 UidDAO uidDAO = UidDAO.getInstance(context);
                 for (String pkgName : externalPkgNameMap.keySet()) {
                     UidInfo uidInfo = uidDAO.get(pkgName);
+                    if (uidInfo == null) {
+                        continue;
+                    }
                     ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
                     uidInfo.setExternalDir(externalPathList);
                     uidDAO.update(uidInfo, UidDAO.EXTERNAL_DIR_COLUMN);
