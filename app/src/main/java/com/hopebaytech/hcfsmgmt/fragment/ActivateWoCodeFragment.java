@@ -437,26 +437,29 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                     int errorMsgResId = R.string.activate_failed;
                                     if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                                        if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
-                                            Bundle bundle = new Bundle();
-                                            bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
-                                            bundle.putString(KEY_USERNAME, email);
-                                            bundle.putString(KEY_AUTH_CODE, serverAuthCode);
-                                            bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
+                                        String errorCode = deviceServiceInfo.getErrorCode();
+                                        if (errorCode != null) {
+                                            if (errorCode.equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                                                Bundle bundle = new Bundle();
+                                                bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
+                                                bundle.putString(KEY_USERNAME, email);
+                                                bundle.putString(KEY_AUTH_CODE, serverAuthCode);
+                                                bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
 
-                                            ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                            fragment.setArguments(bundle);
+                                                ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                                                fragment.setArguments(bundle);
 
-                                            FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                            ft.replace(R.id.fragment_container, fragment);
-                                            ft.commit();
-                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                                                deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                                            errorMsgResId = R.string.activate_failed_not_supported_device;
-                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
-                                            errorMsgResId = R.string.activate_failed_device_expired;
-                                        } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.MAPPING_EXISTED)) {
-                                            errorMsgResId = R.string.activate_failed_device_in_use;
+                                                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                                ft.replace(R.id.fragment_container, fragment);
+                                                ft.commit();
+                                            } else if (errorCode.equals(MgmtCluster.INCORRECT_MODEL) ||
+                                                    deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
+                                                errorMsgResId = R.string.activate_failed_not_supported_device;
+                                            } else if (errorCode.equals(MgmtCluster.DEVICE_EXPIRED)) {
+                                                errorMsgResId = R.string.activate_failed_device_expired;
+                                            } else if (errorCode.equals(MgmtCluster.MAPPING_EXISTED)) {
+                                                errorMsgResId = R.string.activate_failed_device_in_use;
+                                            }
                                         }
                                     } else {
                                         errorMsgResId = HTTPErrorMessage.getErrorMessageResId(deviceServiceInfo.getResponseCode());

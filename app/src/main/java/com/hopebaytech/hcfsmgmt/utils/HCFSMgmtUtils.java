@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class HCFSMgmtUtils {
 
     public static final String TAG = "HopeBay";
@@ -770,6 +772,11 @@ public class HCFSMgmtUtils {
         return encryptedIMEI;
     }
 
+    /**
+     * @param jsonString the encrypted json string which is only encrypted when HTTP response code
+     *                   is {@link HttpsURLConnection#HTTP_OK}.
+     * @return the decrypted json string
+     */
     public static String getDecryptedJsonString(String jsonString) {
         String decryptedJsonString = new String(HCFSApiUtils.getDecryptedJsonString(jsonString));
         Logs.d(CLASSNAME, "getDecryptedJsonString", "decryptedJsonString=" + decryptedJsonString);
