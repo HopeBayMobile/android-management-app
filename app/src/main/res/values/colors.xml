@@ -40,4 +40,17 @@
     <color name="C8">#00af41</color>
     <color name="C9">#012639</color>
 
+    <color name="colorF1">#ffffff</color>
+    <color name="colorF2">#ffffff</color>
+    <color name="colorF3">#4d4d4d</color>
+    <color name="colorF4">#4579bb</color>
+    <color name="colorF5">#ffffff</color>
+    <color name="colorF6">#4d4d4d</color>
+    <color name="colorF7">#77bc1f</color>
+    <color name="colorF8">#4d4d4d</color>
+    <color name="colorF9">#77bc1f</color>
+    <color name="colorF10">#4579bb</color>
+    <color name="colorF11">#b9b9b9</color>
+    <color name="colorF12">#b9b9b9</color>
+
 </resources>
