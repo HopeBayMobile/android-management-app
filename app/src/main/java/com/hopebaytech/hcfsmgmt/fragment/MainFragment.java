@@ -181,7 +181,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                         }
 
                                         GoogleSignInAccount acct = result.getSignInAccount();
-                                        Logs.w(CLASSNAME, "onAuthSuccessful", "acct=" + acct);
+                                        Logs.d(CLASSNAME, "onAuthSuccessful", "acct=" + acct);
                                         if (acct == null) {
                                             return;
                                         }
@@ -190,6 +190,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                         if (acct.getPhotoUrl() != null) {
                                             Uri iconUri = acct.getPhotoUrl();
                                             if (iconUri == null) {
+                                                Logs.d(CLASSNAME, "onAuthSuccessful", "The icon uri is null.");
                                                 return;
                                             } else {
                                                 iconUrl = iconUri.toString();
@@ -201,22 +202,25 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                             @Override
                                             public void run() {
                                                 final Bitmap iconBitmap = downloadUserIconWithRetry(finalIconUrl);
-                                                if (iconBitmap != null) {
-                                                    mUiHandler.post(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            iconImage.setImageBitmap(iconBitmap);
-                                                        }
-                                                    });
-
-                                                    String imgBase64 = BitmapBase64Factory.encodeToBase64(
-                                                            iconBitmap,
-                                                            Bitmap.CompressFormat.PNG,
-                                                            100);
-                                                    accountInfo.setImgBase64(imgBase64);
-                                                    accountInfo.setImgExpiringTime(System.currentTimeMillis() + Interval.DAY);
-                                                    accountDAO.update(accountInfo);
+                                                if (iconBitmap == null) {
+                                                    Logs.d(CLASSNAME, "onAuthSuccessful", "Download user icon failed.");
+                                                    return;
                                                 }
+
+                                                mUiHandler.post(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        iconImage.setImageBitmap(iconBitmap);
+                                                    }
+                                                });
+
+                                                String imgBase64 = BitmapBase64Factory.encodeToBase64(
+                                                        iconBitmap,
+                                                        Bitmap.CompressFormat.PNG,
+                                                        100);
+                                                accountInfo.setImgBase64(imgBase64);
+                                                accountInfo.setImgExpiringTime(System.currentTimeMillis() + Interval.DAY);
+                                                accountDAO.update(accountInfo);
                                             }
                                         });
                                     }
