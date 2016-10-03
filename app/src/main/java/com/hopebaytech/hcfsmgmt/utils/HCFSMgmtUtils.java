@@ -761,6 +761,7 @@ public class HCFSMgmtUtils {
      * @return the decrypted json string
      */
     public static String getDecryptedJsonString(String jsonString) {
+        Logs.d(CLASSNAME, "getDecryptedJsonString", "jsonString=" + jsonString);
         String decryptedJsonString = new String(HCFSApiUtils.getDecryptedJsonString(jsonString));
         Logs.d(CLASSNAME, "getDecryptedJsonString", "decryptedJsonString=" + decryptedJsonString);
         return decryptedJsonString;

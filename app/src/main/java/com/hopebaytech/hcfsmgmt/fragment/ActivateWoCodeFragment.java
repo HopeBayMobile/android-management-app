@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -43,11 +42,9 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.info.RegisterResultInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
@@ -430,44 +427,29 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                 @Override
                                 public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "deviceServiceInfo=" + deviceServiceInfo.toString());
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "deviceServiceInfo=" + deviceServiceInfo);
 
                                     signOut();
                                     dismissProgressDialog();
-
-                                    int errorMsgResId = R.string.activate_failed;
                                     if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
                                         String errorCode = deviceServiceInfo.getErrorCode();
-                                        if (errorCode != null) {
-                                            if (errorCode.equals(MgmtCluster.IMEI_NOT_FOUND)) {
-                                                Bundle bundle = new Bundle();
-                                                bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
-                                                bundle.putString(KEY_USERNAME, email);
-                                                bundle.putString(KEY_AUTH_CODE, serverAuthCode);
-                                                bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
+                                        if (errorCode != null && errorCode.equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                                            Bundle bundle = new Bundle();
+                                            bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
+                                            bundle.putString(KEY_USERNAME, email);
+                                            bundle.putString(KEY_AUTH_CODE, serverAuthCode);
+                                            bundle.putString(KEY_JWT_TOKEN, authResultInfo.getToken());
 
-                                                ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                                                fragment.setArguments(bundle);
+                                            ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
+                                            fragment.setArguments(bundle);
 
-                                                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                                ft.replace(R.id.fragment_container, fragment);
-                                                ft.commit();
-                                            } else if (errorCode.equals(MgmtCluster.INCORRECT_MODEL) ||
-                                                    deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                                                errorMsgResId = R.string.activate_failed_not_supported_device;
-                                            } else if (errorCode.equals(MgmtCluster.DEVICE_EXPIRED)) {
-                                                errorMsgResId = R.string.activate_failed_device_expired;
-                                            } else if (errorCode.equals(MgmtCluster.MAPPING_EXISTED)) {
-                                                errorMsgResId = R.string.activate_failed_device_in_use;
-                                            }
+                                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                            ft.replace(R.id.fragment_container, fragment);
+                                            ft.commit();
                                         }
-                                    } else {
-                                        errorMsgResId = HTTPErrorMessage.getErrorMessageResId(deviceServiceInfo.getResponseCode());
                                     }
-                                    mErrorMessage.setText(errorMsgResId);
-
+                                    mErrorMessage.setText(deviceServiceInfo.getMessage(R.string.activate_failed));
                                 }
-
                             });
                             registerProxy.register();
                         }

@@ -1,10 +1,21 @@
 package com.hopebaytech.hcfsmgmt.info;
 
 import android.content.ContentValues;
+import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.StringRes;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.fragment.ActivateWithCodeFragment;
+import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
@@ -33,12 +44,26 @@ public class DeviceServiceInfo {
     private Backend backend;
     private String errorCode;
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    @StringRes
+    public int getMessage(@StringRes int defaultMsgResId) {
+        int errorMsgResId = defaultMsgResId;
+        if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
+            switch (errorCode) {
+                case MgmtCluster.INCORRECT_MODEL:
+                case MgmtCluster.INCORRECT_VENDOR:
+                    errorMsgResId = R.string.activate_failed_not_supported_device;
+                    break;
+                case MgmtCluster.DEVICE_EXPIRED:
+                    errorMsgResId = R.string.activate_failed_device_expired;
+                    break;
+                case MgmtCluster.MAPPING_EXISTED:
+                    errorMsgResId = R.string.activate_failed_device_in_use;
+                    break;
+            }
+        } else {
+            errorMsgResId = HTTPErrorMessage.getErrorMessageResId(responseCode);
+        }
+        return errorMsgResId;
     }
 
     public int getResponseCode() {
