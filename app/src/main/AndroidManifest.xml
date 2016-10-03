@@ -62,6 +62,14 @@
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="hbt.intent.action.RESET_DATA_XFER" />
+                <action android:name="hbt.intent.action.UPDATE_EXTERNAL_APP_DIR" />
+                <action android:name="hbt.intent.action.NOTIFY_LOCAL_STORAGE_USED_RATIO" />
+                <action android:name="hbt.intent.action.NOTIFY_INSUFFICIENT_PIN_SPACE" />
+                <action android:name="hbt.intent.action.TOKEN_EXPIRED" />
+                <action android:name="hbt.intent.action.EXCEED_PIN_MAX" />
+                <action android:name="hbt.intent.action.RESTORE_STAGE_1" />
+                <action android:name="hbt.intent.action.RESTORE_STAGE_2" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -71,9 +79,6 @@
                 <action android:name="android.intent.action.PACKAGE_REPLACED" />
 
                 <data android:scheme="package" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
