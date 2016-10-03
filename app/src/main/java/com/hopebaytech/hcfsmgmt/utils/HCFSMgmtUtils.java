@@ -94,32 +94,15 @@ public class HCFSMgmtUtils {
         return isPinned;
     }
 
-    public static void stopPinDataTypeFileAlarm(Context context) {
-        Logs.d(CLASSNAME, "stopPinDataTypeFileAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_PIN_DATA_TYPE_FILE);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_DATA_TYPE_FILE);
-
-        int requestCode = RequestCode.PIN_DATA_TYPE_FILE;
-        int flags = PendingIntent.FLAG_CANCEL_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-        pi.cancel();
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(pi);
-    }
-
     public static void startResetXferAlarm(Context context) {
         Logs.d(CLASSNAME, "startResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_RESET_XFER);
+        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
 //        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 //        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
-        int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
+        int requestCode = RequestCode.RESET_XFER;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
@@ -159,7 +142,7 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "stopResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_RESET_XFER);
+        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
 //        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 //        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 

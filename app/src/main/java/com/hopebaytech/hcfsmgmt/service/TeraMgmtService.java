@@ -126,7 +126,7 @@ public class TeraMgmtService extends Service {
                         pinUnpinAgainWhenAppUpdated(intent);
                     } else if (action.equals(TeraIntent.ACTION_REMOVE_UID_FROM_DB)) {
                         removeUidFromDatabase(intent, action);
-                    } else if (action.equals(TeraIntent.ACTION_RESET_XFER)) {
+                    } else if (action.equals(TeraIntent.ACTION_RESET_DATA_XFER)) {
                         HCFSMgmtUtils.resetXfer();
                     } else if (action.equals(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
                         notifyLocalStorageUsedRatio();
