@@ -330,7 +330,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         // Start ResetXferAlarm if it doesn't exist
         Intent intent = new Intent(mContext, HCFSMgmtReceiver.class);
 //        intent.setAction(HCFSMgmtUtils.ACTION_HCFS_MANAGEMENT_ALARM);
-        intent.setAction(TeraIntent.ACTION_RESET_XFER);
+        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
         boolean isResetXferAlarmExist = PendingIntent.getBroadcast(mContext, RequestCode.RESET_XFER,
                 intent, PendingIntent.FLAG_NO_CREATE) != null;
         if (!isResetXferAlarmExist) {

@@ -44,6 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class HCFSMgmtUtils {
 
     public static final String TAG = "HopeBay";
@@ -94,32 +96,15 @@ public class HCFSMgmtUtils {
         return isPinned;
     }
 
-    public static void stopPinDataTypeFileAlarm(Context context) {
-        Logs.d(CLASSNAME, "stopPinDataTypeFileAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_PIN_DATA_TYPE_FILE);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_PIN_DATA_TYPE_FILE);
-
-        int requestCode = RequestCode.PIN_DATA_TYPE_FILE;
-        int flags = PendingIntent.FLAG_CANCEL_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-        pi.cancel();
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(pi);
-    }
-
     public static void startResetXferAlarm(Context context) {
         Logs.d(CLASSNAME, "startResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_RESET_XFER);
+        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
 //        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 //        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
-        int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
+        int requestCode = RequestCode.RESET_XFER;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
         PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
 
@@ -159,7 +144,7 @@ public class HCFSMgmtUtils {
         Logs.d(CLASSNAME, "stopResetXferAlarm", null);
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_RESET_XFER);
+        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
 //        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
 //        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
 
@@ -635,6 +620,9 @@ public class HCFSMgmtUtils {
                 UidDAO uidDAO = UidDAO.getInstance(context);
                 for (String pkgName : externalPkgNameMap.keySet()) {
                     UidInfo uidInfo = uidDAO.get(pkgName);
+                    if (uidInfo == null) {
+                        continue;
+                    }
                     ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
                     uidInfo.setExternalDir(externalPathList);
                     uidDAO.update(uidInfo, UidDAO.EXTERNAL_DIR_COLUMN);
@@ -767,6 +755,11 @@ public class HCFSMgmtUtils {
         return encryptedIMEI;
     }
 
+    /**
+     * @param jsonString the encrypted json string which is only encrypted when HTTP response code
+     *                   is {@link HttpsURLConnection#HTTP_OK}.
+     * @return the decrypted json string
+     */
     public static String getDecryptedJsonString(String jsonString) {
         String decryptedJsonString = new String(HCFSApiUtils.getDecryptedJsonString(jsonString));
         Logs.d(CLASSNAME, "getDecryptedJsonString", "decryptedJsonString=" + decryptedJsonString);

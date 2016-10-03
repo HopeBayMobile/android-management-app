@@ -90,13 +90,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                         context.startService(intentService);
                     }
                 }
-            } else if (action.equals(TeraIntent.ACTION_PIN_DATA_TYPE_FILE)) {
+            } else if (action.equals(TeraIntent.ACTION_RESET_DATA_XFER)) {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
-                intentService.setAction(TeraIntent.ACTION_PIN_DATA_TYPE_FILE);
-                context.startService(intentService);
-            } else if (action.equals(TeraIntent.ACTION_RESET_XFER)) {
-                Intent intentService = new Intent(context, TeraMgmtService.class);
-                intentService.setAction(TeraIntent.ACTION_RESET_XFER);
+                intentService.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
                 context.startService(intentService);
             } else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
