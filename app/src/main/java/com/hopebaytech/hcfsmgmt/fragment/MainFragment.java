@@ -182,8 +182,9 @@ public class MainFragment extends Fragment {
         mPagerAdapter = new PagerAdapter(((MainActivity) mContext).getSupportFragmentManager());
         if (mViewPager != null) {
             mViewPager.setOffscreenPageLimit(3);
-            PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
-            pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(mContext, R.color.C2));
+//            PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
+//            pagerTabStrip.setDrawFullUnderline(false);
+//            pagerTabStrip.invalidate();
             mViewPager.setAdapter(mPagerAdapter);
         }
 

@@ -1803,7 +1803,9 @@ public class FileMgmtFragment extends Fragment {
                     builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, RequestCode.PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                            ActivityCompat.requestPermissions((Activity) mContext,
+                                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                    RequestCode.PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
                         }
                     });
                     builder.setCancelable(false);
