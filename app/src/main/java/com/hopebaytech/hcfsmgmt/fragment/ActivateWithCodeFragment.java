@@ -26,7 +26,6 @@ import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
@@ -166,33 +165,21 @@ public class ActivateWithCodeFragment extends Fragment {
 
                                 @Override
                                 public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
-                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + deviceServiceInfo.toString());
+                                    Logs.e(CLASSNAME, "onRegisterFailed", "registerResultInfo=" + deviceServiceInfo);
 
                                     dismissProgressDialog();
-
-                                    int errorMsgResId = R.string.activate_failed;
                                     if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
                                         String errorCode = deviceServiceInfo.getErrorCode();
-                                        if (errorCode != null) {
-                                            if (errorCode.equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
-                                                String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
-                                                Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(), getString(R.string.activate_with_code_msg), hyperLink));
-                                                mErrorMessage.setMovementMethod(LinkMovementMethod.getInstance());
-                                                mErrorMessage.setText(errorMsg);
-                                                return;
-                                            } else if (errorCode.equals(MgmtCluster.INCORRECT_MODEL) ||
-                                                    deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                                                errorMsgResId = R.string.activate_failed_not_supported_device;
-                                            } else if (errorCode.equals(MgmtCluster.DEVICE_EXPIRED)) {
-                                                errorMsgResId = R.string.activate_failed_device_expired;
-                                            } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.MAPPING_EXISTED)) {
-                                                errorMsgResId = R.string.activate_failed_device_in_use;
-                                            }
+                                        if (errorCode != null && errorCode.equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
+                                            String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
+                                            Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(),
+                                                    getString(R.string.activate_with_code_msg), hyperLink));
+                                            mErrorMessage.setMovementMethod(LinkMovementMethod.getInstance());
+                                            mErrorMessage.setText(errorMsg);
+                                            return;
                                         }
-                                    } else {
-                                        errorMsgResId = HTTPErrorMessage.getErrorMessageResId(deviceServiceInfo.getResponseCode());
                                     }
-                                    mErrorMessage.setText(errorMsgResId);
+                                    mErrorMessage.setText(deviceServiceInfo.getMessage(R.string.activate_failed));
                                 }
 
                             });

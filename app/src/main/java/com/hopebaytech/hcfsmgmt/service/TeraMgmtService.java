@@ -488,43 +488,37 @@ public class TeraMgmtService extends Service {
         getDeviceInfoProxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
             @Override
             public void onGetDeviceServiceInfoSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                try {
-                    String responseContent = deviceServiceInfo.getMessage();
-                    JSONObject result = new JSONObject(responseContent);
-                    String state = result.getString("state");
-                    if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
-                        JSONObject backend = result.getJSONObject("backend");
-                        String url = backend.getString("url");
-                        String token = backend.getString("token");
-                        HCFSMgmtUtils.setSwiftToken(url, token);
-                    } else {
-                        JSONObject piggyback = result.getJSONObject("piggyback");
-                        String category = piggyback.getString("category");
-                        switch (category) {
-                            // Device is not transferred completely, revert device status to "activated" status
-                            case GetDeviceInfo.Category.TX_WAITING:
-                                MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
-                                unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
-                                    @Override
-                                    public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
-                                        Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
-                                    }
+                String state = deviceServiceInfo.getState();
+                DeviceServiceInfo.Backend backend = deviceServiceInfo.getBackend();
+                DeviceServiceInfo.Piggyback piggyback = deviceServiceInfo.getPiggyback();
+                if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
+                    String url = backend.getUrl();
+                    String token = backend.getToken();
+                    HCFSMgmtUtils.setSwiftToken(url, token);
+                } else {
+                    String category = piggyback.getCategory();
+                    switch (category) {
+                        // Device is not transferred completely, revert device status to "activated" status
+                        case GetDeviceInfo.Category.TX_WAITING:
+                            MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
+                            unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
+                                @Override
+                                public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
+                                    Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
+                                }
 
-                                    @Override
-                                    public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
-                                        Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
-                                    }
-                                });
-                                unlockDeviceProxy.unlock();
-                                break;
-                            // Device is already transferred, execute factory reset
-                            case GetDeviceInfo.Category.UNREGISTERED:
-                                FactoryResetUtils.reset(TeraMgmtService.this);
-                                break;
-                        }
+                                @Override
+                                public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
+                                    Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
+                                }
+                            });
+                            unlockDeviceProxy.unlock();
+                            break;
+                        // Device is already transferred, execute factory reset
+                        case GetDeviceInfo.Category.UNREGISTERED:
+                            FactoryResetUtils.reset(TeraMgmtService.this);
+                            break;
                     }
-                } catch (JSONException e) {
-                    Logs.e(CLASSNAME, "checkDeviceStatus", Log.getStackTraceString(e));
                 }
             }
 
@@ -908,26 +902,20 @@ public class TeraMgmtService extends Service {
                         OnGetDeviceServiceInfoListener() {
                     @Override
                     public void onGetDeviceServiceInfoSuccessful(DeviceServiceInfo deviceServiceInfo) {
-                        try {
-                            String responseContent = deviceServiceInfo.getMessage();
-                            JSONObject result = new JSONObject(responseContent);
-                            String state = result.getString("state");
-                            if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
-                                // Refresh backend token
-                                JSONObject backend = result.getJSONObject("backend");
-                                String url = backend.getString("url");
-                                String token = backend.getString("token");
-                                HCFSMgmtUtils.setSwiftToken(url, token);
-                            } else { // Other situation is handled by MgmtPollingService.
-                                // Stop the the running service if exists.
-                                MgmtPollingUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
+                        String state = deviceServiceInfo.getState();
+                        DeviceServiceInfo.Backend backend = deviceServiceInfo.getBackend();
+                        if (state.equals(GetDeviceInfo.State.ACTIVATED)) {
+                            // Refresh backend token
+                            String url = backend.getUrl();
+                            String token = backend.getToken();
+                            HCFSMgmtUtils.setSwiftToken(url, token);
+                        } else { // Other situation is handled by MgmtPollingService.
+                            // Stop the the running service if exists.
+                            MgmtPollingUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
 
-                                // Start a new polling service
-                                MgmtPollingUtils.startPollingService(TeraMgmtService.this,
-                                        Interval.CHECK_DEVICE_SERVICE_WHEN_TOKEN_EXPIRED, MgmtPollingService.class);
-                            }
-                        } catch (JSONException e) {
-                            Logs.e(CLASSNAME, "onGetDeviceInfoSuccessful", Log.getStackTraceString(e));
+                            // Start a new polling service
+                            MgmtPollingUtils.startPollingService(TeraMgmtService.this,
+                                    Interval.CHECK_DEVICE_SERVICE_WHEN_TOKEN_EXPIRED, MgmtPollingService.class);
                         }
                     }
 

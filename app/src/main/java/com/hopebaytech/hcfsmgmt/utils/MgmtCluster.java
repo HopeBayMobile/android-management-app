@@ -212,16 +212,16 @@ public class MgmtCluster {
                     ContentValues data = new ContentValues();
                     data.put(KEY_NEW_AUTH_CODE, newServerAuthCode);
                     int responseCode = httpProxyImpl.post(data);
+                    deviceServiceInfo.setResponseCode(responseCode);
                     String responseContent = httpProxyImpl.getResponseContent();
                     if (responseCode == HttpsURLConnection.HTTP_OK) {
                         responseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
+                        parseDeviceServiceInfo(deviceServiceInfo, responseContent);
                     }
-
-                    deviceServiceInfo.setResponseCode(responseCode);
                     deviceServiceInfo.setResponseContent(responseContent);
                     Logs.d(CLASSNAME, "ChangeAccountProxy", "changeAccount",
-                            "responseCode=" + responseCode + ", responseContent=" + responseContent);
-                    parseDeviceServiceInfo(deviceServiceInfo, deviceServiceInfo.getResponseContent());
+                            "responseCode=" + responseCode +
+                                    ", responseContent=" + responseContent);
                 } catch (Exception e) {
                     Logs.e(CLASSNAME, "ChangeAccountProxy", "change", Log.getStackTraceString(e));
                 } finally {
@@ -307,15 +307,14 @@ public class MgmtCluster {
                 httpProxyImpl.connect();
 
                 int responseCode = httpProxyImpl.get();
+                deviceServiceInfo.setResponseCode(responseCode);
                 String responseContent = httpProxyImpl.getResponseContent();
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     responseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
+                    parseDeviceServiceInfo(deviceServiceInfo, responseContent);
                 }
-
-                deviceServiceInfo.setResponseCode(responseCode);
-                deviceServiceInfo.setMessage(responseContent);
-                Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode
-                        + ", responseContent=" + responseContent);
+                deviceServiceInfo.setResponseContent(responseContent);
+                Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceServiceInfo", Log.getStackTraceString(e));
             } finally {
@@ -562,9 +561,8 @@ public class MgmtCluster {
                     responseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
                     parseDeviceServiceInfo(deviceServiceInfo, responseContent);
                 }
-                deviceServiceInfo.setMessage(responseContent);
-                Logs.d(CLASSNAME, "switchDeviceBackend", "responseCode=" + responseCode
-                        + ", responseContent=" + responseContent);
+                deviceServiceInfo.setResponseContent(responseContent);
+                Logs.d(CLASSNAME, "switchDeviceBackend", "responseCode=" + responseCode + ", responseContent=" + responseContent);
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "switchDeviceBackend", Log.getStackTraceString(e));
             } finally {
@@ -768,29 +766,6 @@ public class MgmtCluster {
             deviceServiceInfo.setBackend(_backend);
         }
 
-
-        /*
-        JSONObject jsonObj = new JSONObject(responseContent);
-
-        String token = null;
-        try {
-            token = jsonObj.getString("token");
-        } catch (JSONException e) {
-            Logs.w(CLASSNAME, "parseDeviceServiceInfo", Log.getStackTraceString(e));
-        }
-
-        if (token != null) {
-            registerResultInfo.setBackendType(jsonObj.getString("backend_type") + "token"); // swifttoken
-            registerResultInfo.setStorageAccessToken(token);
-        } else {
-            registerResultInfo.setBackendType(jsonObj.getString("backend_type"));
-        }
-
-        registerResultInfo.setBackendUser(jsonObj.getString("account").split(":")[0]);
-        registerResultInfo.setBackendUrl(jsonObj.getString("url"));
-        registerResultInfo.setBucket(jsonObj.getString("bucket"));
-        return registerResultInfo;
-*/
     }
 
     /**
@@ -990,7 +965,7 @@ public class MgmtCluster {
                 if (responseCode == HttpsURLConnection.HTTP_OK) {
                     String responseContent = httpProxyImpl.getResponseContent();
                     String decryptResponseContent = HCFSMgmtUtils.getDecryptedJsonString(responseContent);
-                    deviceServiceInfo.setMessage(decryptResponseContent);
+                    deviceServiceInfo.setResponseContent(decryptResponseContent);
                     Logs.d(CLASSNAME, "register", "responseCode=" + responseCode + ", responseContent=" + decryptResponseContent);
 
                     parseDeviceServiceInfo(deviceServiceInfo, decryptResponseContent);
@@ -1002,20 +977,18 @@ public class MgmtCluster {
                     Logs.d(CLASSNAME, "register", "token=" + deviceServiceInfo.getBackend().getToken());
                 } else {
                     String responseContent = httpProxyImpl.getResponseContent();
+                    deviceServiceInfo.setResponseContent(responseContent);
                     try {
                         JSONObject jsonObj = new JSONObject(responseContent);
                         if (responseCode != HttpsURLConnection.HTTP_INTERNAL_ERROR) {
                             String errorCode = jsonObj.getString("error_code");
                             deviceServiceInfo.setErrorCode(errorCode);
                         }
-                        String message = jsonObj.getString("detail");
-                        deviceServiceInfo.setMessage(message);
                     } catch (JSONException e) {
                         Logs.e(CLASSNAME, "register", Log.getStackTraceString(e));
                     }
                 }
             } catch (Exception e) {
-                deviceServiceInfo.setMessage(Log.getStackTraceString(e));
                 Logs.e(CLASSNAME, "register", Log.getStackTraceString(e));
             } finally {
                 if (httpProxyImpl != null) {

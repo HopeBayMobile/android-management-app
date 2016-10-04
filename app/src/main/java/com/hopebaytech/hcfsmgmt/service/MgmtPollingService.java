@@ -89,37 +89,30 @@ public class MgmtPollingService extends Service {
                                         GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
                                     @Override
                                     public void onGetDeviceServiceInfoSuccessful(DeviceServiceInfo deviceServiceInfo) {
-                                        try {
-                                            String responseContent = deviceServiceInfo.getMessage();
-                                            JSONObject result = new JSONObject(responseContent);
-                                            JSONObject piggyback = result.getJSONObject("piggyback");
-                                            String category = piggyback.getString("category");
-                                            switch (category) {
-                                                case GetDeviceInfo.Category.LOCK:
-                                                    action.lock(piggyback);
-                                                    break;
-                                                case GetDeviceInfo.Category.RESET:
-                                                    action.reset();
-                                                    break;
-                                                case GetDeviceInfo.Category.TX_WAITING:
-                                                    break;
-                                                case GetDeviceInfo.Category.UNREGISTERED:
-                                                    action.unregistered();
-                                                    break;
-                                                default:
-                                                    if (result.getString("state").equals(GetDeviceInfo.State.ACTIVATED)) {
-                                                        stopped = true;
-                                                        stopPollingService();
-                                                    }
-                                                    break;
-                                            }
-                                        } catch (JSONException e) {
-                                            Logs.e(CLASSNAME, "onGetDeviceInfoFailed", Log.getStackTraceString(e));
+                                        DeviceServiceInfo.Piggyback piggyback = deviceServiceInfo.getPiggyback();
+                                        String category = piggyback.getCategory();
+                                        switch (category) {
+                                            case GetDeviceInfo.Category.LOCK:
+                                                action.lock(piggyback.getMessage());
+                                                break;
+                                            case GetDeviceInfo.Category.RESET:
+                                                action.reset();
+                                                break;
+                                            case GetDeviceInfo.Category.TX_WAITING:
+                                                break;
+                                            case GetDeviceInfo.Category.UNREGISTERED:
+                                                action.unregistered();
+                                                break;
+                                            default:
+                                                if (deviceServiceInfo.getState().equals(GetDeviceInfo.State.ACTIVATED)) {
+                                                    stopped = true;
+                                                    stopPollingService();
+                                                }
                                         }
                                     }
 
                                     @Override
-                                    public void onGetDeviceServiceInfoFailed(DeviceServiceInfo  deviceServiceInfo) {
+                                    public void onGetDeviceServiceInfoFailed(DeviceServiceInfo deviceServiceInfo) {
                                         Logs.e(CLASSNAME, "onGetDeviceServiceInfoFailed", null);
                                     }
                                 });
@@ -149,15 +142,10 @@ public class MgmtPollingService extends Service {
 
     private class Action {
 
-        private void lock(JSONObject piggyback) {
-            try {
-                lockMsg = piggyback.getString("message");
-                Logs.d(CLASSNAME, this.getClass().getName(), lockMsg);
-
-                mHandler.sendEmptyMessage(0);
-            } catch (JSONException e) {
-                Logs.e(CLASSNAME, this.getClass().getName() + ".Lock", e.toString());
-            }
+        private void lock(String message) {
+            Logs.d(CLASSNAME, "Action", "lock", "message=" + message);
+            lockMsg = message;
+            mHandler.sendEmptyMessage(0);
         }
 
         private void reset() {
