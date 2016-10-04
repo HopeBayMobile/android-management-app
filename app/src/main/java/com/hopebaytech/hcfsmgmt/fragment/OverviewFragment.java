@@ -122,7 +122,7 @@ public class OverviewFragment extends Fragment {
         mCloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
         TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
         cloudStorageTitle.setText(mContext.getString(R.string.overview_used_space));
-        ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.iconView);
+        ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.item_icon);
         cloudStorageImageView.setImageResource(R.drawable.icon_system_used_space);
 
         RelativeLayout pinnedStorage = (RelativeLayout) view.findViewById(R.id.pinned_storage);
@@ -132,7 +132,7 @@ public class OverviewFragment extends Fragment {
         mPinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
         pinnedStorageTitle.setText(mContext.getString(R.string.overview_pinned_storage));
-        ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.iconView);
+        ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.item_icon);
         pinnedStorageImageView.setImageResource(R.drawable.icon_system_pinned_space);
 
         RelativeLayout waitToUploadData = (RelativeLayout) view.findViewById(R.id.to_be_upload_data);
@@ -142,7 +142,7 @@ public class OverviewFragment extends Fragment {
         mWaitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
         TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
         waitToUploadDataTitle.setText(mContext.getString(R.string.overview_data_to_be_uploaded));
-        ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.iconView);
+        ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.item_icon);
         waitToUploadDataUsageImageView.setImageResource(R.drawable.icon_system_upload_data);
 
         RelativeLayout data_transmission_today = (RelativeLayout) view.findViewById(R.id.network_xfer_today);
@@ -152,7 +152,7 @@ public class OverviewFragment extends Fragment {
         mXferProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.xfer_progressbar));
         TextView network_xfer_today_title = (TextView) data_transmission_today.findViewById(R.id.textViewTitle);
         network_xfer_today_title.setText(mContext.getString(R.string.overview_data_transmission_today));
-        ImageView networkXferImageView = (ImageView) data_transmission_today.findViewById(R.id.iconView);
+        ImageView networkXferImageView = (ImageView) data_transmission_today.findViewById(R.id.item_icon);
         networkXferImageView.setImageResource(R.drawable.icon_system_transmitting);
 
         if (savedInstanceState != null) {

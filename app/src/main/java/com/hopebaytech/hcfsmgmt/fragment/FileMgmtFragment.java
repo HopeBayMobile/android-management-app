@@ -486,6 +486,7 @@ public class FileMgmtFragment extends Fragment {
                 // Always show progress on the recyclerView, prevent user from not knowing whether
                 // pin/unpin process is done or not when the app/file info dialog dismiss
                 mProgressCircle.setVisibility(View.VISIBLE);
+                Logs.w(CLASSNAME, "showProgress", "---------");
             }
         });
     }
@@ -971,7 +972,6 @@ public class FileMgmtFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(GridRecyclerViewHolder holder, int position) {
-
             final ItemInfo itemInfo = mItemInfoList.get(position);
             itemInfo.setViewHolder(holder);
             holder.setItemInfo(itemInfo);
@@ -979,7 +979,6 @@ public class FileMgmtFragment extends Fragment {
             holder.rootView.setContentDescription(itemInfo.getName());
 
             displayItem(position, holder, mMemoryCache, mExecutor);
-
         }
 
         @Override
@@ -991,14 +990,16 @@ public class FileMgmtFragment extends Fragment {
         class GridRecyclerViewHolder extends RecyclerViewHolder implements OnClickListener, OnLongClickListener {
 
             private View rootView;
-            private TextView itemName;
             private ImageView iconView;
+            private ImageView pinView;
+            private TextView itemName;
 
             private GridRecyclerViewHolder(View itemView) {
                 super(itemView);
                 rootView = itemView;
-                iconView = (ImageView) itemView.findViewById(R.id.iconView);
-                itemName = (TextView) itemView.findViewById(R.id.itemName);
+                iconView = (ImageView) itemView.findViewById(R.id.item_icon);
+                pinView = (ImageView) itemView.findViewById(R.id.pin_view);
+                itemName = (TextView) itemView.findViewById(R.id.item_name);
                 itemView.setOnClickListener(this);
                 itemView.setOnLongClickListener(this);
             }
@@ -1023,16 +1024,6 @@ public class FileMgmtFragment extends Fragment {
             @Override
             public void setIconAlpha(int alpha) {
                 iconView.setImageAlpha(alpha);
-            }
-
-            @Override
-            public void showPinnedDate(long currentTimeMillis) {
-
-            }
-
-            @Override
-            public void hidePinnedDate() {
-
             }
 
             @Override
@@ -1086,28 +1077,10 @@ public class FileMgmtFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(final LinearRecyclerViewHolder holder, int position) {
-
             final ItemInfo itemInfo = mItemInfoList.get(position);
             itemInfo.setViewHolder(holder);
             holder.setItemInfo(itemInfo);
             holder.itemName.setText(itemInfo.getName());
-
-            // Display the beginning date of pining for data type */
-//            if (itemInfo instanceof DataTypeInfo) {
-//                final DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
-//                if (dataTypeInfo.isPinned()) {
-//                    if (dataTypeInfo.getDatePinned() != 0) {
-//                        Date date = new Date(dataTypeInfo.getDatePinned());
-//                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
-//                        String displayTime = sdf.format(date);
-//                        String displayText = String.format(mContext.getString(R.string.file_mgmt_date_since_pinned), displayTime);
-//                        holder.datePinnedTextView.setText(displayText);
-//                        holder.datePinnedTextView.setVisibility(View.VISIBLE);
-//                    }
-//                }
-//            } else {
-//                holder.datePinnedTextView.setVisibility(View.GONE);
-//            }
 
             displayItem(position, holder, mMemoryCache, mExecutor);
         }
@@ -1145,8 +1118,8 @@ public class FileMgmtFragment extends Fragment {
             private LinearRecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
                 super(itemView, executor);
                 rootView = itemView;
-                itemName = (TextView) itemView.findViewById(R.id.itemName);
-                iconView = (ImageView) itemView.findViewById(R.id.iconView);
+                itemName = (TextView) itemView.findViewById(R.id.item_name);
+                iconView = (ImageView) itemView.findViewById(R.id.item_icon);
                 pinView = (ImageView) itemView.findViewById(R.id.pinView);
                 datePinnedTextView = (TextView) itemView.findViewById(R.id.datePinned);
 
@@ -1196,19 +1169,19 @@ public class FileMgmtFragment extends Fragment {
                 iconView.setImageAlpha(alpha);
             }
 
-            @Override
-            public void showPinnedDate(long currentTimeMillis) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
-                String displayTime = sdf.format(new Date(currentTimeMillis));
-                String displayText = String.format(mContext.getString(R.string.app_file_date_since_pinned), displayTime);
-                datePinnedTextView.setText(displayText);
-                datePinnedTextView.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void hidePinnedDate() {
-                datePinnedTextView.setVisibility(View.GONE);
-            }
+//            @Override
+//            public void showPinnedDate(long currentTimeMillis) {
+//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
+//                String displayTime = sdf.format(new Date(currentTimeMillis));
+//                String displayText = String.format(mContext.getString(R.string.app_file_date_since_pinned), displayTime);
+//                datePinnedTextView.setText(displayText);
+//                datePinnedTextView.setVisibility(View.VISIBLE);
+//            }
+//
+//            @Override
+//            public void hidePinnedDate() {
+//                datePinnedTextView.setVisibility(View.GONE);
+//            }
 
         }
 
@@ -2016,7 +1989,6 @@ public class FileMgmtFragment extends Fragment {
                         Snackbar.make(view, mContext.getString(R.string.app_file_snackbar_unknown_type_file), Snackbar.LENGTH_SHORT).show();
                     }
                 }
-
             }
         }
     }
@@ -2182,10 +2154,31 @@ public class FileMgmtFragment extends Fragment {
 
         abstract void setIconAlpha(int alpha);
 
-        abstract void showPinnedDate(long currentTimeMillis);
+    }
 
-        abstract void hidePinnedDate();
+    private void displayPinView(RecyclerViewHolder holder, ItemInfo itemInfo, int alpha) {
+        holder.setIconAlpha(alpha);
 
+        ImageView pinView;
+        if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
+            pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
+        } else {
+            pinView = ((GridRecyclerViewAdapter.GridRecyclerViewHolder) holder).pinView;
+        }
+
+        boolean isDirectory = false;
+        if (itemInfo instanceof FileDirInfo) {
+            isDirectory = ((FileDirInfo) itemInfo).isDirectory();
+        }
+
+        if (isDirectory) {
+            pinView.setVisibility(View.GONE);
+        } else {
+            // Display pinned/unpinned item image
+            pinView.setVisibility(View.VISIBLE);
+            pinView.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
+            pinView.setContentDescription(getPinViewContentDescription(itemInfo.isPinned()));
+        }
     }
 
     private void displayItem(final int position, final RecyclerViewHolder holder,
@@ -2202,105 +2195,121 @@ public class FileMgmtFragment extends Fragment {
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                        final int alpha = itemInfo.getIconAlpha();
-                        final boolean isPinned = isItemPinned(itemInfo);
-                        // A workaround to solve the problem that pin icons refresh abnormally when
-                        // user pin/unpin items.
-                        if (mWaitToExecuteSparseArr.get(itemInfo.hashCode()) != null) {
-                            return;
-                        }
-                        itemInfo.setPinned(isPinned);
-                        itemInfo.setPosition(position);
-
-                        mUiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                holder.setIconAlpha(alpha);
-                                if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
-                                    boolean isDirectory = false;
-                                    if (itemInfo instanceof FileDirInfo) {
-                                        isDirectory = ((FileDirInfo) itemInfo).isDirectory();
-                                    }
-
-                                    ImageView pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
-                                    if (isDirectory) {
-                                        pinView.setVisibility(View.GONE);
-                                    } else {
-                                        // Display pinned/unpinned item image
-                                        pinView.setVisibility(View.VISIBLE);
-                                        pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
-                                        pinView.setContentDescription(getPinViewContentDescription(isPinned));
-                                    }
-                                }
-                            }
-                        });
+                    if (!holder.getItemInfo().getName().equals(itemInfo.getName())) {
+                        return;
                     }
+
+                    final int alpha = itemInfo.getIconAlpha();
+                    boolean isPinned = isItemPinned(itemInfo);
+                    // A workaround to solve the problem that pin icons refresh abnormally when
+                    // user pin/unpin items.
+                    if (mWaitToExecuteSparseArr.get(itemInfo.hashCode()) != null) {
+                        return;
+                    }
+                    itemInfo.setPinned(isPinned);
+                    itemInfo.setPosition(position);
+
+                    mUiHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            displayPinView(holder, itemInfo, alpha);
+//                            holder.setIconAlpha(alpha);
+//                            ImageView pinView;
+//                            if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
+//                                pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
+//                            } else {
+//                                pinView = ((GridRecyclerViewAdapter.GridRecyclerViewHolder) holder).pinView;
+//                            }
+//
+//                            boolean isDirectory = false;
+//                            if (itemInfo instanceof FileDirInfo) {
+//                                isDirectory = ((FileDirInfo) itemInfo).isDirectory();
+//                            }
+//
+//                            if (isDirectory) {
+//                                pinView.setVisibility(View.GONE);
+//                            } else {
+//                                // Display pinned/unpinned item image
+//                                pinView.setVisibility(View.VISIBLE);
+//                                pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+//                                pinView.setContentDescription(getPinViewContentDescription(isPinned));
+//                            }
+                        }
+                    });
                 }
             });
-        } else {
-            holder.setIconDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                        final boolean isPinned = isItemPinned(itemInfo);
-                        itemInfo.setPinned(isPinned);
-                        itemInfo.setPosition(position);
-
-                        final int alpha = itemInfo.getIconAlpha();
-                        mUiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                holder.setIconAlpha(alpha);
-                            }
-                        });
-                        final Bitmap iconBitmap = itemInfo.getIconImage();
-                        mUiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bitmap bitmap = iconBitmap;
-                                if (!itemInfo.isPinned()) {
-                                    Bitmap adjustBitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
-                                    if (adjustBitmap != null) {
-                                        bitmap = adjustBitmap;
-                                    }
-                                }
-                                if (bitmap != null) {
-                                    holder.setIconBitmap(bitmap);
-                                    memoryCache.put(itemInfo.hashCode(), bitmap);
-                                }
-                            }
-                        });
-
-                        // Display pinned/unpinned item image
-                        if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
-                            mUiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    boolean isDirectory = false;
-                                    if (itemInfo instanceof FileDirInfo) {
-                                        isDirectory = ((FileDirInfo) itemInfo).isDirectory();
-                                    }
-
-                                    ImageView pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
-                                    if (isDirectory) {
-                                        pinView.setVisibility(View.GONE);
-                                    } else {
-                                        // Display pinned/unpinned item image
-                                        pinView.setVisibility(View.VISIBLE);
-                                        pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
-                                        pinView.setContentDescription(getPinViewContentDescription(isPinned));
-                                    }
-                                }
-                            });
-                        }
-
-                    }
-                }
-            });
-
+            return;
         }
+
+        // Item icon cache miss, get latest item icon.
+        holder.setIconDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (!holder.getItemInfo().getName().equals(itemInfo.getName())) {
+                    return;
+                }
+
+                final boolean isPinned = isItemPinned(itemInfo);
+                itemInfo.setPinned(isPinned);
+                itemInfo.setPosition(position);
+
+                final int alpha = itemInfo.getIconAlpha();
+                mUiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        holder.setIconAlpha(alpha);
+                    }
+                });
+                final Bitmap iconBitmap = itemInfo.getIconImage();
+                mUiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Bitmap bitmap = iconBitmap;
+                        if (!itemInfo.isPinned()) {
+                            Bitmap adjustBitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
+                            if (adjustBitmap != null) {
+                                bitmap = adjustBitmap;
+                            }
+                        }
+                        if (bitmap != null) {
+                            holder.setIconBitmap(bitmap);
+                            memoryCache.put(itemInfo.hashCode(), bitmap);
+                        }
+                    }
+                });
+
+                // Display pinned/unpinned item image
+                mUiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        displayPinView(holder, itemInfo, alpha);
+//                        ImageView pinView;
+//                        if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
+//                            pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
+//                        } else {
+//                            pinView = ((GridRecyclerViewAdapter.GridRecyclerViewHolder) holder).pinView;
+//                        }
+//
+//                        boolean isDirectory = false;
+//                        if (itemInfo instanceof FileDirInfo) {
+//                            isDirectory = ((FileDirInfo) itemInfo).isDirectory();
+//                        }
+//
+//                        if (isDirectory) {
+//                            pinView.setVisibility(View.GONE);
+//                        } else {
+//                            // Display pinned/unpinned item image
+//                            pinView.setVisibility(View.VISIBLE);
+//                            pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+//                            pinView.setContentDescription(getPinViewContentDescription(isPinned));
+//                        }
+                    }
+                });
+
+            }
+        });
+
     }
 
     @Override

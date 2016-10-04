@@ -17,7 +17,7 @@
         android:gravity="center">
 
         <ImageView
-            android:id="@+id/iconView"
+            android:id="@+id/item_icon"
             android:layout_width="@dimen/icon_image_width"
             android:layout_height="@dimen/icon_image_height"
             android:layout_marginEnd="@dimen/M2"
@@ -29,7 +29,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/itemName"
+                android:id="@+id/item_name"
                 style="@style/F6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
