@@ -776,7 +776,11 @@ public class TeraMgmtService extends Service {
                 appInfo.setApplicationInfo(applicationInfo);
                 appInfo.setName(applicationInfo.loadLabel(pm).toString());
                 appInfo.setExternalDirList(null);
-                pinOrUnpinApp(appInfo);
+                if (HCFSMgmtUtils.isSystemPackage(applicationInfo)) {
+                    pinOrUnpinApp(appInfo, PinType.PRIORITY);
+                } else {
+                    pinOrUnpinApp(appInfo);
+                }
             }
         } catch (PackageManager.NameNotFoundException e) {
             Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
