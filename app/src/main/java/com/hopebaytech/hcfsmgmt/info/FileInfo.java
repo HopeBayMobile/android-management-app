@@ -24,7 +24,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
-public class FileDirInfo extends ItemInfo implements Cloneable {
+public class FileInfo extends ItemInfo implements Cloneable {
 
     private static final String CLASSNAME = FileDirInfo.class.getSimpleName();
 
@@ -39,8 +39,10 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     private boolean mIsDirectory;
     private String mFilePath;
+    private long mLastModified;
+    private long mSize;
 
-    public FileDirInfo(Context context) {
+    public FileInfo(Context context) {
         super(context);
     }
 
@@ -50,6 +52,22 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     public void setDirectory(boolean isDirectory) {
         mIsDirectory = isDirectory;
+    }
+
+    public long getLastModified() {
+        return mLastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.mLastModified = lastModified;
+    }
+
+    public long getSize() {
+        return mSize;
+    }
+
+    public void setSize(long size) {
+        this.mSize = size;
     }
 
     @Nullable

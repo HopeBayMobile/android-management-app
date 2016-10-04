@@ -92,6 +92,10 @@
     <string name="app_file_spinner_apps">依應用程式顯示</string>
     <string name="app_file_spinner_data_type">依資料型態顯示</string>
     <string name="app_file_spinner_files">依檔案顯示</string>
+    <string name="app_file_spinner_sort_by_name">Sort by name</string>
+    <string name="app_file_spinner_sort_by_installed_time">Sort by installed time</string>
+    <string name="app_file_spinner_sort_by_modified_time">Sort by modified time</string>
+    <string name="app_file_spinner_sort_by_size">Sort by size</string>
     <string name="app_file_list_data_type_image">圖片</string>
     <string name="app_file_list_data_type_video">影片</string>
     <string name="app_file_list_data_type_audio">音樂</string>

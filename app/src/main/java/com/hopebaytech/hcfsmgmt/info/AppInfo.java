@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.info;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -24,6 +25,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     private long dbId;
     private int uid;
     private ApplicationInfo applicationInfo;
+    private PackageInfo packageInfo;
     private String packageName;
     private List<String> externalDirList;
     private String[] sharedLibraryFiles;
@@ -58,6 +60,14 @@ public class AppInfo extends ItemInfo implements Cloneable {
             iconImage = ((BitmapDrawable) drawable).getBitmap();
         }
         return iconImage;
+    }
+
+    public PackageInfo getPackageInfo() {
+        return packageInfo;
+    }
+
+    public void setPackageInfo(PackageInfo packageInfo) {
+        this.packageInfo = packageInfo;
     }
 
     public void setApplicationInfo(ApplicationInfo appInfo) {

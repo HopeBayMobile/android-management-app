@@ -214,8 +214,18 @@ public class MainFragment extends Fragment {
             String title = titleArray[i];
             if (title.equals(getString(R.string.nav_overview))) {
                 fragment = OverviewFragment.newInstance();
-            } else if (title.equals(getString(R.string.nav_app_file))) {
-                fragment = FileMgmtFragment.newInstance(false);
+            } else if (title.equals(getString(R.string.nav_apps))) {
+                fragment = AppFileFragment.newInstance(false);
+
+                Bundle args = new Bundle();
+                args.putInt(AppFileFragment.KEY_ARGUMENT_APP_FILE, AppFileFragment.DisplayType.BY_APP);
+                fragment.setArguments(args);
+            } else if (title.equals(getString(R.string.nav_files))) {
+                fragment = AppFileFragment.newInstance(false);
+
+                Bundle args = new Bundle();
+                args.putInt(AppFileFragment.KEY_ARGUMENT_APP_FILE, AppFileFragment.DisplayType.BY_FILE);
+                fragment.setArguments(args);
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_help))) {

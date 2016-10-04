@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.FileInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
@@ -39,7 +39,7 @@ public class FileDialogFragment extends DialogFragment {
     public static final String TAG = FileDialogFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
 
-    private FileMgmtFragment.RecyclerViewHolder mViewHolder;
+    private AppFileFragment.RecyclerViewHolder mViewHolder;
     private Thread mDisplayIconThread;
     private Thread mCalculateFileDirDataRatioThread;
     private Thread mCalculateFileDirSizeThread;
@@ -88,7 +88,7 @@ public class FileDialogFragment extends DialogFragment {
         fileDirName.setText(itemInfo.getName());
 
         final ImageView fileDirPinIcon = (ImageView) view.findViewById(R.id.file_dir_pin_icon);
-        if (itemInfo instanceof FileDirInfo && ((FileDirInfo) itemInfo).isDirectory()) {
+        if (itemInfo instanceof FileInfo && ((FileInfo) itemInfo).isDirectory()) {
             fileDirPinIcon.setVisibility(View.GONE);
         } else {
             fileDirPinIcon.setVisibility(View.VISIBLE);
@@ -112,8 +112,8 @@ public class FileDialogFragment extends DialogFragment {
             @Override
             public void run() {
                 try {
-                    FileDirInfo fileDirInfo = ((FileDirInfo) itemInfo);
-                    File file = new File(fileDirInfo.getFilePath());
+                    FileInfo fileInfo = ((FileInfo) itemInfo);
+                    File file = new File(fileInfo.getFilePath());
                     long dirSize = getDirectorySize(file);
                     final String formatSize = UnitConverter.convertByteToProperUnit(dirSize);
                     ((Activity) mContext).runOnUiThread(new Runnable() {
@@ -137,7 +137,7 @@ public class FileDialogFragment extends DialogFragment {
             @Override
             public void run() {
                 try {
-                    final String dataRatio = getFileDirDataRatio((FileDirInfo) itemInfo);
+                    final String dataRatio = getFileDirDataRatio((FileInfo) itemInfo);
                     ((Activity) mContext).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -179,12 +179,12 @@ public class FileDialogFragment extends DialogFragment {
 
     }
 
-    private String getFileDirDataRatio(FileDirInfo fileDirInfo) {
+    private String getFileDirDataRatio(FileInfo fileInfo) {
         FileDirStatusInfo fileDirStatusInfo;
-        if (fileDirInfo.isDirectory()) {
-            fileDirStatusInfo = getDirStatusInfo(fileDirInfo.getFilePath());
+        if (fileInfo.isDirectory()) {
+            fileDirStatusInfo = getDirStatusInfo(fileInfo.getFilePath());
         } else {
-            fileDirStatusInfo = getFileStatusInfo(fileDirInfo.getFilePath());
+            fileDirStatusInfo = getFileStatusInfo(fileInfo.getFilePath());
         }
 
         int numLocal = 0;
@@ -296,7 +296,7 @@ public class FileDialogFragment extends DialogFragment {
     }
 
     /**
-     * Return the size of a directory in bytes
+     * @return the size of a directory in bytes
      */
     private long getDirectorySize(File directory) {
         long dirSize = 0;
@@ -310,7 +310,7 @@ public class FileDialogFragment extends DialogFragment {
         return dirSize;
     }
 
-    public void setViewHolder(FileMgmtFragment.RecyclerViewHolder viewHolder) {
+    public void setViewHolder(AppFileFragment.RecyclerViewHolder viewHolder) {
         this.mViewHolder = viewHolder;
     }
 

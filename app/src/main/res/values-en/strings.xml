@@ -92,6 +92,10 @@
     <string name="app_file_spinner_apps">Display by app</string>
     <string name="app_file_spinner_data_type">Display by type</string>
     <string name="app_file_spinner_files">Display by file</string>
+    <string name="app_file_spinner_sort_by_name">Sort by name</string>
+    <string name="app_file_spinner_sort_by_installed_time">Sort by installed time</string>
+    <string name="app_file_spinner_sort_by_modified_time">Sort by modified time</string>
+    <string name="app_file_spinner_sort_by_size">Sort by size</string>
     <string name="app_file_list_data_type_image">Image</string>
     <string name="app_file_list_data_type_video">Video</string>
     <string name="app_file_list_data_type_audio">Music</string>
