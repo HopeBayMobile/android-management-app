@@ -13,7 +13,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/fragment_title_bar_height"
-            android:background="@color/colorAccent"
+            android:background="@drawable/img_subtitle_bkg"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 

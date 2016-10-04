@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -8,7 +7,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/fragment_title_bar_height"
-        android:background="@color/colorAccent"
+        android:background="@drawable/img_subtitle_bkg"
         android:orientation="horizontal"
         android:paddingBottom="@dimen/fragment_title_bar_padding_bottom"
         android:paddingEnd="@dimen/fragment_title_bar_padding_right"
@@ -37,8 +36,8 @@
         <LinearLayout
             android:id="@+id/user_manual"
             android:layout_width="match_parent"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_height="56dp"
+            android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical">
 
             <TextView
@@ -53,8 +52,8 @@
         <LinearLayout
             android:id="@+id/faq"
             android:layout_width="match_parent"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_height="56dp"
+            android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical">
 
             <TextView
@@ -69,8 +68,8 @@
         <LinearLayout
             android:id="@+id/quick_tour"
             android:layout_width="match_parent"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_height="56dp"
+            android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical">
 
             <TextView
@@ -85,8 +84,8 @@
         <LinearLayout
             android:id="@+id/customer_center"
             android:layout_width="match_parent"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_height="56dp"
+            android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical">
 
             <TextView
@@ -101,8 +100,8 @@
         <LinearLayout
             android:id="@+id/email_feedback"
             android:layout_width="match_parent"
-            android:background="?android:attr/selectableItemBackground"
             android:layout_height="56dp"
+            android:background="?android:attr/selectableItemBackground"
             android:gravity="center_vertical">
 
             <TextView
@@ -111,6 +110,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/help_email_feedback_title" />
         </LinearLayout>
+
         <View style="@style/Divider" />
 
     </LinearLayout>
