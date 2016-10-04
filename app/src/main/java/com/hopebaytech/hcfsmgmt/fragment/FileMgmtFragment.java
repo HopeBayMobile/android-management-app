@@ -811,14 +811,19 @@ public class FileMgmtFragment extends Fragment {
                 if ((currentTime - lastClickTime) > Interval.NOT_ALLOW_REFRESH) {
                     mSectionedRecyclerViewAdapter.init();
                     if (!isSDCard1) {
-                        String itemName = mSpinner.getSelectedItem().toString();
-                        if (itemName.equals(mContext.getString(R.string.app_file_spinner_apps))) {
+                        if (mDisplayType == DISPLAY_BY_APP) {
                             showContent(R.string.app_file_spinner_apps);
-                        } else if (itemName.equals(mContext.getString(R.string.app_file_spinner_data_type))) {
-                            showContent(R.string.app_file_spinner_data_type);
-                        } else if (itemName.equals(mContext.getString(R.string.app_file_spinner_files))) {
+                        } else {
                             showContent(R.string.app_file_spinner_files);
                         }
+//                        String itemName = mSpinner.getSelectedItem().toString();
+//                        if (itemName.equals(mContext.getString(R.string.app_file_spinner_apps))) {
+//                            showContent(R.string.app_file_spinner_apps);
+//                        } else if (itemName.equals(mContext.getString(R.string.app_file_spinner_data_type))) {
+//                            showContent(R.string.app_file_spinner_data_type);
+//                        } else if (itemName.equals(mContext.getString(R.string.app_file_spinner_files))) {
+//                            showContent(R.string.app_file_spinner_files);
+//                        }
                     } else {
                         showContent(R.string.app_file_spinner_files);
                     }
