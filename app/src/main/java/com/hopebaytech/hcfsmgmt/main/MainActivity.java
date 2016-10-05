@@ -13,9 +13,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.LoadingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 /**
@@ -32,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main_container);
 
         init(getIntent());
-        Logs.w(CLASSNAME, "onCreate", null);
     }
 
     private void init(Intent intent) {
