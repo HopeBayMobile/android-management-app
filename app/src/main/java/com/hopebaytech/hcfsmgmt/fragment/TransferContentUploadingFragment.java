@@ -86,6 +86,7 @@ public class TransferContentUploadingFragment extends Fragment {
         if (code == 1) {
             TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
 
+            Logs.d(CLASSNAME, "onActivityCreated", "Replace with TransferContentWaitingFragment");
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
             ft.commit();
@@ -173,6 +174,7 @@ public class TransferContentUploadingFragment extends Fragment {
                             public void onTransferSuccessful(TransferContentInfo transferContentInfo) {
                                 TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
 
+                                Logs.d(CLASSNAME, "onTransferSuccessful", "Replace with TransferContentWaitingFragment");
                                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                                 ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
                                 ft.commit();

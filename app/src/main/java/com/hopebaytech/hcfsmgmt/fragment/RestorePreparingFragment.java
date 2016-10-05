@@ -252,6 +252,7 @@ public class RestorePreparingFragment extends Fragment {
     }
 
     private void gotoRestoreReadyPage() {
+        Logs.d(CLASSNAME, "gotoRestoreReadyPage", "Replace with RestoreReadyFragment");
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, RestoreReadyFragment.newInstance());
         ft.commit();
@@ -283,6 +284,7 @@ public class RestorePreparingFragment extends Fragment {
         Fragment fragment = RestoreFailedFragment.newInstance();
         fragment.setArguments(args);
 
+        Logs.d(CLASSNAME, "gotoRestoreFailedPage", "Replace with RestoreFailedFragment");
         FragmentTransaction ft = ((MainActivity) mContext).getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment);
         ft.commit();

@@ -130,6 +130,8 @@ public class TransferContentWaitingFragment extends Fragment {
             String action = intent.getAction();
             if (action.equals(TeraIntent.ACTION_TRANSFER_COMPLETED)) {
                 Logs.d(CLASSNAME, "onReceive", TeraIntent.ACTION_TRANSFER_COMPLETED);
+
+                Logs.d(CLASSNAME, "onReceive", "Replace with TransferContentTransferringFragment");
                 TransferContentTransferringFragment fragment = TransferContentTransferringFragment.newInstance();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.fragment_container, fragment, TransferContentTransferringFragment.TAG);

@@ -547,6 +547,7 @@ public class RestoreFragment extends Fragment {
                                 MainFragment mainFragment = MainFragment.newInstance();
                                 mainFragment.setArguments(args);
 
+                                Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
                                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                                 ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
                                 ft.commit();
@@ -576,6 +577,7 @@ public class RestoreFragment extends Fragment {
                         ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
                         fragment.setArguments(bundle);
 
+                        Logs.d(CLASSNAME, "onRegisterFailed", "Replace with ActivateWithCodeFragment");
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, fragment);
                         ft.commit();
@@ -690,6 +692,7 @@ public class RestoreFragment extends Fragment {
                     }
                 });
 
+                Logs.d(CLASSNAME, "onSwitchSuccessful", "Replace with RestorePreparingFragment");
                 FragmentManager fm = getFragmentManager();
                 fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 FragmentTransaction ft = fm.beginTransaction();

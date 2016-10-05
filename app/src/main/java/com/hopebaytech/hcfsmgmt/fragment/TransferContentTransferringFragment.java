@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 /**
  * @author Aaron
@@ -32,6 +33,7 @@ public class TransferContentTransferringFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                Logs.d(CLASSNAME, "onCreate", "Replace with TransferContentDoneFragment");
                 TransferContentDoneFragment fragment = TransferContentDoneFragment.newInstance();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.fragment_container, fragment, TransferContentDoneFragment.TAG);

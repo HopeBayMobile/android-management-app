@@ -54,20 +54,24 @@ public class MainActivity extends AppCompatActivity {
         int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
         switch (status) {
             case RestoreStatus.MINI_RESTORE_IN_PROGRESS:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestorePreparingFragment");
                 fragment = RestorePreparingFragment.newInstance();
                 TAG = RestorePreparingFragment.TAG;
                 break;
             case RestoreStatus.MINI_RESTORE_COMPLETED:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestoreReadyFragment");
                 fragment = RestoreReadyFragment.newInstance();
                 TAG = RestoreReadyFragment.TAG;
                 break;
             case RestoreStatus.FULL_RESTORE_IN_PROGRESS:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestoreMajorInstallFragment");
                 fragment = RestoreMajorInstallFragment.newInstance();
                 TAG = RestoreMajorInstallFragment.TAG;
                 break;
             case RestoreStatus.Error.CONN_FAILED:
             case RestoreStatus.Error.OUT_OF_SPACE:
             case RestoreStatus.Error.DAMAGED_BACKUP:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestoreFailedFragment");
                 Bundle args = new Bundle();
                 args.putInt(RestoreFailedFragment.KEY_ERROR_CODE, status);
 
@@ -78,9 +82,11 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
                 if (TeraAppConfig.isTeraAppLogin(this)) {
+                    Logs.d(CLASSNAME, "switchFragment", "Replace with MainFragment");
                     fragment = MainFragment.newInstance();
                     TAG = MainFragment.TAG;
                 } else {
+                    Logs.d(CLASSNAME, "switchFragment", "Replace with LoadingFragment");
                     fragment = LoadingFragment.newInstance();
                     TAG = LoadingFragment.TAG;
                 }

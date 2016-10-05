@@ -369,6 +369,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     if (isAllowEnabled) {
                         TeraAppConfig.enableApp(mContext);
 
+                        Logs.d(CLASSNAME, "onAuthSuccessful", "Replace with MainFragment");
                         MainFragment mainFragment = MainFragment.newInstance();
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
@@ -410,6 +411,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         Fragment restorationFragment = RestoreFragment.newInstance();
                         restorationFragment.setArguments(args);
 
+                        Logs.d(CLASSNAME, "onGetDeviceListSuccessful", "Replace with RestoreFragment");
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, restorationFragment, RestoreFragment.TAG);
                         ft.addToBackStack(null);
@@ -548,6 +550,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                     MainFragment mainFragment = MainFragment.newInstance();
                                     mainFragment.setArguments(args);
 
+                                    Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
                                     FragmentTransaction ft = getFragmentManager().beginTransaction();
                                     ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
                                     ft.commit();
@@ -580,6 +583,7 @@ public class ActivateWoCodeFragment extends Fragment {
                         ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
                         fragment.setArguments(bundle);
 
+                        Logs.d(CLASSNAME, "onRegisterFailed", "Replace with ActivateWithCodeFragment");
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, fragment);
                         ft.commit();
