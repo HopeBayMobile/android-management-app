@@ -130,17 +130,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             Intent checkRestoreStatusIntent = new Intent(context, TeraMgmtService.class);
             checkRestoreStatusIntent.setAction(TeraIntent.ACTION_CHECK_RESTORE_STATUS);
             context.startService(checkRestoreStatusIntent);
-
-//            // Add uid and pin system app
-//            Intent addUidAndPinSystemAppIntent = new Intent(context, TeraMgmtService.class);
-//            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
-//            context.startService(addUidAndPinSystemAppIntent);
-
-//            // Update app external dir list in uid.db
-//            Intent updateAppExternalDirIntent = new Intent(context, TeraMgmtService.class);
-//            addUidAndPinSystemAppIntent.putExtra(TeraIntent.KEY_OPERATION,
-//                    TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR);
-//            context.startService(updateAppExternalDirIntent);
         } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)) {
             // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
             boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);

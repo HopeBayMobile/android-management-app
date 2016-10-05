@@ -1,9 +1,17 @@
 package com.hopebaytech.hcfsmgmt.info;
 
+import android.support.annotation.StringRes;
+import android.system.Os;
 import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron

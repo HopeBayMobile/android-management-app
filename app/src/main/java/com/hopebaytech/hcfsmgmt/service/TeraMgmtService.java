@@ -33,6 +33,7 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
@@ -828,6 +829,7 @@ public class TeraMgmtService extends Service {
                 Logs.e(CLASSNAME, "onFetchFailed", null);
             }
         });
+    }
 
     private void handleStage1RestoreEvent(Intent intent) {
         Logs.d(CLASSNAME, "handleStage1RestoreEvent", null);
