@@ -23,12 +23,15 @@ import android.support.v7.app.AlertDialog;
 import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
@@ -55,7 +58,7 @@ public class AboutDialogFragment extends DialogFragment {
     private View.OnClickListener listener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            String packageName = getContext().getPackageName();
+            String packageName = mContext.getPackageName();
             Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
             teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
             teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -70,7 +73,7 @@ public class AboutDialogFragment extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Logs.w(CLASSNAME, "onCreate", null);
+        Logs.d(CLASSNAME, "onCreate", null);
         mContext = getActivity();
         mHandler = new Handler();
     }
@@ -81,16 +84,15 @@ public class AboutDialogFragment extends DialogFragment {
         Logs.d(CLASSNAME, "onCreateDialog", null);
 
         LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-        final View view = inflater.inflate(R.layout.about_dialog_fragment, null);
-        mView = view;
-        mImeiOne = (TextView) view.findViewById(R.id.device_imei_1);
-        mImeiTwo = (TextView) view.findViewById(R.id.device_imei_2);
-        mImeiTwoLayout = (LinearLayout) view.findViewById(R.id.device_imei_2_layout);
+        mView = inflater.inflate(R.layout.about_dialog_fragment, null);
+        mImeiOne = (TextView) mView.findViewById(R.id.device_imei_1);
+        mImeiTwo = (TextView) mView.findViewById(R.id.device_imei_2);
+        mImeiTwoLayout = (LinearLayout) mView.findViewById(R.id.device_imei_2_layout);
 
-        TextView teraVersion = (TextView) view.findViewById(R.id.terafonn_version);
+        TextView teraVersion = (TextView) mView.findViewById(R.id.terafonn_version);
         teraVersion.setText(getString(R.string.tera_version));
 
-        LinearLayout mTeraVersionLayout = (LinearLayout) view.findViewById(R.id.tera_version_layout);
+        LinearLayout mTeraVersionLayout = (LinearLayout) mView.findViewById(R.id.tera_version_layout);
         mTeraVersionLayout.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -112,7 +114,7 @@ public class AboutDialogFragment extends DialogFragment {
         });
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-        builder.setView(view);
+        builder.setView(mView);
         builder.setPositiveButton(R.string.close, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -122,22 +124,14 @@ public class AboutDialogFragment extends DialogFragment {
             }
         });
 
-        AlertDialog alertDialog = builder.create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button close = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
-                close.setTextColor(ContextCompat.getColor(mContext, R.color.C5));
-            }
-        });
-
-        return alertDialog;
+        return builder.create();
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mSnackbar = Snackbar.make(mView, "", Snackbar.LENGTH_INDEFINITE);
+        Logs.d(CLASSNAME, "onActivityCreated", null);
+
     }
 
     @Override
@@ -161,74 +155,74 @@ public class AboutDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        Logs.w(CLASSNAME, "onResume", null);
-        if (!denyGrandPermission)
-            this.setMenuVisibility(true);
-        else
-            dismiss();
-    }
+        Logs.d(CLASSNAME, "onResume", null);
 
-    @Override
-    public void setMenuVisibility(boolean menuVisible) {
-        super.setMenuVisibility(menuVisible);
-        Logs.w(CLASSNAME, "setMenuVisibility", null);
-        if (menuVisible) {
-            if (mSnackbar == null) {
-                mSnackbar = Snackbar.make(mView, "", Snackbar.LENGTH_INDEFINITE);
-            }
-            if (!isImeiShown) {
-                if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                    showImei();
-                } else {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                        builder.setMessage(getString(R.string.require_read_phone_state_permission));
-                        builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-                            }
-                        });
-                        builder.setCancelable(false);
-                        builder.show();
-                    } else {
-                        mSnackbar.setText(R.string.require_read_phone_state_permission);
-                        mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                        mSnackbar.setAction(R.string.go, listener);
-                        mSnackbar.show();
-                    }
-                }
-            }
-        } else {
-            if (mSnackbar != null) {
-                mSnackbar.dismiss();
-            }
+        if (mSnackbar == null) {
+            mSnackbar = Snackbar.make(mView, "", Snackbar.LENGTH_INDEFINITE);
         }
+
+        if (denyGrandPermission) {
+            dismiss();
+            return;
+        }
+
+        if (isImeiShown) {
+            return;
+        }
+
+        if (ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED) {
+            showImei();
+            return;
+        }
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext,
+                Manifest.permission.READ_PHONE_STATE)) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setTitle(getString(R.string.alert_dialog_title_warning));
+            builder.setMessage(getString(R.string.require_read_phone_state_permission));
+            builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE},
+                            RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                }
+            });
+            builder.setCancelable(false);
+            builder.show();
+        } else {
+            mSnackbar.setText(R.string.require_read_phone_state_permission);
+            mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
+            mSnackbar.setAction(R.string.go, listener);
+            mSnackbar.show();
+        }
+
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Logs.d(CLASSNAME, "setMenuVisibility", "requestCode=" + requestCode);
 
-        switch (requestCode) {
-            case RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
-                        mSnackbar.setText(R.string.require_read_phone_state_permission);
-                        mSnackbar.setDuration(Snackbar.LENGTH_LONG);
-                        mSnackbar.setAction(null, null);
-                    } else {
-                        mSnackbar.setText(R.string.require_read_phone_state_permission);
-                        mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
-                        mSnackbar.setAction(R.string.go, listener);
-                    }
-                    denyGrandPermission = true;
-                } else {
-                    showImei();
-                }
-                break;
+        if (requestCode != RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE) {
+            return;
+        }
+
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length <= 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext,
+                    Manifest.permission.READ_PHONE_STATE)) {
+                mSnackbar.setText(R.string.require_read_phone_state_permission);
+                mSnackbar.setDuration(Snackbar.LENGTH_LONG);
+                mSnackbar.setAction(null, null);
+            } else {
+                mSnackbar.setText(R.string.require_read_phone_state_permission);
+                mSnackbar.setDuration(Snackbar.LENGTH_INDEFINITE);
+                mSnackbar.setAction(R.string.go, listener);
+            }
+            denyGrandPermission = true;
+        } else {
+            showImei();
         }
 
     }
