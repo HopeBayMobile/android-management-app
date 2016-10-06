@@ -206,7 +206,7 @@ public class RestoreMajorInstallFragment extends Fragment {
         Logs.d(CLASSNAME, "gotoRestoreDonePage", "Replace with RestoreDoneFragment");
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, RestoreDoneFragment.newInstance());
-        ft.commit();
+        ft.commitAllowingStateLoss();
     }
 
     private void gotoRestoreFailedPage(int errorCode) {
@@ -238,7 +238,7 @@ public class RestoreMajorInstallFragment extends Fragment {
         Logs.d(CLASSNAME, "gotoRestoreFailedPage", "Replace with RestoreFailedFragment");
         FragmentTransaction ft = ((MainActivity) mContext).getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment);
-        ft.commit();
+        ft.commitAllowingStateLoss();
     }
 
     /**

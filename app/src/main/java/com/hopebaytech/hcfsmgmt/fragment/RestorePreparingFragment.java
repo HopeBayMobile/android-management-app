@@ -1,6 +1,5 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,7 +13,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
@@ -255,7 +253,7 @@ public class RestorePreparingFragment extends Fragment {
         Logs.d(CLASSNAME, "gotoRestoreReadyPage", "Replace with RestoreReadyFragment");
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, RestoreReadyFragment.newInstance());
-        ft.commit();
+        ft.commitAllowingStateLoss();
     }
 
     private void gotoRestoreFailedPage(int errorCode) {
@@ -287,7 +285,7 @@ public class RestorePreparingFragment extends Fragment {
         Logs.d(CLASSNAME, "gotoRestoreFailedPage", "Replace with RestoreFailedFragment");
         FragmentTransaction ft = ((MainActivity) mContext).getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment);
-        ft.commit();
+        ft.commitAllowingStateLoss();
     }
 
     private void showHeadsUpNotification() {

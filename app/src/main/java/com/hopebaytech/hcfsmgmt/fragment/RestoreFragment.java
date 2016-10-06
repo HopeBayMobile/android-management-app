@@ -550,7 +550,7 @@ public class RestoreFragment extends Fragment {
                                 Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
                                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                                 ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
-                                ft.commit();
+                                ft.commitAllowingStateLoss();
 
                                 mProgressDialogUtils.dismiss();
                             }
@@ -580,7 +580,7 @@ public class RestoreFragment extends Fragment {
                         Logs.d(CLASSNAME, "onRegisterFailed", "Replace with ActivateWithCodeFragment");
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, fragment);
-                        ft.commit();
+                        ft.commitAllowingStateLoss();
                     } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
                             deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
                         errorMsgResId = R.string.activate_failed_not_supported_device;
@@ -697,7 +697,7 @@ public class RestoreFragment extends Fragment {
                 fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 FragmentTransaction ft = fm.beginTransaction();
                 ft.replace(R.id.fragment_container, RestorePreparingFragment.newInstance());
-                ft.commit();
+                ft.commitAllowingStateLoss();
             }
 
             @Override

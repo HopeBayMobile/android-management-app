@@ -161,7 +161,10 @@ public class TeraMgmtService extends Service {
             });
         }
 
-        return START_REDELIVER_INTENT;
+        // return START_STICKY instead of START_REDELIVER_INTENT. If the service has died, the
+        // restarted service won't receive intent such as BOOT_COMPLETED, CHECK_RESTORE_STATUS and
+        // PIN_UNPIN_UPDATED_APP. It prevents from doing unexpected action again.
+        return START_STICKY;
     }
 
     private boolean pinOrUnpinApp(AppInfo info) {
