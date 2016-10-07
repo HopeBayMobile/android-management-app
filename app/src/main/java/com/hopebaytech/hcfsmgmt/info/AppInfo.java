@@ -127,26 +127,25 @@ public class AppInfo extends ItemInfo implements Cloneable {
         int externalStatus = LocationStatus.LOCAL;
 
         int externalLocalCounter = 0;
-        int externalHybridCounter = 0;
         int externalCloudCounter = 0;
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
                 int locationStatus = HCFSMgmtUtils.getDirLocationStatus(externalDir);
+                if (locationStatus == LocationStatus.HYBRID) {
+                    return LocationStatus.HYBRID;
+                }
+
                 if (locationStatus == LocationStatus.LOCAL) {
                     externalLocalCounter++;
-                } else if (locationStatus == LocationStatus.HYBRID) {
-                    externalHybridCounter++;
                 } else if (locationStatus == LocationStatus.CLOUD) {
                     externalCloudCounter++;
                 }
             }
 
-            if (externalHybridCounter == 0 && externalCloudCounter == 0) {
+            if (externalCloudCounter == 0) {
                 externalStatus = LocationStatus.LOCAL;
-            } else if (externalHybridCounter == 0 && externalLocalCounter == 0) {
+            } else if (externalLocalCounter == 0) {
                 externalStatus = LocationStatus.CLOUD;
-            } else {
-                externalStatus = LocationStatus.HYBRID;
             }
         }
         return externalStatus;

@@ -77,13 +77,13 @@ public class AppStatus implements Parcelable {
         this.onFetching = onFetching;
     }
 
-    public boolean isPin() {
-        return isPinned;
-    }
+//    public boolean isPin() {
+//        return isPinned;
+//    }
 
-    public void setPin(boolean pin) {
-        this.isPinned = pin;
-    }
+//    public void setPin(boolean pin) {
+//        this.isPinned = pin;
+//    }
 
     public String getPackageName() {
         return packageName;
