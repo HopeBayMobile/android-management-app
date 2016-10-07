@@ -6,7 +6,7 @@ package com.hopebaytech.hcfsmgmt.info;
  */
 public class ItemStatus {
 
-    public static final int STATUS_AVAILABLE = 0;
-    public static final int STATUS_UNAVAILABLE = 1;
+    public static final int AVAILABLE = 0;
+    public static final int UNAVAILABLE = 1;
 
 }

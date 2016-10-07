@@ -40,8 +40,7 @@ import java.util.concurrent.Executors;
 
 public class TeraFonnApiService extends Service {
 
-    private final String TAG = "TeraFonnService";
-    private final String CLASSNAME = getClass().getSimpleName();
+    private static final String CLASSNAME = TeraFonnApiService.class.getSimpleName();
 
     private IGetJWTandIMEIListener mGetJwtAndImeiListener;
     private IFetchAppDataListener mFetchAppDataListener;
@@ -216,7 +215,15 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int checkAppAvailable(String packageName) throws RemoteException {
-            return getPackageStatus(packageName);
+            int status;
+            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+            boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+            if (isAvailable) {
+                status = AppStatus.AVAILABLE;
+            } else {
+                status = getPackageStatus(packageName);
+            }
+            return status;
         }
 
         @Override
@@ -335,32 +342,47 @@ public class TeraFonnApiService extends Service {
             public void run() {
                 try {
                     while (true) {
-                        Set<String> packageNameSet = mPackageNameMap.keySet();
-                        if (mTrackAppStatusListener != null) {
-                            for (String packageName : packageNameSet) {
-                                try {
-                                    AppStatus appStatus = mPackageNameMap.get(packageName);
-                                    if (appStatus != null) {
-                                        int reportStatus = getPackageStatus(packageName);
-                                        if (appStatus.getStatus() != reportStatus) {
-                                            mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
-                                        }
-                                        appStatus.setStatus(reportStatus);
-                                        mPackageNameMap.put(packageName, appStatus);
-                                    }
-                                } catch (Exception e) {
-                                    Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
-                                    try {
-                                        mTrackAppStatusListener.onTrackFailed(packageName);
-                                    } catch (Exception e1) {
-                                        Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e1));
-                                    }
-                                }
-                            }
-                        } else {
+                        if (mTrackAppStatusListener == null) {
                             Logs.w(CLASSNAME, "onStartCommand", "TrackAppStatusListener is null");
+                            Thread.sleep(3000);
+                            continue;
                         }
 
+                        Set<String> packageNameSet = mPackageNameMap.keySet();
+                        HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                        final boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+                        for (final String packageName : packageNameSet) {
+                            mCacheExecutor.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        AppStatus appStatus = mPackageNameMap.get(packageName);
+                                        if (appStatus == null) {
+                                            return;
+                                        }
+
+                                        int reportStatus;
+                                        if (isAvailable) {
+                                            reportStatus = AppStatus.AVAILABLE;
+                                        } else {
+                                            reportStatus = getPackageStatus(packageName);
+                                        }
+
+                                        if (appStatus.getStatus() != reportStatus) {
+                                            mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
+                                            appStatus.setStatus(reportStatus);
+                                        }
+                                    } catch (Exception e) {
+                                        Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+                                        try {
+                                            mTrackAppStatusListener.onTrackFailed(packageName);
+                                        } catch (Exception e1) {
+                                            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e1));
+                                        }
+                                    }
+                                }
+                            });
+                        }
                         Thread.sleep(3000);
                     }
                 } catch (InterruptedException e) {
@@ -402,36 +424,36 @@ public class TeraFonnApiService extends Service {
             Logs.e(CLASSNAME, "getAppStatus", Log.getStackTraceString(e));
         }
 
-        int status = getPackageStatus(packageName);
-        if (status != AppStatus.STATUS_AVAILABLE) {
-            status = AppStatus.STATUS_UNAVAILABLE;
+        int status;
+        HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+        boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+        if (isAvailable) {
+            status = AppStatus.AVAILABLE;
+        } else {
+            status = getPackageStatus(packageName);
         }
 
         return new AppStatus(packageName, isPinned, isOnFetching, status);
     }
 
     private int getPackageStatus(String packageName) {
-        if (HCFSConnStatus.isAvailable(TeraFonnApiService.this, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return AppStatus.STATUS_AVAILABLE;
-        } else {
-            try {
-                UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
-                UidInfo uidInfo = uidDAO.get(packageName);
+        try {
+            UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
+            UidInfo uidInfo = uidDAO.get(packageName);
 
-                ApplicationInfo applicationInfo = getPackageManager().
-                        getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                com.hopebaytech.hcfsmgmt.info.AppInfo appInfo =
-                        new com.hopebaytech.hcfsmgmt.info.AppInfo(TeraFonnApiService.this);
-                appInfo.setApplicationInfo(applicationInfo);
-                if (uidInfo != null) {
-                    appInfo.setExternalDirList(uidInfo.getExternalDir());
-                }
-                return appInfo.getAppStatus();
-            } catch (PackageManager.NameNotFoundException e) {
-                Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));
+            ApplicationInfo applicationInfo = getPackageManager().
+                    getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+            com.hopebaytech.hcfsmgmt.info.AppInfo appInfo =
+                    new com.hopebaytech.hcfsmgmt.info.AppInfo(TeraFonnApiService.this);
+            appInfo.setApplicationInfo(applicationInfo);
+            if (uidInfo != null) {
+                appInfo.setExternalDirList(uidInfo.getExternalDir());
             }
+            return appInfo.getAppStatus();
+        } catch (PackageManager.NameNotFoundException e) {
+            Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));
         }
-        return AppStatus.STATUS_UNAVAILABLE;
+        return AppStatus.UNAVAILABLE;
     }
 
     private int getDefaultLocation(String packageName) {

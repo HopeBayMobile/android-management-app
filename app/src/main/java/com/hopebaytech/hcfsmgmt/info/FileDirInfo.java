@@ -14,7 +14,6 @@ import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -24,12 +23,9 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
-import java.util.Locale;
-import java.util.regex.Pattern;
-
 public class FileDirInfo extends ItemInfo implements Cloneable {
 
-    private final String CLASSNAME = this.getClass().getSimpleName();
+    private static final String CLASSNAME = FileDirInfo.class.getSimpleName();
 
     public static final String MIME_TYPE_IMAGE = "image";
     public static final String MIME_TYPE_VIDEO = "video";
@@ -182,12 +178,12 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
     public int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
         if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return AppStatus.STATUS_AVAILABLE;
+            return AppStatus.AVAILABLE;
         } else {
             if (locationStatus == LocationStatus.LOCAL) {
-                return ItemStatus.STATUS_AVAILABLE;
+                return ItemStatus.AVAILABLE;
             } else {
-                return ItemStatus.STATUS_UNAVAILABLE;
+                return ItemStatus.UNAVAILABLE;
             }
         }
     }
@@ -214,7 +210,7 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     @Override
     public int getIconAlpha() {
-        return getFileDirStatus() == ItemStatus.STATUS_AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
+        return getFileDirStatus() == ItemStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
     public boolean isDirectory() {

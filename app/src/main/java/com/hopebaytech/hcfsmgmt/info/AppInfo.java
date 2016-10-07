@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 
@@ -18,7 +17,8 @@ import java.util.List;
 
 public class AppInfo extends ItemInfo implements Cloneable {
 
-    private final String CLASSNAME = AppInfo.class.getSimpleName();
+    private static final String CLASSNAME = AppInfo.class.getSimpleName();
+
     private long dbId;
     private int uid;
     private ApplicationInfo applicationInfo;
@@ -33,19 +33,6 @@ public class AppInfo extends ItemInfo implements Cloneable {
         super(context);
         this.context = context;
     }
-
-//	public AppInfo(AppInfo applicationInfo) {
-//		super(applicationInfo.mContext);
-//		this.dbId = applicationInfo.dbId;
-//		this.uid = applicationInfo.uid;
-//		this.applicationInfo = applicationInfo.applicationInfo;
-//		this.packageName = applicationInfo.packageName;
-//		this.externalDir = applicationInfo.externalDir;
-//		this.sharedLibraryFiles = applicationInfo.sharedLibraryFiles;
-//		this.appSize = applicationInfo.appSize;
-//		this.mContext = applicationInfo.mContext;
-//		this.status = applicationInfo.status;
-//	}
 
     public int getUid() {
         return uid;
@@ -78,18 +65,13 @@ public class AppInfo extends ItemInfo implements Cloneable {
         // Default sourceDir = /data/app/<package-name>-1/base.apk
         String sourceDir = applicationInfo.sourceDir;
         int lastIndex = sourceDir.lastIndexOf("/");
-        String sourceDirWithoutApkSuffix = sourceDir.substring(0, lastIndex);
-        return sourceDirWithoutApkSuffix;
+        return sourceDir.substring(0, lastIndex); // source dir path without apk suffix, such as /data/app/<package-name>-1/
     }
 
     @Nullable
     public List<String> getExternalDirList() {
         return externalDirList;
     }
-
-//	public void setExternalDir(String externalDir) {
-//		this.externalDir = externalDir;
-//	}
 
     public void setExternalDirList(List<String> externalDirList) {
         this.externalDirList = externalDirList;
@@ -132,18 +114,13 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public int getAppStatus() {
-        if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return AppStatus.STATUS_AVAILABLE;
-        } else {
-            int externalLocationStatus = getExternalLocationStatus();
-            if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
-                    HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
-                    externalLocationStatus == LocationStatus.LOCAL) {
-                return ItemStatus.STATUS_AVAILABLE;
-            } else {
-                return ItemStatus.STATUS_UNAVAILABLE;
-            }
+        int externalLocationStatus = getExternalLocationStatus();
+        if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
+                HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
+                externalLocationStatus == LocationStatus.LOCAL) {
+            return ItemStatus.AVAILABLE;
         }
+        return ItemStatus.UNAVAILABLE;
     }
 
     private int getExternalLocationStatus() {
@@ -154,11 +131,12 @@ public class AppInfo extends ItemInfo implements Cloneable {
         int externalCloudCounter = 0;
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
-                if (HCFSMgmtUtils.getDirLocationStatus(externalDir) == LocationStatus.LOCAL) {
+                int locationStatus = HCFSMgmtUtils.getDirLocationStatus(externalDir);
+                if (locationStatus == LocationStatus.LOCAL) {
                     externalLocalCounter++;
-                } else if (HCFSMgmtUtils.getDirLocationStatus(externalDir) == LocationStatus.HYBRID) {
+                } else if (locationStatus == LocationStatus.HYBRID) {
                     externalHybridCounter++;
-                } else if (HCFSMgmtUtils.getDirLocationStatus(externalDir) == LocationStatus.CLOUD) {
+                } else if (locationStatus == LocationStatus.CLOUD) {
                     externalCloudCounter++;
                 }
             }
@@ -186,14 +164,18 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
     @Override
     public int getIconAlpha() {
-        return getAppStatus() == ItemStatus.STATUS_AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
+        HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+        if (HCFSConnStatus.isAvailable(mContext, hcfsStatInfo)) {
+            return ICON_COLORFUL;
+        }
+        return getAppStatus() == ItemStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
     public ApplicationInfo getApplicationInfo() {
         return applicationInfo;
     }
 
-    public boolean isSystemApp() {
+    boolean isSystemApp() {
         return isSystemApp;
     }
 
