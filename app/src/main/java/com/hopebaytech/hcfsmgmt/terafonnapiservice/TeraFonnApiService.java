@@ -14,7 +14,6 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
@@ -30,7 +29,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -252,6 +250,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public AppInfo getAppInfo(List<String> packageNameList) throws RemoteException {
+            long start = System.currentTimeMillis();
             AppInfo appInfo = new AppInfo();
             List<AppStatus> appStatusList = new ArrayList<>();
             if (packageNameList == null) {
@@ -263,6 +262,8 @@ public class TeraFonnApiService extends Service {
                 }
             }
             appInfo.setAppStatusList(appStatusList);
+            long end = System.currentTimeMillis();
+            Logs.d(CLASSNAME, "getAppInfo", "Spent time in millis: " + (end - start));
             return appInfo;
         }
 
@@ -404,6 +405,7 @@ public class TeraFonnApiService extends Service {
     }
 
     private AppStatus getAppStatus(String packageName) {
+        long start = System.currentTimeMillis();
         Random random = new Random();
         // TODO: not implemented yet
         boolean isOnFetching = random.nextBoolean();
@@ -431,7 +433,8 @@ public class TeraFonnApiService extends Service {
         } catch (Exception e) {
             Logs.e(CLASSNAME, "getAppStatus", Log.getStackTraceString(e));
         }
-
+        long end = System.currentTimeMillis();
+        Logs.d(CLASSNAME, "getAppStatus", "Spent time in millis: " + (end - start));
         return new AppStatus(packageName, isPinned, isOnFetching, AppStatus.UNAVAILABLE);
     }
 

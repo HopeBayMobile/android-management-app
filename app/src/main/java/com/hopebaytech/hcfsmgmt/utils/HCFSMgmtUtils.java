@@ -479,8 +479,6 @@ public class HCFSMgmtUtils {
             if (isSuccess) {
                 int code = jObject.getInt("code");
                 if (code == 0) {
-                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
-
                     JSONObject dataObj = jObject.getJSONObject("data");
                     int num_local = dataObj.getInt("num_local");
                     int num_hybrid = dataObj.getInt("num_hybrid");
