@@ -486,14 +486,10 @@ public class HCFSMgmtUtils {
                     int num_hybrid = dataObj.getInt("num_hybrid");
                     int num_cloud = dataObj.getInt("num_cloud");
 
-                    if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
+                    if (num_cloud == 0 && num_hybrid == 0) {
                         locationStatus = LocationStatus.LOCAL;
-                    } else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
-                        locationStatus = LocationStatus.LOCAL;
-                    } else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
-                        locationStatus = LocationStatus.CLOUD;
                     } else {
-                        locationStatus = LocationStatus.HYBRID;
+                        locationStatus = LocationStatus.NOT_LOCAL;
                     }
                 } else {
                     Logs.e(CLASSNAME, "getDirLocationStatus", logMsg);
@@ -521,10 +517,8 @@ public class HCFSMgmtUtils {
                         status = LocationStatus.LOCAL;
                         break;
                     case 1:
-                        status = LocationStatus.CLOUD;
-                        break;
                     case 2:
-                        status = LocationStatus.HYBRID;
+                        status = LocationStatus.NOT_LOCAL;
                         break;
                 }
 //                Logs.i(CLASSNAME, "getFileLocationStatus", logMsg);

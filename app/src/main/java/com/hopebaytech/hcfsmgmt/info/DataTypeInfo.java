@@ -64,45 +64,45 @@ public class DataTypeInfo extends ItemInfo {
 		return status;
 	}
 
-	private int getStatus(ArrayList<String> pathList) {
-		int status = LocationStatus.LOCAL;
-		int num_local = 0;
-		int num_hybrid = 0;
-		int num_cloud = 0;
-		for (String path : pathList) {
-			if (!Thread.currentThread().isInterrupted()) {
-				if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.HYBRID) {
-					status = LocationStatus.HYBRID;
-					num_hybrid++;
-					return status;
-				} else if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.LOCAL) {
-					num_local++;
-				} else if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.HYBRID) {
-					num_cloud++;
-				}
-			}
-		}
-
-		if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
-			status = LocationStatus.LOCAL;
-		} else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
-			status = LocationStatus.LOCAL;
-		} else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
-			status = LocationStatus.CLOUD;
-		} else {
-			status = LocationStatus.HYBRID;
-		}
-		return status;
-	}
+//	private int getStatus(ArrayList<String> pathList) {
+//		int status = LocationStatus.LOCAL;
+//		int num_local = 0;
+//		int num_hybrid = 0;
+//		int num_cloud = 0;
+//		for (String path : pathList) {
+//			if (!Thread.currentThread().isInterrupted()) {
+//				if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.HYBRID) {
+//					status = LocationStatus.HYBRID;
+//					num_hybrid++;
+//					return status;
+//				} else if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.LOCAL) {
+//					num_local++;
+//				} else if (HCFSMgmtUtils.getFileLocationStatus(path) == LocationStatus.HYBRID) {
+//					num_cloud++;
+//				}
+//			}
+//		}
+//
+//		if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
+//			status = LocationStatus.LOCAL;
+//		} else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
+//			status = LocationStatus.LOCAL;
+//		} else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
+//			status = LocationStatus.CLOUD;
+//		} else {
+//			status = LocationStatus.HYBRID;
+//		}
+//		return status;
+//	}
 
 	public long getDateUpdated() {
 		return date_updated;
 	}
-	
+
 	public long getDatePinned() {
 		return date_pinned;
 	}
-	
+
 	public void setDatePinned(long date_pinned) {
 		this.date_pinned = date_pinned;
 	}

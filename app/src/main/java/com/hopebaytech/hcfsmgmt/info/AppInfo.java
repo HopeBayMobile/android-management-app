@@ -114,41 +114,24 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public int getAppStatus() {
-        int externalLocationStatus = getExternalLocationStatus();
         if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
                 HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
-                externalLocationStatus == LocationStatus.LOCAL) {
+                getExternalDirLocationStatus() == LocationStatus.LOCAL) {
             return ItemStatus.AVAILABLE;
         }
         return ItemStatus.UNAVAILABLE;
     }
 
-    private int getExternalLocationStatus() {
-        int externalStatus = LocationStatus.LOCAL;
-
-        int externalLocalCounter = 0;
-        int externalCloudCounter = 0;
+    private int getExternalDirLocationStatus() {
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
                 int locationStatus = HCFSMgmtUtils.getDirLocationStatus(externalDir);
-                if (locationStatus == LocationStatus.HYBRID) {
-                    return LocationStatus.HYBRID;
+                if (locationStatus == LocationStatus.NOT_LOCAL) {
+                    return LocationStatus.NOT_LOCAL;
                 }
-
-                if (locationStatus == LocationStatus.LOCAL) {
-                    externalLocalCounter++;
-                } else if (locationStatus == LocationStatus.CLOUD) {
-                    externalCloudCounter++;
-                }
-            }
-
-            if (externalCloudCounter == 0) {
-                externalStatus = LocationStatus.LOCAL;
-            } else if (externalLocalCounter == 0) {
-                externalStatus = LocationStatus.CLOUD;
             }
         }
-        return externalStatus;
+        return LocationStatus.LOCAL;
     }
 
     @Override
