@@ -116,6 +116,7 @@ public class RestoreMajorInstallFragment extends Fragment {
 
         mRestoreReceiver.unregisterReceiver(mContext);
         mScreenOffEventReceiver.unregisterReceiver(mContext);
+        mHomeKeyEventReceiver.unregisterReceiver(mContext);
     }
 
     private void startInProgressNotification() {
@@ -133,7 +134,7 @@ public class RestoreMajorInstallFragment extends Fragment {
                 | NotificationEvent.FLAG_HEADS_UP
                 | NotificationEvent.FLAG_OPEN_APP
                 | NotificationEvent.FLAG_IN_PROGRESS;
-        String title = getString(R.string.restore_notification_title);
+        String title = mContext.getString(R.string.restore_notification_title);
         NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, null, flag);
     }
 
@@ -143,7 +144,7 @@ public class RestoreMajorInstallFragment extends Fragment {
                 | NotificationEvent.FLAG_OPEN_APP
                 | NotificationEvent.FLAG_IN_PROGRESS;
         int restoreIconId = R.drawable.restore_icon_anim;
-        String title = getString(R.string.restore_notification_title);
+        String title = mContext.getString(R.string.restore_notification_title);
         NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title,
                 null /* message*/, restoreIconId, null /* action */, flag, null /* extras */);
     }
