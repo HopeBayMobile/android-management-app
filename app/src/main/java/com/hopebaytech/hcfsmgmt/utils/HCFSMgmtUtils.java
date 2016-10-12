@@ -321,7 +321,7 @@ public class HCFSMgmtUtils {
             JSONObject dataObj = jObject.getJSONObject("data");
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
+//                Logs.d(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
 
                 hcfsStatInfo = new HCFSStatInfo();
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));

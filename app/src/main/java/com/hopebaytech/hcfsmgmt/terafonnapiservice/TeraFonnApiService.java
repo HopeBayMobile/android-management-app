@@ -16,6 +16,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -35,7 +36,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class TeraFonnApiService extends Service {
 
@@ -48,7 +48,7 @@ public class TeraFonnApiService extends Service {
     private ITrackAppStatusListener mTrackAppStatusListener;
 
     private Map<String, Integer> mPackageStatusMap = new ConcurrentHashMap<>();
-    private ExecutorService mCacheExecutor = Executors.newCachedThreadPool();
+    private ExecutorService mExecutor = ExecutorFactory.createThreadPoolExecutor();
 
     private Runnable mTrackAppStatusRunnable = new Runnable() {
         @Override
@@ -65,7 +65,7 @@ public class TeraFonnApiService extends Service {
                     HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
                     final boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
                     for (final String packageName : packageKeySet) {
-                        mCacheExecutor.execute(new Runnable() {
+                        mExecutor.execute(new Runnable() {
                             @Override
                             public void run() {
                                 try {
@@ -111,7 +111,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean getJWTandIMEI() throws RemoteException {
-            mCacheExecutor.execute(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     MgmtCluster.getJwtToken(TeraFonnApiService.this, new MgmtCluster.OnFetchJwtTokenListener() {
@@ -147,7 +147,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean fetchAppData(final String packageName) throws RemoteException {
-            mCacheExecutor.execute(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     if (mFetchAppDataListener == null) {
@@ -394,9 +394,9 @@ public class TeraFonnApiService extends Service {
             mPackageStatusMap.clear();
             mPackageStatusMap = null;
         }
-        if (mCacheExecutor != null) {
-            mCacheExecutor.shutdownNow();
-            mCacheExecutor = null;
+        if (mExecutor != null) {
+            mExecutor.shutdownNow();
+            mExecutor = null;
         }
         if (mTrackAppStatusThread != null) {
             mTrackAppStatusThread.interrupt();
