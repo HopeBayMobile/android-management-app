@@ -689,6 +689,9 @@ public class RestoreFragment extends Fragment {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
                         editor.apply();
+
+                        // Enable Tera app so that we are able to get new token when token expired
+                        TeraAppConfig.enableApp(mContext);
                     }
                 });
 

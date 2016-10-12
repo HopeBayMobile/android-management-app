@@ -949,6 +949,12 @@ public class TeraMgmtService extends Service {
             case 2: // In stage 2 of restoration process
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
                 startActivity = true;
+
+                // Enable Tera app so that we are able to get new token when token expired. The step
+                // is to guarantee the restoration process in stage 2 can execute normally, because
+                // the pref_tera_app_login value in the teracom.hopebaytech.hcfsmgmt_preferences.xml
+                // which is restored in stage 1 may not be true.
+                TeraAppConfig.enableApp(mContext);
                 break;
             default:
         }
