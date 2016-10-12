@@ -1716,21 +1716,21 @@ public class FileMgmtFragment extends Fragment {
         return selectedItemName.equals(mContext.getString(typeStringResourceID));
     }
 
-    private String getPinViewContentDescription(boolean isPinned, int location) {
-        String contentDescription = "-1";
-        if (isPinned && location == LocationStatus.LOCAL) {
-            contentDescription = "0";
-        } else if (isPinned && (location == LocationStatus.HYBRID || location == LocationStatus.CLOUD)) {
-            contentDescription = "1";
-        } else if (!isPinned && location == LocationStatus.LOCAL) {
-            contentDescription = "2";
-        } else if (!isPinned && location == LocationStatus.HYBRID) {
-            contentDescription = "3";
-        } else if (!isPinned && location == LocationStatus.CLOUD) {
-            contentDescription = "4";
-        }
-        return contentDescription;
-    }
+//    private String getPinViewContentDescription(boolean isPinned, int location) {
+//        String contentDescription = "-1";
+//        if (isPinned && location == LocationStatus.LOCAL) {
+//            contentDescription = "0";
+//        } else if (isPinned && (location == LocationStatus.HYBRID || location == LocationStatus.CLOUD)) {
+//            contentDescription = "1";
+//        } else if (!isPinned && location == LocationStatus.LOCAL) {
+//            contentDescription = "2";
+//        } else if (!isPinned && location == LocationStatus.HYBRID) {
+//            contentDescription = "3";
+//        } else if (!isPinned && location == LocationStatus.CLOUD) {
+//            contentDescription = "4";
+//        }
+//        return contentDescription;
+//    }
 
     private String getPinViewContentDescription(boolean isPinned) {
         String contentDescription;

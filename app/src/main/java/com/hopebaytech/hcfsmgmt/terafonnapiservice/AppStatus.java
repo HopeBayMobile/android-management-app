@@ -11,8 +11,8 @@ import com.hopebaytech.hcfsmgmt.info.ItemStatus;
  */
 public class AppStatus implements Parcelable {
 
-    public static final int STATUS_AVAILABLE = ItemStatus.STATUS_AVAILABLE;
-    public static final int STATUS_UNAVAILABLE = ItemStatus.STATUS_UNAVAILABLE;
+    public static final int AVAILABLE = ItemStatus.AVAILABLE;
+    public static final int UNAVAILABLE = ItemStatus.UNAVAILABLE;
 
     private String packageName;
     private boolean isPinned;

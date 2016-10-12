@@ -321,7 +321,7 @@ public class HCFSMgmtUtils {
             JSONObject dataObj = jObject.getJSONObject("data");
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
+//                Logs.d(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
 
                 hcfsStatInfo = new HCFSStatInfo();
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
@@ -479,21 +479,15 @@ public class HCFSMgmtUtils {
             if (isSuccess) {
                 int code = jObject.getInt("code");
                 if (code == 0) {
-                    Logs.i(CLASSNAME, "getDirLocationStatus", logMsg);
-
                     JSONObject dataObj = jObject.getJSONObject("data");
                     int num_local = dataObj.getInt("num_local");
                     int num_hybrid = dataObj.getInt("num_hybrid");
                     int num_cloud = dataObj.getInt("num_cloud");
 
-                    if (num_local == 0 && num_cloud == 0 && num_hybrid == 0) {
+                    if (num_cloud == 0 && num_hybrid == 0) {
                         locationStatus = LocationStatus.LOCAL;
-                    } else if (num_local != 0 && num_cloud == 0 && num_hybrid == 0) {
-                        locationStatus = LocationStatus.LOCAL;
-                    } else if (num_local == 0 && num_cloud != 0 && num_hybrid == 0) {
-                        locationStatus = LocationStatus.CLOUD;
                     } else {
-                        locationStatus = LocationStatus.HYBRID;
+                        locationStatus = LocationStatus.NOT_LOCAL;
                     }
                 } else {
                     Logs.e(CLASSNAME, "getDirLocationStatus", logMsg);
@@ -521,10 +515,8 @@ public class HCFSMgmtUtils {
                         status = LocationStatus.LOCAL;
                         break;
                     case 1:
-                        status = LocationStatus.CLOUD;
-                        break;
                     case 2:
-                        status = LocationStatus.HYBRID;
+                        status = LocationStatus.NOT_LOCAL;
                         break;
                 }
 //                Logs.i(CLASSNAME, "getFileLocationStatus", logMsg);

@@ -14,9 +14,9 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -36,21 +36,19 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class TeraFonnApiService extends Service {
 
-    private final String TAG = "TeraFonnService";
-    private final String CLASSNAME = getClass().getSimpleName();
+    private static final String CLASSNAME = TeraFonnApiService.class.getSimpleName();
 
+    private boolean isServiceRunning;
     private IGetJWTandIMEIListener mGetJwtAndImeiListener;
     private IFetchAppDataListener mFetchAppDataListener;
     private ITrackAppStatusListener mTrackAppStatusListener;
-    private Map<String, AppStatus> mPackageNameMap = new ConcurrentHashMap<>();
-    private ExecutorService mCacheExecutor = Executors.newCachedThreadPool();
-    private Thread mTrackAppStatusThread;
 
-    private boolean isServiceRunning;
+    private Map<String, Integer> mPackageStatusMap = new ConcurrentHashMap<>();
+    private ExecutorService mExecutor = ExecutorFactory.createThreadPoolExecutor();
+    private TrackAppStatusThread mTrackAppStatusThread = new TrackAppStatusThread();
 
     private final ITeraFonnApiService.Stub mBinder = new ITeraFonnApiService.Stub() {
 
@@ -61,8 +59,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean getJWTandIMEI() throws RemoteException {
-            boolean isSuccess = true;
-            mCacheExecutor.execute(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     MgmtCluster.getJwtToken(TeraFonnApiService.this, new MgmtCluster.OnFetchJwtTokenListener() {
@@ -88,7 +85,7 @@ public class TeraFonnApiService extends Service {
 
                 }
             });
-            return isSuccess;
+            return true;
         }
 
         @Override
@@ -98,41 +95,38 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean fetchAppData(final String packageName) throws RemoteException {
-            boolean isSuccess = false;
-            if (mPackageNameMap.containsKey(packageName)) {
-                isSuccess = true;
-                mCacheExecutor.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (mFetchAppDataListener == null) {
-                            Logs.w(CLASSNAME, "fetchAppData", "run", "mFetchAppDataListener is null");
-                            return;
-                        }
-                        try {
-                            mFetchAppDataListener.onPreFetch(packageName);
-                            int progress;
-                            while (true) {
-                                progress = getAppProgress(packageName);
-                                if (progress >= 100 || progress < 0) {
-                                    break;
-                                } else {
-                                    mFetchAppDataListener.onProgressUpdate(packageName, progress);
-                                }
-                                Thread.sleep(3000);
-                            }
-
-                            if (progress < 0) {
-                                mFetchAppDataListener.onFetchFailed(packageName);
-                            } else {
-                                mFetchAppDataListener.onPostFetch(packageName);
-                            }
-                        } catch (Exception e) {
-                            Logs.e(CLASSNAME, "fetchAppData", "run", Log.getStackTraceString(e));
-                        }
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    if (mFetchAppDataListener == null) {
+                        Logs.w(CLASSNAME, "fetchAppData", "run", "mFetchAppDataListener is null");
+                        return;
                     }
-                });
-            }
-            return isSuccess;
+                    try {
+                        mFetchAppDataListener.onPreFetch(packageName);
+                        int progress;
+                        while (true) {
+                            progress = getAppProgress(packageName);
+                            if (progress >= 100 || progress < 0) {
+                                break;
+                            } else {
+                                mFetchAppDataListener.onProgressUpdate(packageName, progress);
+                            }
+                            Thread.sleep(3000);
+                        }
+
+                        if (progress < 0) {
+                            mFetchAppDataListener.onFetchFailed(packageName);
+                        } else {
+                            mFetchAppDataListener.onPostFetch(packageName);
+                        }
+                    } catch (Exception e) {
+                        Logs.e(CLASSNAME, "fetchAppData", "run", Log.getStackTraceString(e));
+                    }
+                }
+            });
+
+            return true;
         }
 
         @Override
@@ -144,18 +138,22 @@ public class TeraFonnApiService extends Service {
         public boolean addTrackAppStatus(List<String> packageNameList) throws RemoteException {
             boolean isSuccess = false;
             try {
-                if (packageNameList != null) {
-                    isSuccess = true;
-                    for (String packageName : packageNameList) {
-                        if (!mPackageNameMap.containsKey(packageName)) {
-                            mPackageNameMap.put(packageName, getAppStatus(packageName));
-                        }
-                    }
+                if (packageNameList == null) {
+                    return false;
                 }
+                for (final String packageName : packageNameList) {
+                    if (mPackageStatusMap.containsKey(packageName)) {
+                        continue;
+                    }
+                    // Given a default app status for the package, the status will be changed later
+                    // in TrackAppStatusRunnable.
+                    mPackageStatusMap.put(packageName, AppStatus.UNAVAILABLE /* default app status */);
+                }
+                isSuccess = true;
             } catch (Exception e) {
-                isSuccess = false;
                 Logs.e(CLASSNAME, "addTrackAppStatus", Log.getStackTraceString(e));
             }
+            mTrackAppStatusThread._continue();
             return isSuccess;
         }
 
@@ -163,12 +161,13 @@ public class TeraFonnApiService extends Service {
         public boolean removeTrackAppStatus(List<String> packageNameList) throws RemoteException {
             boolean isSuccess = false;
             try {
-                if (packageNameList != null) {
-                    for (String packageName : packageNameList) {
-                        mPackageNameMap.remove(packageName);
-                    }
-                    isSuccess = true;
+                if (packageNameList == null) {
+                    return false;
                 }
+                for (String packageName : packageNameList) {
+                    mPackageStatusMap.remove(packageName);
+                }
+                isSuccess = true;
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "removeTrackAppStatus", Log.getStackTraceString(e));
             }
@@ -177,9 +176,10 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean clearTrackAppStatus() throws RemoteException {
+            mTrackAppStatusThread.pause();
             boolean isSuccess;
             try {
-                mPackageNameMap.clear();
+                mPackageStatusMap.clear();
                 isSuccess = true;
             } catch (Exception e) {
                 isSuccess = false;
@@ -216,7 +216,16 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int checkAppAvailable(String packageName) throws RemoteException {
-            return getPackageStatus(packageName);
+            int status;
+            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+            boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+            if (isAvailable) {
+                status = AppStatus.AVAILABLE;
+            } else {
+                status = getPackageStatus(packageName);
+            }
+            mPackageStatusMap.put(packageName, status);
+            return status;
         }
 
         @Override
@@ -287,6 +296,21 @@ public class TeraFonnApiService extends Service {
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, final int startId) {
+        Logs.d(CLASSNAME, "onStartCommand", null);
+
+        if (isServiceRunning) {
+            Logs.d(CLASSNAME, "onStartCommand", "Service is running");
+            return super.onStartCommand(intent, flags, startId);
+        } else {
+            isServiceRunning = true;
+            mTrackAppStatusThread.start();
+        }
+
+        return START_STICKY;
+    }
+
+    @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         Logs.d(CLASSNAME, "onTaskRemoved", null);
@@ -306,71 +330,18 @@ public class TeraFonnApiService extends Service {
         mGetJwtAndImeiListener = null;
         mTrackAppStatusListener = null;
         mFetchAppDataListener = null;
-        if (mPackageNameMap != null) {
-            mPackageNameMap.clear();
-            mPackageNameMap = null;
+        if (mPackageStatusMap != null) {
+            mPackageStatusMap.clear();
+            mPackageStatusMap = null;
         }
-        if (mCacheExecutor != null) {
-            mCacheExecutor.shutdownNow();
-            mCacheExecutor = null;
+        if (mExecutor != null) {
+            mExecutor.shutdownNow();
+            mExecutor = null;
         }
         if (mTrackAppStatusThread != null) {
             mTrackAppStatusThread.interrupt();
             mTrackAppStatusThread = null;
         }
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, final int startId) {
-        Logs.d(CLASSNAME, "onStartCommand", null);
-
-        if (isServiceRunning) {
-            Logs.d(CLASSNAME, "onStartCommand", "Service is running");
-            return super.onStartCommand(intent, flags, startId);
-        }
-
-        isServiceRunning = true;
-        mTrackAppStatusThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    while (true) {
-                        Set<String> packageNameSet = mPackageNameMap.keySet();
-                        if (mTrackAppStatusListener != null) {
-                            for (String packageName : packageNameSet) {
-                                try {
-                                    AppStatus appStatus = mPackageNameMap.get(packageName);
-                                    if (appStatus != null) {
-                                        int reportStatus = getPackageStatus(packageName);
-                                        if (appStatus.getStatus() != reportStatus) {
-                                            mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
-                                        }
-                                        appStatus.setStatus(reportStatus);
-                                        mPackageNameMap.put(packageName, appStatus);
-                                    }
-                                } catch (Exception e) {
-                                    Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
-                                    try {
-                                        mTrackAppStatusListener.onTrackFailed(packageName);
-                                    } catch (Exception e1) {
-                                        Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e1));
-                                    }
-                                }
-                            }
-                        } else {
-                            Logs.w(CLASSNAME, "onStartCommand", "TrackAppStatusListener is null");
-                        }
-
-                        Thread.sleep(3000);
-                    }
-                } catch (InterruptedException e) {
-                    Logs.w(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
-                }
-            }
-        });
-        mTrackAppStatusThread.start();
-
-        return START_STICKY;
     }
 
     private AppStatus getAppStatus(String packageName) {
@@ -401,67 +372,27 @@ public class TeraFonnApiService extends Service {
         } catch (Exception e) {
             Logs.e(CLASSNAME, "getAppStatus", Log.getStackTraceString(e));
         }
-
-        int status = getPackageStatus(packageName);
-        if (status != AppStatus.STATUS_AVAILABLE) {
-            status = AppStatus.STATUS_UNAVAILABLE;
-        }
-
-        return new AppStatus(packageName, isPinned, isOnFetching, status);
+        return new AppStatus(packageName, isPinned, isOnFetching, AppStatus.UNAVAILABLE);
     }
 
     private int getPackageStatus(String packageName) {
-        if (HCFSConnStatus.isAvailable(TeraFonnApiService.this, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return AppStatus.STATUS_AVAILABLE;
-        } else {
-            try {
-                UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
-                UidInfo uidInfo = uidDAO.get(packageName);
-
-                ApplicationInfo applicationInfo = getPackageManager().
-                        getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                com.hopebaytech.hcfsmgmt.info.AppInfo appInfo =
-                        new com.hopebaytech.hcfsmgmt.info.AppInfo(TeraFonnApiService.this);
-                appInfo.setApplicationInfo(applicationInfo);
-                if (uidInfo != null) {
-                    appInfo.setExternalDirList(uidInfo.getExternalDir());
-                }
-                return appInfo.getAppStatus();
-            } catch (PackageManager.NameNotFoundException e) {
-                Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));
-            }
-        }
-        return AppStatus.STATUS_UNAVAILABLE;
-    }
-
-    private int getDefaultLocation(String packageName) {
-        int location = LocationStatus.LOCAL;
         try {
-            String dataDir = getDataDir(packageName);
-            List<String> appPath = getExternalDir(packageName);
+            UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
+            UidInfo uidInfo = uidDAO.get(packageName);
 
-            appPath.add(dataDir);
-
-            List<Integer> appLocation = new ArrayList<>();
-
-            for (String path : appPath) {
-                appLocation.add(HCFSMgmtUtils.getDirLocationStatus(path));
+            ApplicationInfo applicationInfo = getPackageManager().
+                    getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+            com.hopebaytech.hcfsmgmt.info.AppInfo appInfo =
+                    new com.hopebaytech.hcfsmgmt.info.AppInfo(TeraFonnApiService.this);
+            appInfo.setApplicationInfo(applicationInfo);
+            if (uidInfo != null) {
+                appInfo.setExternalDirList(uidInfo.getExternalDir());
             }
-
-            if (appLocation.contains(LocationStatus.HYBRID)) {
-                location = LocationStatus.HYBRID;
-            } else if (appLocation.contains(LocationStatus.CLOUD)) {
-                location = LocationStatus.CLOUD;
-            } else {
-                location = LocationStatus.LOCAL;
-            }
-
-            Logs.d(CLASSNAME, "getDefaultLocation", "APP Location: " + String.valueOf(location));
-        } catch (Exception e) {
-            Logs.e(CLASSNAME, "getDefaultLocation", "Error: " + e.toString());
+            return appInfo.getAppStatus();
+        } catch (PackageManager.NameNotFoundException e) {
+            Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));
         }
-
-        return location;
+        return AppStatus.UNAVAILABLE;
     }
 
     private Boolean handleFailureOfPinOrUnpin(Boolean pinOP, String packageName) {
@@ -479,40 +410,42 @@ public class TeraFonnApiService extends Service {
         String OP = pinOP ? "Pin" : "Unpin";
         String dataDir = getDataDir(packageName);
 
-        if (!dataDir.equals("")) {
-            try {
-                String jsonResult = pinOP ? HCFSApiUtils.pin(dataDir, PinType.NORMAL) : HCFSApiUtils.unpin(dataDir);
-                JSONObject jObject = new JSONObject(jsonResult);
-                isSuccess = jObject.getBoolean("result");
+        if (dataDir.equals("")) {
+            return false;
+        }
 
-                String logMsg = "operation=" + OP + ", filePath=" + dataDir + ", jsonResult=" + jsonResult;
-                if (isSuccess) {
-                    Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
-                    List<String> externalPath = getExternalDir(packageName);
+        try {
+            String jsonResult = pinOP ? HCFSApiUtils.pin(dataDir, PinType.NORMAL) : HCFSApiUtils.unpin(dataDir);
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
 
-                    if (externalPath.size() != 0) {
-                        for (String path : externalPath) {
-                            jsonResult = pinOP ? HCFSApiUtils.pin(path, PinType.NORMAL) : HCFSApiUtils.unpin(path);
-                            jObject = new JSONObject(jsonResult);
-                            isSuccess = jObject.getBoolean("result");
+            String logMsg = "operation=" + OP + ", filePath=" + dataDir + ", jsonResult=" + jsonResult;
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
+                List<String> externalPath = getExternalDir(packageName);
 
-                            logMsg = "operation=" + OP + ", filePath=" + path + ", jsonResult=" + jsonResult;
-                            if (isSuccess) {
-                                Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
-                            } else {
-                                Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
-                                break;
-                            }
-                        }
-                    }
-
-                } else {
-                    Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
+                if (externalPath.size() == 0) {
+                    return true;
                 }
 
-            } catch (JSONException e) {
-                Logs.e(CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
+                for (String path : externalPath) {
+                    jsonResult = pinOP ? HCFSApiUtils.pin(path, PinType.NORMAL) : HCFSApiUtils.unpin(path);
+                    jObject = new JSONObject(jsonResult);
+                    isSuccess = jObject.getBoolean("result");
+
+                    logMsg = "operation=" + OP + ", filePath=" + path + ", jsonResult=" + jsonResult;
+                    if (isSuccess) {
+                        Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
+                    } else {
+                        Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
+                        break;
+                    }
+                }
+            } else {
+                Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
             }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
         }
 
         return isSuccess;
@@ -565,7 +498,7 @@ public class TeraFonnApiService extends Service {
     }
 
     private List<String> getExternalDir(String packageName) {
-        List<String> externalDir = new ArrayList<String>();
+        List<String> externalDir = new ArrayList<>();
         String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
         try {
             File externalAndroidFile = new File(externalPath);
@@ -591,51 +524,129 @@ public class TeraFonnApiService extends Service {
         int progress = -1;
 
         try {
-            if (HCFSConnStatus.isAvailable(TeraFonnApiService.this, HCFSMgmtUtils.getHCFSStatInfo())) {
-                String dataDir = getDataDir(packageName);
-                if (dataDir.equals("")) return -1;
-
-                String sourceDir = getSourceDir(packageName);
-                if (sourceDir.equals("")) return -1;
-
-                List<String> appPath = getExternalDir(packageName);
-                appPath.add(dataDir);
-                appPath.add(sourceDir);
-                boolean getDirStatusResult = true;
-                int appTotal = 0;
-                int localTotal = 0;
-
-                for (String path : appPath) {
-                    String jsonResult = HCFSApiUtils.getDirStatus(path);
-                    JSONObject jObject = new JSONObject(jsonResult);
-                    if (jObject.getBoolean("result") && jObject.getInt("code") == 0) {
-                        JSONObject dataObj = jObject.getJSONObject("data");
-                        int numLocal = dataObj.getInt("num_local");
-                        int numHybrid = dataObj.getInt("num_hybrid");
-                        int numCloud = dataObj.getInt("num_cloud");
-                        appTotal = appTotal + numLocal + numHybrid + numCloud;
-                        localTotal = localTotal + numLocal;
-                        Logs.d(CLASSNAME, "getAppProgress", jsonResult);
-                    } else {
-                        getDirStatusResult = false;
-                        break;
-                    }
-                }
-
-                if (getDirStatusResult) {
-                    progress = Math.round((float) (localTotal / appTotal) * 100);
-                } else {
-                    progress = -1;
-                }
-
-                Logs.d(CLASSNAME, "getAppProgress", String.valueOf(progress));
+            if (!HCFSConnStatus.isAvailable(TeraFonnApiService.this, HCFSMgmtUtils.getHCFSStatInfo())) {
+                return progress;
             }
+
+            String dataDir = getDataDir(packageName);
+            if (dataDir.equals("")) return -1;
+
+            String sourceDir = getSourceDir(packageName);
+            if (sourceDir.equals("")) return -1;
+
+            List<String> appPath = getExternalDir(packageName);
+            appPath.add(dataDir);
+            appPath.add(sourceDir);
+            boolean getDirStatusResult = true;
+            int appTotal = 0;
+            int localTotal = 0;
+
+            for (String path : appPath) {
+                String jsonResult = HCFSApiUtils.getDirStatus(path);
+                JSONObject jObject = new JSONObject(jsonResult);
+                if (jObject.getBoolean("result") && jObject.getInt("code") == 0) {
+                    JSONObject dataObj = jObject.getJSONObject("data");
+                    int numLocal = dataObj.getInt("num_local");
+                    int numHybrid = dataObj.getInt("num_hybrid");
+                    int numCloud = dataObj.getInt("num_cloud");
+                    appTotal = appTotal + numLocal + numHybrid + numCloud;
+                    localTotal = localTotal + numLocal;
+                    Logs.d(CLASSNAME, "getAppProgress", jsonResult);
+                } else {
+                    getDirStatusResult = false;
+                    break;
+                }
+            }
+
+            if (getDirStatusResult) {
+                progress = Math.round((float) (localTotal / appTotal) * 100);
+            } else {
+                progress = -1;
+            }
+
+            Logs.d(CLASSNAME, "getAppProgress", String.valueOf(progress));
         } catch (Exception e) {
             progress = -1;
             Logs.e(CLASSNAME, "getAppProgress", e.toString());
         }
-
         return progress;
+    }
+
+    private class TrackAppStatusThread extends Thread {
+
+        private boolean running;
+
+        private void pause() {
+            this.running = false;
+        }
+
+        private void _continue() {
+            this.running = true;
+            synchronized (this) {
+                notify();
+            }
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            while (true) {
+                try {
+                    if (!running) {
+                        synchronized (this) {
+                            try {
+                                wait();
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    if (mTrackAppStatusListener == null) {
+                        Logs.w(CLASSNAME, "onStartCommand", "TrackAppStatusListener is null");
+                        Thread.sleep(3000);
+                        continue;
+                    }
+
+                    final Set<String> packageKeySet = mPackageStatusMap.keySet();
+                    HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                    final boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+                    for (final String packageName : packageKeySet) {
+                        mExecutor.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    int appStatus = mPackageStatusMap.get(packageName);
+
+                                    int reportStatus;
+                                    if (isAvailable) {
+                                        reportStatus = AppStatus.AVAILABLE;
+                                    } else {
+                                        reportStatus = getPackageStatus(packageName);
+                                    }
+
+                                    if (appStatus != reportStatus) {
+                                        mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
+                                        mPackageStatusMap.put(packageName, reportStatus);
+                                    }
+                                } catch (Exception e) {
+                                    Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+                                    try {
+                                        mTrackAppStatusListener.onTrackFailed(packageName);
+                                    } catch (Exception e1) {
+                                        Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e1));
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    Logs.w(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+                    break;
+                }
+            }
+        }
     }
 
 }
