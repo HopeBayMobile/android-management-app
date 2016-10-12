@@ -27,14 +27,14 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     private static final String CLASSNAME = FileDirInfo.class.getSimpleName();
 
-    public static final String MIME_TYPE_IMAGE = "image";
-    public static final String MIME_TYPE_VIDEO = "video";
-    public static final String MIME_TYPE_AUDIO = "audio";
-    public static final String MIME_TYPE_APPLICATION = "application";
-    public static final String MIME_SUBTYPE_APK = "vnd.android.package-archive";
-    public static final String MIME_SUBTYPE_OGG = "ogg";
-    public static final String MIME_SUBTYPE_PNG = "png";
-    public static final String MIME_SUBTYPE_SVG = "svg";
+    private static final String MIME_TYPE_IMAGE = "image";
+    private static final String MIME_TYPE_VIDEO = "video";
+    private static final String MIME_TYPE_AUDIO = "audio";
+    private static final String MIME_TYPE_APPLICATION = "application";
+    private static final String MIME_SUBTYPE_APK = "vnd.android.package-archive";
+    private static final String MIME_SUBTYPE_OGG = "ogg";
+    private static final String MIME_SUBTYPE_PNG = "png";
+    private static final String MIME_SUBTYPE_SVG = "svg";
 
     private boolean mIsDirectory;
     private String mFilePath;
@@ -170,12 +170,24 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
     }
 
     @Nullable
-    public String getMimeType(String path) {
-        String extension = MimeTypeMap.getFileExtensionFromUrl(path);
+    private String getMimeType(String path) {
+        String extension = getFileExtension(path);
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
     }
 
-    public int getFileDirStatus() {
+    private static String getFileExtension(String path) {
+        if (!TextUtils.isEmpty(path)) {
+            int filenamePos = path.lastIndexOf('/');
+            String filename = filenamePos >=  0 ? path.substring(filenamePos + 1) : path;
+            int dotPos = filename.lastIndexOf('.');
+            if (dotPos >= 0) {
+                return filename.substring(dotPos + 1);
+            }
+        }
+        return "";
+    }
+
+    private int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
         if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
             return AppStatus.AVAILABLE;

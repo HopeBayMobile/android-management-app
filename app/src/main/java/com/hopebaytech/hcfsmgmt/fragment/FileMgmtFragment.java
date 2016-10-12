@@ -871,7 +871,6 @@ public class FileMgmtFragment extends Fragment {
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Logs.w(CLASSNAME, "showTypeContent", "itemInfoList.size()=" + itemInfoList.size());
                         mSectionedRecyclerViewAdapter.setSubAdapterItems(itemInfoList);
 //                        mSectionedRecyclerViewAdapter.mBaseAdapter.notifyDataSetChanged();
                         mSectionedRecyclerViewAdapter.notifyDataSetChanged();
@@ -927,7 +926,6 @@ public class FileMgmtFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            Logs.d(CLASSNAME, "GridRecyclerViewAdapter", "getItemCount", "itemInfoList.size()=" + mItemInfoList.size());
             return mItemInfoList.size();
         }
 
@@ -1039,7 +1037,6 @@ public class FileMgmtFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            Logs.d(CLASSNAME, "LinearRecyclerViewAdapter", "getItemCount", "mItemInfoList.size()=" + mItemInfoList.size());
             return mItemInfoList.size();
         }
 
