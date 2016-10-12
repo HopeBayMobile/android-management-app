@@ -147,11 +147,7 @@ public class TeraFonnApiService extends Service {
                     }
                     // Given a default app status for the package, the status will be changed later
                     // in TrackAppStatusRunnable.
-                    Integer status = mPackageStatusMap.get(packageName);
-                    if (status == null) {
-                        status = AppStatus.UNAVAILABLE;
-                    }
-                    mPackageStatusMap.put(packageName, status /* default app status */);
+                    mPackageStatusMap.put(packageName, AppStatus.UNAVAILABLE /* default app status */);
                 }
                 isSuccess = true;
             } catch (Exception e) {
@@ -194,7 +190,6 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public AppInfo getAppInfo(List<String> packageNameList) throws RemoteException {
-            long start = System.currentTimeMillis();
             AppInfo appInfo = new AppInfo();
             List<AppStatus> appStatusList = new ArrayList<>();
             if (packageNameList == null) {
@@ -206,8 +201,6 @@ public class TeraFonnApiService extends Service {
                 }
             }
             appInfo.setAppStatusList(appStatusList);
-            long end = System.currentTimeMillis();
-            Logs.d(CLASSNAME, "getAppInfo", "Spent time in millis: " + (end - start));
             return appInfo;
         }
 
