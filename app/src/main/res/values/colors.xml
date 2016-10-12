@@ -14,21 +14,14 @@
     <color name="colorHomePageXferProgressBarSecondary">#0071BC</color>
     <color name="colorHomePageProgressBarText">#4D4D4D</color>
     
-    <color name="colorFileManagementSpinnerBar">#8CC63F</color>
-    <color name="colorFileManagementStorageTypeTitle">#0071BC</color>
-    <color name="colorFileManagementLocalStorageText">#4D4D4D</color>
-    <color name="colorFileManagementTotalStorageText">#4D4D4D</color>
-    <color name="colorFileManagementAvailStorageText">#8CC63F</color>
-    <color name="colorFileManagementCircleArc">#0071BC</color>
-    <color name="colorFileManagementCircleWhole">#E6E6E6</color>
-    <color name="colorFileManagementCircleText">#29ABE2</color>
-
     <color name="colorWhite">@android:color/white</color>
     <color name="colorBlack">@android:color/black</color>
     <color name="colorPagerTabStrip">#4E8D1F</color>
 
     <color name="colorSwitchAccountTextBackground">#F2F8EA</color>
     <color name="colorAboutTitle">#3C89C7</color>
+
+    <color name="colorDefaultBackground">#FAFAFA</color>
 
     <color name="C1">#77bc1f</color>
     <color name="C2">#026937</color>

@@ -110,6 +110,10 @@
     <string name="app_file_section_item_total_storage_space">總空間:&#160;</string>
     <string name="app_file_section_item_available_storage_space">可用空間:&#160;</string>
     <string name="app_file_section_item_internal_storage_space">本地空間:&#160;</string>
+    <string name="app_file_section_item_all_apps">All Apps</string>
+    <string name="app_file_section_item_all_pinned_apps">Pinned Apps</string>
+    <string name="app_file_section_item_all_files">All Files</string>
+    <string name="app_file_section_item_all_pinned_files">Pinned Files</string>
     <string name="app_file_alert_dialog_title">提示</string>
     <string name="app_file_alert_dialog_message_pin_datatype">之後新增的檔案將自動被釘選，是否也同時釘選現存的檔案？</string>
     <string name="app_file_alert_dialog_message_unpin_datatype">之後新增的檔案將自動被取消釘選，是否也同時取消釘選現存的檔案？</string>

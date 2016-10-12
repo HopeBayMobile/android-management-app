@@ -49,9 +49,20 @@
                     android:layout_centerVertical="true">
 
                     <ImageView
+                        android:id="@+id/search"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/M3"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:padding="@dimen/M6"
+                        android:src="@drawable/icon_btn_tab_search_light" />
+
+                    <ImageView
                         android:id="@+id/refresh"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/M3"
                         android:background="?android:attr/selectableItemBackground"
                         android:clickable="true"
                         android:padding="@dimen/M6"
@@ -104,6 +115,12 @@
         </RelativeLayout>
 
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorDefaultBackground" />
 
     <HorizontalScrollView
         android:id="@+id/file_path_navigation_scrollview"

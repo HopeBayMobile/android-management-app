@@ -109,7 +109,11 @@
     <string name="app_file_section_item_calculating">Calculating&#8230;</string>
     <string name="app_file_section_item_total_storage_space">Total space:&#160;</string>
     <string name="app_file_section_item_available_storage_space">Available space:&#160;</string>
-    <string name="app_file_section_item_internal_storage_space">Local space:&#160;</string>
+    <string name="app_file_section_item_internal_storage_space">Local space:&#160;</string> ?
+    <string name="app_file_section_item_all_apps">All Apps</string>
+    <string name="app_file_section_item_all_pinned_apps">Pinned Apps</string>
+    <string name="app_file_section_item_all_files">All Files</string>
+    <string name="app_file_section_item_all_pinned_files">Pinned Files</string>
     <string name="app_file_alert_dialog_title">Tip</string>
     <string name="app_file_alert_dialog_message_pin_datatype">Newly added files will be auto pinned. Pin existing files now?</string>
     <string name="app_file_alert_dialog_message_unpin_datatype">Newly added files will be auto unpinned. Unpin existing files now?</string>

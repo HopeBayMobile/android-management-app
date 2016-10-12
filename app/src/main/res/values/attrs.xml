@@ -18,11 +18,13 @@
     </declare-styleable>
 
     <declare-styleable name="CircleDisplay">
-        <attr name="circleBackground" format="color"/>
+        <!-- Initially draw collapsed until adapters have been set. -->
+        <attr name="arcBackground" format="color"/>
         <attr name="valueColor" format="color"/>
-        <attr name="ratioColor" format="color"/>
-        <attr name="ratioTextSize" format="dimension"/>
-        <attr name="capacityColor" format="color"/>
+        <attr name="percentageTextColor" format="color"/>
+        <attr name="percentageTextSize" format="dimension"/>
+        <attr name="capacityTextColor" format="color"/>
         <attr name="capacityTextSize" format="dimension"/>
+        <attr name="arcStokeWidth" format="dimension"/>
     </declare-styleable>
 </resources>

@@ -1,5 +1,8 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
+
 import java.util.Locale;
 
 public class UnitConverter {
@@ -115,5 +118,16 @@ public class UnitConverter {
 //		}
 //
 //	}
+
+	/**
+	 * This method converts dp unit to equivalent pixels, depending on device density.
+	 *
+	 * @param dp A value in dp (density independent pixels) unit. Which we need to convert into pixels
+	 * @return A float value to represent px equivalent to dp depending on device density
+	 */
+	public static float convertDpToPixel(Resources r, float dp) {
+		DisplayMetrics metrics = r.getDisplayMetrics();
+		return dp * (metrics.densityDpi / 160f);
+	}
 
 }

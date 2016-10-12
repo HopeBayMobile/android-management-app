@@ -143,8 +143,26 @@ public class AppFileFragment extends Fragment {
     private boolean mCurrentVisible;
     private boolean mServiceBound;
     private TeraMgmtService mMgmtService;
+    private boolean mFilterByPin;
+
+    /**
+     * @see LayoutType#GRID
+     * @see LayoutType#LINEAR
+     */
     private LayoutType mLayoutType;
+
+    /**
+     * @see DisplayType#BY_APP
+     * @see DisplayType#BY_FILE
+     */
     private int mDisplayType;
+
+    /**
+     * @see SortType#BY_NAME
+     * @see SortType#BY_INSTALLED_TIME
+     * @see SortType#BY_MODIFIED_TIME
+     * @see SortType#BY_SIZE
+     */
     private int mSortType;
 
     /**
@@ -792,7 +810,7 @@ public class AppFileFragment extends Fragment {
                 } else if (itemName.equals(mContext.getString(R.string.app_file_spinner_sort_by_size))) {
                     mSortType = SortType.BY_SIZE;
                 }
-                showContent(mSortType);
+                showContent();
             }
 
             @Override
@@ -810,7 +828,7 @@ public class AppFileFragment extends Fragment {
                 long currentTime = System.currentTimeMillis();
                 if ((currentTime - lastClickTime) > Interval.NOT_ALLOW_REFRESH) {
                     mSectionedRecyclerViewAdapter.init();
-                    showContent(mSortType);
+                    showContent();
                     lastClickTime = currentTime;
                 }
             }
@@ -859,10 +877,10 @@ public class AppFileFragment extends Fragment {
         });
     }
 
-    public void showContent(final int sortType) {
-        Logs.d(CLASSNAME, "showContent", null);
+    public void showContent() {
+        Logs.d(CLASSNAME, "showContent", "mSortType=" + mSortType + ", mFilterByPin=" + mFilterByPin);
 
-        if (!isRunOnCorrectSortType(sortType)) {
+        if (!isRunOnCorrectSortType(mSortType)) {
             return;
         }
 
@@ -873,15 +891,15 @@ public class AppFileFragment extends Fragment {
                 ArrayList<ItemInfo> itemInfoList = null;
                 switch (mDisplayType) {
                     case DisplayType.BY_APP:
-                        itemInfoList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_USER);
+                        itemInfoList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_USER, mFilterByPin);
                         break;
                     case DisplayType.BY_FILE:
-                        itemInfoList = DisplayTypeFactory.getListOfFileDirs(mContext, mCurrentFile);
+                        itemInfoList = DisplayTypeFactory.getListOfFileDirs(mContext, mCurrentFile, mFilterByPin);
                         break;
                     default:
                         itemInfoList = new ArrayList<>();
                 }
-                DisplayTypeFactory.sort(itemInfoList, sortType);
+                DisplayTypeFactory.sort(itemInfoList, mSortType);
 
                 final ArrayList<ItemInfo> finalItemInfoList = itemInfoList;
                 mUiHandler.post(new Runnable() {
@@ -915,7 +933,7 @@ public class AppFileFragment extends Fragment {
         });
     }
 
-    public class GridRecyclerViewAdapter extends RecyclerView.Adapter<GridRecyclerViewAdapter.GridRecyclerViewHolder> {
+    private class GridRecyclerViewAdapter extends RecyclerView.Adapter<GridRecyclerViewAdapter.GridRecyclerViewHolder> {
 
         private ArrayList<ItemInfo> mItemInfoList;
         private LruCache<Integer, Bitmap> mMemoryCache;
@@ -1082,8 +1100,8 @@ public class AppFileFragment extends Fragment {
         @Override
         public LinearRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Logs.d(CLASSNAME, "LinearRecyclerViewAdapter", "onCreateViewHolder");
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_mgmt_linear_item, parent, false);
-            return new LinearRecyclerViewHolder(view, mExecutor);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_file_linear_item, parent, false);
+            return new LinearRecyclerViewHolder(view);
         }
 
         private void setItemData(@Nullable ArrayList<ItemInfo> items) {
@@ -1102,19 +1120,16 @@ public class AppFileFragment extends Fragment {
 
         class LinearRecyclerViewHolder extends RecyclerViewHolder implements OnClickListener, OnLongClickListener {
 
-            private View rootView;
             private TextView itemName;
             private ImageView iconView;
             private ImageView pinView;
-            private TextView datePinnedTextView;
 
-            private LinearRecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
-                super(itemView, executor);
-                rootView = itemView;
+            private LinearRecyclerViewHolder(View itemView) {
+                super(itemView);
+
                 itemName = (TextView) itemView.findViewById(R.id.item_name);
                 iconView = (ImageView) itemView.findViewById(R.id.item_icon);
                 pinView = (ImageView) itemView.findViewById(R.id.pinView);
-                datePinnedTextView = (TextView) itemView.findViewById(R.id.datePinned);
 
                 pinView.setOnClickListener(this);
                 itemView.setOnClickListener(this);
@@ -1162,20 +1177,6 @@ public class AppFileFragment extends Fragment {
                 iconView.setImageAlpha(alpha);
             }
 
-//            @Override
-//            public void showPinnedDate(long currentTimeMillis) {
-//                SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.getDefault());
-//                String displayTime = sdf.format(new Date(currentTimeMillis));
-//                String displayText = String.format(mContext.getString(R.string.app_file_date_since_pinned), displayTime);
-//                datePinnedTextView.setText(displayText);
-//                datePinnedTextView.setVisibility(View.VISIBLE);
-//            }
-//
-//            @Override
-//            public void hidePinnedDate() {
-//                datePinnedTextView.setVisibility(View.GONE);
-//            }
-
         }
 
     }
@@ -1188,39 +1189,8 @@ public class AppFileFragment extends Fragment {
         private SparseArray<Section> mSections = new SparseArray<>();
         private boolean isFirstCircleAnimated = true;
 
-        private boolean isDataObserverRegistered;
-        private RecyclerView.AdapterDataObserver mDataObserver = new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onChanged() {
-                hasChildItem = mBaseAdapter.getItemCount() > 0;
-                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onChanged", "mBaseAdapter.getItemCount()=" + mBaseAdapter.getItemCount());
-                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onChanged", "hasChildItem=" + hasChildItem);
-                checkSubAdapterItem();
-            }
-
-            @Override
-            public void onItemRangeChanged(int positionStart, int itemCount) {
-                hasChildItem = mBaseAdapter.getItemCount() > 0;
-                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeChanged", "hasChildItem=" + hasChildItem);
-                checkSubAdapterItem();
-            }
-
-            @Override
-            public void onItemRangeInserted(int positionStart, int itemCount) {
-                hasChildItem = mBaseAdapter.getItemCount() > 0;
-                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeInserted", "hasChildItem=" + hasChildItem);
-                checkSubAdapterItem();
-            }
-
-            @Override
-            public void onItemRangeRemoved(int positionStart, int itemCount) {
-                hasChildItem = mBaseAdapter.getItemCount() > 0;
-                Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "onItemRangeRemoved", "hasChildItem=" + hasChildItem);
-                checkSubAdapterItem();
-            }
-        };
-
-        private SectionedRecyclerViewAdapter(final RecyclerView.Adapter mBaseAdapter) {
+        @SuppressWarnings("rawtypes")
+        private SectionedRecyclerViewAdapter(RecyclerView.Adapter mBaseAdapter) {
             this.mBaseAdapter = mBaseAdapter;
             registerAdapterDataObserver();
         }
@@ -1296,6 +1266,35 @@ public class AppFileFragment extends Fragment {
             }
         }
 
+        @SuppressWarnings("rawtypes")
+        private void registerAdapterDataObserver(final RecyclerView.Adapter mBaseAdapter) {
+            mBaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    mValid = mBaseAdapter.getItemCount() > 0;
+                    notifyDataSetChanged();
+                }
+
+                @Override
+                public void onItemRangeChanged(int positionStart, int itemCount) {
+                    mValid = mBaseAdapter.getItemCount() > 0;
+                    notifyItemRangeChanged(positionStart, itemCount);
+                }
+
+                @Override
+                public void onItemRangeInserted(int positionStart, int itemCount) {
+                    mValid = mBaseAdapter.getItemCount() > 0;
+                    notifyItemRangeInserted(positionStart, itemCount);
+                }
+
+                @Override
+                public void onItemRangeRemoved(int positionStart, int itemCount) {
+                    mValid = mBaseAdapter.getItemCount() > 0;
+                    notifyItemRangeRemoved(positionStart, itemCount);
+                }
+            });
+        }
+
         private void setGridLayoutManagerSpanSize() {
             final GridLayoutManager gridLayoutManager = (GridLayoutManager) (mRecyclerView.getLayoutManager());
             gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -1330,7 +1329,7 @@ public class AppFileFragment extends Fragment {
         public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int position) {
             if (isSectionHeaderPosition(position)) {
                 final SectionedViewHolder sectionViewHolder = (SectionedViewHolder) viewHolder;
-                mSections.get(position).viewHolder = sectionViewHolder;
+//                mSections.get(position).viewHolder = sectionViewHolder;
                 mWorkerHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -1438,21 +1437,65 @@ public class AppFileFragment extends Fragment {
             return sectionedPosition + offset;
         }
 
-        private class SectionedViewHolder extends RecyclerView.ViewHolder {
+        private class SectionedViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
 
-            private View rootView;
             private CircleDisplay circleDisplay;
             private TextView storageType;
             private TextView totalSpace;
             private TextView freeSpace;
+            private LinearLayout allItem;
+            private LinearLayout pinnedItem;
+            private ImageView allItemImage;
+            private ImageView pinnedItemImage;
+            private TextView allItemText;
+            private TextView pinnedItemText;
 
             private SectionedViewHolder(View itemView) {
                 super(itemView);
-                rootView = itemView;
                 circleDisplay = (CircleDisplay) itemView.findViewById(R.id.circle_display_view);
                 storageType = (TextView) itemView.findViewById(R.id.storage_type);
                 totalSpace = (TextView) itemView.findViewById(R.id.total_space);
                 freeSpace = (TextView) itemView.findViewById(R.id.free_space);
+                allItem = (LinearLayout) itemView.findViewById(R.id.all_item);
+                pinnedItem = (LinearLayout) itemView.findViewById(R.id.pinned_item);
+                allItemImage = (ImageView) allItem.findViewById(R.id.all_item_img);
+                pinnedItemImage = (ImageView) pinnedItem.findViewById(R.id.pinned_item_img);
+                allItemText = (TextView) allItem.findViewById(R.id.all_item_text);
+                pinnedItemText = (TextView) pinnedItem.findViewById(R.id.pinned_item_text);
+
+                switch (mDisplayType) {
+                    case DisplayType.BY_APP:
+                        allItemText.setText(R.string.app_file_section_item_all_apps);
+                        pinnedItemText.setText(R.string.app_file_section_item_all_pinned_apps);
+                        break;
+                    case DisplayType.BY_FILE:
+                        allItemText.setText(R.string.app_file_section_item_all_files);
+                        pinnedItemText.setText(R.string.app_file_section_item_all_pinned_files);
+                        break;
+                }
+
+                allItem.setOnClickListener(this);
+                pinnedItem.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                Drawable unSelectedDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_btn_unselected);
+                allItemImage.setImageDrawable(unSelectedDrawable);
+                pinnedItemImage.setImageDrawable(unSelectedDrawable);
+
+                Drawable selectedDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_btn_selected);
+                switch (v.getId()) {
+                    case R.id.all_item:
+                        allItemImage.setImageDrawable(selectedDrawable);
+                        mFilterByPin = false;
+                        break;
+                    case R.id.pinned_item:
+                        pinnedItemImage.setImageDrawable(selectedDrawable);
+                        mFilterByPin = true;
+                        break;
+                }
+                showContent();
             }
 
         }
@@ -1460,9 +1503,10 @@ public class AppFileFragment extends Fragment {
     }
 
     public class Section {
+
         private int firstPosition;
         private int sectionedPosition;
-        private SectionedRecyclerViewAdapter.SectionedViewHolder viewHolder;
+//        private SectionedRecyclerViewAdapter.SectionedViewHolder viewHolder;
 
         public Section(int firstPosition) {
             this.firstPosition = firstPosition;
@@ -1587,7 +1631,7 @@ public class AppFileFragment extends Fragment {
             mFilePathNavigationLayout.removeViews(startIndex, childCount - startIndex);
 
             mCurrentFile = new File(currentFilePath);
-            showContent(mSortType);
+            showContent();
 
             mUiHandler.post(new Runnable() {
                 @Override
@@ -1629,7 +1673,7 @@ public class AppFileFragment extends Fragment {
                 FilePathNavigationView filePathNavigationView = (FilePathNavigationView) mFilePathNavigationLayout.getChildAt(childCount - 2);
                 final int firstVisibleItemPosition = filePathNavigationView.firstVisibleItemPosition;
                 mFilePathNavigationLayout.removeViewAt(childCount - 1);
-                showContent(mSortType);
+                showContent();
 
                 mUiHandler.post(new Runnable() {
                     @Override
@@ -1977,7 +2021,7 @@ public class AppFileFragment extends Fragment {
                 });
 
                 // Show the file list of the entered directory
-                showContent(mSortType);
+                showContent();
             } else {
                 // Build the intent
                 String mimeType = fileInfo.getMimeType();
@@ -2011,15 +2055,9 @@ public class AppFileFragment extends Fragment {
     public abstract class RecyclerViewHolder extends RecyclerView.ViewHolder {
 
         ItemInfo itemInfo;
-        private ThreadPoolExecutor executor;
 
         private RecyclerViewHolder(View itemView) {
             super(itemView);
-        }
-
-        private RecyclerViewHolder(View itemView, ThreadPoolExecutor executor) {
-            this(itemView);
-            this.executor = executor;
         }
 
         void setItemInfo(ItemInfo itemInfo) {
@@ -2046,80 +2084,6 @@ public class AppFileFragment extends Fragment {
                 } catch (CloneNotSupportedException e) {
                     Logs.e(CLASSNAME, "pinUnpinItem", Log.getStackTraceString(e));
                 }
-            } else if (itemInfo instanceof DataTypeInfo) {
-                /*
-                final DataTypeInfo dataTypeInfo = (DataTypeInfo) itemInfo;
-                dataTypeInfo.setDateUpdated(0);
-
-                final String dataTypeText;
-                if (dataTypeInfo.getDataType().equals(DataTypeDAO.DATA_TYPE_IMAGE)) {
-                    dataTypeText = mContext.getString(R.string.file_mgmt_list_data_type_image);
-                } else if (dataTypeInfo.getDataType().equals(DataTypeDAO.DATA_TYPE_VIDEO)) {
-                    dataTypeText = mContext.getString(R.string.file_mgmt_list_data_type_video);
-                } else if (dataTypeInfo.getDataType().equals(DataTypeDAO.DATA_TYPE_AUDIO)) {
-                    dataTypeText = mContext.getString(R.string.file_mgmt_list_data_type_audio);
-                } else {
-                    dataTypeText = "";
-                }
-
-                if (!dataTypeText.isEmpty()) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    builder.setTitle(dataTypeText);
-                    if (dataTypeInfo.isPinned()) {
-                        builder.setMessage(mContext.getString(R.string.file_mgmt_alert_dialog_message_pin_datatype));
-                        builder.setPositiveButton(mContext.getString(R.string.yes), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dataTypeInfo.setDateUpdated(0);
-                                dataTypeInfo.setDatePinned(0);
-                                executor.execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        DataTypeDAO.getInstance(mContext).update(dataTypeInfo);
-                                    }
-                                });
-                                mPinUnpinTypeMap.put(dataTypeInfo.getDataType(), isPinned);
-                            }
-                        });
-                        builder.setNegativeButton(mContext.getString(R.string.no), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                long currentTimeMillis = System.currentTimeMillis();
-                                dataTypeInfo.setDateUpdated(currentTimeMillis);
-                                dataTypeInfo.setDatePinned(currentTimeMillis);
-                                showPinnedDate(currentTimeMillis);
-
-                                executor.execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        DataTypeDAO.getInstance(mContext).update(dataTypeInfo);
-                                    }
-                                });
-                                mPinUnpinTypeMap.put(dataTypeInfo.getDataType(), isPinned);
-                            }
-                        });
-                    } else {
-                        builder.setMessage(mContext.getString(R.string.file_mgmt_alert_dialog_message_unpin_datatype));
-                        builder.setPositiveButton(mContext.getString(R.string.confirm), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dataTypeInfo.setDateUpdated(0);
-                                hidePinnedDate();
-                                executor.execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        DataTypeDAO.getInstance(mContext).update(dataTypeInfo.getDataType(), dataTypeInfo, DataTypeDAO.PIN_STATUS_COLUMN);
-                                        DataTypeDAO.getInstance(mContext).update(dataTypeInfo.getDataType(), dataTypeInfo, DataTypeDAO.DATE_UPDATED_COLUMN);
-                                    }
-                                });
-                                mPinUnpinTypeMap.put(dataTypeInfo.getDataType(), isPinned);
-                            }
-                        });
-                    }
-                    builder.setCancelable(false);
-                    builder.show();
-                }
-                */
             } else if (itemInfo instanceof FileInfo) {
                 final FileInfo fileInfo = (FileInfo) itemInfo;
                 boolean isNeedToProcess = true;

@@ -9,11 +9,13 @@ import android.support.v4.content.ContextCompat;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.AppFileFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,60 +33,77 @@ public class DisplayTypeFactory {
     public static final int APP_USER = 1;
     public static final int APP_ALL = 2;
 
+
     public static ArrayList<ItemInfo> getListOfInstalledApps(Context context, int flags) {
+        return getListOfInstalledApps(context, flags, false /* filter by pin */);
+    }
+
+    public static ArrayList<ItemInfo> getListOfInstalledApps(Context context, int flags, boolean filterByPin) {
         ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
-        if (context != null) {
-            Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-                Logs.d(CLASSNAME, "getListOfInstalledApps", "externalPath=" + externalPath);
-                File externalAndroidFile = new File(externalPath);
-                if (externalAndroidFile.exists()) {
-                    for (File type : externalAndroidFile.listFiles()) {
-                        File[] fileList = type.listFiles();
-                        for (File file : fileList) {
-                            String path = file.getAbsolutePath();
-                            String[] splitPath = path.split("/");
-                            String pkgName = splitPath[splitPath.length - 1];
+        if (context == null) {
+            return itemInfoList;
+        }
 
-                            ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
-                            if (externalPathList == null) {
-                                externalPathList = new ArrayList<>();
-                            }
-                            externalPathList.add(path);
-                            externalPkgNameMap.put(pkgName, externalPathList);
+        Map<String, ArrayList<String>> externalPkgNameMap = new HashMap<>();
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            String externalPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
+            Logs.d(CLASSNAME, "getListOfInstalledApps", "externalPath=" + externalPath);
+            File externalAndroidFile = new File(externalPath);
+            if (externalAndroidFile.exists()) {
+                for (File type : externalAndroidFile.listFiles()) {
+                    File[] fileList = type.listFiles();
+                    for (File file : fileList) {
+                        String path = file.getAbsolutePath();
+                        String[] splitPath = path.split("/");
+                        String pkgName = splitPath[splitPath.length - 1];
+
+                        ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+                        if (externalPathList == null) {
+                            externalPathList = new ArrayList<>();
                         }
+                        externalPathList.add(path);
+                        externalPkgNameMap.put(pkgName, externalPathList);
                     }
                 }
-            }
-
-            PackageManager pm = context.getPackageManager();
-            List<PackageInfo> packageInfoList = pm.getInstalledPackages(0);
-            for (PackageInfo packageInfo : packageInfoList) {
-                boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(packageInfo.applicationInfo);
-                if (flags == APP_SYSTEM) {
-                    if (!isSystemApp) {
-                        continue;
-                    }
-                } else if (flags == APP_USER) {
-                    if (isSystemApp) {
-                        continue;
-                    }
-                }
-
-                AppInfo appInfo = new AppInfo(context);
-                appInfo.setUid(packageInfo.applicationInfo.uid);
-                appInfo.setSystemApp(isSystemApp);
-                appInfo.setPackageInfo(packageInfo);
-                appInfo.setApplicationInfo(packageInfo.applicationInfo);
-                appInfo.setName(packageInfo.applicationInfo.loadLabel(pm).toString());
-                if (externalPkgNameMap.containsKey(packageInfo.packageName)) {
-                    appInfo.setExternalDirList(externalPkgNameMap.get(packageInfo.packageName));
-                }
-
-                itemInfoList.add(appInfo);
             }
         }
+
+        UidDAO uidDAO = UidDAO.getInstance(context);
+        PackageManager pm = context.getPackageManager();
+        List<PackageInfo> packageInfoList = pm.getInstalledPackages(0);
+        for (PackageInfo packageInfo : packageInfoList) {
+            boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(packageInfo.applicationInfo);
+            if (flags == APP_SYSTEM) {
+                if (!isSystemApp) {
+                    continue;
+                }
+            } else if (flags == APP_USER) {
+                if (isSystemApp) {
+                    continue;
+                }
+            }
+
+            AppInfo appInfo = new AppInfo(context);
+            appInfo.setUid(packageInfo.applicationInfo.uid);
+            appInfo.setSystemApp(isSystemApp);
+            appInfo.setPackageInfo(packageInfo);
+            appInfo.setApplicationInfo(packageInfo.applicationInfo);
+            appInfo.setName(packageInfo.applicationInfo.loadLabel(pm).toString());
+            if (externalPkgNameMap.containsKey(packageInfo.packageName)) {
+                appInfo.setExternalDirList(externalPkgNameMap.get(packageInfo.packageName));
+            }
+
+            if (filterByPin) {
+                UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
+                if (uidInfo != null) {
+                    if (!uidInfo.isPinned()) {
+                        continue;
+                    }
+                }
+            }
+            itemInfoList.add(appInfo);
+        }
+
         return itemInfoList;
     }
 
@@ -116,25 +135,34 @@ public class DisplayTypeFactory {
         return itemInfoList;
     }
 
-    public static ArrayList<ItemInfo> getListOfFileDirs(Context context, File currentFile) {
+    public static ArrayList<ItemInfo> getListOfFileDirs(Context context, File currentFile, boolean filterByPin) {
         ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
             File[] fileList = currentFile.listFiles();
-            for (int i = 0; i < fileList.length; i++) {
-                File file = fileList[i];
+            for (File file : fileList) {
                 FileInfo fileInfo = new FileInfo(context);
                 fileInfo.setName(file.getName());
                 fileInfo.setDirectory(file.isDirectory());
                 fileInfo.setFilePath(file.getAbsolutePath());
                 fileInfo.setLastModified(file.lastModified());
                 fileInfo.setSize(file.length());
-                itemInfoList.add(fileInfo);
-                if (file.isDirectory()) {
-                    Logs.w(CLASSNAME, "getListOfFileDirs", file.getName() + ": " + file.lastModified());
+
+                if (filterByPin) {
+                    boolean isPinned = HCFSMgmtUtils.isPathPinned(fileInfo.getFilePath());
+                    if (!isPinned) {
+                        continue;
+                    }
                 }
+                itemInfoList.add(fileInfo);
             }
         }
         return itemInfoList;
+
+    }
+
+    public static ArrayList<ItemInfo> getListOfFileDirs(Context context, File currentFile) {
+        return getListOfFileDirs(context, currentFile, false /* filer by pin */);
     }
 
     /**
