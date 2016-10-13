@@ -34,8 +34,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class TeraFonnApiService extends Service {
 
@@ -215,17 +222,33 @@ public class TeraFonnApiService extends Service {
         }
 
         @Override
-        public int checkAppAvailable(String packageName) throws RemoteException {
-            int status;
-            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
-            boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
-            if (isAvailable) {
-                status = AppStatus.AVAILABLE;
-            } else {
-                status = getPackageStatus(packageName);
-            }
-            mPackageStatusMap.put(packageName, status);
-            return status;
+        public int checkAppAvailable(final String packageName) throws RemoteException {
+
+            Future<?> future = mExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    int status;
+                    HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                    boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+                    if (isAvailable) {
+                        status = AppStatus.AVAILABLE;
+                    } else {
+                        status = getPackageStatus(packageName);
+                    }
+                    mPackageStatusMap.put(packageName, status);
+                }
+            });
+
+//            int status;
+//            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+//            boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+//            if (isAvailable) {
+//                status = AppStatus.AVAILABLE;
+//            } else {
+//                status = getPackageStatus(packageName);
+//            }
+//            mPackageStatusMap.put(packageName, status);
+            return 0;
         }
 
         @Override
