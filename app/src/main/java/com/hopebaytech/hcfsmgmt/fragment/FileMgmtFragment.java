@@ -72,7 +72,6 @@ import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
-import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
@@ -373,7 +372,7 @@ public class FileMgmtFragment extends Fragment {
                     removeList.add(key);
                 }
             }
-            for (int key: removeList) {
+            for (int key : removeList) {
                 mWaitToExecuteSparseArr.remove(key);
             }
         }
@@ -697,7 +696,6 @@ public class FileMgmtFragment extends Fragment {
         mSpinner = (Spinner) view.findViewById(R.id.spinner);
         mRefresh = (ImageView) view.findViewById(R.id.refresh);
         mLayoutType = (ImageView) view.findViewById(R.id.layout_type);
-
     }
 
     @Override
