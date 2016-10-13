@@ -616,7 +616,7 @@ public class TeraFonnApiService extends Service {
                             @Override
                             public void run() {
                                 try {
-                                    int appStatus = mPackageStatusMap.get(packageName);
+                                    Integer appStatus = mPackageStatusMap.get(packageName);
 
                                     int reportStatus;
                                     if (isAvailable) {
@@ -625,7 +625,7 @@ public class TeraFonnApiService extends Service {
                                         reportStatus = getPackageStatus(packageName);
                                     }
 
-                                    if (appStatus != reportStatus) {
+                                    if (appStatus != null && appStatus != reportStatus) {
                                         mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
                                         mPackageStatusMap.put(packageName, reportStatus);
                                     }
