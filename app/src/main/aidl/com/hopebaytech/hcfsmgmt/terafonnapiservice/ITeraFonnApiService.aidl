@@ -77,4 +77,5 @@ interface ITeraFonnApiService {
 
     /** Get connection status **/
     int getConnStatus();
+    
 }
