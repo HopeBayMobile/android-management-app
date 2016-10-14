@@ -65,7 +65,7 @@
             android:layout_gravity="center"
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
-            android:text="@string/restore_exit" />
+            android:text="@string/restore_done_exit" />
 
     </FrameLayout>
 
