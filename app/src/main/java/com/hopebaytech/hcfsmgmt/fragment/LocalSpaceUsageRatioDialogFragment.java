@@ -60,13 +60,6 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                for (LinearLayout layout: radioButtonLayoutList) {
-//                    ImageView radioImage = (ImageView) layout.findViewById(R.id.radio_image);
-//                    radioImage.setImageResource(R.drawable.icon_btn_unselected);
-//                }
-//                ImageView radioImage = (ImageView) v.findViewById(R.id.radio_image);
-//                radioImage.setImageResource(R.drawable.icon_btn_selected);
-//
                 TextView radioName = (TextView) v.findViewById(R.id.radio_name);
 
                 Intent data = new Intent();
@@ -93,7 +86,6 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
             }
 
             radioButtonContainer.addView(radioButtonLayout);
-//            radioButtonLayoutList.add(radioButtonLayout);
         }
 
         LinearLayout cancel = (LinearLayout) view.findViewById(R.id.cancel);

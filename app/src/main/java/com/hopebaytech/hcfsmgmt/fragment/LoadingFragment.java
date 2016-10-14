@@ -46,6 +46,7 @@ public class LoadingFragment extends Fragment {
                 ActivateWoCodeFragment fragment = ActivateWoCodeFragment.newInstance();
                 fragment.setArguments(getArguments());
 
+                Logs.d(CLASSNAME, "mSplashScreenRunnable", "Replace with ActivateWoCodeFragment");
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.fragment_container, fragment, ActivateWoCodeFragment.TAG);
                 ft.commit();

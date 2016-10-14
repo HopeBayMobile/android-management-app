@@ -25,6 +25,8 @@ public class TransferContentActivity extends AppCompatActivity {
     }
 
     private void init() {
+        Logs.d(CLASSNAME, "init", "Replace with TransferContentUploadingFragment");
+
         TransferContentUploadingFragment fragment = TransferContentUploadingFragment.newInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment, TransferContentUploadingFragment.TAG);

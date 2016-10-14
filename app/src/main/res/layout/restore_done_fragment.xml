@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/img_login_bkg" />
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="26dp"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/icon_tera_logo_l_login" />
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/title"
+        style="@style/F3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/logo"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/M4"
+        android:gravity="center"
+        android:text="@string/restore_done_title" />
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/message"
+        style="@style/F6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/title"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginEnd="30dp"
+        android:layout_marginStart="30dp"
+        android:gravity="center_horizontal"
+        android:text="@string/restore_done_message" />
+
+    <FrameLayout
+        android:id="@+id/cancel_layout"
+        android:layout_width="200dp"
+        android:layout_height="36dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="80dp"
+        android:layout_marginTop="76dp"
+        android:background="@color/colorAccent"
+        android:clickable="true">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/exit"
+            style="@style/F2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:text="@string/restore_done_exit" />
+
+    </FrameLayout>
+
+</RelativeLayout>

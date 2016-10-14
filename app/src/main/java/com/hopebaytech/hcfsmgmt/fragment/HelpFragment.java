@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.ZipUtils;
 
@@ -32,7 +34,8 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Created by daniel on 2016/8/11.
+ * @author Aaron Daniel
+ *         Created by Daniel on 2016/8/11.
  */
 public class HelpFragment extends Fragment {
 
@@ -150,13 +153,12 @@ public class HelpFragment extends Fragment {
 
     private void attachLogInMail() {
         cancelAttachLog = false;
-        final ProgressDialog mProgressDialog;
-        mProgressDialog = getProgressDialog(
+        final ProgressDialog progressDialog = getProgressDialog(
                 getString(R.string.settings_feedback_log_collecting_title),
                 getString(R.string.settings_feedback_log_collecting_message));
-        mProgressDialog.show();
+        progressDialog.show();
 
-        new Thread(new Runnable(){
+        new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -190,17 +192,17 @@ public class HelpFragment extends Fragment {
                             }
                         }
                         if (!cancelAttachLog) {
-                            getActivity().runOnUiThread(new Runnable() {
+                            ((Activity) mContext).runOnUiThread(new Runnable() {
                                 public void run() {
-                                    mProgressDialog.hide();
+                                    progressDialog.dismiss();
                                 }
                             });
                             startActivity(intent);
                         }
                     } else {
-                        getActivity().runOnUiThread(new Runnable() {
+                        ((Activity) mContext).runOnUiThread(new Runnable() {
                             public void run() {
-                                mProgressDialog.hide();
+                                progressDialog.dismiss();
                                 Snackbar snackbar = Snackbar.make(
                                         mView,
                                         R.string.settings_snackbar_no_available_email_app_found,
@@ -211,7 +213,7 @@ public class HelpFragment extends Fragment {
                             }
                         });
                     }
-                } catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -219,7 +221,7 @@ public class HelpFragment extends Fragment {
     }
 
     private ProgressDialog getProgressDialog(String title, String msg) {
-        final ProgressDialog progressDialog = new ProgressDialog(getActivity());
+        final ProgressDialog progressDialog = new ProgressDialog(mContext);
         progressDialog.setIndeterminate(true);
         progressDialog.setCancelable(false);
         progressDialog.setTitle(title);

@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -23,6 +25,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
@@ -34,15 +38,17 @@ import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
+import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
+import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -51,11 +57,10 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -72,14 +77,12 @@ public class TeraMgmtService extends Service {
     private final IBinder mBinder = new MgmtServiceBinder();
 
     private ExecutorService mCacheExecutor;
-
     private Thread mOngoingThread;
-
-    private Context mContext;
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
     private SettingsDAO mSettingsDAO;
-//    private ServiceFileDirDAO mServiceFileDirDAO;
+
+    private Context mContext;
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -96,8 +99,8 @@ public class TeraMgmtService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mContext = this;
         mCacheExecutor = Executors.newCachedThreadPool();
-//        mServiceFileDirDAO = ServiceFileDirDAO.getInstance(this);
         mUidDAO = UidDAO.getInstance(this);
         mDataTypeDAO = DataTypeDAO.getInstance(this);
         mSettingsDAO = SettingsDAO.getInstance(this);
@@ -110,9 +113,7 @@ public class TeraMgmtService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        mContext = this;
         if (intent != null) {
-//            final String operation = intent.getStringExtra(TeraIntent.KEY_OPERATION);
             final String action = intent.getAction();
             Logs.d(CLASSNAME, "onStartCommand", "action=" + action);
             mCacheExecutor.execute(new Runnable() {
@@ -142,88 +143,29 @@ public class TeraMgmtService extends Service {
                         checkTokenExpiredCause();
                     } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
                         notifyUserExceedPinMax();
+                    } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_1)) {
+                        handleStage1RestoreEvent(intent);
+                    } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_2)) {
+                        handleStage2RestoreEvent(intent);
+                    } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM)) {
+                        RestoreReadyFragment.rebootSystemForStage2(mContext);
+                    } else if (action.equals(TeraIntent.ACTION_CHECK_RESTORE_STATUS)) {
+                        checkRestoreStatus();
+                    } else if (action.equals(TeraIntent.ACTION_FACTORY_RESET)) {
+                        FactoryResetUtils.reset(mContext);
+                    } else if (action.equals(TeraIntent.ACTION_RETRY_RESTORE_WHEN_CONN_FAILED)) {
+                        openPreparingOrRestoringPage();
                     }
 
-//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_AND_PIN_SYSTEM_APP_WHEN_BOOT_UP)) {
-//                        addUidAndPinSysApp();
-//                    } else
-//                    if (operation.equals(TeraIntent.VALUE_ADD_UID_TO_DATABASE_AND_UNPIN_USER_APP)) {
-//                        addUidAndUnpinUserApp(intent);
-//                    } else if (operation.equals(TeraIntent.VALUE_PIN_UNPIN_UDPATE_APP)) {
-//                        pinUnpinAgainWhenAppUpdated(intent);
-//                    } else if (operation.equals(TeraIntent.VALUE_REMOVE_UID_FROM_DATABASE)) {
-//                        removeUidFromDatabase(intent, operation);
-//                    } else if (operation.equals(TeraIntent.VALUE_RESET_XFER)) {
-//                        HCFSMgmtUtils.resetXfer();
-//                    } else if (operation.equals(TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
-//                        notifyLocalStorageUsedRatio();
-//                    } else if (operation.equals(TeraIntent.VALUE_ONGOING_NOTIFICATION)) {
-//                        startOngoingNotificationService(intent);
-//                    } else if (operation.equals(TeraIntent.VALUE_CHECK_DEVICE_STATUS)) {
-//                        checkDeviceStatus();
-//                    } else if (operation.equals(TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE)) {
-//                        notifyInsufficientPinSpace();
-//                    }  else if (operation.equals(TeraIntent.VALUE_UPDATE_APP_EXTERNAL_DIR)) {
-//                        updateAppExternalDir();
-//                    }
                 }
             });
-        } else {
-            // Service is restarted and then execute the uncompleted pin/unpin operation when user
-            // manually close app and removes it from background.
-//            mCacheExecutor.execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (mServiceFileDirDAO.getCount() > 0) {
-//                        List<ServiceFileDirInfo> infoList = mServiceFileDirDAO.getAll();
-//                        for (final ServiceFileDirInfo info : infoList) {
-//                            pinOrUnpinFileOrDirectory(info);
-//                            mServiceFileDirDAO.delete(info.getFilePath());
-//                        }
-//                    }
-//                }
-//            });
         }
-        return super.onStartCommand(intent, flags, startId);
-        // return START_REDELIVER_INTENT;
-    }
 
-//    private void mgmtAuthOrRegisterFailed(GoogleApiClient googleApiClient, String failedMsg) {
-//        Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", null);
-//
-//        if (MgmtCluster.isNeedToRetryAgain()) {
-//            Intent intentService = new Intent(TeraMgmtService.this, TeraMgmtService.class);
-//            intentService.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_CHECK_DEVICE_STATUS);
-//            startService(intentService);
-//            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "Authentication failed, retry again");
-//        } else {
-//            int flag = NotificationEvent.FLAG_OPEN_APP;
-//            int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
-//            String notify_title = getString(R.string.app_name);
-//            String notify_content = failedMsg;
-//            Bundle extras = new Bundle();
-//            extras.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-//            NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content, flag, extras);
-//
-//            Auth.GoogleSignInApi.signOut(googleApiClient)
-//                    .setResultCallback(new ResultCallback<Status>() {
-//                        @Override
-//                        public void onResult(Status status) {
-//                            Logs.e(CLASSNAME, "mgmtAuthOrRegisterFailed", "status=" + status);
-//                        }
-//                    });
-//
-//            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
-//            editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
-//            editor.apply();
-//        }
-//        googleApiClient.disconnect();
-//        TeraCloudConfig.stopSyncToCloud();
-//
-//        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
-//    }
+        // return START_STICKY instead of START_REDELIVER_INTENT. If the service has died, the
+        // restarted service won't receive intent such as BOOT_COMPLETED, CHECK_RESTORE_STATUS and
+        // PIN_UNPIN_UPDATED_APP. It prevents from doing unexpected action again.
+        return START_STICKY;
+    }
 
     private boolean pinOrUnpinApp(AppInfo info) {
         Logs.d(CLASSNAME, "pinOrUnpinApp", info.getName());
@@ -279,13 +221,6 @@ public class TeraMgmtService extends Service {
         } else {
             HCFSMgmtUtils.pinApp(info);
         }
-
-//        // Notify user pin/unpin failed
-//        int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//        String notify_title = getString(R.string.app_name);
-//        String notify_message = notifyMsg + ": " + info.getName();
-//        NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-
     }
 
     private void pinOrUnpinDataTypeFile() {
@@ -421,35 +356,10 @@ public class TeraMgmtService extends Service {
         }
     }
 
-//    private void pinOrUnpinFileOrDirectory(ServiceFileDirInfo info) {
-//        String filePath = info.getFilePath();
-//        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
-//        boolean isPinned = info.isPinned();
-//        if (isPinned) {
-//            int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
-//            boolean isSuccess = (code == 0);
-//            if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-//            }
-//        } else {
-//            boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
-//            if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-//            }
-//        }
-//    }
-
     public void pinOrUnpinFileDirectory(FileDirInfo info, IPinUnpinListener listener) {
         ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
         serviceFileDirInfo.setPinned(info.isPinned());
         serviceFileDirInfo.setFilePath(info.getFilePath());
-//        mServiceFileDirDAO.insert(serviceFileDirInfo);
         String filePath = info.getFilePath();
         Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
         boolean isPinned = info.isPinned();
@@ -457,11 +367,6 @@ public class TeraMgmtService extends Service {
             int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
             boolean isSuccess = (code == 0);
             if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_pin_file_dir_failure) + "： " + filePath + " (errorCode=" + code + ")";
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-
                 listener.onPinUnpinFailed(info);
             } else {
                 listener.onPinUnpinSuccessful(info);
@@ -469,23 +374,17 @@ public class TeraMgmtService extends Service {
         } else {
             boolean isSuccess = (HCFSMgmtUtils.unpinFileOrDirectory(filePath) == 0);
             if (!isSuccess) {
-//                int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//                String notify_title = getString(R.string.app_name);
-//                String notify_message = getString(R.string.notify_unpin_file_dir_failure) + "： " + filePath;
-//                NotificationEvent.notify(this, notify_id, notify_title, notify_message);
-
                 listener.onPinUnpinFailed(info);
             } else {
                 listener.onPinUnpinSuccessful(info);
             }
         }
-//        mServiceFileDirDAO.delete(serviceFileDirInfo.getFilePath());
     }
 
     private void doActionAccordingToDeviceStatus(final String jwtToken) {
         final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
-        MgmtCluster.GetDeviceServiceInfoProxy getDeviceInfoProxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
-        getDeviceInfoProxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
+        MgmtCluster.GetDeviceServiceInfoProxy getDeviceServiceInfoProxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
+        getDeviceServiceInfoProxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
             @Override
             public void onGetDeviceServiceInfoSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 String state = deviceServiceInfo.getState();
@@ -524,14 +423,14 @@ public class TeraMgmtService extends Service {
 
             @Override
             public void onGetDeviceServiceInfoFailed(DeviceServiceInfo deviceServiceInfo) {
-                Logs.e(CLASSNAME, "onGetDeviceInfoFailed", null);
+                Logs.e(CLASSNAME, "onGetDeviceServiceInfoFailed", null);
                 int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
                 String notify_title = getString(R.string.app_name);
                 String notify_content = getString(R.string.auth_at_bootup_auth_get_device_info);
                 NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content);
             }
         });
-        getDeviceInfoProxy.get();
+        getDeviceServiceInfoProxy.get();
     }
 
     private void checkDeviceStatus() {
@@ -569,7 +468,6 @@ public class TeraMgmtService extends Service {
 
                                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                                     SharedPreferences.Editor editor = sharedPreferences.edit();
-//                                    editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                                     editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                                     editor.apply();
                                 }
@@ -595,7 +493,6 @@ public class TeraMgmtService extends Service {
 
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-//                        editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
                         editor.putString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE, notify_content);
                         editor.apply();
                     }
@@ -814,7 +711,11 @@ public class TeraMgmtService extends Service {
                 appInfo.setApplicationInfo(applicationInfo);
                 appInfo.setName(applicationInfo.loadLabel(pm).toString());
                 appInfo.setExternalDirList(null);
-                pinOrUnpinApp(appInfo);
+                if (HCFSMgmtUtils.isSystemPackage(applicationInfo)) {
+                    pinOrUnpinApp(appInfo, PinType.PRIORITY);
+                } else {
+                    pinOrUnpinApp(appInfo);
+                }
             }
         } catch (PackageManager.NameNotFoundException e) {
             Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
@@ -883,11 +784,6 @@ public class TeraMgmtService extends Service {
                     Toast.makeText(mContext, R.string.notify_pin_unpin_system_app_failed, Toast.LENGTH_LONG).show();
                 }
             });
-
-//            int notify_id = (int) (Math.random() * Integer.MAX_VALUE);
-//            String notify_title = getString(R.string.app_name);
-//            String notify_message = getString(R.string.notify_pin_unpin_system_app_failed);
-//            NotificationEvent.notify(TeraMgmtService.this, notify_id, notify_title, notify_message);
         }
     }
 
@@ -938,14 +834,142 @@ public class TeraMgmtService extends Service {
         });
     }
 
+    private void handleStage1RestoreEvent(Intent intent) {
+        Logs.d(CLASSNAME, "handleStage1RestoreEvent", null);
+
+        if (MainApplication.Foreground.get().isForeground()) {
+            Logs.d(CLASSNAME, "handleStage1RestoreEvent", "Application is not in foreground.");
+            return;
+        }
+
+        int status = RestoreStatus.NONE;
+        int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+        Logs.d(CLASSNAME, "handleStage1RestoreEvent", "errorCode=" + errorCode);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        switch (errorCode) {
+            case 0:
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
+
+                String rebootAction = getString(R.string.restore_system_reboot);
+                Intent rebootIntent = new Intent(TeraMgmtService.this, TeraMgmtService.class);
+                rebootIntent.setAction(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM);
+                PendingIntent pendingIntent = PendingIntent.getService(TeraMgmtService.this, 0, rebootIntent, 0);
+                NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
+
+                int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+                int flag = NotificationEvent.FLAG_ON_GOING
+                        | NotificationEvent.FLAG_HEADS_UP
+                        | NotificationEvent.FLAG_OPEN_APP;
+                String title = getString(R.string.restore_ready_title);
+                String message = getString(R.string.restore_ready_message);
+                NotificationEvent.notify(mContext, notifyId, title, message, action, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENOENT:
+                status = RestoreStatus.Error.DAMAGED_BACKUP;
+                break;
+            case HCFSEvent.ErrorCode.ENOSPC:
+                status = RestoreStatus.Error.OUT_OF_SPACE;
+                break;
+            case HCFSEvent.ErrorCode.ENETDOWN:
+                status = RestoreStatus.Error.CONN_FAILED;
+                break;
+        }
+        if (errorCode != 0) {
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, status);
+            RestoreFailedFragment.startFailedNotification(mContext, status);
+        }
+        editor.apply();
+
+    }
+
+    private void handleStage2RestoreEvent(Intent intent) {
+        Logs.d(CLASSNAME, "handleStage2RestoreEvent", null);
+
+        if (MainApplication.Foreground.get().isForeground()) {
+            Logs.d(CLASSNAME, "handleStage2RestoreEvent", "Application is not in foreground.");
+            return;
+        }
+
+        int status = RestoreStatus.NONE;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+        switch (errorCode) {
+            case 0:
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_COMPLETED);
+
+                int flag = NotificationEvent.FLAG_HEADS_UP;
+                int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+                String title = getString(R.string.restore_done_title);
+                String message = getString(R.string.restore_done_message);
+                NotificationEvent.notify(mContext, notifyId, title, message, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENOENT:
+                status = RestoreStatus.Error.DAMAGED_BACKUP;
+                break;
+            case HCFSEvent.ErrorCode.ENOSPC:
+                status = RestoreStatus.Error.OUT_OF_SPACE;
+                break;
+            case HCFSEvent.ErrorCode.ENETDOWN:
+                status = RestoreStatus.Error.CONN_FAILED;
+                break;
+        }
+        if (errorCode != 0) {
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, status);
+            RestoreFailedFragment.startFailedNotification(mContext, status);
+        }
+        editor.apply();
+    }
+
     private void notifyUserExceedPinMax() {
         int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
         String notifyTitle = getString(R.string.app_name);
         String notifyContent = getString(R.string.notify_exceed_pin_max);
+
 
         int flag = NotificationEvent.FLAG_OPEN_APP;
         Bundle extras = new Bundle();
         extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
         NotificationEvent.notify(this, idNotify, notifyTitle, notifyContent, flag, extras);
     }
+
+    private void checkRestoreStatus() {
+        boolean startActivity = false;
+        int status = HCFSMgmtUtils.checkRestoreStatus();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        switch (status) {
+            case 0: // Not being restored
+                break;
+            case 1: // In stage 1 of restoration process
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                startActivity = true;
+                break;
+            case 2: // In stage 2 of restoration process
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_IN_PROGRESS);
+                startActivity = true;
+
+                // Enable Tera app so that we are able to get new token when token expired. The step
+                // is to guarantee the restoration process in stage 2 can execute normally, because
+                // the pref_tera_app_login value in the teracom.hopebaytech.hcfsmgmt_preferences.xml
+                // which is restored in stage 1 may not be true.
+                TeraAppConfig.enableApp(mContext);
+                break;
+            default:
+        }
+        editor.apply();
+
+        if (startActivity) {
+            Intent intent = new Intent(mContext, MainActivity.class);
+            // Need to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+    }
+
+    private void openPreparingOrRestoringPage() {
+        checkRestoreStatus();
+    }
+
 }

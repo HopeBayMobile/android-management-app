@@ -75,6 +75,7 @@ import com.hopebaytech.hcfsmgmt.info.ItemInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
@@ -702,7 +703,8 @@ public class FileMgmtFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mSnackbar = Snackbar.make(mView, "", Snackbar.LENGTH_INDEFINITE);
+        View view = ((MainActivity) mContext).findViewById(android.R.id.content);
+        mSnackbar = Snackbar.make(view, "", Snackbar.LENGTH_INDEFINITE);
 
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setHasFixedSize(true);

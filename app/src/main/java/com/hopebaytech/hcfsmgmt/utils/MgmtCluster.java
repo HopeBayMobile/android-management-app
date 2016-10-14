@@ -13,10 +13,13 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -119,7 +122,6 @@ public class MgmtCluster {
     public static final int USER_AUTH = 1;
 
     public static class ServiceState {
-
         /**
          * The device service has been activated.
          */
@@ -315,6 +317,7 @@ public class MgmtCluster {
                 }
                 deviceServiceInfo.setResponseContent(responseContent);
                 Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                // TODO can use parseDeviceServiceInfo(deviceServiceInfo, deviceServiceInfo.getResponseContent());
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceServiceInfo", Log.getStackTraceString(e));
             } finally {
@@ -494,9 +497,11 @@ public class MgmtCluster {
 
         private OnSwitchDeviceBackendListener listener;
         private SwitchDeviceBackendParam params;
+        private String currentImei;
         private String jwtToken;
 
-        public SwitchDeviceBackendProxy(SwitchDeviceBackendParam params, String jwtToken) {
+        public SwitchDeviceBackendProxy(SwitchDeviceBackendParam params, String currentImei, String jwtToken) {
+            this.currentImei = currentImei;
             this.params = params;
             this.jwtToken = jwtToken;
         }
@@ -518,7 +523,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final DeviceServiceInfo info = switchDeviceBackend(params);
+                    final DeviceServiceInfo info = switchDeviceBackend();
                     if (info.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
                             @Override
@@ -538,12 +543,11 @@ public class MgmtCluster {
             }).start();
         }
 
-        private DeviceServiceInfo switchDeviceBackend(SwitchDeviceBackendParam params) {
+        private DeviceServiceInfo switchDeviceBackend() {
             IHttpProxy httpProxyImpl = null;
             DeviceServiceInfo deviceServiceInfo = new DeviceServiceInfo();
             try {
-                String imei = this.params.sourceImei;
-                String url = DEVICE_API + imei + "/switch_device_backend/";
+                String url = DEVICE_API + currentImei + "/switch_device_backend/";
 
                 httpProxyImpl = HttpProxy.newInstance();
                 httpProxyImpl.setUrl(url);
@@ -728,8 +732,8 @@ public class MgmtCluster {
                             ", force=" + force +
                             ", hcfsVersion=" + hcfsVersion);
 
-            return cv;
-        }
+	    return cv;
+	}
 
     }
 
@@ -997,6 +1001,133 @@ public class MgmtCluster {
             }
 
             return deviceServiceInfo;
+        }
+
+    }
+
+    public static class GetDeviceListProxy {
+
+        private OnGetDeviceListListener listener;
+        private String jwtToken;
+        private String imei;
+
+        public GetDeviceListProxy(String jwtToken, String imei) {
+            this.jwtToken = jwtToken;
+            this.imei = imei;
+        }
+
+        public void get() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final DeviceListInfo deviceListInfo = getDeviceList();
+                    Logs.d(CLASSNAME, "GetDeviceListProxy", "get", "deviceListInfo=" + deviceListInfo);
+                    if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetDeviceListSuccessful(deviceListInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetDeviceListFailed(deviceListInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnGetDeviceListListener(OnGetDeviceListListener listener) {
+            this.listener = listener;
+        }
+
+        public interface OnGetDeviceListListener {
+
+            void onGetDeviceListSuccessful(DeviceListInfo deviceListInfo);
+
+            void onGetDeviceListFailed(DeviceListInfo deviceListInfo);
+
+        }
+
+        private static void parseJson(DeviceListInfo deviceListInfo, String json) {
+            try {
+                JSONObject jObj = new JSONObject(json);
+
+                String imei = jObj.getJSONObject("device").getString("imei");
+                String serviceStatus = jObj.getString("service_state");
+
+                DeviceStatusInfo info = new DeviceStatusInfo();
+                info.setImei(imei);
+                info.setServiceStatus(serviceStatus);
+                deviceListInfo.setMessage(json);
+                deviceListInfo.addDeviceStatusInfo(info);
+                deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_MY_TERA);
+                return;
+            } catch (JSONException e) {
+                Logs.w(CLASSNAME, "GetDeviceListProxy", "parseJson", Log.getStackTraceString(e));
+            }
+
+            try {
+                JSONArray jArr = new JSONArray(json);
+                for (int i = 0; i < jArr.length(); i++) {
+                    JSONObject jObj = jArr.getJSONObject(i);
+
+                    String imei = jObj.getJSONObject("device").getString("imei");
+                    String serviceState = jObj.getString("service_state");
+                    String model = jObj.getJSONObject("device").getJSONObject("model").getString("name");
+
+                    if (serviceState.equals(ServiceState.DISABLED) ||
+                            serviceState.equals(ServiceState.TX_READY)) {
+                        DeviceStatusInfo info = new DeviceStatusInfo();
+                        info.setImei(imei);
+                        info.setModel(model);
+                        info.setServiceStatus(serviceState);
+                        deviceListInfo.addDeviceStatusInfo(info);
+                    }
+                }
+                deviceListInfo.setMessage(json);
+                deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_BACKUP);
+            } catch (JSONException e) {
+                Logs.e(CLASSNAME, "GetDeviceListProxy", "parseJson", Log.getStackTraceString(e));
+            }
+        }
+
+        private DeviceListInfo getDeviceList() {
+            DeviceListInfo deviceListInfo = new DeviceListInfo();
+            IHttpProxy httpProxyImpl = null;
+            try {
+                String url = DEVICE_API + imei;
+
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                int responseCode = httpProxyImpl.get();
+                deviceListInfo.setResponseCode(responseCode);
+                String responseContent = httpProxyImpl.getResponseContent();
+                deviceListInfo.setResponseContent(responseContent);
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    Logs.d(CLASSNAME, "GetDeviceListProxy", "getDeviceList", "responseContent=" + responseContent);
+                    parseJson(deviceListInfo, responseContent);
+                }
+            } catch (Exception e) {
+                deviceListInfo.setMessage(Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "GetDeviceListProxy", "getDeviceList", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+            return deviceListInfo;
         }
 
     }

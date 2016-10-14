@@ -41,7 +41,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
                 }
             }
         }
-        mDataBase = HCFSDBHelper.getDataBase(context);
+        mDataBase = TeraDBHelper.getDataBase(context);
         return mSettingsDAO;
     }
 
@@ -94,7 +94,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
 
     @Override
     public void close() {
-        HCFSDBHelper.closeDataBase();
+        TeraDBHelper.closeDataBase();
     }
 
     @Override

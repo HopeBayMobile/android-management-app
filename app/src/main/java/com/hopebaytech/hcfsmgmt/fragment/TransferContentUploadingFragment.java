@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,13 +18,12 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
-import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 /**
  * @author Aaron
@@ -88,6 +86,7 @@ public class TransferContentUploadingFragment extends Fragment {
         if (code == 1) {
             TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
 
+            Logs.d(CLASSNAME, "onActivityCreated", "Replace with TransferContentWaitingFragment");
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
             ft.commit();
@@ -175,6 +174,7 @@ public class TransferContentUploadingFragment extends Fragment {
                             public void onTransferSuccessful(TransferContentInfo transferContentInfo) {
                                 TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
 
+                                Logs.d(CLASSNAME, "onTransferSuccessful", "Replace with TransferContentWaitingFragment");
                                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                                 ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
                                 ft.commit();

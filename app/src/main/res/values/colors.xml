@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#019547</color>
-    <color name="colorPrimaryDark">#4D4D4D</color>
-    <color name="colorAccent">#8cc541</color>
+    <color name="colorPrimary">@color/C2</color>
+    <color name="colorPrimaryDark">@color/C4</color>
+    <color name="colorAccent">@color/C1</color>
     <color name="colorDivider">#90AAAAAA</color>
                                    
     <color name="colorActionBarNavMenu">#656565</color>
@@ -30,14 +30,14 @@
     <color name="colorSwitchAccountTextBackground">#F2F8EA</color>
     <color name="colorAboutTitle">#3C89C7</color>
 
-    <color name="C1">#8cc541</color>
-    <color name="C2">#019547</color>
+    <color name="C1">#77bc1f</color>
+    <color name="C2">#026937</color>
     <color name="C3">#4579bb</color>
     <color name="C4">#4d4d4d</color>
     <color name="C5">#b9b9b9</color>
     <color name="C6">#e6e6e6</color>
     <color name="C7">#ffffff</color>
-    <color name="C8">#3bb34a</color>
-    <color name="C9">#002a40</color>
+    <color name="C8">#00af41</color>
+    <color name="C9">#012639</color>
 
 </resources>

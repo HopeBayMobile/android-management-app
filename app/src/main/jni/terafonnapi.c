@@ -24,6 +24,11 @@ extern void HCFS_set_sync_point(const char **json_res);
 extern void HCFS_clear_sync_point(const char **json_res);
 extern void HCFS_set_notify_server(const char **json_res, const char *pathname);
 extern void HCFS_set_swift_token(const char **json_res, const char *url, const char *token);
+extern void HCFS_trigger_restore(const char **json_res);
+extern void HCFS_check_restore_status(const char **json_res);
+extern void HCFS_notify_applist_change(const char **json_res);
+
+//extern void HCFS_collect_sys_logs(const char **json_res);
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_getFileStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jFilePath) {
@@ -263,7 +268,7 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_stopU
     free((char *)json_res);
     return result;
 }
-
+/*
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_collectSysLogs(
         JNIEnv *jEnv, jobject jObject) {
     const char *json_res;
@@ -271,4 +276,31 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_colle
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
     return result;
+}
+*/
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_triggerRestore(
+		JNIEnv *jEnv, jobject jObject) {
+	const char *json_res;
+	HCFS_trigger_restore(&json_res);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free((char *)json_res);
+	return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_checkRestoreStatus(
+		JNIEnv *jEnv, jobject jObject) {
+	const char *json_res;
+	HCFS_check_restore_status(&json_res);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free((char *)json_res);
+	return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_notifyApplistChange(
+		JNIEnv *jEnv, jobject jObject) {
+	const char *json_res;
+	HCFS_notify_applist_change(&json_res);
+	jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+	free((char *)json_res);
+	return result;
 }

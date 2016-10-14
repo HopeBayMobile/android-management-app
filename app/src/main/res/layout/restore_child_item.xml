@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center_vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/model"
+                style="@style/F6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="Nexus 5X" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    style="@style/F11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IMEI: "
+                    android:textColor="@android:color/darker_gray" />
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    android:id="@+id/imei"
+                    style="@style/F11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="123-456-789"
+                    android:textColor="@android:color/darker_gray" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/locked_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/M4"
+            android:layout_toStartOf="@+id/radio_btn"
+            android:src="@drawable/icon_locked_device" />
+
+        <ImageView
+            android:id="@+id/radio_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="@dimen/M4"
+            android:src="@drawable/icon_btn_unselected" />
+
+    </RelativeLayout>
+</LinearLayout>

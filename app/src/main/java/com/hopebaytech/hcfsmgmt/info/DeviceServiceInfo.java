@@ -1,14 +1,10 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.os.Bundle;
 import android.support.annotation.StringRes;
-import android.support.v4.app.FragmentTransaction;
+import android.system.Os;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.fragment.ActivateWithCodeFragment;
 import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 

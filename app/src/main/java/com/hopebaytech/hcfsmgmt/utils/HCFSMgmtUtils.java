@@ -28,9 +28,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.LocationStatus;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
-import com.hopebaytech.hcfsmgmt.info.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 
@@ -70,6 +68,7 @@ public class HCFSMgmtUtils {
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
+    public static final String PREF_RESTORE_STATUS = "pref_restore_status";
 
     // public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
@@ -322,7 +321,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
 //                Logs.d(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
-
+                
                 hcfsStatInfo = new HCFSStatInfo();
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
@@ -650,12 +649,12 @@ public class HCFSMgmtUtils {
     public static void notifyNetworkStatus(Context context, int notify_id, String notify_title, String notify_content) {
         SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
         SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_CONN_FAILED_RECOVERY);
-        boolean notifyConnFailedRecoveryPref;
+        boolean notifyConnFailedRecoveryPref = false;
         if (settingsInfo != null) {
             notifyConnFailedRecoveryPref = Boolean.valueOf(settingsInfo.getValue());
-            if (notifyConnFailedRecoveryPref) {
-                NotificationEvent.notify(context, notify_id, notify_title, notify_content);
-            }
+        }
+        if (notifyConnFailedRecoveryPref) {
+            NotificationEvent.notify(context, notify_id, notify_title, notify_content);
         }
     }
 
@@ -699,8 +698,6 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
 
         int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
@@ -861,4 +858,69 @@ public class HCFSMgmtUtils {
         }
         return isSuccess;
     }
+
+    /**
+     * @return
+     * */
+    public static int triggerRestore() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.triggerRestore();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "triggerRestore", "jsonResult=" + jsonResult);
+            } else {
+                code = -(jObject.getInt("code"));
+                Logs.e(CLASSNAME, "triggerRestore", "jsonResult=" + jsonResult);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "triggerRestore", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
+    /**
+     * @return <li>-1 if error occurs</li>
+     * <li>0 if not being restored</li>
+     * <li>1 if in stage 1 of restoration process</li>
+     * <li>2 if in stage 2 of restoration process</li>
+     */
+    public static int checkRestoreStatus() {
+        int code = -1;
+        try {
+            String jsonResult = HCFSApiUtils.checkRestoreStatus();
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                code = jObject.getInt("code");
+                Logs.i(CLASSNAME, "checkRestoreStatus", "jObject=" + jObject);
+            } else {
+                code = -(jObject.getInt("code"));
+                Logs.e(CLASSNAME, "checkRestoreStatus", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "checkRestoreStatus", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
+    public static boolean notifyAppListChange() {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.notifyApplistChange();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "notifyAppListChange", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
 }

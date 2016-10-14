@@ -1,7 +1,9 @@
 package com.hopebaytech.hcfsmgmt.main;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,7 +15,13 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.LoadingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreMajorInstallFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestorePreparingFragment;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 /**
@@ -28,35 +36,67 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_container);
-
-        init(getIntent());
-    }
-
-    private void init(Intent intent) {
-        String TAG;
-        Fragment fragment;
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        if (TeraAppConfig.isTeraAppLogin(this)) {
-            fragment = MainFragment.newInstance();
-            TAG = MainFragment.TAG;
-        } else {
-            fragment = LoadingFragment.newInstance();
-            TAG = LoadingFragment.TAG;
-        }
-        if (intent != null) {
-            fragment.setArguments(intent.getExtras());
-        }
-        ft.replace(R.id.fragment_container, fragment, TAG);
-        ft.commit();
+        switchFragment();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        MainFragment mainFragment = (MainFragment) getSupportFragmentManager().findFragmentByTag(MainFragment.TAG);
-        if (mainFragment != null) {
-            mainFragment.changeArguments(intent.getExtras());
+        setIntent(intent);
+        switchFragment();
+    }
+
+    private void switchFragment() {
+        String TAG;
+        Fragment fragment;
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int status = sharedPreferences.getInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.NONE);
+        switch (status) {
+            case RestoreStatus.MINI_RESTORE_IN_PROGRESS:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestorePreparingFragment");
+                fragment = RestorePreparingFragment.newInstance();
+                TAG = RestorePreparingFragment.TAG;
+                break;
+            case RestoreStatus.MINI_RESTORE_COMPLETED:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestoreReadyFragment");
+                fragment = RestoreReadyFragment.newInstance();
+                TAG = RestoreReadyFragment.TAG;
+                break;
+            case RestoreStatus.FULL_RESTORE_IN_PROGRESS:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestoreMajorInstallFragment");
+                fragment = RestoreMajorInstallFragment.newInstance();
+                TAG = RestoreMajorInstallFragment.TAG;
+                break;
+            case RestoreStatus.Error.CONN_FAILED:
+            case RestoreStatus.Error.OUT_OF_SPACE:
+            case RestoreStatus.Error.DAMAGED_BACKUP:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestoreFailedFragment");
+                Bundle args = new Bundle();
+                args.putInt(RestoreFailedFragment.KEY_ERROR_CODE, status);
+
+                fragment = RestoreFailedFragment.newInstance();
+                fragment.setArguments(args);
+
+                TAG = RestoreFailedFragment.TAG;
+                break;
+            default:
+                if (TeraAppConfig.isTeraAppLogin(this)) {
+                    Logs.d(CLASSNAME, "switchFragment", "Replace with MainFragment");
+                    fragment = MainFragment.newInstance();
+                    TAG = MainFragment.TAG;
+                } else {
+                    Logs.d(CLASSNAME, "switchFragment", "Replace with LoadingFragment");
+                    fragment = LoadingFragment.newInstance();
+                    TAG = LoadingFragment.TAG;
+                }
+                Intent intent = getIntent();
+                if (intent != null) {
+                    fragment.setArguments(intent.getExtras());
+                }
         }
+        ft.replace(R.id.fragment_container, fragment, TAG);
+        ft.commit();
     }
 
     @Override

@@ -11,8 +11,10 @@
     <uses-permission android:name="android.permission.GET_PACKAGE_SIZE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.MASTER_CLEAR" />
+    <uses-permission android:name="android.permission.REBOOT" />
 
     <application
+        android:name=".main.MainApplication"
         android:allowBackup="true"
         android:icon="@drawable/icon_tera_app_default"
         android:label="@string/app_name"
@@ -70,6 +72,9 @@
                 <action android:name="hbt.intent.action.EXCEED_PIN_MAX" />
                 <action android:name="hbt.intent.action.RESTORE_STAGE_1" />
                 <action android:name="hbt.intent.action.RESTORE_STAGE_2" />
+                <action android:name="hbt.intent.action.MINI_RESTORE_COMPLETED" />
+                <action android:name="hbt.intent.action.FULL_RESTORE_COMPLETED" />
+                <action android:name="hbt.intent.action.CHECK_RESTORE_STATUS" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>

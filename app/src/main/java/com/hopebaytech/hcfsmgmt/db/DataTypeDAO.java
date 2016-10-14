@@ -144,7 +144,7 @@ public class DataTypeDAO {
     }
 
     private SQLiteDatabase getDataBase() {
-        return HCFSDBHelper.getDataBase(context);
+        return TeraDBHelper.getDataBase(context);
     }
 
 }

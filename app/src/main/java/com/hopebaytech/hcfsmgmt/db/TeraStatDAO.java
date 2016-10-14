@@ -40,7 +40,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
                 }
             }
         }
-        mDataBase = HCFSDBHelper.getDataBase(context);
+        mDataBase = TeraDBHelper.getDataBase(context);
         return mTeraStatDAO;
     }
 
@@ -99,7 +99,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
 
     @Override
     public void close() {
-        HCFSDBHelper.closeDataBase();
+        TeraDBHelper.closeDataBase();
     }
 
     @Override

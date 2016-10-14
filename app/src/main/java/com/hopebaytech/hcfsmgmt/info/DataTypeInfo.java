@@ -3,6 +3,7 @@ package com.hopebaytech.hcfsmgmt.info;
 import java.util.ArrayList;
 
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 
 import android.content.Context;
 import android.graphics.Bitmap;

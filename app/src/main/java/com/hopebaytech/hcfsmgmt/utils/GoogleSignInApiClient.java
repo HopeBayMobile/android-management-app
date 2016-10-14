@@ -16,7 +16,7 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
 /**
- * Wrapper the Google sign-in procedure to provide an user friendly API util
+ * A wrapper to wrap the Google sign-in procedure to provide a user friendly API util
  *
  * @author Aaron
  *         Created by Aaron on 2016/7/21.

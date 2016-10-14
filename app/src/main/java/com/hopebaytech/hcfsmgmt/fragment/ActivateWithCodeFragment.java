@@ -171,9 +171,9 @@ public class ActivateWithCodeFragment extends Fragment {
                                     if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
                                         String errorCode = deviceServiceInfo.getErrorCode();
                                         if (errorCode != null && errorCode.equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
-                                            String hyperLink = "<a href=\"http://www.hopebaytech.com\">TeraClient</a>";
-                                            Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(),
-                                                    getString(R.string.activate_with_code_msg), hyperLink));
+                                            String teraClientLink = getString(R.string.tera_client_link);
+                                            String hyperLink = "<a href=\"" + teraClientLink + "\">TeraClient</a>";
+                                            Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(), getString(R.string.activate_with_code_msg), hyperLink));
                                             mErrorMessage.setMovementMethod(LinkMovementMethod.getInstance());
                                             mErrorMessage.setText(errorMsg);
                                             return;
@@ -208,7 +208,7 @@ public class ActivateWithCodeFragment extends Fragment {
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setCancelable(false);
         }
-        mProgressDialog.setMessage(getString(R.string.activate_processing_msg));
+        mProgressDialog.setMessage(getString(R.string.processing_msg));
         mProgressDialog.show();
     }
 

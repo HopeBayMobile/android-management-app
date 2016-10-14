@@ -30,6 +30,7 @@ public class ActivateActivity extends AppCompatActivity {
         ActivateWoCodeFragment fragment = ActivateWoCodeFragment.newInstance();
         fragment.setArguments(getIntent().getExtras());
 
+        Logs.d(CLASSNAME, "init", "Replace with ActivateWoCodeFragment");
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, fragment, ActivateWoCodeFragment.TAG);
         ft.commit();

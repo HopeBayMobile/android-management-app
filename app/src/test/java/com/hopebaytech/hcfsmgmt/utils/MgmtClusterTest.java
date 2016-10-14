@@ -90,40 +90,40 @@ public class MgmtClusterTest {
 //        assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, info.getResponseCode());
 //    }
 
-    @Test
-    public void testSwitchAccount() throws Exception {
-        DeviceServiceInfo deviceServiceInfo;
-        String correctJwtToken = HttpProxyMock.CORRECT_JWT_TOKEN;
-        String correctNewAuthCode = HttpProxyMock.CORRECT_NEW_AUTH_CODE;
-        String correctImei = HttpProxyMock.CORRECT_IMEI;
-        String incorrectJwtToken = HttpProxyMock.INCORRECT_JWT_TOKEN;
-        String incorrectNewAuthCode = HttpProxyMock.INCORRECT_AUTH_CODE;
-        String incorrectImei = HttpProxyMock.INCORRECT_IMEI;
-
-        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, correctImei);
-        assertTrue(deviceServiceInfo != null);
-
-        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, correctImei);
-        assertFalse(deviceServiceInfo != null);
-
-        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, correctImei);
-        assertFalse(deviceServiceInfo != null);
-
-        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, incorrectImei);
-        assertFalse(deviceServiceInfo != null);
-
-        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, correctImei);
-        assertFalse(deviceServiceInfo != null);
-
-        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, incorrectImei);
-        assertFalse(deviceServiceInfo != null);
-
-        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, incorrectImei);
-        assertFalse(deviceServiceInfo != null);
-
-        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, incorrectImei);
-        assertFalse(deviceServiceInfo != null);
-    }
+//    @Test
+//    public void testSwitchAccount() throws Exception {
+//        DeviceServiceInfo deviceServiceInfo;
+//        String correctJwtToken = HttpProxyMock.CORRECT_JWT_TOKEN;
+//        String correctNewAuthCode = HttpProxyMock.CORRECT_NEW_AUTH_CODE;
+//        String correctImei = HttpProxyMock.CORRECT_IMEI;
+//        String incorrectJwtToken = HttpProxyMock.INCORRECT_JWT_TOKEN;
+//        String incorrectNewAuthCode = HttpProxyMock.INCORRECT_AUTH_CODE;
+//        String incorrectImei = HttpProxyMock.INCORRECT_IMEI;
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, correctImei);
+//        assertTrue(deviceServiceInfo != null);
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, correctImei);
+//        assertFalse(deviceServiceInfo != null);
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, correctImei);
+//        assertFalse(deviceServiceInfo != null);
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, correctNewAuthCode, incorrectImei);
+//        assertFalse(deviceServiceInfo != null);
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, correctImei);
+//        assertFalse(deviceServiceInfo != null);
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, correctNewAuthCode, incorrectImei);
+//        assertFalse(deviceServiceInfo != null);
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(correctJwtToken, incorrectNewAuthCode, incorrectImei);
+//        assertFalse(deviceServiceInfo != null);
+//
+//        deviceServiceInfo = MgmtCluster.switchAccount(incorrectJwtToken, incorrectNewAuthCode, incorrectImei);
+//        assertFalse(deviceServiceInfo != null);
+//    }
 
     @Test
     public void testTransferDevice() throws Exception {

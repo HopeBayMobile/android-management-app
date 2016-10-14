@@ -1,4 +1,4 @@
-package com.hopebaytech.hcfsmgmt.info;
+package com.hopebaytech.hcfsmgmt.utils;
 
 /**
  * @author Aaron a

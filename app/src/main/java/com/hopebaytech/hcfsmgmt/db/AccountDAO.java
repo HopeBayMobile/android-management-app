@@ -52,7 +52,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
                 }
             }
         }
-        mDataBase = HCFSDBHelper.getDataBase(context);
+        mDataBase = TeraDBHelper.getDataBase(context);
         return mAccountDAO;
     }
 
@@ -135,7 +135,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
 
     @Override
     public void close() {
-        HCFSDBHelper.closeDataBase();
+        TeraDBHelper.closeDataBase();
     }
 
     @Override
