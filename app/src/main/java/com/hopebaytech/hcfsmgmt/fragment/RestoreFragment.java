@@ -674,13 +674,22 @@ public class RestoreFragment extends Fragment {
             @Override
             public void onSwitchSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
-                mProgressDialogUtils.dismiss();
 
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo);
-                        HCFSMgmtUtils.triggerRestore();
+                        int code = HCFSMgmtUtils.triggerRestore();
+                        if (code == RestoreStatus.Error.OUT_OF_SPACE) {
+                            mUiHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mErrorMessage.setText(R.string.restore_pre_check_out_of_space);
+                                    mProgressDialogUtils.dismiss();
+                                }
+                            });
+                            return;
+                        }
                         TeraCloudConfig.reloadConfig();
                         HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
                                 deviceServiceInfo.getBackend().getToken());
@@ -692,15 +701,23 @@ public class RestoreFragment extends Fragment {
 
                         // Enable Tera app so that we are able to get new token when token expired
                         TeraAppConfig.enableApp(mContext);
+
+                        mUiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressDialogUtils.dismiss();
+
+                                Logs.d(CLASSNAME, "onSwitchSuccessful", "Replace with RestorePreparingFragment");
+                                FragmentManager fm = getFragmentManager();
+                                fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                                FragmentTransaction ft = fm.beginTransaction();
+                                ft.replace(R.id.fragment_container, RestorePreparingFragment.newInstance());
+                                ft.commitAllowingStateLoss();
+                            }
+                        });
                     }
                 });
 
-                Logs.d(CLASSNAME, "onSwitchSuccessful", "Replace with RestorePreparingFragment");
-                FragmentManager fm = getFragmentManager();
-                fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.replace(R.id.fragment_container, RestorePreparingFragment.newInstance());
-                ft.commitAllowingStateLoss();
             }
 
             @Override
@@ -708,7 +725,12 @@ public class RestoreFragment extends Fragment {
                 mProgressDialogUtils.dismiss();
 
                 if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+                    // Jwt token is expired
                     restoreDeviceWithoutJwtToken(sourceImei);
+                } else if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                    // If restore failed due to out of space, user choose another backup but not allow
+                    // to restore due to mapping error.
+                    mErrorMessage.setText(R.string.restore_failed_device_in_use);
                 } else {
                     mErrorMessage.setText(R.string.restore_failed);
                 }

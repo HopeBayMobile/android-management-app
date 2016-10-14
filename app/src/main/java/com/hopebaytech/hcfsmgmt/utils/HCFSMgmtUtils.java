@@ -859,6 +859,9 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
+    /**
+     * @return
+     * */
     public static int triggerRestore() {
         int code = -1;
         try {
