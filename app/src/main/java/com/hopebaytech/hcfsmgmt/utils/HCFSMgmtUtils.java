@@ -628,19 +628,19 @@ public class HCFSMgmtUtils {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (syncWifiOnly) {
-            if (netInfo != null && netInfo.isConnected() && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                String logMsg = "Wifi is connected";
+            if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                String logMsg = "Current wifi network is active";
                 TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
-                String logMsg = "Wifi is not connected";
+                String logMsg = "No default network or wifi network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         } else {
-            if (netInfo != null && netInfo.isConnected()) {
-                String logMsg = "Wifi or Mobile network is connected";
+            if (netInfo != null) {
+                String logMsg = "Current default network is active";
                 TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
-                String logMsg = "Wifi or Mobile network is not connected";
+                String logMsg = "No default network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         }
