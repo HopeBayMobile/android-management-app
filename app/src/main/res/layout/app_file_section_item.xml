@@ -21,6 +21,7 @@
             tools:text="@string/app_file_internal_storage_name" />
 
         <LinearLayout
+            android:layout_marginTop="6dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
@@ -33,14 +34,14 @@
                 android:orientation="horizontal">
 
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                    style="@style/F8"
+                    style="@style/F6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_file_section_item_total_storage_space" />
 
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
                     android:id="@+id/total_space"
-                    style="@style/F8"
+                    style="@style/F6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_file_section_item_calculating" />
@@ -55,19 +56,17 @@
                 android:id="@+id/available_storage_space_field"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/M7"
-                android:layout_marginTop="@dimen/M7"
                 android:orientation="horizontal">
 
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                    style="@style/F7"
+                    style="@style/F15"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_file_section_item_available_storage_space" />
 
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
                     android:id="@+id/free_space"
-                    style="@style/F7"
+                    style="@style/F15"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_file_section_item_calculating" />

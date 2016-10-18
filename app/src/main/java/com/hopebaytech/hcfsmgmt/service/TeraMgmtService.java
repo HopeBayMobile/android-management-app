@@ -510,10 +510,10 @@ public class TeraMgmtService extends Service {
 
             long pinTotal = statInfo.getPinTotal();
             long pinMax = statInfo.getPinMax();
-            String notifyRatio = HCFSMgmtUtils.NOTIFY_INSUFFICIENT_PIN_PACE_RATIO;
+            int notifyRatio = HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD;
             double ratio = ((double) pinTotal / pinMax) * 100;
             Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio + ", ratio=" + ratio);
-            if (ratio >= Integer.valueOf(notifyRatio)) {
+            if (ratio >= notifyRatio) {
                 if (!isNotified) {
                     int flag = NotificationEvent.FLAG_OPEN_APP;
                     int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;

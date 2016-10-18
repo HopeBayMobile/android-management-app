@@ -8,6 +8,8 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
  */
 public class DataStatus {
 
+    public static final int UNKNOWN = -1;
+
     /**
      * <p>The data of file/app is all on the device. Or, the tera connection status is one of the
      * following status:

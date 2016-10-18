@@ -13,7 +13,6 @@ import android.support.v4.content.ContextCompat;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 
 import java.util.List;
@@ -184,7 +183,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
         if (HCFSConnStatus.isAvailable(mContext, hcfsStatInfo)) {
             return ICON_COLORFUL;
         }
-        return getAppStatus() == ItemStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
+        return getAppStatus() == DataStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
     public ApplicationInfo getApplicationInfo() {

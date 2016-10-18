@@ -26,7 +26,7 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 public class FileInfo extends ItemInfo implements Cloneable {
 
-    private static final String CLASSNAME = FileDirInfo.class.getSimpleName();
+    private static final String CLASSNAME = FileInfo.class.getSimpleName();
 
     private static final String MIME_TYPE_IMAGE = "image";
     private static final String MIME_TYPE_VIDEO = "video";

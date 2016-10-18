@@ -643,7 +643,7 @@ public class AppFileFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.file_mgmt_fragment, container, false);
+        return inflater.inflate(R.layout.app_file_fragment, container, false);
     }
 
     @Override
@@ -994,7 +994,7 @@ public class AppFileFragment extends Fragment {
 
         @Override
         public GridRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.file_mgmt_grid_item, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_file_grid_item, parent, false);
             return new GridRecyclerViewHolder(view);
         }
 
@@ -1192,7 +1192,7 @@ public class AppFileFragment extends Fragment {
         @SuppressWarnings("rawtypes")
         private SectionedRecyclerViewAdapter(RecyclerView.Adapter mBaseAdapter) {
             this.mBaseAdapter = mBaseAdapter;
-            registerAdapterDataObserver();
+            registerAdapterDataObserver(mBaseAdapter);
         }
 
         private void init() {
@@ -1202,28 +1202,11 @@ public class AppFileFragment extends Fragment {
             subAdapterInit();
         }
 
-        private void registerAdapterDataObserver() {
-            if (isDataObserverRegistered) {
-                unregisterAdapterDataObserver(mDataObserver);
-                isDataObserverRegistered = false;
-            }
-            registerAdapterDataObserver(mDataObserver);
-            isDataObserverRegistered = true;
-        }
-
         private void subAdapterInit() {
             if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
                 ((GridRecyclerViewAdapter) mBaseAdapter).init();
             } else {
                 ((LinearRecyclerViewAdapter) mBaseAdapter).init();
-            }
-        }
-
-        private void checkSubAdapterItem() {
-            if (mBaseAdapter.getItemCount() != 0) {
-                mEmptyFolder.setVisibility(View.GONE);
-            } else {
-                mEmptyFolder.setVisibility(View.VISIBLE);
             }
         }
 
@@ -1271,25 +1254,25 @@ public class AppFileFragment extends Fragment {
             mBaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
                 public void onChanged() {
-                    mValid = mBaseAdapter.getItemCount() > 0;
+                    hasChildItem = mBaseAdapter.getItemCount() > 0;
                     notifyDataSetChanged();
                 }
 
                 @Override
                 public void onItemRangeChanged(int positionStart, int itemCount) {
-                    mValid = mBaseAdapter.getItemCount() > 0;
+                    hasChildItem = mBaseAdapter.getItemCount() > 0;
                     notifyItemRangeChanged(positionStart, itemCount);
                 }
 
                 @Override
                 public void onItemRangeInserted(int positionStart, int itemCount) {
-                    mValid = mBaseAdapter.getItemCount() > 0;
+                    hasChildItem = mBaseAdapter.getItemCount() > 0;
                     notifyItemRangeInserted(positionStart, itemCount);
                 }
 
                 @Override
                 public void onItemRangeRemoved(int positionStart, int itemCount) {
-                    mValid = mBaseAdapter.getItemCount() > 0;
+                    hasChildItem = mBaseAdapter.getItemCount() > 0;
                     notifyItemRangeRemoved(positionStart, itemCount);
                 }
             });
@@ -1370,7 +1353,7 @@ public class AppFileFragment extends Fragment {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int typeView) {
             if (typeView == SECTION_TYPE) {
-                View view = LayoutInflater.from(mContext).inflate(R.layout.file_mgmt_section_item, parent, false);
+                View view = LayoutInflater.from(mContext).inflate(R.layout.app_file_section_item, parent, false);
                 return new SectionedViewHolder(view);
             } else {
                 return mBaseAdapter.onCreateViewHolder(parent, typeView - 1);
@@ -1390,7 +1373,7 @@ public class AppFileFragment extends Fragment {
 
         private void setBaseAdapter(RecyclerView.Adapter mBaseAdapter) {
             this.mBaseAdapter = mBaseAdapter;
-            registerAdapterDataObserver();
+            registerAdapterDataObserver(mBaseAdapter);
         }
 
         public SparseArray<Section> getSections() {

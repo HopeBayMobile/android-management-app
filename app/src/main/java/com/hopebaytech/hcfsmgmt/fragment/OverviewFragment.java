@@ -1,20 +1,23 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.customview.UsageIcon;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -24,243 +27,175 @@ import java.util.Locale;
 
 public class OverviewFragment extends Fragment {
 
-    public static String TAG = OverviewFragment.class.getSimpleName();
-    private final String CLASSNAME = getClass().getSimpleName();
-    private final String KEY_CLOUD_STORAGE_USAGE = "cloud_storage_usage";
-    private final String KEY_CLOUD_STORAGE_USAGE_PROGRESS = "cloud_storage_usage_progress";
-    private final String KEY_CLOUD_STORAGE_USAGE_SECONDARY_PROGRESS = "cloud_storage_usage_secondary_progress";
-    private final String KEY_PINNED_STORAGE_USAGE = "pinned_storage_usage";
-    private final String KEY_PINNED_STORAGE_USAGE_PROGRESS = "pinned_storage_usage_progress";
-    private final String KEY_PINNED_STORAGE_USAGE_SECONDARY_PROGRESS = "pinned_storage_usage_secondary_progress";
-    private final String KEY_WAIT_TO_UPLOAD_DATA_USAGE = "wait_to_upload_data_usage";
-    private final String KEY_WAIT_TO_UPLOAD_DATA_USAGE_PROGRESS = "wait_to_upload_data_usage_progress";
-    private final String KEY_WAIT_TO_UPLOAD_DATA_USAGE_SECONDARY_PROGRESS = "wait_to_upload_data_usage_secondary_progress";
-    private final String KEY_NETWORK_XFER_UP = "network_xfer_up";
-    private final String KEY_NETWORK_XFER_DOWNLOAD = "network_xfer_download";
-    private final String KEY_NETWORK_XFER_PROGRESS = "network_xfer_progress";
-    private final String KEY_NETWORK_XFER_SECONDARY_PROGRESS = "network_xfer_secondary_progress";
+    public static final String TAG = OverviewFragment.class.getSimpleName();
+    private static final String CLASSNAME = TAG;
 
     private Thread mUiRefreshThread;
-    private Runnable mUiRefreshRunnable;
     private ImageView mNetworkConnStatusImage;
     private TextView mNetworkConnStatusText;
-    private TextView mCloudStorageUsage;
-    private ProgressBar mCloudStorageProgressBar;
-    private TextView mPinnedStorageUsage;
-    private ProgressBar mPinnedStorageProgressBar;
-    private TextView mWaitToUploadDataUsage;
-    private ProgressBar mWaitToUploadDataUsageProgressBar;
+    private Usage mUsedSpaceUsage;
+    private Usage mPinnedSpaceUsage;
+    private Usage mDataWaitToUploadUsage;
     private TextView mNetworkXferUp;
     private TextView mNetworkXferDown;
-    private ProgressBar mXferProgressBar;
     private boolean mIsCurrentVisible;
     private Context mContext;
     private HCFSStatInfo mStatInfo;
+    private Handler mUiHandler;
+
+    private Runnable mUiRefreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    mStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+                    mUiHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (mStatInfo == null) {
+                                mUsedSpaceUsage.getValue().setText("-");
+                                mPinnedSpaceUsage.getValue().setText("-");
+                                mDataWaitToUploadUsage.getValue().setText("-");
+                                mNetworkXferUp.setText("-");
+                                mNetworkXferDown.setText("-");
+                                return;
+                            }
+
+                            updateNetworkStatus(HCFSConnStatus.getConnStatus(mContext, mStatInfo));
+
+                            String usedSpaceText = String.format(Locale.getDefault(),
+                                    "%s / %s",
+                                    mStatInfo.getFormatTeraUsed(),
+                                    mStatInfo.getFormatTeraTotal());
+                            mUsedSpaceUsage.showUsage(mStatInfo.getTeraUsedPercentage(),
+                                    usedSpaceText);
+
+                            String pinnedSpaceText = String.format(Locale.getDefault(),
+                                    "%s / %s",
+                                    mStatInfo.getFormatPinTotal(),
+                                    mStatInfo.getFormatPinMax());
+                            mPinnedSpaceUsage.showUsage(mStatInfo.getPinnedUsedPercentage(),
+                                    pinnedSpaceText);
+
+                            mDataWaitToUploadUsage.showUsage(mStatInfo.getDirtyPercentage(),
+                                    mStatInfo.getFormatCacheDirtyUsed());
+
+                            String xferDownload = mStatInfo.getFormatXferDownload();
+                            String xferUpload = mStatInfo.getFormatXferUpload();
+                            mNetworkXferUp.setText(xferUpload);
+                            mNetworkXferDown.setText(xferDownload);
+                        }
+                    });
+                    Thread.sleep(Interval.UPDATE_OVERVIEW_INFO);
+                } catch (InterruptedException e) {
+                    Logs.d(CLASSNAME, "Runnable", "run", "UiRefreshThread is interrupted");
+                    break;
+                }
+            }
+        }
+    };
 
     public static OverviewFragment newInstance() {
         return new OverviewFragment();
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mContext = context;
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-    }
-
-    @Override
-    public void onViewStateRestored(Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        if (mStatInfo != null) {
-            String cloudStorageUsage = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatTeraUsed(), mStatInfo.getFormatTeraTotal());
-            outState.putString(KEY_CLOUD_STORAGE_USAGE, cloudStorageUsage);
-            outState.putInt(KEY_CLOUD_STORAGE_USAGE_PROGRESS, mStatInfo.getTeraUsedPercentage());
-            outState.putInt(KEY_CLOUD_STORAGE_USAGE_SECONDARY_PROGRESS, 0);
-
-            outState.putString(KEY_PINNED_STORAGE_USAGE, mStatInfo.getFormatPinTotal());
-            outState.putInt(KEY_PINNED_STORAGE_USAGE_PROGRESS, mStatInfo.getPinnedUsedPercentage());
-            outState.putInt(KEY_PINNED_STORAGE_USAGE_SECONDARY_PROGRESS, 0);
-
-            outState.putString(KEY_WAIT_TO_UPLOAD_DATA_USAGE, mStatInfo.getFormatCacheDirtyUsed());
-            outState.putInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_PROGRESS, mStatInfo.getDirtyPercentage());
-            outState.putInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_SECONDARY_PROGRESS, 0);
-
-            outState.putString(KEY_NETWORK_XFER_UP, mStatInfo.getFormatXferUpload());
-            outState.putString(KEY_NETWORK_XFER_DOWNLOAD, mStatInfo.getFormatXferDownload());
-            outState.putInt(KEY_NETWORK_XFER_PROGRESS, mStatInfo.getXterDownloadPercentage());
-            outState.putInt(KEY_NETWORK_XFER_SECONDARY_PROGRESS, 100);
-        }
-
+        Logs.d(CLASSNAME, "onCreate", null);
+        mContext = getActivity();
+        mUiHandler = new Handler();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.overview_fragment, container, false);
+        Logs.d(CLASSNAME, "onCreateView", null);
+        return inflater.inflate(R.layout.overview_fragment_new, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Logs.d(CLASSNAME, "onViewCreated", null);
 
+        // Initialized network status view
         mNetworkConnStatusImage = (ImageView) view.findViewById(R.id.network_conn_status_icon);
         mNetworkConnStatusText = (TextView) view.findViewById(R.id.network_conn_status);
 
-        RelativeLayout cloudStorage = (RelativeLayout) view.findViewById(R.id.cloud_storage);
-        mCloudStorageUsage = (TextView) cloudStorage.findViewById(R.id.textViewUsage);
-        mCloudStorageUsage.setContentDescription(getString(R.string.overview_used_space));
-        mCloudStorageProgressBar = (ProgressBar) cloudStorage.findViewById(R.id.progressBar);
-        TextView cloudStorageTitle = (TextView) cloudStorage.findViewById(R.id.textViewTitle);
-        cloudStorageTitle.setText(mContext.getString(R.string.overview_used_space));
-        ImageView cloudStorageImageView = (ImageView) cloudStorage.findViewById(R.id.item_icon);
-        cloudStorageImageView.setImageResource(R.drawable.icon_system_used_space);
+        // Initialized used space view
+        RelativeLayout usedSpace = (RelativeLayout) view.findViewById(R.id.used_space);
+        UsageIcon usedSpaceIcon = (UsageIcon) usedSpace.findViewById(R.id.used_space_icon);
+        TextView usedSpaceValue = (TextView) usedSpace.findViewById(R.id.used_space_value);
+        mUsedSpaceUsage = new Usage(usedSpaceIcon, usedSpaceValue);
 
-        RelativeLayout pinnedStorage = (RelativeLayout) view.findViewById(R.id.pinned_storage);
-        mPinnedStorageUsage = (TextView) pinnedStorage.findViewById(R.id.textViewUsage);
-        mPinnedStorageUsage.setContentDescription(getString(R.string.overview_pinned_storage));
-        mPinnedStorageProgressBar = (ProgressBar) pinnedStorage.findViewById(R.id.progressBar);
-        mPinnedStorageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
-        TextView pinnedStorageTitle = (TextView) pinnedStorage.findViewById(R.id.textViewTitle);
-        pinnedStorageTitle.setText(mContext.getString(R.string.overview_pinned_storage));
-        ImageView pinnedStorageImageView = (ImageView) pinnedStorage.findViewById(R.id.item_icon);
-        pinnedStorageImageView.setImageResource(R.drawable.icon_system_pinned_space);
+        // Initialized pinned space view
+        RelativeLayout pinnedSpace = (RelativeLayout) view.findViewById(R.id.pinned_space);
+        UsageIcon pinnedSpaceIcon = (UsageIcon) pinnedSpace.findViewById(R.id.pinned_space_icon);
+        TextView pinnedSpaceValue = (TextView) pinnedSpace.findViewById(R.id.pinned_space_value);
+        pinnedSpaceIcon.setWarningPercentage(HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD);
+        mPinnedSpaceUsage = new Usage(pinnedSpaceIcon, pinnedSpaceValue);
 
-        RelativeLayout waitToUploadData = (RelativeLayout) view.findViewById(R.id.to_be_upload_data);
-        mWaitToUploadDataUsage = (TextView) waitToUploadData.findViewById(R.id.textViewUsage);
-        mWaitToUploadDataUsage.setContentDescription(getString(R.string.overview_data_to_be_uploaded));
-        mWaitToUploadDataUsageProgressBar = (ProgressBar) waitToUploadData.findViewById(R.id.progressBar);
-        mWaitToUploadDataUsageProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.storage_progressbar));
-        TextView waitToUploadDataTitle = (TextView) waitToUploadData.findViewById(R.id.textViewTitle);
-        waitToUploadDataTitle.setText(mContext.getString(R.string.overview_data_to_be_uploaded));
-        ImageView waitToUploadDataUsageImageView = (ImageView) waitToUploadData.findViewById(R.id.item_icon);
-        waitToUploadDataUsageImageView.setImageResource(R.drawable.icon_system_upload_data);
+        // Initialized data wait to upload view
+        RelativeLayout dataWaitToUpload = (RelativeLayout) view.findViewById(R.id.data_wait_to_upload);
+        UsageIcon dataWaitToUploadIcon = (UsageIcon) dataWaitToUpload.findViewById(R.id.data_wait_to_upload_icon);
+        TextView dataWaitToUploadValue = (TextView) dataWaitToUpload.findViewById(R.id.data_wait_to_upload_value);
+        mDataWaitToUploadUsage = new Usage(dataWaitToUploadIcon, dataWaitToUploadValue);
 
-        RelativeLayout data_transmission_today = (RelativeLayout) view.findViewById(R.id.network_xfer_today);
-        mNetworkXferUp = (TextView) data_transmission_today.findViewById(R.id.xfer_up);
-        mNetworkXferDown = (TextView) data_transmission_today.findViewById(R.id.xfer_down);
-        mXferProgressBar = (ProgressBar) data_transmission_today.findViewById(R.id.progressBar);
-        mXferProgressBar.setProgressDrawable(ContextCompat.getDrawable(mContext, R.drawable.xfer_progressbar));
-        TextView network_xfer_today_title = (TextView) data_transmission_today.findViewById(R.id.textViewTitle);
-        network_xfer_today_title.setText(mContext.getString(R.string.overview_data_transmission_today));
-        ImageView networkXferImageView = (ImageView) data_transmission_today.findViewById(R.id.item_icon);
-        networkXferImageView.setImageResource(R.drawable.icon_system_transmitting);
-
-        if (savedInstanceState != null) {
-            mCloudStorageUsage.setText(savedInstanceState.getString(KEY_CLOUD_STORAGE_USAGE));
-            mCloudStorageProgressBar.setProgress(savedInstanceState.getInt(KEY_CLOUD_STORAGE_USAGE_PROGRESS));
-            mCloudStorageProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_CLOUD_STORAGE_USAGE_SECONDARY_PROGRESS));
-
-            mPinnedStorageUsage.setText(savedInstanceState.getString(KEY_PINNED_STORAGE_USAGE));
-            mPinnedStorageProgressBar.setProgress(savedInstanceState.getInt(KEY_PINNED_STORAGE_USAGE_PROGRESS));
-            mPinnedStorageProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_PINNED_STORAGE_USAGE_SECONDARY_PROGRESS));
-
-            mWaitToUploadDataUsage.setText(savedInstanceState.getString(KEY_WAIT_TO_UPLOAD_DATA_USAGE));
-            mWaitToUploadDataUsageProgressBar.setProgress(savedInstanceState.getInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_PROGRESS));
-            mWaitToUploadDataUsageProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_WAIT_TO_UPLOAD_DATA_USAGE_SECONDARY_PROGRESS));
-
-            mNetworkXferUp.setText(savedInstanceState.getString(KEY_NETWORK_XFER_UP));
-            mNetworkXferDown.setText(savedInstanceState.getString(KEY_NETWORK_XFER_DOWNLOAD));
-            mXferProgressBar.setProgress(savedInstanceState.getInt(KEY_NETWORK_XFER_PROGRESS));
-            mXferProgressBar.setSecondaryProgress(savedInstanceState.getInt(KEY_NETWORK_XFER_SECONDARY_PROGRESS));
-        }
-
+        // Initialized network xfer up/down view
+        mNetworkXferUp = (TextView) view.findViewById(R.id.xfer_up);
+        mNetworkXferDown = (TextView) view.findViewById(R.id.xfer_down);
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Logs.d(CLASSNAME, "onActivityCreated", null);
 
-        mUiRefreshRunnable = new Runnable() {
+        new Thread(new Runnable() {
             @Override
             public void run() {
-                while (true) {
-                    try {
-                        mStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (mStatInfo != null) {
-                                    displayNetworkStatus(HCFSConnStatus.getConnStatus(mContext, mStatInfo));
-
-                                    String storageUsageText = String.format(Locale.getDefault(), "%s / %s", mStatInfo.getFormatTeraUsed(), mStatInfo.getFormatTeraTotal());
-                                    mCloudStorageUsage.setText(storageUsageText);
-                                    mCloudStorageProgressBar.setProgress(mStatInfo.getTeraUsedPercentage());
-                                    mCloudStorageProgressBar.setSecondaryProgress(0);
-
-                                    mPinnedStorageUsage.setText(mStatInfo.getFormatPinTotal());
-                                    mPinnedStorageProgressBar.setProgress(mStatInfo.getPinnedUsedPercentage());
-                                    mPinnedStorageProgressBar.setSecondaryProgress(0);
-
-                                    mWaitToUploadDataUsage.setText(mStatInfo.getFormatCacheDirtyUsed());
-                                    mWaitToUploadDataUsageProgressBar.setProgress(mStatInfo.getDirtyPercentage());
-                                    mWaitToUploadDataUsageProgressBar.setSecondaryProgress(0);
-
-                                    String xferDownload = mStatInfo.getFormatXferDownload();
-                                    String xferUpload = mStatInfo.getFormatXferUpload();
-                                    mNetworkXferUp.setText(xferUpload);
-                                    mNetworkXferDown.setText(xferDownload);
-                                    mXferProgressBar.setProgress(mStatInfo.getXterDownloadPercentage());
-                                    mXferProgressBar.setSecondaryProgress(100);
-                                } else {
-                                    mCloudStorageUsage.setText("-");
-                                    mCloudStorageProgressBar.setProgress(0);
-
-                                    mPinnedStorageUsage.setText("-");
-                                    mPinnedStorageProgressBar.setProgress(0);
-
-                                    mWaitToUploadDataUsage.setText("-");
-                                    mWaitToUploadDataUsageProgressBar.setProgress(0);
-
-                                    mNetworkXferUp.setText("-");
-                                    mNetworkXferDown.setText("-");
-                                    mXferProgressBar.setProgress(0);
-                                    mXferProgressBar.setSecondaryProgress(0);
-                                }
-                            }
-                        });
-                        Thread.sleep(Interval.UPDATE_OVERVIEW_INFO);
-                    } catch (InterruptedException e) {
-                        Logs.d(CLASSNAME, "Runnable", "run", "UiRefreshThread is interrupted");
-                        break;
-                    }
+                SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+                int warningPercentage = Integer.valueOf(defaultValue);
+                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+                if (settingsInfo != null) {
+                    warningPercentage = Integer.valueOf(settingsInfo.getValue());
                 }
+
+                final int percentage = warningPercentage;
+                mUiHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mUsedSpaceUsage.getIcon().setWarningPercentage(percentage);
+                    }
+                });
             }
-        };
+        }).start();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Logs.d(CLASSNAME, "onResume", null);
+
         if (mUiRefreshThread == null) {
-            if (mUiRefreshRunnable != null) {
-                if (mIsCurrentVisible) {
-                    mUiRefreshThread = new Thread(mUiRefreshRunnable);
-                    mUiRefreshThread.start();
-                    Logs.d(CLASSNAME, "onPause", "UiRefreshThread is started");
-                }
+            if (mIsCurrentVisible) {
+                mUiRefreshThread = new Thread(mUiRefreshRunnable);
+                mUiRefreshThread.start();
+                Logs.d(CLASSNAME, "onPause", "UiRefreshThread is started");
             }
         }
     }
 
     @Override
     public void onPause() {
+        super.onPause();
         Logs.d(CLASSNAME, "onPause", null);
+
         if (mUiRefreshThread != null && !mUiRefreshThread.isInterrupted()) {
             mUiRefreshThread.interrupt();
             mUiRefreshThread = null;
         }
-        super.onPause();
     }
 
     @Override
@@ -284,7 +219,8 @@ public class OverviewFragment extends Fragment {
             }
         }
     }
-    private void displayNetworkStatus(int connStatus) {
+
+    private void updateNetworkStatus(int connStatus) {
         switch (connStatus) {
             case HCFSConnStatus.TRANS_FAILED:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
@@ -309,5 +245,34 @@ public class OverviewFragment extends Fragment {
         }
     }
 
+    private class Usage {
+
+        private UsageIcon icon;
+        private TextView value;
+
+        private Usage(UsageIcon icon, TextView value) {
+            this.icon = icon;
+            this.value = value;
+        }
+
+        public UsageIcon getIcon() {
+            return icon;
+        }
+
+        private TextView getValue() {
+            return value;
+        }
+
+        private void showUsage(int percentage, String valueText) {
+            icon.showPercentage(percentage);
+            if (icon.isWarning()) {
+                value.setTextColor(ContextCompat.getColor(mContext, R.color.colorUserIconWarningValue));
+            } else {
+                value.setTextColor(ContextCompat.getColor(mContext, R.color.colorUserIconNormalValue));
+            }
+            value.setText(valueText);
+        }
+
+    }
 
 }

@@ -22,7 +22,8 @@
     </string-array>
     <string-array name="nav_title">
         <item>@string/nav_overview</item>
-        <item>@string/nav_app_file</item>
+        <item>@string/nav_apps</item>
+        <item>@string/nav_files</item>
         <item>@string/nav_settings</item>
         <item>@string/nav_help</item>
     </string-array>

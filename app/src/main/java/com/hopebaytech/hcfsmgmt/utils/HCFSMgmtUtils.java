@@ -50,7 +50,7 @@ public class HCFSMgmtUtils {
     public static final String CLASSNAME = "HCFSMgmtUtils";
 //    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
-    public static final String NOTIFY_INSUFFICIENT_PIN_PACE_RATIO = "80";
+    public static final int PINNED_SPACE_WARNING_THRESHOLD = 80; // Unit: percentage
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
 

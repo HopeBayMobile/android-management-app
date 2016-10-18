@@ -61,7 +61,7 @@ public class FileDialogFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final ItemInfo itemInfo = mViewHolder.getItemInfo();
         LayoutInflater inflater = ((MainActivity) mContext).getLayoutInflater();
-        View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_file_dir_info, null);
+        View view = inflater.inflate(R.layout.file_dialog_fragment_file_dir_info, null);
 
         final ImageView fileDirIcon = (ImageView) view.findViewById(R.id.file_dir_icon);
         fileDirIcon.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));

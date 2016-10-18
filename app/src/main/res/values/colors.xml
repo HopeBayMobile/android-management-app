@@ -23,6 +23,11 @@
 
     <color name="colorDefaultBackground">#FAFAFA</color>
 
+    <color name="colorUserIconNormalBackground">#e9faf4</color>
+    <color name="colorUserIconNormalValue">@color/C1</color>
+    <color name="colorUserIconWarningBackground">#ffe5e5</color>
+    <color name="colorUserIconWarningValue">#ff9000</color>
+
     <color name="C1">#77bc1f</color>
     <color name="C2">#026937</color>
     <color name="C3">#4579bb</color>
@@ -45,5 +50,8 @@
     <color name="colorF10">#4579bb</color>
     <color name="colorF11">#b9b9b9</color>
     <color name="colorF12">#b9b9b9</color>
+    <color name="colorF13">#77bc1f</color>
+    <color name="colorF14">#ff9000</color>
+    <color name="colorF15">#77bc1f</color>
 
 </resources>

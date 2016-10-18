@@ -39,7 +39,8 @@
     <string name="nav_drawer_open">Open navigation drawer.</string>
     <string name="nav_drawer_close">Close navigation drawer.</string>
     <string name="nav_overview">OVERVIEW</string>
-    <string name="nav_app_file">APP/FILE</string>
+    <string name="nav_apps">APPS</string>
+    <string name="nav_files">FILES</string>
     <string name="nav_sdcard1">SD card</string>
     <string name="nav_add_mountpoint">Add Shared Space</string>
     <string name="nav_settings">SETTINGS</string>
@@ -63,7 +64,7 @@
     <string name="notify_unpin_video_failure">Unpinning video failed.</string>
     <string name="notify_unpin_audio_failure">Unpinning music failed.</string>
     <string name="notify_exceed_local_storage_used_ratio">Local space usage reached %s%%. To avoid using up the space, make sure Internet connection is normal or unpin some apps/files.</string>
-    <string name="notify_exceed_pin_used_ratio">Pinned space usage reached %s%%. To avoid using up the space, note the app/file size to pin or unpin some apps/files.</string>
+    <string name="notify_exceed_pin_used_ratio">Pinned space usage reached %d%%. To avoid using up the space, note the app/file size to pin or unpin some apps/files.</string>
     <string name="notify_exceed_pin_max">Insufficient pinned space</string>
     <string name="notify_pin_unpin_system_app_failed">Pinning system apps failed.</string>
 
@@ -80,7 +81,7 @@
     <string name="overview_pinned_storage">Pinned space</string>
     <string name="overview_network_traffic_title">Data Transmission</string>
     <string name="overview_data_transmission_today">Data transmitted today</string>
-    <string name="overview_data_to_be_uploaded">Data to be uploaded</string>
+    <string name="overview_data_wait_to_uploaded">To be uploaded</string>
     <string name="overview_snackbar_exit_app">Tap Return key again to quit.</string>
 
     <string name="action_settings">Settings</string>
