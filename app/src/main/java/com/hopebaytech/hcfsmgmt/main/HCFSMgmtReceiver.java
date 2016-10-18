@@ -32,15 +32,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             Logs.d(CLASSNAME, "onReceive", "isTeraAppLogin=" + isTeraAppLogin);
             switch (action) {
                 case Intent.ACTION_BOOT_COMPLETED: {
-                    // Detect network status and determine whether sync data to cloud
-                    boolean syncWifiOnly = true;
-                    SettingsDAO mSettingsDAO = SettingsDAO.getInstance(context);
-                    SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
-                    if (settingsInfo != null) {
-                        syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
-                    }
-                    HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
-
                     // Start an alarm to reset xfer
                     HCFSMgmtUtils.startResetXferAlarm(context);
 

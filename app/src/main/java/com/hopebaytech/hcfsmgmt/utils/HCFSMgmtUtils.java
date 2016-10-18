@@ -628,7 +628,6 @@ public class HCFSMgmtUtils {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (syncWifiOnly) {
-
             if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 String logMsg = "Current wifi network is active";
                 TeraCloudConfig.startSyncToCloud(context, logMsg);
