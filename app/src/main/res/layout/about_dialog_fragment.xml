@@ -94,19 +94,6 @@
                 android:layout_marginTop="10dp" />
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_below="@+id/device_imei_2_layout">
-
-            <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                style="@style/F11"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/close" />
-        </LinearLayout>
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
