@@ -5,6 +5,10 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -27,6 +31,7 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -62,60 +67,103 @@ public class MgmtCluster {
 
     public static final String SERVER_CLIENT_ID = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
 
-    /**
-     * Unknown error.
-     */
-    public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
+    public static class ErrorCode {
 
-    /**
-     * Input parameter relative error.
-     */
-    public static final String INPUT_ERROR = "INPUT_ERROR";
+        /**
+         * Unknown error.
+         */
+        public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
 
-    /**
-     * Device IMEI code is not registered.
-     */
-    public static final String IMEI_NOT_FOUND = "IMEI_NOT_FOUND";
+        /**
+         * Input parameter relative error.
+         */
+        public static final String INPUT_ERROR = "INPUT_ERROR";
 
-    /**
-     * Device IMEI code decrypt failed.
-     */
-    public static final String IMEI_DECRYPT_FAILED = "IMEI_DECRYPT_FAILED";
+        /**
+         * Device IMEI code is not registered.
+         */
+        public static final String IMEI_NOT_FOUND = "IMEI_NOT_FOUND";
 
-    /**
-     * The model information is not matched with the device. It may not support tera service.
-     */
-    public static final String INCORRECT_MODEL = "INCORRECT_MODEL";
+        /**
+         * Device IMEI code decrypt failed.
+         */
+        public static final String IMEI_DECRYPT_FAILED = "IMEI_DECRYPT_FAILED";
 
-    /**
-     * The vendor information is not matched with the device. It may not support tera service.
-     */
-    public static final String INCORRECT_VENDOR = "INCORRECT_VENDOR";
+        /**
+         * The model information is not matched with the device. It may not support tera service.
+         */
+        public static final String INCORRECT_MODEL = "INCORRECT_MODEL";
 
-    /**
-     * The device is expired. No support tera service anymore.
-     */
-    public static final String DEVICE_EXPIRED = "DEVICE_EXPIRED";
+        /**
+         * The vendor information is not matched with the device. It may not support tera service.
+         */
+        public static final String INCORRECT_VENDOR = "INCORRECT_VENDOR";
 
-    /**
-     * Invalid activation code or wrong model mapping. The device may not support tera service.
-     */
-    public static final String INVALID_CODE_OR_MODEL = "INVALID_CODE_OR_MODEL";
+        /**
+         * The device is expired. No support tera service anymore.
+         */
+        public static final String DEVICE_EXPIRED = "DEVICE_EXPIRED";
 
-    /**
-     * No service registered for the user and device.
-     */
-    public static final String MAPPING_NOT_FOUND = "MAPPING_NOT_FOUND";
+        /**
+         * Invalid activation code or wrong model mapping. The device may not support tera service.
+         */
+        public static final String INVALID_CODE_OR_MODEL = "INVALID_CODE_OR_MODEL";
 
-    /**
-     * The device is registered.
-     */
-    public static final String MAPPING_EXISTED = "MAPPING_EXISTED";
+        /**
+         * No service registered for the user and device.
+         */
+        public static final String MAPPING_NOT_FOUND = "MAPPING_NOT_FOUND";
 
-    /**
-     * The device service is locked or expired.
-     */
-    public static final String SERVICE_BLOCK = "SERVICE_BLOCK";
+        /**
+         * The device is registered.
+         */
+        public static final String MAPPING_EXISTED = "MAPPING_EXISTED";
+
+        /**
+         * The device service is locked or expired.
+         */
+        public static final String SERVICE_BLOCK = "SERVICE_BLOCK";
+
+        public static CharSequence getErrorMessage(Context context, String errorCode) {
+            CharSequence errorMessage;
+            switch (errorCode) {
+                case INPUT_ERROR:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_input);
+                    break;
+                case IMEI_NOT_FOUND:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_imei_not_found);
+                    break;
+                case IMEI_DECRYPT_FAILED:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_device_expired);
+                    break;
+                case INCORRECT_MODEL:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_incorrect_model);
+                    break;
+                case INCORRECT_VENDOR:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_incorrect_vendor);
+                    break;
+                case DEVICE_EXPIRED:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_device_expired);
+                    break;
+                case INVALID_CODE_OR_MODEL:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_invalid_code_or_model);
+                    break;
+                case MAPPING_NOT_FOUND:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_mapping_not_found);
+                    break;
+                case MAPPING_EXISTED:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_mapping_existed);
+                    break;
+                case SERVICE_BLOCK:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_service_block);
+                    break;
+                default: // UNKNOWN_ERROR
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_unknown);
+            }
+            return errorMessage;
+        }
+
+    }
 
     private static int retryCount = 0;
     public static final int GOOGLE_AUTH = 0;
@@ -222,8 +270,7 @@ public class MgmtCluster {
                     }
                     deviceServiceInfo.setResponseContent(responseContent);
                     Logs.d(CLASSNAME, "ChangeAccountProxy", "changeAccount",
-                            "responseCode=" + responseCode +
-                                    ", responseContent=" + responseContent);
+                            "responseCode=" + responseCode + ", responseContent=" + responseContent);
                 } catch (Exception e) {
                     Logs.e(CLASSNAME, "ChangeAccountProxy", "change", Log.getStackTraceString(e));
                 } finally {
@@ -732,8 +779,8 @@ public class MgmtCluster {
                             ", force=" + force +
                             ", hcfsVersion=" + hcfsVersion);
 
-	    return cv;
-	}
+            return cv;
+        }
 
     }
 
@@ -1218,36 +1265,6 @@ public class MgmtCluster {
 
     public static void plusRetryCount() {
         retryCount = retryCount + 1;
-    }
-
-    public static int errorMessageResId(String errorCode) {
-        int resId = 0;
-        if (errorCode.equals(UNKNOWN_ERROR)) {
-
-        } else if (errorCode.equals(UNKNOWN_ERROR)) {
-
-        } else if (errorCode.equals(INPUT_ERROR)) {
-
-        } else if (errorCode.equals(IMEI_NOT_FOUND)) {
-
-        } else if (errorCode.equals(IMEI_DECRYPT_FAILED)) {
-
-        } else if (errorCode.equals(INCORRECT_MODEL)) {
-
-        } else if (errorCode.equals(INCORRECT_VENDOR)) {
-
-        } else if (errorCode.equals(DEVICE_EXPIRED)) {
-
-        } else if (errorCode.equals(INVALID_CODE_OR_MODEL)) {
-
-        } else if (errorCode.equals(MAPPING_EXISTED)) {
-
-        } else if (errorCode.equals(SERVICE_BLOCK)) {
-
-        } else if (errorCode.equals(MAPPING_NOT_FOUND)) {
-
-        }
-        return resId;
     }
 
 }

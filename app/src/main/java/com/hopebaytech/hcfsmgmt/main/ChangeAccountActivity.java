@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -50,11 +49,11 @@ import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
-import java.net.HttpURLConnection;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -66,7 +65,9 @@ import javax.net.ssl.HttpsURLConnection;
 public class ChangeAccountActivity extends AppCompatActivity {
 
     public static final String CLASSNAME = ChangeAccountActivity.class.getSimpleName();
+
     private GoogleApiClient mGoogleApiClient;
+
     private TextView mCurrentAccount;
     private LinearLayout mTargetAccountLayout;
     private TextView mTargetAccount;
@@ -75,10 +76,12 @@ public class ChangeAccountActivity extends AppCompatActivity {
     private LinearLayout mSwitchAccountLayoutText;
     private TextView mSwitchAccount;
     private LinearLayout mSwitchAccountLayoutIcon;
+    private GoogleSignInOptions mGoogleSignInOptions;
+    //    private ProgressDialog mProgressDialog;
+    private ProgressDialogUtils mProgressDialog;
+
     private String mServerClientId;
     private String mOldServerAuthCode;
-    private GoogleSignInOptions mGoogleSignInOptions;
-    private ProgressDialog mProgressDialog;
     private String mNewServerAuthCode;
     private String mAccountEmail;
     private String mAccountName;
@@ -106,6 +109,9 @@ public class ChangeAccountActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_account_activity);
+
+        mProgressDialog = new ProgressDialogUtils(this);
+        mProgressDialog.setMessage(getString(R.string.processing_msg));
 
         View contentView = findViewById(android.R.id.content);
         if (contentView != null) {
@@ -145,7 +151,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     if (ContextCompat.checkSelfPermission(ChangeAccountActivity.this,
                             Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                        showProgressDialog();
+                        mProgressDialog.show();
 
                         MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(mOldServerAuthCode);
                         MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
@@ -162,7 +168,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
                                                 ", responseContent=" + authResultInfo.getMessage());
                                 signOut();
                                 mErrorMsg.setText(R.string.change_account_failed);
-                                dismissProgressDialog();
+                                mProgressDialog.dismiss();
                             }
                         });
                         authProxy.auth();
@@ -194,7 +200,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
         View.OnClickListener chooseAccountListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProgressDialog();
+                mProgressDialog.show();
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -269,7 +275,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
     }
 
     private void init() {
-        showProgressDialog();
+        mProgressDialog.show();
 
         new Thread(new Runnable() {
             @Override
@@ -316,7 +322,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
                             });
                         }
 
-                        dismissProgressDialog();
+                        mProgressDialog.dismiss();
                     }
 
                     @Override
@@ -335,16 +341,16 @@ public class ChangeAccountActivity extends AppCompatActivity {
                                 // Show dialog using GoogleApiAvailability.getErrorDialog()
                                 showErrorDialog(result.getErrorCode());
                                 mResolvingError = true;
-                                dismissProgressDialog();
+                                mProgressDialog.dismiss();
                             }
                         }
 
-                        dismissProgressDialog();
+                        mProgressDialog.dismiss();
                     }
 
                     @Override
                     public void onConnectionSuspended(int cause) {
-                        dismissProgressDialog();
+                        mProgressDialog.dismiss();
                     }
                 });
         signInApiClient.connect();
@@ -365,28 +371,12 @@ public class ChangeAccountActivity extends AppCompatActivity {
         startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
     }
 
-    private void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setIndeterminate(true);
-            mProgressDialog.setCancelable(false);
-        }
-        mProgressDialog.setMessage(getString(R.string.processing_msg));
-        mProgressDialog.show();
-    }
-
-    private void dismissProgressDialog() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == RequestCode.GOOGLE_SIGN_IN) {
-            dismissProgressDialog();
+            mProgressDialog.dismiss();
 
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result != null && result.isSuccess()) {
@@ -486,9 +476,13 @@ public class ChangeAccountActivity extends AppCompatActivity {
             public void onChangeAccountFailed(DeviceServiceInfo deviceServiceInfo) {
                 if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
                     changeAccountWithoutJwtToken();
+                } else if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
+                    mErrorMsg.setText(MgmtCluster.ErrorCode.getErrorMessage(ChangeAccountActivity.this,
+                            deviceServiceInfo.getErrorCode()));
                 } else {
                     signOut();
                     mErrorMsg.setText(R.string.change_account_failed);
+                    mProgressDialog.dismiss();
                 }
             }
         });
@@ -535,7 +529,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
             @Override
             public void onAuthFailed() {
                 Logs.e(CLASSNAME, "changeAccountWithoutJwtToken", "onAuthFailed", null);
-                dismissProgressDialog();
+                mProgressDialog.dismiss();
             }
 
         });

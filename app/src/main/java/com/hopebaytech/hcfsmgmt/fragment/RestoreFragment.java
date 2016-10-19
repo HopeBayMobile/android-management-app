@@ -565,10 +565,10 @@ public class RestoreFragment extends Fragment {
                 Logs.e(CLASSNAME, "registerWithJwtToken", "onRegisterFailed",
                         "deviceServiceInfo=" + deviceServiceInfo);
 
-                int errorMsgResId = R.string.activate_failed;
+                CharSequence errorMessage = mContext.getText(R.string.activate_failed);
                 if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
                     mProgressDialogUtils.dismiss();
-                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.ErrorCode.IMEI_NOT_FOUND)) {
                         Bundle bundle = new Bundle();
                         bundle.putInt(ActivateWoCodeFragment.KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
                         bundle.putString(ActivateWoCodeFragment.KEY_USERNAME, mAccountEmail);
@@ -581,17 +581,14 @@ public class RestoreFragment extends Fragment {
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, fragment);
                         ft.commitAllowingStateLoss();
-                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                            deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                        errorMsgResId = R.string.activate_failed_not_supported_device;
-                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
-                        errorMsgResId = R.string.activate_failed_device_expired;
+                        return;
                     }
-                    mErrorMessage.setText(errorMsgResId);
+                    errorMessage = MgmtCluster.ErrorCode.getErrorMessage(mContext, deviceServiceInfo.getErrorCode());
+                    mErrorMessage.setText(errorMessage);
                 } else if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
                     registerWithoutJwtToken();
                 } else {
-                    mErrorMessage.setText(errorMsgResId);
+                    mErrorMessage.setText(errorMessage);
                 }
             }
 

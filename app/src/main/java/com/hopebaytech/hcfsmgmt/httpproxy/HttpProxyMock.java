@@ -185,7 +185,7 @@ public class HttpProxyMock implements IHttpProxy {
                     try {
                         JSONObject jsonObj = new JSONObject();
                         jsonObj.put("detail", "HTTP_NOT_FOUND");
-                        jsonObj.put("error_code", MgmtCluster.INVALID_CODE_OR_MODEL);
+                        jsonObj.put("error_code", MgmtCluster.ErrorCode.INVALID_CODE_OR_MODEL);
                         mResponseContent = jsonObj.toString();
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -196,7 +196,7 @@ public class HttpProxyMock implements IHttpProxy {
                 try {
                     JSONObject jsonObj = new JSONObject();
                     jsonObj.put("detail", "HTTP_BAD_REQUEST");
-                    jsonObj.put("error_code", MgmtCluster.INVALID_CODE_OR_MODEL);
+                    jsonObj.put("error_code", MgmtCluster.ErrorCode.INVALID_CODE_OR_MODEL);
                     mResponseContent = jsonObj.toString();
                 } catch (JSONException e) {
                     e.printStackTrace();
