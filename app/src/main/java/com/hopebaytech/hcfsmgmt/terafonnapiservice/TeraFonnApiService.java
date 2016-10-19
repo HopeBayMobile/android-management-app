@@ -154,7 +154,7 @@ public class TeraFonnApiService extends Service {
                     }
                     // Given a default app status for the package, the status will be changed later
                     // in TrackAppStatusRunnable.
-                    mPackageStatusMap.put(packageName, AppStatus.UNAVAILABLE /* default app status */);
+                    mPackageStatusMap.put(packageName, AppStatus.UNKNOWN /* default app status */);
                 }
                 isSuccess = true;
             } catch (Exception e) {
@@ -222,9 +222,23 @@ public class TeraFonnApiService extends Service {
         }
 
         @Override
-        public int checkAppAvailable(final String packageName) throws RemoteException {
+        public int checkAppAvailable(String packageName) throws RemoteException {
+            int status;
+            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
+            boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+            if (isAvailable) {
+                status = AppStatus.AVAILABLE;
+            } else {
+                status = getPackageStatus(packageName);
+            }
+            mPackageStatusMap.put(packageName, status);
+            return status;
+        }
 
-            Future<?> future = mExecutor.submit(new Runnable() {
+        @Override
+        public void postCheckAppAvailable(final String packageName, final ICheckAppAvailableListener mListener) throws RemoteException {
+
+            mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
                     int status;
@@ -236,19 +250,13 @@ public class TeraFonnApiService extends Service {
                         status = getPackageStatus(packageName);
                     }
                     mPackageStatusMap.put(packageName, status);
+                    try {
+                        mListener.onCheckCompleted(packageName, status);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
-
-//            int status;
-//            HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
-//            boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
-//            if (isAvailable) {
-//                status = AppStatus.AVAILABLE;
-//            } else {
-//                status = getPackageStatus(packageName);
-//            }
-//            mPackageStatusMap.put(packageName, status);
-            return 0;
         }
 
         @Override

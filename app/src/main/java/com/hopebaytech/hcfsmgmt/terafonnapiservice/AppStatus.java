@@ -11,6 +11,7 @@ import com.hopebaytech.hcfsmgmt.info.ItemStatus;
  */
 public class AppStatus implements Parcelable {
 
+    public static final int UNKNOWN = ItemStatus.UNKNOWN;
     public static final int AVAILABLE = ItemStatus.AVAILABLE;
     public static final int UNAVAILABLE = ItemStatus.UNAVAILABLE;
 
