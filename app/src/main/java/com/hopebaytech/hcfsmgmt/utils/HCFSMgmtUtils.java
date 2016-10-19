@@ -321,7 +321,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
 //                Logs.d(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
-                
+
                 hcfsStatInfo = new HCFSStatInfo();
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
@@ -628,21 +628,45 @@ public class HCFSMgmtUtils {
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (syncWifiOnly) {
-            if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                String logMsg = "Current wifi network is active";
-                TeraCloudConfig.startSyncToCloud(context, logMsg);
+            if (netInfo != null) {
+                Logs.d(CLASSNAME, "changeCloudSyncStatus", "type=" + netInfo.getType()
+                        + ", state=" + netInfo.getState()
+                        + ", detailedState=" + netInfo.getDetailedState());
+                
+                if (netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                    String logMsg = "Current wifi network is active";
+                    TeraCloudConfig.startSyncToCloud(context, logMsg);
+                }
             } else {
                 String logMsg = "No default network or wifi network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
+//            if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+//                String logMsg = "Current wifi network is active";
+//                TeraCloudConfig.startSyncToCloud(context, logMsg);
+//            } else {
+//                String logMsg = "No default network or wifi network is current active";
+//                TeraCloudConfig.stopSyncToCloud(context, logMsg);
+//            }
         } else {
             if (netInfo != null) {
+                Logs.d(CLASSNAME, "changeCloudSyncStatus", "type=" + netInfo.getType()
+                        + ", state=" + netInfo.getState()
+                        + ", detailedState=" + netInfo.getDetailedState());
+
                 String logMsg = "Current default network is active";
                 TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
                 String logMsg = "No default network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
+//            if (netInfo != null) {
+//                String logMsg = "Current default network is active";
+//                TeraCloudConfig.startSyncToCloud(context, logMsg);
+//            } else {
+//                String logMsg = "No default network is current active";
+//                TeraCloudConfig.stopSyncToCloud(context, logMsg);
+//            }
         }
     }
 
@@ -861,7 +885,7 @@ public class HCFSMgmtUtils {
 
     /**
      * @return
-     * */
+     */
     public static int triggerRestore() {
         int code = -1;
         try {
