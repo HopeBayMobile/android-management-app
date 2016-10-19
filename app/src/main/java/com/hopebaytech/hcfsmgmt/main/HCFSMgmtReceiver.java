@@ -63,7 +63,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
                     // Detect network status changed and enable/disable data sync to cloud
                     boolean syncWifiOnly = true;
-                    SettingsDAO mSettingsDAO = new SettingsDAO();
+                    SettingsDAO mSettingsDAO = SettingsDAO.getInstance(context);
                     SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
                     if (settingsInfo != null) {
                         syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
