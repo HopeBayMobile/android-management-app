@@ -732,8 +732,8 @@ public class MgmtCluster {
                             ", force=" + force +
                             ", hcfsVersion=" + hcfsVersion);
 
-	    return cv;
-	}
+            return cv;
+        }
 
     }
 
@@ -1101,7 +1101,7 @@ public class MgmtCluster {
             DeviceListInfo deviceListInfo = new DeviceListInfo();
             IHttpProxy httpProxyImpl = null;
             try {
-                String url = DEVICE_API + imei;
+                String url = DEVICE_API + imei + "/";
 
                 ContentValues header = new ContentValues();
                 header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
@@ -1198,7 +1198,7 @@ public class MgmtCluster {
                             }
 
                             @Override
-                            public void onAuthFailed() {
+                            public void onAuthFailed(GoogleSignInResult result) {
                                 listener.onFetchFailed();
                             }
 

@@ -642,8 +642,20 @@ public class RestoreFragment extends Fragment {
                     }
 
                     @Override
-                    public void onAuthFailed() {
-                        Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed", null);
+                    public void onAuthFailed(GoogleSignInResult result) {
+                        Logs.e(CLASSNAME, "registerWithoutJwtToken",
+                                "onAuthFailed", "result=" + result);
+                        if (result != null) {
+                            String email = null;
+                            String status = result.getStatus().toString();
+                            GoogleSignInAccount account = result.getSignInAccount();
+                            if (account != null) {
+                                email = account.getEmail();
+                            }
+                            Logs.e(CLASSNAME, "registerWithoutJwtToken",
+                                    "onAuthFailed",
+                                    "email=" + email + ", status=" + status);
+                        }
                         mProgressDialogUtils.dismiss();
                     }
 
@@ -786,8 +798,21 @@ public class RestoreFragment extends Fragment {
                     }
 
                     @Override
-                    public void onAuthFailed() {
-                        Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken", "onAuthFailed", null);
+                    public void onAuthFailed(GoogleSignInResult result) {
+                        Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken",
+                                "onAuthFailed",
+                                "result=" + result);
+                        if (result != null) {
+                            String email = null;
+                            String status = result.getStatus().toString();
+                            GoogleSignInAccount account = result.getSignInAccount();
+                            if (account != null) {
+                                email = account.getEmail();
+                            }
+                            Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken",
+                                    "onAuthFailed",
+                                    "email=" + email + ", status=" + status);
+                        }
                         mProgressDialogUtils.dismiss();
                     }
 
@@ -883,8 +908,20 @@ public class RestoreFragment extends Fragment {
             }
 
             @Override
-            public void onAuthFailed() {
-
+            public void onAuthFailed(GoogleSignInResult result) {
+                Logs.e(CLASSNAME, "refreshDeviceListWithoutJwtToken",
+                        "onAuthFailed", "result=" + result);
+                if (result != null) {
+                    String email = null;
+                    String status = result.getStatus().toString();
+                    GoogleSignInAccount account = result.getSignInAccount();
+                    if (account != null) {
+                        email = account.getEmail();
+                    }
+                    Logs.e(CLASSNAME, "refreshDeviceListWithoutJwtToken",
+                            "onAuthFailed",
+                            "email=" + email + ", status=" + status);
+                }
             }
         });
         proxy.auth();

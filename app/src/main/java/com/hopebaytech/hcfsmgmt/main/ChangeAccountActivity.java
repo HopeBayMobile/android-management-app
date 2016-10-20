@@ -533,7 +533,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onAuthFailed() {
+            public void onAuthFailed(GoogleSignInResult result) {
                 Logs.e(CLASSNAME, "changeAccountWithoutJwtToken", "onAuthFailed", null);
                 dismissProgressDialog();
             }

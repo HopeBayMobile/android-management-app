@@ -226,8 +226,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                     }
 
                                     @Override
-                                    public void onAuthFailed() {
-                                        Logs.e(CLASSNAME, "onAuthFailed", null);
+                                    public void onAuthFailed(GoogleSignInResult result) { ?
+                                        Logs.e(CLASSNAME, "onAuthFailed", "result=" + result);
+                                        if (result != null) {
+                                            String email = null;
+                                            String status = result.getStatus().toString();
+                                            GoogleSignInAccount account = result.getSignInAccount();
+                                            if (account != null) {
+                                                email = account.getEmail();
+                                            }
+                                            Logs.e(CLASSNAME, "onAuthFailed", "email=" + email + ", status=" + status);
+                                        }
                                     }
                                 });
                                 silentAuthProxy.auth();

@@ -19,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
@@ -477,7 +478,18 @@ public class TeraMgmtService extends Service {
                     }
 
                     @Override
-                    public void onAuthFailed() { // Google silent auth failed
+                    public void onAuthFailed(GoogleSignInResult result) { // Google silent auth failed
+                        Logs.e(CLASSNAME, "onAuthFailed", "result=" + result);
+                        if (result != null) {
+                            String email = null;
+                            String status = result.getStatus().toString();
+                            GoogleSignInAccount account = result.getSignInAccount();
+                            if (account != null) {
+                                email = account.getEmail();
+                            }
+                            Logs.e(CLASSNAME, "onAuthFailed", "email=" + email + ", status=" + status);
+                        }
+                        
                         TeraCloudConfig.stopSyncToCloud();
                         NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
