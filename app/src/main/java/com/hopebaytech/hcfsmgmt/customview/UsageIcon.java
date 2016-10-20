@@ -11,19 +11,17 @@ import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.util.AttributeSet;
-import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 /**
  * @author Aaron
  *         Created by Aaron on 2016/10/12.
  */
 
-public class UsageIcon extends View{
+public class UsageIcon extends View {
 
     private static final String CLASSNAME = UsageIcon.class.getSimpleName();
 
@@ -33,11 +31,9 @@ public class UsageIcon extends View{
     private final float WARNING_RIPPLE_GAP_RATIO = 0.1f;
     private final float START_ANGLE = 270f;
 
-    private Context mContext;
     private Paint mWholeCirclePaint;
     private Paint mInnerCirclePaint;
     private Paint mValuePaint;
-    private SurfaceHolder mSurfaceHolder;
     /**
      * <li> {@link Pair#first} is the drawable of normal icon</li>
      * <li> {@link Pair#second} is the drawable of warning icon</li>
@@ -66,9 +62,12 @@ public class UsageIcon extends View{
 
     /**
      * The animation is triggered or not
-     * */
+     */
     private boolean isAnimated;
 
+    /**
+     * Unit: %
+     */
     private int mValuePercentage;
     private int mWarningPercentage = 100; // Default is 100%
 
@@ -92,7 +91,6 @@ public class UsageIcon extends View{
     }
 
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        mContext = context;
 
         TypedArray typedArray = context.getTheme()
                 .obtainStyledAttributes(attrs, R.styleable.UsageIcon, defStyleAttr, defStyleRes);
@@ -131,37 +129,6 @@ public class UsageIcon extends View{
 
         mDrawAnimator = ObjectAnimator.ofFloat(this, "phase", 0f, 1.0f).setDuration(500);
         mDrawAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-
-//        mSurfaceHolder = getHolder();
-//        mSurfaceHolder.addCallback(this);
-    }
-
-//    @Override
-//    public void surfaceCreated(SurfaceHolder holder) {
-//    }
-//
-//    @Override
-//    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-//
-//    }
-//
-//    @Override
-//    public void surfaceDestroyed(SurfaceHolder holder) {
-//
-//    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-
-        drawWholeCircle(canvas);
-        drawValue(canvas);
-        drawInnerCircle(canvas);
-        drawIcon(canvas);
-
-        if (isWarning()) {
-            drawWarningRipple(canvas);
-        }
     }
 
     private void drawWarningRipple(Canvas canvas) {
@@ -268,21 +235,15 @@ public class UsageIcon extends View{
             invalidate();
         } else {
             isAnimated = true;
-
             mPhase = 0f;
             mDrawAnimator.start();
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    myDraw();
-//                }
-//            }).start();
         }
+
     }
 
-    public void myDraw() {
-        Canvas canvas = mSurfaceHolder.lockCanvas();
-        canvas.drawColor(ContextCompat.getColor(mContext, R.color.colorDefaultBackground));
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
 
         drawWholeCircle(canvas);
         drawValue(canvas);
@@ -292,8 +253,6 @@ public class UsageIcon extends View{
         if (isWarning()) {
             drawWarningRipple(canvas);
         }
-
-        mSurfaceHolder.unlockCanvasAndPost(canvas);
     }
 
     public void setWarningPercentage(int percentage) {
@@ -301,7 +260,6 @@ public class UsageIcon extends View{
     }
 
     public boolean isWarning() {
-        Logs.w(CLASSNAME, "isWarning", "mValuePercentage=" + mValuePercentage + ", mWarningPercentage=" + mWarningPercentage);
         return mValuePercentage >= mWarningPercentage;
     }
 
@@ -311,7 +269,7 @@ public class UsageIcon extends View{
 
     /**
      * The setter function for mDrawAnimator
-     * */
+     */
     public void setPhase(float mPhase) {
         this.mPhase = mPhase;
         invalidate();
