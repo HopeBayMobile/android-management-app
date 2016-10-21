@@ -78,6 +78,15 @@ public class NotificationEvent {
                               String notifyTitle,
                               String notifyMessage,
                               int iconDrawableId,
+                              int flag) {
+        notify(context, notifyId, notifyTitle, notifyMessage, iconDrawableId, null, flag, null);
+    }
+
+    public static void notify(Context context,
+                              int notifyId,
+                              String notifyTitle,
+                              String notifyMessage,
+                              int iconDrawableId,
                               NotificationCompat.Action action,
                               int flag,
                               Bundle extras) {

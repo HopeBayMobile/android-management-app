@@ -564,17 +564,17 @@ public class TeraMgmtService extends Service {
                             continue;
                         }
 
-                        int connStatus = HCFSConnStatus.getConnStatus(TeraMgmtService.this, statInfo);
+                        int drawableId = R.drawable.icon_tera_logo_status_bar_01;
                         String notifyTitle;
+                        int connStatus = HCFSConnStatus.getConnStatus(TeraMgmtService.this, statInfo);
                         switch (connStatus) {
                             case HCFSConnStatus.TRANS_FAILED:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
+                                drawableId = R.drawable.icon_tera_logo_status_bar_02;
                                 break;
                             case HCFSConnStatus.TRANS_NOT_ALLOWED:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
-                                break;
-                            case HCFSConnStatus.TRANS_NORMAL:
-                                notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
+                                drawableId = R.drawable.icon_tera_logo_status_bar_02;
                                 break;
                             case HCFSConnStatus.TRANS_IN_PROGRESS:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
@@ -582,12 +582,21 @@ public class TeraMgmtService extends Service {
                             case HCFSConnStatus.TRANS_SLOW:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
                                 break;
-                            default:
+                            default: // HCFSConnStatus.TRANS_NORMAL
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                         }
-                        String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatTeraUsed() + " / " + statInfo.getFormatTeraTotal();
+                        String notifyMsg = getString(R.string.overview_used_space) +
+                                ": " +
+                                statInfo.getFormatTeraUsed() +
+                                " / " +
+                                statInfo.getFormatTeraTotal();
                         int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
-                        NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
+                        NotificationEvent.notify(TeraMgmtService.this,
+                                HCFSMgmtUtils.NOTIFY_ID_ONGOING,
+                                notifyTitle,
+                                notifyMsg,
+                                drawableId,
+                                flag);
 
                         Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
                     } catch (InterruptedException e) {
