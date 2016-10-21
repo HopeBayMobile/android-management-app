@@ -226,7 +226,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
                                     }
 
                                     @Override
-                                    public void onAuthFailed(GoogleSignInResult result) { ?
+                                    public void onAuthFailed(GoogleSignInResult result) {
                                         Logs.e(CLASSNAME, "onAuthFailed", "result=" + result);
                                         if (result != null) {
                                             String email = null;

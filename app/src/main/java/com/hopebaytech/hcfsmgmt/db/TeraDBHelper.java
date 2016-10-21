@@ -9,7 +9,7 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 public class TeraDBHelper extends SQLiteOpenHelper {
 
-    private static final String CLASSNAME = HCFSDBHelper.class.getSimpleName();
+    private static final String CLASSNAME = TeraDBHelper.class.getSimpleName();
 
     public static final String DATABASE_NAME = "hopebay.db";
     public static final int VERSION = 1;
