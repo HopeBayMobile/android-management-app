@@ -95,10 +95,8 @@ public class DisplayTypeFactory {
 
             if (filterByPin) {
                 UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
-                if (uidInfo != null) {
-                    if (!uidInfo.isPinned()) {
-                        continue;
-                    }
+                if (uidInfo == null || !uidInfo.isPinned()) {
+                    continue;
                 }
             }
             itemInfoList.add(appInfo);

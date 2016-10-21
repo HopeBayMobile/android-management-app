@@ -35,8 +35,8 @@
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
     <string name="nav_overview">總覽</string>
-    <string name="nav_apps">應用程式/檔案</string>
-    <string name="nav_files">應用程式/檔案</string>
+    <string name="nav_apps">應用程式</string>
+    <string name="nav_files">檔案</string>
     <string name="nav_sdcard1">SD 卡</string>
     <string name="nav_add_mountpoint">新增共用空間</string>
     <string name="nav_settings">設定</string>

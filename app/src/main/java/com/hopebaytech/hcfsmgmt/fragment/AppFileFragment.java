@@ -896,9 +896,8 @@ public class AppFileFragment extends Fragment {
                     case DisplayType.BY_FILE:
                         itemInfoList = DisplayTypeFactory.getListOfFileDirs(mContext, mCurrentFile, mFilterByPin);
                         break;
-                    default:
-                        itemInfoList = new ArrayList<>();
                 }
+                Logs.w(CLASSNAME, "showContent", "itemInfoList.size()=" + itemInfoList.size());
                 DisplayTypeFactory.sort(itemInfoList, mSortType);
 
                 final ArrayList<ItemInfo> finalItemInfoList = itemInfoList;
@@ -912,8 +911,12 @@ public class AppFileFragment extends Fragment {
                             return;
                         }
 
-                        if (finalItemInfoList.size() != 0) {
+                        if (!finalItemInfoList.isEmpty()) {
                             mNoDataMsg.setVisibility(View.GONE);
+                            return;
+                        }
+
+                        if (mFilterByPin) {
                             return;
                         }
 
@@ -1254,25 +1257,33 @@ public class AppFileFragment extends Fragment {
             mBaseAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
                 @Override
                 public void onChanged() {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
+                    // if item count > 0 or mFilterByPin is true, show section and item list. Else,
+                    // do not show action or item list.
+                    hasChildItem = mBaseAdapter.getItemCount() > 0 || mFilterByPin;
                     notifyDataSetChanged();
                 }
 
                 @Override
                 public void onItemRangeChanged(int positionStart, int itemCount) {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
+                    // if item count > 0 or mFilterByPin is true, show section and item list. Else,
+                    // do not show action or item list.
+                    hasChildItem = mBaseAdapter.getItemCount() > 0 || mFilterByPin;
                     notifyItemRangeChanged(positionStart, itemCount);
                 }
 
                 @Override
                 public void onItemRangeInserted(int positionStart, int itemCount) {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
+                    // if item count > 0 or mFilterByPin is true, show section and item list. Else,
+                    // do not show action or item list.
+                    hasChildItem = mBaseAdapter.getItemCount() > 0 || mFilterByPin;
                     notifyItemRangeInserted(positionStart, itemCount);
                 }
 
                 @Override
                 public void onItemRangeRemoved(int positionStart, int itemCount) {
-                    hasChildItem = mBaseAdapter.getItemCount() > 0;
+                    // if item count > 0 or mFilterByPin is true, show section and item list. Else,
+                    // do not show action or item list.
+                    hasChildItem = mBaseAdapter.getItemCount() > 0 || mFilterByPin;
                     notifyItemRangeRemoved(positionStart, itemCount);
                 }
             });
