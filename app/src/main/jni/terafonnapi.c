@@ -268,7 +268,7 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_stopU
     free((char *)json_res);
     return result;
 }
-/*
+
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_collectSysLogs(
         JNIEnv *jEnv, jobject jObject) {
     const char *json_res;
@@ -277,7 +277,7 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_colle
     free((char *)json_res);
     return result;
 }
-*/
+
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_triggerRestore(
 		JNIEnv *jEnv, jobject jObject) {
 	const char *json_res;
