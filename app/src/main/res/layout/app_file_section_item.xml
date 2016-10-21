@@ -128,10 +128,6 @@
 
     </LinearLayout>
 
-    <View
-        style="@style/Divider"
-        android:layout_alignParentBottom="true" />
-
     <com.hopebaytech.hcfsmgmt.customview.CircleDisplay
         android:id="@+id/circle_display_view"
         android:layout_width="80dp"
@@ -146,5 +142,10 @@
         app:valueColor="@color/C1"
         android:layout_centerVertical="true"
         android:layout_alignParentEnd="true" />
+
+    <!--<View-->
+        <!--style="@style/Divider"-->
+        <!--android:layout_alignParentBottom="true" />-->
+
 
 </RelativeLayout>

@@ -761,12 +761,12 @@ public class AppFileFragment extends Fragment {
                 mRecyclerViewScrollDown = (dy >= 0);
             }
         });
+        mRecyclerView.addItemDecoration(mDividerItemDecoration);
 
         switch (mLayoutType) {
             case LINEAR:
                 mChangeLayout.setImageResource(R.drawable.icon_btn_tab_gridview_light);
                 mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-                mRecyclerView.addItemDecoration(mDividerItemDecoration);
                 mSectionedRecyclerViewAdapter = new SectionedRecyclerViewAdapter(new LinearRecyclerViewAdapter());
                 break;
             case GRID:
@@ -841,9 +841,7 @@ public class AppFileFragment extends Fragment {
                 switch (mLayoutType) {
                     case LINEAR:
                         mChangeLayout.setImageResource(R.drawable.icon_btn_tab_listview_light);
-
                         mRecyclerView.setLayoutManager(new GridLayoutManager(mContext, GRID_LAYOUT_SPAN_COUNT));
-                        mRecyclerView.removeItemDecoration(mDividerItemDecoration);
 
                         itemInfoList = mSectionedRecyclerViewAdapter.getSubAdapterItemInfoList();
                         mSectionedRecyclerViewAdapter.setBaseAdapter(new GridRecyclerViewAdapter(itemInfoList));
@@ -853,9 +851,7 @@ public class AppFileFragment extends Fragment {
                         break;
                     case GRID:
                         mChangeLayout.setImageResource(R.drawable.icon_btn_tab_gridview_light);
-
                         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-                        mRecyclerView.addItemDecoration(mDividerItemDecoration);
 
                         itemInfoList = mSectionedRecyclerViewAdapter.getSubAdapterItemInfoList();
                         mSectionedRecyclerViewAdapter.setBaseAdapter(new LinearRecyclerViewAdapter(itemInfoList));
@@ -878,8 +874,6 @@ public class AppFileFragment extends Fragment {
     }
 
     public void showContent() {
-        Logs.d(CLASSNAME, "showContent", "mSortType=" + mSortType + ", mFilterByPin=" + mFilterByPin);
-
         if (!isRunOnCorrectSortType(mSortType)) {
             return;
         }
@@ -1218,7 +1212,6 @@ public class AppFileFragment extends Fragment {
         }
 
         private void shutdownSubAdapterExecutor() {
-            Logs.d(CLASSNAME, "SectionedRecyclerViewAdapter", "shutdownSubAdapterExecutor", null);
             if (mBaseAdapter instanceof GridRecyclerViewAdapter) {
                 ((GridRecyclerViewAdapter) mBaseAdapter).shutdownExecutor();
             } else {
@@ -1500,7 +1493,6 @@ public class AppFileFragment extends Fragment {
 
         private int firstPosition;
         private int sectionedPosition;
-//        private SectionedRecyclerViewAdapter.SectionedViewHolder viewHolder;
 
         public Section(int firstPosition) {
             this.firstPosition = firstPosition;
@@ -1540,6 +1532,11 @@ public class AppFileFragment extends Fragment {
         }
 
         private void drawVertical(Canvas c, RecyclerView parent) {
+            boolean isGridLayout = false;
+            if (mRecyclerView.getLayoutManager() instanceof GridLayoutManager) {
+                isGridLayout = true;
+            }
+
             final int left = parent.getPaddingLeft();
             final int right = parent.getWidth() - parent.getPaddingRight();
 
@@ -1547,10 +1544,16 @@ public class AppFileFragment extends Fragment {
             for (int i = 0; i < childCount; i++) {
                 final View child = parent.getChildAt(i);
                 final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
+
                 final int top = child.getBottom() + params.bottomMargin + Math.round(ViewCompat.getTranslationY(child));
                 final int bottom = top + mDivider.getIntrinsicHeight();
                 mDivider.setBounds(left, top, right, bottom);
                 mDivider.draw(c);
+
+                // Only draw divider in the storage usage section item which is the first item
+                if (isGridLayout) {
+                    break;
+                }
             }
         }
 
