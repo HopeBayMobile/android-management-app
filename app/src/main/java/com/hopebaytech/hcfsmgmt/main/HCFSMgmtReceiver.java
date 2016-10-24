@@ -157,7 +157,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     Intent intentService = new Intent(context, TeraMgmtService.class);
                     int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                     String packageName = intent.getData().getSchemeSpecificPart();
-                    intentService.setAction(TeraIntent.ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP);
+                    intentService.setAction(TeraIntent.ACTION_ADD_UID_INFO_TO_DATABASE);
                     intentService.putExtra(TeraIntent.KEY_UID, uid);
                     intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                     context.startService(intentService);

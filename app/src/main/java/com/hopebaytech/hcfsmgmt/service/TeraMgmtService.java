@@ -121,8 +121,8 @@ public class TeraMgmtService extends Service {
                     if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                         addUidAndPinSysApp();
                         HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
-                    } else if (action.equals(TeraIntent.ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP)) {
-                        addUidAndUnpinUserApp(intent);
+                    } else if (action.equals(TeraIntent.ACTION_ADD_UID_INFO_TO_DATABASE)) {
+                        addUidInfoToDatabase(intent);
                     } else if (action.equals(TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP)) {
                         pinUnpinAgainWhenAppUpdated(intent);
                     } else if (action.equals(TeraIntent.ACTION_REMOVE_UID_FROM_DB)) {
@@ -681,7 +681,7 @@ public class TeraMgmtService extends Service {
                 appInfo.setUid(applicationInfo.uid);
                 appInfo.setApplicationInfo(applicationInfo);
                 appInfo.setName(applicationInfo.loadLabel(pm).toString());
-                appInfo.setExternalDirList(null);
+                appInfo.setExternalDirList(uidInfo.getExternalDir());
                 if (HCFSMgmtUtils.isSystemPackage(applicationInfo)) {
                     pinOrUnpinApp(appInfo, PinType.PRIORITY);
                 } else {
@@ -694,40 +694,14 @@ public class TeraMgmtService extends Service {
     }
 
     /**
-     * Add uid info of new installed app to database and unpin user app on /data/data and /data/app,
-     * triggered by HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
+     * Add uid info of new installed app to database, triggered by HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
      */
-    private void addUidAndUnpinUserApp(Intent intent) {
+    private void addUidInfoToDatabase(Intent intent) {
         // Add uid info of new installed app to database
         int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) == null) {
-            final boolean isPinned = false;
-            final boolean isSystemApp = false;
-            mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
-        }
-
-        // Unpin user app on /data/data and /data/app
-        try {
-            PackageManager pm = getPackageManager();
-            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-            boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
-            if (!isSystemApp) {
-                AppInfo appInfo = new AppInfo(mContext);
-                appInfo.setPinned(false);
-                appInfo.setUid(applicationInfo.uid);
-                appInfo.setSystemApp(isSystemApp);
-                appInfo.setApplicationInfo(applicationInfo);
-                appInfo.setName(applicationInfo.loadLabel(pm).toString());
-                appInfo.setExternalDirList(null);
-                if (HCFSMgmtUtils.isSystemPackage(applicationInfo)) {
-                    pinOrUnpinApp(appInfo, PinType.PRIORITY);
-                } else {
-                    pinOrUnpinApp(appInfo);
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+            mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, uid, packageName));
         }
     }
 
