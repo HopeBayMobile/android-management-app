@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +40,7 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_SHOW_BA_LOGGING_OPTION = "pref_show_ba_logging_option";
     public static final String PREF_ASK_MOBILE_WITHOUT_WIFI_ONLY = "pref_ask_mobile_without_wifi_only";
     public static final String PREF_ASK_CONFIRM_TURN_OFF_WIFI_ONLY = "pref_ask_confirm_turn_off_wifi_only";
+    public static final String PREF_ALLOW_PIN_UNPIN_APPS = "pref_allow_pin_unpin_apps";
 
     public static final String KEY_RATIO = "ratio";
 

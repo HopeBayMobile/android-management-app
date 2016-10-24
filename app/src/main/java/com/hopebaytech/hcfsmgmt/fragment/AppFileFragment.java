@@ -67,12 +67,14 @@ import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.customview.CircleDisplay;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
@@ -142,8 +144,10 @@ public class AppFileFragment extends Fragment {
     private boolean mRecyclerViewScrollDown;
     private boolean mCurrentVisible;
     private boolean mServiceBound;
-    private TeraMgmtService mMgmtService;
     private boolean mFilterByPin;
+    private boolean mAllowPinUnpinApps;
+
+    private TeraMgmtService mMgmtService;
 
     /**
      * @see LayoutType#GRID
@@ -1843,6 +1847,17 @@ public class AppFileFragment extends Fragment {
                     mSnackbar.show();
                 }
             }
+
+            mWorkerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                    SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ALLOW_PIN_UNPIN_APPS);
+                    if (settingsInfo != null) {
+                        mAllowPinUnpinApps = Boolean.valueOf(settingsInfo.getValue());
+                    }
+                }
+            });
         } else {
             mCurrentVisible = false;
             if (mApiExecutorThread != null && !mApiExecutorThread.isInterrupted()) {
@@ -2135,6 +2150,10 @@ public class AppFileFragment extends Fragment {
     private void displayPinView(RecyclerViewHolder holder, ItemInfo
             itemInfo, int alpha) {
         holder.setIconAlpha(alpha);
+
+        if (!mAllowPinUnpinApps && itemInfo instanceof AppInfo) {
+            return;
+        }
 
         ImageView pinView;
         if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
