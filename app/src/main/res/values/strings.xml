@@ -178,11 +178,15 @@
     <string name="settings_snackbar_no_available_email_app_found">無可用的 email 應用程式和/或設定好的 email 帳戶。請至少安裝一個 email 應用程式，並且設定一組可用的 email 帳戶。</string>
     <string name="settings_confirm_when_turn_off_wifi_only_title">Turn on mobile data for transferring data?</string>
     <string name="settings_confirm_when_turn_off_wifi_only_message">Using mobile data connection while transferring data can result in additional charges. Please check your data plan with mobile carrier.</string>
+    <string name="settings_advanced_settings">Advanced Settings</string>
+    <string name="settings_allow_pin_unpin_apps">Allow pin/unpin apps</string>
+
     <string name="change_account_require_new_account">與目前帳戶相同。變更帳戶操作已經停止。</string>
     <string name="change_account_start_to_change">確認變更</string>
     <string name="change_account_failed">更換帳戶失敗，請重試或點選返回鍵以離開應用程式。</string>
     <string name="change_account_another_account"><u>選擇其他帳戶</u></string>
     <string name="change_account_require_read_phone_state_permission">更換帳戶需啟用 Tera 的電話權限，請點選右方鍵繼續。</string>
+
     <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗， 無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗，無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_register">Tera 註冊失敗，無法存取雲端資料。</string>
@@ -223,6 +227,7 @@
     <string name="restore_failed_device_in_use">您選擇的備份已經使用中，請選擇其餘備份還原。</string>
 
     <string name="alert_dialog_title_warning">警告</string>
+
     <!-- Button text for dialog -->
     <string name="yes">是</string>
     <string name="no">否</string>

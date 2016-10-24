@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,13 +51,18 @@ public class SettingsFragment extends Fragment {
 
     private Handler mWorkHandler;
 
+    private View mView;
     private Context mContext;
+    private Snackbar mSnackbar;
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
-    private LinearLayout mNotifyLocalStorageUsedRatio;
-    private LinearLayout mTransferContent;
-    private LinearLayout mAbout;
+    private CheckBox mAllowPinUnpinApps;
+    private CheckBox mAdvancedSettings;
     private LinearLayout mBa;
+    private LinearLayout mAbout;
+    private LinearLayout mTransferContent;
+    private LinearLayout mAdvancedSettingsLayout;
+    private LinearLayout mNotifyLocalStorageUsedRatio;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -88,12 +94,16 @@ public class SettingsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Logs.d(CLASSNAME, "onViewCreated", null);
 
+        mView = view;
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
+        mAdvancedSettings = (CheckBox) view.findViewById(R.id.advanced_settings);
+        mAllowPinUnpinApps = (CheckBox) view.findViewById(R.id.allow_pin_unpin_apps);
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
-        mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
-        mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
-        mAbout = (LinearLayout) view.findViewById(R.id.about);
         mBa = (LinearLayout) view.findViewById(R.id.extra_log_for_ba_layout);
+        mAbout = (LinearLayout) view.findViewById(R.id.about);
+        mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
+        mAdvancedSettingsLayout = (LinearLayout) view.findViewById(R.id.advanced_settings_layout);
+        mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
     }
 
     @Override
@@ -101,8 +111,8 @@ public class SettingsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         boolean isChecked = true;
-        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
-        SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(getContext());
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
         if (settingsInfo != null) {
             isChecked = Boolean.valueOf(settingsInfo.getValue());
         }
@@ -125,7 +135,7 @@ public class SettingsFragment extends Fragment {
         });
 
         isChecked = false;
-        settingsInfo = mSettingsDAO.get(PREF_NOTIFY_CONN_FAILED_RECOVERY);
+        settingsInfo = settingsDAO.get(PREF_NOTIFY_CONN_FAILED_RECOVERY);
         if (settingsInfo != null) {
             isChecked = Boolean.valueOf(settingsInfo.getValue());
         }
@@ -140,8 +150,8 @@ public class SettingsFragment extends Fragment {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(mContext);
-                        mSettingsDAO.update(settingsInfo);
+                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                        settingsDAO.update(settingsInfo);
                     }
                 });
             }
@@ -150,7 +160,7 @@ public class SettingsFragment extends Fragment {
         String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
         String getRatio = defaultValue.concat("%");
 
-        settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+        settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
         if (settingsInfo != null) {
             getRatio = settingsInfo.getValue().concat("%");
         }
@@ -183,6 +193,41 @@ public class SettingsFragment extends Fragment {
                 fragment.show(getFragmentManager(), AboutDialogFragment.TAG);
             }
         });
+
+        mAdvancedSettings.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
+                } else {
+                    mAdvancedSettingsLayout.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        isChecked = false;
+        settingsInfo = settingsDAO.get(PREF_ALLOW_PIN_UNPIN_APPS);
+        if (settingsInfo != null) {
+            isChecked = Boolean.valueOf(settingsInfo.getValue());
+        }
+        mAllowPinUnpinApps.setChecked(isChecked);
+        mAllowPinUnpinApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                final SettingsInfo settingsInfo = new SettingsInfo();
+                settingsInfo.setKey(PREF_ALLOW_PIN_UNPIN_APPS);
+                settingsInfo.setValue(String.valueOf(isChecked));
+
+                mWorkHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                        settingsDAO.update(settingsInfo);
+                    }
+                });
+            }
+        });
+
     }
 
     @Override
@@ -206,11 +251,11 @@ public class SettingsFragment extends Fragment {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
+                        SettingsDAO settingsDAO = SettingsDAO.getInstance(getContext());
                         SettingsInfo settingsInfo = new SettingsInfo();
                         settingsInfo.setKey(PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
                         settingsInfo.setValue(String.valueOf(ratio.replace("%", "")));
-                        mSettingsDAO.update(settingsInfo);
+                        settingsDAO.update(settingsInfo);
                     }
                 });
             }
@@ -241,8 +286,8 @@ public class SettingsFragment extends Fragment {
         mWorkHandler.post(new Runnable() {
             @Override
             public void run() {
-                SettingsDAO mSettingsDAO = SettingsDAO.getInstance(getContext());
-                mSettingsDAO.update(settingsInfo);
+                SettingsDAO settingsDAO = SettingsDAO.getInstance(getContext());
+                settingsDAO.update(settingsInfo);
             }
         });
     }
