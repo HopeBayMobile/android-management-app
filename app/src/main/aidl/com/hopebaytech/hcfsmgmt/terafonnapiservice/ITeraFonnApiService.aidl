@@ -82,4 +82,7 @@ interface ITeraFonnApiService {
     /** Get connection status **/
     int getConnStatus();
 
+    /** Check the allow pin/unpin apps flag in advanced settings **/
+    boolean isAllowPinUnpinApps();
+
 }

@@ -320,6 +320,17 @@ public class TeraFonnApiService extends Service {
             HCFSStatInfo info = HCFSMgmtUtils.getHCFSStatInfo();
             return HCFSConnStatus.getConnStatus(TeraFonnApiService.this, info);
         }
+
+        @Override
+        public boolean isAllowPinUnpinApps() throws RemoteException {
+            boolean isAllowPinUnpinApps = false;
+            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
+            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ALLOW_PIN_UNPIN_APPS);
+            if (settingsInfo != null) {
+                isAllowPinUnpinApps = Boolean.valueOf(settingsInfo.getValue());
+            }
+            return isAllowPinUnpinApps;
+        }
     };
 
     @Override
