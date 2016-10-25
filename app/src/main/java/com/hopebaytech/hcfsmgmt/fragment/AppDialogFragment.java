@@ -80,17 +80,24 @@ public class AppDialogFragment extends DialogFragment {
         appName.setText(appInfo.getName());
 
         final ImageView appPinIcon = (ImageView) view.findViewById(R.id.app_pin_icon);
-        appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(appInfo.isPinned()));
-        appPinIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean isPinned = !appInfo.isPinned();
-                boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
-                if (allowPinUnpin) {
-                    appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
+        boolean isAllowPinUnpinApps = false;
+        Bundle args = getArguments();
+        if (args != null) {
+            isAllowPinUnpinApps = args.getBoolean(AppFileFragment.KEY_ARGUMENT_ALLOW_PIN_UNPIN_APPS);
+        }
+        if (isAllowPinUnpinApps) {
+            appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(appInfo.isPinned()));
+            appPinIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean isPinned = !appInfo.isPinned();
+                    boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
+                    if (allowPinUnpin) {
+                        appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
+                    }
                 }
-            }
-        });
+            });
+        }
 
         try {
             PackageInfo packageInfo = mContext.getPackageManager().getPackageInfo(appInfo.getPackageName(), 0);

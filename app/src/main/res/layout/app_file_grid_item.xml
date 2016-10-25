@@ -24,7 +24,7 @@
         android:layout_height="24dp"
         android:layout_marginTop="14dp"
         android:layout_toEndOf="@id/item_icon"
-        android:src="@drawable/icon_btn_app_pin_s" />
+        tools:src="@drawable/icon_btn_app_pin_s" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/item_name"

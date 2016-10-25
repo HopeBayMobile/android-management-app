@@ -106,6 +106,7 @@ public class AppFileFragment extends Fragment {
     public static final String KEY_ARGUMENT_APP_FILE = "key_argument_app_file";
     private static final String KEY_ARGUMENT_IS_SDCARD1 = "key_argument_is_sdcard1";
     private static final String KEY_ARGUMENT_SDCARD1_PATH = "key_argument_sdcard1_path";
+    public static final String KEY_ARGUMENT_ALLOW_PIN_UNPIN_APPS = "key_argument_allow_pin_unpin_apps";
     private final String EXTERNAL_ANDROID_PATH = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
     private final int GRID_LAYOUT_SPAN_COUNT = 3;
 
@@ -214,7 +215,6 @@ public class AppFileFragment extends Fragment {
         public void run() {
             while (true) {
                 try {
-                    Thread.sleep(Interval.AUTO_REFRESH_UI);
                     if (mProgressCircle.getVisibility() == View.GONE &&
                             mRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
                             mWaitToExecuteSparseArr.size() == 0 &&
@@ -222,6 +222,7 @@ public class AppFileFragment extends Fragment {
                             mPinUnpinFileMap.size() == 0) {
                         notifyRecyclerViewItemChanged();
                     }
+                    Thread.sleep(Interval.AUTO_REFRESH_UI);
                 } catch (InterruptedException e) {
                     Logs.d(CLASSNAME, "AutoUiRefreshRunnable", "mAutoUiRefreshThread is interrupted");
                     break;
@@ -2002,7 +2003,11 @@ public class AppFileFragment extends Fragment {
 
     private void onItemClick(ItemInfo itemInfo) {
         if (itemInfo instanceof AppInfo) {
+            Bundle args = new Bundle();
+            args.putBoolean(KEY_ARGUMENT_ALLOW_PIN_UNPIN_APPS, mAllowPinUnpinApps);
+
             AppDialogFragment dialogFragment = AppDialogFragment.newInstance();
+            dialogFragment.setArguments(args);
             dialogFragment.setViewHolder(itemInfo.getViewHolder());
             dialogFragment.show(getFragmentManager(), AppDialogFragment.TAG);
         } else if (itemInfo instanceof DataTypeInfo) {
@@ -2151,15 +2156,16 @@ public class AppFileFragment extends Fragment {
             itemInfo, int alpha) {
         holder.setIconAlpha(alpha);
 
-        if (!mAllowPinUnpinApps && itemInfo instanceof AppInfo) {
-            return;
-        }
-
         ImageView pinView;
         if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
             pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
         } else {
             pinView = ((GridRecyclerViewAdapter.GridRecyclerViewHolder) holder).pinView;
+        }
+
+        if (!mAllowPinUnpinApps && itemInfo instanceof AppInfo) {
+            pinView.setVisibility(View.GONE);
+            return;
         }
 
         boolean isDirectory = false;
