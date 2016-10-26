@@ -3,6 +3,7 @@ package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.IGetJWTandIMEIListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.IFetchAppDataListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.ITrackAppStatusListener;
+import com.hopebaytech.hcfsmgmt.terafonnapiservice.ICheckAppAvailableListener;
 import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppInfo;
 
 interface ITeraFonnApiService {
@@ -41,8 +42,11 @@ interface ITeraFonnApiService {
     /** Unpin an App with given package name */
     boolean unpinApp(String packageName);
 
-    /** Check datalocation of all apps in appList */
+    /** Check data location of an app */
     int checkAppAvailable(String packageName);
+
+    /** Check data location of an app and callback while get status */
+    void postCheckAppAvailable(String packageName, ICheckAppAvailableListener listener);
 
     /** Get the HCFS status and related information */
     String getHCFSStat();
@@ -77,4 +81,5 @@ interface ITeraFonnApiService {
 
     /** Get connection status **/
     int getConnStatus();
+
 }
