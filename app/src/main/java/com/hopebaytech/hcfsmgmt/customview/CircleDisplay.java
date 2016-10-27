@@ -219,7 +219,7 @@ public class CircleDisplay extends View {
         mPercentageTextPaint.getTextBounds(percentage, 0, percentage.length(), percentageBound);
 
         Rect capacityBound = new Rect();
-        mPercentageTextPaint.getTextBounds(mCapacityValue, 0, mCapacityValue.length(), percentageBound);
+        mCapacityTextPaint.getTextBounds(mCapacityValue, 0, mCapacityValue.length(), capacityBound);
 
         float percentageTextX = getWidth() >> 1;
         float percentageTextY = getHeight() >> 1;
