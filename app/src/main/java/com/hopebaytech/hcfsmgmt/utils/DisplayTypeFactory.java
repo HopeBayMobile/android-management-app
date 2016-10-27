@@ -84,21 +84,21 @@ public class DisplayTypeFactory {
             }
 
             AppInfo appInfo = new AppInfo(context);
-            appInfo.setUid(packageInfo.applicationInfo.uid);
-            appInfo.setSystemApp(isSystemApp);
-            appInfo.setPackageInfo(packageInfo);
             appInfo.setApplicationInfo(packageInfo.applicationInfo);
-            appInfo.setName(packageInfo.applicationInfo.loadLabel(pm).toString());
-            if (externalPkgNameMap.containsKey(packageInfo.packageName)) {
-                appInfo.setExternalDirList(externalPkgNameMap.get(packageInfo.packageName));
-            }
-
             if (filterByPin) {
                 UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
                 if (uidInfo == null || !uidInfo.isPinned()) {
                     continue;
                 }
             }
+            appInfo.setUid(packageInfo.applicationInfo.uid);
+            appInfo.setSystemApp(isSystemApp);
+            appInfo.setPackageInfo(packageInfo);
+            appInfo.setName(packageInfo.applicationInfo.loadLabel(pm).toString());
+            if (externalPkgNameMap.containsKey(packageInfo.packageName)) {
+                appInfo.setExternalDirList(externalPkgNameMap.get(packageInfo.packageName));
+            }
+
             itemInfoList.add(appInfo);
         }
 
@@ -140,18 +140,18 @@ public class DisplayTypeFactory {
             File[] fileList = currentFile.listFiles();
             for (File file : fileList) {
                 FileInfo fileInfo = new FileInfo(context);
-                fileInfo.setName(file.getName());
-                fileInfo.setDirectory(file.isDirectory());
                 fileInfo.setFilePath(file.getAbsolutePath());
-                fileInfo.setLastModified(file.lastModified());
-                fileInfo.setSize(file.length());
-
                 if (filterByPin) {
                     boolean isPinned = HCFSMgmtUtils.isPathPinned(fileInfo.getFilePath());
                     if (!isPinned) {
                         continue;
                     }
                 }
+                fileInfo.setName(file.getName());
+                fileInfo.setDirectory(file.isDirectory());
+                fileInfo.setLastModified(file.lastModified());
+                fileInfo.setSize(file.length());
+
                 itemInfoList.add(fileInfo);
             }
         }
