@@ -24,6 +24,7 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 /**
  * @author Aaron
@@ -217,12 +218,16 @@ public class SettingsFragment extends Fragment {
                 final SettingsInfo settingsInfo = new SettingsInfo();
                 settingsInfo.setKey(PREF_ALLOW_PIN_UNPIN_APPS);
                 settingsInfo.setValue(String.valueOf(isChecked));
+                final boolean finalIsChecked = isChecked;
 
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
                         settingsDAO.update(settingsInfo);
+                        Intent intent =  new Intent(TeraIntent.ACTION_ALLOW_PIN_UNPIN);
+                        intent.putExtra(TeraIntent.KEY_ALLOW_PIN_UNPIN, finalIsChecked);
+                        mContext.sendBroadcast(intent);
                     }
                 });
             }
