@@ -37,6 +37,9 @@
     <dimen name="nav_drawer_menu_item_height">56dp</dimen>
     <dimen name="nav_drawer_menu_item_img_end_margin">32dp</dimen>
 
+    <dimen name="usage_icon_width">115dp</dimen>
+    <dimen name="usage_icon_height">115dp</dimen>
+
     <dimen name="M1">20dp</dimen>
     <dimen name="M2">16dp</dimen>
     <dimen name="M3">12dp</dimen>

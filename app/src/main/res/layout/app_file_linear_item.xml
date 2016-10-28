@@ -17,36 +17,20 @@
         android:gravity="center">
 
         <ImageView
-            android:id="@+id/iconView"
+            android:id="@+id/item_icon"
             android:layout_width="@dimen/icon_image_width"
             android:layout_height="@dimen/icon_image_height"
             android:layout_marginEnd="@dimen/M2"
             android:src="@drawable/icon_doc_default_gray" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/item_name"
+            style="@style/F6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:ellipsize="end"
+            android:maxLines="1" />
 
-            <TextView
-                android:id="@+id/itemName"
-                style="@style/F6"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:singleLine="true" />
-
-            <TextView
-                android:id="@+id/datePinned"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@android:color/darker_gray"
-                android:visibility="gone"
-                tools:text="Pinned since 2016/03/01 21:00:00" />
-        </LinearLayout>
     </LinearLayout>
 
     <RelativeLayout
@@ -67,6 +51,7 @@
             android:id="@+id/pinView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            tools:src="@drawable/icon_btn_app_pin"
             android:scaleType="centerInside" />
     </RelativeLayout>
 

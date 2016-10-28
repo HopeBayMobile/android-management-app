@@ -15,7 +15,7 @@ public class TeraIntent {
     public static final String ACTION_PIN_APP = "hbt.intent.action.PIN_APP";
     public static final String ACTION_PIN_FILE_DIRECTORY = "hbt.intent.action.PIN_FILE_DIR";
     public static final String ACTION_ADD_UID_AND_PIN_SYS_APP_WHEN_BOOT_UP = "hbt.intent.action.ADD_UID_AND_PIN_SYS_APP_WHEN_BOOT_UP";
-    public static final String ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP = "hbt.intent.action.ADD_UID_TO_DB_AND_UNPIN_USER_APP";
+    public static final String ACTION_ADD_UID_INFO_TO_DATABASE = "hbt.intent.action.ADD_UID_INFO_TO_DATABASE";
     public static final String ACTION_REMOVE_UID_FROM_DB = "hbt.intent.action.REMOVE_UID_FROM_DB";
     public static final String ACTION_RESET_DATA_XFER = "hbt.intent.action.RESET_DATA_XFER";
     public static final String ACTION_ONGOING_NOTIFICATION = "hbt.intent.action.ONGOING_NOTIFICATION";
@@ -35,6 +35,7 @@ public class TeraIntent {
     public static final String ACTION_CHECK_RESTORE_STATUS = "hbt.intent.action.CHECK_RESTORE_STATUS";
     public static final String ACTION_FACTORY_RESET = "hbt.intent.action.FACTORY_RESET";
     public static final String ACTION_RETRY_RESTORE_WHEN_CONN_FAILED = "hbt.intent.action.RETRY_RESTORE_WHEN_CONN_FAILED";
+    public static final String ACTION_ALLOW_PIN_UNPIN = "hbt.intent.action.allowpinunpin";
 
     // Intent key
     public static final String KEY_UID = "intent_key_uid";
@@ -44,5 +45,5 @@ public class TeraIntent {
     public static final String KEY_GOOGLE_SIGN_IN_EMAIL = "intent_key_google_sign_in_email";
     public static final String KEY_GOOGLE_SIGN_IN_PHOTO_URI = "intent_key_google_sign_in_photo_uri";
     public static final String KEY_RESTORE_ERROR_CODE = "intent_key_restore_error_code";
-
+    public static final String KEY_ALLOW_PIN_UNPIN = "pin_unpin_enalbed";
 }

@@ -50,7 +50,7 @@ public class HCFSMgmtUtils {
     public static final String CLASSNAME = "HCFSMgmtUtils";
 //    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
-    public static final String NOTIFY_INSUFFICIENT_PIN_PACE_RATIO = "80";
+    public static final int PINNED_SPACE_WARNING_THRESHOLD = 80; // Unit: percentage
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
 
@@ -68,6 +68,8 @@ public class HCFSMgmtUtils {
     public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
+    public static final String PREF_APP_DISPLAY_LAYOUT = "pref_app_display_layout";
+    public static final String PREF_FILE_DISPLAY_LAYOUT = "pref_file_display_layout";
     public static final String PREF_RESTORE_STATUS = "pref_restore_status";
 
     // public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
@@ -321,7 +323,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
 //                Logs.d(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
-                
+
                 hcfsStatInfo = new HCFSStatInfo();
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
@@ -615,6 +617,9 @@ public class HCFSMgmtUtils {
                         continue;
                     }
                     ArrayList<String> externalPathList = externalPkgNameMap.get(pkgName);
+                    if (uidInfo == null) {
+                        continue;
+                    }
                     uidInfo.setExternalDir(externalPathList);
                     uidDAO.update(uidInfo, UidDAO.EXTERNAL_DIR_COLUMN);
                 }

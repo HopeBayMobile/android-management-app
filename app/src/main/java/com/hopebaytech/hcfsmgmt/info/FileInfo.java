@@ -19,16 +19,14 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.terafonnapiservice.AppStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
-public class FileDirInfo extends ItemInfo implements Cloneable {
+public class FileInfo extends ItemInfo implements Cloneable {
 
-    private static final String CLASSNAME = FileDirInfo.class.getSimpleName();
+    private static final String CLASSNAME = FileInfo.class.getSimpleName();
 
     private static final String MIME_TYPE_IMAGE = "image";
     private static final String MIME_TYPE_VIDEO = "video";
@@ -41,8 +39,10 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     private boolean mIsDirectory;
     private String mFilePath;
+    private long mLastModified;
+    private long mSize;
 
-    public FileDirInfo(Context context) {
+    public FileInfo(Context context) {
         super(context);
     }
 
@@ -52,6 +52,22 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     public void setDirectory(boolean isDirectory) {
         mIsDirectory = isDirectory;
+    }
+
+    public long getLastModified() {
+        return mLastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.mLastModified = lastModified;
+    }
+
+    public long getSize() {
+        return mSize;
+    }
+
+    public void setSize(long size) {
+        this.mSize = size;
     }
 
     @Nullable
@@ -193,12 +209,12 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
     private int getFileDirStatus() {
         int locationStatus = getFileDirLocationStatus();
         if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return AppStatus.AVAILABLE;
+            return DataStatus.AVAILABLE;
         } else {
             if (locationStatus == LocationStatus.LOCAL) {
-                return ItemStatus.AVAILABLE;
+                return DataStatus.AVAILABLE;
             } else {
-                return ItemStatus.UNAVAILABLE;
+                return DataStatus.UNAVAILABLE;
             }
         }
     }
@@ -225,7 +241,7 @@ public class FileDirInfo extends ItemInfo implements Cloneable {
 
     @Override
     public int getIconAlpha() {
-        return getFileDirStatus() == ItemStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
+        return getFileDirStatus() == DataStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
     public boolean isDirectory() {
