@@ -63,123 +63,134 @@ public class FileMgmtAppDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final ItemInfo itemInfo = mViewHolder.getItemInfo();
-        if (itemInfo instanceof AppInfo) {
-            final AppInfo appInfo = (AppInfo) itemInfo;
+        if (!(itemInfo instanceof AppInfo)) {
+            return super.onCreateDialog(savedInstanceState);
+        }
 
-            LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
-            final View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_app_info, null);
+        final AppInfo appInfo = (AppInfo) itemInfo;
 
-            ImageView appIcon = (ImageView) view.findViewById(R.id.app_icon);
-            appIcon.setImageBitmap(appInfo.getIconImage());
+        LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
+        final View view = inflater.inflate(R.layout.file_mgmt_dialog_fragment_app_info, null);
 
-            TextView appName = (TextView) view.findViewById(R.id.app_name);
-            appName.setText(appInfo.getName());
+        ImageView appIcon = (ImageView) view.findViewById(R.id.app_icon);
+        appIcon.setImageBitmap(appInfo.getIconImage());
 
-            final ImageView appPinIcon = (ImageView) view.findViewById(R.id.app_pin_icon);
-            appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(itemInfo.isPinned()));
-            appPinIcon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    boolean isPinned = !itemInfo.isPinned();
-                    boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
-                    if (allowPinUnpin) {
-                        appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
-                    }
+        TextView appName = (TextView) view.findViewById(R.id.app_name);
+        appName.setText(appInfo.getName());
+
+        final ImageView appPinIcon = (ImageView) view.findViewById(R.id.app_pin_icon);
+        appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(itemInfo.isPinned()));
+        appPinIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isPinned = !itemInfo.isPinned();
+                boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
+                if (allowPinUnpin) {
+                    appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
                 }
-            });
-
-            try {
-                PackageInfo packageInfo = mContext.getPackageManager().getPackageInfo(appInfo.getPackageName(), 0);
-                TextView appVersion = (TextView) view.findViewById(R.id.app_version);
-                String version = String.format(getString(R.string.file_mgmt_dialog_app_version), packageInfo.versionName);
-                appVersion.setText(version);
-            } catch (PackageManager.NameNotFoundException e) {
-                Logs.e(CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
             }
+        });
 
-            final TextView appSize = (TextView) view.findViewById(R.id.app_size);
-            String size = String.format(getString(R.string.file_mgmt_dialog_data_size), getString(R.string.file_mgmt_dialog_calculating));
-            appSize.setText(size);
-            try {
-                PackageManager pm = mContext.getPackageManager();
-                Method getPackageSizeInfo = pm.getClass().getMethod("getPackageSizeInfo", String.class, IPackageStatsObserver.class);
-                getPackageSizeInfo.invoke(pm, appInfo.getPackageName(), new IPackageStatsObserver.Stub() {
-                    @Override
-                    public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
-                        final long totalSize = pStats.cacheSize
-                                + pStats.codeSize
-                                + pStats.dataSize
-                                + pStats.externalCacheSize
-                                + pStats.externalCodeSize
-                                + pStats.externalDataSize
-                                + pStats.externalMediaSize
-                                + pStats.externalObbSize;
+        try {
+            PackageInfo packageInfo = mContext.getPackageManager().getPackageInfo(appInfo.getPackageName(), 0);
+            TextView appVersion = (TextView) view.findViewById(R.id.app_version);
+            String version = String.format(
+                    getString(R.string.file_mgmt_dialog_app_version),
+                    packageInfo.versionName
+            );
+            appVersion.setText(version);
+        } catch (PackageManager.NameNotFoundException e) {
+            Logs.e(CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
+        }
 
-                        Logs.d(CLASSNAME, "onCreateDialog", "cacheSize=" + UnitConverter.convertByteToProperUnit(pStats.cacheSize));
-                        Logs.d(CLASSNAME, "onCreateDialog", "codeSize=" + UnitConverter.convertByteToProperUnit(pStats.codeSize));
-                        Logs.d(CLASSNAME, "onCreateDialog", "dataSize=" + UnitConverter.convertByteToProperUnit(pStats.dataSize));
-                        Logs.d(CLASSNAME, "onCreateDialog", "externalCacheSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCacheSize));
-                        Logs.d(CLASSNAME, "onCreateDialog", "externalCodeSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCodeSize));
-                        Logs.d(CLASSNAME, "onCreateDialog", "externalDataSize=" + UnitConverter.convertByteToProperUnit(pStats.externalDataSize));
-                        Logs.d(CLASSNAME, "onCreateDialog", "externalMediaSize=" + UnitConverter.convertByteToProperUnit(pStats.externalMediaSize));
-                        Logs.d(CLASSNAME, "onCreateDialog", "externalObbSize=" + UnitConverter.convertByteToProperUnit(pStats.externalObbSize));
-
-                        ((Activity) mContext).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                String formatSize = UnitConverter.convertByteToProperUnit(totalSize);
-                                appSize.setText(String.format(mContext.getString(R.string.file_mgmt_dialog_data_size), formatSize));
-                            }
-                        });
-
-                    }
-                });
-            } catch (Exception e) {
-                Logs.e(CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
-            }
-
-            final TextView appPkgName = (TextView) view.findViewById(R.id.app_pkg_name);
-            String pkgName = String.format(getString(R.string.file_mgmt_dialog_app_package_name), appInfo.getPackageName());
-            appPkgName.setText(pkgName);
-
-            final TextView appDataRatio = (TextView) view.findViewById(R.id.app_local_percentage);
-            String ratio = String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), getString(R.string.file_mgmt_dialog_calculating));
-            appDataRatio.setText(ratio);
-            mCalculateAppDataRatioThread = new Thread(new Runnable() {
+        final TextView appSize = (TextView) view.findViewById(R.id.app_size);
+        String size = String.format(
+                getString(R.string.file_mgmt_dialog_data_size),
+                getString(R.string.file_mgmt_dialog_calculating)
+        );
+        appSize.setText(size);
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            Method getPackageSizeInfo = pm.getClass().getMethod("getPackageSizeInfo", String.class, IPackageStatsObserver.class);
+            getPackageSizeInfo.invoke(pm, appInfo.getPackageName(), new IPackageStatsObserver.Stub() {
                 @Override
-                public void run() {
+                public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
+                    final long totalSize = pStats.cacheSize
+                            + pStats.codeSize
+                            + pStats.dataSize
+                            + pStats.externalCacheSize
+                            + pStats.externalCodeSize
+                            + pStats.externalDataSize
+                            + pStats.externalMediaSize
+                            + pStats.externalObbSize;
+
+                    Logs.d(CLASSNAME, "onCreateDialog", "cacheSize=" + UnitConverter.convertByteToProperUnit(pStats.cacheSize));
+                    Logs.d(CLASSNAME, "onCreateDialog", "codeSize=" + UnitConverter.convertByteToProperUnit(pStats.codeSize));
+                    Logs.d(CLASSNAME, "onCreateDialog", "dataSize=" + UnitConverter.convertByteToProperUnit(pStats.dataSize));
+                    Logs.d(CLASSNAME, "onCreateDialog", "externalCacheSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCacheSize));
+                    Logs.d(CLASSNAME, "onCreateDialog", "externalCodeSize=" + UnitConverter.convertByteToProperUnit(pStats.externalCodeSize));
+                    Logs.d(CLASSNAME, "onCreateDialog", "externalDataSize=" + UnitConverter.convertByteToProperUnit(pStats.externalDataSize));
+                    Logs.d(CLASSNAME, "onCreateDialog", "externalMediaSize=" + UnitConverter.convertByteToProperUnit(pStats.externalMediaSize));
+                    Logs.d(CLASSNAME, "onCreateDialog", "externalObbSize=" + UnitConverter.convertByteToProperUnit(pStats.externalObbSize));
+
                     ((Activity) mContext).runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            if (isAdded()) {
+                                String formatSize = UnitConverter.convertByteToProperUnit(totalSize);
+                                appSize.setText(String.format(mContext.getString(R.string.file_mgmt_dialog_data_size), formatSize));
+                            }
+                        }
+                    });
+
+                }
+            });
+        } catch (Exception e) {
+            Logs.e(CLASSNAME, "onCreateDialog", Log.getStackTraceString(e));
+        }
+
+        final TextView appPkgName = (TextView) view.findViewById(R.id.app_pkg_name);
+        String pkgName = String.format(getString(R.string.file_mgmt_dialog_app_package_name), appInfo.getPackageName());
+        appPkgName.setText(pkgName);
+
+        final TextView appDataRatio = (TextView) view.findViewById(R.id.app_local_percentage);
+        String ratio = String.format(getString(R.string.file_mgmt_dialog_local_data_ratio), getString(R.string.file_mgmt_dialog_calculating));
+        appDataRatio.setText(ratio);
+        mCalculateAppDataRatioThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ((Activity) mContext).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isAdded()) {
                             String ratio = getAppDataRatio(appInfo);
                             appDataRatio.setText(ratio);
                         }
-                    });
-                }
-            });
-            mCalculateAppDataRatioThread.start();
+                    }
+                });
+            }
+        });
+        mCalculateAppDataRatioThread.start();
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setView(view)
-                    .setPositiveButton(R.string.file_mgmt_dialog_app_open, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent launchIntent = mContext.getPackageManager().getLaunchIntentForPackage(appInfo.getPackageName());
-                            startActivity(launchIntent);
-                        }
-                    })
-                    .setNegativeButton(R.string.file_mgmt_dialog_app_remove, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent intent = new Intent(Intent.ACTION_DELETE);
-                            intent.setData(Uri.parse("package:" + appInfo.getPackageName()));
-                            intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
-                            startActivity(intent);
-                        }
-                    });
-            return builder.create();
-        }
-        return super.onCreateDialog(savedInstanceState);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setView(view)
+                .setPositiveButton(R.string.file_mgmt_dialog_app_open, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent launchIntent = mContext.getPackageManager().getLaunchIntentForPackage(appInfo.getPackageName());
+                        startActivity(launchIntent);
+                    }
+                })
+                .setNegativeButton(R.string.file_mgmt_dialog_app_remove, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Intent.ACTION_DELETE);
+                        intent.setData(Uri.parse("package:" + appInfo.getPackageName()));
+                        intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+                        startActivity(intent);
+                    }
+                });
+        return builder.create();
     }
 
     @Override
