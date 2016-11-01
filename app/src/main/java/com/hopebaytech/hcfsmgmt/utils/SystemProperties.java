@@ -1,5 +1,7 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.util.Log;
+
 import java.lang.reflect.Method;
 
 /**
@@ -16,7 +18,8 @@ public class SystemProperties {
             Method method = _class.getDeclaredMethod("get", String.class);
             value = (String) method.invoke(_class, key);
         } catch (Exception e) {
-            e.printStackTrace();
+            String CLASSNAME = SystemProperties.class.getSimpleName();
+            Logs.e(CLASSNAME, "get", Log.getStackTraceString(e));
         }
         return value;
     }
