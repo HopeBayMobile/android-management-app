@@ -941,4 +941,52 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
+    public static boolean movePkgDataToSmartCache(String pkgName) {
+        boolean isTriggered = false;
+        try {
+            String jsonResult = HCFSApiUtils.movePkgDataToSmartCache(pkgName);
+            String logMsg = "pkgName=" + pkgName + ", jsonResult=" + jsonResult;
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+//                Logs.i(CLASSNAME, "movePkgDataToSmartCache", logMsg);
+                int code = jObject.getInt("code");
+                if (code == 1) {
+                    isTriggered = true;
+                } else {
+                    isTriggered = false;
+                }
+            } else {
+                Logs.e(CLASSNAME, "movePkgDataToSmartCache", logMsg);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "movePkgDataToSmartCache", Log.getStackTraceString(e));
+        }
+        return isTriggered;
+    }
+
+    public static boolean movePkgDataFromSmartCache(String pkgName) {
+        boolean isTriggered = false;
+        try {
+            String jsonResult = HCFSApiUtils.movePkgDataFromSmartCache(pkgName);
+            String logMsg = "pkgName=" + pkgName + ", jsonResult=" + jsonResult;
+            JSONObject jObject = new JSONObject(jsonResult);
+            boolean isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+//                Logs.i(CLASSNAME, "movePkgDataFromSmartCache", logMsg);
+                int code = jObject.getInt("code");
+                if (code == 1) {
+                    isTriggered = true;
+                } else {
+                    isTriggered = false;
+                }
+            } else {
+                Logs.e(CLASSNAME, "movePkgDataFromSmartCache", logMsg);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "movePkgDataFromSmartCache", Log.getStackTraceString(e));
+        }
+        return isTriggered;
+    }
+
 }

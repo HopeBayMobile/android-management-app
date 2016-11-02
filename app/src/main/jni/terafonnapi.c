@@ -304,3 +304,25 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_notif
 	free((char *)json_res);
 	return result;
 }
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_movePkgDataToSmartCache(
+		JNIEnv *jEnv, jobject jObject, jstring jString) {
+	const char *json_res;
+    const char *pkgname = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
+    HCFS_move_pkg_data_to_smart_cache(&json_res, pkgname);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pkgname);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_movePkgDataFromSmartCache(
+		JNIEnv *jEnv, jobject jObject, jstring jString) {
+	const char *json_res;
+    const char *pkgname = (*jEnv)->GetStringUTFChars(jEnv, jString, 0);
+    HCFS_move_pkg_data_from_smart_cache(&json_res, pkgname);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pkgname);
+    return result;
+}

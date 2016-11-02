@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
@@ -44,6 +45,7 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_ASK_CONFIRM_TURN_OFF_WIFI_ONLY = "pref_ask_confirm_turn_off_wifi_only";
     public static final String PREF_ALLOW_PIN_UNPIN_APPS = "pref_allow_pin_unpin_apps";
     public static final String PREF_SHOW_ACCESS_CLOUD_SETTINGS = "pref_show_access_cloud_settings";
+    public static final String PREF_SMART_CACHE = "pref_smart_cache";
 
     public static final String KEY_RATIO = "ratio";
 
@@ -59,11 +61,13 @@ public class SettingsFragment extends Fragment {
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
     private CheckBox mAllowPinUnpinApps;
+    private CheckBox mEnableSmartCache;
     private CheckBox mAdvancedSettings;
     private LinearLayout mBa;
     private LinearLayout mAbout;
     private LinearLayout mTransferContent;
     private LinearLayout mAdvancedSettingsLayout;
+    private RelativeLayout mEnableSmartCacheLayout;
     private LinearLayout mNotifyLocalStorageUsedRatio;
 
     public static SettingsFragment newInstance() {
@@ -100,11 +104,13 @@ public class SettingsFragment extends Fragment {
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
         mAdvancedSettings = (CheckBox) view.findViewById(R.id.advanced_settings);
         mAllowPinUnpinApps = (CheckBox) view.findViewById(R.id.allow_pin_unpin_apps);
+        mEnableSmartCache = (CheckBox) view.findViewById(R.id.enable_smart_cache);
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
         mBa = (LinearLayout) view.findViewById(R.id.extra_log_for_ba_layout);
         mAbout = (LinearLayout) view.findViewById(R.id.about);
         mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
         mAdvancedSettingsLayout = (LinearLayout) view.findViewById(R.id.advanced_settings_layout);
+        mEnableSmartCacheLayout = (RelativeLayout) view.findViewById(R.id.enable_smart_cache_layout);
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
     }
 
@@ -201,8 +207,10 @@ public class SettingsFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
+                    mEnableSmartCacheLayout.setVisibility(View.VISIBLE);
                 } else {
                     mAdvancedSettingsLayout.setVisibility(View.GONE);
+                    mEnableSmartCacheLayout.setVisibility(View.GONE);
                 }
             }
         });
@@ -234,6 +242,22 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        isChecked = false;
+        settingsInfo = settingsDAO.get(PREF_SMART_CACHE);
+        if (settingsInfo != null) {
+            isChecked = Boolean.valueOf(settingsInfo.getValue());
+        }
+        mEnableSmartCache.setChecked(isChecked);
+        mEnableSmartCache.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                final SettingsInfo settingsInfo = new SettingsInfo();
+                settingsInfo.setKey(PREF_SMART_CACHE);
+                settingsInfo.setValue(String.valueOf(isChecked));
+
+                // open the smart cache fragment
+            }
+        });
     }
 
     @Override
