@@ -45,7 +45,7 @@
         </RelativeLayout>
 
         <View
-            style="@style/Divider"
+            style="@style/HorizontalDivider"
             android:layout_marginEnd="@dimen/M2"
             android:layout_marginStart="@dimen/M2" />
 

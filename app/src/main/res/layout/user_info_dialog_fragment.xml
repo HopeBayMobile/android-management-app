@@ -60,7 +60,7 @@
     </LinearLayout>
 
     <View
-        style="@style/Divider"
+        style="@style/HorizontalDivider"
         android:layout_marginEnd="@dimen/M1"
         android:layout_marginStart="@dimen/M1" />
 

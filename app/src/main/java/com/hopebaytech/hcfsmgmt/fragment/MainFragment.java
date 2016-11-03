@@ -17,10 +17,10 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,15 +30,22 @@ import android.widget.ImageView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
-import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -59,7 +66,6 @@ public class MainFragment extends Fragment {
     private HandlerThread mWorkerThread;
     private Handler mWorkHandler;
     private Handler mUiHandler;
-    private PagerAdapter mPagerAdapter;
 
     private boolean isExitApp = false;
     private Bundle mArguments;
@@ -138,10 +144,9 @@ public class MainFragment extends Fragment {
         }
 
         // Initialize ViewPager with CustomPagerTabStrip
-        mPagerAdapter = new PagerAdapter(((MainActivity) mContext).getSupportFragmentManager());
         if (mViewPager != null) {
             mViewPager.setOffscreenPageLimit(3);
-            mViewPager.setAdapter(mPagerAdapter);
+            mViewPager.setAdapter(new ViewPagerAdapter(getFragmentManager()));
         }
 
         // User login Tera app with mobile network, but the Wi-Fi only option is enabled by default.
@@ -189,21 +194,37 @@ public class MainFragment extends Fragment {
 
     }
 
-    public class PagerAdapter extends FragmentStatePagerAdapter {
+    private class ViewPagerAdapter extends FragmentStatePagerAdapter {
 
-        private String[] titleArray;
-        private SparseArray<Fragment> pageReference;
+        private List<String> titleList;
+        private Map<String, WeakReference<Fragment>> fragmentMap;
+        private boolean isSmartCacheEnabled;
 
-        private PagerAdapter(FragmentManager fm) {
+        @Override
+        public int getItemPosition(Object object) {
+            // The method is called only when data set changed
+            if (isSmartCacheEnabled) {
+                if (object instanceof HelpFragment) {
+                    return PagerAdapter.POSITION_NONE;
+                }
+            } else {
+                if (object instanceof SmartCacheFragment || object instanceof HelpFragment) {
+                    return PagerAdapter.POSITION_NONE;
+                }
+            }
+            return super.getItemPosition(object);
+        }
+
+        private ViewPagerAdapter(FragmentManager fm) {
             super(fm);
-            titleArray = getResources().getStringArray(R.array.nav_title);
-            pageReference = new SparseArray<>();
+            titleList = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.nav_title)));
+            fragmentMap = new LinkedHashMap<>();
         }
 
         @Override
-        public Fragment getItem(int i) {
+        public Fragment getItem(int position) {
             Fragment fragment;
-            String title = titleArray[i];
+            String title = titleList.get(position);
             if (title.equals(getString(R.string.nav_overview))) {
                 fragment = OverviewFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_apps))) {
@@ -220,39 +241,51 @@ public class MainFragment extends Fragment {
                 fragment.setArguments(args);
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
+            } else if (title.equals(getString(R.string.nav_smart_cache))) {
+                fragment = SmartCacheFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_help))) {
                 fragment = HelpFragment.newInstance();
             } else {
                 fragment = new Fragment();
             }
-            pageReference.put(i, fragment);
+            fragmentMap.put(title, new WeakReference<>(fragment));
             return fragment;
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
             super.destroyItem(container, position, object);
-            pageReference.remove(position);
+            if (position < titleList.size()) {
+                fragmentMap.remove(titleList.get(position));
+            }
         }
 
         @Override
         public int getCount() {
-            return titleArray.length;
+            return titleList.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return titleArray[position];
+            return titleList.get(position);
         }
 
         @Nullable
-        private Fragment getFragment(int position) {
-            return pageReference.get(position);
+        Fragment getFragment(int position) {
+            return fragmentMap.get(titleList.get(position)).get();
+        }
+
+        private List<String> getTitleList() {
+            return titleList;
+        }
+
+        public void setSmartCacheEnabled(boolean smartCacheEnabled) {
+            isSmartCacheEnabled = smartCacheEnabled;
         }
 
         public int getFragmentPosition(String title) {
-            for (int position = 0; position < titleArray.length; position++) {
-                if (title.equals(titleArray[position])) {
+            for (int position = 0; position < titleList.size(); position++) {
+                if (title.equals(titleList.get(position))) {
                     return position;
                 }
             }
@@ -263,8 +296,8 @@ public class MainFragment extends Fragment {
 
     public void onBackPressed() {
         int position = mViewPager.getCurrentItem();
-        Fragment fragment = mPagerAdapter.getFragment(position);
-        if (fragment instanceof AppFileFragment) {
+        Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getFragment(position);
+        if (fragment != null && fragment instanceof AppFileFragment) {
             boolean isProcessed = ((AppFileFragment) fragment).onBackPressed();
             if (!isProcessed) {
                 exitApp();
@@ -304,7 +337,7 @@ public class MainFragment extends Fragment {
         }
         final int toViewPager = mArguments.getInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, -1);
 
-        if (toViewPager <= -1 || toViewPager >= mPagerAdapter.getCount()) {
+        if (toViewPager <= -1 || toViewPager >= mViewPager.getAdapter().getCount()) {
             return;
         }
 
@@ -317,8 +350,8 @@ public class MainFragment extends Fragment {
                         Thread.sleep(500);
 
                         boolean hasFragmentVisible = false;
-                        for (int i = 0; i < mPagerAdapter.getCount(); i++) {
-                            Fragment fragment = mPagerAdapter.getFragment(i);
+                        for (int i = 0; i < mViewPager.getAdapter().getCount(); i++) {
+                            Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getFragment(i);
                             if (fragment != null && fragment.isVisible()) {
                                 hasFragmentVisible = true;
                                 break;
@@ -377,7 +410,7 @@ public class MainFragment extends Fragment {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         int position = mViewPager.getCurrentItem();
-        Fragment fragment = mPagerAdapter.getFragment(position);
+        Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getFragment(position);
         if (fragment != null) {
             fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -390,11 +423,50 @@ public class MainFragment extends Fragment {
         if (requestCode == RequestCode.SHOW_ACCESS_CLOUD_SETTINGS) {
             if (resultCode == Activity.RESULT_OK) {
                 // Move current page to settings page
-                int position = mPagerAdapter.getFragmentPosition(getString(R.string.settings));
+                int position = ((ViewPagerAdapter) mViewPager.getAdapter()).getFragmentPosition(getString(R.string.settings));
                 if (position != -1) {
                     mViewPager.setCurrentItem(position, true);
                 }
             }
         }
     }
+
+    public void addPageToViewPager(String targetPageTitle, String addPageTitle) {
+        List<String> titleList = ((ViewPagerAdapter) mViewPager.getAdapter()).getTitleList();
+        int index = -1;
+        for (int i = 0; i < titleList.size(); i++) {
+            if (titleList.get(i).equals(targetPageTitle)) {
+                index = i + 1;
+                break;
+            }
+        }
+        if (index == -1) {
+            return;
+        }
+
+        titleList.add(index, addPageTitle);
+        if (addPageTitle.equals(getString(R.string.nav_smart_cache))) {
+            ((ViewPagerAdapter) mViewPager.getAdapter()).setSmartCacheEnabled(true);
+        }
+        mViewPager.getAdapter().notifyDataSetChanged();
+
+        final int finalIndex = index;
+        mUiHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mViewPager.setCurrentItem(finalIndex);
+            }
+        }, Interval.MOVE_TO_SMART_PAGE_DELAY_TIME);
+    }
+
+    public void removePageFromViewPager(String removePageTile) {
+        List<String> titleList = ((ViewPagerAdapter) mViewPager.getAdapter()).getTitleList();
+        titleList.remove(removePageTile);
+        if (removePageTile.equals(getString(R.string.nav_smart_cache))) {
+            ((ViewPagerAdapter) mViewPager.getAdapter()).setSmartCacheEnabled(false);
+        }
+        mViewPager.getAdapter().notifyDataSetChanged();
+    }
+
 }
+

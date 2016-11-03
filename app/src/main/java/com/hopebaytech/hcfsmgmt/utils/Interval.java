@@ -84,4 +84,9 @@ public class Interval {
      */
     public static final int PIN_ANDROID_FOLDER = 10 * SECOND;
 
+    /**
+     * Interval for delaying the movement from settings page to smart cache page
+     */
+    public static final int MOVE_TO_SMART_PAGE_DELAY_TIME = (int) (1.2f * SECOND);
+
 }

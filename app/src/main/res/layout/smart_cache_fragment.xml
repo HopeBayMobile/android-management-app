@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fragment_title_bar_height"
+        android:background="@drawable/img_subtitle_bkg"
+        android:paddingBottom="@dimen/fragment_title_bar_padding_bottom"
+        android:paddingEnd="@dimen/fragment_title_bar_padding_right"
+        android:paddingStart="@dimen/fragment_title_bar_padding_left"
+        android:paddingTop="@dimen/fragment_title_bar_padding_top">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="@string/smart_cache_title_bar"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/colorWhite" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/boost_unboost_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="30dp">
+
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:background="@color/C1">
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    android:id="@+id/unboost_tab"
+                    style="@style/F5"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="Unboosted" />
+            </LinearLayout>
+
+            <View
+                style="@style/VerticalDivider"
+                android:background="@android:color/white" />
+
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:background="@color/C5">
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    android:id="@+id/boost_tab"
+                    style="@style/F5"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="Boosted" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            style="@style/HorizontalDivider"
+            android:layout_above="@+id/recycler_view" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/action_layout"
+            android:layout_below="@+id/boost_unboost_layout" />
+
+        <View
+            style="@style/HorizontalDivider"
+            android:layout_below="@+id/recycler_view" />
+
+        <RelativeLayout
+            android:id="@+id/action_layout"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center">
+
+                <LinearLayout
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:background="@color/C5">
+
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                        android:id="@+id/cancel"
+                        style="@style/F1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="Cancel" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:background="@color/C1">
+
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                        android:id="@+id/action"
+                        style="@style/F1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="@string/smart_cache_boost" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/message"
+                style="@style/F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Tapping app for boosting."
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
+

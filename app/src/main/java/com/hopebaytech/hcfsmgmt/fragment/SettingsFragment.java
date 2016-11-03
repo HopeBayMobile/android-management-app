@@ -205,10 +205,17 @@ public class SettingsFragment extends Fragment {
         mAdvancedSettings.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                MainFragment mainFragment = (MainFragment) getFragmentManager().findFragmentByTag(MainFragment.TAG);
                 if (isChecked) {
+                    if (mainFragment != null) {
+                        mainFragment.addPageToViewPager(getString(R.string.nav_settings), getString(R.string.nav_smart_cache));
+                    }
                     mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
                     mEnableSmartCacheLayout.setVisibility(View.VISIBLE);
                 } else {
+                    if (mainFragment != null) {
+                        mainFragment.removePageFromViewPager(getString(R.string.nav_smart_cache));
+                    }
                     mAdvancedSettingsLayout.setVisibility(View.GONE);
                     mEnableSmartCacheLayout.setVisibility(View.GONE);
                 }

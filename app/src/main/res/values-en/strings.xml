@@ -47,6 +47,7 @@
     <string name="nav_sdcard1">SD card</string>
     <string name="nav_add_mountpoint">Add Shared Space</string>
     <string name="nav_settings">SETTINGS</string>
+    <string name="nav_smart_cache">SMART CACHE</string>
     <string name="nav_about">ABOUT</string>
     <string name="nav_help">HELP</string>
 
@@ -272,6 +273,11 @@
     <string name="help_user_manual_title">User manual</string>
     <string name="help_customer_center_title">Customer Center</string>
     <string name="help_email_feedback_title">User Feedback</string>
+
+    <!-- smart cache page -->
+    <string name="smart_cache_title_bar">Boost Zone</string>
+    <string name="smart_cache_boost">Boost</string>
+    <string name="smart_cache_unboost">Unboost</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 
