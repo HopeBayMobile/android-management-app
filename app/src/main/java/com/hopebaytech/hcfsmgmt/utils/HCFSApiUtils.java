@@ -79,4 +79,5 @@ public class HCFSApiUtils {
 
     public static native String movePkgDataToSmartCache(String pkgName);
     public static native String movePkgDataFromSmartCache(String pkgName);
+    public static native String expandSmartCacheSize();
 }

@@ -989,4 +989,31 @@ public class HCFSMgmtUtils {
         return isTriggered;
     }
 
+    public static void enableApp(Context context, String pkgName){
+        PackageManager pm = context.getPackageManager();
+        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+    }
+
+    public static void disableApp(Context context, String pkgName){
+        PackageManager pm = context.getPackageManager();
+        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+    }
+
+    public static boolean expandSmartCacheSize() {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.expandSmartCacheSize();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "expandSmartCacheSize", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "expandSmartCacheSize", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "expandSmartCacheSize", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
 }
