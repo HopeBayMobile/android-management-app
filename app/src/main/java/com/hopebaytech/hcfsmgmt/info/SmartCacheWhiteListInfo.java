@@ -7,7 +7,6 @@ package com.hopebaytech.hcfsmgmt.info;
 public class SmartCacheWhiteListInfo {
 
     private int id;
-    private String whiteListVersion;
     private String packageName;
 
     public int getId() {
@@ -16,14 +15,6 @@ public class SmartCacheWhiteListInfo {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getWhiteListVersion() {
-        return whiteListVersion;
-    }
-
-    public void setWhiteListVersion(String whiteListVersion) {
-        this.whiteListVersion = whiteListVersion;
     }
 
     public String getPackageName() {

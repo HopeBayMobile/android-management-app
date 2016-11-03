@@ -19,6 +19,7 @@ public class SmartCacheWhiteListDBHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		db.execSQL(SmartCacheWhiteListDAO.CREATE_TABLE);
+		db.execSQL(SmartCacheWhiteListVersionDAO.CREATE_TABLE);
 	}
 
 	@Override
