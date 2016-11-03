@@ -144,8 +144,10 @@ public class MgmtPollingService extends Service {
 
         private void lock(String message) {
             Logs.d(CLASSNAME, "Action", "lock", "message=" + message);
-            lockMsg = message;
-            mHandler.sendEmptyMessage(0);
+            if (!message.equals("")) {
+                lockMsg = message;
+                mHandler.sendEmptyMessage(0);
+            }
         }
 
         private void reset() {
