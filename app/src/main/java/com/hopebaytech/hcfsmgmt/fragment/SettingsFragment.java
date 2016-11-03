@@ -255,7 +255,15 @@ public class SettingsFragment extends Fragment {
                 settingsInfo.setKey(PREF_SMART_CACHE);
                 settingsInfo.setValue(String.valueOf(isChecked));
 
-                // open the smart cache fragment
+                mWorkHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                        settingsDAO.update(settingsInfo);
+                    }
+                });
+
+                // open the smart cache fragment here!!!
             }
         });
     }
