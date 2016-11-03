@@ -29,6 +29,7 @@ import org.json.JSONObject;
 public class MgmtPollingService extends Service {
 
     private final String CLASSNAME = getClass().getSimpleName();
+    private final int startActivityToShowMessage = 0;
     private boolean stopped = false;
     private String lockMsg;
 
@@ -93,7 +94,7 @@ public class MgmtPollingService extends Service {
                                         String category = piggyback.getCategory();
                                         switch (category) {
                                             case GetDeviceInfo.Category.LOCK:
-                                                action.lock(piggyback.getMessage());
+                                                action.showMessageWhenLock(piggyback.getMessage());
                                                 break;
                                             case GetDeviceInfo.Category.RESET:
                                                 action.reset();
@@ -142,10 +143,15 @@ public class MgmtPollingService extends Service {
 
     private class Action {
 
-        private void lock(String message) {
+        private void showMessageWhenLock(String message) {
             Logs.d(CLASSNAME, "Action", "lock", "message=" + message);
             lockMsg = message;
             mHandler.sendEmptyMessage(0);
+            // Do not show message if get null string
+            if (!message.equals("")) {
+                lockMsg = message;
+                mHandler.sendEmptyMessage(startActivityToShowMessage);
+            }
         }
 
         private void reset() {
@@ -161,7 +167,7 @@ public class MgmtPollingService extends Service {
     public Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case 0:
+                case startActivityToShowMessage:
                     Intent lockDeviceActivity = new Intent(MgmtPollingService.this, com.hopebaytech.hcfsmgmt.main.LockDeviceActivity.class);
                     lockDeviceActivity.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     Bundle bundle = new Bundle();
