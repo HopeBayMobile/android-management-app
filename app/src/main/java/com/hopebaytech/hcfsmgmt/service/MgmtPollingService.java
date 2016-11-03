@@ -145,8 +145,6 @@ public class MgmtPollingService extends Service {
 
         private void showMessageWhenLock(String message) {
             Logs.d(CLASSNAME, "Action", "lock", "message=" + message);
-            lockMsg = message;
-            mHandler.sendEmptyMessage(0);
             // Do not show message if get null string
             if (!message.equals("")) {
                 lockMsg = message;
