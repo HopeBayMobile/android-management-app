@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.info;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,7 +13,6 @@ import android.support.v4.content.ContextCompat;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 
 import java.util.List;
@@ -24,12 +24,18 @@ public class AppInfo extends ItemInfo implements Cloneable {
     private long dbId;
     private int uid;
     private ApplicationInfo applicationInfo;
+    private PackageInfo packageInfo;
     private String packageName;
     private List<String> externalDirList;
     private String[] sharedLibraryFiles;
     private int appSize;
     private boolean isSystemApp;
     private Context context;
+
+    /**
+     * None real time data status of this app, only be updated when getAppStatus() is called.
+     */
+    private int dataStatus;
 
     public AppInfo(Context context) {
         super(context);
@@ -53,6 +59,14 @@ public class AppInfo extends ItemInfo implements Cloneable {
             iconImage = ((BitmapDrawable) drawable).getBitmap();
         }
         return iconImage;
+    }
+
+    public PackageInfo getPackageInfo() {
+        return packageInfo;
+    }
+
+    public void setPackageInfo(PackageInfo packageInfo) {
+        this.packageInfo = packageInfo;
     }
 
     public void setApplicationInfo(ApplicationInfo appInfo) {
@@ -116,12 +130,29 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public int getAppStatus() {
-        if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
-                HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
-                getExternalDirLocationStatus() == LocationStatus.LOCAL) {
-            return ItemStatus.AVAILABLE;
+        int dataStatus;
+        if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
+            dataStatus = DataStatus.AVAILABLE;
+        } else {
+            int externalLocationStatus = getExternalDirLocationStatus();
+            if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
+                    HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
+                    externalLocationStatus == LocationStatus.LOCAL) {
+                dataStatus = DataStatus.AVAILABLE;
+            } else {
+                dataStatus = DataStatus.UNAVAILABLE;
+            }
         }
-        return ItemStatus.UNAVAILABLE;
+        this.dataStatus = dataStatus;
+        return dataStatus;
+    }
+
+    /**
+     * @return The data status of this app, but the data status is not guaranteed to be correct.
+     * @see AppInfo#dataStatus
+     */
+    public int getLazyAppStatus() {
+        return dataStatus;
     }
 
     private int getExternalDirLocationStatus() {
@@ -152,7 +183,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
         if (HCFSConnStatus.isAvailable(mContext, hcfsStatInfo)) {
             return ICON_COLORFUL;
         }
-        return getAppStatus() == ItemStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
+        return getAppStatus() == DataStatus.AVAILABLE ? ICON_COLORFUL : ICON_TRANSPARENT;
     }
 
     public ApplicationInfo getApplicationInfo() {

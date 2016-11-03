@@ -5,7 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 
-import com.hopebaytech.hcfsmgmt.fragment.FileMgmtFragment;
+import com.hopebaytech.hcfsmgmt.fragment.AppFileFragment;
 
 public abstract class ItemInfo {
 
@@ -13,58 +13,60 @@ public abstract class ItemInfo {
     protected final int ICON_COLORFUL = 255;
     protected final int ICON_TRANSPARENT = 50;
 
-    /** The pin/unpin status of the item */
+    /**
+     * The pin/unpin status of the item
+     */
     private boolean isPinned;
 
     private String name;
     private boolean isProcessing;
     private long lastProcessTime;
-    private int position;  
+    private int position;
 
-    public FileMgmtFragment.RecyclerViewHolder viewHolder;
-    
+    public AppFileFragment.RecyclerViewHolder viewHolder;
+
     public ItemInfo(Context context) {
-    	this.mContext = context;
+        this.mContext = context;
     }
-    
-    public FileMgmtFragment.RecyclerViewHolder getViewHolder() {
-    	return viewHolder;
+
+    public AppFileFragment.RecyclerViewHolder getViewHolder() {
+        return viewHolder;
     }
-    
-    public void setViewHolder(FileMgmtFragment.RecyclerViewHolder viewHolder) {
-    	this.viewHolder = viewHolder;
+
+    public void setViewHolder(AppFileFragment.RecyclerViewHolder viewHolder) {
+        this.viewHolder = viewHolder;
     }
-    
+
     public String getName() {
-    	return name;
+        return name;
     }
-    
+
     public long getLastProcessTime() {
-    	return lastProcessTime;
+        return lastProcessTime;
     }
-    
+
     public void setLastProcessTime(long lastProcessTime) {
-    	this.lastProcessTime = lastProcessTime;
+        this.lastProcessTime = lastProcessTime;
     }
-    
+
     public boolean isProcessing() {
-    	return isProcessing;
+        return isProcessing;
     }
-    
+
     public void setProcessing(boolean isProcessing) {
-    	this.isProcessing = isProcessing;
+        this.isProcessing = isProcessing;
     }
-    
+
     public void setName(String infoName) {
-    	this.name = infoName;
+        this.name = infoName;
     }
-    
+
     public boolean isPinned() {
-    	return isPinned;
+        return isPinned;
     }
-    
+
     public void setPinned(boolean isPinned) {
-    	this.isPinned = isPinned;
+        this.isPinned = isPinned;
     }
 
     public void setPosition(int position) {
@@ -74,15 +76,15 @@ public abstract class ItemInfo {
     public int getPosition() {
         return position;
     }
-    
+
     @Nullable
     public abstract Bitmap getIconImage();
-    
+
     @Nullable
     public abstract Drawable getPinUnpinImage(boolean isPinned);
-    
+
     public abstract int hashCode();
-    
+
     public abstract int getIconAlpha();
 
 }

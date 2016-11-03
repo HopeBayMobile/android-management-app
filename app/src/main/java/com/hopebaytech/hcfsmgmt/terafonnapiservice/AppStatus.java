@@ -3,7 +3,7 @@ package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
+import com.hopebaytech.hcfsmgmt.info.DataStatus;
 
 /**
  * @author Aaron, Vince
@@ -11,9 +11,9 @@ import com.hopebaytech.hcfsmgmt.utils.ItemStatus;
  */
 public class AppStatus implements Parcelable {
 
-    public static final int UNKNOWN = ItemStatus.UNKNOWN;
-    public static final int AVAILABLE = ItemStatus.AVAILABLE;
-    public static final int UNAVAILABLE = ItemStatus.UNAVAILABLE;
+    public static final int UNKNOWN = DataStatus.UNKNOWN;
+    public static final int AVAILABLE = DataStatus.AVAILABLE;
+    public static final int UNAVAILABLE = DataStatus.UNAVAILABLE;
 
     private String packageName;
     private boolean isPinned;

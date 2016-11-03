@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/gridItemLayout"
+    android:layout_width="match_parent"
+    android:layout_height="99dp"
+    android:layout_marginStart="5dp"
+    android:layout_marginEnd="5dp"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true">
+
+    <ImageView
+        android:id="@+id/item_icon"
+        android:layout_width="@dimen/icon_image_width"
+        android:layout_height="@dimen/icon_image_width"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="6dp"
+        android:layout_marginTop="14dp"
+        android:src="@drawable/icon_doc_default" />
+
+    <ImageView
+        android:id="@+id/pin_view"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="14dp"
+        android:layout_toEndOf="@id/item_icon"
+        tools:src="@drawable/icon_btn_app_pin_s" />
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/item_name"
+        style="@style/F6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/item_icon"
+        android:layout_centerHorizontal="true"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:maxLines="1"
+        tools:text="item_name" />
+
+</RelativeLayout>

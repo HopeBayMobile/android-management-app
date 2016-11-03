@@ -1,69 +1,45 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.AccountDAO;
-import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
-import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
-import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
-import java.io.BufferedInputStream;
-import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
  *         Created by Aaron on 2016/7/19.
  */
-public class MainFragment extends Fragment implements View.OnClickListener {
+public class MainFragment extends Fragment {
 
     public static final String TAG = MainFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
@@ -74,12 +50,12 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private View mView;
     private Context mContext;
     private ViewPager mViewPager;
-    private NavigationView mNavigationView;
-    private PagerAdapter mPagerAdapter;
-    private DrawerLayout mDrawerLayout;
+    private ImageView mUserIcon;
 
+    private HandlerThread mWorkerThread;
     private Handler mWorkHandler;
     private Handler mUiHandler;
+    private PagerAdapter mPagerAdapter;
 
     private String sdcard1_path;
     private boolean isSDCard1;
@@ -91,18 +67,17 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mContext = context;
-    }
-
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        mUiHandler = new Handler();
 
         mArguments = getArguments();
+        mContext = getActivity();
+        ((MainActivity) mContext).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        mUiHandler = new Handler();
+        mWorkerThread = new HandlerThread(MainFragment.class.getSimpleName());
+        mWorkerThread.start();
+        mWorkHandler = new Handler(mWorkerThread.getLooper());
     }
 
     @Nullable
@@ -116,158 +91,8 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         super.onViewCreated(view, savedInstanceState);
 
         mView = view;
-
-        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            toolbar.setLogo(R.drawable.icon_tera_logo_m_tab);
-            toolbar.setTitle("");
-            ((AppCompatActivity) mContext).setSupportActionBar(toolbar);
-        }
-
         mViewPager = (ViewPager) view.findViewById(R.id.viewpager);
-
-        mDrawerLayout = (DrawerLayout) view.findViewById(R.id.drawer_layout);
-        if (mDrawerLayout != null) {
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle((AppCompatActivity) mContext,
-                    mDrawerLayout, toolbar, R.string.nav_drawer_open, R.string.nav_drawer_close);
-            mDrawerLayout.addDrawerListener(toggle);
-            toggle.syncState();
-        }
-
-        mNavigationView = (NavigationView) view.findViewById(R.id.nav_view);
-        if (mNavigationView != null) {
-            mNavigationView.findViewById(R.id.nav_dashboard).setOnClickListener(this);
-            mNavigationView.findViewById(R.id.nav_app_file).setOnClickListener(this);
-            mNavigationView.findViewById(R.id.nav_settings).setOnClickListener(this);
-            mNavigationView.findViewById(R.id.nav_help).setOnClickListener(this);
-            final AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-            if (accountDAO.getCount() != 0) {
-                mNavigationView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-                    @Override
-                    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                        mNavigationView.removeOnLayoutChangeListener(this);
-
-                        final AccountInfo accountInfo = accountDAO.getFirst();
-
-                        TextView displayName = (TextView) mNavigationView.findViewById(R.id.display_name);
-                        displayName.setText(accountInfo.getName());
-
-                        TextView email = (TextView) mNavigationView.findViewById(R.id.email);
-                        email.setText(accountInfo.getEmail());
-
-                        // Icon expiring time doesn't reach, use cache icon base64 instead of download
-                        // the latest icon
-                        final ImageView iconImage = (ImageView) mNavigationView.findViewById(R.id.icon);
-                        if (System.currentTimeMillis() <= accountInfo.getImgExpiringTime()) {
-                            String imgBase64 = accountInfo.getImgBase64();
-                            if (imgBase64 != null) {
-                                iconImage.setImageBitmap(BitmapBase64Factory.decodeBase64(imgBase64));
-                            }
-                            return;
-                        }
-
-                        // Show the latest Google user icon on NavigationView
-                        mWorkHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                String serverClientId = MgmtCluster.getServerClientId();
-                                GoogleSilentAuthProxy silentAuthProxy = new GoogleSilentAuthProxy(mContext,
-                                        serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
-                                    @Override
-                                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-
-                                        if (result == null || !result.isSuccess()) {
-                                            return;
-                                        }
-
-                                        GoogleSignInAccount acct = result.getSignInAccount();
-                                        Logs.d(CLASSNAME, "onAuthSuccessful", "acct=" + acct);
-                                        if (acct == null) {
-                                            return;
-                                        }
-
-                                        String iconUrl = null;
-                                        if (acct.getPhotoUrl() != null) {
-                                            Uri iconUri = acct.getPhotoUrl();
-                                            if (iconUri == null) {
-                                                Logs.d(CLASSNAME, "onAuthSuccessful", "The icon uri is null.");
-                                                return;
-                                            } else {
-                                                iconUrl = iconUri.toString();
-                                            }
-                                        }
-
-                                        final String finalIconUrl = iconUrl;
-                                        mWorkHandler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                final Bitmap iconBitmap = downloadUserIconWithRetry(finalIconUrl);
-                                                if (iconBitmap == null) {
-                                                    Logs.d(CLASSNAME, "onAuthSuccessful", "Download user icon failed.");
-                                                    return;
-                                                }
-
-                                                mUiHandler.post(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        iconImage.setImageBitmap(iconBitmap);
-                                                    }
-                                                });
-
-                                                String imgBase64 = BitmapBase64Factory.encodeToBase64(
-                                                        iconBitmap,
-                                                        Bitmap.CompressFormat.PNG,
-                                                        100);
-                                                accountInfo.setImgBase64(imgBase64);
-                                                accountInfo.setImgExpiringTime(System.currentTimeMillis() + Interval.DAY);
-                                                accountDAO.update(accountInfo);
-                                            }
-                                        });
-                                    }
-
-                                    @Override
-                                    public void onAuthFailed() {
-                                        Logs.e(CLASSNAME, "onAuthFailed", null);
-                                    }
-                                });
-                                silentAuthProxy.auth();
-                            }
-                        });
-
-                    }
-                });
-            }
-
-        }
-    }
-
-    private Bitmap downloadUserIconWithRetry(String iconUrl) {
-        Bitmap bitmap = null;
-        for (int i = 0; i < 3; i++) {
-            bitmap = downloadUserIcon(iconUrl);
-            if (bitmap != null) {
-                break;
-            }
-        }
-        return bitmap;
-    }
-
-    private Bitmap downloadUserIcon(String iconUrl) {
-        Bitmap bitmap = null;
-        if (iconUrl != null) {
-            try {
-                URL urlConnection = new URL(iconUrl);
-                HttpsURLConnection conn = (HttpsURLConnection) urlConnection.openConnection();
-                conn.setRequestMethod("GET");
-                conn.connect();
-
-                BufferedInputStream bInputStream = new BufferedInputStream(conn.getInputStream());
-                bitmap = BitmapFactory.decodeStream(bInputStream);
-            } catch (Exception e) {
-                Logs.e(CLASSNAME, "run", Log.getStackTraceString(e));
-            }
-        }
-        return bitmap;
+        mUserIcon = (ImageView) view.findViewById(R.id.user_icon);
     }
 
     @Override
@@ -277,11 +102,6 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     }
 
     private void init() {
-
-        HandlerThread handlerThread = new HandlerThread(MainFragment.class.getSimpleName());
-        handlerThread.start();
-        mWorkHandler = new Handler(handlerThread.getLooper());
-
 //        sdCardReceiver = new SDCardBroadcastReceiver();
 
 //        IntentFilter filter = new IntentFilter();
@@ -357,32 +177,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         // Initialize ViewPager with CustomPagerTabStrip
-        mPagerAdapter = new PagerAdapter(((AppCompatActivity) mContext).getSupportFragmentManager());
+        mPagerAdapter = new PagerAdapter(((MainActivity) mContext).getSupportFragmentManager());
         if (mViewPager != null) {
             mViewPager.setOffscreenPageLimit(3);
-            PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
-            pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(mContext, R.color.C2));
+//            PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
+//            pagerTabStrip.setDrawFullUnderline(false);
+//            pagerTabStrip.invalidate();
             mViewPager.setAdapter(mPagerAdapter);
         }
-    }
 
-    @Override
-    public void onClick(View v) {
-        /** Handle navigation view item clicks here. */
-        int id = v.getId();
-        if (id == R.id.nav_dashboard) {
-            mViewPager.setCurrentItem(0, true);
-        } else if (id == R.id.nav_app_file) {
-            isSDCard1 = false;
-            mViewPager.setCurrentItem(1, true);
-        } else if (id == R.id.nav_settings) {
-            mViewPager.setCurrentItem(2, true);
-        } else if (id == R.id.nav_help) {
-            mViewPager.setCurrentItem(3, true);
-        } else if (id == NAV_MENU_SDCARD1_ID) {
-            isSDCard1 = true;
-        }
-        mDrawerLayout.closeDrawer(GravityCompat.START);
+        mUserIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DialogFragment dialogFragment = UserInfoDialogFragment.newInstance();
+                dialogFragment.show(getFragmentManager(), UserInfoDialogFragment.TAG);
+            }
+        });
     }
 
     public class PagerAdapter extends FragmentStatePagerAdapter {
@@ -390,7 +200,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         private String[] titleArray;
         private SparseArray<Fragment> pageReference;
 
-        public PagerAdapter(FragmentManager fm) {
+        private PagerAdapter(FragmentManager fm) {
             super(fm);
             titleArray = getResources().getStringArray(R.array.nav_title);
             pageReference = new SparseArray<>();
@@ -402,8 +212,18 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             String title = titleArray[i];
             if (title.equals(getString(R.string.nav_overview))) {
                 fragment = OverviewFragment.newInstance();
-            } else if (title.equals(getString(R.string.nav_app_file))) {
-                fragment = FileMgmtFragment.newInstance(false);
+            } else if (title.equals(getString(R.string.nav_apps))) {
+                fragment = AppFileFragment.newInstance(false);
+
+                Bundle args = new Bundle();
+                args.putInt(AppFileFragment.KEY_ARGUMENT_APP_FILE, AppFileFragment.DisplayType.BY_APP);
+                fragment.setArguments(args);
+            } else if (title.equals(getString(R.string.nav_files))) {
+                fragment = AppFileFragment.newInstance(false);
+
+                Bundle args = new Bundle();
+                args.putInt(AppFileFragment.KEY_ARGUMENT_APP_FILE, AppFileFragment.DisplayType.BY_FILE);
+                fragment.setArguments(args);
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_help))) {
@@ -432,26 +252,22 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
 
         @Nullable
-        public Fragment getFragment(int position) {
+        private Fragment getFragment(int position) {
             return pageReference.get(position);
         }
 
     }
 
     public void onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            int position = mViewPager.getCurrentItem();
-            Fragment fragment = mPagerAdapter.getFragment(position);
-            if (fragment instanceof FileMgmtFragment) {
-                boolean isProcessed = ((FileMgmtFragment) fragment).onBackPressed();
-                if (!isProcessed) {
-                    exitApp();
-                }
-            } else {
+        int position = mViewPager.getCurrentItem();
+        Fragment fragment = mPagerAdapter.getFragment(position);
+        if (fragment instanceof AppFileFragment) {
+            boolean isProcessed = ((AppFileFragment) fragment).onBackPressed();
+            if (!isProcessed) {
                 exitApp();
             }
+        } else {
+            exitApp();
         }
     }
 
@@ -472,33 +288,33 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public class SDCardBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            Logs.d(CLASSNAME, "onReceive", "sdcard_action=" + action);
-            sdcard1_path = intent.getData().getSchemeSpecificPart().replace("///", "/");
-            if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-                mUiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
+//    public class SDCardBroadcastReceiver extends BroadcastReceiver {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            final String action = intent.getAction();
+//            Logs.d(CLASSNAME, "onReceive", "sdcard_action=" + action);
+//            sdcard1_path = intent.getData().getSchemeSpecificPart().replace("///", "/");
+//            if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
+//                mUiHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+////                        Menu menu = mNavigationView.getMenu();
+////                        MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
+////                        menuItem.setIcon(R.drawable.ic_sd_storage_black);
+//                    }
+//                });
+//            } else if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
+//                mUiHandler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
 //                        Menu menu = mNavigationView.getMenu();
-//                        MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
-//                        menuItem.setIcon(R.drawable.ic_sd_storage_black);
-                    }
-                });
-            } else if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
-                mUiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Menu menu = mNavigationView.getMenu();
-                        menu.removeItem(NAV_MENU_SDCARD1_ID);
-                    }
-                });
-            }
-        }
-
-    }
+//                        menu.removeItem(NAV_MENU_SDCARD1_ID);
+//                    }
+//                });
+//            }
+//        }
+//
+//    }
 
     @Override
     public void onResume() {
@@ -506,43 +322,47 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         Intent intentService = new Intent(mContext, TeraMgmtService.class);
         intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, false);
+        mContext.startService(intentService);
 
-        // Jump to specific page, 0 Overview, 1 FILE/APP, 2 SETTINGS, 3 HELP.
-        if (mArguments != null) {
-            final int toViewPager = mArguments.getInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, -1);
-            if (toViewPager > -1 && toViewPager < mPagerAdapter.getCount()) {
-                mWorkHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        while (true) {
-                            try {
-                                Thread.sleep(500);
+        if (mArguments == null) {
+            return;
+        }
+        final int toViewPager = mArguments.getInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, -1);
 
-                                boolean hasFragmentVisible = false;
-                                for (int i = 0; i < mPagerAdapter.getCount(); i++) {
-                                    Fragment fragment = mPagerAdapter.getFragment(i);
-                                    if (fragment != null && fragment.isVisible()) {
-                                        hasFragmentVisible = true;
-                                        break;
-                                    }
-                                }
-
-                                if (hasFragmentVisible) {
-                                    Thread.sleep(500);
-                                    mViewPager.setCurrentItem(toViewPager, true);
-                                    mArguments = null;
-                                    break;
-                                }
-                            } catch (InterruptedException e) {
-                                Logs.e(CLASSNAME, "onResume", Log.getStackTraceString(e));
-                            }
-                        }
-                    }
-                });
-            }
+        if (toViewPager <= -1 || toViewPager >= mPagerAdapter.getCount()) {
+            return;
         }
 
-        mContext.startService(intentService);
+        // Jump to specific page, 0 Overview, 1 FILE/APP, 2 SETTINGS, 3 HELP.
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(500);
+
+                        boolean hasFragmentVisible = false;
+                        for (int i = 0; i < mPagerAdapter.getCount(); i++) {
+                            Fragment fragment = mPagerAdapter.getFragment(i);
+                            if (fragment != null && fragment.isVisible()) {
+                                hasFragmentVisible = true;
+                                break;
+                            }
+                        }
+
+                        if (hasFragmentVisible) {
+                            Thread.sleep(500);
+                            mViewPager.setCurrentItem(toViewPager, true);
+                            mArguments = null;
+                            break;
+                        }
+                    } catch (InterruptedException e) {
+                        Logs.e(CLASSNAME, "onResume", Log.getStackTraceString(e));
+                    }
+                }
+            }
+        });
+
     }
 
     @Override
@@ -557,6 +377,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroy() {
 //        unregisterReceiver(sdCardReceiver);
+        if (mWorkerThread != null) {
+            mWorkerThread.quit();
+            mWorkerThread = null;
+        }
         super.onDestroy();
     }
 

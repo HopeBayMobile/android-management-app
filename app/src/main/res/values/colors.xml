@@ -14,21 +14,19 @@
     <color name="colorHomePageXferProgressBarSecondary">#0071BC</color>
     <color name="colorHomePageProgressBarText">#4D4D4D</color>
     
-    <color name="colorFileManagementSpinnerBar">#8CC63F</color>
-    <color name="colorFileManagementStorageTypeTitle">#0071BC</color>
-    <color name="colorFileManagementLocalStorageText">#4D4D4D</color>
-    <color name="colorFileManagementTotalStorageText">#4D4D4D</color>
-    <color name="colorFileManagementAvailStorageText">#8CC63F</color>
-    <color name="colorFileManagementCircleArc">#0071BC</color>
-    <color name="colorFileManagementCircleWhole">#E6E6E6</color>
-    <color name="colorFileManagementCircleText">#29ABE2</color>
-
     <color name="colorWhite">@android:color/white</color>
     <color name="colorBlack">@android:color/black</color>
     <color name="colorPagerTabStrip">#4E8D1F</color>
 
     <color name="colorSwitchAccountTextBackground">#F2F8EA</color>
     <color name="colorAboutTitle">#3C89C7</color>
+
+    <color name="colorDefaultBackground">#FAFAFA</color>
+
+    <color name="colorUserIconNormalBackground">#e9faf4</color>
+    <color name="colorUserIconNormalValue">@color/C1</color>
+    <color name="colorUserIconWarningBackground">#ffe5e5</color>
+    <color name="colorUserIconWarningValue">#ff9000</color>
 
     <color name="C1">#77bc1f</color>
     <color name="C2">#026937</color>
@@ -39,5 +37,21 @@
     <color name="C7">#ffffff</color>
     <color name="C8">#00af41</color>
     <color name="C9">#012639</color>
+
+    <color name="colorF1">#ffffff</color>
+    <color name="colorF2">#ffffff</color>
+    <color name="colorF3">#4d4d4d</color>
+    <color name="colorF4">#4579bb</color>
+    <color name="colorF5">#ffffff</color>
+    <color name="colorF6">#4d4d4d</color>
+    <color name="colorF7">#77bc1f</color>
+    <color name="colorF8">#4d4d4d</color>
+    <color name="colorF9">#77bc1f</color>
+    <color name="colorF10">#4579bb</color>
+    <color name="colorF11">#b9b9b9</color>
+    <color name="colorF12">#b9b9b9</color>
+    <color name="colorF13">#77bc1f</color>
+    <color name="colorF14">#ff9000</color>
+    <color name="colorF15">#77bc1f</color>
 
 </resources>

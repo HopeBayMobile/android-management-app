@@ -32,7 +32,7 @@ import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.info.FileDirInfo;
+import com.hopebaytech.hcfsmgmt.info.FileInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.ItemInfo;
@@ -121,8 +121,8 @@ public class TeraMgmtService extends Service {
                     if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
                         addUidAndPinSysApp();
                         HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
-                    } else if (action.equals(TeraIntent.ACTION_ADD_UID_TO_DB_AND_UNPIN_USER_APP)) {
-                        addUidAndUnpinUserApp(intent);
+                    } else if (action.equals(TeraIntent.ACTION_ADD_UID_INFO_TO_DATABASE)) {
+                        addUidInfoToDatabase(intent);
                     } else if (action.equals(TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP)) {
                         pinUnpinAgainWhenAppUpdated(intent);
                     } else if (action.equals(TeraIntent.ACTION_REMOVE_UID_FROM_DB)) {
@@ -356,7 +356,7 @@ public class TeraMgmtService extends Service {
         }
     }
 
-    public void pinOrUnpinFileDirectory(FileDirInfo info, IPinUnpinListener listener) {
+    public void pinOrUnpinFileDirectory(FileInfo info, IPinUnpinListener listener) {
         ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
         serviceFileDirInfo.setPinned(info.isPinned());
         serviceFileDirInfo.setFilePath(info.getFilePath());
@@ -510,10 +510,10 @@ public class TeraMgmtService extends Service {
 
             long pinTotal = statInfo.getPinTotal();
             long pinMax = statInfo.getPinMax();
-            String notifyRatio = HCFSMgmtUtils.NOTIFY_INSUFFICIENT_PIN_PACE_RATIO;
+            int notifyRatio = HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD;
             double ratio = ((double) pinTotal / pinMax) * 100;
             Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio + ", ratio=" + ratio);
-            if (ratio >= Integer.valueOf(notifyRatio)) {
+            if (ratio >= notifyRatio) {
                 if (!isNotified) {
                     int flag = NotificationEvent.FLAG_OPEN_APP;
                     int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
@@ -564,17 +564,17 @@ public class TeraMgmtService extends Service {
                             continue;
                         }
 
-                        int connStatus = HCFSConnStatus.getConnStatus(TeraMgmtService.this, statInfo);
+                        int drawableId = R.drawable.icon_tera_logo_status_bar_01;
                         String notifyTitle;
+                        int connStatus = HCFSConnStatus.getConnStatus(TeraMgmtService.this, statInfo);
                         switch (connStatus) {
                             case HCFSConnStatus.TRANS_FAILED:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
+                                drawableId = R.drawable.icon_tera_logo_status_bar_02;
                                 break;
                             case HCFSConnStatus.TRANS_NOT_ALLOWED:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
-                                break;
-                            case HCFSConnStatus.TRANS_NORMAL:
-                                notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
+                                drawableId = R.drawable.icon_tera_logo_status_bar_02;
                                 break;
                             case HCFSConnStatus.TRANS_IN_PROGRESS:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_in_progress);
@@ -582,12 +582,21 @@ public class TeraMgmtService extends Service {
                             case HCFSConnStatus.TRANS_SLOW:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_slow);
                                 break;
-                            default:
+                            default: // HCFSConnStatus.TRANS_NORMAL
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                         }
-                        String notifyMsg = getString(R.string.overview_used_space) + ": " + statInfo.getFormatTeraUsed() + " / " + statInfo.getFormatTeraTotal();
+                        String notifyMsg = getString(R.string.overview_used_space) +
+                                ": " +
+                                statInfo.getFormatTeraUsed() +
+                                " / " +
+                                statInfo.getFormatTeraTotal();
                         int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
-                        NotificationEvent.notify(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING, notifyTitle, notifyMsg, flag);
+                        NotificationEvent.notify(TeraMgmtService.this,
+                                HCFSMgmtUtils.NOTIFY_ID_ONGOING,
+                                notifyTitle,
+                                notifyMsg,
+                                drawableId,
+                                flag);
 
                         Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
                     } catch (InterruptedException e) {
@@ -672,7 +681,7 @@ public class TeraMgmtService extends Service {
                 appInfo.setUid(applicationInfo.uid);
                 appInfo.setApplicationInfo(applicationInfo);
                 appInfo.setName(applicationInfo.loadLabel(pm).toString());
-                appInfo.setExternalDirList(null);
+                appInfo.setExternalDirList(uidInfo.getExternalDir());
                 if (HCFSMgmtUtils.isSystemPackage(applicationInfo)) {
                     pinOrUnpinApp(appInfo, PinType.PRIORITY);
                 } else {
@@ -685,40 +694,14 @@ public class TeraMgmtService extends Service {
     }
 
     /**
-     * Add uid info of new installed app to database and unpin user app on /data/data and /data/app,
-     * triggered by HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
+     * Add uid info of new installed app to database, triggered by HCFSMgmtReceiver's ACTION_PACKAGE_ADDED
      */
-    private void addUidAndUnpinUserApp(Intent intent) {
+    private void addUidInfoToDatabase(Intent intent) {
         // Add uid info of new installed app to database
         int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) == null) {
-            final boolean isPinned = false;
-            final boolean isSystemApp = false;
-            mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
-        }
-
-        // Unpin user app on /data/data and /data/app
-        try {
-            PackageManager pm = getPackageManager();
-            ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-            boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(applicationInfo);
-            if (!isSystemApp) {
-                AppInfo appInfo = new AppInfo(mContext);
-                appInfo.setPinned(false);
-                appInfo.setUid(applicationInfo.uid);
-                appInfo.setSystemApp(isSystemApp);
-                appInfo.setApplicationInfo(applicationInfo);
-                appInfo.setName(applicationInfo.loadLabel(pm).toString());
-                appInfo.setExternalDirList(null);
-                if (HCFSMgmtUtils.isSystemPackage(applicationInfo)) {
-                    pinOrUnpinApp(appInfo, PinType.PRIORITY);
-                } else {
-                    pinOrUnpinApp(appInfo);
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+            mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, uid, packageName));
         }
     }
 
