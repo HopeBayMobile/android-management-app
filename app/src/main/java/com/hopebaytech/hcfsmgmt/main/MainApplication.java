@@ -3,6 +3,10 @@ package com.hopebaytech.hcfsmgmt.main;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.SystemProperties;
 
 /**
  * @author Aaron
@@ -43,7 +47,11 @@ public class MainApplication extends Application {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
+            // if debugEnable is "true", increase the log level to Log.DEBUG
+            String debugEnabled = SystemProperties.get("debug.tera.enable");
+            if (Boolean.valueOf(debugEnabled)) {
+                Logs.LOG_LEVEL = Log.DEBUG;
+            }
         }
 
         @Override
