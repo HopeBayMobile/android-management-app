@@ -258,4 +258,18 @@
     <string name="http_internal_error">內部伺服器錯誤</string>
     <string name="http_unknown_error">未知的錯誤。</string>
 
+    <string name="mgmt_server_error_msg_unknown">Unknown error</string>
+    <string name="mgmt_server_error_msg_input">Input parameter relative error.</string>
+    <string name="mgmt_server_error_msg_imei_not_found">Device IMEI code is not registered</string>
+    <string name="mgmt_server_error_msg_imei_decrypt_failed">Device IMEI code decrypt failed</string>
+    <string name="mgmt_server_error_msg_incorrect_model">不支援此裝置，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_incorrect_vendor">不支援此裝置，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_device_expired">Tera 已逾期，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_invalid_code_or_model">
+        此啟動碼已被使用過。如果您的舊Tera裝置已經遺失或損壞，請先在 <a href="https://my.tera.mobi">TeraClient</a> 將該裝置上鎖，然後再嘗試啟動。
+    </string>
+    <string name="mgmt_server_error_msg_mapping_not_found">No service registered for the user and device.</string>
+    <string name="mgmt_server_error_msg_mapping_existed">此裝置已經被註冊，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_service_block">The device service is locked or expired.</string>
+
 </resources>

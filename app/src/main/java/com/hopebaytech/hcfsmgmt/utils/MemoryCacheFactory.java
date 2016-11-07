@@ -4,7 +4,8 @@ import android.graphics.Bitmap;
 import android.util.LruCache;
 
 /**
- * Created by Aaron on 2016/4/13.
+ * @author Aaron
+ *         Created by Aaron on 2016/4/13.
  */
 public class MemoryCacheFactory {
 
@@ -17,7 +18,6 @@ public class MemoryCacheFactory {
                 /** The cache size will be measured in kilobytes rather than number of items. */
                 return bitmap.getByteCount() / 1024;
             }
-
         };
     }
 
