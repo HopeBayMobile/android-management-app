@@ -414,10 +414,6 @@ public class TeraMgmtService extends Service {
                             });
                             unlockDeviceProxy.unlock();
                             break;
-                        // Device is already transferred, execute factory reset
-                        case GetDeviceInfo.Category.UNREGISTERED:
-                            FactoryResetUtils.reset(TeraMgmtService.this);
-                            break;
                     }
                 }
             }
