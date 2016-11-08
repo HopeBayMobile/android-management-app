@@ -1083,16 +1083,18 @@ public class HCFSMgmtUtils {
         return totalNeedSize;
     }
 
-    public static boolean isSmartCacheSpaceEnough(Context context, List<String> packageNameList){
+    public static boolean isSmartCacheSpaceEnoughForBoost(Context context, List<String> packageNameList){
+        boolean isSpaceEnough = false;
         File file = new File(SMART_CACHE_FOLDER);
         long freeSpaceInSmartCache = file.getFreeSpace();
-        long usedSpaceInSmartCache = file.getTotalSpace() - freeSpaceInSmartCache;
-        boolean isSpaceEnough = false;
+        //long usedSpaceInSmartCache = file.getTotalSpace() - freeSpaceInSmartCache;
         long totalNeedSize = getBoostNeedSize(context, packageNameList);
 
         if (freeSpaceInSmartCache > totalNeedSize ) {
             isSpaceEnough = true;
-        } else {
+        }
+        /* temp mark, the first smart cache verion's size can't be changed after it is created.
+        else {
             if ( (usedSpaceInSmartCache + totalNeedSize ) <= SMART_CACHE_MAXIMUM_SPACE) {
                 boolean expandOk = expandSmartCacheSize();
                 if (expandOk){
@@ -1103,7 +1105,7 @@ public class HCFSMgmtUtils {
             } else { // smart cache is up to 4G
                 isSpaceEnough = false;
             }
-        }
+        } */
 
         return isSpaceEnough;
     }
