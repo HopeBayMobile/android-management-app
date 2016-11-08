@@ -11,7 +11,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,14 +61,13 @@ public class SettingsFragment extends Fragment {
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
     private CheckBox mAllowPinUnpinApps;
-    private CheckBox mEnableSmartCache;
-    private CheckBox mAdvancedSettings;
+    private CheckBox mEnableBooster;
     private LinearLayout mBa;
     private LinearLayout mAbout;
     private LinearLayout mTransferContent;
     private LinearLayout mAdvancedSettingsLayout;
-    private RelativeLayout mEnableSmartCacheLayout;
     private LinearLayout mNotifyLocalStorageUsedRatio;
+    private RelativeLayout mAdvancedSettings;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -103,16 +101,15 @@ public class SettingsFragment extends Fragment {
 
         mView = view;
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
-        mAdvancedSettings = (CheckBox) view.findViewById(R.id.advanced_settings);
         mAllowPinUnpinApps = (CheckBox) view.findViewById(R.id.allow_pin_unpin_apps);
-        mEnableSmartCache = (CheckBox) view.findViewById(R.id.enable_smart_cache);
+        mEnableBooster = (CheckBox) view.findViewById(R.id.enable_booster);
         mNotifyConnFailedRecovery = (CheckBox) view.findViewById(R.id.notify_conn_failed_recovery);
         mBa = (LinearLayout) view.findViewById(R.id.extra_log_for_ba_layout);
         mAbout = (LinearLayout) view.findViewById(R.id.about);
         mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
         mAdvancedSettingsLayout = (LinearLayout) view.findViewById(R.id.advanced_settings_layout);
-        mEnableSmartCacheLayout = (RelativeLayout) view.findViewById(R.id.enable_smart_cache_layout);
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
+        mAdvancedSettings = (RelativeLayout) view.findViewById(R.id.advanced_settings);
     }
 
     @Override
@@ -203,7 +200,23 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        mAdvancedSettings.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mAdvancedSettings.setOnClickListener(new View.OnClickListener() {
+
+            private boolean isChecked;
+
+            @Override
+            public void onClick(View v) {
+                if (isChecked) {
+                    mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
+                } else {
+                    mAdvancedSettingsLayout.setVisibility(View.GONE);
+                }
+                isChecked = !isChecked;
+            }
+
+        });
+
+        mEnableBooster.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 MainFragment mainFragment = (MainFragment) getFragmentManager().findFragmentByTag(MainFragment.TAG);
@@ -212,13 +225,11 @@ public class SettingsFragment extends Fragment {
                         mainFragment.addPageToViewPager(getString(R.string.nav_settings), getString(R.string.nav_smart_cache));
                     }
                     mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
-                    mEnableSmartCacheLayout.setVisibility(View.VISIBLE);
                 } else {
                     if (mainFragment != null) {
                         mainFragment.removePageFromViewPager(getString(R.string.nav_smart_cache));
                     }
                     mAdvancedSettingsLayout.setVisibility(View.GONE);
-                    mEnableSmartCacheLayout.setVisibility(View.GONE);
                 }
             }
         });
@@ -242,7 +253,7 @@ public class SettingsFragment extends Fragment {
                     public void run() {
                         SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
                         settingsDAO.update(settingsInfo);
-                        Intent intent =  new Intent(TeraIntent.ACTION_ALLOW_PIN_UNPIN);
+                        Intent intent = new Intent(TeraIntent.ACTION_ALLOW_PIN_UNPIN);
                         intent.putExtra(TeraIntent.KEY_ALLOW_PIN_UNPIN, finalIsChecked);
                         mContext.sendBroadcast(intent);
                     }
@@ -255,8 +266,8 @@ public class SettingsFragment extends Fragment {
         if (settingsInfo != null) {
             isChecked = Boolean.valueOf(settingsInfo.getValue());
         }
-        mEnableSmartCache.setChecked(isChecked);
-        mEnableSmartCache.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mEnableBooster.setChecked(isChecked);
+        mEnableBooster.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 final SettingsInfo settingsInfo = new SettingsInfo();

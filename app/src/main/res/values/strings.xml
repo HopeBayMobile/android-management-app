@@ -184,8 +184,8 @@
     <string name="settings_confirm_when_turn_off_wifi_only_message">Using mobile data connection while transferring data can result in additional charges. Please check your data plan with mobile carrier.</string>
     <string name="settings_advanced_settings">Advanced Settings</string>
     <string name="settings_allow_pin_unpin_apps">Allow pin/unpin apps</string>
-    <string name="settings_enable_smart_cache_title">Enable Smart Cache</string>
-    <string name="settings_enable_smart_cache_summary">Enhancing app performance by boosting apps</string>
+    <string name="settings_booster_title">Booster</string>
+    <string name="settings_booster_subtitle">Enhancing app performance by boosting apps</string>
 
     <string name="change_account_require_new_account">與目前帳戶相同。變更帳戶操作已經停止。</string>
     <string name="change_account_start_to_change">確認變更</string>
