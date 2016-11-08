@@ -306,11 +306,13 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_notif
 }
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_enableSmartCache(
-		JNIEnv *jEnv, jobject jObject) {
+		JNIEnv *jEnv, jobject jObject, jstring jSmartCacheSize) {
 	const char *json_res;
-    HCFS_enable_smart_cache(&json_res);
+    const char *smart_cache_size = (*jEnv)->GetStringUTFChars(jEnv, jSmartCacheSize, 0);
+    HCFS_enable_smart_cache(&json_res, smart_cache_size);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
+    free((char *)smart_cache_size);
     return result;
 }
 

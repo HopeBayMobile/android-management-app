@@ -949,10 +949,25 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static boolean enableSmartCache() {
+    public static long getAvailableSpaceForSmartCache(){
+        //smart cache uses pinned space
+        HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
+        long availableSpace = 0L;
+        if (hcfsStatInfo != null) {
+            availableSpace = hcfsStatInfo.getPinMax() - hcfsStatInfo.getPinTotal();
+            if (availableSpace > SMART_CACHE_MAXIMUM_SPACE) {
+               return SMART_CACHE_MAXIMUM_SPACE;
+            } else {
+                return availableSpace;
+            }
+        }
+        return availableSpace;
+    }
+
+    public static boolean enableSmartCache(long smartCacheSize) {
         boolean isSuccess = false;
         try {
-            String jsonResult = HCFSApiUtils.enableSmartCache();
+            String jsonResult = HCFSApiUtils.enableSmartCache(smartCacheSize);
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
