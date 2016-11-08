@@ -19,6 +19,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.content.pm.IPackageStatsObserver;
+import android.content.pm.PackageStats;
+import android.os.RemoteException;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
@@ -31,6 +34,7 @@ import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
+import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -43,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+import java.lang.reflect.Method;
 
 public class HCFSMgmtUtils {
 
@@ -51,6 +56,8 @@ public class HCFSMgmtUtils {
 //    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
     public static final int PINNED_SPACE_WARNING_THRESHOLD = 80; // Unit: percentage
+    public static final long SMART_CACHE_MAXIMUM_SPACE = 4 * 1024 * 1024 * 1024; // smart_cache_size <= 4G
+    private static long boostNeedSize = 0L;
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
 
@@ -75,6 +82,7 @@ public class HCFSMgmtUtils {
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
 
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
+    public static final String SMART_CACHE_FOLDER = "/data/mnt/hcfsblock";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
         Logs.d(CLASSNAME, "isAppPinned", appInfo.getName());
@@ -941,15 +949,49 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static boolean movePkgDataToSmartCache(String pkgName) {
+    public static boolean enableSmartCache() {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.enableSmartCache();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "enableSmartCache", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "enableSmartCache", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "enableSmartCache", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
+    public static boolean disableSmartCache() {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.disableSmartCache();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "disableSmartCache", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "disableSmartCache", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "disableSmartCache", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
+    public static boolean smartCacheBoost() {
         boolean isTriggered = false;
         try {
-            String jsonResult = HCFSApiUtils.movePkgDataToSmartCache(pkgName);
-            String logMsg = "pkgName=" + pkgName + ", jsonResult=" + jsonResult;
+            String jsonResult = HCFSApiUtils.smartCacheBoost();
+            String logMsg = "jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-//                Logs.i(CLASSNAME, "movePkgDataToSmartCache", logMsg);
+//                Logs.i(CLASSNAME, "smartCacheBoost", logMsg);
                 int code = jObject.getInt("code");
                 if (code == 1) {
                     isTriggered = true;
@@ -957,23 +999,23 @@ public class HCFSMgmtUtils {
                     isTriggered = false;
                 }
             } else {
-                Logs.e(CLASSNAME, "movePkgDataToSmartCache", logMsg);
+                Logs.e(CLASSNAME, "smartCacheBoost", logMsg);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "movePkgDataToSmartCache", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "smartCacheBoost", Log.getStackTraceString(e));
         }
         return isTriggered;
     }
 
-    public static boolean movePkgDataFromSmartCache(String pkgName) {
+    public static boolean smartCacheUnboost() {
         boolean isTriggered = false;
         try {
-            String jsonResult = HCFSApiUtils.movePkgDataFromSmartCache(pkgName);
-            String logMsg = "pkgName=" + pkgName + ", jsonResult=" + jsonResult;
+            String jsonResult = HCFSApiUtils.smartCacheUnboost();
+            String logMsg = "jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-//                Logs.i(CLASSNAME, "movePkgDataFromSmartCache", logMsg);
+//                Logs.i(CLASSNAME, "smartCacheUnboost", logMsg);
                 int code = jObject.getInt("code");
                 if (code == 1) {
                     isTriggered = true;
@@ -981,22 +1023,74 @@ public class HCFSMgmtUtils {
                     isTriggered = false;
                 }
             } else {
-                Logs.e(CLASSNAME, "movePkgDataFromSmartCache", logMsg);
+                Logs.e(CLASSNAME, "smartCacheUnboost", logMsg);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "movePkgDataFromSmartCache", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "smartCacheUnboost", Log.getStackTraceString(e));
         }
         return isTriggered;
     }
 
-    public static void enableApp(Context context, String pkgName){
+    public static void enableApp(Context context, String pkgName) {
         PackageManager pm = context.getPackageManager();
         pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
     }
 
-    public static void disableApp(Context context, String pkgName){
+    public static void disableApp(Context context, String pkgName) {
         PackageManager pm = context.getPackageManager();
         pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+    }
+
+    public static long getBoostNeedSize(Context context, List<String> packageNameList) {
+        long totalNeedSize = 0L;
+        boostNeedSize = 0L; //reset static variable boostNeedSize to 0L
+        PackageManager pm = context.getPackageManager();
+
+        for (String packageName : packageNameList) {
+            try {
+                Method getPackageSizeInfo = getPackageSizeInfo = pm.getClass().getMethod("getPackageSizeInfo", String.class, IPackageStatsObserver.class);
+                getPackageSizeInfo.invoke(pm, packageName, new IPackageStatsObserver.Stub() {
+                    @Override
+                    public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
+                        boostNeedSize += pStats.dataSize;
+                        //Logs.d(CLASSNAME, "isSmartCacheSpaceEnough", "packageName = " + packageName
+                        //            + ", dataSize=" + UnitConverter.convertByteToProperUnit(pStats.dataSize));
+                    }
+                });
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "getBoostNeedSize", Log.getStackTraceString(e));
+            //    return ;
+            }
+        }
+
+        totalNeedSize = boostNeedSize;
+        boostNeedSize = 0L; //reset static variable boostNeedSize to 0L
+        return totalNeedSize;
+    }
+
+    public static boolean isSmartCacheSpaceEnough(Context context, List<String> packageNameList){
+        File file = new File(SMART_CACHE_FOLDER);
+        long freeSpaceInSmartCache = file.getFreeSpace();
+        long usedSpaceInSmartCache = file.getTotalSpace() - freeSpaceInSmartCache;
+        boolean isSpaceEnough = false;
+        long totalNeedSize = getBoostNeedSize(context, packageNameList);
+
+        if (freeSpaceInSmartCache > totalNeedSize ) {
+            isSpaceEnough = true;
+        } else {
+            if ( (usedSpaceInSmartCache + totalNeedSize ) <= SMART_CACHE_MAXIMUM_SPACE) {
+                boolean expandOk = expandSmartCacheSize();
+                if (expandOk){
+                    isSpaceEnough = true;
+                } else { // expand failed!
+                    isSpaceEnough = false;
+                }
+            } else { // smart cache is up to 4G
+                isSpaceEnough = false;
+            }
+        }
+
+        return isSpaceEnough;
     }
 
     public static boolean expandSmartCacheSize() {
