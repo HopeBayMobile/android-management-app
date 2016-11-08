@@ -47,7 +47,7 @@
     <string name="nav_sdcard1">SD card</string>
     <string name="nav_add_mountpoint">Add Shared Space</string>
     <string name="nav_settings">SETTINGS</string>
-    <string name="nav_smart_cache">SMART CACHE</string>
+    <string name="nav_smart_cache">BOOSTER</string>
     <string name="nav_about">ABOUT</string>
     <string name="nav_help">HELP</string>
 
@@ -276,8 +276,21 @@
 
     <!-- smart cache page -->
     <string name="smart_cache_title_bar">Boost Zone</string>
-    <string name="smart_cache_boost">Boost</string>
-    <string name="smart_cache_unboost">Unboost</string>
+    <string name="smart_cache_action_boost">Boost</string>
+    <string name="smart_cache_action_unboost">Unboost</string>
+    <string name="smart_cache_tab_boost">Boosted</string>
+    <string name="smart_cache_tab_unboost">Unboosted</string>
+    <string name="smart_cache_boost_hint_tap_app_to_boost">Tap app to boost.</string>
+    <string name="smart_cache_boost_hint_tap_app_to_unboost">Tap app to unboost.</string>
+    <string name="smart_cache_boost_hint_boosting">Boosting</string>
+    <string name="smart_cache_boost_hint_unboosting">Unboosting</string>
+    <string name="smart_cache_dialog_boost_title">App Boosted</string>
+    <string name="smart_cache_dialog_boost_message">All selected apps have been boosted.</string>
+    <string name="smart_cache_dialog_unboost_title">App Unboosted</string>
+    <string name="smart_cache_dialog_unboost_message">All selected apps have been unboosted.</string>
+    <string name="smart_cache_dialog_disable_apps_title">Disable Apps</string>
+    <string name="smart_cache_dialog_disable_apps_message_while_unboosting">The following apps will be temporarily disabled while unboosting.</string>
+    <string name="smart_cache_dialog_disable_apps_message_while_boosting">The following apps will be temporarily disabled while boosting.</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 

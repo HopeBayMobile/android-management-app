@@ -208,7 +208,7 @@ public class MainFragment extends Fragment {
                     return PagerAdapter.POSITION_NONE;
                 }
             } else {
-                if (object instanceof SmartCacheFragment || object instanceof HelpFragment) {
+                if (object instanceof BoosterFragment || object instanceof HelpFragment) {
                     return PagerAdapter.POSITION_NONE;
                 }
             }
@@ -242,7 +242,7 @@ public class MainFragment extends Fragment {
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_smart_cache))) {
-                fragment = SmartCacheFragment.newInstance();
+                fragment = BoosterFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_help))) {
                 fragment = HelpFragment.newInstance();
             } else {

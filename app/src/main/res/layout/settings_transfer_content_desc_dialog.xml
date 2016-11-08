@@ -10,7 +10,8 @@
         android:layout_margin="@dimen/M3"
         android:layout_height="wrap_content"
         android:text="@string/settings_transfer_content_desc_title"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/fontTextView2" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/textView"

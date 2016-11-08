@@ -48,11 +48,11 @@
                     android:id="@+id/unboost_tab"
                     style="@style/F5"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:padding="10dp"
-                    android:text="Unboosted" />
+                    android:text="@string/smart_cache_tab_unboost" />
             </LinearLayout>
 
             <View
@@ -67,12 +67,12 @@
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
                     android:id="@+id/boost_tab"
                     style="@style/F5"
-                    android:layout_width="100dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:padding="10dp"
-                    android:text="Boosted" />
+                    android:text="@string/smart_cache_tab_boost" />
             </LinearLayout>
 
         </LinearLayout>
@@ -86,7 +86,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/action_layout"
-            android:layout_below="@+id/boost_unboost_layout" />
+            android:layout_below="@+id/boost_unboost_layout"
+            android:background="@android:color/transparent"
+            android:overScrollMode="never"
+            android:scrollbars="vertical" />
 
         <View
             style="@style/HorizontalDivider"
@@ -99,10 +102,12 @@
             android:layout_alignParentBottom="true">
 
             <LinearLayout
+                android:id="@+id/action_button_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:gravity="center">
+                android:gravity="center"
+                android:visibility="gone">
 
                 <LinearLayout
                     android:layout_width="100dp"
@@ -135,19 +140,19 @@
                         android:background="?attr/selectableItemBackground"
                         android:gravity="center"
                         android:padding="10dp"
-                        android:text="@string/smart_cache_boost" />
+                        android:text="@string/smart_cache_action_boost" />
                 </LinearLayout>
 
             </LinearLayout>
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/message"
+                android:id="@+id/hint_message"
                 style="@style/F3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="Tapping app for boosting."
-                android:visibility="gone" />
+                android:text="@string/smart_cache_boost_hint_tap_app_to_boost"
+                android:visibility="visible" />
 
         </RelativeLayout>
 

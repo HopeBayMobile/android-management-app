@@ -28,6 +28,8 @@
     <color name="colorUserIconWarningBackground">#ffe5e5</color>
     <color name="colorUserIconWarningValue">#ff9000</color>
 
+    <color name="colorSmartCacheItemSelectedBackground">#ededed</color>
+
     <color name="C1">#77bc1f</color>
     <color name="C2">#026937</color>
     <color name="C3">#4579bb</color>
