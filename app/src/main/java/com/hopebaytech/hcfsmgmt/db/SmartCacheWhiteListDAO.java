@@ -133,5 +133,4 @@ public class SmartCacheWhiteListDAO implements IGenericDAO<SmartCacheWhiteListIn
         return SmartCacheWhiteListDBHelper.getDataBase(context);
     }
 
-
 }
