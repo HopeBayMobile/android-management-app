@@ -56,7 +56,7 @@ public class HCFSMgmtUtils {
 //    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
     public static final int PINNED_SPACE_WARNING_THRESHOLD = 80; // Unit: percentage
-    public static final long SMART_CACHE_MAXIMUM_SPACE = 4 * 1024 * 1024 * 1024; // smart_cache_size <= 4G
+    public static final long BOOSTER_MAXIMUM_SPACE = 4 * 1024 * 1024 * 1024; // booster_size <= 4G
     private static long boostNeedSize = 0L;
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
@@ -82,7 +82,7 @@ public class HCFSMgmtUtils {
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
 
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
-    public static final String SMART_CACHE_FOLDER = "/data/mnt/hcfsblock";
+    public static final String BOOSTER_FOLDER = "/data/mnt/hcfsblock";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
         Logs.d(CLASSNAME, "isAppPinned", appInfo.getName());
@@ -949,64 +949,66 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static long getAvailableSpaceForSmartCache(){
-        //smart cache uses pinned space
-        HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
-        long availableSpace = 0L;
-        if (hcfsStatInfo != null) {
-            availableSpace = hcfsStatInfo.getPinMax() - hcfsStatInfo.getPinTotal();
-            if (availableSpace > SMART_CACHE_MAXIMUM_SPACE) {
-               return SMART_CACHE_MAXIMUM_SPACE;
-            } else {
-                return availableSpace;
-            }
-        }
-        return availableSpace;
-    }
-
-    public static boolean enableSmartCache(long smartCacheSize) {
+    public static boolean checkPackageBoostStatus(String packageName) {
         boolean isSuccess = false;
         try {
-            String jsonResult = HCFSApiUtils.enableSmartCache(smartCacheSize);
+            String jsonResult = HCFSApiUtils.checkPackageBoostStatus(packageName);
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "enableSmartCache", "jObject=" + jObject);
+                Logs.i(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
             } else {
-                Logs.e(CLASSNAME, "enableSmartCache", "jObject=" + jObject);
+                Logs.e(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "enableSmartCache", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "checkPackageBoostStatus", Log.getStackTraceString(e));
         }
         return isSuccess;
     }
 
-    public static boolean disableSmartCache() {
+    public static boolean enableBooster(long boosterSize) {
         boolean isSuccess = false;
         try {
-            String jsonResult = HCFSApiUtils.disableSmartCache();
+            String jsonResult = HCFSApiUtils.enableBooster(boosterSize);
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "disableSmartCache", "jObject=" + jObject);
+                Logs.i(CLASSNAME, "enableBooster", "jObject=" + jObject);
             } else {
-                Logs.e(CLASSNAME, "disableSmartCache", "jObject=" + jObject);
+                Logs.e(CLASSNAME, "enableBooster", "jObject=" + jObject);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "disableSmartCache", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "enableBooster", Log.getStackTraceString(e));
         }
         return isSuccess;
     }
 
-    public static boolean smartCacheBoost() {
+    public static boolean disableBooster() {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.disableBooster();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "disableBooster", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "disableBooster", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "disableBooster", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
+    public static boolean triggerBoost() {
         boolean isTriggered = false;
         try {
-            String jsonResult = HCFSApiUtils.smartCacheBoost();
+            String jsonResult = HCFSApiUtils.triggerBoost();
             String logMsg = "jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-//                Logs.i(CLASSNAME, "smartCacheBoost", logMsg);
+//                Logs.i(CLASSNAME, "triggerBoost", logMsg);
                 int code = jObject.getInt("code");
                 if (code == 1) {
                     isTriggered = true;
@@ -1014,23 +1016,23 @@ public class HCFSMgmtUtils {
                     isTriggered = false;
                 }
             } else {
-                Logs.e(CLASSNAME, "smartCacheBoost", logMsg);
+                Logs.e(CLASSNAME, "triggerBoost", logMsg);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "smartCacheBoost", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "triggerBoost", Log.getStackTraceString(e));
         }
         return isTriggered;
     }
 
-    public static boolean smartCacheUnboost() {
+    public static boolean triggerUnboost() {
         boolean isTriggered = false;
         try {
-            String jsonResult = HCFSApiUtils.smartCacheUnboost();
+            String jsonResult = HCFSApiUtils.triggerUnboost();
             String logMsg = "jsonResult=" + jsonResult;
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-//                Logs.i(CLASSNAME, "smartCacheUnboost", logMsg);
+//                Logs.i(CLASSNAME, "triggerUnboost", logMsg);
                 int code = jObject.getInt("code");
                 if (code == 1) {
                     isTriggered = true;
@@ -1038,10 +1040,10 @@ public class HCFSMgmtUtils {
                     isTriggered = false;
                 }
             } else {
-                Logs.e(CLASSNAME, "smartCacheUnboost", logMsg);
+                Logs.e(CLASSNAME, "triggerUnboost", logMsg);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "smartCacheUnboost", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "triggerUnboost", Log.getStackTraceString(e));
         }
         return isTriggered;
     }
@@ -1056,6 +1058,21 @@ public class HCFSMgmtUtils {
         pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
     }
 
+    public static long getAvailableSpaceForBooster(){
+        //booster uses pinned space
+        HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
+        long availableSpace = 0L;
+        if (hcfsStatInfo != null) {
+            availableSpace = hcfsStatInfo.getPinMax() - hcfsStatInfo.getPinTotal();
+            if (availableSpace > BOOSTER_MAXIMUM_SPACE) {
+               return BOOSTER_MAXIMUM_SPACE;
+            } else {
+                return availableSpace;
+            }
+        }
+        return availableSpace;
+    }
+
     public static long getBoostNeedSize(Context context, List<String> packageNameList) {
         long totalNeedSize = 0L;
         boostNeedSize = 0L; //reset static variable boostNeedSize to 0L
@@ -1068,7 +1085,7 @@ public class HCFSMgmtUtils {
                     @Override
                     public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
                         boostNeedSize += pStats.dataSize;
-                        //Logs.d(CLASSNAME, "isSmartCacheSpaceEnough", "packageName = " + packageName
+                        //Logs.d(CLASSNAME, "isBoosterSpaceEnoughForBoost", "packageName = " + packageName
                         //            + ", dataSize=" + UnitConverter.convertByteToProperUnit(pStats.dataSize));
                     }
                 });
@@ -1083,26 +1100,26 @@ public class HCFSMgmtUtils {
         return totalNeedSize;
     }
 
-    public static boolean isSmartCacheSpaceEnoughForBoost(Context context, List<String> packageNameList){
+    public static boolean isBoosterSpaceEnoughForBoost(Context context, List<String> packageNameList){
         boolean isSpaceEnough = false;
-        File file = new File(SMART_CACHE_FOLDER);
-        long freeSpaceInSmartCache = file.getFreeSpace();
-        //long usedSpaceInSmartCache = file.getTotalSpace() - freeSpaceInSmartCache;
+        File file = new File(BOOSTER_FOLDER);
+        long freeSpaceInBooster = file.getFreeSpace();
+        //long usedSpaceInBooster = file.getTotalSpace() - freeSpaceInBooster;
         long totalNeedSize = getBoostNeedSize(context, packageNameList);
 
-        if (freeSpaceInSmartCache > totalNeedSize ) {
+        if (freeSpaceInBooster > totalNeedSize ) {
             isSpaceEnough = true;
         }
-        /* temp mark, the first smart cache verion's size can't be changed after it is created.
+        /* temp mark, the first version of ther booster size can't be changed after it is created.
         else {
-            if ( (usedSpaceInSmartCache + totalNeedSize ) <= SMART_CACHE_MAXIMUM_SPACE) {
-                boolean expandOk = expandSmartCacheSize();
+            if ( (usedSpaceInBooster + totalNeedSize ) <= BOOSTER_MAXIMUM_SPACE) {
+                boolean expandOk = expandBoosterSize();
                 if (expandOk){
                     isSpaceEnough = true;
                 } else { // expand failed!
                     isSpaceEnough = false;
                 }
-            } else { // smart cache is up to 4G
+            } else { // booser maximum space is up to 4G
                 isSpaceEnough = false;
             }
         } */
@@ -1110,21 +1127,23 @@ public class HCFSMgmtUtils {
         return isSpaceEnough;
     }
 
-    public static boolean expandSmartCacheSize() {
+    /* temp mark, the first version of ther booster size can't be changed after it is created.
+    public static boolean expandBoosterSize() {
         boolean isSuccess = false;
         try {
-            String jsonResult = HCFSApiUtils.expandSmartCacheSize();
+            String jsonResult = HCFSApiUtils.expandBoosterSize();
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "expandSmartCacheSize", "jObject=" + jObject);
+                Logs.i(CLASSNAME, "expandBoosterSize", "jObject=" + jObject);
             } else {
-                Logs.e(CLASSNAME, "expandSmartCacheSize", "jObject=" + jObject);
+                Logs.e(CLASSNAME, "expandBoosterSize", "jObject=" + jObject);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "expandSmartCacheSize", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "expandBoosterSize", Log.getStackTraceString(e));
         }
         return isSuccess;
     }
+    */
 
 }

@@ -77,9 +77,9 @@ public class HCFSApiUtils {
 
     public static native String notifyApplistChange();
 
-    public static native String enableSmartCache(long smartCacheSize);
-    public static native String disableSmartCache();
-    public static native String smartCacheBoost();
-    public static native String smartCacheUnboost();
-    public static native String expandSmartCacheSize();
+    public static native String checkPackageBoostStatus(String packageName);
+    public static native String enableBooster(long boosterSize);
+    public static native String disableBooster();
+    public static native String triggerBoost();
+    public static native String triggerUnboost();
 }

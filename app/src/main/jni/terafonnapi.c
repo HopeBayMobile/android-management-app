@@ -304,40 +304,49 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_notif
 	free((char *)json_res);
 	return result;
 }
-
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_enableSmartCache(
-		JNIEnv *jEnv, jobject jObject, jstring jSmartCacheSize) {
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_checkPackageBoostStatus(
+		JNIEnv *jEnv, jobject jObject, jstring jpackageName) {
 	const char *json_res;
-    const char *smart_cache_size = (*jEnv)->GetStringUTFChars(jEnv, jSmartCacheSize, 0);
-    HCFS_enable_smart_cache(&json_res, smart_cache_size);
+    const char *package_name = (*jEnv)->GetStringUTFChars(jEnv, jpackageName, 0);
+    HCFS_check_package_boost_status(&json_res, package_name);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
-    free((char *)smart_cache_size);
+    free((char *)package_name);
     return result;
 }
 
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_disableSmartCache(
-		JNIEnv *jEnv, jobject jObject) {
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_enableBooster(
+		JNIEnv *jEnv, jobject jObject, jlong jboosterSize) {
 	const char *json_res;
-    HCFS_disable_smart_cache(&json_res);
-    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
-    free((char *)json_res);
-    return result;
-}
-
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_smartCacheBoost(
-		JNIEnv *jEnv, jobject jObject) {
-	const char *json_res;
-    HCFS_smart_cache_boost(&json_res);
+    const long booster_size = jboosterSize;
+    HCFS_enable_booster(&json_res, booster_size);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
     return result;
 }
 
-JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_smartCacheUnboost(
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_disableBooster(
 		JNIEnv *jEnv, jobject jObject) {
 	const char *json_res;
-    HCFS_smart_cache_unboost(&json_res);
+    HCFS_disable_booster(&json_res);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_triggerBoost(
+		JNIEnv *jEnv, jobject jObject) {
+	const char *json_res;
+    HCFS_trigger_boost(&json_res);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_triggerUnboost(
+		JNIEnv *jEnv, jobject jObject) {
+	const char *json_res;
+    HCFS_trigger_unboost(&json_res);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
     return result;
