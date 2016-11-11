@@ -1146,4 +1146,21 @@ public class HCFSMgmtUtils {
     }
     */
 
+    public static boolean clearBoosterPackageRemaining(String packageName) {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.clearBoosterPackageRemaining(packageName);
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.i(CLASSNAME, "clearBoosterPackageRemaining", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "clearBoosterPackageRemaining", "jObject=" + jObject);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "clearBoosterPackageRemaining", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
 }

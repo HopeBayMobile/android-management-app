@@ -196,6 +196,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     Intent intentService = new Intent(context, TeraMgmtService.class);
                     int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                     String packageName = intent.getData().getSchemeSpecificPart();
+                    HCFSMgmtUtils.clearBoosterPackageRemaining(packageName);
                     intentService.setAction(TeraIntent.ACTION_REMOVE_UID_FROM_DB);
                     intentService.putExtra(TeraIntent.KEY_UID, uid);
                     intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);

@@ -82,4 +82,5 @@ public class HCFSApiUtils {
     public static native String disableBooster();
     public static native String triggerBoost();
     public static native String triggerUnboost();
+    public static native String clearBoosterPackageRemaining(String packageName);
 }

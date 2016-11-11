@@ -304,6 +304,7 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_notif
 	free((char *)json_res);
 	return result;
 }
+
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_checkPackageBoostStatus(
 		JNIEnv *jEnv, jobject jObject, jstring jpackageName) {
 	const char *json_res;
@@ -349,5 +350,16 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_trigg
     HCFS_trigger_unboost(&json_res);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_clearBoosterPackageRemaining(
+		JNIEnv *jEnv, jobject jObject, jstring jpackageName) {
+	const char *json_res;
+    const char *package_name = (*jEnv)->GetStringUTFChars(jEnv, jpackageName, 0);
+    HCFS_clear_booster_package_remaining(&json_res, package_name);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)package_name);
     return result;
 }
