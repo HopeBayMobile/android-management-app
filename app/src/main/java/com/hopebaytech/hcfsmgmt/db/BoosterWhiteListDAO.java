@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.hopebaytech.hcfsmgmt.info.SmartCacheWhiteListInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterWhiteListInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IGenericDAO;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
@@ -16,11 +16,11 @@ import java.util.List;
  * @author GuoYu
  *         Created by GuoYu on 2016/10/27.
  */
-public class SmartCacheWhiteListDAO implements IGenericDAO<SmartCacheWhiteListInfo> {
+public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
 
     private final String CLASSNAME = getClass().getSimpleName();
 
-    public static final String TABLE_NAME = "smart_cache_while_list";
+    public static final String TABLE_NAME = "booster_white_list";
     public static final String KEY_ID = "_id";
     public static final String PACKAGE_NAME_COLUMN = "package_name";
     public static final String CREATE_TABLE =
@@ -29,31 +29,31 @@ public class SmartCacheWhiteListDAO implements IGenericDAO<SmartCacheWhiteListIn
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL)";
 
     private Context context;
-    private static SmartCacheWhiteListDAO mSmartCacheWhiteListDAO;
+    private static BoosterWhiteListDAO mBoosterWhiteListDAO;
     private static SQLiteDatabase mDataBase;
 
-    private SmartCacheWhiteListDAO(Context context) {
+    private BoosterWhiteListDAO(Context context) {
         this.context = context;
     }
 
-    public static SmartCacheWhiteListDAO getInstance(Context context) {
-        if (mSmartCacheWhiteListDAO == null) {
-            synchronized (SmartCacheWhiteListDAO.class) {
-                if (mSmartCacheWhiteListDAO == null) {
-                    mSmartCacheWhiteListDAO = new SmartCacheWhiteListDAO(context);
+    public static BoosterWhiteListDAO getInstance(Context context) {
+        if (mBoosterWhiteListDAO == null) {
+            synchronized (BoosterWhiteListDAO.class) {
+                if (mBoosterWhiteListDAO == null) {
+                    mBoosterWhiteListDAO = new BoosterWhiteListDAO(context);
                 }
             }
         }
-        mDataBase = SmartCacheWhiteListDBHelper.getDataBase(context);
-        return mSmartCacheWhiteListDAO;
+        mDataBase = Uid2PkgDBHelper.getDataBase(context);
+        return mBoosterWhiteListDAO;
     }
 
     @Override
-    public SmartCacheWhiteListInfo getRecord(Cursor cursor) {
-        SmartCacheWhiteListInfo scwListInfo = new SmartCacheWhiteListInfo();
-        scwListInfo.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
-        scwListInfo.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
-        return scwListInfo;
+    public BoosterWhiteListInfo getRecord(Cursor cursor) {
+        BoosterWhiteListInfo boosterWhiteListInfo = new BoosterWhiteListInfo();
+        boosterWhiteListInfo.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
+        boosterWhiteListInfo.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
+        return boosterWhiteListInfo;
     }
 
     @Override
@@ -65,28 +65,27 @@ public class SmartCacheWhiteListDAO implements IGenericDAO<SmartCacheWhiteListIn
     }
 
     @Override
-    public List<SmartCacheWhiteListInfo> getAll() {
-        List<SmartCacheWhiteListInfo> scwListInfoList = new ArrayList<>();
+    public List<BoosterWhiteListInfo> getAll() {
+        List<BoosterWhiteListInfo> boosterWhiteListInfoList = new ArrayList<>();
         Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
-            scwListInfoList.add(getRecord(cursor));
+            boosterWhiteListInfoList.add(getRecord(cursor));
         }
         cursor.close();
-        return scwListInfoList;
+        return boosterWhiteListInfoList;
     }
 
-    public SmartCacheWhiteListInfo getFirst() {
-        SmartCacheWhiteListInfo scwListInfo = null;
+    public BoosterWhiteListInfo getFirst() {
+        BoosterWhiteListInfo boosterWhiteListInfo = null;
         Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
-            scwListInfo = getRecord(cursor);
+            boosterWhiteListInfo = getRecord(cursor);
         }
-        return scwListInfo;
+        return boosterWhiteListInfo;
     }
 
     @Override
-    public boolean insert(SmartCacheWhiteListInfo info) {
-
+    public boolean insert(BoosterWhiteListInfo info) {
         String packageName = info.getPackageName();
 
         ContentValues cv = new ContentValues();
@@ -116,7 +115,7 @@ public class SmartCacheWhiteListDAO implements IGenericDAO<SmartCacheWhiteListIn
     }
 
     @Override
-    public boolean update(SmartCacheWhiteListInfo info) {
+    public boolean update(BoosterWhiteListInfo info) {
         ContentValues cv = new ContentValues();
         cv.put(PACKAGE_NAME_COLUMN, info.getPackageName());
 
@@ -130,7 +129,7 @@ public class SmartCacheWhiteListDAO implements IGenericDAO<SmartCacheWhiteListIn
     }
 
     private SQLiteDatabase getDataBase() {
-        return SmartCacheWhiteListDBHelper.getDataBase(context);
+        return Uid2PkgDBHelper.getDataBase(context);
     }
 
 }

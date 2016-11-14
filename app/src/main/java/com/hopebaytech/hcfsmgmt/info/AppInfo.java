@@ -30,6 +30,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     private String[] sharedLibraryFiles;
     private int appSize;
     private boolean isSystemApp;
+    private int boostStatus;
     private Context context;
 
     /**
@@ -196,6 +197,14 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
     public void setSystemApp(boolean systemApp) {
         isSystemApp = systemApp;
+    }
+
+    public int getBoostStatus() {
+        return boostStatus;
+    }
+
+    public void setBoostStatus(int boostStatus) {
+        boostStatus = boostStatus;
     }
 
     @Override

@@ -22,11 +22,13 @@ public class UidDAO {
     public static final String UID_COLUMN = "uid";
     public static final String PACKAGE_NAME_COLUMN = "package_name";
     public static final String EXTERNAL_DIR_COLUMN = "external_dir";
+    public static final String BOOST_STATUS_COLUMN = "boost_status";
     public static final String CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     PIN_STATUS_COLUMN + " INTEGER NOT NULL, " +
                     SYSTEM_APP_COLUMN + " INTEGER NOT NULL, " +
+                    BOOST_STATUS_COLUMN + " INTEGER, " +
                     UID_COLUMN + " TEXT NOT NULL, " +
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
                     EXTERNAL_DIR_COLUMN + " TEXT)";
@@ -65,6 +67,7 @@ public class UidDAO {
         }
         contentValues.put(PIN_STATUS_COLUMN, pinStatus);
         contentValues.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
+        contentValues.put(BOOST_STATUS_COLUMN, uidInfo.getBoostStatus());
         contentValues.put(UID_COLUMN, uidInfo.getUid());
         contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
 
@@ -85,6 +88,7 @@ public class UidDAO {
         String logMsg = "isPinned=" + uidInfo.isPinned() +
                 ", pinStatus=" + pinStatus +
                 ", isSystemApp=" + uidInfo.isSystemApp() +
+                ", boostStatus=" + uidInfo.getBoostStatus() +
                 ", uid=" + uidInfo.getUid() +
                 ", packageName=" + uidInfo.getPackageName() +
                 ", externalDir=" + uidInfo.getExternalDir();
@@ -110,6 +114,8 @@ public class UidDAO {
                 contentValues.put(PIN_STATUS_COLUMN, uidInfo.isPinned() ? 1 : 0);
             } else if (column.equals(SYSTEM_APP_COLUMN)) {
                 contentValues.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
+            } else if (column.equals(BOOST_STATUS_COLUMN)) {
+                contentValues.put(BOOST_STATUS_COLUMN, uidInfo.getBoostStatus());
             } else if (column.equals(UID_COLUMN)) {
                 contentValues.put(UID_COLUMN, uidInfo.getUid());
             } else if (column.equals(PACKAGE_NAME_COLUMN)) {
@@ -181,6 +187,7 @@ public class UidDAO {
         UidInfo result = new UidInfo();
         result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
         result.setSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
+        result.setUid(cursor.getInt(cursor.getColumnIndex(BOOST_STATUS_COLUMN)));
         result.setUid(cursor.getInt(cursor.getColumnIndex(UID_COLUMN)));
         result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));
 

@@ -4,7 +4,7 @@ package com.hopebaytech.hcfsmgmt.info;
  * @author GuoYu
  *         Created by GuoYu on 2016/11/03.
  */
-public class SmartCacheWhiteListVersionInfo {
+public class BoosterWhiteListVersionInfo {
 
     private int id;
     private String whiteListVersion;
