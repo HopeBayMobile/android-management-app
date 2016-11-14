@@ -55,7 +55,7 @@ public class EnableBoosterDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater inflater = ((MainActivity) mContext).getLayoutInflater();
-        final View view = inflater.inflate(R.layout.booster_dialog_fragment, null);
+        final View view = inflater.inflate(R.layout.enable_booster_dialog, null);
         final BoosterSeekBar boosterSeekBar = (BoosterSeekBar) view.findViewById(R.id.booster_seek_bar);
         boosterSeekBar.setValueRange(mMinSize, mMaxSize);
         boosterSeekBar.setValueFormatter(new BoosterSeekBar.ValueFormatter() {

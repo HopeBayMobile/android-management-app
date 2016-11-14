@@ -241,19 +241,15 @@ public class SettingsFragment extends Fragment {
         });
 
         mAdvancedSettings.setOnClickListener(new View.OnClickListener() {
-
-            private boolean isChecked;
-
             @Override
             public void onClick(View v) {
-                if (isChecked) {
-                    mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
-                } else {
+                int visible = mAdvancedSettingsLayout.getVisibility();
+                if (visible == View.VISIBLE) {
                     mAdvancedSettingsLayout.setVisibility(View.GONE);
+                } else if (visible == View.GONE) {
+                    mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
                 }
-                isChecked = !isChecked;
             }
-
         });
 
         mEnableBooster.setOnClickListener(new View.OnClickListener() {

@@ -129,7 +129,7 @@ public class BoosterSeekBar extends View {
 
         mSeekBarWidth = calcSeekBarWidth();
         mSeekBarY = getHeight() / 2f + Math.max(mThumb.getIntrinsicHeight(), mBackgroundLineHeight) / 2f;
-        mValueTextY = getHeight() / 2f - mTextRect.height() / 2f;
+        mValueTextY = getHeight() / 2f - mTextRect.height();
         mStartX = mPaddingLeft;
         mEndX = mStartX + mSeekBarWidth;
         mThumbInterval = calcThumbInterval(mSeekBarWidth);
