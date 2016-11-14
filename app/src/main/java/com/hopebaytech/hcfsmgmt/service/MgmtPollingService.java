@@ -93,7 +93,7 @@ public class MgmtPollingService extends Service {
                                             case GetDeviceInfo.Category.LOCK:
                                                 action.showMessageWhenLock(piggyback.getMessage());
                                                 break;
-                                            case GetDeviceInfo.Category.RESET:
+                                            case GetDeviceInfo.Category. RESET:
                                                 action.reset();
                                                 break;
                                             case GetDeviceInfo.Category.TX_WAITING:

@@ -247,7 +247,6 @@
                         android:text="@string/settings_booster_title" />
 
                     <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                        android:id="@+id/fontTextView3"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/settings_booster_subtitle"
