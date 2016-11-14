@@ -9,38 +9,38 @@ import com.hopebaytech.hcfsmgmt.info.UidInfo;
 
 public class Uid2PkgDBHelper extends SQLiteOpenHelper {
 
-	public static final String DATABASE_NAME = "uid.db";
-	public static final int VERSION = 2;
-	private static SQLiteDatabase database;
-	private static Uid2PkgDBHelper mUid2PkgDBHelper;
+    public static final String DATABASE_NAME = "uid.db";
+    public static final int VERSION = 2;
+    private static SQLiteDatabase database;
+    private static Uid2PkgDBHelper mUid2PkgDBHelper;
 
-	public Uid2PkgDBHelper(Context context, String name, CursorFactory factory, int version) {
-		super(context, name, factory, version);
-	}
+    public Uid2PkgDBHelper(Context context, String name, CursorFactory factory, int version) {
+        super(context, name, factory, version);
+    }
 
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(UidDAO.CREATE_TABLE);
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        db.execSQL(UidDAO.CREATE_TABLE);
         db.execSQL(BoosterWhiteListDAO.CREATE_TABLE);
         db.execSQL(BoosterWhiteListVersionDAO.CREATE_TABLE);
-	}
+    }
 
-	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
             addBoostStatusAndBoosterWhiteListTables(db);
         }
-	}
+    }
 
-	public static SQLiteDatabase getDataBase(Context context) {
-		if (mUid2PkgDBHelper == null) {
-			mUid2PkgDBHelper = new Uid2PkgDBHelper(context, DATABASE_NAME, null, VERSION);
-		}
-		if (database == null || !database.isOpen()) {
-			database = mUid2PkgDBHelper.getWritableDatabase();
-		}
-		return database;
-	}
+    public static SQLiteDatabase getDataBase(Context context) {
+        if (mUid2PkgDBHelper == null) {
+            mUid2PkgDBHelper = new Uid2PkgDBHelper(context, DATABASE_NAME, null, VERSION);
+        }
+        if (database == null || !database.isOpen()) {
+            database = mUid2PkgDBHelper.getWritableDatabase();
+        }
+        return database;
+    }
 
     private void addBoostStatusAndBoosterWhiteListTables(SQLiteDatabase db) {
             String uidTableName = UidDAO.TABLE_NAME;
@@ -64,7 +64,7 @@ public class Uid2PkgDBHelper extends SQLiteOpenHelper {
                         " where " + UidDAO.SYSTEM_APP_COLUMN + "=0";
 
             db.execSQL(RENAME_OLD_UID_TABLE);
-	    	db.execSQL(UidDAO.CREATE_TABLE);
+            db.execSQL(UidDAO.CREATE_TABLE);
             db.execSQL(BoosterWhiteListDAO.CREATE_TABLE);
             db.execSQL(BoosterWhiteListVersionDAO.CREATE_TABLE);
             db.execSQL(COPY_OLD_UID_DATA_TO_NEW_UID_TABLE);
