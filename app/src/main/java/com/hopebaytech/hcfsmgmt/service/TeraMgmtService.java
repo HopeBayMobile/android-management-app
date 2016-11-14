@@ -734,7 +734,8 @@ public class TeraMgmtService extends Service {
         int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) == null) {
-            mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, uid, packageName));
+            int boostStatus = HCFSMgmtUtils.getInstalledAppBoostStatus(packageName);
+            mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, uid, packageName, boostStatus));
         }
     }
 

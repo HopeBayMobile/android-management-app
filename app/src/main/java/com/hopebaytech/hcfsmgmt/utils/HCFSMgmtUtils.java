@@ -949,7 +949,7 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static boolean checkPackageBoostStatus(String packageName) {
+    public static boolean isPackageBoosted(String packageName) {
         boolean isSuccess = false;
         try {
             String jsonResult = HCFSApiUtils.checkPackageBoostStatus(packageName);
@@ -964,6 +964,10 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "checkPackageBoostStatus", Log.getStackTraceString(e));
         }
         return isSuccess;
+    }
+
+    public static int getInstalledAppBoostStatus(String packageName) {
+        return HCFSMgmtUtils.isPackageBoosted(packageName) ? UidInfo.BoostStatus.BOOSTED : UidInfo.BoostStatus.UNBOOSTED;
     }
 
     public static boolean enableBooster(long boosterSize) {

@@ -504,7 +504,8 @@ public class TeraFonnApiService extends Service {
             } else {
                 PackageManager pm = getPackageManager();
                 ApplicationInfo packageInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                uidDAO.insert(new UidInfo(pinOP, false, packageInfo.uid, packageName));
+                int boostStatus = HCFSMgmtUtils.getInstalledAppBoostStatus(packageName);
+                uidDAO.insert(new UidInfo(pinOP, false, packageInfo.uid, packageName, boostStatus));
             }
         } catch (Exception e) {
             Logs.e(CLASSNAME, "updateDB", e.toString());
