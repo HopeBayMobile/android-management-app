@@ -5,14 +5,14 @@ import android.os.Looper;
 
 /**
  * @author Aaron
- *         Created by Aaron on 2016/11/21.
+ *         Created by Aaron on 2016/11/14.
  */
 
 public class UiHandler {
 
     private static Handler sUiHandler;
 
-    public static Handler getInstace() {
+    public static Handler getInstance() {
         if (sUiHandler == null) {
             synchronized (UiHandler.class) {
                 if (sUiHandler == null) {

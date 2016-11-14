@@ -19,6 +19,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
@@ -26,6 +27,7 @@ import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 /**
  * @author Aaron
@@ -45,13 +47,15 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_ASK_CONFIRM_TURN_OFF_WIFI_ONLY = "pref_ask_confirm_turn_off_wifi_only";
     public static final String PREF_ALLOW_PIN_UNPIN_APPS = "pref_allow_pin_unpin_apps";
     public static final String PREF_SHOW_ACCESS_CLOUD_SETTINGS = "pref_show_access_cloud_settings";
-    public static final String PREF_SMART_CACHE = "pref_smart_cache";
+    public static final String PREF_ENABLE_BOOSTER = "pref_enable_booster";
 
     public static final String KEY_RATIO = "ratio";
 
     public static final int REQUEST_CODE_RATIO = 0;
     public static final int REQUEST_ABOUT_FRAGMENT = 1;
     public static final int REQUEST_CANCEL_WIFI_ONLY = 2;
+    public static final int REQUEST_CODE_ENABLE_BOOSTER = 3;
+    public static final int REQUEST_CODE_DISABLE_BOOSTER = 4;
 
     private Handler mWorkHandler;
 
@@ -67,6 +71,7 @@ public class SettingsFragment extends Fragment {
     private LinearLayout mTransferContent;
     private LinearLayout mAdvancedSettingsLayout;
     private LinearLayout mNotifyLocalStorageUsedRatio;
+    private TextView mSummaryText;
     private RelativeLayout mAdvancedSettings;
 
     public static SettingsFragment newInstance() {
@@ -109,20 +114,72 @@ public class SettingsFragment extends Fragment {
         mTransferContent = (LinearLayout) view.findViewById(R.id.transfer_content);
         mAdvancedSettingsLayout = (LinearLayout) view.findViewById(R.id.advanced_settings_layout);
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
+        mSummaryText = (TextView) mNotifyLocalStorageUsedRatio.findViewById(R.id.notify_local_storage_used_ratio_summary);
         mAdvancedSettings = (RelativeLayout) view.findViewById(R.id.advanced_settings);
+
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        boolean isChecked = true;
-        SettingsDAO settingsDAO = SettingsDAO.getInstance(getContext());
-        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
-        if (settingsInfo != null) {
-            isChecked = Boolean.valueOf(settingsInfo.getValue());
-        }
-        mSyncWifiOnly.setChecked(isChecked);
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                boolean isSyncWifiOnly = true;
+                SettingsDAO settingsDAO = SettingsDAO.getInstance(getContext());
+                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                if (settingsInfo != null) {
+                    isSyncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
+                }
+
+                boolean isNotifyConnFailedRecovery = false;
+                settingsInfo = settingsDAO.get(PREF_NOTIFY_CONN_FAILED_RECOVERY);
+                if (settingsInfo != null) {
+                    isNotifyConnFailedRecovery = Boolean.valueOf(settingsInfo.getValue());
+                }
+
+                String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+                String ratio = defaultValue.concat("%");
+                settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
+                if (settingsInfo != null) {
+                    ratio = settingsInfo.getValue().concat("%");
+                }
+
+                boolean isAllowPinUnpinApps = false;
+                settingsInfo = settingsDAO.get(PREF_ALLOW_PIN_UNPIN_APPS);
+                if (settingsInfo != null) {
+                    isAllowPinUnpinApps = Boolean.valueOf(settingsInfo.getValue());
+                }
+
+                final String finalRatio = ratio;
+                final boolean finalIsSyncWifiOnly = isSyncWifiOnly;
+                final boolean finalIsNotifyConnFailedRecovery = isNotifyConnFailedRecovery;
+                final boolean finalIsAllowPinUnpinApps = isAllowPinUnpinApps;
+                final boolean isBoosterEnabled = PreferenceManager.getDefaultSharedPreferences(mContext)
+                        .getBoolean(PREF_ENABLE_BOOSTER, false);
+                UiHandler.getInstance().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSyncWifiOnly.setChecked(finalIsSyncWifiOnly);
+                        mNotifyConnFailedRecovery.setChecked(finalIsNotifyConnFailedRecovery);
+                        mAllowPinUnpinApps.setChecked(finalIsAllowPinUnpinApps);
+                        mEnableBooster.setChecked(isBoosterEnabled);
+
+                        if (isAdded()) {
+                            String summary = getString(R.string.settings_local_storage_used_ratio, finalRatio);
+                            mSummaryText.setText(summary);
+                        }
+
+                        setUpListener();
+                    }
+                });
+            }
+        });
+
+    }
+
+    private void setUpListener() {
         mSyncWifiOnly.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -140,12 +197,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        isChecked = false;
-        settingsInfo = settingsDAO.get(PREF_NOTIFY_CONN_FAILED_RECOVERY);
-        if (settingsInfo != null) {
-            isChecked = Boolean.valueOf(settingsInfo.getValue());
-        }
-        mNotifyConnFailedRecovery.setChecked(isChecked);
         mNotifyConnFailedRecovery.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -163,17 +214,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
-        String getRatio = defaultValue.concat("%");
-
-        settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
-        if (settingsInfo != null) {
-            getRatio = settingsInfo.getValue().concat("%");
-        }
-        final String ratio = getRatio;
-        String summary = getString(R.string.settings_local_storage_used_ratio, ratio);
-        TextView summaryText = (TextView) mNotifyLocalStorageUsedRatio.findViewById(R.id.notify_local_storage_used_ratio_summary);
-        summaryText.setText(summary);
         mNotifyLocalStorageUsedRatio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -216,30 +256,26 @@ public class SettingsFragment extends Fragment {
 
         });
 
-        mEnableBooster.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mEnableBooster.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MainFragment mainFragment = (MainFragment) getFragmentManager().findFragmentByTag(MainFragment.TAG);
+            public void onClick(View v) {
+                boolean isChecked = ((CheckBox) v).isChecked();
                 if (isChecked) {
-                    if (mainFragment != null) {
-                        mainFragment.addPageToViewPager(getString(R.string.nav_settings), getString(R.string.nav_smart_cache));
-                    }
-                    mAdvancedSettingsLayout.setVisibility(View.VISIBLE);
+                    EnableBoosterDialogFragment dialogFragment = EnableBoosterDialogFragment.newInstance();
+                    dialogFragment.setCancelable(false);
+                    dialogFragment.setTargetFragment(SettingsFragment.this, REQUEST_CODE_ENABLE_BOOSTER);
+                    dialogFragment.setMaxSize(4L * 1024 * 1024 * 1024);
+                    dialogFragment.setMinSize(100 * 1024 * 1024);
+                    dialogFragment.show(getFragmentManager(), EnableBoosterDialogFragment.TAG);
                 } else {
-                    if (mainFragment != null) {
-                        mainFragment.removePageFromViewPager(getString(R.string.nav_smart_cache));
-                    }
-                    mAdvancedSettingsLayout.setVisibility(View.GONE);
+                    DisableBoosterDialogFragment dialogFragment = DisableBoosterDialogFragment.newInstance();
+                    dialogFragment.setCancelable(false);
+                    dialogFragment.setTargetFragment(SettingsFragment.this, REQUEST_CODE_DISABLE_BOOSTER);
+                    dialogFragment.show(getFragmentManager(), EnableBoosterDialogFragment.TAG);
                 }
             }
         });
 
-        isChecked = false;
-        settingsInfo = settingsDAO.get(PREF_ALLOW_PIN_UNPIN_APPS);
-        if (settingsInfo != null) {
-            isChecked = Boolean.valueOf(settingsInfo.getValue());
-        }
-        mAllowPinUnpinApps.setChecked(isChecked);
         mAllowPinUnpinApps.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -258,31 +294,6 @@ public class SettingsFragment extends Fragment {
                         mContext.sendBroadcast(intent);
                     }
                 });
-            }
-        });
-
-        isChecked = false;
-        settingsInfo = settingsDAO.get(PREF_SMART_CACHE);
-        if (settingsInfo != null) {
-            isChecked = Boolean.valueOf(settingsInfo.getValue());
-        }
-        mEnableBooster.setChecked(isChecked);
-        mEnableBooster.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                final SettingsInfo settingsInfo = new SettingsInfo();
-                settingsInfo.setKey(PREF_SMART_CACHE);
-                settingsInfo.setValue(String.valueOf(isChecked));
-
-                mWorkHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
-                        settingsDAO.update(settingsInfo);
-                    }
-                });
-
-                // open the smart cache fragment here!!!
             }
         });
     }
@@ -328,6 +339,32 @@ public class SettingsFragment extends Fragment {
         } else if (requestCode == REQUEST_CANCEL_WIFI_ONLY) {
             if (resultCode == Activity.RESULT_CANCELED) {
                 setSyncWifiOnly(true);
+            }
+        } else if (requestCode == REQUEST_CODE_ENABLE_BOOSTER) {
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    Toast.makeText(mContext, R.string.booster_enable_dialog_success, Toast.LENGTH_LONG).show();
+                    MainFragment mainFragment = (MainFragment) getFragmentManager().findFragmentByTag(MainFragment.TAG);
+                    if (mainFragment != null) {
+                        mainFragment.addBoosterPage(getString(R.string.nav_settings), true /* moveToAddedPage */);
+                    }
+                    break;
+                case Activity.RESULT_CANCELED:
+                    mEnableBooster.setChecked(false);
+                    break;
+            }
+        } else if (requestCode == REQUEST_CODE_DISABLE_BOOSTER) {
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+                    Toast.makeText(mContext, R.string.booster_disable_dialog_success, Toast.LENGTH_LONG).show();
+                    MainFragment mainFragment = (MainFragment) getFragmentManager().findFragmentByTag(MainFragment.TAG);
+                    if (mainFragment != null) {
+                        mainFragment.removeBooster();
+                    }
+                    break;
+                case Activity.RESULT_CANCELED:
+                    mEnableBooster.setChecked(true);
+                    break;
             }
         }
     }

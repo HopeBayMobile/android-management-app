@@ -159,12 +159,12 @@ public class BoosterFragment extends Fragment {
                     return;
                 }
 
-                String title = getString(R.string.smart_cache_dialog_disable_apps_title);
+                String title = getString(R.string.booster_dialog_disable_apps_title);
                 StringBuilder builder = new StringBuilder();
                 if (mCurrnetTab == Tab.UNBOOSTED) {
-                    builder.append(getString(R.string.smart_cache_dialog_disable_apps_message_while_boosting));
+                    builder.append(getString(R.string.booster_dialog_disable_apps_message_while_boosting));
                 } else {
-                    builder.append(getString(R.string.smart_cache_dialog_disable_apps_message_while_unboosting));
+                    builder.append(getString(R.string.booster_dialog_disable_apps_message_while_unboosting));
                 }
                 builder.append("\n\n");
 
@@ -194,8 +194,8 @@ public class BoosterFragment extends Fragment {
             case Tab.UNBOOSTED:
                 ((View) mUnboostTab.getParent()).setBackgroundColor(ContextCompat.getColor(mContext, R.color.C1));
                 ((View) mBoostTab.getParent()).setBackgroundColor(ContextCompat.getColor(mContext, R.color.C5));
-                mAction.setText(R.string.smart_cache_action_boost);
-                mHintMessage.setText(R.string.smart_cache_boost_hint_tap_app_to_boost);
+                mAction.setText(R.string.booster_action_boost);
+                mHintMessage.setText(R.string.booster_boost_hint_tap_app_to_boost);
 
                 if (updateAppList) {
                     showUnboostedAppList();
@@ -204,8 +204,8 @@ public class BoosterFragment extends Fragment {
             case Tab.BOOSTED:
                 ((View) mBoostTab.getParent()).setBackgroundColor(ContextCompat.getColor(mContext, R.color.C1));
                 ((View) mUnboostTab.getParent()).setBackgroundColor(ContextCompat.getColor(mContext, R.color.C5));
-                mAction.setText(R.string.smart_cache_action_unboost);
-                mHintMessage.setText(R.string.smart_cache_boost_hint_tap_app_to_unboost);
+                mAction.setText(R.string.booster_action_unboost);
+                mHintMessage.setText(R.string.booster_boost_hint_tap_app_to_unboost);
 
                 if (updateAppList) {
                     showBoostedAppList();
@@ -434,14 +434,14 @@ public class BoosterFragment extends Fragment {
                         targetView = (View) mBoostTab.getParent();
 
                         // In unboosted page, show boost success message after processing
-                        title = getString(R.string.smart_cache_dialog_boost_title);
-                        message = getString(R.string.smart_cache_dialog_boost_message);
+                        title = getString(R.string.booster_dialog_boost_title);
+                        message = getString(R.string.booster_dialog_boost_message);
                     } else {
                         targetView = (View) mUnboostTab.getParent();
 
                         // In boosted page, show unboost success message after processing
-                        title = getString(R.string.smart_cache_dialog_unboost_title);
-                        message = getString(R.string.smart_cache_dialog_unboost_message);
+                        title = getString(R.string.booster_dialog_unboost_title);
+                        message = getString(R.string.booster_dialog_unboost_message);
                     }
 
                     final Animation scaleAnim = AnimationUtils.loadAnimation(mContext, R.anim.boost_unboust_scale);
@@ -481,9 +481,9 @@ public class BoosterFragment extends Fragment {
 
             final String processingMsg;
             if (mCurrnetTab == Tab.BOOSTED) { // In boosted page, execute unboost action
-                processingMsg = getString(R.string.smart_cache_boost_hint_unboosting);
+                processingMsg = getString(R.string.booster_boost_hint_unboosting);
             } else { // In unboosted page, execute boost action
-                processingMsg = getString(R.string.smart_cache_boost_hint_boosting);
+                processingMsg = getString(R.string.booster_boost_hint_boosting);
             }
             mHintMessage.setText(processingMsg);
             mHintMessage.setVisibility(View.VISIBLE);
@@ -531,9 +531,9 @@ public class BoosterFragment extends Fragment {
                     Logs.w(CLASSNAME, "stopProcessingTextAnim", mHintMessage.getText().toString());
                     String message;
                     if (mCurrnetTab == Tab.UNBOOSTED) { // In unboosted page, show boost message after processing
-                        message = getString(R.string.smart_cache_boost_hint_tap_app_to_boost);
+                        message = getString(R.string.booster_boost_hint_tap_app_to_boost);
                     } else { // In boosted page, show unboost message after processing
-                        message = getString(R.string.smart_cache_boost_hint_tap_app_to_unboost);
+                        message = getString(R.string.booster_boost_hint_tap_app_to_unboost);
                     }
                     mHintMessage.setText(message);
                     Logs.w(CLASSNAME, "stopProcessingTextAnim", mHintMessage.getText().toString());

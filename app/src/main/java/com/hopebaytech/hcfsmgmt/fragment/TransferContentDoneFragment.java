@@ -65,7 +65,7 @@ public class TransferContentDoneFragment extends Fragment {
                 try {
                     for (int i = 5; i >= 0; i--) {
                         final String seconds = String.valueOf(i);
-                        UiHandler.getInstace().post(new Runnable() {
+                        UiHandler.getInstance().post(new Runnable() {
                             @Override
                             public void run() {
                                 String template = getString(R.string.settings_transfer_content_done_factory_reset);

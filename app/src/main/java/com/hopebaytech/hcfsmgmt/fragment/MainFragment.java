@@ -147,6 +147,11 @@ public class MainFragment extends Fragment {
         if (mViewPager != null) {
             mViewPager.setOffscreenPageLimit(3);
             mViewPager.setAdapter(new ViewPagerAdapter(getFragmentManager()));
+            boolean isBoosterEnabled = PreferenceManager.getDefaultSharedPreferences(mContext)
+                    .getBoolean(SettingsFragment.PREF_ENABLE_BOOSTER, false);
+            if (isBoosterEnabled) {
+                addBoosterPage(getString(R.string.nav_settings), false /* moveToAddedPage */);
+            }
         }
 
         // User login Tera app with mobile network, but the Wi-Fi only option is enabled by default.
@@ -198,12 +203,12 @@ public class MainFragment extends Fragment {
 
         private List<String> titleList;
         private Map<String, WeakReference<Fragment>> fragmentMap;
-        private boolean isSmartCacheEnabled;
+        private boolean isBoosterEnabled;
 
         @Override
         public int getItemPosition(Object object) {
             // The method is called only when data set changed
-            if (isSmartCacheEnabled) {
+            if (isBoosterEnabled) {
                 if (object instanceof HelpFragment) {
                     return PagerAdapter.POSITION_NONE;
                 }
@@ -241,7 +246,7 @@ public class MainFragment extends Fragment {
                 fragment.setArguments(args);
             } else if (title.equals(getString(R.string.nav_settings))) {
                 fragment = SettingsFragment.newInstance();
-            } else if (title.equals(getString(R.string.nav_smart_cache))) {
+            } else if (title.equals(getString(R.string.nav_booster))) {
                 fragment = BoosterFragment.newInstance();
             } else if (title.equals(getString(R.string.nav_help))) {
                 fragment = HelpFragment.newInstance();
@@ -279,8 +284,8 @@ public class MainFragment extends Fragment {
             return titleList;
         }
 
-        public void setSmartCacheEnabled(boolean smartCacheEnabled) {
-            isSmartCacheEnabled = smartCacheEnabled;
+        public void setBoosterEnabled(boolean smartCacheEnabled) {
+            isBoosterEnabled = smartCacheEnabled;
         }
 
         public int getFragmentPosition(String title) {
@@ -431,7 +436,10 @@ public class MainFragment extends Fragment {
         }
     }
 
-    public void addPageToViewPager(String targetPageTitle, String addPageTitle) {
+    /**
+     * Add the booster page to the right of target page and move to the added booster page.
+     */
+    public void addBoosterPage(String targetPageTitle, boolean moveToAddedPage) {
         List<String> titleList = ((ViewPagerAdapter) mViewPager.getAdapter()).getTitleList();
         int index = -1;
         for (int i = 0; i < titleList.size(); i++) {
@@ -441,30 +449,33 @@ public class MainFragment extends Fragment {
             }
         }
         if (index == -1) {
+            Logs.e(CLASSNAME, "addBoosterPage", "Target page was not found.");
             return;
         }
 
-        titleList.add(index, addPageTitle);
-        if (addPageTitle.equals(getString(R.string.nav_smart_cache))) {
-            ((ViewPagerAdapter) mViewPager.getAdapter()).setSmartCacheEnabled(true);
+        String boosterTile = getString(R.string.nav_booster);
+        titleList.add(index, boosterTile);
+        if (boosterTile.equals(getString(R.string.nav_booster))) {
+            ((ViewPagerAdapter) mViewPager.getAdapter()).setBoosterEnabled(true);
         }
         mViewPager.getAdapter().notifyDataSetChanged();
 
-        final int finalIndex = index;
-        mUiHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mViewPager.setCurrentItem(finalIndex);
-            }
-        }, Interval.MOVE_TO_SMART_PAGE_DELAY_TIME);
+        if (moveToAddedPage) {
+            final int finalIndex = index;
+            mUiHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mViewPager.setCurrentItem(finalIndex);
+                }
+            }, Interval.MOVE_TO_SMART_PAGE_DELAY_TIME);
+        }
     }
 
-    public void removePageFromViewPager(String removePageTile) {
+    public void removeBooster() {
+        String boosterTitle = getString(R.string.nav_booster);
         List<String> titleList = ((ViewPagerAdapter) mViewPager.getAdapter()).getTitleList();
-        titleList.remove(removePageTile);
-        if (removePageTile.equals(getString(R.string.nav_smart_cache))) {
-            ((ViewPagerAdapter) mViewPager.getAdapter()).setSmartCacheEnabled(false);
-        }
+        titleList.remove(boosterTitle);
+        ((ViewPagerAdapter) mViewPager.getAdapter()).setBoosterEnabled(false);
         mViewPager.getAdapter().notifyDataSetChanged();
     }
 

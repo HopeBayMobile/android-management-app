@@ -896,7 +896,6 @@ public class AppFileFragment extends Fragment {
                         itemInfoList = DisplayTypeFactory.getListOfFileDirs(mContext, mCurrentFile, mFilterByPin);
                         break;
                 }
-                Logs.w(CLASSNAME, "showContent", "itemInfoList.size()=" + itemInfoList.size());
                 DisplayTypeFactory.sort(itemInfoList, mSortType);
 
                 final ArrayList<ItemInfo> finalItemInfoList = itemInfoList;

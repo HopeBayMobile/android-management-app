@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text="@string/smart_cache_title_bar"
+            android:text="@string/booster_title_bar"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/colorWhite" />
 
@@ -52,7 +52,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:padding="10dp"
-                    android:text="@string/smart_cache_tab_unboost" />
+                    android:text="@string/booster_tab_unboost" />
             </LinearLayout>
 
             <View
@@ -72,7 +72,7 @@
                     android:background="?attr/selectableItemBackground"
                     android:gravity="center"
                     android:padding="10dp"
-                    android:text="@string/smart_cache_tab_boost" />
+                    android:text="@string/booster_tab_boost" />
             </LinearLayout>
 
         </LinearLayout>
@@ -140,7 +140,7 @@
                         android:background="?attr/selectableItemBackground"
                         android:gravity="center"
                         android:padding="10dp"
-                        android:text="@string/smart_cache_action_boost" />
+                        android:text="@string/booster_action_boost" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -151,7 +151,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:text="@string/smart_cache_boost_hint_tap_app_to_boost"
+                android:text="@string/booster_boost_hint_tap_app_to_boost"
                 android:visibility="visible" />
 
         </RelativeLayout>

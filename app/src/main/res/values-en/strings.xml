@@ -47,7 +47,7 @@
     <string name="nav_sdcard1">SD card</string>
     <string name="nav_add_mountpoint">Add Shared Space</string>
     <string name="nav_settings">SETTINGS</string>
-    <string name="nav_smart_cache">BOOSTER</string>
+    <string name="nav_booster">BOOSTER</string>
     <string name="nav_about">ABOUT</string>
     <string name="nav_help">HELP</string>
 
@@ -274,23 +274,30 @@
     <string name="help_customer_center_title">Customer Center</string>
     <string name="help_email_feedback_title">User Feedback</string>
 
-    <!-- smart cache page -->
-    <string name="smart_cache_title_bar">Boost Zone</string>
-    <string name="smart_cache_action_boost">Boost</string>
-    <string name="smart_cache_action_unboost">Unboost</string>
-    <string name="smart_cache_tab_boost">Boosted</string>
-    <string name="smart_cache_tab_unboost">Unboosted</string>
-    <string name="smart_cache_boost_hint_tap_app_to_boost">Tap app to boost.</string>
-    <string name="smart_cache_boost_hint_tap_app_to_unboost">Tap app to unboost.</string>
-    <string name="smart_cache_boost_hint_boosting">Boosting</string>
-    <string name="smart_cache_boost_hint_unboosting">Unboosting</string>
-    <string name="smart_cache_dialog_boost_title">App Boosted</string>
-    <string name="smart_cache_dialog_boost_message">All selected apps have been boosted.</string>
-    <string name="smart_cache_dialog_unboost_title">App Unboosted</string>
-    <string name="smart_cache_dialog_unboost_message">All selected apps have been unboosted.</string>
-    <string name="smart_cache_dialog_disable_apps_title">Disable Apps</string>
-    <string name="smart_cache_dialog_disable_apps_message_while_unboosting">The following apps will be temporarily disabled while unboosting.</string>
-    <string name="smart_cache_dialog_disable_apps_message_while_boosting">The following apps will be temporarily disabled while boosting.</string>
+    <!-- booster page -->
+    <string name="booster_title_bar">Boost Zone</string>
+    <string name="booster_action_boost">Boost</string>
+    <string name="booster_action_unboost">Unboost</string>
+    <string name="booster_tab_boost">Boosted</string>
+    <string name="booster_tab_unboost">Unboosted</string>
+    <string name="booster_boost_hint_tap_app_to_boost">Tap app to boost.</string>
+    <string name="booster_boost_hint_tap_app_to_unboost">Tap app to unboost.</string>
+    <string name="booster_boost_hint_boosting">Boosting</string>
+    <string name="booster_boost_hint_unboosting">Unboosting</string>
+    <string name="booster_dialog_boost_title">App Boosted</string>
+    <string name="booster_dialog_boost_message">All selected apps have been boosted.</string>
+    <string name="booster_dialog_unboost_title">App Unboosted</string>
+    <string name="booster_dialog_unboost_message">All selected apps have been unboosted.</string>
+    <string name="booster_dialog_disable_apps_title">Disable Apps</string>
+    <string name="booster_dialog_disable_apps_message_while_unboosting">The following apps will be temporarily disabled while unboosting.</string>
+    <string name="booster_dialog_disable_apps_message_while_boosting">The following apps will be temporarily disabled while boosting.</string>
+    <string name="booster_enable_dialog_title">Enlarge Boost Zone Size</string>
+    <string name="booster_enable_dialog_message">Please enlarge Boost Zone size to release more spaces for boosting apps.</string>
+    <string name="booster_enable_dialog_success">Enable boost zone successful.</string>
+    <string name="booster_disable_dialog_title">Disable Boost Zone</string>
+    <string name="booster_disable_dialog_content_message">Disable boost zone will unboost any boosted apps. Are you sure you want to continue?</string>
+    <string name="booster_disable_dialog_check_message">@string/settings_transfer_content_desc_check</string>
+    <string name="booster_disable_dialog_success">Disable boost zone successful.</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 

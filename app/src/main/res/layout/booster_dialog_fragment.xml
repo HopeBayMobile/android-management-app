@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/title"
+        style="@style/F4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/M3"
+        android:text="@string/booster_enable_dialog_title" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical">
+
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/M3"
+                android:maxLines="10"
+                android:scrollbars="vertical"
+                android:text="@string/booster_enable_dialog_message"
+                android:textColor="@android:color/black" />
+
+            <com.hopebaytech.hcfsmgmt.customview.BoosterSeekBar
+                android:id="@+id/booster_seek_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/M5" />
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:visibility="gone"
+            android:indeterminate="true" />
+
+    </RelativeLayout>
+
+</LinearLayout>

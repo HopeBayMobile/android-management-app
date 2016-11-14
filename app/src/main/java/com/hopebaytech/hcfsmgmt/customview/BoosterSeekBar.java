@@ -24,6 +24,35 @@ public class BoosterSeekBar extends View {
 
     private final String CLASSNAME = BoosterSeekBar.class.getSimpleName();
 
+    private int mThumbNum = 4;
+    private int mPaddingLeft = (int) dipToPixels(getContext(), 30);
+    private int mPaddingRight = mPaddingLeft;
+    private int mPaddingTop = (int) dipToPixels(getContext(), 10);
+    private int mPaddingBottom = mPaddingTop;
+    private int mBackgroundLineHeight = (int) dipToPixels(getContext(), 8);
+    private int mBackgroundThumbRadius = (int) dipToPixels(getContext(), 8);
+    private int mThumbIntervalNum = mThumbNum - 1;
+    private int mSelectedIndex;
+
+    private float mEndX;
+    private float mSeekBarY;
+    private float mTouchDownX;
+    private float mValueTextY;
+    private float mSeekBarWidth;
+    private float mThumbInterval;
+    private double mMinValue = 0d;
+    private double mMaxValue = 100d;
+    private double mValue = mMinValue;
+    private float mStartX = mPaddingLeft;
+
+    private Drawable mThumb;
+    private Rect mTextRect = new Rect();
+    private Paint mValuePaint = new Paint();
+    private Paint mBackgroundPaint = new Paint();
+    private String mValueText = String.valueOf(mValue);
+
+    private boolean isFirstTime = true;
+
     public BoosterSeekBar(Context context) {
         super(context);
         init();
@@ -38,35 +67,6 @@ public class BoosterSeekBar extends View {
         super(context, attrs, defStyleAttr);
         init();
     }
-
-    private int mThumbNum = 4;
-    private int mPaddingLeft = (int) dipToPixels(getContext(), 30);
-    private int mPaddingRight = mPaddingLeft;
-    private int mPaddingTop = (int) dipToPixels(getContext(), 10);
-    private int mPaddingBottom = mPaddingTop;
-    private int mBackgroundLineHeight = (int) dipToPixels(getContext(), 5);
-    private int mBackgroundThumbRadius = (int) dipToPixels(getContext(), 8);
-    private int mThumbIntervalNum = mThumbNum - 1;
-
-    private Rect mTextRect = new Rect();
-    private Drawable mThumb;
-    private Paint mBackgroundPaint = new Paint();
-    private Paint mValuePaint = new Paint();
-    private String mValueText = "0 B";
-    private float mStartX = mPaddingLeft;
-
-    private float mTouchDownX;
-    private float mSeekBarY;
-    private float mValueTextY;
-    private float mEndX;
-    private float mSeekBarWidth;
-    private float mThumbInterval;
-    private int mSelectedIndex;
-    private float mMinValue = 0f;
-    private float mMaxValue = 100f;
-    private float mValue = mMinValue;
-
-    private boolean isFirstTime = true;
 
     private void init() {
         mThumb = ContextCompat.getDrawable(getContext(), R.drawable.icon_btn_selected);
@@ -128,18 +128,16 @@ public class BoosterSeekBar extends View {
         mValuePaint.getTextBounds(mValueText, 0, mValueText.length(), mTextRect);
 
         mSeekBarWidth = calcSeekBarWidth();
-        mSeekBarY = getHeight() / 2f + mBackgroundLineHeight;
-        mValueTextY = getHeight() / 2f - mTextRect.height();
+        mSeekBarY = getHeight() / 2f + Math.max(mThumb.getIntrinsicHeight(), mBackgroundLineHeight) / 2f;
+        mValueTextY = getHeight() / 2f - mTextRect.height() / 2f;
         mStartX = mPaddingLeft;
         mEndX = mStartX + mSeekBarWidth;
         mThumbInterval = calcThumbInterval(mSeekBarWidth);
 
         if (isFirstTime) {
             mTouchDownX = mStartX + mThumbInterval * mSelectedIndex;
-            if (mProgressChangedListener != null) {
-                int progress = calcProgress();
-                mValue = calcValue(progress);
-//                mValueText = mProgressChangedListener.onProcessChanged(progress, mValue);
+            if (mValueFormatter != null) {
+                mValue = calcValue(calcProgress());
                 mValueText = mValueFormatter.getFormatValue(mValue);
             }
             isFirstTime = false;
@@ -217,7 +215,7 @@ public class BoosterSeekBar extends View {
 
     public interface ValueFormatter {
 
-        String getFormatValue(float value);
+        String getFormatValue(double value);
 
     }
 
@@ -226,7 +224,7 @@ public class BoosterSeekBar extends View {
         /**
          * @param progress the current progress which range is from 0 to 100.
          */
-        void onProcessChanged(int progress, float value);
+        void onProcessChanged(int progress, double value);
 
     }
 
@@ -298,7 +296,7 @@ public class BoosterSeekBar extends View {
         return (int) ((thumbOffset / mSeekBarWidth) * 100);
     }
 
-    private float calcValue(int progress) {
+    private double calcValue(int progress) {
         return mMinValue + ((mMaxValue - mMinValue) * progress / 100f);
     }
 
@@ -354,27 +352,34 @@ public class BoosterSeekBar extends View {
         return seekBarWidth / mThumbIntervalNum;
     }
 
-    public float getMinValue() {
+    public double getMinValue() {
         return mMinValue;
     }
 
-    public void setMinValue(float min) {
+    public void setMinValue(double min) {
         this.mMinValue = min;
+
+        invalidate();
     }
 
-    public float getMaxValue() {
+    public double getMaxValue() {
         return mMaxValue;
     }
 
-    public void setMaxValue(float max) {
+    public void setMaxValue(double max) {
         this.mMaxValue = max;
+
+        invalidate();
     }
 
-    public void setValueRange(float min, float max) {
+    public void setValueRange(double min, double max) {
         this.mMinValue = min;
         this.mMaxValue = max;
 
         invalidate();
     }
 
+    public double getValue() {
+        return mValue;
+    }
 }
