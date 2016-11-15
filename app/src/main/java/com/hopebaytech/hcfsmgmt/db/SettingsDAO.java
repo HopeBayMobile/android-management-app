@@ -30,21 +30,21 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
                     VALUE + " TEXT)";
 
 
-    private static SettingsDAO mSettingsDAO;
-    private static SQLiteDatabase mDataBase;
+    private static SettingsDAO sSettingsDAO;
+    private static SQLiteDatabase sSqLiteDatabase;
 
     private SettingsDAO() {}
 
     public static SettingsDAO getInstance(Context context) {
-        if (mSettingsDAO == null) {
+        if (sSettingsDAO == null) {
             synchronized (SettingsDAO.class) {
-                if (mSettingsDAO == null) {
-                    mSettingsDAO = new SettingsDAO();
+                if (sSettingsDAO == null) {
+                    sSettingsDAO = new SettingsDAO();
                 }
             }
         }
-        mDataBase = TeraDBHelper.getDataBase(context);
-        return mSettingsDAO;
+        sSqLiteDatabase = TeraDBHelper.getDataBase(context);
+        return sSettingsDAO;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
 
     @Override
     public int getCount() {
-        Cursor cursor = mDataBase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = sSqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
         int count = cursor.getCount();
         cursor.close();
         return count;
@@ -67,7 +67,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
     @Override
     public List<SettingsInfo> getAll() {
         List<SettingsInfo> teraStatInfoList = new ArrayList<>();
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             teraStatInfoList.add(getRecord(cursor));
         }
@@ -78,7 +78,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
     @Nullable
     public SettingsInfo getFirst() {
         SettingsInfo settingsInfo = null;
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             settingsInfo = getRecord(cursor);
         }
@@ -91,7 +91,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
         cv.put(KEY, info.getKey());
         cv.put(VALUE, info.getValue());
 
-        return mDataBase.insert(TABLE_NAME, null, cv) != -1;
+        return sSqLiteDatabase.insert(TABLE_NAME, null, cv) != -1;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
 
     @Override
     public void clear() {
-        mDataBase.delete(TABLE_NAME, null, null);
+        sSqLiteDatabase.delete(TABLE_NAME, null, null);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
 
         String where = KEY + "='" + info.getKey() + "'";
 
-        boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
+        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
         if (!isSuccess) {
             Logs.d(CLASSNAME, "update", "Update item no exist. Try to insert.");
             isSuccess = insert(info);
@@ -133,7 +133,7 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
     public SettingsInfo get(String key) {
         SettingsInfo settingsInfo = null;
         String where = KEY + "='" + key + "'";
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, where, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             settingsInfo = getRecord(cursor);
         }

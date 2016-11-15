@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.Nullable;
 
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IGenericDAO;
@@ -37,24 +36,19 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
                     IMG_BASE64_COLUMN + " TEXT, " +
                     IMG_EXPIRED_TIME_COLUMN + " TEXT)";
 
-    private Context context;
-    private static AccountDAO mAccountDAO;
-    private static SQLiteDatabase mDataBase;
-
-    private AccountDAO(Context context) {
-        this.context = context;
-    }
+    private static AccountDAO sAccountDAO;
+    private static SQLiteDatabase sSqLiteDatabase;
 
     public static AccountDAO getInstance(Context context) {
-        if (mAccountDAO == null) {
+        if (sAccountDAO == null) {
             synchronized (AccountDAO.class) {
-                if (mAccountDAO == null) {
-                    mAccountDAO = new AccountDAO(context);
+                if (sAccountDAO == null) {
+                    sAccountDAO = new AccountDAO();
                 }
             }
         }
-        mDataBase = TeraDBHelper.getDataBase(context);
-        return mAccountDAO;
+        sSqLiteDatabase = TeraDBHelper.getDataBase(context);
+        return sAccountDAO;
     }
 
     @Override
@@ -71,7 +65,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
 
     @Override
     public int getCount() {
-        Cursor cursor = mDataBase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = sSqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
         int count = cursor.getCount();
         cursor.close();
         return count;
@@ -80,7 +74,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
     @Override
     public List<AccountInfo> getAll() {
         List<AccountInfo> accountInfoList = new ArrayList<>();
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             accountInfoList.add(getRecord(cursor));
         }
@@ -90,7 +84,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
 
     public AccountInfo getFirst() {
         AccountInfo accountInfo = null;
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             accountInfo = getRecord(cursor);
         }
@@ -116,7 +110,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         }
         cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpiringTime());
 
-        boolean isSuccess = mDataBase.insert(TABLE_NAME, null, cv) != -1;
+        boolean isSuccess = sSqLiteDatabase.insert(TABLE_NAME, null, cv) != -1;
         if (isSuccess) {
             Logs.d(CLASSNAME, "insert",
                     "name=" + name +
@@ -141,7 +135,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
 
     @Override
     public void clear() {
-        mDataBase.delete(TABLE_NAME, null, null);
+        sSqLiteDatabase.delete(TABLE_NAME, null, null);
     }
 
     @Override
@@ -159,7 +153,7 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
         cv.put(IMG_EXPIRED_TIME_COLUMN, info.getImgExpiringTime());
 
         String where = KEY_ID + "=" + info.getId();
-        boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
+        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
         Logs.d(CLASSNAME, "update",
                 "id=" + info.getId() +
                         ", name=" + info.getName() +

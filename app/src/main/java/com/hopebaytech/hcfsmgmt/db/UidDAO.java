@@ -33,26 +33,23 @@ public class UidDAO {
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
                     EXTERNAL_DIR_COLUMN + " TEXT)";
 
-    private Context context;
-    private static UidDAO mUidDAO;
-
-    private UidDAO(Context context) {
-        this.context = context;
-    }
+    private static UidDAO sUidDAO;
+    private static SQLiteDatabase sSqLiteDatabase;
 
     public static UidDAO getInstance(Context context) {
-        if (mUidDAO == null) {
+        if (sUidDAO == null) {
             synchronized (UidDAO.class) {
-                if (mUidDAO == null) {
-                    mUidDAO = new UidDAO(context);
+                if (sUidDAO == null) {
+                    sUidDAO = new UidDAO();
                 }
             }
         }
-        return mUidDAO;
+        sSqLiteDatabase = Uid2PkgDBHelper.getDataBase(context);
+        return sUidDAO;
     }
 
     public void close() {
-        getDataBase().close();
+        sSqLiteDatabase.close();
     }
 
     public boolean insert(UidInfo uidInfo) {
@@ -84,7 +81,7 @@ public class UidDAO {
             contentValues.put(EXTERNAL_DIR_COLUMN, sb.toString());
         }
 
-        boolean isInserted = getDataBase().insert(TABLE_NAME, null, contentValues) > -1;
+        boolean isInserted = sSqLiteDatabase.insert(TABLE_NAME, null, contentValues) > -1;
         String logMsg = "isPinned=" + uidInfo.isPinned() +
                 ", pinStatus=" + pinStatus +
                 ", isSystemApp=" + uidInfo.isSystemApp() +
@@ -135,7 +132,7 @@ public class UidDAO {
             String where = PACKAGE_NAME_COLUMN + "='" + uidInfo.getPackageName() + "'";
             boolean isSuccess;
             if (get(uidInfo.getPackageName()) != null) {
-                isSuccess = getDataBase().update(TABLE_NAME, contentValues, where, null) > 0;
+                isSuccess = sSqLiteDatabase.update(TABLE_NAME, contentValues, where, null) > 0;
                 if (!isSuccess) {
                     Logs.e(CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
                 }
@@ -148,7 +145,7 @@ public class UidDAO {
 
     public boolean delete(String packageName) {
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
-        boolean isDeleted = getDataBase().delete(TABLE_NAME, where, null) > 0;
+        boolean isDeleted = sSqLiteDatabase.delete(TABLE_NAME, where, null) > 0;
         if (isDeleted) {
             Logs.d(CLASSNAME, "delete", "packageName=" + packageName);
         } else {
@@ -158,12 +155,12 @@ public class UidDAO {
     }
 
     public boolean deleteAll() {
-        return getDataBase().delete(TABLE_NAME, null, null) > 0;
+        return sSqLiteDatabase.delete(TABLE_NAME, null, null) > 0;
     }
 
     public List<UidInfo> getAll() {
         List<UidInfo> result = new ArrayList<UidInfo>();
-        Cursor cursor = getDataBase().query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             result.add(getRecord(cursor));
         }
@@ -175,7 +172,7 @@ public class UidDAO {
     public UidInfo get(String packageName) {
         UidInfo uidInfo = null;
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
-        Cursor cursor = getDataBase().query(TABLE_NAME, null, where, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             uidInfo = getRecord(cursor);
         }
@@ -204,14 +201,10 @@ public class UidDAO {
     }
 
     public long getCount() {
-        Cursor cursor = getDataBase().rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = sSqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
         int count = cursor.getCount();
         cursor.close();
         return count;
-    }
-
-    private SQLiteDatabase getDataBase() {
-        return Uid2PkgDBHelper.getDataBase(context);
     }
 
 }

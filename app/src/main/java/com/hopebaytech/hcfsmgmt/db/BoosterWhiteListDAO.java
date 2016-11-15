@@ -28,24 +28,19 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL)";
 
-    private Context context;
-    private static BoosterWhiteListDAO mBoosterWhiteListDAO;
-    private static SQLiteDatabase mDataBase;
-
-    private BoosterWhiteListDAO(Context context) {
-        this.context = context;
-    }
+    private static BoosterWhiteListDAO sBoosterWhiteListDAO;
+    private static SQLiteDatabase sSqLiteDatabase;
 
     public static BoosterWhiteListDAO getInstance(Context context) {
-        if (mBoosterWhiteListDAO == null) {
+        if (sBoosterWhiteListDAO == null) {
             synchronized (BoosterWhiteListDAO.class) {
-                if (mBoosterWhiteListDAO == null) {
-                    mBoosterWhiteListDAO = new BoosterWhiteListDAO(context);
+                if (sBoosterWhiteListDAO == null) {
+                    sBoosterWhiteListDAO = new BoosterWhiteListDAO();
                 }
             }
         }
-        mDataBase = Uid2PkgDBHelper.getDataBase(context);
-        return mBoosterWhiteListDAO;
+        sSqLiteDatabase = Uid2PkgDBHelper.getDataBase(context);
+        return sBoosterWhiteListDAO;
     }
 
     @Override
@@ -58,7 +53,7 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
 
     @Override
     public int getCount() {
-        Cursor cursor = mDataBase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = sSqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
         int count = cursor.getCount();
         cursor.close();
         return count;
@@ -67,7 +62,7 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
     @Override
     public List<BoosterWhiteListInfo> getAll() {
         List<BoosterWhiteListInfo> boosterWhiteListInfoList = new ArrayList<>();
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             boosterWhiteListInfoList.add(getRecord(cursor));
         }
@@ -77,7 +72,7 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
 
     public BoosterWhiteListInfo getFirst() {
         BoosterWhiteListInfo boosterWhiteListInfo = null;
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             boosterWhiteListInfo = getRecord(cursor);
         }
@@ -91,7 +86,7 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
         ContentValues cv = new ContentValues();
         cv.put(PACKAGE_NAME_COLUMN, packageName);
 
-        boolean isSuccess = mDataBase.insert(TABLE_NAME, null, cv) != -1;
+        boolean isSuccess = sSqLiteDatabase.insert(TABLE_NAME, null, cv) != -1;
         Logs.d(CLASSNAME, "insert",
                 ", packageName=" + packageName +
                         ", isSuccess=" + isSuccess);
@@ -101,12 +96,12 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
 
     @Override
     public void close() {
-        getDataBase().close();
+        sSqLiteDatabase.close();
     }
 
     @Override
     public void clear() {
-        mDataBase.delete(TABLE_NAME, null, null);
+        sSqLiteDatabase.delete(TABLE_NAME, null, null);
     }
 
     @Override
@@ -120,16 +115,12 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
         cv.put(PACKAGE_NAME_COLUMN, info.getPackageName());
 
         String where = PACKAGE_NAME_COLUMN + "='" + info.getPackageName() + "'";
-        boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
+        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
         Logs.d(CLASSNAME, "update", "id=" + info.getId() +
                 ", packageName=" + info.getPackageName() +
                 ", isSuccess=" + isSuccess);
 
         return isSuccess;
-    }
-
-    private SQLiteDatabase getDataBase() {
-        return Uid2PkgDBHelper.getDataBase(context);
     }
 
 }
