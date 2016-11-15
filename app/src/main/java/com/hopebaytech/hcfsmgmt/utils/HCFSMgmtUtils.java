@@ -973,13 +973,14 @@ public class HCFSMgmtUtils {
     }
 
     public static boolean enableBooster(long boosterSize) {
+        Logs.i(CLASSNAME, "enableBooster", "boosterSize=" + boosterSize);
         boolean isSuccess = false;
         try {
             String jsonResult = HCFSApiUtils.enableBooster(boosterSize);
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "enableBooster", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "enableBooster", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "enableBooster", "jObject=" + jObject);
             }
@@ -990,13 +991,14 @@ public class HCFSMgmtUtils {
     }
 
     public static boolean disableBooster() {
+        Logs.i(CLASSNAME, "disableBooster", null);
         boolean isSuccess = false;
         try {
             String jsonResult = HCFSApiUtils.disableBooster();
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "disableBooster", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "disableBooster", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "disableBooster", "jObject=" + jObject);
             }

@@ -18,6 +18,8 @@ import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.customview.BoosterSeekBar;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
@@ -35,6 +37,7 @@ public class EnableBoosterDialogFragment extends DialogFragment {
     private final String CLASSNAME = TAG;
 
     public static final String KEY_BOOSTER_SIZE = "key_booster_size";
+    public static final int RESULT_FAILED = -2;
 
     private Context mContext;
 
@@ -117,8 +120,8 @@ public class EnableBoosterDialogFragment extends DialogFragment {
         contentLayout.setVisibility(View.INVISIBLE);
         progressBar.setVisibility(View.VISIBLE);
 
-        final double boosterSpace = boosterSeekBar.getValue();
-        if (boosterSpace < HCFSMgmtUtils.getMinimumAvailableBoosterSpace()) {
+        final double boosterSize = boosterSeekBar.getValue();
+        if (boosterSize < HCFSMgmtUtils.getMinimumAvailableBoosterSpace()) {
             Toast.makeText(mContext, R.string.booster_enable_dialog_insufficient_space, Toast.LENGTH_LONG).show();
             cancelBoost();
             return;
@@ -127,22 +130,26 @@ public class EnableBoosterDialogFragment extends DialogFragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
+                boolean isSuccess = HCFSMgmtUtils.enableBooster((long) boosterSize);
 
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                final int resultCode;
+                if (isSuccess) {
+                    SettingsInfo settingsInfo = new SettingsInfo();
+                    settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                    settingsInfo.setValue(String.valueOf(true));
+
+                    SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                    settingsDAO.update(settingsInfo);
+
+                    resultCode = Activity.RESULT_OK;
+                } else {
+                    resultCode = RESULT_FAILED;
                 }
-
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(SettingsFragment.PREF_ENABLE_BOOSTER, true);
-                editor.apply();
 
                 UiHandler.getInstance().post(new Runnable() {
                     @Override
                     public void run() {
-                        getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+                        getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, null);
                         dismiss();
                     }
                 });

@@ -354,6 +354,9 @@ public class SettingsFragment extends Fragment {
                 case Activity.RESULT_CANCELED:
                     mEnableBooster.setChecked(false);
                     break;
+                case EnableBoosterDialogFragment.RESULT_FAILED:
+                    Toast.makeText(mContext, R.string.booster_enable_dialog_failed, Toast.LENGTH_LONG).show();
+                    break;
             }
         } else if (requestCode == REQUEST_CODE_DISABLE_BOOSTER) {
             switch (resultCode) {
@@ -361,11 +364,14 @@ public class SettingsFragment extends Fragment {
                     Toast.makeText(mContext, R.string.booster_disable_dialog_success, Toast.LENGTH_LONG).show();
                     MainFragment mainFragment = (MainFragment) getFragmentManager().findFragmentByTag(MainFragment.TAG);
                     if (mainFragment != null) {
-                        mainFragment.removeBooster();
+                        mainFragment.removeBoosterPage();
                     }
                     break;
                 case Activity.RESULT_CANCELED:
                     mEnableBooster.setChecked(true);
+                    break;
+                case DisableBoosterDialogFragment.RESULT_FAILED:
+                    Toast.makeText(mContext, R.string.booster_disable_dialog_failed, Toast.LENGTH_LONG).show();
                     break;
             }
         }

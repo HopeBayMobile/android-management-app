@@ -30,6 +30,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,11 +56,7 @@ public class BoosterFragment extends Fragment {
     private TextView mHintMessage;
     private LinearLayout mActionButtonLayout;
 
-    private HandlerThread mWorkerThread;
-    private Handler mWorkerHandler;
-    private Handler mUiHandler;
-
-    private int mCurrnetTab = Tab.UNBOOSTED;
+    private int mCurrentTab = Tab.UNBOOSTED;
 
     public static BoosterFragment newInstance() {
         return new BoosterFragment();
@@ -76,10 +73,6 @@ public class BoosterFragment extends Fragment {
         Logs.d(CLASSNAME, "onCreate", null);
 
         mContext = getActivity();
-        mWorkerThread = new HandlerThread(CLASSNAME);
-        mWorkerThread.start();
-        mWorkerHandler = new Handler(mWorkerThread.getLooper());
-        mUiHandler = new Handler();
     }
 
     @Override
@@ -127,11 +120,11 @@ public class BoosterFragment extends Fragment {
         mUnboostTab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCurrnetTab == Tab.UNBOOSTED ||
+                if (mCurrentTab == Tab.UNBOOSTED ||
                         ((BoosterAdapter) mRecycleView.getAdapter()).isProcessing()) {
                     return;
                 }
-                mCurrnetTab = Tab.UNBOOSTED;
+                mCurrentTab = Tab.UNBOOSTED;
 
                 ((BoosterAdapter) mRecycleView.getAdapter()).init();
                 updateUI(true /* update app list */);
@@ -141,11 +134,11 @@ public class BoosterFragment extends Fragment {
         mBoostTab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCurrnetTab == Tab.BOOSTED ||
+                if (mCurrentTab == Tab.BOOSTED ||
                         ((BoosterAdapter) mRecycleView.getAdapter()).isProcessing()) {
                     return;
                 }
-                mCurrnetTab = Tab.BOOSTED;
+                mCurrentTab = Tab.BOOSTED;
 
                 ((BoosterAdapter) mRecycleView.getAdapter()).init();
                 updateUI(true /* update app list */);
@@ -161,7 +154,7 @@ public class BoosterFragment extends Fragment {
 
                 String title = getString(R.string.booster_dialog_disable_apps_title);
                 StringBuilder builder = new StringBuilder();
-                if (mCurrnetTab == Tab.UNBOOSTED) {
+                if (mCurrentTab == Tab.UNBOOSTED) {
                     builder.append(getString(R.string.booster_dialog_disable_apps_message_while_boosting));
                 } else {
                     builder.append(getString(R.string.booster_dialog_disable_apps_message_while_unboosting));
@@ -190,7 +183,7 @@ public class BoosterFragment extends Fragment {
     }
 
     private void updateUI(boolean updateAppList) {
-        switch (mCurrnetTab) {
+        switch (mCurrentTab) {
             case Tab.UNBOOSTED:
                 ((View) mUnboostTab.getParent()).setBackgroundColor(ContextCompat.getColor(mContext, R.color.C1));
                 ((View) mBoostTab.getParent()).setBackgroundColor(ContextCompat.getColor(mContext, R.color.C5));
@@ -226,7 +219,7 @@ public class BoosterFragment extends Fragment {
 
     private void showBoostedAppList() {
         final List<ItemInfo> appList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_USER);
-        mUiHandler.post(new Runnable() {
+        UiHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
                 BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
@@ -238,7 +231,7 @@ public class BoosterFragment extends Fragment {
 
     private void showUnboostedAppList() {
         final List<ItemInfo> appList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_SYSTEM);
-        mUiHandler.post(new Runnable() {
+        UiHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
                 BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
@@ -260,11 +253,6 @@ public class BoosterFragment extends Fragment {
         Logs.d(CLASSNAME, "onViewCreated", null);
 
         ((BoosterAdapter) mRecycleView.getAdapter()).freeCache();
-
-        if (mWorkerThread != null) {
-            mWorkerThread.quit();
-            mWorkerThread = null;
-        }
     }
 
     private class BoosterAdapter extends RecyclerView.Adapter<BoosterAdapter.AppViewHolder> {
@@ -346,7 +334,7 @@ public class BoosterFragment extends Fragment {
             }
             holder.itemName.setText(appInfo.getName());
 
-            if ((mCurrnetTab == Tab.UNBOOSTED && isChecked) || (mCurrnetTab == Tab.BOOSTED && !isChecked)) {
+            if ((mCurrentTab == Tab.UNBOOSTED && isChecked) || (mCurrentTab == Tab.BOOSTED && !isChecked)) {
                 holder.pinView.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_btn_app_boosted));
             } else {
                 ThreadPool.getInstance().execute(new Runnable() {
@@ -358,7 +346,7 @@ public class BoosterFragment extends Fragment {
 
                         final boolean isPinned = HCFSMgmtUtils.isAppPinned(mContext, appInfo);
                         appInfo.setPinned(isPinned);
-                        mUiHandler.post(new Runnable() {
+                        UiHandler.getInstance().post(new Runnable() {
                             @Override
                             public void run() {
                                 holder.pinView.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
@@ -395,7 +383,7 @@ public class BoosterFragment extends Fragment {
             }
 
             // Suppose apps have been boosted
-            mUiHandler.postDelayed(new Runnable() {
+            UiHandler.getInstance().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     notifyProcessingAppsCompleted();
@@ -420,7 +408,7 @@ public class BoosterFragment extends Fragment {
             }
 
             stopProcessingTextAnim();
-            mUiHandler.postDelayed(new Runnable() {
+            UiHandler.getInstance().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     if (!isAdded()) {
@@ -430,7 +418,7 @@ public class BoosterFragment extends Fragment {
                     final View targetView;
                     final String title;
                     final String message;
-                    if (mCurrnetTab == Tab.UNBOOSTED) {
+                    if (mCurrentTab == Tab.UNBOOSTED) {
                         targetView = (View) mBoostTab.getParent();
 
                         // In unboosted page, show boost success message after processing
@@ -480,7 +468,7 @@ public class BoosterFragment extends Fragment {
             }
 
             final String processingMsg;
-            if (mCurrnetTab == Tab.BOOSTED) { // In boosted page, execute unboost action
+            if (mCurrentTab == Tab.BOOSTED) { // In boosted page, execute unboost action
                 processingMsg = getString(R.string.booster_boost_hint_unboosting);
             } else { // In unboosted page, execute boost action
                 processingMsg = getString(R.string.booster_boost_hint_boosting);
@@ -496,7 +484,7 @@ public class BoosterFragment extends Fragment {
 
                 @Override
                 public void run() {
-                    mUiHandler.post(new Runnable() {
+                    UiHandler.getInstance().post(new Runnable() {
                         @Override
                         public void run() {
                             String dot = "";
@@ -525,12 +513,12 @@ public class BoosterFragment extends Fragment {
                 return;
             }
 
-            mUiHandler.postDelayed(new Runnable() {
+            UiHandler.getInstance().postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     Logs.w(CLASSNAME, "stopProcessingTextAnim", mHintMessage.getText().toString());
                     String message;
-                    if (mCurrnetTab == Tab.UNBOOSTED) { // In unboosted page, show boost message after processing
+                    if (mCurrentTab == Tab.UNBOOSTED) { // In unboosted page, show boost message after processing
                         message = getString(R.string.booster_boost_hint_tap_app_to_boost);
                     } else { // In boosted page, show unboost message after processing
                         message = getString(R.string.booster_boost_hint_tap_app_to_unboost);
@@ -602,7 +590,6 @@ public class BoosterFragment extends Fragment {
                     notifyItemChanged(position);
                 } else {
                     mCheckedPositionArr.put(position, true);
-//                    showCheckedAppState(this);
                     notifyItemChanged(position);
                 }
 

@@ -281,10 +281,12 @@
     <string name="booster_enable_dialog_message">Please enlarge Boost Zone size to release more spaces for boosting apps.</string>
     <string name="booster_enable_dialog_success">Enable boost zone successful.</string>
     <string name="booster_enable_dialog_insufficient_space">Insufficient space for enabling booster zone.</string>
+    <string name="booster_enable_dialog_failed">Enable boost zone failed.</string>
     <string name="booster_disable_dialog_title">Disable Boost Zone</string>
     <string name="booster_disable_dialog_content_message">Disable boost zone will unboost any boosted apps. Do you want to continue?</string>
     <string name="booster_disable_dialog_check_message">@string/settings_transfer_content_desc_check</string>
     <string name="booster_disable_dialog_success">Disable boost zone successful.</string>
+    <string name="booster_disable_dialog_failed">Disable boost zone failed.</string>
 
     <string name="quick_tour_title">Quick Tour</string>
     <string name="http_gateway_timeout">閘道器逾時：此伺服器乃作為閘道器或者代理伺服器並且嘗試執行請求時，未能從上游伺服器及時收到回應。</string>

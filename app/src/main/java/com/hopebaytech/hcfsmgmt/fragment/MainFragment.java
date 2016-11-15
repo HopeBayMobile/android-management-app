@@ -471,7 +471,7 @@ public class MainFragment extends Fragment {
         }
     }
 
-    public void removeBooster() {
+    public void removeBoosterPage() {
         String boosterTitle = getString(R.string.nav_booster);
         List<String> titleList = ((ViewPagerAdapter) mViewPager.getAdapter()).getTitleList();
         titleList.remove(boosterTitle);

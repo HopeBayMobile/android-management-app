@@ -22,7 +22,10 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
@@ -34,6 +37,8 @@ public class DisableBoosterDialogFragment extends DialogFragment {
 
     public static final String TAG = DisableBoosterDialogFragment.class.getSimpleName();
     private final String CLASSNAME = TAG;
+
+    public static final int RESULT_FAILED = -2;
 
     private Context mContext;
 
@@ -107,21 +112,26 @@ public class DisableBoosterDialogFragment extends DialogFragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                boolean isSuccess = HCFSMgmtUtils.disableBooster();
 
-                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putBoolean(SettingsFragment.PREF_ENABLE_BOOSTER, false);
-                editor.apply();
+                final int resultCode;
+                if (isSuccess) {
+                    SettingsInfo settingsInfo = new SettingsInfo();
+                    settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                    settingsInfo.setValue(String.valueOf(false));
+
+                    SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                    settingsDAO.update(settingsInfo);
+
+                    resultCode = Activity.RESULT_OK;
+                } else {
+                    resultCode = RESULT_FAILED;
+                }
 
                 UiHandler.getInstance().post(new Runnable() {
                     @Override
                     public void run() {
-                        getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, null);
+                        getTargetFragment().onActivityResult(getTargetRequestCode(), resultCode, null);
                         dismiss();
                     }
                 });
