@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 /**
  * @author Aaron
@@ -44,6 +45,7 @@ public class BoosterSeekBar extends View {
     private double mMaxValue = 100d;
     private double mValue = mMinValue;
     private float mStartX = mPaddingLeft;
+    private int mProgress;
 
     private Drawable mThumb;
     private Rect mTextRect = new Rect();
@@ -133,13 +135,10 @@ public class BoosterSeekBar extends View {
         mStartX = mPaddingLeft;
         mEndX = mStartX + mSeekBarWidth;
         mThumbInterval = calcThumbInterval(mSeekBarWidth);
+        mValue = calcValue(mProgress);
 
         if (isFirstTime) {
             mTouchDownX = mStartX + mThumbInterval * mSelectedIndex;
-            if (mValueFormatter != null) {
-                mValue = calcValue(calcProgress());
-                mValueText = mValueFormatter.getFormatValue(mValue);
-            }
             isFirstTime = false;
         }
     }
@@ -224,7 +223,7 @@ public class BoosterSeekBar extends View {
         /**
          * @param progress the current progress which range is from 0 to 100.
          */
-        void onProcessChanged(int progress, double value);
+        void onProcessChanged(int progress);
 
     }
 
@@ -232,6 +231,10 @@ public class BoosterSeekBar extends View {
         float mForegroundThumbOffset = mTouchDownX - mStartX;
         float x = mStartX + mForegroundThumbOffset;
         float y = mValueTextY;
+        mValueText = String.valueOf(mProgress);
+        if (mValueFormatter != null) {
+            mValueText = mValueFormatter.getFormatValue(mValue);
+        }
         canvas.drawText(mValueText, x, y, mValuePaint);
     }
 
@@ -241,45 +244,29 @@ public class BoosterSeekBar extends View {
             return false;
         }
 
-        int progress;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mTouchDownX = limitSeekRange(event);
-                progress = calcProgress();
-                mValue = calcValue(progress);
-                mValueText = String.valueOf(progress);
+                mProgress = calcProgress();
                 if (mProgressChangedListener != null) {
-                    mProgressChangedListener.onProcessChanged(progress, mValue);
-                }
-                if (mValueFormatter != null) {
-                    mValueText = mValueFormatter.getFormatValue(mValue);
+                    mProgressChangedListener.onProcessChanged(mProgress);
                 }
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
                 mTouchDownX = limitSeekRange(event);
-                progress = calcProgress();
-                mValue = calcValue(progress);
-                mValueText = String.valueOf(progress);
+                mProgress = calcProgress();
                 if (mProgressChangedListener != null) {
-                    mProgressChangedListener.onProcessChanged(progress, mValue);
-                }
-                if (mValueFormatter != null) {
-                    mValueText = mValueFormatter.getFormatValue(mValue);
+                    mProgressChangedListener.onProcessChanged(mProgress);
                 }
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
                 mTouchDownX = closestThumbX(limitSeekRange(event));
-                progress = calcProgress();
-                mValue = calcValue(progress);
-                mValueText = String.valueOf(progress);
+                mProgress = calcProgress();
                 if (mProgressChangedListener != null) {
-                    mProgressChangedListener.onProcessChanged(progress, mValue);
+                    mProgressChangedListener.onProcessChanged(mProgress);
 
-                }
-                if (mValueFormatter != null) {
-                    mValueText = mValueFormatter.getFormatValue(mValue);
                 }
                 invalidate();
                 break;

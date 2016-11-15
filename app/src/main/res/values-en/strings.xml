@@ -294,6 +294,7 @@
     <string name="booster_enable_dialog_title">Enlarge Boost Zone Size</string>
     <string name="booster_enable_dialog_message">Please enlarge Boost Zone size to release more spaces for boosting apps.</string>
     <string name="booster_enable_dialog_success">Enable boost zone successful.</string>
+    <string name="booster_enable_dialog_insufficient_space">Insufficient space for enabling booster zone.</string>
     <string name="booster_disable_dialog_title">Disable Boost Zone</string>
     <string name="booster_disable_dialog_content_message">Disable boost zone will unboost any boosted apps. Are you sure you want to continue?</string>
     <string name="booster_disable_dialog_check_message">@string/settings_transfer_content_desc_check</string>

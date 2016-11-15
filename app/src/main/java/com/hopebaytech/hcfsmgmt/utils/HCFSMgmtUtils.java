@@ -17,6 +17,7 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.Pair;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.content.pm.IPackageStatsObserver;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+
 import java.lang.reflect.Method;
 
 public class HCFSMgmtUtils {
@@ -56,7 +58,7 @@ public class HCFSMgmtUtils {
 //    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
     public static final int PINNED_SPACE_WARNING_THRESHOLD = 80; // Unit: percentage
-    public static final long BOOSTER_MAXIMUM_SPACE = 4 * 1024 * 1024 * 1024; // booster_size <= 4G
+    private static final long BOOSTER_MAXIMUM_SPACE = 4L * 1024 * 1024 * 1024; // booster_size <= 4G
     private static long boostNeedSize = 0L;
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
@@ -1062,14 +1064,23 @@ public class HCFSMgmtUtils {
         pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
     }
 
-    public static long getAvailableSpaceForBooster(){
-        //booster uses pinned space
+    public static long getMinimumAvailableBoosterSpace() {
+        return 100 * 1024 * 1024; // 100 MB
+    }
+
+    /**
+     * Get the available booster space which maximum value is {@link #BOOSTER_MAXIMUM_SPACE}.
+     *
+     * @return the available booster space
+     */
+    public static long getAvailableBoosterSpace() {
+        // booster uses pinned space
         HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
         long availableSpace = 0L;
         if (hcfsStatInfo != null) {
             availableSpace = hcfsStatInfo.getPinMax() - hcfsStatInfo.getPinTotal();
             if (availableSpace > BOOSTER_MAXIMUM_SPACE) {
-               return BOOSTER_MAXIMUM_SPACE;
+                return BOOSTER_MAXIMUM_SPACE;
             } else {
                 return availableSpace;
             }
@@ -1095,7 +1106,7 @@ public class HCFSMgmtUtils {
                 });
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getBoostNeedSize", Log.getStackTraceString(e));
-            //    return ;
+                //    return ;
             }
         }
 
@@ -1104,14 +1115,14 @@ public class HCFSMgmtUtils {
         return totalNeedSize;
     }
 
-    public static boolean isBoosterSpaceEnoughForBoost(Context context, List<String> packageNameList){
+    public static boolean isBoosterSpaceEnoughForBoost(Context context, List<String> packageNameList) {
         boolean isSpaceEnough = false;
         File file = new File(BOOSTER_FOLDER);
         long freeSpaceInBooster = file.getFreeSpace();
         //long usedSpaceInBooster = file.getTotalSpace() - freeSpaceInBooster;
         long totalNeedSize = getBoostNeedSize(context, packageNameList);
 
-        if (freeSpaceInBooster > totalNeedSize ) {
+        if (freeSpaceInBooster > totalNeedSize) {
             isSpaceEnough = true;
         }
         /* temp mark, the first version of ther booster size can't be changed after it is created.

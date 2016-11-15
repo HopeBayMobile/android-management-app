@@ -257,17 +257,9 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 boolean isChecked = ((CheckBox) v).isChecked();
                 if (isChecked) {
-                    EnableBoosterDialogFragment dialogFragment = EnableBoosterDialogFragment.newInstance();
-                    dialogFragment.setCancelable(false);
-                    dialogFragment.setTargetFragment(SettingsFragment.this, REQUEST_CODE_ENABLE_BOOSTER);
-                    dialogFragment.setMaxSize(4L * 1024 * 1024 * 1024);
-                    dialogFragment.setMinSize(100 * 1024 * 1024);
-                    dialogFragment.show(getFragmentManager(), EnableBoosterDialogFragment.TAG);
+                    showEnableBoosterDialog();
                 } else {
-                    DisableBoosterDialogFragment dialogFragment = DisableBoosterDialogFragment.newInstance();
-                    dialogFragment.setCancelable(false);
-                    dialogFragment.setTargetFragment(SettingsFragment.this, REQUEST_CODE_DISABLE_BOOSTER);
-                    dialogFragment.show(getFragmentManager(), EnableBoosterDialogFragment.TAG);
+                    showDisableBoosterDialog();
                 }
             }
         });
@@ -292,6 +284,20 @@ public class SettingsFragment extends Fragment {
                 });
             }
         });
+    }
+
+    private void showEnableBoosterDialog() {
+        EnableBoosterDialogFragment dialogFragment = EnableBoosterDialogFragment.newInstance();
+        dialogFragment.setCancelable(false);
+        dialogFragment.setTargetFragment(SettingsFragment.this, REQUEST_CODE_ENABLE_BOOSTER);
+        dialogFragment.show(getFragmentManager(), EnableBoosterDialogFragment.TAG);
+    }
+
+    private void showDisableBoosterDialog() {
+        DisableBoosterDialogFragment dialogFragment = DisableBoosterDialogFragment.newInstance();
+        dialogFragment.setCancelable(false);
+        dialogFragment.setTargetFragment(SettingsFragment.this, REQUEST_CODE_DISABLE_BOOSTER);
+        dialogFragment.show(getFragmentManager(), EnableBoosterDialogFragment.TAG);
     }
 
     @Override
