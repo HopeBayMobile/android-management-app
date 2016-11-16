@@ -364,7 +364,6 @@ public class MgmtCluster {
                 }
                 deviceServiceInfo.setResponseContent(responseContent);
                 Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-                // TODO can use parseDeviceServiceInfo(deviceServiceInfo, deviceServiceInfo.getResponseContent());
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceServiceInfo", Log.getStackTraceString(e));
             } finally {
@@ -788,32 +787,78 @@ public class MgmtCluster {
                                                String responseContent) throws JSONException {
 
         JSONObject result = new JSONObject(responseContent);
-        JSONObject piggyback = result.getJSONObject("piggyback");
-        String category = piggyback.getString("category");
-        String message = piggyback.getString("message");
-        if (category != null || message != null) {
+
+        // Parse piggyback
+        String PIGGYBACK = "piggyback";
+        if (result.has(PIGGYBACK)) {
+            JSONObject piggyback = result.getJSONObject(PIGGYBACK);
             DeviceServiceInfo.Piggyback _piggyback = new DeviceServiceInfo.Piggyback();
-            _piggyback.setCategory(category);
-            _piggyback.setMessage(message);
+
+            // Parse category
+            String CATEGORY = "category";
+            if (piggyback.has(CATEGORY)) {
+                String category = piggyback.getString(CATEGORY);
+                _piggyback.setCategory(category);
+            }
+
+            // Parse message
+            String MESSAGE = "message";
+            if (piggyback.has(MESSAGE)) {
+                String message = piggyback.getString(MESSAGE);
+                _piggyback.setMessage(message);
+            }
+
             deviceServiceInfo.setPiggyback(_piggyback);
         }
 
-        String state = result.getString("state");
-        deviceServiceInfo.setState(state);
+        // Parse state
+        String STATE = "state";
+        if (result.has(STATE)) {
+            String state = result.getString(STATE);
+            deviceServiceInfo.setState(state);
+        }
 
-        JSONObject backend = result.getJSONObject("backend");
-        String url = backend.getString("url");
-        String token = backend.getString("token");
-        String backendType = backend.getString("backend_type");
-        String bucket = backend.getString("bucket");
-        String account = backend.getString("account");
-        if (url != null || token != null || backendType != null || bucket != null || account != null) {
+        // Parse backend
+        String BACKEND = "backend";
+        if (result.has(BACKEND)) {
+            JSONObject backend = result.getJSONObject(BACKEND);
             DeviceServiceInfo.Backend _backend = new DeviceServiceInfo.Backend();
-            _backend.setUrl(url);
-            _backend.setToken(token);
-            _backend.setBackendType(backendType);
-            _backend.setBucket(bucket);
-            _backend.setAccount(account);
+
+            // Parse url
+            String URL = "url";
+            if (backend.has(URL)) {
+                String url = backend.getString(URL);
+                _backend.setUrl(url);
+            }
+
+            // Parse token
+            String TOKEN = "token";
+            if (backend.has(TOKEN)) {
+                String token = backend.getString(TOKEN);
+                _backend.setToken(token);
+            }
+
+            // Parse backend type
+            String BACKEND_TYPE = "backend_type";
+            if (backend.has(BACKEND_TYPE)) {
+                String backendType = backend.getString(BACKEND_TYPE);
+                _backend.setBackendType(backendType);
+            }
+
+            // Parse bucket
+            String BUCKET = "bucket";
+            if (backend.has(BUCKET)) {
+                String bucket = backend.getString(BUCKET);
+                _backend.setBucket(bucket);
+            }
+
+            // Parse account
+            String ACCOUNT = "account";
+            if (backend.has(ACCOUNT)) {
+                String account = backend.getString(ACCOUNT);
+                _backend.setAccount(account);
+            }
+
             deviceServiceInfo.setBackend(_backend);
         }
 

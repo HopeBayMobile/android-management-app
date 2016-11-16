@@ -815,7 +815,7 @@ public class HCFSMgmtUtils {
             isSuccess = jObject.getBoolean("result");
             String logMsg = "url=" + url + ", token=" + token + ", result=" + jsonResult;
             if (isSuccess) {
-                Logs.i(CLASSNAME, "setSwiftToken", logMsg);
+                Logs.d(CLASSNAME, "setSwiftToken", logMsg);
             } else {
                 Logs.e(CLASSNAME, "setSwiftToken", logMsg);
             }
