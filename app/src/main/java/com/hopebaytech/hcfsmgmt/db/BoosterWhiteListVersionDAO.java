@@ -26,7 +26,7 @@ public class BoosterWhiteListVersionDAO implements IGenericDAO<BoosterWhiteListV
     public static final String CREATE_TABLE =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    WHITE_LIST_VERSION_COLUMN + " TEXT NOT NULL)";
+                    WHITE_LIST_VERSION_COLUMN + " INTEGER NOT NULL)";
 
     private static BoosterWhiteListVersionDAO sBoosterWhiteListVersionDAO;
     private static SQLiteDatabase sSqLiteDatabase;
@@ -48,10 +48,10 @@ public class BoosterWhiteListVersionDAO implements IGenericDAO<BoosterWhiteListV
 
     @Override
     public BoosterWhiteListVersionInfo getRecord(Cursor cursor) {
-        BoosterWhiteListVersionInfo scwListVersionInfo = new BoosterWhiteListVersionInfo();
-        scwListVersionInfo.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
-        scwListVersionInfo.setWhiteListVersion(cursor.getString(cursor.getColumnIndex(WHITE_LIST_VERSION_COLUMN)));
-        return scwListVersionInfo;
+        BoosterWhiteListVersionInfo boosterWhiteListVersionInfo = new BoosterWhiteListVersionInfo();
+        boosterWhiteListVersionInfo.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
+        boosterWhiteListVersionInfo.setWhiteListVersion(cursor.getInt(cursor.getColumnIndex(WHITE_LIST_VERSION_COLUMN)));
+        return boosterWhiteListVersionInfo;
     }
 
     @Override
@@ -64,27 +64,27 @@ public class BoosterWhiteListVersionDAO implements IGenericDAO<BoosterWhiteListV
 
     @Override
     public List<BoosterWhiteListVersionInfo> getAll() {
-        List<BoosterWhiteListVersionInfo> scwListVersionInfoList = new ArrayList<>();
+        List<BoosterWhiteListVersionInfo> boosterWhiteListVersionInfoList = new ArrayList<>();
         Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
-            scwListVersionInfoList.add(getRecord(cursor));
+            boosterWhiteListVersionInfoList.add(getRecord(cursor));
         }
         cursor.close();
-        return scwListVersionInfoList;
+        return boosterWhiteListVersionInfoList;
     }
 
     public BoosterWhiteListVersionInfo getFirst() {
-        BoosterWhiteListVersionInfo scwListVersionInfo = null;
+        BoosterWhiteListVersionInfo boosterWhiteListVersionInfo = null;
         Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
-            scwListVersionInfo = getRecord(cursor);
+            boosterWhiteListVersionInfo = getRecord(cursor);
         }
-        return scwListVersionInfo;
+        return boosterWhiteListVersionInfo;
     }
 
     @Override
     public boolean insert(BoosterWhiteListVersionInfo info) {
-        String whiteListVersion = info.getWhiteListVersion();
+        int whiteListVersion = info.getWhiteListVersion();
 
         ContentValues cv = new ContentValues();
         cv.put(WHITE_LIST_VERSION_COLUMN, whiteListVersion);

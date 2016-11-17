@@ -25,6 +25,8 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
+import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListDAO;
+import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListVersionDAO;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
@@ -40,6 +42,9 @@ import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterWhiteListInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterWhiteListVersionInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
@@ -84,6 +89,8 @@ public class TeraMgmtService extends Service {
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
     private SettingsDAO mSettingsDAO;
+    private BoosterWhiteListVersionDAO mBoosterWhiteListVersionDAO;
+    private BoosterWhiteListDAO mBoosterWhiteListDAO;
 
     private Context mContext;
 
@@ -107,6 +114,8 @@ public class TeraMgmtService extends Service {
         mUidDAO = UidDAO.getInstance(this);
         mDataTypeDAO = DataTypeDAO.getInstance(this);
         mSettingsDAO = SettingsDAO.getInstance(this);
+        mBoosterWhiteListVersionDAO = BoosterWhiteListVersionDAO.getInstance(this);
+        mBoosterWhiteListDAO = BoosterWhiteListDAO.getInstance(this);
     }
 
     @Override
@@ -803,6 +812,7 @@ public class TeraMgmtService extends Service {
         MgmtCluster.getJwtToken(this, new MgmtCluster.OnFetchJwtTokenListener() {
             @Override
             public void onFetchSuccessful(String jwtToken) {
+                final String jwtTokenArg = jwtToken;
                 String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
                 MgmtCluster.GetDeviceServiceInfoProxy proxy =
                         new MgmtCluster.GetDeviceServiceInfoProxy(jwtToken, imei);
@@ -817,6 +827,7 @@ public class TeraMgmtService extends Service {
                             String url = backend.getUrl();
                             String token = backend.getToken();
                             HCFSMgmtUtils.setSwiftToken(url, token);
+                            updateBoosterWhiteList(deviceServiceInfo, jwtTokenArg);
                         } else { // Other situation is handled by MgmtPollingService.
                             // Stop the the running service if exists.
                             PollingServiceUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
@@ -1012,4 +1023,57 @@ public class TeraMgmtService extends Service {
         Booster.removeBoostStatusInXml(this);
     }
 
+    private void updateBoosterWhiteList(DeviceServiceInfo deviceServiceInfo,final String jwtToken) {
+        Logs.d(CLASSNAME, "updateBoosterWhiteList", null);
+        BoosterWhiteListVersionInfo boosterWhiteListVersionInfo = mBoosterWhiteListVersionDAO.getFirst(); //if the table is empty, then return null
+
+        if (boosterWhiteListVersionInfo == null) {
+            // add the very first version, 0, to the database
+            doUpdateBoosterWhiteListToDatabase(jwtToken);
+        } else {
+            int oldWhiteListVersion = boosterWhiteListVersionInfo.getWhiteListVersion();
+            int newWhiteListVersion = deviceServiceInfo.getWhiteListLatestVersion();
+
+            if (newWhiteListVersion > oldWhiteListVersion) {
+                Logs.d(CLASSNAME, "updateBoosterWhiteList", "got new white list version");
+                doUpdateBoosterWhiteListToDatabase(jwtToken);
+            }
+        }
+    }
+
+    private void doUpdateBoosterWhiteListToDatabase(final String jwtToken) {
+        final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
+        MgmtCluster.GetBoosterWhiteListInfoProxy getBoosterWhiteListInfoProxy = new MgmtCluster.GetBoosterWhiteListInfoProxy(jwtToken, imei);
+        getBoosterWhiteListInfoProxy.setOnGetBoosterWhiteListInfoListener(new MgmtCluster.
+                                            GetBoosterWhiteListInfoProxy.OnGetBoosterWhiteListInfoListener() {
+            @Override
+            public void onGetBoosterWhiteListInfoSuccessful(final BoosterDeviceInfo boosterDeviceInfo) {
+                Logs.e(CLASSNAME, "onGetBoosterWhiteListInfoSuccessful", null);
+
+                BoosterWhiteListVersionInfo boosterWhiteListVersionInfo = new BoosterWhiteListVersionInfo();
+                mBoosterWhiteListVersionDAO.clear();
+
+                int whiteListVersion = boosterDeviceInfo.getWhiteListVersion();
+                boosterWhiteListVersionInfo.setWhiteListVersion(whiteListVersion);
+                mBoosterWhiteListVersionDAO.insert(boosterWhiteListVersionInfo);
+
+                BoosterWhiteListInfo boosterWhiteListInfo = new BoosterWhiteListInfo();
+                mBoosterWhiteListDAO.clear();
+
+                List<String> whiteList = boosterDeviceInfo.getWhiteList();
+                if(!whiteList.isEmpty()) {
+                    for (String packageName : whiteList) {
+                        boosterWhiteListInfo.setPackageName(packageName);
+                        mBoosterWhiteListDAO.insert(boosterWhiteListInfo);
+                    }
+                }
+            }
+
+            @Override
+            public void onGetBoosterWhiteListInfoFailed(BoosterDeviceInfo boosterDeviceInfo) {
+                Logs.e(CLASSNAME, "onGetBoosterWhiteListInfoFailed", null);
+            }
+        });
+        getBoosterWhiteListInfoProxy.get();
+    }
 }

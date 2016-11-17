@@ -37,6 +37,7 @@ public class DeviceServiceInfo {
     private String state;
     private Piggyback piggyback;
     private Backend backend;
+    private int whiteListLatestVersion;
     private String errorCode;
 
     public CharSequence getErrorMessage(Context context) {
@@ -89,6 +90,13 @@ public class DeviceServiceInfo {
         this.backend = backend;
     }
 
+    public int getWhiteListLatestVersion() {
+        return whiteListLatestVersion;
+    }
+
+    public void setWhiteListLatestVersion(int whiteListLatestVersion) {
+        this.whiteListLatestVersion= whiteListLatestVersion;
+    }
     public String getErrorCode() {
         return errorCode;
     }
@@ -214,6 +222,7 @@ public class DeviceServiceInfo {
             jsonObject.put("state", state);
             jsonObject.put("piggyback", piggyback);
             jsonObject.put("backend", backend);
+            jsonObject.put("whiteListLatestVersion", whiteListLatestVersion);
             jsonObject.put("errorCode", errorCode);
         } catch (JSONException e) {
             return Log.getStackTraceString(e);

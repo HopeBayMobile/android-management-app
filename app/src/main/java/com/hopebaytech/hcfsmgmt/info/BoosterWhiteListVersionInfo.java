@@ -7,7 +7,7 @@ package com.hopebaytech.hcfsmgmt.info;
 public class BoosterWhiteListVersionInfo {
 
     private int id;
-    private String whiteListVersion;
+    private int whiteListVersion;
 
     public int getId() {
         return id;
@@ -17,11 +17,11 @@ public class BoosterWhiteListVersionInfo {
         this.id = id;
     }
 
-    public String getWhiteListVersion() {
+    public int getWhiteListVersion() {
         return whiteListVersion;
     }
 
-    public void setWhiteListVersion(String whiteListVersion) {
+    public void setWhiteListVersion(int whiteListVersion) {
         this.whiteListVersion = whiteListVersion;
     }
 }
