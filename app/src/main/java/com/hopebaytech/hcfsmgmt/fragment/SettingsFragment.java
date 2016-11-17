@@ -48,6 +48,7 @@ public class SettingsFragment extends Fragment {
     public static final String PREF_ALLOW_PIN_UNPIN_APPS = "pref_allow_pin_unpin_apps";
     public static final String PREF_SHOW_ACCESS_CLOUD_SETTINGS = "pref_show_access_cloud_settings";
     public static final String PREF_ENABLE_BOOSTER = "pref_enable_booster";
+    public static final String PREF_BOOSTER_STATUS = "pref_booster_status";
 
     public static final String KEY_RATIO = "ratio";
 

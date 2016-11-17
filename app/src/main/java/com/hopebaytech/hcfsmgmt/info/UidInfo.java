@@ -16,6 +16,7 @@ public class UidInfo {
         public static final int BOOST_FAILED = 8;
     }
 
+    private int id;
     private boolean isPinned;
     private boolean isSystemApp;
     private int uid;
@@ -45,6 +46,14 @@ public class UidInfo {
         this.packageName = packageName;
         this.isSystemApp = isSystemApp;
         this.boostStatus = boostStatus;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public int getUid() {

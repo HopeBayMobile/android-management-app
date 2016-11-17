@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
@@ -28,13 +29,16 @@ public class UidDAO {
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     PIN_STATUS_COLUMN + " INTEGER NOT NULL, " +
                     SYSTEM_APP_COLUMN + " INTEGER NOT NULL, " +
-                    BOOST_STATUS_COLUMN + " INTEGER, " +
+                    BOOST_STATUS_COLUMN + " INTEGER NOT NULL, " +
                     UID_COLUMN + " TEXT NOT NULL, " +
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
                     EXTERNAL_DIR_COLUMN + " TEXT)";
 
     private static UidDAO sUidDAO;
     private static SQLiteDatabase sSqLiteDatabase;
+
+    private UidDAO() {
+    }
 
     public static UidDAO getInstance(Context context) {
         if (sUidDAO == null) {
@@ -98,7 +102,59 @@ public class UidDAO {
         }
     }
 
-    /** Update specific column */
+    public boolean update(String packageName, ContentValues cv) {
+        String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
+        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
+        if (isSuccess) {
+            Logs.d(CLASSNAME, "update", "packageName=" + packageName + ", cv: " + cv.toString());
+        } else {
+            Logs.e(CLASSNAME, "update", "packageName=" + packageName + ", cv: " + cv.toString());
+        }
+        return isSuccess;
+    }
+
+    public boolean update(UidInfo uidInfo) {
+        if (uidInfo == null) {
+            return false;
+        }
+
+        ContentValues cv = new ContentValues();
+        cv.put(PIN_STATUS_COLUMN, uidInfo.isPinned());
+        cv.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp());
+        cv.put(UID_COLUMN, uidInfo.getUid());
+        cv.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
+        cv.put(EXTERNAL_DIR_COLUMN, convertListToString(uidInfo.getExternalDir()));
+        cv.put(BOOST_STATUS_COLUMN, uidInfo.getBoostStatus());
+
+        String where = KEY_ID + "='" + uidInfo.getId() + "'";
+        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
+        if (isSuccess) {
+            Logs.d(CLASSNAME, "update", cv.toString());
+        } else {
+            Logs.e(CLASSNAME, "update", cv.toString());
+        }
+        return isSuccess;
+    }
+
+    private String convertListToString(List<String> externalDirList) {
+        if (externalDirList == null) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        String comma = ",";
+        for (int i = 0; i < externalDirList.size(); i++) {
+            sb.append(externalDirList.get(i));
+            if (i != externalDirList.size() - 1) {
+                sb.append(comma);
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Update specific column
+     */
     public boolean update(UidInfo uidInfo, String column) {
         String logMsg = "uidInfo=" + uidInfo + ", column=" + column;
         Logs.d(CLASSNAME, "update", logMsg);
@@ -168,6 +224,25 @@ public class UidDAO {
         return result;
     }
 
+    @NonNull
+    public List<UidInfo> get(ContentValues cv) {
+        List<UidInfo> uidInfoList = new ArrayList<>();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        String AND = " and ";
+        for (String key : cv.keySet()) {
+            stringBuilder.append(key).append("='").append(cv.get(key)).append("'").append(AND);
+        }
+
+        String where = stringBuilder.substring(0, stringBuilder.length() - AND.length());
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            uidInfoList.add(getRecord(cursor));
+        }
+        cursor.close();
+        return uidInfoList;
+    }
+
     @Nullable
     public UidInfo get(String packageName) {
         UidInfo uidInfo = null;
@@ -182,6 +257,7 @@ public class UidDAO {
 
     public UidInfo getRecord(Cursor cursor) {
         UidInfo result = new UidInfo();
+        result.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
         result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
         result.setSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
         result.setBoostStatus(cursor.getInt(cursor.getColumnIndex(BOOST_STATUS_COLUMN)));
@@ -197,6 +273,7 @@ public class UidDAO {
             }
             result.setExternalDir(externalDirList);
         }
+
         return result;
     }
 

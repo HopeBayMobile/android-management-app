@@ -12,6 +12,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.service.PinAndroidFolderService;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -70,8 +71,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
                     // Detect network status changed and enable/disable data sync to cloud
                     boolean syncWifiOnly = true;
-                    SettingsDAO mSettingsDAO = SettingsDAO.getInstance(context);
-                    SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                    SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
+                    SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
                     if (settingsInfo != null) {
                         syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
                     }
@@ -196,7 +197,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     Intent intentService = new Intent(context, TeraMgmtService.class);
                     int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                     String packageName = intent.getData().getSchemeSpecificPart();
-                    HCFSMgmtUtils.clearBoosterPackageRemaining(packageName);
+                    Booster.clearBoosterPackageRemaining(packageName);
                     intentService.setAction(TeraIntent.ACTION_REMOVE_UID_FROM_DB);
                     intentService.putExtra(TeraIntent.KEY_UID, uid);
                     intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
@@ -217,6 +218,18 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 intentService.putExtras(intent.getExtras());
                 context.startService(intentService);
                 return;
+            }
+            case TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED: {
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED);
+                context.startService(intentService);
+                break;
+            }
+            case TeraIntent.ACTION_BOOSTER_PROCESS_FAILED: {
+                Intent intentService = new Intent(context, TeraMgmtService.class);
+                intentService.setAction(TeraIntent.ACTION_BOOSTER_PROCESS_FAILED);
+                context.startService(intentService);
+                break;
             }
         }
 

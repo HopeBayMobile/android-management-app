@@ -9,7 +9,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -47,6 +46,7 @@ import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
@@ -56,10 +56,10 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
+import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
@@ -180,7 +180,12 @@ public class TeraMgmtService extends Service {
                         case TeraIntent.ACTION_TRANSFER_COMPLETED:
                             showCompletedPageThenExecuteFactoryReset();
                             break;
-
+                        case TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED:
+                            onBoosterProcessCompleted();
+                            break;
+                        case TeraIntent.ACTION_BOOSTER_PROCESS_FAILED:
+                            onBoosterProcessFailed();
+                            break;
                     }
 
                 }
@@ -658,12 +663,12 @@ public class TeraMgmtService extends Service {
             }
 
             long occupiedSize = HCFSMgmtUtils.getOccupiedSize();
-            long rawCacheTotal = statInfo.getRawCacheTotal();
+            long cacheTotal = statInfo.getCacheTotal();
             SharedPreferences.Editor editor = sharedPreferences.edit();
             boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_LOCAL_STORAGE_USAGE_RATIO_NOTIFIED, false);
-            double pinPlusUnpinButDirtyRatio = ((double) occupiedSize / rawCacheTotal) * 100;
+            double pinPlusUnpinButDirtyRatio = ((double) occupiedSize / cacheTotal) * 100;
             Logs.d(CLASSNAME, "onStartCommand", "occupiedSize=" + occupiedSize +
-                    ", rawCacheTotal=" + rawCacheTotal +
+                    ", cacheTotal=" + cacheTotal +
                     ", pinPlusUnpinButDirty=" + pinPlusUnpinButDirtyRatio);
             if (pinPlusUnpinButDirtyRatio >= Double.valueOf(storageUsedRatio)) {
                 if (!isNotified) {
@@ -734,7 +739,7 @@ public class TeraMgmtService extends Service {
         int uid = intent.getIntExtra(TeraIntent.KEY_UID, -1);
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) == null) {
-            int boostStatus = HCFSMgmtUtils.getInstalledAppBoostStatus(packageName);
+            int boostStatus = Booster.getInstalledAppBoostStatus(packageName);
             mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, uid, packageName, boostStatus));
         }
     }
@@ -990,6 +995,21 @@ public class TeraMgmtService extends Service {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
+    }
+
+    private void onBoosterProcessCompleted() {
+        if (MainApplication.Foreground.get().isForeground()) {
+            return;
+        }
+        Booster.removeBoostStatusInXml(this);
+    }
+
+    private void onBoosterProcessFailed() {
+        if (MainApplication.Foreground.get().isForeground()) {
+            return;
+        }
+        Booster.recoverBoostStatusWhenFailed(this);
+        Booster.removeBoostStatusInXml(this);
     }
 
 }

@@ -31,6 +31,9 @@ public class BoosterWhiteListDAO implements IGenericDAO<BoosterWhiteListInfo> {
     private static BoosterWhiteListDAO sBoosterWhiteListDAO;
     private static SQLiteDatabase sSqLiteDatabase;
 
+    private BoosterWhiteListDAO() {
+    }
+
     public static BoosterWhiteListDAO getInstance(Context context) {
         if (sBoosterWhiteListDAO == null) {
             synchronized (BoosterWhiteListDAO.class) {

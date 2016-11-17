@@ -17,7 +17,6 @@ import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.util.Pair;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.content.pm.IPackageStatsObserver;
@@ -35,7 +34,6 @@ import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
-import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,8 +56,6 @@ public class HCFSMgmtUtils {
 //    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
     public static final int PINNED_SPACE_WARNING_THRESHOLD = 80; // Unit: percentage
-    private static final long BOOSTER_MAXIMUM_SPACE = 4L * 1024 * 1024 * 1024; // booster_size <= 4G
-    private static long boostNeedSize = 0L;
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
 
@@ -84,7 +80,6 @@ public class HCFSMgmtUtils {
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
 
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
-    public static final String BOOSTER_FOLDER = "/data/mnt/hcfsblock";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
         Logs.d(CLASSNAME, "isAppPinned", appInfo.getName());
@@ -951,233 +946,5 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static boolean isPackageBoosted(String packageName) {
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.checkPackageBoostStatus(packageName);
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                Logs.i(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
-            } else {
-                Logs.e(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "checkPackageBoostStatus", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
-
-    public static int getInstalledAppBoostStatus(String packageName) {
-        return HCFSMgmtUtils.isPackageBoosted(packageName) ? UidInfo.BoostStatus.BOOSTED : UidInfo.BoostStatus.UNBOOSTED;
-    }
-
-    public static boolean enableBooster(long boosterSize) {
-        Logs.i(CLASSNAME, "enableBooster", "boosterSize=" + boosterSize);
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.enableBooster(boosterSize);
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                Logs.d(CLASSNAME, "enableBooster", "jObject=" + jObject);
-            } else {
-                Logs.e(CLASSNAME, "enableBooster", "jObject=" + jObject);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "enableBooster", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
-
-    public static boolean disableBooster() {
-        Logs.i(CLASSNAME, "disableBooster", null);
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.disableBooster();
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                Logs.d(CLASSNAME, "disableBooster", "jObject=" + jObject);
-            } else {
-                Logs.e(CLASSNAME, "disableBooster", "jObject=" + jObject);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "disableBooster", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
-
-    public static boolean triggerBoost() {
-        boolean isTriggered = false;
-        try {
-            String jsonResult = HCFSApiUtils.triggerBoost();
-            String logMsg = "jsonResult=" + jsonResult;
-            JSONObject jObject = new JSONObject(jsonResult);
-            boolean isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-//                Logs.i(CLASSNAME, "triggerBoost", logMsg);
-                int code = jObject.getInt("code");
-                if (code == 1) {
-                    isTriggered = true;
-                } else {
-                    isTriggered = false;
-                }
-            } else {
-                Logs.e(CLASSNAME, "triggerBoost", logMsg);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "triggerBoost", Log.getStackTraceString(e));
-        }
-        return isTriggered;
-    }
-
-    public static boolean triggerUnboost() {
-        boolean isTriggered = false;
-        try {
-            String jsonResult = HCFSApiUtils.triggerUnboost();
-            String logMsg = "jsonResult=" + jsonResult;
-            JSONObject jObject = new JSONObject(jsonResult);
-            boolean isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-//                Logs.i(CLASSNAME, "triggerUnboost", logMsg);
-                int code = jObject.getInt("code");
-                if (code == 1) {
-                    isTriggered = true;
-                } else {
-                    isTriggered = false;
-                }
-            } else {
-                Logs.e(CLASSNAME, "triggerUnboost", logMsg);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "triggerUnboost", Log.getStackTraceString(e));
-        }
-        return isTriggered;
-    }
-
-    public static void enableApp(Context context, String pkgName) {
-        PackageManager pm = context.getPackageManager();
-        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
-    }
-
-    public static void disableApp(Context context, String pkgName) {
-        PackageManager pm = context.getPackageManager();
-        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
-    }
-
-    public static long getMinimumAvailableBoosterSpace() {
-        return 100 * 1024 * 1024; // 100 MB
-    }
-
-    /**
-     * Get the available booster space which maximum value is {@link #BOOSTER_MAXIMUM_SPACE}.
-     *
-     * @return the available booster space
-     */
-    public static long getAvailableBoosterSpace() {
-        // booster uses pinned space
-        HCFSStatInfo hcfsStatInfo = getHCFSStatInfo();
-        long availableSpace = 0L;
-        if (hcfsStatInfo != null) {
-            availableSpace = hcfsStatInfo.getPinMax() - hcfsStatInfo.getPinTotal();
-            if (availableSpace > BOOSTER_MAXIMUM_SPACE) {
-                return BOOSTER_MAXIMUM_SPACE;
-            } else {
-                return availableSpace;
-            }
-        }
-        return availableSpace;
-    }
-
-    public static long getBoostNeedSize(Context context, List<String> packageNameList) {
-        long totalNeedSize = 0L;
-        boostNeedSize = 0L; //reset static variable boostNeedSize to 0L
-        PackageManager pm = context.getPackageManager();
-
-        for (String packageName : packageNameList) {
-            try {
-                Method getPackageSizeInfo = getPackageSizeInfo = pm.getClass().getMethod("getPackageSizeInfo", String.class, IPackageStatsObserver.class);
-                getPackageSizeInfo.invoke(pm, packageName, new IPackageStatsObserver.Stub() {
-                    @Override
-                    public void onGetStatsCompleted(PackageStats pStats, boolean succeeded) throws RemoteException {
-                        boostNeedSize += pStats.dataSize;
-                        //Logs.d(CLASSNAME, "isBoosterSpaceEnoughForBoost", "packageName = " + packageName
-                        //            + ", dataSize=" + UnitConverter.convertByteToProperUnit(pStats.dataSize));
-                    }
-                });
-            } catch (Exception e) {
-                Logs.e(CLASSNAME, "getBoostNeedSize", Log.getStackTraceString(e));
-                //    return ;
-            }
-        }
-
-        totalNeedSize = boostNeedSize;
-        boostNeedSize = 0L; //reset static variable boostNeedSize to 0L
-        return totalNeedSize;
-    }
-
-    public static boolean isBoosterSpaceEnoughForBoost(Context context, List<String> packageNameList) {
-        boolean isSpaceEnough = false;
-        File file = new File(BOOSTER_FOLDER);
-        long freeSpaceInBooster = file.getFreeSpace();
-        //long usedSpaceInBooster = file.getTotalSpace() - freeSpaceInBooster;
-        long totalNeedSize = getBoostNeedSize(context, packageNameList);
-
-        if (freeSpaceInBooster > totalNeedSize) {
-            isSpaceEnough = true;
-        }
-        /* temp mark, the first version of ther booster size can't be changed after it is created.
-        else {
-            if ( (usedSpaceInBooster + totalNeedSize ) <= BOOSTER_MAXIMUM_SPACE) {
-                boolean expandOk = expandBoosterSize();
-                if (expandOk){
-                    isSpaceEnough = true;
-                } else { // expand failed!
-                    isSpaceEnough = false;
-                }
-            } else { // booser maximum space is up to 4G
-                isSpaceEnough = false;
-            }
-        } */
-
-        return isSpaceEnough;
-    }
-
-    /* temp mark, the first version of ther booster size can't be changed after it is created.
-    public static boolean expandBoosterSize() {
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.expandBoosterSize();
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                Logs.i(CLASSNAME, "expandBoosterSize", "jObject=" + jObject);
-            } else {
-                Logs.e(CLASSNAME, "expandBoosterSize", "jObject=" + jObject);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "expandBoosterSize", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
-    */
-
-    public static boolean clearBoosterPackageRemaining(String packageName) {
-        boolean isSuccess = false;
-        try {
-            String jsonResult = HCFSApiUtils.clearBoosterPackageRemaining(packageName);
-            JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
-            if (isSuccess) {
-                Logs.i(CLASSNAME, "clearBoosterPackageRemaining", "jObject=" + jObject);
-            } else {
-                Logs.e(CLASSNAME, "clearBoosterPackageRemaining", "jObject=" + jObject);
-            }
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "clearBoosterPackageRemaining", Log.getStackTraceString(e));
-        }
-        return isSuccess;
-    }
 
 }

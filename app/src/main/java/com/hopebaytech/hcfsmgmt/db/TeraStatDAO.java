@@ -32,6 +32,9 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
     private static TeraStatDAO sTeraStatDAO;
     private static SQLiteDatabase sSqLiteDatabase;
 
+    private TeraStatDAO() {
+    }
+
     public static TeraStatDAO getInstance(Context context) {
         if (sTeraStatDAO == null) {
             synchronized (TeraStatDAO.class) {

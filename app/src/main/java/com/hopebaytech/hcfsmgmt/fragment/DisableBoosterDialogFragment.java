@@ -25,6 +25,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
@@ -112,7 +113,7 @@ public class DisableBoosterDialogFragment extends DialogFragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                boolean isSuccess = HCFSMgmtUtils.disableBooster();
+                boolean isSuccess = Booster.disableBooster();
 
                 final int resultCode;
                 if (isSuccess) {

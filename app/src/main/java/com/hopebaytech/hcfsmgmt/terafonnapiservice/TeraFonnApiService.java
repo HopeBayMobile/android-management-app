@@ -16,6 +16,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
@@ -514,7 +515,7 @@ public class TeraFonnApiService extends Service {
             } else {
                 PackageManager pm = getPackageManager();
                 ApplicationInfo packageInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                int boostStatus = HCFSMgmtUtils.getInstalledAppBoostStatus(packageName);
+                int boostStatus = Booster.getInstalledAppBoostStatus(packageName);
                 uidDAO.insert(new UidInfo(pinOP, false, packageInfo.uid, packageName, boostStatus));
             }
         } catch (Exception e) {

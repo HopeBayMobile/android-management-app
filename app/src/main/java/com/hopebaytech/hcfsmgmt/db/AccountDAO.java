@@ -39,6 +39,9 @@ public class AccountDAO implements IGenericDAO<AccountInfo> {
     private static AccountDAO sAccountDAO;
     private static SQLiteDatabase sSqLiteDatabase;
 
+    private AccountDAO() {
+    }
+
     public static AccountDAO getInstance(Context context) {
         if (sAccountDAO == null) {
             synchronized (AccountDAO.class) {

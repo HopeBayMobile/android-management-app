@@ -33,7 +33,8 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
     private static SettingsDAO sSettingsDAO;
     private static SQLiteDatabase sSqLiteDatabase;
 
-    private SettingsDAO() {}
+    private SettingsDAO() {
+    }
 
     public static SettingsDAO getInstance(Context context) {
         if (sSettingsDAO == null) {

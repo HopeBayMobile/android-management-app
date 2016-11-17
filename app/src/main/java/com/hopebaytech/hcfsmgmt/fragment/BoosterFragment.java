@@ -1,11 +1,13 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -21,31 +23,37 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
-import com.hopebaytech.hcfsmgmt.info.ItemInfo;
-import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * @author Aaron Daniel
- *         Created by Daniel on 2016/8/11.
+ * @author Aaron
+ *         Created by Aaron on 2016/11/07.
  */
 public class BoosterFragment extends Fragment {
 
     public static final String TAG = BoosterFragment.class.getSimpleName();
     private final String CLASSNAME = BoosterFragment.class.getSimpleName();
+
+    private int mCurrentTab = Tab.UNBOOSTED;
 
     private Context mContext;
     private RecyclerView mRecycleView;
@@ -56,7 +64,7 @@ public class BoosterFragment extends Fragment {
     private TextView mHintMessage;
     private LinearLayout mActionButtonLayout;
 
-    private int mCurrentTab = Tab.UNBOOSTED;
+    private BoosterReceiver mBoosterReceiver;
 
     public static BoosterFragment newInstance() {
         return new BoosterFragment();
@@ -73,10 +81,12 @@ public class BoosterFragment extends Fragment {
         Logs.d(CLASSNAME, "onCreate", null);
 
         mContext = getActivity();
+        mBoosterReceiver = new BoosterReceiver();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Logs.d(CLASSNAME, "onCreateView", null);
         return inflater.inflate(R.layout.smart_cache_fragment, container, false);
     }
 
@@ -94,12 +104,53 @@ public class BoosterFragment extends Fragment {
         mActionButtonLayout = (LinearLayout) view.findViewById(R.id.action_button_layout);
     }
 
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Logs.d(CLASSNAME, "onViewCreated", null);
+        Logs.d(CLASSNAME, "onActivityCreated", null);
 
         init();
         showUnboostedAppList();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Logs.d(CLASSNAME, "onStart", null);
+        mBoosterReceiver.register(mContext);
+
+        BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
+        if (!adapter.isProcessing()) {
+            // The UI is not processing boost/unboost yet, but we need to check whether the
+            // boost/unboost was triggered before. If it has been triggered, we have to show the
+            // processing UI.
+            boolean isProcessing = true;
+            switch (Booster.currentProcessBoostStatus(mContext)) {
+                case UidInfo.BoostStatus.UNBOOSTING:
+                    setCurrentTab(Tab.BOOSTED);
+                    break;
+                case UidInfo.BoostStatus.BOOSTING:
+                    setCurrentTab(Tab.UNBOOSTED);
+                    break;
+                default:
+                    isProcessing = false;
+            }
+            if (isProcessing) {
+                adapter.notifyProcessingApps();
+            }
+        }
+    }
+
+    private void setCurrentTab(int currentTab) {
+        mCurrentTab = currentTab;
+        updateUI(true /* update app list */);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Logs.d(CLASSNAME, "onStop", null);
+        mBoosterReceiver.unregister(mContext);
     }
 
     private void init() {
@@ -120,28 +171,24 @@ public class BoosterFragment extends Fragment {
         mUnboostTab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCurrentTab == Tab.UNBOOSTED ||
-                        ((BoosterAdapter) mRecycleView.getAdapter()).isProcessing()) {
+                BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
+                if (mCurrentTab == Tab.UNBOOSTED || adapter.isProcessing()) {
                     return;
                 }
-                mCurrentTab = Tab.UNBOOSTED;
-
-                ((BoosterAdapter) mRecycleView.getAdapter()).init();
-                updateUI(true /* update app list */);
+                adapter.init();
+                setCurrentTab(Tab.UNBOOSTED);
             }
         });
 
         mBoostTab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCurrentTab == Tab.BOOSTED ||
-                        ((BoosterAdapter) mRecycleView.getAdapter()).isProcessing()) {
+                BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
+                if (mCurrentTab == Tab.BOOSTED || adapter.isProcessing()) {
                     return;
                 }
-                mCurrentTab = Tab.BOOSTED;
-
-                ((BoosterAdapter) mRecycleView.getAdapter()).init();
-                updateUI(true /* update app list */);
+                adapter.init();
+                setCurrentTab(Tab.BOOSTED);
             }
         });
 
@@ -162,8 +209,8 @@ public class BoosterFragment extends Fragment {
                 builder.append("\n\n");
 
                 BoosterAdapter adapter = ((BoosterAdapter) mRecycleView.getAdapter());
-                for (int i = 0; i < adapter.mCheckedPositionArr.size(); i++) {
-                    int position = adapter.mCheckedPositionArr.keyAt(i);
+                for (int i = 0; i < adapter.mCheckedPosition.size(); i++) {
+                    int position = adapter.mCheckedPosition.keyAt(i);
                     builder.append(adapter.getAppList().get(position).getName());
                     builder.append("\n");
                 }
@@ -207,8 +254,7 @@ public class BoosterFragment extends Fragment {
         }
 
         BoosterAdapter adapter = ((BoosterAdapter) mRecycleView.getAdapter());
-        Logs.w(CLASSNAME, "updateUI", "checkedPositionArr.size()=" + adapter.mCheckedPositionArr.size());
-        if (adapter.mCheckedPositionArr.size() == 0) {
+        if (adapter.mCheckedPosition.size() == 0) {
             mActionButtonLayout.setVisibility(View.GONE);
             mHintMessage.setVisibility(View.VISIBLE);
         } else {
@@ -218,24 +264,37 @@ public class BoosterFragment extends Fragment {
     }
 
     private void showBoostedAppList() {
-        final List<ItemInfo> appList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_USER);
+        final List<AppInfo> appList = Booster.getAppList(mContext, Booster.Type.BOOSTED);
         UiHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
                 BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
                 adapter.setAppList(appList);
+                adapter.setCheckedApps(getCheckedApps(appList, UidInfo.BoostStatus.INIT_UNBOOST));
                 adapter.notifyDataSetChanged();
             }
         });
     }
 
+    private SparseBooleanArray getCheckedApps(List<AppInfo> appList, int checkedStatus) {
+        SparseBooleanArray checkedPosition = new SparseBooleanArray();
+        for (int position = 0; position < appList.size(); position++) {
+            int boostStatus = appList.get(position).getBoostStatus();
+            if (boostStatus == checkedStatus) {
+                checkedPosition.put(position, true);
+            }
+        }
+        return checkedPosition;
+    }
+
     private void showUnboostedAppList() {
-        final List<ItemInfo> appList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_SYSTEM);
+        final List<AppInfo> appList = Booster.getAppList(mContext, Booster.Type.UNBOOSTED);
         UiHandler.getInstance().post(new Runnable() {
             @Override
             public void run() {
                 BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
                 adapter.setAppList(appList);
+                adapter.setCheckedApps(getCheckedApps(appList, UidInfo.BoostStatus.INIT_BOOST));
                 adapter.notifyDataSetChanged();
             }
         });
@@ -243,27 +302,26 @@ public class BoosterFragment extends Fragment {
 
     private void executeAction() {
         BoosterAdapter adapter = (BoosterAdapter) mRecycleView.getAdapter();
-        adapter.setProcessing(true);
         adapter.notifyProcessingApps();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Logs.d(CLASSNAME, "onViewCreated", null);
+        Logs.d(CLASSNAME, "onDestroy", null);
 
         ((BoosterAdapter) mRecycleView.getAdapter()).freeCache();
     }
 
     private class BoosterAdapter extends RecyclerView.Adapter<BoosterAdapter.AppViewHolder> {
 
-        private List<ItemInfo> mAppList;
+        private List<AppInfo> mAppList;
         private LruCache<Integer, Bitmap> mMemoryCache;
 
         /**
          * The position which is checked will be added to this array.
          */
-        private SparseBooleanArray mCheckedPositionArr;
+        private SparseBooleanArray mCheckedPosition;
         private boolean isProcessing;
         private Timer mProcessingTextTimer;
 
@@ -271,7 +329,7 @@ public class BoosterFragment extends Fragment {
             this(null);
         }
 
-        private BoosterAdapter(List<ItemInfo> appList) {
+        private BoosterAdapter(List<AppInfo> appList) {
             mAppList = appList;
             init();
         }
@@ -283,13 +341,13 @@ public class BoosterFragment extends Fragment {
             if (mMemoryCache == null) {
                 mMemoryCache = MemoryCacheFactory.createMemoryCache();
             }
-            if (mCheckedPositionArr == null) {
-                mCheckedPositionArr = new SparseBooleanArray();
+            if (mCheckedPosition == null) {
+                mCheckedPosition = new SparseBooleanArray();
             }
 
             mAppList.clear();
             mMemoryCache.evictAll();
-            mCheckedPositionArr.clear();
+            mCheckedPosition.clear();
         }
 
         @Override
@@ -300,7 +358,7 @@ public class BoosterFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(AppViewHolder holder, int position) {
-            final boolean isChecked = mCheckedPositionArr.get(position);
+            final boolean isChecked = mCheckedPosition.get(position);
             if (isChecked && isProcessing) {
                 holder.itemView.setVisibility(View.INVISIBLE);
                 return;
@@ -322,7 +380,7 @@ public class BoosterFragment extends Fragment {
         }
 
         private void onBindAppViewHolder(final AppViewHolder holder, int position, boolean isChecked) {
-            final AppInfo appInfo = (AppInfo) mAppList.get(position);
+            final AppInfo appInfo = mAppList.get(position);
             holder.appInfo = appInfo;
 
             int backgroundColor = isChecked ? R.color.colorSmartCacheItemSelectedBackground : android.R.color.transparent;
@@ -362,39 +420,120 @@ public class BoosterFragment extends Fragment {
             return mAppList.size();
         }
 
-        private void setProcessing(boolean processing) {
-            isProcessing = processing;
-        }
-
         private boolean isProcessing() {
             return isProcessing;
         }
 
         private void notifyProcessingApps() {
+            isProcessing = true;
+
             startProcessingTextAnim();
             mActionButtonLayout.setVisibility(View.GONE);
 
-            for (int i = 0; i < mCheckedPositionArr.size(); i++) {
-                int position = mCheckedPositionArr.keyAt(i);
-                boolean isChecked = mCheckedPositionArr.get(position);
+            final List<AppInfo> checkedApps = new LinkedList<>();
+            for (int i = 0; i < mCheckedPosition.size(); i++) {
+                int position = mCheckedPosition.keyAt(i);
+                boolean isChecked = mCheckedPosition.get(position);
                 if (isChecked) {
+                    checkedApps.add(mAppList.get(position));
                     notifyItemChanged(position);
                 }
             }
 
-            // Suppose apps have been boosted
-            UiHandler.getInstance().postDelayed(new Runnable() {
+            ThreadPool.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
-                    notifyProcessingAppsCompleted();
+                    if (mCurrentTab == Tab.UNBOOSTED) {
+                        if (Booster.isEnoughBoosterSpace(mContext, checkedApps)) {
+                            Booster.updateBoostStatusInXml(mContext, UidInfo.BoostStatus.BOOSTING);
+
+                            UidDAO uidDAO = UidDAO.getInstance(mContext);
+                            ContentValues cv = new ContentValues();
+                            cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_BOOST);
+                            for (AppInfo appInfo : checkedApps) {
+                                uidDAO.update(appInfo.getPackageName(), cv);
+                            }
+                            for (AppInfo appInfo : checkedApps) {
+                                Booster.disableApp(mContext, appInfo.getPackageName());
+                            }
+                            Booster.triggerBoost();
+                            return;
+                        }
+                    } else { // Tab.BOOSTED
+                        if (Booster.isEnoughUnboosterSpace(mContext, checkedApps)) {
+                            Booster.updateBoostStatusInXml(mContext, UidInfo.BoostStatus.UNBOOSTING);
+
+                            UidDAO uidDAO = UidDAO.getInstance(mContext);
+                            ContentValues cv = new ContentValues();
+                            cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_UNBOOST);
+                            for (AppInfo appInfo : checkedApps) {
+                                uidDAO.update(appInfo.getPackageName(), cv);
+                            }
+                            for (AppInfo appInfo : checkedApps) {
+                                Booster.enableApp(mContext, appInfo.getPackageName());
+                            }
+                            Booster.triggerUnboost();
+                            return;
+                        }
+                    }
+                    Booster.removeBoostStatusInXml(mContext);
+
+                    UiHandler.getInstance().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            insufficientSpaceFailed();
+                        }
+                    });
                 }
-            }, 3000);
+            });
+
+        }
+
+        private void insufficientSpaceFailed() {
+            isProcessing = false;
+            uncheckAllApps();
+            stopProcessingTextAnim();
+
+            if (mCurrentTab == Tab.UNBOOSTED) {
+                Toast.makeText(mContext, R.string.booster_boost_apps_insufficient_space, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(mContext, R.string.booster_unboost_apps_insufficient_space, Toast.LENGTH_LONG).show();
+            }
+        }
+
+        private void notifyProcessingAppsFailed() {
+            ThreadPool.getInstance().execute(new Runnable() {
+                @Override
+                public void run() {
+                    Booster.recoverBoostStatusWhenFailed(mContext);
+                    Booster.removeBoostStatusInXml(mContext);
+
+                    UiHandler.getInstance().post(new Runnable() {
+                        @Override
+                        public void run() {
+                            isProcessing = false;
+                            uncheckAllApps();
+                            stopProcessingTextAnim();
+
+                            int resId;
+                            if (mCurrentTab == Tab.UNBOOSTED) {
+                                resId = R.string.booster_boost_apps_failed;
+                            } else { // Tab.BOOSTED
+                                resId = R.string.booster_unboost_apps_failed;
+                            }
+                            Toast.makeText(mContext, resId, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
         }
 
         private void notifyProcessingAppsCompleted() {
+            Booster.removeBoostStatusInXml(mContext);
+
             List<Integer> removePositionList = new ArrayList<>();
-            for (int i = 0; i < mCheckedPositionArr.size(); i++) {
-                int position = mCheckedPositionArr.keyAt(i);
+            for (int i = 0; i < mCheckedPosition.size(); i++) {
+                int position = mCheckedPosition.keyAt(i);
                 removePositionList.add(position);
             }
 
@@ -441,7 +580,7 @@ public class BoosterFragment extends Fragment {
 
                         @Override
                         public void onAnimationEnd(Animation animation) {
-                            mCheckedPositionArr.clear();
+                            mCheckedPosition.clear();
                             isProcessing = false;
 
                             updateUI(false /* update app list */);
@@ -516,7 +655,6 @@ public class BoosterFragment extends Fragment {
             UiHandler.getInstance().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Logs.w(CLASSNAME, "stopProcessingTextAnim", mHintMessage.getText().toString());
                     String message;
                     if (mCurrentTab == Tab.UNBOOSTED) { // In unboosted page, show boost message after processing
                         message = getString(R.string.booster_boost_hint_tap_app_to_boost);
@@ -524,21 +662,20 @@ public class BoosterFragment extends Fragment {
                         message = getString(R.string.booster_boost_hint_tap_app_to_unboost);
                     }
                     mHintMessage.setText(message);
-                    Logs.w(CLASSNAME, "stopProcessingTextAnim", mHintMessage.getText().toString());
                 }
             }, 200);
         }
 
         private void uncheckAllApps() {
             List<Integer> checkedPositionList = new ArrayList<>();
-            for (int i = 0; i < mCheckedPositionArr.size(); i++) {
-                int position = mCheckedPositionArr.keyAt(i);
-                boolean isChecked = mCheckedPositionArr.get(position);
+            for (int i = 0; i < mCheckedPosition.size(); i++) {
+                int position = mCheckedPosition.keyAt(i);
+                boolean isChecked = mCheckedPosition.get(position);
                 if (isChecked) {
                     checkedPositionList.add(position);
                 }
             }
-            mCheckedPositionArr.clear();
+            mCheckedPosition.clear();
 
             for (int position : checkedPositionList) {
                 notifyItemChanged(position);
@@ -548,12 +685,16 @@ public class BoosterFragment extends Fragment {
             mHintMessage.setVisibility(View.VISIBLE);
         }
 
-        public List<ItemInfo> getAppList() {
+        private List<AppInfo> getAppList() {
             return mAppList;
         }
 
-        public void setAppList(List<ItemInfo> mAppList) {
+        private void setAppList(List<AppInfo> mAppList) {
             this.mAppList = mAppList;
+        }
+
+        public void setCheckedApps(SparseBooleanArray checkedPosition) {
+            this.mCheckedPosition = checkedPosition;
         }
 
         class AppViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -583,17 +724,17 @@ public class BoosterFragment extends Fragment {
                 }
 
                 int position = getAdapterPosition();
-                boolean isChecked = mCheckedPositionArr.get(position);
+                boolean isChecked = mCheckedPosition.get(position);
 
                 if (isChecked) { // Original state is checked, so un-check it
-                    mCheckedPositionArr.delete(position);
+                    mCheckedPosition.delete(position);
                     notifyItemChanged(position);
                 } else {
-                    mCheckedPositionArr.put(position, true);
+                    mCheckedPosition.put(position, true);
                     notifyItemChanged(position);
                 }
 
-                if (mCheckedPositionArr.size() != 0) {
+                if (mCheckedPosition.size() != 0) {
                     mHintMessage.setVisibility(View.GONE);
                     mActionButtonLayout.setVisibility(View.VISIBLE);
                 } else {
@@ -606,6 +747,44 @@ public class BoosterFragment extends Fragment {
 
         private void freeCache() {
             mMemoryCache.evictAll();
+        }
+
+    }
+
+    private class BoosterReceiver extends BroadcastReceiver {
+
+        private boolean isRegistered;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            BoosterAdapter adapter = ((BoosterAdapter) mRecycleView.getAdapter());
+            switch (intent.getAction()) {
+                case TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED:
+                    adapter.notifyProcessingAppsCompleted();
+                    break;
+                case TeraIntent.ACTION_BOOSTER_PROCESS_FAILED:
+                    adapter.notifyProcessingAppsFailed();
+                    break;
+            }
+        }
+
+        private void register(Context context) {
+            if (!isRegistered) {
+                isRegistered = true;
+
+                IntentFilter intentFilter = new IntentFilter();
+                intentFilter.addAction(TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED);
+                intentFilter.addAction(TeraIntent.ACTION_BOOSTER_PROCESS_FAILED);
+                context.registerReceiver(this, intentFilter);
+            }
+        }
+
+        private void unregister(Context context) {
+            if (isRegistered) {
+                isRegistered = false;
+
+                context.unregisterReceiver(this);
+            }
         }
 
     }
