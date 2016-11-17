@@ -331,6 +331,16 @@ public class TeraFonnApiService extends Service {
             }
             return isAllowPinUnpinApps;
         }
+
+        @Override
+        public int getAppBoostStatus(String packageName) throws RemoteException {
+            int status  = UidInfo.BoostStatus.UNBOOSTED;
+            UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
+            UidInfo uidInfo = uidDAO.get(packageName);
+            if (uidInfo != null)
+                status = uidInfo.getBoostStatus();
+            return status;
+        }
     };
 
     @Override
