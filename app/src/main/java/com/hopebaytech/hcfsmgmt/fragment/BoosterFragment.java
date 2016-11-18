@@ -340,7 +340,7 @@ public class BoosterFragment extends Fragment {
                 mAppList = new ArrayList<>();
             }
             if (mMemoryCache == null) {
-                mMemoryCache = MemoryCacheFactory.createMemoryCache(mContext);
+                mMemoryCache = MemoryCacheFactory.createMemoryCache();
             }
             if (mCheckedPosition == null) {
                 mCheckedPosition = new SparseBooleanArray();

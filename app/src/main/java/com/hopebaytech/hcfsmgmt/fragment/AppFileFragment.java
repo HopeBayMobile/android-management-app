@@ -954,7 +954,7 @@ public class AppFileFragment extends Fragment {
 
         public void init() {
             mExecutor = ExecutorFactory.createThreadPoolExecutor();
-            mMemoryCache = MemoryCacheFactory.createMemoryCache(mContext);
+            mMemoryCache = MemoryCacheFactory.createMemoryCache();
         }
 
         private void shutdownExecutor() {
@@ -1073,7 +1073,7 @@ public class AppFileFragment extends Fragment {
 
         public void init() {
             mExecutor = ExecutorFactory.createThreadPoolExecutor();
-            mMemoryCache = MemoryCacheFactory.createMemoryCache(mContext);
+            mMemoryCache = MemoryCacheFactory.createMemoryCache();
         }
 
         private void shutdownExecutor() {
