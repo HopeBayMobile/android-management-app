@@ -186,6 +186,7 @@
     <string name="settings_allow_pin_unpin_apps">Allow pin/unpin apps</string>
     <string name="settings_booster_title">Booster</string>
     <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
+    <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
 
     <string name="change_account_require_new_account">與目前帳戶相同。變更帳戶操作已經停止。</string>
     <string name="change_account_start_to_change">確認變更</string>

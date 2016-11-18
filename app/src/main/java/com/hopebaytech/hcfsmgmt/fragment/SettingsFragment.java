@@ -260,7 +260,9 @@ public class SettingsFragment extends Fragment {
                 if (isChecked) {
                     showEnableBoosterDialog();
                 } else {
-                    showDisableBoosterDialog();
+                    mEnableBooster.setChecked(true);
+                    Toast.makeText(mContext, R.string.settings_booster_cannot_disable, Toast.LENGTH_LONG).show();
+//                    showDisableBoosterDialog();
                 }
             }
         });
