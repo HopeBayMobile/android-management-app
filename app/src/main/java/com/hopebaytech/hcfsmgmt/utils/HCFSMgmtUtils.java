@@ -82,7 +82,6 @@ public class HCFSMgmtUtils {
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
-        Logs.d(CLASSNAME, "isAppPinned", appInfo.getName());
         UidDAO uidDAO = UidDAO.getInstance(context);
         UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
         return uidInfo != null && uidInfo.isPinned();

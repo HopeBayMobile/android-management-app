@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -316,7 +317,7 @@ public class BoosterFragment extends Fragment {
     private class BoosterAdapter extends RecyclerView.Adapter<BoosterAdapter.AppViewHolder> {
 
         private List<AppInfo> mAppList;
-        private LruCache<Integer, Bitmap> mMemoryCache;
+        private LruCache<Integer, Drawable> mMemoryCache;
 
         /**
          * The position which is checked will be added to this array.
@@ -339,7 +340,7 @@ public class BoosterFragment extends Fragment {
                 mAppList = new ArrayList<>();
             }
             if (mMemoryCache == null) {
-                mMemoryCache = MemoryCacheFactory.createMemoryCache();
+                mMemoryCache = MemoryCacheFactory.createMemoryCache(mContext);
             }
             if (mCheckedPosition == null) {
                 mCheckedPosition = new SparseBooleanArray();
@@ -370,13 +371,13 @@ public class BoosterFragment extends Fragment {
         }
 
         @Nullable
-        private Bitmap getAppIcon(AppInfo appInfo) {
-            Bitmap iconBitmap = mMemoryCache.get(appInfo.hashCode());
-            if (iconBitmap == null) {
-                iconBitmap = appInfo.getIconImage();
-                mMemoryCache.put(appInfo.hashCode(), iconBitmap);
+        private Drawable getAppIcon(AppInfo appInfo) {
+            Drawable iconDrawable = mMemoryCache.get(appInfo.hashCode());
+            if (iconDrawable == null) {
+                iconDrawable = appInfo.getIconDrawable();
+                mMemoryCache.put(appInfo.hashCode(), iconDrawable);
             }
-            return iconBitmap;
+            return iconDrawable;
         }
 
         private void onBindAppViewHolder(final AppViewHolder holder, int position, boolean isChecked) {
@@ -386,9 +387,9 @@ public class BoosterFragment extends Fragment {
             int backgroundColor = isChecked ? R.color.colorSmartCacheItemSelectedBackground : android.R.color.transparent;
             holder.itemView.setBackgroundColor(ContextCompat.getColor(mContext, backgroundColor));
 
-            Bitmap iconBitmap = getAppIcon(appInfo);
+            Drawable iconBitmap = getAppIcon(appInfo);
             if (iconBitmap != null) {
-                holder.itemIcon.setImageBitmap(iconBitmap);
+                holder.itemIcon.setImageDrawable(iconBitmap);
             }
             holder.itemName.setText(appInfo.getName());
 

@@ -10,8 +10,8 @@ import com.hopebaytech.hcfsmgmt.fragment.AppFileFragment;
 public abstract class ItemInfo {
 
     protected Context mContext;
-    protected final int ICON_COLORFUL = 255;
-    protected final int ICON_TRANSPARENT = 50;
+    public static final int ICON_COLORFUL = 255;
+    public static final int ICON_TRANSPARENT = 50;
 
     /**
      * The pin/unpin status of the item
@@ -79,6 +79,9 @@ public abstract class ItemInfo {
 
     @Nullable
     public abstract Bitmap getIconImage();
+
+    @Nullable
+    public abstract Drawable getIconDrawable();
 
     @Nullable
     public abstract Drawable getPinUnpinImage(boolean isPinned);

@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
-import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.LruCache;
 
 /**
@@ -9,14 +10,14 @@ import android.util.LruCache;
  */
 public class MemoryCacheFactory {
 
-    public static LruCache<Integer, Bitmap> createMemoryCache() {
+    public static LruCache<Integer, Drawable> createMemoryCache() {
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        int cacheSize = maxMemory / 8;
-        return new LruCache<Integer, Bitmap>(cacheSize) {
+        int cacheSize = maxMemory / 8; // Use 1/8 memory size of max memory
+        return new LruCache<Integer, Drawable>(cacheSize) {
             @Override
-            protected int sizeOf(Integer key, Bitmap bitmap) {
-                /** The cache size will be measured in kilobytes rather than number of items. */
-                return bitmap.getByteCount() / 1024;
+            protected int sizeOf(Integer key, Drawable drawable) {
+                // The cache size will be measured in kilobytes rather than number of items.
+                return ((BitmapDrawable) drawable).getBitmap().getByteCount() / 1024;
             }
         };
     }

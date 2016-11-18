@@ -714,6 +714,7 @@ public class AppFileFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        Logs.d(CLASSNAME, "onPause", null);
 
         // Interrupt mApiExecutorThread
         if (mApiExecutorThread != null) {
@@ -775,6 +776,7 @@ public class AppFileFragment extends Fragment {
                 mSectionedRecyclerViewAdapter = new SectionedRecyclerViewAdapter(new LinearRecyclerViewAdapter());
                 break;
             case GRID:
+                Logs.w(CLASSNAME, "onActivityCreated", null);
                 mChangeLayout.setImageResource(R.drawable.icon_btn_tab_listview_light);
                 mRecyclerView.setLayoutManager(new GridLayoutManager(mContext, GRID_LAYOUT_SPAN_COUNT));
                 mSectionedRecyclerViewAdapter = new SectionedRecyclerViewAdapter(new GridRecyclerViewAdapter());
@@ -937,7 +939,7 @@ public class AppFileFragment extends Fragment {
     private class GridRecyclerViewAdapter extends RecyclerView.Adapter<GridRecyclerViewAdapter.GridRecyclerViewHolder> {
 
         private ArrayList<ItemInfo> mItemInfoList;
-        private LruCache<Integer, Bitmap> mMemoryCache;
+        private LruCache<Integer, Drawable> mMemoryCache;
         private ThreadPoolExecutor mExecutor;
 
         private GridRecyclerViewAdapter() {
@@ -952,7 +954,7 @@ public class AppFileFragment extends Fragment {
 
         public void init() {
             mExecutor = ExecutorFactory.createThreadPoolExecutor();
-            mMemoryCache = MemoryCacheFactory.createMemoryCache();
+            mMemoryCache = MemoryCacheFactory.createMemoryCache(mContext);
         }
 
         private void shutdownExecutor() {
@@ -1057,7 +1059,7 @@ public class AppFileFragment extends Fragment {
 
         private ArrayList<ItemInfo> mItemInfoList;
         private ThreadPoolExecutor mExecutor;
-        private LruCache<Integer, Bitmap> mMemoryCache;
+        private LruCache<Integer, Drawable> mMemoryCache;
 
         private LinearRecyclerViewAdapter() {
             mItemInfoList = new ArrayList<>();
@@ -1071,7 +1073,7 @@ public class AppFileFragment extends Fragment {
 
         public void init() {
             mExecutor = ExecutorFactory.createThreadPoolExecutor();
-            mMemoryCache = MemoryCacheFactory.createMemoryCache();
+            mMemoryCache = MemoryCacheFactory.createMemoryCache(mContext);
         }
 
         private void shutdownExecutor() {
@@ -1588,8 +1590,15 @@ public class AppFileFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Logs.d(CLASSNAME, "onDestroyView", null);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
+        Logs.d(CLASSNAME, "onDestroy", null);
 
         // Interrupt the threads in the threading pool of executor
         mSectionedRecyclerViewAdapter.shutdownSubAdapterExecutor();
@@ -1977,6 +1986,10 @@ public class AppFileFragment extends Fragment {
 
     private Drawable adjustImageSaturation(Bitmap bitmap) {
         Drawable drawable = new BitmapDrawable(mContext.getResources(), bitmap);
+        return adjustImageSaturation(drawable);
+    }
+
+    private Drawable adjustImageSaturation(Drawable drawable) {
         ColorMatrix matrix = new ColorMatrix();
         matrix.setSaturation(0.5f);
         ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
@@ -2152,8 +2165,7 @@ public class AppFileFragment extends Fragment {
     }
 
     private void displayPinView(RecyclerViewHolder holder, ItemInfo
-            itemInfo, int alpha) {
-        holder.setIconAlpha(alpha);
+            itemInfo) {
 
         ImageView pinView;
         if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
@@ -2184,7 +2196,7 @@ public class AppFileFragment extends Fragment {
 
     private void displayItem(final int position,
                              final RecyclerViewHolder holder,
-                             final LruCache<Integer, Bitmap> memoryCache, ThreadPoolExecutor
+                             final LruCache<Integer, Drawable> memoryCache, ThreadPoolExecutor
                                      executor) {
 
         if (!isPositionVisible(position)) {
@@ -2192,9 +2204,9 @@ public class AppFileFragment extends Fragment {
         }
 
         final ItemInfo itemInfo = holder.getItemInfo();
-        final Bitmap cacheBitmap = memoryCache.get(itemInfo.hashCode());
-        if (cacheBitmap != null) {
-            holder.setIconBitmap(cacheBitmap);
+        final Drawable cacheDrawable = memoryCache.get(itemInfo.hashCode());
+        if (cacheDrawable != null) {
+            holder.setIconDrawable(cacheDrawable);
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -2203,6 +2215,18 @@ public class AppFileFragment extends Fragment {
                     }
 
                     final int alpha = itemInfo.getIconAlpha();
+                    Drawable drawable = cacheDrawable;
+                    if (alpha != cacheDrawable.getAlpha()) {
+                        if (alpha == ItemInfo.ICON_COLORFUL) {
+                            drawable = itemInfo.getIconDrawable();
+                        } else {
+                            Drawable adjustDrawable = adjustImageSaturation(drawable);
+                            if (adjustDrawable != null) {
+                                drawable = adjustDrawable;
+                            }
+                        }
+                    }
+
                     boolean isPinned = isItemPinned(itemInfo);
                     // A workaround to solve the problem that pin icons refresh abnormally when
                     // user pin/unpin items.
@@ -2212,10 +2236,14 @@ public class AppFileFragment extends Fragment {
                     itemInfo.setPinned(isPinned);
                     itemInfo.setPosition(position);
 
+                    final Drawable finalCacheDrawable = drawable;
                     mUiHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            displayPinView(holder, itemInfo, alpha);
+                            holder.setIconAlpha(alpha);
+                            holder.setIconDrawable(finalCacheDrawable);
+
+                            displayPinView(holder, itemInfo);
                         }
                     });
                 }
@@ -2237,27 +2265,20 @@ public class AppFileFragment extends Fragment {
                 itemInfo.setPosition(position);
 
                 final int alpha = itemInfo.getIconAlpha();
+                final Drawable iconDrawable = itemInfo.getIconDrawable();
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        holder.setIconAlpha(alpha);
-                    }
-                });
-                final Bitmap iconBitmap = itemInfo.getIconImage();
-                mUiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Bitmap bitmap = iconBitmap;
-                        if (!itemInfo.isPinned()) {
-                            Bitmap adjustBitmap = ((BitmapDrawable) adjustImageSaturation(iconBitmap)).getBitmap();
-                            if (adjustBitmap != null) {
-                                bitmap = adjustBitmap;
+                        Drawable drawable = iconDrawable;
+                        if (alpha == ItemInfo.ICON_TRANSPARENT) {
+                            Drawable adjustDrawable = adjustImageSaturation(drawable);
+                            if (adjustDrawable != null) {
+                                drawable = adjustDrawable;
                             }
                         }
-                        if (bitmap != null) {
-                            holder.setIconBitmap(bitmap);
-                            memoryCache.put(itemInfo.hashCode(), bitmap);
-                        }
+                        holder.setIconAlpha(alpha);
+                        holder.setIconDrawable(drawable);
+                        memoryCache.put(itemInfo.hashCode(), drawable);
                     }
                 });
 
@@ -2265,7 +2286,7 @@ public class AppFileFragment extends Fragment {
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        displayPinView(holder, itemInfo, alpha);
+                        displayPinView(holder, itemInfo);
                     }
                 });
 
@@ -2298,5 +2319,6 @@ public class AppFileFragment extends Fragment {
         }
 
     }
+
 
 }
