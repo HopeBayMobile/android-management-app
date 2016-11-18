@@ -40,13 +40,18 @@ public class Booster {
     private static final long BOOSTER_MAXIMUM_SPACE = 4L * 1024 * 1024 * 1024; // booster_size <= 4G
     private static final String BOOSTER_PARTITION = "/data/mnt/hcfsblock";
 
+    /**
+     * @return 0 if boosted, 1 if unboosted, error otherwise.
+     * */
     public static boolean isPackageBoosted(String packageName) {
-        boolean isSuccess = false;
+        boolean isBoosted = false;
         try {
             String jsonResult = HCFSApiUtils.checkPackageBoostStatus(packageName);
             JSONObject jObject = new JSONObject(jsonResult);
-            isSuccess = jObject.getBoolean("result");
+            boolean isSuccess = jObject.getBoolean("result");
+            int code = jObject.getInt("code");
             if (isSuccess) {
+                isBoosted = (code == 0);
                 Logs.d(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
@@ -54,7 +59,7 @@ public class Booster {
         } catch (JSONException e) {
             Logs.e(CLASSNAME, "checkPackageBoostStatus", Log.getStackTraceString(e));
         }
-        return isSuccess;
+        return isBoosted;
     }
 
     public static int getInstalledAppBoostStatus(String packageName) {
@@ -141,14 +146,14 @@ public class Booster {
 
     public static void enableApp(Context context, String pkgName) {
         Logs.i(CLASSNAME, "enableApp", "pkgName=" + pkgName);
-//        PackageManager pm = context.getPackageManager(); // TODO for test
-//        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+        PackageManager pm = context.getPackageManager();
+        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
     }
 
     public static void disableApp(Context context, String pkgName) {
         Logs.i(CLASSNAME, "disableApp", "pkgName=" + pkgName);
-//        PackageManager pm = context.getPackageManager(); // TODO for test
-//        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+        PackageManager pm = context.getPackageManager();
+        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
     }
 
     public static long getMinimumAvailableBoosterSpace() {
@@ -240,6 +245,21 @@ public class Booster {
         return appDataSize < freeSpace;
     }
 
+    public static long getBoosterFreeSpace() {
+        File partition = new File(BOOSTER_PARTITION);
+        return partition.getFreeSpace();
+    }
+
+    public static long getBoosterUsedSpace() {
+        File partition = new File(BOOSTER_PARTITION);
+        return partition.getTotalSpace() - partition.getFreeSpace();
+    }
+
+    public static long getBoosterTotalSpace() {
+        File partition = new File(BOOSTER_PARTITION);
+        return partition.getTotalSpace();
+    }
+
     /**
      * Check whether the app data size is smaller than free space which subtracts pin max size from
      * pin total size.
@@ -250,8 +270,7 @@ public class Booster {
      */
     public static boolean isEnoughBoosterSpace(Context context, List<AppInfo> packageNameList) {
         boolean isSpaceEnough = false;
-        File file = new File(BOOSTER_PARTITION);
-        long freeSpaceInBooster = file.getFreeSpace();
+        long freeSpaceInBooster = getBoosterFreeSpace();
         //long usedSpaceInBooster = file.getTotalSpace() - freeSpaceInBooster;
         AppDataSizeHelper appDataSizeHelper = new AppDataSizeHelper(context, packageNameList);
         long appDataSize = appDataSizeHelper.getDataSize();
@@ -273,8 +292,7 @@ public class Booster {
             }
         } */
 
-//        return isSpaceEnough;
-        return true; // for test
+        return isSpaceEnough;
     }
 
     /* temp mark, the first version of ther booster size can't be changed after it is created.

@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -37,11 +36,13 @@ import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
+import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -57,6 +58,8 @@ public class BoosterFragment extends Fragment {
     private int mCurrentTab = Tab.UNBOOSTED;
 
     private Context mContext;
+    private TextView mUsedSpaceInfo;
+    private ImageView mRefresh;
     private RecyclerView mRecycleView;
     private TextView mBoostTab;
     private TextView mUnboostTab;
@@ -88,7 +91,7 @@ public class BoosterFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Logs.d(CLASSNAME, "onCreateView", null);
-        return inflater.inflate(R.layout.smart_cache_fragment, container, false);
+        return inflater.inflate(R.layout.booster_fragment, container, false);
     }
 
     @Override
@@ -96,6 +99,8 @@ public class BoosterFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Logs.d(CLASSNAME, "onViewCreated", null);
 
+        mUsedSpaceInfo = (TextView) view.findViewById(R.id.used_space_info);
+        mRefresh = (ImageView) view.findViewById(R.id.refresh);
         mRecycleView = (RecyclerView) view.findViewById(R.id.recycler_view);
         mBoostTab = (TextView) view.findViewById(R.id.boost_tab);
         mUnboostTab = (TextView) view.findViewById(R.id.unboost_tab);
@@ -159,9 +164,45 @@ public class BoosterFragment extends Fragment {
         mRecycleView.setAdapter(new BoosterAdapter());
 
         setUpListener();
+        updateUsedSpaceInfo();
+    }
+
+    private void updateUsedSpaceInfo() {
+        ThreadPool.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                UiHandler.getInstance().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isAdded()) {
+                            return;
+                        }
+
+                        String usedSpaceInfo = String.format(
+                                Locale.getDefault(),
+                                getString(R.string.booster_used_space_info),
+                                UnitConverter.convertByteToProperUnit(Booster.getBoosterUsedSpace()),
+                                UnitConverter.convertByteToProperUnit(Booster.getBoosterTotalSpace())
+                        );
+                        mUsedSpaceInfo.setText(usedSpaceInfo);
+                    }
+                });
+            }
+        });
     }
 
     private void setUpListener() {
+        mRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (((BoosterAdapter) mRecycleView.getAdapter()).isProcessing()) {
+                    return;
+                }
+                updateUsedSpaceInfo();
+                updateUI(true /* update app list */);
+            }
+        });
+
         mCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

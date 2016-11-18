@@ -305,6 +305,7 @@
     <string name="booster_boost_apps_failed">Boost apps failed.</string>
     <string name="booster_unboost_apps_insufficient_space">Insufficient space to unboost apps.</string>
     <string name="booster_unboost_apps_failed">Unboost apps failed.</string>
+    <string name="booster_used_space_info">Used Space: %1$s / %2$s</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 

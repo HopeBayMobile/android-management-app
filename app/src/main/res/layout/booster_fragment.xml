@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/fragment_title_bar_height"
         android:background="@drawable/img_subtitle_bkg"
@@ -17,13 +17,33 @@
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:text="@string/booster_title_bar"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/colorWhite" />
 
-    </LinearLayout>
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F6"
+            android:id="@+id/used_space_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/refresh"
+            android:padding="@dimen/M6"
+            tools:text="@string/booster_used_space_info" />
+
+        <ImageView
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="@dimen/M6"
+            android:src="@drawable/icon_btn_tab_refresh_light" />
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
