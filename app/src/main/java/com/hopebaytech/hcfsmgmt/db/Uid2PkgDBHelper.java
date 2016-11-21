@@ -27,8 +27,14 @@ public class Uid2PkgDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 2) {
-            addBoostStatusAndBoosterWhiteListTables(db);
+        switch (oldVersion) {
+            case 1: {
+                addBoostStatusAndBoosterWhiteListTables(db);
+            }
+            case VERSION: {
+                // DB upgraded successfully
+                return;
+            }
         }
     }
 

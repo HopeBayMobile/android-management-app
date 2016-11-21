@@ -827,7 +827,7 @@ public class TeraMgmtService extends Service {
                             String url = backend.getUrl();
                             String token = backend.getToken();
                             HCFSMgmtUtils.setSwiftToken(url, token);
-                            //updateBoosterWhiteList(deviceServiceInfo, jwtTokenArg);
+                            updateBoosterWhiteList(deviceServiceInfo, jwtTokenArg);
                         } else { // Other situation is handled by MgmtPollingService.
                             // Stop the the running service if exists.
                             PollingServiceUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
