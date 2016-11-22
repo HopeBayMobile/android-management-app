@@ -122,6 +122,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     context.startService(intentService);
                     break;
                 }
+                case TeraIntent.ACTION_TRANSFER_COMPLETED: {
+                    Intent intentService = new Intent(context, TeraMgmtService.class);
+                    intentService.setAction(TeraIntent.ACTION_TRANSFER_COMPLETED);
+                    context.startService(intentService);
+                    break;
+                }
             }
         } else {
             Logs.i(CLASSNAME, "onReceive", "isHCFSActivated=" + isTeraAppLogin);

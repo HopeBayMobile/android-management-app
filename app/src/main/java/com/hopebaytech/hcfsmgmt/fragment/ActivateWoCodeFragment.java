@@ -336,7 +336,7 @@ public class ActivateWoCodeFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
 
-        if (requestCode != RequestCode.GOOGLE_SIGN_IN && resultCode != Activity.RESULT_OK) {
+        if (requestCode != RequestCode.GOOGLE_SIGN_IN || resultCode != Activity.RESULT_OK) {
             mProgressDialogUtils.dismiss();
             return;
         }

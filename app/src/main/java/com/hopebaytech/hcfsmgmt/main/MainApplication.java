@@ -8,6 +8,9 @@ import android.util.Log;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.SystemProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Aaron
  *         Created by Aaron on 2016/8/30.
@@ -25,7 +28,10 @@ public class MainApplication extends Application {
         private static Foreground instance;
         private boolean foreground;
 
-        private Foreground() {}
+        private Map<String, Boolean> mForegroundMap = new HashMap<>();
+
+        private Foreground() {
+        }
 
         private static void init(Application app) {
             if (instance == null) {
@@ -38,7 +44,7 @@ public class MainApplication extends Application {
             return instance;
         }
 
-        public static Foreground get(Application application){
+        public static Foreground get(Application application) {
             if (instance == null) {
                 init(application);
             }
@@ -47,9 +53,9 @@ public class MainApplication extends Application {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            // if debugEnable is "true", increase the log level to Log.DEBUG
-            String debugEnabled = SystemProperties.get("debug.tera.enable");
-            if (Boolean.valueOf(debugEnabled)) {
+            // if ro.build.type is not "user", increase the log level to Log.DEBUG
+            String buildType = SystemProperties.get("ro.build.type");
+            if (!buildType.equals("user")) {
                 Logs.LOG_LEVEL = Log.DEBUG;
             }
         }
@@ -61,11 +67,13 @@ public class MainApplication extends Application {
 
         @Override
         public void onActivityResumed(Activity activity) {
+            mForegroundMap.put(activity.getClass().getSimpleName(), true);
             foreground = true;
         }
 
         @Override
         public void onActivityPaused(Activity activity) {
+            mForegroundMap.put(activity.getClass().getSimpleName(), false);
             foreground = false;
         }
 
@@ -86,6 +94,14 @@ public class MainApplication extends Application {
 
         public boolean isForeground() {
             return foreground;
+        }
+
+        public boolean isActivityForeground(String activityName) {
+            Boolean isForeground = mForegroundMap.get(activityName);
+            if (isForeground == null) {
+                return false;
+            }
+            return isForeground;
         }
     }
 

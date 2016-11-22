@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,14 +16,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
-import com.hopebaytech.hcfsmgmt.service.MgmtPollingService;
+import com.hopebaytech.hcfsmgmt.service.TransferDataPollingService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
+import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 /**
  * @author Aaron
@@ -36,6 +37,7 @@ public class TransferContentWaitingFragment extends Fragment {
     private TransferCompletedReceiver mTransferCompletedReceiver;
 
     private ProgressDialog mProgressDialog;
+    private Context mContext;
 
     public static TransferContentWaitingFragment newInstance() {
         return new TransferContentWaitingFragment();
@@ -45,16 +47,21 @@ public class TransferContentWaitingFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mContext = getActivity();
+
         IntentFilter filter = new IntentFilter();
         filter.addAction(TeraIntent.ACTION_TRANSFER_COMPLETED);
-        mTransferCompletedReceiver = new TransferCompletedReceiver(getActivity());
+        mTransferCompletedReceiver = new TransferCompletedReceiver(mContext);
         mTransferCompletedReceiver.registerReceiver(filter);
 
         // Start polling service to check device status (need to register a BroadcastReceiver for
         // receiving intent with TeraIntent.ACTION_TRANSFER_COMPLETED action.)
-        MgmtPollingUtils.startPollingService(getActivity(),
+        PollingServiceUtils.startPollingService(
+                mContext,
                 Interval.WAIT_RESTORE_AFTER_TRANSFER_DEVICE,
-                MgmtPollingService.class);
+                PollingServiceUtils.JOB_ID_TRANSFER_DATA,
+                TransferDataPollingService.class
+        );
     }
 
     @Nullable
@@ -72,8 +79,8 @@ public class TransferContentWaitingFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 showProgressDialog();
-                final String imei = HCFSMgmtUtils.getDeviceImei(getActivity());
-                MgmtCluster.getJwtToken(getActivity(), new MgmtCluster.OnFetchJwtTokenListener() {
+                final String imei = HCFSMgmtUtils.getDeviceImei(mContext);
+                MgmtCluster.getJwtToken(mContext, new MgmtCluster.OnFetchJwtTokenListener() {
                     @Override
                     public void onFetchSuccessful(String jwtToken) {
                         MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
@@ -82,14 +89,14 @@ public class TransferContentWaitingFragment extends Fragment {
                             public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
                                 dismissProgressDialog();
-                                getActivity().finish();
+                                ((Activity) mContext).finish();
                             }
 
                             @Override
                             public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
                                 dismissProgressDialog();
-                                getActivity().finish();
+                                ((Activity) mContext).finish();
                             }
                         });
                         unlockDeviceProxy.unlock();
@@ -99,7 +106,7 @@ public class TransferContentWaitingFragment extends Fragment {
                     public void onFetchFailed() {
                         Logs.e(CLASSNAME, "onFetchFailed", null);
                         dismissProgressDialog();
-                        getActivity().finish();
+                        ((Activity) mContext).finish();
                     }
                 });
             }
@@ -111,7 +118,6 @@ public class TransferContentWaitingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mTransferCompletedReceiver.unregisterReceiver();
-        MgmtPollingUtils.stopPollingService(getActivity(), MgmtPollingService.class);
     }
 
     public class TransferCompletedReceiver extends BroadcastReceiver {
@@ -158,7 +164,7 @@ public class TransferContentWaitingFragment extends Fragment {
 
     private void showProgressDialog() {
         if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(getActivity());
+            mProgressDialog = new ProgressDialog(mContext);
             mProgressDialog.setIndeterminate(true);
             mProgressDialog.setCancelable(false);
         }

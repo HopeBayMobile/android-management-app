@@ -10,16 +10,12 @@ import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
+import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 /**
  * @author Vince
@@ -28,7 +24,7 @@ import org.json.JSONObject;
 
 public class MgmtPollingService extends Service {
 
-    private final String CLASSNAME = getClass().getSimpleName();
+    private final String CLASSNAME = MgmtPollingService.class.getSimpleName();
     private final int startActivityToShowMessage = 0;
     private boolean stopped = false;
     private String lockMsg;
@@ -46,7 +42,7 @@ public class MgmtPollingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        int interval = intent.getIntExtra(MgmtPollingUtils.KEY_INTERVAL, -1);
+        int interval = intent.getIntExtra(PollingServiceUtils.KEY_INTERVAL, -1);
         Logs.i(CLASSNAME, this.getClass().getName(), String.valueOf(interval));
 
         new PollingThread(interval).start();
@@ -57,8 +53,9 @@ public class MgmtPollingService extends Service {
 
     @Override
     public void onDestroy() {
-        stopped = true;
         super.onDestroy();
+        Logs.d(CLASSNAME, "onDestroy", null);
+        stopped = true;
     }
 
     public void stopPollingService() {
@@ -102,7 +99,9 @@ public class MgmtPollingService extends Service {
                                             case GetDeviceInfo.Category.TX_WAITING:
                                                 break;
                                             case GetDeviceInfo.Category.UNREGISTERED:
-                                                action.unregistered();
+                                                // The UNREGISTERED category is processed by
+                                                // TransferDataPollingService
+//                                                action.unregistered();
                                                 break;
                                             default:
                                                 if (deviceServiceInfo.getState().equals(GetDeviceInfo.State.ACTIVATED)) {
@@ -156,9 +155,9 @@ public class MgmtPollingService extends Service {
             FactoryResetUtils.reset(MgmtPollingService.this);
         }
 
-        private void unregistered() {
-            sendBroadcast(new Intent(TeraIntent.ACTION_TRANSFER_COMPLETED));
-        }
+//        private void unregistered() {
+//            sendBroadcast(new Intent(TeraIntent.ACTION_TRANSFER_COMPLETED));
+//        }
 
     }
 
