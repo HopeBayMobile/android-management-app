@@ -52,12 +52,12 @@ public class Booster {
             int code = jObject.getInt("code");
             if (isSuccess) {
                 isBoosted = (code == 0);
-                Logs.d(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "isPackageBoosted", "jObject=" + jObject);
             } else {
-                Logs.e(CLASSNAME, "checkPackageBoostStatus", "jObject=" + jObject);
+                Logs.e(CLASSNAME, "isPackageBoosted", "jObject=" + jObject);
             }
         } catch (JSONException e) {
-            Logs.e(CLASSNAME, "checkPackageBoostStatus", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "isPackageBoosted", Log.getStackTraceString(e));
         }
         return isBoosted;
     }
@@ -144,10 +144,26 @@ public class Booster {
         return isTriggered;
     }
 
-    public static void enableApp(Context context, String pkgName) {
-        Logs.i(CLASSNAME, "enableApp", "pkgName=" + pkgName);
+    public static void enableApp(Context context, String packageName) {
+        Logs.i(CLASSNAME, "enableApp", "packageName=" + packageName);
         PackageManager pm = context.getPackageManager();
-        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+        pm.setApplicationEnabledSetting(packageName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+    }
+
+    public static void enableApps(Context context) {
+        Logs.i(CLASSNAME, "enableApps", null);
+
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.ENABLED_COLUMN, 0 /* disable */);
+
+        UidDAO uidDAO = UidDAO.getInstance(context);
+        List<UidInfo> disabledList = uidDAO.get(cv);
+        for (UidInfo uidInfo: disabledList) {
+            enableApp(context, uidInfo.getPackageName());
+
+            uidInfo.setEnabled(true);
+            uidDAO.update(uidInfo);
+        }
     }
 
     public static void disableApp(Context context, String pkgName) {

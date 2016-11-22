@@ -20,6 +20,7 @@ public class UidDAO {
     public static final String KEY_ID = "_id";
     public static final String PIN_STATUS_COLUMN = "pin_status";
     public static final String SYSTEM_APP_COLUMN = "system_app";
+    public static final String ENABLED_COLUMN = "enabled";
     public static final String UID_COLUMN = "uid";
     public static final String PACKAGE_NAME_COLUMN = "package_name";
     public static final String EXTERNAL_DIR_COLUMN = "external_dir";
@@ -30,6 +31,7 @@ public class UidDAO {
                     PIN_STATUS_COLUMN + " INTEGER NOT NULL, " +
                     SYSTEM_APP_COLUMN + " INTEGER NOT NULL, " +
                     BOOST_STATUS_COLUMN + " INTEGER NOT NULL, " +
+                    ENABLED_COLUMN + " INTEGER NOT NULL, " +
                     UID_COLUMN + " TEXT NOT NULL, " +
                     PACKAGE_NAME_COLUMN + " TEXT NOT NULL, " +
                     EXTERNAL_DIR_COLUMN + " TEXT)";
@@ -68,6 +70,7 @@ public class UidDAO {
         }
         contentValues.put(PIN_STATUS_COLUMN, pinStatus);
         contentValues.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
+        contentValues.put(ENABLED_COLUMN, 1);
         contentValues.put(BOOST_STATUS_COLUMN, uidInfo.getBoostStatus());
         contentValues.put(UID_COLUMN, uidInfo.getUid());
         contentValues.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
@@ -118,9 +121,19 @@ public class UidDAO {
             return false;
         }
 
+        int pinStatus = 0;
+        if (uidInfo.isPinned()) {
+            if (uidInfo.isSystemApp()) {
+                pinStatus = 2;
+            } else {
+                pinStatus = 1;
+            }
+        }
+
         ContentValues cv = new ContentValues();
-        cv.put(PIN_STATUS_COLUMN, uidInfo.isPinned());
-        cv.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp());
+        cv.put(PIN_STATUS_COLUMN, pinStatus);
+        cv.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
+        cv.put(ENABLED_COLUMN, uidInfo.isEnabled() ? 1 : 0);
         cv.put(UID_COLUMN, uidInfo.getUid());
         cv.put(PACKAGE_NAME_COLUMN, uidInfo.getPackageName());
         cv.put(EXTERNAL_DIR_COLUMN, convertListToString(uidInfo.getExternalDir()));
@@ -164,9 +177,19 @@ public class UidDAO {
         } else {
             ContentValues contentValues = new ContentValues();
             if (column.equals(PIN_STATUS_COLUMN)) {
-                contentValues.put(PIN_STATUS_COLUMN, uidInfo.isPinned() ? 1 : 0);
+                int pinStatus = 0;
+                if (uidInfo.isPinned()) {
+                    if (uidInfo.isSystemApp()) {
+                        pinStatus = 2;
+                    } else {
+                        pinStatus = 1;
+                    }
+                }
+                contentValues.put(PIN_STATUS_COLUMN, pinStatus);
             } else if (column.equals(SYSTEM_APP_COLUMN)) {
                 contentValues.put(SYSTEM_APP_COLUMN, uidInfo.isSystemApp() ? 1 : 0);
+            } else if (column.equals(ENABLED_COLUMN)) {
+                contentValues.put(ENABLED_COLUMN, uidInfo.isEnabled() ? 1 : 0);
             } else if (column.equals(BOOST_STATUS_COLUMN)) {
                 contentValues.put(BOOST_STATUS_COLUMN, uidInfo.getBoostStatus());
             } else if (column.equals(UID_COLUMN)) {
@@ -260,6 +283,7 @@ public class UidDAO {
         result.setId(cursor.getInt(cursor.getColumnIndex(KEY_ID)));
         result.setPinned(cursor.getInt(cursor.getColumnIndex(PIN_STATUS_COLUMN)) != 0);
         result.setSystemApp(cursor.getInt(cursor.getColumnIndex(SYSTEM_APP_COLUMN)) == 1);
+        result.setEnabled(cursor.getInt(cursor.getColumnIndex(ENABLED_COLUMN)) == 1);
         result.setBoostStatus(cursor.getInt(cursor.getColumnIndex(BOOST_STATUS_COLUMN)));
         result.setUid(cursor.getInt(cursor.getColumnIndex(UID_COLUMN)));
         result.setPackageName(cursor.getString(cursor.getColumnIndex(PACKAGE_NAME_COLUMN)));

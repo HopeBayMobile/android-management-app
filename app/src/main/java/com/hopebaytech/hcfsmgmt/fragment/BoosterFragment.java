@@ -491,11 +491,10 @@ public class BoosterFragment extends Fragment {
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
+                            cv.put(UidDAO.ENABLED_COLUMN, UidInfo.EnableStatus.DISABLED);
                             cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_BOOST);
                             for (AppInfo appInfo : checkedApps) {
                                 uidDAO.update(appInfo.getPackageName(), cv);
-                            }
-                            for (AppInfo appInfo : checkedApps) {
                                 Booster.disableApp(mContext, appInfo.getPackageName());
                             }
                             Booster.triggerBoost();
@@ -507,12 +506,11 @@ public class BoosterFragment extends Fragment {
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
+                            cv.put(UidDAO.ENABLED_COLUMN, UidInfo.EnableStatus.DISABLED);
                             cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_UNBOOST);
                             for (AppInfo appInfo : checkedApps) {
                                 uidDAO.update(appInfo.getPackageName(), cv);
-                            }
-                            for (AppInfo appInfo : checkedApps) {
-                                Booster.enableApp(mContext, appInfo.getPackageName());
+                                Booster.disableApp(mContext, appInfo.getPackageName());
                             }
                             Booster.triggerUnboost();
                             return;
@@ -547,6 +545,7 @@ public class BoosterFragment extends Fragment {
             ThreadPool.getInstance().execute(new Runnable() {
                 @Override
                 public void run() {
+                    Booster.enableApps(mContext);
                     Booster.recoverBoostStatusWhenFailed(mContext);
                     Booster.removeBoostStatusInXml(mContext);
 
@@ -571,6 +570,7 @@ public class BoosterFragment extends Fragment {
         }
 
         private void notifyProcessingAppsCompleted() {
+            Booster.enableApps(mContext);
             Booster.removeBoostStatusInXml(mContext);
 
             List<Integer> removePositionList = new ArrayList<>();

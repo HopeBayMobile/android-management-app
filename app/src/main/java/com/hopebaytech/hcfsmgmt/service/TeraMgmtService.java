@@ -1012,6 +1012,7 @@ public class TeraMgmtService extends Service {
         if (MainApplication.Foreground.get().isForeground()) {
             return;
         }
+        Booster.enableApps(this);
         Booster.removeBoostStatusInXml(this);
     }
 
@@ -1019,6 +1020,7 @@ public class TeraMgmtService extends Service {
         if (MainApplication.Foreground.get().isForeground()) {
             return;
         }
+        Booster.enableApps(this);
         Booster.recoverBoostStatusWhenFailed(this);
         Booster.removeBoostStatusInXml(this);
     }
