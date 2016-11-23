@@ -1005,8 +1005,7 @@ public class TeraMgmtService extends Service {
     }
 
     private void showCompletedPageThenExecuteFactoryReset() {
-        String activityName = TransferContentActivity.class.getSimpleName();
-        if (MainApplication.Foreground.get().isActivityForeground(activityName)) {
+        if (MainApplication.Foreground.get().isForeground()) {
             return;
         }
 

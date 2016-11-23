@@ -8,9 +8,6 @@ import android.util.Log;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.SystemProperties;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Aaron
  *         Created by Aaron on 2016/8/30.
@@ -27,8 +24,6 @@ public class MainApplication extends Application {
 
         private static Foreground instance;
         private boolean foreground;
-
-        private Map<String, Boolean> mForegroundMap = new HashMap<>();
 
         private Foreground() {
         }
@@ -67,13 +62,11 @@ public class MainApplication extends Application {
 
         @Override
         public void onActivityResumed(Activity activity) {
-            mForegroundMap.put(activity.getClass().getSimpleName(), true);
             foreground = true;
         }
 
         @Override
         public void onActivityPaused(Activity activity) {
-            mForegroundMap.put(activity.getClass().getSimpleName(), false);
             foreground = false;
         }
 
@@ -96,13 +89,6 @@ public class MainApplication extends Application {
             return foreground;
         }
 
-        public boolean isActivityForeground(String activityName) {
-            Boolean isForeground = mForegroundMap.get(activityName);
-            if (isForeground == null) {
-                return false;
-            }
-            return isForeground;
-        }
     }
 
 }
