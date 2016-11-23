@@ -36,6 +36,9 @@
     <string name="activate_device_not_registered">Tera is not activated on this device. Enter an activation code to activate Tera.</string>
     <string name="activate_require_read_phone_state_permission">Enable the "Phone" permission to activate Tera.</string>
 
+    <string name="access_cloud_settings_title">Access Cloud Settings</string>
+    <string name="access_cloud_settings_message">Please choose available Wi-Fi connection or turn off "Sync" section in Tera settings to access cloud.</string>
+
     <string name="nav_drawer_open">Open navigation drawer.</string>
     <string name="nav_drawer_close">Close navigation drawer.</string>
     <string name="nav_overview">OVERVIEW</string>

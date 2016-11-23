@@ -622,7 +622,6 @@ public class HCFSMgmtUtils {
         }
     }
 
-
     public static void changeCloudSyncStatus(Context context, boolean syncWifiOnly) {
         Logs.d(CLASSNAME, "changeCloudSyncStatus", null);
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -636,18 +635,14 @@ public class HCFSMgmtUtils {
                 if (netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                     String logMsg = "Current wifi network is active";
                     TeraCloudConfig.startSyncToCloud(context, logMsg);
+                } else {
+                    String logMsg = "Current network is active but not wifi";
+                    TeraCloudConfig.stopSyncToCloud(context, logMsg);
                 }
             } else {
                 String logMsg = "No default network or wifi network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
-//            if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-//                String logMsg = "Current wifi network is active";
-//                TeraCloudConfig.startSyncToCloud(context, logMsg);
-//            } else {
-//                String logMsg = "No default network or wifi network is current active";
-//                TeraCloudConfig.stopSyncToCloud(context, logMsg);
-//            }
         } else {
             if (netInfo != null) {
                 Logs.d(CLASSNAME, "changeCloudSyncStatus", "type=" + netInfo.getType()
@@ -660,13 +655,6 @@ public class HCFSMgmtUtils {
                 String logMsg = "No default network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
-//            if (netInfo != null) {
-//                String logMsg = "Current default network is active";
-//                TeraCloudConfig.startSyncToCloud(context, logMsg);
-//            } else {
-//                String logMsg = "No default network is current active";
-//                TeraCloudConfig.stopSyncToCloud(context, logMsg);
-//            }
         }
     }
 
