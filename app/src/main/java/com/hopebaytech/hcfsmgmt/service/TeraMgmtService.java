@@ -755,8 +755,8 @@ public class TeraMgmtService extends Service {
     }
 
     /**
-     * Add NEW uid info to database when system boot up and pin /storage/emulated/0/Android folder,
-     * and then pin system app, triggered by HCFSMgmtReceiver's ACTION_BOOT_COMPLETED
+     * Add NEW uid info to database when system boot up and pin system app, triggered by
+     * HCFSMgmtReceiver's ACTION_BOOT_COMPLETED
      */
     private void addUidAndPinSysApp() {
         // Add NEW uid info to database when system boot up
@@ -779,20 +779,6 @@ public class TeraMgmtService extends Service {
                 }
                 mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
             }
-        }
-
-        // Pin /storage/emulated/0/Android folder
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        boolean isAndroidFolderPinned = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, false);
-        if (!isAndroidFolderPinned) {
-            String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-            if (!HCFSMgmtUtils.isPathPinned(externalAndroidPath)) {
-                HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
-            }
-
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, true);
-            editor.apply();
         }
 
         // Pin system app on system start up

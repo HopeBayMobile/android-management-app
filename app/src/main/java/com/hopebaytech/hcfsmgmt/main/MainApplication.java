@@ -49,10 +49,7 @@ public class MainApplication extends Application {
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
             // if ro.build.type is not "user", increase the log level to Log.DEBUG
-            String buildType = SystemProperties.get("ro.build.type");
-            if (!buildType.equals("user")) {
-                Logs.LOG_LEVEL = Log.DEBUG;
-            }
+            Logs.init();
         }
 
         @Override

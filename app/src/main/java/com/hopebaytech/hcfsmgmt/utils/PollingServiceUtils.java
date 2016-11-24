@@ -14,9 +14,12 @@ import android.content.Intent;
 
 public class PollingServiceUtils {
 
+    private static final String CLASSNAME = PollingServiceUtils.class.getSimpleName();
+
     public static final String KEY_INTERVAL = "key_interval";
 
     public static final int JOB_ID_TRANSFER_DATA = 1;
+    public static final int JOB_ID_PIN_ANDROID_FOLDER = 2;
 
     // Not allowed to initialize this class
     private PollingServiceUtils() {
@@ -55,6 +58,10 @@ public class PollingServiceUtils {
      * @param cls            The component class that is to be used for the service.
      */
     public static void startPollingService(Context context, int intervalMillis, int jobId, Class<? extends JobService> cls) {
+        Logs.d(CLASSNAME, "startPollingService",
+                "intervalMillis=" + intervalMillis
+                        + ", jobId=" + jobId
+                        + ", cls=" + cls);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         JobInfo.Builder builder = new JobInfo.Builder(jobId, new ComponentName(context.getPackageName(), cls.getName()));
         builder.setPeriodic(intervalMillis);
@@ -68,6 +75,7 @@ public class PollingServiceUtils {
      * @param jobId   The job id to be canceled.
      */
     public static void stopPollingService(Context context, int jobId) {
+        Logs.d(CLASSNAME, "startPollingService", "jobId=" + jobId);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.cancel(jobId);
     }

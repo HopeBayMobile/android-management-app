@@ -11,6 +11,13 @@ public class Logs {
     public static final String TAG = "HopeBay";
     public static int LOG_LEVEL = Log.INFO;
 
+    public static void init() {
+        String buildType = SystemProperties.get("ro.build.type");
+        if (!buildType.equals("user")) {
+            LOG_LEVEL = Log.DEBUG;
+        }
+    }
+
     public static void i(String className, String funcName, String logMsg) {
         log(Log.INFO, className, funcName, logMsg);
     }
