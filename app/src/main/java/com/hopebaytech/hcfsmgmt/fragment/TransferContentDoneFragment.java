@@ -1,10 +1,10 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +12,9 @@ import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import java.util.Locale;
 
@@ -24,8 +27,19 @@ public class TransferContentDoneFragment extends Fragment {
     public static final String TAG = TransferContentDoneFragment.class.getSimpleName();
     private final String CLASSNAME = TransferContentDoneFragment.class.getSimpleName();
 
+    private boolean isResetTriggered;
+
+    private Context mContext;
+    private TextView mFactoryResetMsg;
+
     public static TransferContentDoneFragment newInstance() {
         return new TransferContentDoneFragment();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mContext = getActivity();
     }
 
     @Nullable
@@ -38,38 +52,48 @@ public class TransferContentDoneFragment extends Fragment {
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        final TextView factoryResetMsg = (TextView) view.findViewById(R.id.factory_reset_message);
-        final Handler uiHandler = new Handler();
-        new Thread(new Runnable() {
+        mFactoryResetMsg = (TextView) view.findViewById(R.id.factory_reset_message);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 try {
                     for (int i = 5; i >= 0; i--) {
                         final String seconds = String.valueOf(i);
-                        uiHandler.post(new Runnable() {
+                        UiHandler.getInstace().post(new Runnable() {
                             @Override
                             public void run() {
                                 String template = getString(R.string.settings_transfer_content_done_factory_reset);
                                 String message = String.format(Locale.getDefault(), template, seconds);
-                                factoryResetMsg.setText(message);
+                                mFactoryResetMsg.setText(message);
                             }
                         });
                         Thread.sleep(1000);
                     }
-                    // Factory reset
-                    FactoryResetUtils.reset(getActivity());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Logs.e(CLASSNAME, "onViewCreated", Log.getStackTraceString(e));
+                } finally {
+                    // Factory reset
+                    FactoryResetUtils.reset(mContext);
+
+                    isResetTriggered = true;
                 }
-
-                // Factory reset
-                Intent intent = new Intent("android.intent.action.MASTER_CLEAR");
-                intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                intent.putExtra("android.intent.extra.REASON", "MasterClearConfirm");
-                getActivity().sendBroadcast(intent);
             }
-        }).start();
-
+        });
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (!isResetTriggered) {
+            // Factory reset
+            FactoryResetUtils.reset(mContext);
+        }
+    }
 }

@@ -5,10 +5,6 @@ import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.text.Html;
-import android.text.Spanned;
 import android.util.Log;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -31,7 +27,6 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -458,14 +453,14 @@ public class MgmtCluster {
 
     }
 
-    public static class TransferContentProxy {
+    public static class TransferReadyProxy {
 
         private String jwtToken;
         private String imei;
 
         private OnTransferContentListener listener;
 
-        public TransferContentProxy(String jwtToken, String imei) {
+        public TransferReadyProxy(String jwtToken, String imei) {
             this.jwtToken = jwtToken;
             this.imei = imei;
         }
@@ -475,7 +470,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final TransferContentInfo transferContentInfo = transferContents(jwtToken, imei);
+                    final TransferContentInfo transferContentInfo = transferReady(jwtToken, imei);
                     if (transferContentInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
                             @Override
@@ -507,7 +502,7 @@ public class MgmtCluster {
 
         }
 
-        public static TransferContentInfo transferContents(String jwtToken, String imei) {
+        public static TransferContentInfo transferReady(String jwtToken, String imei) {
             IHttpProxy httpProxyImpl = null;
             TransferContentInfo transferContentInfo = new TransferContentInfo();
             try {
@@ -527,9 +522,9 @@ public class MgmtCluster {
                 String responseContent = httpProxyImpl.getResponseContent();
                 transferContentInfo.setResponseCode(responseCode);
                 transferContentInfo.setMessage(responseContent);
-                Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                Logs.d(CLASSNAME, "transferReady", "responseCode=" + responseCode + ", responseContent=" + responseContent);
             } catch (Exception e) {
-                Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "transferReady", Log.getStackTraceString(e));
             } finally {
                 if (httpProxyImpl != null) {
                     httpProxyImpl.disconnect();

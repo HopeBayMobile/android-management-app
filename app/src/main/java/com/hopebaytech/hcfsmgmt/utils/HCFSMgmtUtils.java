@@ -831,6 +831,7 @@ public class HCFSMgmtUtils {
      * <li>Negative error code in case that error occurs</li>
      */
     public static int startUploadTeraData() {
+        Logs.i(CLASSNAME, "startUploadTeraData", null);
         int code = -1;
         try {
             String jsonResult = HCFSApiUtils.startUploadTeraData();
@@ -838,7 +839,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 code = jObject.getInt("code");
-                Logs.i(CLASSNAME, "startUploadTeraData", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "startUploadTeraData", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "startUploadTeraData", null);
             }
@@ -854,6 +855,7 @@ public class HCFSMgmtUtils {
      * <li>Negative error code in case that error occurs</li>
      */
     public static int stopUploadTeraData() {
+        Logs.i(CLASSNAME, "stopUploadTeraData", null);
         int code = -1;
         try {
             String jsonResult = HCFSApiUtils.stopUploadTeraData();
@@ -861,7 +863,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 code = jObject.getInt("code");
-                Logs.i(CLASSNAME, "stopUploadTeraData", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "stopUploadTeraData", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "stopUploadTeraData", null);
             }
