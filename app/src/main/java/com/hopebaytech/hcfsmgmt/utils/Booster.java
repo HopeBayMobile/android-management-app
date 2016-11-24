@@ -40,6 +40,11 @@ public class Booster {
     private static final long BOOSTER_MAXIMUM_SPACE = 4L * 1024 * 1024 * 1024; // booster_size <= 4G
     private static final String BOOSTER_PARTITION = "/data/mnt/hcfsblock";
 
+    public static class Type {
+        public static final int UNBOOSTED = 1;
+        public static final int BOOSTED = 2;
+    }
+
     /**
      * @return 0 if boosted, 1 if unboosted, error otherwise.
      * */
@@ -162,6 +167,22 @@ public class Booster {
             enableApp(context, uidInfo.getPackageName());
 
             uidInfo.setEnabled(true);
+            uidDAO.update(uidInfo);
+        }
+    }
+
+    public static void disableApps(Context context) {
+        Logs.i(CLASSNAME, "enableApps", null);
+
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.ENABLED_COLUMN, 1 /* enabled */);
+
+        UidDAO uidDAO = UidDAO.getInstance(context);
+        List<UidInfo> enabledList = uidDAO.get(cv);
+        for (UidInfo uidInfo: enabledList) {
+            disableApp(context, uidInfo.getPackageName());
+
+            uidInfo.setEnabled(false);
             uidDAO.update(uidInfo);
         }
     }
@@ -449,9 +470,40 @@ public class Booster {
         return appInfoList;
     }
 
-    public static class Type {
-        public static final int UNBOOSTED = 1;
-        public static final int BOOSTED = 2;
+    public static boolean umountBooster() {
+        Logs.i(CLASSNAME, "umountBooster", null);
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.umountBooster();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.d(CLASSNAME, "umountBooster", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "umountBooster", null);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "umountBooster", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
+
+    public static boolean mountBooster() {
+        Logs.i(CLASSNAME, "mountBooster", null);
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.mountBooster();
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            if (isSuccess) {
+                Logs.d(CLASSNAME, "mountBooster", "jObject=" + jObject);
+            } else {
+                Logs.e(CLASSNAME, "mountBooster", null);
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "mountBooster", Log.getStackTraceString(e));
+        }
+        return isSuccess;
     }
 
 }

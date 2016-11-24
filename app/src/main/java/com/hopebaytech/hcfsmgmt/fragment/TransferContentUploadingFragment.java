@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +16,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 /**
  * @author Aaron
@@ -69,8 +73,20 @@ public class TransferContentUploadingFragment extends Fragment {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                HCFSMgmtUtils.stopUploadTeraData();
-                ((Activity) mContext).finish();
+                ThreadPool.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        HCFSMgmtUtils.stopUploadTeraData();
+                        Booster.mountBooster();
+                        Booster.enableApps(mContext);
+                        UiHandler.getInstance().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                ((Activity) mContext).finish();
+                            }
+                        });
+                    }
+                });
             }
         });
 
@@ -83,25 +99,47 @@ public class TransferContentUploadingFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        int code = HCFSMgmtUtils.startUploadTeraData();
-        if (code == 1) {
-            TransferStatus.setTransferStatus(mContext, TransferStatus.WAIT_DEVICE);
+        ThreadPool.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean isBoosterEnabled = false;
+                SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+                if (settingsInfo != null) {
+                    isBoosterEnabled = Boolean.valueOf(settingsInfo.getValue());
+                }
 
-            Logs.d(CLASSNAME, "onActivityCreated", "Replace with TransferContentWaitingFragment");
-            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
-            FragmentTransaction ft = getFragmentManager().beginTransaction();
-            ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
-            ft.commit();
-        } else if (code == 0) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
-            mUploadCompletedReceiver = new UploadCompletedReceiver(mContext);
-            mUploadCompletedReceiver.registerReceiver(filter);
-        } else {
-            mErrorMsg.setText(R.string.settings_transfer_content_failed);
-            mTeraConnStatus.setVisibility(View.GONE);
-            mProgressLayout.setVisibility(View.GONE);
-        }
+                if (isBoosterEnabled) {
+                    Booster.disableApps(mContext);
+                    Booster.umountBooster();
+                }
+
+                final int code = HCFSMgmtUtils.startUploadTeraData();
+                UiHandler.getInstance().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (code == 1) {
+                            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
+
+                            Logs.d(CLASSNAME, "onActivityCreated", "Replace with TransferContentWaitingFragment");
+                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
+                            ft.commit();
+                        } else if (code == 0) {
+                            IntentFilter filter = new IntentFilter();
+                            filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
+                            mUploadCompletedReceiver = new UploadCompletedReceiver(mContext);
+                            mUploadCompletedReceiver.registerReceiver(filter);
+                        } else {
+                            mErrorMsg.setText(R.string.settings_transfer_content_failed);
+                            mTeraConnStatus.setVisibility(View.GONE);
+                            mProgressLayout.setVisibility(View.GONE);
+                        }
+                    }
+                });
+            }
+        });
+
     }
 
     @Override
@@ -241,7 +279,6 @@ public class TransferContentUploadingFragment extends Fragment {
                 break;
         }
     }
-
 
 
 }

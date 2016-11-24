@@ -358,6 +358,7 @@ public class SettingsFragment extends Fragment {
                     mEnableBooster.setChecked(false);
                     break;
                 case EnableBoosterDialogFragment.RESULT_FAILED:
+                    mEnableBooster.setChecked(false);
                     Toast.makeText(mContext, R.string.booster_enable_dialog_failed, Toast.LENGTH_LONG).show();
                     break;
             }
@@ -374,6 +375,7 @@ public class SettingsFragment extends Fragment {
                     mEnableBooster.setChecked(true);
                     break;
                 case DisableBoosterDialogFragment.RESULT_FAILED:
+                    mEnableBooster.setChecked(true);
                     Toast.makeText(mContext, R.string.booster_disable_dialog_failed, Toast.LENGTH_LONG).show();
                     break;
             }
@@ -407,4 +409,6 @@ public class SettingsFragment extends Fragment {
         else
             mBa.setVisibility(View.GONE);
     }
+
+
 }

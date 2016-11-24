@@ -18,12 +18,15 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.service.TransferDataPollingService;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 /**
  * @author Aaron
@@ -36,8 +39,8 @@ public class TransferContentWaitingFragment extends Fragment {
 
     private TransferCompletedReceiver mTransferCompletedReceiver;
 
-    private ProgressDialog mProgressDialog;
     private Context mContext;
+    private ProgressDialog mProgressDialog;
 
     public static TransferContentWaitingFragment newInstance() {
         return new TransferContentWaitingFragment();
@@ -88,8 +91,20 @@ public class TransferContentWaitingFragment extends Fragment {
                             @Override
                             public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
-                                dismissProgressDialog();
-                                ((Activity) mContext).finish();
+                                ThreadPool.getInstance().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Booster.mountBooster();
+                                        Booster.enableApps(mContext);
+                                        UiHandler.getInstance().post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                dismissProgressDialog();
+                                                ((Activity) mContext).finish();
+                                            }
+                                        });
+                                    }
+                                });
                             }
 
                             @Override

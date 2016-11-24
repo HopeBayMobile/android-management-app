@@ -27,6 +27,8 @@ extern void HCFS_set_swift_token(const char **json_res, const char *url, const c
 extern void HCFS_trigger_restore(const char **json_res);
 extern void HCFS_check_restore_status(const char **json_res);
 extern void HCFS_notify_applist_change(const char **json_res);
+extern void HCFS_mount_smart_cache(const char **json_res);
+extern void HCFS_umount_smart_cache(const char **json_res);
 
 //extern void HCFS_collect_sys_logs(const char **json_res);
 
@@ -361,5 +363,23 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_clear
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
     free((char *)package_name);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_umountBooster(
+		JNIEnv *jEnv, jobject jObject, jstring jpackageName) {
+	const char *json_res;
+    HCFS_umount_smart_cache(&json_res);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_mountBooster(
+		JNIEnv *jEnv, jobject jObject, jstring jpackageName) {
+	const char *json_res;
+    HCFS_mount_smart_cache(&json_res);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
     return result;
 }
