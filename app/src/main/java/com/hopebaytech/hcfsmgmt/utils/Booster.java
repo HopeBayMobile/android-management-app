@@ -172,7 +172,7 @@ public class Booster {
     }
 
     public static void disableApps(Context context) {
-        Logs.i(CLASSNAME, "enableApps", null);
+        Logs.i(CLASSNAME, "disableApps", null);
 
         ContentValues cv = new ContentValues();
         cv.put(UidDAO.ENABLED_COLUMN, 1 /* enabled */);
