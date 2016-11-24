@@ -69,6 +69,10 @@ public class Uid2PkgDBHelper extends SQLiteOpenHelper {
                         UidDAO.BOOST_STATUS_COLUMN + "=" + UidInfo.BoostStatus.UNBOOSTED +
                         " where " + UidDAO.SYSTEM_APP_COLUMN + "=0";
 
+            String UPDATE_NON_SYSTEM_APP_ENABLE_STATUS = "update " + uidTableName + " set " +
+                UidDAO.ENABLED_COLUMN + "=" + UidInfo.EnableStatus.ENABLED +
+                " where " + UidDAO.SYSTEM_APP_COLUMN + "=0";
+
             db.execSQL(RENAME_OLD_UID_TABLE);
             db.execSQL(UidDAO.CREATE_TABLE);
             db.execSQL(BoosterWhiteListDAO.CREATE_TABLE);
@@ -77,6 +81,7 @@ public class Uid2PkgDBHelper extends SQLiteOpenHelper {
             db.execSQL(DROP_UID_OLD_TEMP_TABLE);
             db.execSQL(UPDATE_SYSTEM_APP_BOOST_STATUS);
             db.execSQL(UPDATE_NON_SYSTEM_APP_BOOST_STATUS);
+            db.execSQL(UPDATE_NON_SYSTEM_APP_ENABLE_STATUS);
     }
 
 }
