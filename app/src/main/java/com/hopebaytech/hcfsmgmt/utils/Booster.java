@@ -159,15 +159,12 @@ public class Booster {
         Logs.i(CLASSNAME, "enableApps", null);
 
         ContentValues cv = new ContentValues();
-        cv.put(UidDAO.ENABLED_COLUMN, 0 /* disable */);
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
 
         UidDAO uidDAO = UidDAO.getInstance(context);
         List<UidInfo> disabledList = uidDAO.get(cv);
         for (UidInfo uidInfo: disabledList) {
             enableApp(context, uidInfo.getPackageName());
-
-            uidInfo.setEnabled(true);
-            uidDAO.update(uidInfo);
         }
     }
 
@@ -175,15 +172,12 @@ public class Booster {
         Logs.i(CLASSNAME, "disableApps", null);
 
         ContentValues cv = new ContentValues();
-        cv.put(UidDAO.ENABLED_COLUMN, 1 /* enabled */);
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
 
         UidDAO uidDAO = UidDAO.getInstance(context);
         List<UidInfo> enabledList = uidDAO.get(cv);
         for (UidInfo uidInfo: enabledList) {
             disableApp(context, uidInfo.getPackageName());
-
-            uidInfo.setEnabled(false);
-            uidDAO.update(uidInfo);
         }
     }
 

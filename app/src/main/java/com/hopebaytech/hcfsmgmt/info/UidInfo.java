@@ -4,11 +4,6 @@ import java.util.List;
 
 public class UidInfo {
 
-    public static class EnableStatus {
-        public static final int DISABLED = 0; // the constant cannot be modified
-        public static final int ENABLED = 1; // the constant cannot be modified
-    }
-
     public static class BoostStatus {
         public static final int NON_BOOSTABLE = 0;
         public static final int INIT_UNBOOST = 1;
@@ -24,7 +19,6 @@ public class UidInfo {
     private int id;
     private boolean isPinned;
     private boolean isSystemApp;
-    private boolean isEnabled;
     private int uid;
     private String packageName;
     private List<String> externalDir;
@@ -38,7 +32,6 @@ public class UidInfo {
         setPackageName(appInfo.getPackageName());
         setPinned(appInfo.isPinned());
         setSystemApp(appInfo.isSystemApp());
-        setEnabled(appInfo.isEnabled());
         setBoostStatus(appInfo.getBoostStatus());
     }
 
@@ -52,7 +45,6 @@ public class UidInfo {
         this.uid = uid;
         this.packageName = packageName;
         this.isSystemApp = isSystemApp;
-        this.isEnabled = true;
         this.boostStatus = boostStatus;
     }
 
@@ -62,14 +54,6 @@ public class UidInfo {
 
     public int getId() {
         return id;
-    }
-
-    public boolean isEnabled() {
-        return isEnabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
     }
 
     public int getUid() {

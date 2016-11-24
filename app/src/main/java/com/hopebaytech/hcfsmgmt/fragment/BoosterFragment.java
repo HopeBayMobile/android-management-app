@@ -491,7 +491,6 @@ public class BoosterFragment extends Fragment {
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
-                            cv.put(UidDAO.ENABLED_COLUMN, UidInfo.EnableStatus.DISABLED);
                             cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_BOOST);
                             for (AppInfo appInfo : checkedApps) {
                                 uidDAO.update(appInfo.getPackageName(), cv);
@@ -506,7 +505,6 @@ public class BoosterFragment extends Fragment {
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
-                            cv.put(UidDAO.ENABLED_COLUMN, UidInfo.EnableStatus.DISABLED);
                             cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_UNBOOST);
                             for (AppInfo appInfo : checkedApps) {
                                 uidDAO.update(appInfo.getPackageName(), cv);
