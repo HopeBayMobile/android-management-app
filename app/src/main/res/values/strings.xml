@@ -32,6 +32,9 @@
     <string name="activate_failed_gateway_timeout">閘道器逾時：此伺服器乃作為閘道器或者代理伺服器並且嘗試執行請求時，未能從上游伺服器及時收到回應。</string>
     <string name="activate_device_not_registered">此裝置尚未啟動 Tera，請輸入啟動碼以啟動 Tera。</string>
     <string name="activate_require_read_phone_state_permission">開啟 "電話" 權限以啟動 Tera。</string>
+    <string name="access_cloud_settings_title">Access Cloud Settings</string>
+    <string name="access_cloud_settings_message">Please choose available Wi-Fi connection or turn off "Sync" section in Tera settings to access cloud.</string>
+
     <string name="nav_drawer_open">Open navigation drawer</string>
     <string name="nav_drawer_close">Close navigation drawer</string>
     <string name="nav_overview">總覽</string>
@@ -257,4 +260,19 @@
     <string name="http_gateway_timeout">閘道器逾時：此伺服器乃作為閘道器或者代理伺服器並且嘗試執行請求時，未能從上游伺服器及時收到回應。</string>
     <string name="http_internal_error">內部伺服器錯誤</string>
     <string name="http_unknown_error">未知的錯誤。</string>
+
+    <string name="mgmt_server_error_msg_unknown">Unknown error</string>
+    <string name="mgmt_server_error_msg_input">Input parameter relative error.</string>
+    <string name="mgmt_server_error_msg_imei_not_found">Device IMEI code is not registered</string>
+    <string name="mgmt_server_error_msg_imei_decrypt_failed">Device IMEI code decrypt failed</string>
+    <string name="mgmt_server_error_msg_incorrect_model">不支援此裝置，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_incorrect_vendor">不支援此裝置，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_device_expired">Tera 已逾期，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_invalid_code_or_model">
+        此啟動碼已被使用過。如果您的舊Tera裝置已經遺失或損壞，請先在 <a href="https://my.tera.mobi">TeraClient</a> 將該裝置上鎖，然後再嘗試啟動。
+    </string>
+    <string name="mgmt_server_error_msg_mapping_not_found">No service registered for the user and device.</string>
+    <string name="mgmt_server_error_msg_mapping_existed">此裝置已經被註冊，啟動失敗。</string>
+    <string name="mgmt_server_error_msg_service_block">The device service is locked or expired.</string>
+
 </resources>

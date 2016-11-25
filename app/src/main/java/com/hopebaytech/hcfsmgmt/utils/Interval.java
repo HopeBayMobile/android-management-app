@@ -79,4 +79,9 @@ public class Interval {
      */
     public static final int UPDATE_NOTIFICATION_INFO = 5 * MINUTE;
 
+    /**
+     * Interval for pining /storage/emulated/0/android folder
+     */
+    public static final int PIN_ANDROID_FOLDER = 10 * SECOND;
+
 }

@@ -61,6 +61,7 @@
             android:name="com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver"
             android:enabled="true"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -75,6 +76,7 @@
                 <action android:name="hbt.intent.action.MINI_RESTORE_COMPLETED" />
                 <action android:name="hbt.intent.action.FULL_RESTORE_COMPLETED" />
                 <action android:name="hbt.intent.action.CHECK_RESTORE_STATUS" />
+                <action android:name="hbt.intent.action.TRANSFER_COMPLETED" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -88,8 +90,13 @@
         </receiver>
 
         <service android:name=".service.TeraMgmtService" />
-
         <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
+        <service
+            android:name="com.hopebaytech.hcfsmgmt.service.TransferDataPollingService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name="com.hopebaytech.hcfsmgmt.service.PinAndroidFolderService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service
             android:name="com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService"

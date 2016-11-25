@@ -2,7 +2,6 @@ package com.hopebaytech.hcfsmgmt.utils;
 
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxyMock;
-import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 
 import org.junit.After;
@@ -133,16 +132,16 @@ public class MgmtClusterTest {
         String incorrectJwtToken = HttpProxyMock.INCORRECT_JWT_TOKEN;
         String incorrectImei = HttpProxyMock.INCORRECT_IMEI;
 
-        transferContentInfo = MgmtCluster.TransferContentProxy.transferContents(correctJwtToken, correctImei);
+        transferContentInfo = MgmtCluster.TransferReadyProxy.transferReady(correctJwtToken, correctImei);
         assertEquals(HttpsURLConnection.HTTP_OK, transferContentInfo.getResponseCode());
 
-        transferContentInfo = MgmtCluster.TransferContentProxy.transferContents(incorrectJwtToken, correctImei);
+        transferContentInfo = MgmtCluster.TransferReadyProxy.transferReady(incorrectJwtToken, correctImei);
         assertEquals(HttpsURLConnection.HTTP_FORBIDDEN, transferContentInfo.getResponseCode());
 
-        transferContentInfo = MgmtCluster.TransferContentProxy.transferContents(correctJwtToken, incorrectImei);
+        transferContentInfo = MgmtCluster.TransferReadyProxy.transferReady(correctJwtToken, incorrectImei);
         assertEquals(HttpsURLConnection.HTTP_BAD_REQUEST, transferContentInfo.getResponseCode());
 
-        transferContentInfo = MgmtCluster.TransferContentProxy.transferContents(incorrectJwtToken, incorrectImei);
+        transferContentInfo = MgmtCluster.TransferReadyProxy.transferReady(incorrectJwtToken, incorrectImei);
         assertEquals(HttpsURLConnection.HTTP_FORBIDDEN, transferContentInfo.getResponseCode());
     }
 

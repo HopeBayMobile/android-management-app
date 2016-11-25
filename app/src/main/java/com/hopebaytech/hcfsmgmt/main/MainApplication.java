@@ -3,6 +3,10 @@ package com.hopebaytech.hcfsmgmt.main;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
+import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.SystemProperties;
 
 /**
  * @author Aaron
@@ -21,7 +25,8 @@ public class MainApplication extends Application {
         private static Foreground instance;
         private boolean foreground;
 
-        private Foreground() {}
+        private Foreground() {
+        }
 
         private static void init(Application app) {
             if (instance == null) {
@@ -34,7 +39,7 @@ public class MainApplication extends Application {
             return instance;
         }
 
-        public static Foreground get(Application application){
+        public static Foreground get(Application application) {
             if (instance == null) {
                 init(application);
             }
@@ -43,7 +48,8 @@ public class MainApplication extends Application {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
+            // if ro.build.type is not "user", increase the log level to Log.DEBUG
+            Logs.init();
         }
 
         @Override
@@ -79,6 +85,7 @@ public class MainApplication extends Application {
         public boolean isForeground() {
             return foreground;
         }
+
     }
 
 }

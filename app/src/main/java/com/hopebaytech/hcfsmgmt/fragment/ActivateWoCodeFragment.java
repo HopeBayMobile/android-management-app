@@ -336,7 +336,7 @@ public class ActivateWoCodeFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
 
-        if (requestCode != RequestCode.GOOGLE_SIGN_IN && resultCode != Activity.RESULT_OK) {
+        if (requestCode != RequestCode.GOOGLE_SIGN_IN || resultCode != Activity.RESULT_OK) {
             mProgressDialogUtils.dismiss();
             return;
         }
@@ -571,9 +571,9 @@ public class ActivateWoCodeFragment extends Fragment {
                 signOut();
                 mProgressDialogUtils.dismiss();
 
-                int errorMsgResId = R.string.activate_failed;
+                CharSequence errorMessage = mContext.getText(R.string.activate_failed);
                 if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.IMEI_NOT_FOUND)) {
+                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.ErrorCode.IMEI_NOT_FOUND)) {
                         Bundle bundle = new Bundle();
                         bundle.putInt(KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
                         bundle.putString(KEY_USERNAME, acct.getEmail());
@@ -587,14 +587,11 @@ public class ActivateWoCodeFragment extends Fragment {
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.fragment_container, fragment);
                         ft.commit();
-                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_MODEL) ||
-                            deviceServiceInfo.getErrorCode().equals(MgmtCluster.INCORRECT_VENDOR)) {
-                        errorMsgResId = R.string.activate_failed_not_supported_device;
-                    } else if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.DEVICE_EXPIRED)) {
-                        errorMsgResId = R.string.activate_failed_device_expired;
+                        return;
                     }
+                    errorMessage = MgmtCluster.ErrorCode.getErrorMessage(mContext, deviceServiceInfo.getErrorCode());
                 }
-                mErrorMessage.setText(errorMsgResId);
+                mErrorMessage.setText(errorMessage);
             }
 
         });

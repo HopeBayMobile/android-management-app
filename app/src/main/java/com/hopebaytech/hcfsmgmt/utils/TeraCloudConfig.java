@@ -58,7 +58,7 @@ public class TeraCloudConfig {
             String logMsg = "key=" + key + ", value=" + value + ", jsonResult=" + jsonResult;
 
             if (isSuccess) {
-                Logs.i(CLASSNAME, "setHCFSConfig", logMsg);
+                Logs.d(CLASSNAME, "setHCFSConfig", logMsg);
             } else {
                 Logs.e(CLASSNAME, "setHCFSConfig", logMsg);
             }

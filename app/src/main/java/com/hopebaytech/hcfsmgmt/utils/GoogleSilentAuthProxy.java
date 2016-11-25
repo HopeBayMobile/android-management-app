@@ -44,7 +44,7 @@ public class GoogleSilentAuthProxy {
 
         void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient);
 
-        void onAuthFailed();
+        void onAuthFailed(@Nullable GoogleSignInResult result);
 
     }
 
@@ -62,7 +62,7 @@ public class GoogleSilentAuthProxy {
                             if (result != null && result.isSuccess()) {
                                 mOnAuthListener.onAuthSuccessful(result, mGoogleApiClient);
                             } else {
-                                mOnAuthListener.onAuthFailed();
+                                mOnAuthListener.onAuthFailed(result);
                             }
                             if (mAutoDisconnectEnabled) {
                                 mGoogleApiClient.disconnect();
@@ -75,7 +75,7 @@ public class GoogleSilentAuthProxy {
                                     if (result.isSuccess()) {
                                         mOnAuthListener.onAuthSuccessful(result, mGoogleApiClient);
                                     } else {
-                                        mOnAuthListener.onAuthFailed();
+                                        mOnAuthListener.onAuthFailed(result);
                                     }
                                     if (mAutoDisconnectEnabled) {
                                         mGoogleApiClient.disconnect();
@@ -89,7 +89,7 @@ public class GoogleSilentAuthProxy {
                     @Override
                     public void onConnectionFailed(@NonNull ConnectionResult result) {
                         Logs.d(CLASSNAME, "onConnectionFailed", "result=" + result);
-                        mOnAuthListener.onAuthFailed();
+                        mOnAuthListener.onAuthFailed(null);
                     }
 
                     @Override

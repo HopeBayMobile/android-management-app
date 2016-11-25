@@ -19,6 +19,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
@@ -44,6 +45,8 @@ import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.main.MainApplication;
+import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
+import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
@@ -53,7 +56,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.MgmtPollingUtils;
+import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
@@ -118,43 +121,66 @@ public class TeraMgmtService extends Service {
             Logs.d(CLASSNAME, "onStartCommand", "action=" + action);
             mCacheExecutor.execute(new Runnable() {
                 public void run() {
-                    if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-                        addUidAndPinSysApp();
-                        HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
-                    } else if (action.equals(TeraIntent.ACTION_ADD_UID_INFO_TO_DATABASE)) {
-                        addUidInfoToDatabase(intent);
-                    } else if (action.equals(TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP)) {
-                        pinUnpinAgainWhenAppUpdated(intent);
-                    } else if (action.equals(TeraIntent.ACTION_REMOVE_UID_FROM_DB)) {
-                        removeUidFromDatabase(intent, action);
-                    } else if (action.equals(TeraIntent.ACTION_RESET_DATA_XFER)) {
-                        HCFSMgmtUtils.resetXfer();
-                    } else if (action.equals(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO)) {
-                        notifyLocalStorageUsedRatio();
-                    } else if (action.equals(TeraIntent.ACTION_ONGOING_NOTIFICATION)) {
-                        startOngoingNotificationService(intent);
-                    } else if (action.equals(TeraIntent.ACTION_CHECK_DEVICE_STATUS)) {
-                        checkDeviceStatus();
-                    } else if (action.equals(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE)) {
-                        notifyInsufficientPinSpace();
-                    } else if (action.equals(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR)) {
-                        HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
-                    } else if (action.equals(TeraIntent.ACTION_TOKEN_EXPIRED)) {
-                        checkTokenExpiredCause();
-                    } else if (action.equals(TeraIntent.ACTION_EXCEED_PIN_MAX)) {
-                        notifyUserExceedPinMax();
-                    } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_1)) {
-                        handleStage1RestoreEvent(intent);
-                    } else if (action.equals(TeraIntent.ACTION_RESTORE_STAGE_2)) {
-                        handleStage2RestoreEvent(intent);
-                    } else if (action.equals(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM)) {
-                        RestoreReadyFragment.rebootSystemForStage2(mContext);
-                    } else if (action.equals(TeraIntent.ACTION_CHECK_RESTORE_STATUS)) {
-                        checkRestoreStatus();
-                    } else if (action.equals(TeraIntent.ACTION_FACTORY_RESET)) {
-                        FactoryResetUtils.reset(mContext);
-                    } else if (action.equals(TeraIntent.ACTION_RETRY_RESTORE_WHEN_CONN_FAILED)) {
-                        openPreparingOrRestoringPage();
+                    switch (action) {
+                        case Intent.ACTION_BOOT_COMPLETED:
+                            addUidAndPinSysApp();
+                            HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
+                            break;
+                        case TeraIntent.ACTION_ADD_UID_INFO_TO_DATABASE:
+                            addUidInfoToDatabase(intent);
+                            break;
+                        case TeraIntent.ACTION_PIN_UNPIN_UDPATED_APP:
+                            pinUnpinAgainWhenAppUpdated(intent);
+                            break;
+                        case TeraIntent.ACTION_REMOVE_UID_FROM_DB:
+                            removeUidFromDatabase(intent, action);
+                            break;
+                        case TeraIntent.ACTION_RESET_DATA_XFER:
+                            HCFSMgmtUtils.resetXfer();
+                            break;
+                        case TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO:
+                            notifyLocalStorageUsedRatio();
+                            break;
+                        case TeraIntent.ACTION_ONGOING_NOTIFICATION:
+                            startOngoingNotificationService(intent);
+                            break;
+                        case TeraIntent.ACTION_CHECK_DEVICE_STATUS:
+                            checkDeviceStatus();
+                            break;
+                        case TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE:
+                            notifyInsufficientPinSpace();
+                            break;
+                        case TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR:
+                            HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
+                            break;
+                        case TeraIntent.ACTION_TOKEN_EXPIRED:
+                            checkTokenExpiredCause();
+                            break;
+                        case TeraIntent.ACTION_EXCEED_PIN_MAX:
+                            notifyUserExceedPinMax();
+                            break;
+                        case TeraIntent.ACTION_RESTORE_STAGE_1:
+                            handleStage1RestoreEvent(intent);
+                            break;
+                        case TeraIntent.ACTION_RESTORE_STAGE_2:
+                            handleStage2RestoreEvent(intent);
+                            break;
+                        case TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM:
+                            RestoreReadyFragment.rebootSystemForStage2(mContext);
+                            break;
+                        case TeraIntent.ACTION_CHECK_RESTORE_STATUS:
+                            checkRestoreStatus();
+                            break;
+                        case TeraIntent.ACTION_FACTORY_RESET:
+                            FactoryResetUtils.reset(mContext);
+                            break;
+                        case TeraIntent.ACTION_RETRY_RESTORE_WHEN_CONN_FAILED:
+                            openPreparingOrRestoringPage();
+                            break;
+                        case TeraIntent.ACTION_TRANSFER_COMPLETED:
+                            showCompletedPageThenExecuteFactoryReset();
+                            break;
+
                     }
 
                 }
@@ -413,10 +439,6 @@ public class TeraMgmtService extends Service {
                             });
                             unlockDeviceProxy.unlock();
                             break;
-                        // Device is already transferred, execute factory reset
-                        case GetDeviceInfo.Category.UNREGISTERED:
-                            FactoryResetUtils.reset(TeraMgmtService.this);
-                            break;
                     }
                 }
             }
@@ -477,7 +499,18 @@ public class TeraMgmtService extends Service {
                     }
 
                     @Override
-                    public void onAuthFailed() { // Google silent auth failed
+                    public void onAuthFailed(GoogleSignInResult result) { // Google silent auth failed
+                        Logs.e(CLASSNAME, "onAuthFailed", "result=" + result);
+                        if (result != null) {
+                            String email = null;
+                            String status = result.getStatus().toString();
+                            GoogleSignInAccount account = result.getSignInAccount();
+                            if (account != null) {
+                                email = account.getEmail();
+                            }
+                            Logs.e(CLASSNAME, "onAuthFailed", "email=" + email + ", status=" + status);
+                        }
+
                         TeraCloudConfig.stopSyncToCloud();
                         NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
 
@@ -706,8 +739,8 @@ public class TeraMgmtService extends Service {
     }
 
     /**
-     * Add NEW uid info to database when system boot up and pin /storage/emulated/0/Android folder,
-     * and then pin system app, triggered by HCFSMgmtReceiver's ACTION_BOOT_COMPLETED
+     * Add NEW uid info to database when system boot up and pin system app, triggered by
+     * HCFSMgmtReceiver's ACTION_BOOT_COMPLETED
      */
     private void addUidAndPinSysApp() {
         // Add NEW uid info to database when system boot up
@@ -730,20 +763,6 @@ public class TeraMgmtService extends Service {
                 }
                 mUidDAO.insert(new UidInfo(isPinned, isSystemApp, uid, packageName));
             }
-        }
-
-        // Pin /storage/emulated/0/Android folder
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        boolean isAndroidFolderPinned = sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, false);
-        if (!isAndroidFolderPinned) {
-            String externalAndroidPath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/Android";
-            if (!HCFSMgmtUtils.isPathPinned(externalAndroidPath)) {
-                HCFSMgmtUtils.pinFileOrDirectory(externalAndroidPath);
-            }
-
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean(HCFSMgmtUtils.PREF_ANDROID_FOLDER_PINNED, true);
-            editor.apply();
         }
 
         // Pin system app on system start up
@@ -794,10 +813,10 @@ public class TeraMgmtService extends Service {
                             HCFSMgmtUtils.setSwiftToken(url, token);
                         } else { // Other situation is handled by MgmtPollingService.
                             // Stop the the running service if exists.
-                            MgmtPollingUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
+                            PollingServiceUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
 
                             // Start a new polling service
-                            MgmtPollingUtils.startPollingService(TeraMgmtService.this,
+                            PollingServiceUtils.startPollingService(TeraMgmtService.this,
                                     Interval.CHECK_DEVICE_SERVICE_WHEN_TOKEN_EXPIRED, MgmtPollingService.class);
                         }
                     }
@@ -953,6 +972,23 @@ public class TeraMgmtService extends Service {
 
     private void openPreparingOrRestoringPage() {
         checkRestoreStatus();
+    }
+
+    private void showCompletedPageThenExecuteFactoryReset() {
+        if (MainApplication.Foreground.get().isForeground()) {
+            return;
+        }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        int status = sharedPreferences.getInt(TransferContentActivity.PREF_TRANSFER_STATUS, TransferStatus.NONE);
+        if (status == TransferStatus.WAIT_DEVICE) {
+            TransferStatus.setTransferStatus(this, TransferStatus.TRANSFERRED);
+
+            Intent intent = new Intent(this, TransferContentActivity.class);
+            // Require to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
 
 }

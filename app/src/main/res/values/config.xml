@@ -49,5 +49,4 @@
 
     <!-- Link is not defined. -->
     <string name="tera_customer_service_link" translatable="false">https://www.hopebaytech.com/company/contact</string>
-    <string name="tera_client_link" translatable="false">https://my.tera.mobi</string>
 </resources>

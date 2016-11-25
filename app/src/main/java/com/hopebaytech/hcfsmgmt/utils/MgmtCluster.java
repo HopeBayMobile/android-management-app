@@ -62,60 +62,103 @@ public class MgmtCluster {
 
     public static final String SERVER_CLIENT_ID = "795577377875-1tj6olgu34bqi7afnnmavvm5hj5vh1tr.apps.googleusercontent.com";
 
-    /**
-     * Unknown error.
-     */
-    public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
+    public static class ErrorCode {
 
-    /**
-     * Input parameter relative error.
-     */
-    public static final String INPUT_ERROR = "INPUT_ERROR";
+        /**
+         * Unknown error.
+         */
+        public static final String UNKNOWN_ERROR = "UNKNOWN_ERROR";
 
-    /**
-     * Device IMEI code is not registered.
-     */
-    public static final String IMEI_NOT_FOUND = "IMEI_NOT_FOUND";
+        /**
+         * Input parameter relative error.
+         */
+        public static final String INPUT_ERROR = "INPUT_ERROR";
 
-    /**
-     * Device IMEI code decrypt failed.
-     */
-    public static final String IMEI_DECRYPT_FAILED = "IMEI_DECRYPT_FAILED";
+        /**
+         * Device IMEI code is not registered.
+         */
+        public static final String IMEI_NOT_FOUND = "IMEI_NOT_FOUND";
 
-    /**
-     * The model information is not matched with the device. It may not support tera service.
-     */
-    public static final String INCORRECT_MODEL = "INCORRECT_MODEL";
+        /**
+         * Device IMEI code decrypt failed.
+         */
+        public static final String IMEI_DECRYPT_FAILED = "IMEI_DECRYPT_FAILED";
 
-    /**
-     * The vendor information is not matched with the device. It may not support tera service.
-     */
-    public static final String INCORRECT_VENDOR = "INCORRECT_VENDOR";
+        /**
+         * The model information is not matched with the device. It may not support tera service.
+         */
+        public static final String INCORRECT_MODEL = "INCORRECT_MODEL";
 
-    /**
-     * The device is expired. No support tera service anymore.
-     */
-    public static final String DEVICE_EXPIRED = "DEVICE_EXPIRED";
+        /**
+         * The vendor information is not matched with the device. It may not support tera service.
+         */
+        public static final String INCORRECT_VENDOR = "INCORRECT_VENDOR";
 
-    /**
-     * Invalid activation code or wrong model mapping. The device may not support tera service.
-     */
-    public static final String INVALID_CODE_OR_MODEL = "INVALID_CODE_OR_MODEL";
+        /**
+         * The device is expired. No support tera service anymore.
+         */
+        public static final String DEVICE_EXPIRED = "DEVICE_EXPIRED";
 
-    /**
-     * No service registered for the user and device.
-     */
-    public static final String MAPPING_NOT_FOUND = "MAPPING_NOT_FOUND";
+        /**
+         * Invalid activation code or wrong model mapping. The device may not support tera service.
+         */
+        public static final String INVALID_CODE_OR_MODEL = "INVALID_CODE_OR_MODEL";
 
-    /**
-     * The device is registered.
-     */
-    public static final String MAPPING_EXISTED = "MAPPING_EXISTED";
+        /**
+         * No service registered for the user and device.
+         */
+        public static final String MAPPING_NOT_FOUND = "MAPPING_NOT_FOUND";
 
-    /**
-     * The device service is locked or expired.
-     */
-    public static final String SERVICE_BLOCK = "SERVICE_BLOCK";
+        /**
+         * The device is registered.
+         */
+        public static final String MAPPING_EXISTED = "MAPPING_EXISTED";
+
+        /**
+         * The device service is locked or expired.
+         */
+        public static final String SERVICE_BLOCK = "SERVICE_BLOCK";
+
+        public static CharSequence getErrorMessage(Context context, String errorCode) {
+            CharSequence errorMessage;
+            switch (errorCode) {
+                case INPUT_ERROR:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_input);
+                    break;
+                case IMEI_NOT_FOUND:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_imei_not_found);
+                    break;
+                case IMEI_DECRYPT_FAILED:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_device_expired);
+                    break;
+                case INCORRECT_MODEL:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_incorrect_model);
+                    break;
+                case INCORRECT_VENDOR:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_incorrect_vendor);
+                    break;
+                case DEVICE_EXPIRED:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_device_expired);
+                    break;
+                case INVALID_CODE_OR_MODEL:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_invalid_code_or_model);
+                    break;
+                case MAPPING_NOT_FOUND:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_mapping_not_found);
+                    break;
+                case MAPPING_EXISTED:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_mapping_existed);
+                    break;
+                case SERVICE_BLOCK:
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_service_block);
+                    break;
+                default: // UNKNOWN_ERROR
+                    errorMessage = context.getText(R.string.mgmt_server_error_msg_unknown);
+            }
+            return errorMessage;
+        }
+
+    }
 
     private static int retryCount = 0;
     public static final int GOOGLE_AUTH = 0;
@@ -222,8 +265,7 @@ public class MgmtCluster {
                     }
                     deviceServiceInfo.setResponseContent(responseContent);
                     Logs.d(CLASSNAME, "ChangeAccountProxy", "changeAccount",
-                            "responseCode=" + responseCode +
-                                    ", responseContent=" + responseContent);
+                            "responseCode=" + responseCode + ", responseContent=" + responseContent);
                 } catch (Exception e) {
                     Logs.e(CLASSNAME, "ChangeAccountProxy", "change", Log.getStackTraceString(e));
                 } finally {
@@ -317,7 +359,6 @@ public class MgmtCluster {
                 }
                 deviceServiceInfo.setResponseContent(responseContent);
                 Logs.d(CLASSNAME, "getDeviceServiceInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
-                // TODO can use parseDeviceServiceInfo(deviceServiceInfo, deviceServiceInfo.getResponseContent());
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "getDeviceServiceInfo", Log.getStackTraceString(e));
             } finally {
@@ -412,14 +453,14 @@ public class MgmtCluster {
 
     }
 
-    public static class TransferContentProxy {
+    public static class TransferReadyProxy {
 
         private String jwtToken;
         private String imei;
 
         private OnTransferContentListener listener;
 
-        public TransferContentProxy(String jwtToken, String imei) {
+        public TransferReadyProxy(String jwtToken, String imei) {
             this.jwtToken = jwtToken;
             this.imei = imei;
         }
@@ -429,7 +470,7 @@ public class MgmtCluster {
                 @Override
                 public void run() {
                     Handler uiHandler = new Handler(Looper.getMainLooper());
-                    final TransferContentInfo transferContentInfo = transferContents(jwtToken, imei);
+                    final TransferContentInfo transferContentInfo = transferReady(jwtToken, imei);
                     if (transferContentInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         uiHandler.post(new Runnable() {
                             @Override
@@ -461,7 +502,7 @@ public class MgmtCluster {
 
         }
 
-        public static TransferContentInfo transferContents(String jwtToken, String imei) {
+        public static TransferContentInfo transferReady(String jwtToken, String imei) {
             IHttpProxy httpProxyImpl = null;
             TransferContentInfo transferContentInfo = new TransferContentInfo();
             try {
@@ -481,9 +522,9 @@ public class MgmtCluster {
                 String responseContent = httpProxyImpl.getResponseContent();
                 transferContentInfo.setResponseCode(responseCode);
                 transferContentInfo.setMessage(responseContent);
-                Logs.d(CLASSNAME, "transferContents", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+                Logs.d(CLASSNAME, "transferReady", "responseCode=" + responseCode + ", responseContent=" + responseContent);
             } catch (Exception e) {
-                Logs.e(CLASSNAME, "transferContents", Log.getStackTraceString(e));
+                Logs.e(CLASSNAME, "transferReady", Log.getStackTraceString(e));
             } finally {
                 if (httpProxyImpl != null) {
                     httpProxyImpl.disconnect();
@@ -732,8 +773,8 @@ public class MgmtCluster {
                             ", force=" + force +
                             ", hcfsVersion=" + hcfsVersion);
 
-	    return cv;
-	}
+            return cv;
+        }
 
     }
 
@@ -741,32 +782,78 @@ public class MgmtCluster {
                                                String responseContent) throws JSONException {
 
         JSONObject result = new JSONObject(responseContent);
-        JSONObject piggyback = result.getJSONObject("piggyback");
-        String category = piggyback.getString("category");
-        String message = piggyback.getString("message");
-        if (category != null || message != null) {
+
+        // Parse piggyback
+        String PIGGYBACK = "piggyback";
+        if (result.has(PIGGYBACK)) {
+            JSONObject piggyback = result.getJSONObject(PIGGYBACK);
             DeviceServiceInfo.Piggyback _piggyback = new DeviceServiceInfo.Piggyback();
-            _piggyback.setCategory(category);
-            _piggyback.setMessage(message);
+
+            // Parse category
+            String CATEGORY = "category";
+            if (piggyback.has(CATEGORY)) {
+                String category = piggyback.getString(CATEGORY);
+                _piggyback.setCategory(category);
+            }
+
+            // Parse message
+            String MESSAGE = "message";
+            if (piggyback.has(MESSAGE)) {
+                String message = piggyback.getString(MESSAGE);
+                _piggyback.setMessage(message);
+            }
+
             deviceServiceInfo.setPiggyback(_piggyback);
         }
 
-        String state = result.getString("state");
-        deviceServiceInfo.setState(state);
+        // Parse state
+        String STATE = "state";
+        if (result.has(STATE)) {
+            String state = result.getString(STATE);
+            deviceServiceInfo.setState(state);
+        }
 
-        JSONObject backend = result.getJSONObject("backend");
-        String url = backend.getString("url");
-        String token = backend.getString("token");
-        String backendType = backend.getString("backend_type");
-        String bucket = backend.getString("bucket");
-        String account = backend.getString("account");
-        if (url != null || token != null || backendType != null || bucket != null || account != null) {
+        // Parse backend
+        String BACKEND = "backend";
+        if (result.has(BACKEND)) {
+            JSONObject backend = result.getJSONObject(BACKEND);
             DeviceServiceInfo.Backend _backend = new DeviceServiceInfo.Backend();
-            _backend.setUrl(url);
-            _backend.setToken(token);
-            _backend.setBackendType(backendType);
-            _backend.setBucket(bucket);
-            _backend.setAccount(account);
+
+            // Parse url
+            String URL = "url";
+            if (backend.has(URL)) {
+                String url = backend.getString(URL);
+                _backend.setUrl(url);
+            }
+
+            // Parse token
+            String TOKEN = "token";
+            if (backend.has(TOKEN)) {
+                String token = backend.getString(TOKEN);
+                _backend.setToken(token);
+            }
+
+            // Parse backend type
+            String BACKEND_TYPE = "backend_type";
+            if (backend.has(BACKEND_TYPE)) {
+                String backendType = backend.getString(BACKEND_TYPE);
+                _backend.setBackendType(backendType);
+            }
+
+            // Parse bucket
+            String BUCKET = "bucket";
+            if (backend.has(BUCKET)) {
+                String bucket = backend.getString(BUCKET);
+                _backend.setBucket(bucket);
+            }
+
+            // Parse account
+            String ACCOUNT = "account";
+            if (backend.has(ACCOUNT)) {
+                String account = backend.getString(ACCOUNT);
+                _backend.setAccount(account);
+            }
+
             deviceServiceInfo.setBackend(_backend);
         }
 
@@ -1101,7 +1188,7 @@ public class MgmtCluster {
             DeviceListInfo deviceListInfo = new DeviceListInfo();
             IHttpProxy httpProxyImpl = null;
             try {
-                String url = DEVICE_API + imei;
+                String url = DEVICE_API + imei + "/";
 
                 ContentValues header = new ContentValues();
                 header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
@@ -1198,7 +1285,7 @@ public class MgmtCluster {
                             }
 
                             @Override
-                            public void onAuthFailed() {
+                            public void onAuthFailed(GoogleSignInResult result) {
                                 listener.onFetchFailed();
                             }
 
@@ -1218,36 +1305,6 @@ public class MgmtCluster {
 
     public static void plusRetryCount() {
         retryCount = retryCount + 1;
-    }
-
-    public static int errorMessageResId(String errorCode) {
-        int resId = 0;
-        if (errorCode.equals(UNKNOWN_ERROR)) {
-
-        } else if (errorCode.equals(UNKNOWN_ERROR)) {
-
-        } else if (errorCode.equals(INPUT_ERROR)) {
-
-        } else if (errorCode.equals(IMEI_NOT_FOUND)) {
-
-        } else if (errorCode.equals(IMEI_DECRYPT_FAILED)) {
-
-        } else if (errorCode.equals(INCORRECT_MODEL)) {
-
-        } else if (errorCode.equals(INCORRECT_VENDOR)) {
-
-        } else if (errorCode.equals(DEVICE_EXPIRED)) {
-
-        } else if (errorCode.equals(INVALID_CODE_OR_MODEL)) {
-
-        } else if (errorCode.equals(MAPPING_EXISTED)) {
-
-        } else if (errorCode.equals(SERVICE_BLOCK)) {
-
-        } else if (errorCode.equals(MAPPING_NOT_FOUND)) {
-
-        }
-        return resId;
     }
 
 }

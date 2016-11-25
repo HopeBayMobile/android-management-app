@@ -1,11 +1,15 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -24,13 +28,16 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,9 +50,6 @@ public class MainFragment extends Fragment {
 
     public static final String TAG = MainFragment.class.getSimpleName();
     private final String CLASSNAME = getClass().getSimpleName();
-    private final int NAV_MENU_SDCARD1_ID = (int) (Math.random() * Integer.MAX_VALUE);
-
-    // private SDCardBroadcastReceiver sdCardReceiver;
 
     private View mView;
     private Context mContext;
@@ -57,8 +61,6 @@ public class MainFragment extends Fragment {
     private Handler mUiHandler;
     private PagerAdapter mPagerAdapter;
 
-    private String sdcard1_path;
-    private boolean isSDCard1;
     private boolean isExitApp = false;
     private Bundle mArguments;
 
@@ -102,50 +104,9 @@ public class MainFragment extends Fragment {
     }
 
     private void init() {
-//        sdCardReceiver = new SDCardBroadcastReceiver();
-
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-//        filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
-//        filter.addDataScheme("file");
-//        registerReceiver(sdCardReceiver, filter);
-
-        // Detect whether sdcard1 exists, if exists, add to left slide menu.
-//        mWorkHandler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    BufferedReader br = new BufferedReader(new FileReader(new File("/proc/mounts")));
-//                    try {
-//                        String line;
-//                        while ((line = br.readLine()) != null) {
-//                            if (line.contains("sdcard1") && line.contains("fuse")) {
-//                                sdcard1_path = line.split("\\s")[1];
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        Menu menu = mNavigationView.getMenu();
-//                                        for (int i = 0; i < menu.size(); i++) {
-//                                            if (menu.getItem(i).getTitle().equals(getString(R.string.nav_system))) {
-//                                                MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, i + 1,
-//                                                        getString(R.string.nav_sdcard1));
-//                                                menuItem.setIcon(R.drawable.ic_sd_storage_black);
-//                                                break;
-//                                            }
-//                                        }
-//                                    }
-//                                });
-//                                break;
-//                            }
-//                        }
-//                    } finally {
-//                        br.close();
-//                    }
-//                } catch (Exception e) {
-//                    HCFSMgmtUtils.log(Log.ERROR, CLASSNAME, "init", Log.getStackTraceString(e));
-//                }
-//            }
-//        });
+        mWorkerThread = new HandlerThread(CLASSNAME);
+        mWorkerThread.start();
+        mWorkHandler = new Handler(mWorkerThread.getLooper());
 
         // Start ResetXferAlarm if it doesn't exist
         Intent intent = new Intent(mContext, HCFSMgmtReceiver.class);
@@ -180,11 +141,43 @@ public class MainFragment extends Fragment {
         mPagerAdapter = new PagerAdapter(((MainActivity) mContext).getSupportFragmentManager());
         if (mViewPager != null) {
             mViewPager.setOffscreenPageLimit(3);
-//            PagerTabStrip pagerTabStrip = (PagerTabStrip) mViewPager.findViewById(R.id.pager_tab_strip);
-//            pagerTabStrip.setDrawFullUnderline(false);
-//            pagerTabStrip.invalidate();
             mViewPager.setAdapter(mPagerAdapter);
         }
+
+        // User login Tera app with mobile network, but the Wi-Fi only option is enabled by default.
+        // Thus, we need to notify user to connect to Wi-Fi or disable Wi-Fi only option.
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                String key = SettingsFragment.PREF_SHOW_ACCESS_CLOUD_SETTINGS;
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                boolean showDialog = sharedPreferences.getBoolean(key, true);
+                if (showDialog) {
+                    boolean isWiFiOnly = true; // Default is enabled
+                    SettingsDAO settingsDAO = SettingsDAO.getInstance(getContext());
+                    SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                    if (settingsInfo != null) {
+                        isWiFiOnly = Boolean.valueOf(settingsInfo.getValue());
+                    }
+
+                    int type = NetworkUtils.getNetworkType(mContext);
+                    if (isWiFiOnly && type == ConnectivityManager.TYPE_MOBILE) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(key, false);
+                        editor.apply();
+
+                        mUiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                AccessCloudSettingsDialogFragment dialog = AccessCloudSettingsDialogFragment.newInstance();
+                                dialog.setTargetFragment(MainFragment.this, RequestCode.SHOW_ACCESS_CLOUD_SETTINGS);
+                                dialog.show(getFragmentManager(), AccessCloudSettingsDialogFragment.TAG);
+                            }
+                        });
+                    }
+                }
+            }
+        });
 
         mUserIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -193,6 +186,7 @@ public class MainFragment extends Fragment {
                 dialogFragment.show(getFragmentManager(), UserInfoDialogFragment.TAG);
             }
         });
+
     }
 
     public class PagerAdapter extends FragmentStatePagerAdapter {
@@ -256,6 +250,15 @@ public class MainFragment extends Fragment {
             return pageReference.get(position);
         }
 
+        public int getFragmentPosition(String title) {
+            for (int position = 0; position < titleArray.length; position++) {
+                if (title.equals(titleArray[position])) {
+                    return position;
+                }
+            }
+            return -1;
+        }
+
     }
 
     public void onBackPressed() {
@@ -288,34 +291,6 @@ public class MainFragment extends Fragment {
         }
     }
 
-//    public class SDCardBroadcastReceiver extends BroadcastReceiver {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            final String action = intent.getAction();
-//            Logs.d(CLASSNAME, "onReceive", "sdcard_action=" + action);
-//            sdcard1_path = intent.getData().getSchemeSpecificPart().replace("///", "/");
-//            if (action.equals(Intent.ACTION_MEDIA_MOUNTED)) {
-//                mUiHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-////                        Menu menu = mNavigationView.getMenu();
-////                        MenuItem menuItem = menu.add(R.id.group_system, NAV_MENU_SDCARD1_ID, 2, getString(R.string.nav_sdcard1));
-////                        menuItem.setIcon(R.drawable.ic_sd_storage_black);
-//                    }
-//                });
-//            } else if (action.equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
-//                mUiHandler.post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        Menu menu = mNavigationView.getMenu();
-//                        menu.removeItem(NAV_MENU_SDCARD1_ID);
-//                    }
-//                });
-//            }
-//        }
-//
-//    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -333,7 +308,7 @@ public class MainFragment extends Fragment {
             return;
         }
 
-        // Jump to specific page, 0 Overview, 1 FILE/APP, 2 SETTINGS, 3 HELP.
+        // Move to specific page, 0 Overview, 1 FILE/APP, 2 SETTINGS, 3 HELP.
         mWorkHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -376,12 +351,15 @@ public class MainFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-//        unregisterReceiver(sdCardReceiver);
         if (mWorkerThread != null) {
             mWorkerThread.quit();
             mWorkerThread = null;
         }
         super.onDestroy();
+
+        if (mWorkerThread != null) {
+            mWorkerThread.quit();
+        }
     }
 
     @Override
@@ -405,8 +383,18 @@ public class MainFragment extends Fragment {
         }
     }
 
-    public void changeArguments(Bundle args) {
-        mArguments = args;
-    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode == RequestCode.SHOW_ACCESS_CLOUD_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
+                // Move current page to settings page
+                int position = mPagerAdapter.getFragmentPosition(getString(R.string.settings));
+                if (position != -1) {
+                    mViewPager.setCurrentItem(position, true);
+                }
+            }
+        }
+    }
 }

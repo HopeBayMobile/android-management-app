@@ -130,18 +130,18 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public int getAppStatus() {
-        int dataStatus;
-        if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
-            dataStatus = DataStatus.AVAILABLE;
-        } else {
-            int externalLocationStatus = getExternalDirLocationStatus();
-            if (HCFSMgmtUtils.getDirLocationStatus(getSourceDir()) == LocationStatus.LOCAL &&
-                    HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
-                    externalLocationStatus == LocationStatus.LOCAL) {
-                dataStatus = DataStatus.AVAILABLE;
-            } else {
-                dataStatus = DataStatus.UNAVAILABLE;
-            }
+        boolean isSourceDirInLocal = true;
+        String sourceDir = getSourceDir();
+        if (!sourceDir.startsWith("/system")) {
+            // if the sourceDir is not belong to system app (/system/app or /system/priv-app), check
+            // its location status
+            isSourceDirInLocal = HCFSMgmtUtils.getDirLocationStatus(sourceDir) == LocationStatus.LOCAL;
+        }
+
+        if (isSourceDirInLocal &&
+                HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
+                getExternalDirLocationStatus() == LocationStatus.LOCAL) {
+            return DataStatus.AVAILABLE;
         }
         this.dataStatus = dataStatus;
         return dataStatus;

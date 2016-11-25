@@ -170,8 +170,8 @@ public class UserInfoDialogFragment extends DialogFragment {
             }
 
             @Override
-            public void onAuthFailed() {
-                Logs.e(CLASSNAME, "onAuthFailed", null);
+            public void onAuthFailed(@Nullable GoogleSignInResult result) {
+                Logs.e(CLASSNAME, "onAuthFailed", "result=" + result);
             }
         });
         silentAuthProxy.auth();

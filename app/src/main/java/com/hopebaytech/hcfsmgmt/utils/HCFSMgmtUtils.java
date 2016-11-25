@@ -65,7 +65,6 @@ public class HCFSMgmtUtils {
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
     public static final String PREF_TERA_APP_LOGIN = "pref_tera_app_login";
-    public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
     public static final String PREF_APP_DISPLAY_LAYOUT = "pref_app_display_layout";
@@ -627,25 +626,37 @@ public class HCFSMgmtUtils {
         }
     }
 
-
     public static void changeCloudSyncStatus(Context context, boolean syncWifiOnly) {
         Logs.d(CLASSNAME, "changeCloudSyncStatus", null);
         ConnectivityManager connMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connMgr.getActiveNetworkInfo();
         if (syncWifiOnly) {
-            if (netInfo != null && netInfo.isConnected() && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-                String logMsg = "Wifi is connected";
-                TeraCloudConfig.startSyncToCloud(context, logMsg);
+            if (netInfo != null) {
+                Logs.d(CLASSNAME, "changeCloudSyncStatus", "type=" + netInfo.getType()
+                        + ", state=" + netInfo.getState()
+                        + ", detailedState=" + netInfo.getDetailedState());
+                
+                if (netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                    String logMsg = "Current wifi network is active";
+                    TeraCloudConfig.startSyncToCloud(context, logMsg);
+                } else {
+                    String logMsg = "Current network is active but not wifi";
+                    TeraCloudConfig.stopSyncToCloud(context, logMsg);
+                }
             } else {
-                String logMsg = "Wifi is not connected";
+                String logMsg = "No default network or wifi network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         } else {
-            if (netInfo != null && netInfo.isConnected()) {
-                String logMsg = "Wifi or Mobile network is connected";
+            if (netInfo != null) {
+                Logs.d(CLASSNAME, "changeCloudSyncStatus", "type=" + netInfo.getType()
+                        + ", state=" + netInfo.getState()
+                        + ", detailedState=" + netInfo.getDetailedState());
+
+                String logMsg = "Current default network is active";
                 TeraCloudConfig.startSyncToCloud(context, logMsg);
             } else {
-                String logMsg = "Wifi or Mobile network is not connected";
+                String logMsg = "No default network is current active";
                 TeraCloudConfig.stopSyncToCloud(context, logMsg);
             }
         }
@@ -796,7 +807,7 @@ public class HCFSMgmtUtils {
             isSuccess = jObject.getBoolean("result");
             String logMsg = "url=" + url + ", token=" + token + ", result=" + jsonResult;
             if (isSuccess) {
-                Logs.i(CLASSNAME, "setSwiftToken", logMsg);
+                Logs.d(CLASSNAME, "setSwiftToken", logMsg);
             } else {
                 Logs.e(CLASSNAME, "setSwiftToken", logMsg);
             }
@@ -812,6 +823,7 @@ public class HCFSMgmtUtils {
      * <li>Negative error code in case that error occurs</li>
      */
     public static int startUploadTeraData() {
+        Logs.i(CLASSNAME, "startUploadTeraData", null);
         int code = -1;
         try {
             String jsonResult = HCFSApiUtils.startUploadTeraData();
@@ -819,7 +831,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 code = jObject.getInt("code");
-                Logs.i(CLASSNAME, "startUploadTeraData", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "startUploadTeraData", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "startUploadTeraData", null);
             }
@@ -835,6 +847,7 @@ public class HCFSMgmtUtils {
      * <li>Negative error code in case that error occurs</li>
      */
     public static int stopUploadTeraData() {
+        Logs.i(CLASSNAME, "stopUploadTeraData", null);
         int code = -1;
         try {
             String jsonResult = HCFSApiUtils.stopUploadTeraData();
@@ -842,7 +855,7 @@ public class HCFSMgmtUtils {
             boolean isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
                 code = jObject.getInt("code");
-                Logs.i(CLASSNAME, "stopUploadTeraData", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "stopUploadTeraData", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "stopUploadTeraData", null);
             }
@@ -866,7 +879,7 @@ public class HCFSMgmtUtils {
 
     /**
      * @return
-     * */
+     */
     public static int triggerRestore() {
         int code = -1;
         try {

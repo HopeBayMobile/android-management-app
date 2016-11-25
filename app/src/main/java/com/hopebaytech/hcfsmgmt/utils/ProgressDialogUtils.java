@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.Context;
+import android.support.annotation.StringRes;
 
 import com.hopebaytech.hcfsmgmt.R;
 
@@ -10,7 +11,7 @@ import com.hopebaytech.hcfsmgmt.R;
  */
 public class ProgressDialogUtils {
 
-    private final String CLASSNAME = ProgressDialogUtils.class.getSimpleName();
+    private final static String CLASSNAME = ProgressDialogUtils.class.getSimpleName();
 
     private Context mContext;
     private android.app.ProgressDialog mProgressDialog;
@@ -29,12 +30,27 @@ public class ProgressDialogUtils {
         }
     }
 
-    public void show(int resId) {
+    public void show(@StringRes int resId) {
         if (!mProgressDialog.isShowing()) {
             String message = mContext.getString(resId);
             mProgressDialog.setMessage(message);
             mProgressDialog.show();
         }
+    }
+
+    public void show() {
+        if (!mProgressDialog.isShowing()) {
+            mProgressDialog.show();
+        }
+    }
+
+    public void setMessage(String message) {
+        mProgressDialog.setMessage(message);
+    }
+
+    public void setMessage(@StringRes int resId) {
+        String message = mContext.getString(resId);
+        mProgressDialog.setMessage(message);
     }
 
     public void dismiss() {

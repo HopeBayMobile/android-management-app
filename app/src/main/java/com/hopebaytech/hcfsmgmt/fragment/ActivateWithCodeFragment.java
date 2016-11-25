@@ -9,9 +9,7 @@ import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.text.Html;
 import android.text.InputFilter;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,7 +30,6 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import java.net.HttpURLConnection;
-import java.util.Locale;
 
 /**
  * @author Aaron
@@ -170,16 +167,14 @@ public class ActivateWithCodeFragment extends Fragment {
                                     dismissProgressDialog();
                                     if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
                                         String errorCode = deviceServiceInfo.getErrorCode();
-                                        if (errorCode != null && errorCode.equals(MgmtCluster.INVALID_CODE_OR_MODEL)) {
-                                            String teraClientLink = getString(R.string.tera_client_link);
-                                            String hyperLink = "<a href=\"" + teraClientLink + "\">TeraClient</a>";
-                                            Spanned errorMsg = Html.fromHtml(String.format(Locale.getDefault(), getString(R.string.activate_with_code_msg), hyperLink));
+                                        if (errorCode != null && errorCode.equals(MgmtCluster.ErrorCode.INVALID_CODE_OR_MODEL)) {
+                                            CharSequence errorMsg = MgmtCluster.ErrorCode.getErrorMessage(mContext, errorCode);
                                             mErrorMessage.setMovementMethod(LinkMovementMethod.getInstance());
                                             mErrorMessage.setText(errorMsg);
                                             return;
                                         }
                                     }
-                                    mErrorMessage.setText(deviceServiceInfo.getMessage(R.string.activate_failed));
+                                    mErrorMessage.setText(deviceServiceInfo.getErrorMessage(mContext));
                                 }
 
                             });

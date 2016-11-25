@@ -36,6 +36,9 @@
     <string name="activate_device_not_registered">Tera is not activated on this device. Enter an activation code to activate Tera.</string>
     <string name="activate_require_read_phone_state_permission">Enable the "Phone" permission to activate Tera.</string>
 
+    <string name="access_cloud_settings_title">Access Cloud Settings</string>
+    <string name="access_cloud_settings_message">Please choose available Wi-Fi connection or turn off "Sync" section in Tera settings to access cloud.</string>
+
     <string name="nav_drawer_open">Open navigation drawer.</string>
     <string name="nav_drawer_close">Close navigation drawer.</string>
     <string name="nav_overview">OVERVIEW</string>
@@ -273,5 +276,19 @@
     <string name="http_gateway_timeout">Gateway Timeout: The server was acting as a gateway or proxy and did not receive a timely response from the upstream server.</string>
     <string name="http_internal_error">Internal server error.</string>
     <string name="http_unknown_error">Unknown error.</string>
+
+    <string name="mgmt_server_error_msg_unknown">Unknown error</string>
+    <string name="mgmt_server_error_msg_input">Input parameter relative error.</string>
+    <string name="mgmt_server_error_msg_imei_not_found">Device IMEI code is not registered</string>
+    <string name="mgmt_server_error_msg_imei_decrypt_failed">Device IMEI code decrypt failed</string>
+    <string name="mgmt_server_error_msg_incorrect_model">This device is not supported. Activation failed.</string>
+    <string name="mgmt_server_error_msg_incorrect_vendor">This device is not supported. Activation failed.</string>
+    <string name="mgmt_server_error_msg_device_expired">Tera expired. Activation failed.</string>
+    <string name="mgmt_server_error_msg_invalid_code_or_model">
+        The activation code has been used. If your old Tera device is lost or broken, please lock it on <a href="https://my.tera.mobi">TeraClient</a> before activation.
+    </string>
+    <string name="mgmt_server_error_msg_mapping_not_found">No service registered for the user and device.</string>
+    <string name="mgmt_server_error_msg_mapping_existed">The device has been registered.</string>
+    <string name="mgmt_server_error_msg_service_block">The device service is locked or expired.</string>
 
 </resources>

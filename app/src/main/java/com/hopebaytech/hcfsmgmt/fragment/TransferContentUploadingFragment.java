@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
+import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -84,9 +85,10 @@ public class TransferContentUploadingFragment extends Fragment {
 
         int code = HCFSMgmtUtils.startUploadTeraData();
         if (code == 1) {
-            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
+            TransferStatus.setTransferStatus(mContext, TransferStatus.WAIT_DEVICE);
 
             Logs.d(CLASSNAME, "onActivityCreated", "Replace with TransferContentWaitingFragment");
+            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
             ft.commit();
@@ -123,7 +125,7 @@ public class TransferContentUploadingFragment extends Fragment {
                             Thread.sleep(INTERVAL_TERA_CONN_STATUS);
                         }
                     } catch (InterruptedException e) {
-                        Logs.w(CLASSNAME, "onStart", Log.getStackTraceString(e));
+                        Logs.d(CLASSNAME, "onStart", "mTeraConnStatusThread is interrupted.");
                     }
                 }
             });
@@ -160,44 +162,47 @@ public class TransferContentUploadingFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
             String action = intent.getAction();
-            if (action.equals(TeraIntent.ACTION_UPLOAD_COMPLETED)) {
-                Logs.d(CLASSNAME, "onReceive", TeraIntent.ACTION_UPLOAD_COMPLETED);
-                MgmtCluster.getJwtToken(mContext, new MgmtCluster.OnFetchJwtTokenListener() {
-                    @Override
-                    public void onFetchSuccessful(String jwtToken) {
-                        String imei = HCFSMgmtUtils.getDeviceImei(mContext);
-                        MgmtCluster.TransferContentProxy transferProxy = new MgmtCluster.TransferContentProxy(jwtToken, imei);
-                        transferProxy.setOnTransferContentListener(new MgmtCluster.TransferContentProxy.OnTransferContentListener() {
-                            @Override
-                            public void onTransferSuccessful(TransferContentInfo transferContentInfo) {
-                                TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
-
-                                Logs.d(CLASSNAME, "onTransferSuccessful", "Replace with TransferContentWaitingFragment");
-                                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
-                                ft.commit();
-                            }
-
-                            @Override
-                            public void onTransferFailed(TransferContentInfo transferContentInfo) {
-                                mErrorMsg.setText(R.string.settings_transfer_content_failed);
-                                mTeraConnStatus.setVisibility(View.GONE);
-                                mProgressLayout.setVisibility(View.GONE);
-                            }
-                        });
-                        transferProxy.transfer();
-                    }
-
-                    @Override
-                    public void onFetchFailed() {
-                        mErrorMsg.setText(R.string.settings_transfer_content_failed);
-                        mTeraConnStatus.setVisibility(View.GONE);
-                        mProgressLayout.setVisibility(View.GONE);
-                    }
-                });
+            Logs.d(CLASSNAME, "onReceive", "action=" + action);
+            if (!action.equals(TeraIntent.ACTION_UPLOAD_COMPLETED)) {
+                return;
             }
+
+            MgmtCluster.getJwtToken(mContext, new MgmtCluster.OnFetchJwtTokenListener() {
+                @Override
+                public void onFetchSuccessful(String jwtToken) {
+                    String imei = HCFSMgmtUtils.getDeviceImei(mContext);
+                    MgmtCluster.TransferReadyProxy transferProxy = new MgmtCluster.TransferReadyProxy(jwtToken, imei);
+                    transferProxy.setOnTransferContentListener(new MgmtCluster.TransferReadyProxy.OnTransferContentListener() {
+                        @Override
+                        public void onTransferSuccessful(TransferContentInfo transferContentInfo) {
+                            TransferStatus.setTransferStatus(mContext, TransferStatus.WAIT_DEVICE);
+
+                            Logs.d(CLASSNAME, "onTransferSuccessful", "Replace with TransferContentWaitingFragment");
+                            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
+                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
+                            ft.commitAllowingStateLoss();
+                        }
+
+                        @Override
+                        public void onTransferFailed(TransferContentInfo transferContentInfo) {
+                            mErrorMsg.setText(R.string.settings_transfer_content_failed);
+                            mTeraConnStatus.setVisibility(View.GONE);
+                            mProgressLayout.setVisibility(View.GONE);
+                        }
+                    });
+                    transferProxy.transfer();
+                }
+
+                @Override
+                public void onFetchFailed() {
+                    mErrorMsg.setText(R.string.settings_transfer_content_failed);
+                    mTeraConnStatus.setVisibility(View.GONE);
+                    mProgressLayout.setVisibility(View.GONE);
+                }
+            });
+
 
         }
 
@@ -236,6 +241,7 @@ public class TransferContentUploadingFragment extends Fragment {
                 break;
         }
     }
+
 
 
 }
