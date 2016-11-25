@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.service.TransferDataPollingService;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
@@ -94,8 +96,18 @@ public class TransferContentWaitingFragment extends Fragment {
                                 ThreadPool.getInstance().execute(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Booster.mountBooster();
-                                        Booster.enableApps(mContext);
+                                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                                        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+                                        if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
+                                            if (!Booster.isBoosterMounted()) {
+                                                Booster.mountBooster();
+                                                Booster.enableApps(mContext);
+                                            }
+                                            settingsInfo = new SettingsInfo();
+                                            settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                                            settingsInfo.setValue(String.valueOf(true));
+                                            settingsDAO.update(settingsInfo);
+                                        }
                                         UiHandler.getInstance().post(new Runnable() {
                                             @Override
                                             public void run() {

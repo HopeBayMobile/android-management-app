@@ -77,10 +77,20 @@ public class TransferContentUploadingFragment extends Fragment {
                     @Override
                     public void run() {
                         HCFSMgmtUtils.stopUploadTeraData();
-                        if (!Booster.isBoosterMounted()) {
-                            Booster.mountBooster();
-                            Booster.enableApps(mContext);
+
+                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+                        if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
+                            if (!Booster.isBoosterMounted()) {
+                                Booster.mountBooster();
+                                Booster.enableApps(mContext);
+                            }
+                            settingsInfo = new SettingsInfo();
+                            settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                            settingsInfo.setValue(String.valueOf(true));
+                            settingsDAO.update(settingsInfo);
                         }
+
                         UiHandler.getInstance().post(new Runnable() {
                             @Override
                             public void run() {
@@ -104,9 +114,15 @@ public class TransferContentUploadingFragment extends Fragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                if (Booster.isBoosterMounted()) {
-                    Booster.disableApps(mContext);
-                    Booster.umountBooster();
+                SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+                if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
+                    if (Booster.isBoosterMounted()) {
+                        Booster.disableApps(mContext);
+                        Booster.umountBooster();
+                    }
+                    settingsInfo.setValue(String.valueOf(false));
+                    settingsDAO.update(settingsInfo);
                 }
 
                 final int code = HCFSMgmtUtils.startUploadTeraData();
@@ -180,7 +196,27 @@ public class TransferContentUploadingFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         mUploadCompletedReceiver.unregisterReceiver();
-        HCFSMgmtUtils.stopUploadTeraData();
+
+        ThreadPool.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                HCFSMgmtUtils.stopUploadTeraData();
+
+                SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+                if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
+                    if (!Booster.isBoosterMounted()) {
+                        Booster.mountBooster();
+                        Booster.enableApps(mContext);
+                    }
+                    settingsInfo = new SettingsInfo();
+                    settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                    settingsInfo.setValue(String.valueOf(true));
+                    settingsDAO.update(settingsInfo);
+                }
+            }
+        });
+
     }
 
     public class UploadCompletedReceiver extends BroadcastReceiver {

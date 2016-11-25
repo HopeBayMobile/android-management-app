@@ -21,7 +21,6 @@ import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
@@ -36,15 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class TeraFonnApiService extends Service {
 
@@ -280,9 +272,15 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int startUploadTeraData() throws RemoteException {
-            if (Booster.isBoosterMounted()) {
-                Booster.disableApps(TeraFonnApiService.this);
-                Booster.umountBooster();
+            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
+            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+            if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
+                if (Booster.isBoosterMounted()) {
+                    Booster.disableApps(TeraFonnApiService.this);
+                    Booster.umountBooster();
+                }
+                settingsInfo.setValue(String.valueOf(false));
+                settingsDAO.update(settingsInfo);
             }
             return HCFSMgmtUtils.startUploadTeraData();
         }
@@ -290,9 +288,17 @@ public class TeraFonnApiService extends Service {
         @Override
         public int stopUploadTeraData() throws RemoteException {
             int code = HCFSMgmtUtils.stopUploadTeraData();
-            if (!Booster.isBoosterMounted()) {
-                Booster.mountBooster();
-                Booster.enableApps(TeraFonnApiService.this);
+            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
+            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+            if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
+                if (!Booster.isBoosterMounted()) {
+                    Booster.mountBooster();
+                    Booster.enableApps(TeraFonnApiService.this);
+                }
+                settingsInfo = new SettingsInfo();
+                settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                settingsInfo.setValue(String.valueOf(true));
+                settingsDAO.update(settingsInfo);
             }
             return code;
         }
@@ -344,7 +350,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int getAppBoostStatus(String packageName) throws RemoteException {
-            int status  = UidInfo.BoostStatus.UNBOOSTED;
+            int status = UidInfo.BoostStatus.UNBOOSTED;
             UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
             UidInfo uidInfo = uidDAO.get(packageName);
             if (uidInfo != null)
