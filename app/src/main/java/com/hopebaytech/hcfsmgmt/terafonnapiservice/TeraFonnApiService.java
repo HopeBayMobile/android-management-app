@@ -280,14 +280,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int startUploadTeraData() throws RemoteException {
-            boolean isBoosterEnabled = false;
-            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
-            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-            if (settingsInfo != null) {
-                isBoosterEnabled = Boolean.valueOf(settingsInfo.getValue());
-            }
-
-            if (isBoosterEnabled) {
+            if (Booster.isBoosterMounted()) {
                 Booster.disableApps(TeraFonnApiService.this);
                 Booster.umountBooster();
             }
@@ -297,15 +290,7 @@ public class TeraFonnApiService extends Service {
         @Override
         public int stopUploadTeraData() throws RemoteException {
             int code = HCFSMgmtUtils.stopUploadTeraData();
-
-            boolean isBoosterEnabled = false;
-            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
-            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-            if (settingsInfo != null) {
-                isBoosterEnabled = Boolean.valueOf(settingsInfo.getValue());
-            }
-
-            if (!isBoosterEnabled) {
+            if (!Booster.isBoosterMounted()) {
                 Booster.mountBooster();
                 Booster.enableApps(TeraFonnApiService.this);
             }

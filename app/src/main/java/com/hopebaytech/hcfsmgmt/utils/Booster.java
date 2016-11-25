@@ -500,4 +500,9 @@ public class Booster {
         return isSuccess;
     }
 
+    public static boolean isBoosterMounted() {
+        File partition = new File(BOOSTER_PARTITION);
+        return partition.exists();
+    }
+
 }

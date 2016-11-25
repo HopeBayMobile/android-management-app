@@ -77,8 +77,10 @@ public class TransferContentUploadingFragment extends Fragment {
                     @Override
                     public void run() {
                         HCFSMgmtUtils.stopUploadTeraData();
-                        Booster.mountBooster();
-                        Booster.enableApps(mContext);
+                        if (!Booster.isBoosterMounted()) {
+                            Booster.mountBooster();
+                            Booster.enableApps(mContext);
+                        }
                         UiHandler.getInstance().post(new Runnable() {
                             @Override
                             public void run() {
@@ -102,14 +104,7 @@ public class TransferContentUploadingFragment extends Fragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                boolean isBoosterEnabled = false;
-                SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
-                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-                if (settingsInfo != null) {
-                    isBoosterEnabled = Boolean.valueOf(settingsInfo.getValue());
-                }
-
-                if (isBoosterEnabled) {
+                if (Booster.isBoosterMounted()) {
                     Booster.disableApps(mContext);
                     Booster.umountBooster();
                 }
