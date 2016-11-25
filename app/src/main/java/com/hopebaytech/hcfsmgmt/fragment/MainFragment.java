@@ -1,15 +1,19 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -40,7 +44,11 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
@@ -78,6 +86,7 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     private PagerAdapter mPagerAdapter;
     private DrawerLayout mDrawerLayout;
 
+    private HandlerThread mWorkerThread;
     private Handler mWorkHandler;
     private Handler mUiHandler;
 
@@ -287,9 +296,9 @@ public class MainFragment extends Fragment implements View.OnClickListener {
 
     private void init() {
 
-        HandlerThread handlerThread = new HandlerThread(MainFragment.class.getSimpleName());
-        handlerThread.start();
-        mWorkHandler = new Handler(handlerThread.getLooper());
+        mWorkerThread = new HandlerThread(CLASSNAME);
+        mWorkerThread.start();
+        mWorkHandler = new Handler(mWorkerThread.getLooper());
 
 //        sdCardReceiver = new SDCardBroadcastReceiver();
 
@@ -373,6 +382,42 @@ public class MainFragment extends Fragment implements View.OnClickListener {
             pagerTabStrip.setTabIndicatorColor(ContextCompat.getColor(mContext, R.color.C2));
             mViewPager.setAdapter(mPagerAdapter);
         }
+
+        // User login Tera app with mobile network, but the Wi-Fi only option is enabled by default.
+        // Thus, we need to notify user to connect to Wi-Fi or disable Wi-Fi only option.
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                String key = SettingsFragment.PREF_SHOW_ACCESS_CLOUD_SETTINGS;
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                boolean showDialog = sharedPreferences.getBoolean(key, true);
+                if (showDialog) {
+                    boolean isWiFiOnly = true; // Default is enabled
+                    SettingsDAO settingsDAO = SettingsDAO.getInstance(getContext());
+                    SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+                    if (settingsInfo != null) {
+                        isWiFiOnly = Boolean.valueOf(settingsInfo.getValue());
+                    }
+
+                    int type = NetworkUtils.getNetworkType(mContext);
+                    if (isWiFiOnly && type == ConnectivityManager.TYPE_MOBILE) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(key, false);
+                        editor.apply();
+
+                        mUiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                AccessCloudSettingsDialogFragment dialog = AccessCloudSettingsDialogFragment.newInstance();
+                                dialog.setTargetFragment(MainFragment.this, RequestCode.SHOW_ACCESS_CLOUD_SETTINGS);
+                                dialog.show(getFragmentManager(), AccessCloudSettingsDialogFragment.TAG);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
     }
 
     @Override
@@ -443,6 +488,15 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         @Nullable
         public Fragment getFragment(int position) {
             return pageReference.get(position);
+        }
+
+        public int getFragementPosition(String title) {
+            for (int position = 0; position < titleArray.length; position++) {
+                if (title.equals(titleArray[position])) {
+                    return position;
+                }
+            }
+            return -1;
         }
 
     }
@@ -567,6 +621,10 @@ public class MainFragment extends Fragment implements View.OnClickListener {
     public void onDestroy() {
 //        unregisterReceiver(sdCardReceiver);
         super.onDestroy();
+
+        if (mWorkerThread != null) {
+            mWorkerThread.quit();
+        }
     }
 
     @Override
@@ -594,4 +652,19 @@ public class MainFragment extends Fragment implements View.OnClickListener {
         mArguments = args;
     }
 
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RequestCode.SHOW_ACCESS_CLOUD_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
+                // Move current page to settings page
+                int position = mPagerAdapter.getFragementPosition(getString(R.string.settings));
+                if (position != -1) {
+                    mViewPager.setCurrentItem(position, true);
+                }
+            }
+        }
+    }
 }

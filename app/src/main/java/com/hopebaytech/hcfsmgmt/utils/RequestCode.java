@@ -16,5 +16,6 @@ public class RequestCode {
     public static final int PERMISSIONS_REQUEST_READ_PHONE_STATE = 107;
     public static final int UPDATE_EXTERNAL_APP_DIR = 108;
     public static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 109;
+    public static final int SHOW_ACCESS_CLOUD_SETTINGS = 110;
 
 }

@@ -4,6 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+
 /**
  * @author Aaron
  *         Created by Aaron on 2016/8/16.
@@ -20,6 +24,15 @@ public class TeraAppConfig {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, true);
         editor.apply();
+
+        // Change sync status according to sync_wifi_only option
+        boolean syncWifiOnly = true;
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_SYNC_WIFI_ONLY);
+        if (settingsInfo != null) {
+            syncWifiOnly = Boolean.valueOf(settingsInfo.getValue());
+        }
+        HCFSMgmtUtils.changeCloudSyncStatus(context, syncWifiOnly);
     }
 
     public static void disableApp(Context context) {
