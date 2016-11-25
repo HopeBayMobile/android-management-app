@@ -27,6 +27,12 @@ extern void HCFS_set_swift_token(const char **json_res, const char *url, const c
 extern void HCFS_trigger_restore(const char **json_res);
 extern void HCFS_check_restore_status(const char **json_res);
 extern void HCFS_notify_applist_change(const char **json_res);
+extern void HCFS_check_package_boost_status(const char **json_res, const char *package_name);
+extern void HCFS_enable_booster(const char **json_res, const long booster_size);
+extern void HCFS_disable_booster(const char **json_res);
+extern void HCFS_trigger_boost(const char **json_res);
+extern void HCFS_trigger_unboost(const char **json_res);
+extern void HCFS_clear_booster_package_remaining(const char **json_res, const char *package_name);
 extern void HCFS_mount_smart_cache(const char **json_res);
 extern void HCFS_umount_smart_cache(const char **json_res);
 
