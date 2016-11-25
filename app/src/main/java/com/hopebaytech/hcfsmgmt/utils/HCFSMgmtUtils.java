@@ -65,7 +65,6 @@ public class HCFSMgmtUtils {
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
     public static final String PREF_TERA_APP_LOGIN = "pref_tera_app_login";
-    public static final String PREF_ANDROID_FOLDER_PINNED = "pref_android_folder_pinned";
     public static final String PREF_AUTO_AUTH_FAILED_CAUSE = "pref_auto_auth_failed_cause";
     public static final String PREF_APP_FILE_DISPLAY_LAYOUT = "pref_app_file_display_layout";
     public static final String PREF_RESTORE_STATUS = "pref_restore_status";
