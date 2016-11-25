@@ -22,7 +22,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -501,8 +505,21 @@ public class Booster {
     }
 
     public static boolean isBoosterMounted() {
-        File partition = new File(BOOSTER_PARTITION);
-        return partition.exists();
+        boolean isMounted = false;
+        try {
+            String line;
+            BufferedReader bufferedReader = new BufferedReader(new FileReader("/proc/mounts"));
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.contains(BOOSTER_PARTITION)) {
+                    isMounted = true;
+                    break;
+                }
+            }
+            bufferedReader.close();
+        } catch (Exception e) {
+            Logs.e(CLASSNAME, "isBoosterMounted", Log.getStackTraceString(e));
+        }
+        return isMounted;
     }
 
 }
