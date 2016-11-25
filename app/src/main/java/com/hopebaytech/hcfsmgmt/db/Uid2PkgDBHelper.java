@@ -49,34 +49,41 @@ public class Uid2PkgDBHelper extends SQLiteOpenHelper {
     }
 
     private void addBoostStatusAndBoosterWhiteListTables(SQLiteDatabase db) {
-            String uidTableName = UidDAO.TABLE_NAME;
-            String uidOldTableTempName = "uid_old_table";
+        String uidTableName = UidDAO.TABLE_NAME;
+        String uidOldTableTempName = "uid_old_table";
 
-            String OLD_COLUMNS = UidDAO.KEY_ID + ", " + UidDAO.PIN_STATUS_COLUMN + ", " +
-                                 UidDAO.SYSTEM_APP_COLUMN + ", " + UidDAO.UID_COLUMN + ", " +
-                                 UidDAO.PACKAGE_NAME_COLUMN + ", " + UidDAO.EXTERNAL_DIR_COLUMN;
+        String NEW_COLUMNS = UidDAO.KEY_ID + ", " +
+                UidDAO.PIN_STATUS_COLUMN + ", " +
+                UidDAO.SYSTEM_APP_COLUMN + ", " +
+                UidInfo.BoostStatus.NON_BOOSTABLE + ", " + // set default value
+                UidDAO.UID_COLUMN + ", " +
+                UidDAO.PACKAGE_NAME_COLUMN + ", " +
+                UidDAO.EXTERNAL_DIR_COLUMN;
 
-            String RENAME_OLD_UID_TABLE = "ALTER TABLE " + uidTableName + " RENAME TO " + uidOldTableTempName;
-            String COPY_OLD_UID_DATA_TO_NEW_UID_TABLE = "INSERT INTO " + uidTableName + "(" + OLD_COLUMNS + ") " +
-                        "SELECT " + OLD_COLUMNS + " FROM " + uidOldTableTempName;
-            String DROP_UID_OLD_TEMP_TABLE = "DROP TABLE IF EXISTS "  + uidOldTableTempName;
+        String RENAME_OLD_UID_TABLE = "ALTER TABLE " + uidTableName + " RENAME TO " + uidOldTableTempName;
 
-            String UPDATE_SYSTEM_APP_BOOST_STATUS = "update " + uidTableName + " set " +
-                        UidDAO.BOOST_STATUS_COLUMN + "=" + UidInfo.BoostStatus.NON_BOOSTABLE +
-                        " where " + UidDAO.SYSTEM_APP_COLUMN + "=1";
+        String COPY_OLD_UID_DATA_TO_NEW_UID_TABLE = "INSERT INTO " + uidTableName +
+                " SELECT " + NEW_COLUMNS +
+                " FROM " + uidOldTableTempName;
 
-            String UPDATE_NON_SYSTEM_APP_BOOST_STATUS = "update " + uidTableName + " set " +
-                        UidDAO.BOOST_STATUS_COLUMN + "=" + UidInfo.BoostStatus.UNBOOSTED +
-                        " where " + UidDAO.SYSTEM_APP_COLUMN + "=0";
+        String DROP_UID_OLD_TEMP_TABLE = "DROP TABLE IF EXISTS " + uidOldTableTempName;
 
-            db.execSQL(RENAME_OLD_UID_TABLE);
-            db.execSQL(UidDAO.CREATE_TABLE);
-            db.execSQL(BoosterWhiteListDAO.CREATE_TABLE);
-            db.execSQL(BoosterWhiteListVersionDAO.CREATE_TABLE);
-            db.execSQL(COPY_OLD_UID_DATA_TO_NEW_UID_TABLE);
-            db.execSQL(DROP_UID_OLD_TEMP_TABLE);
-            db.execSQL(UPDATE_SYSTEM_APP_BOOST_STATUS);
-            db.execSQL(UPDATE_NON_SYSTEM_APP_BOOST_STATUS);
+        String UPDATE_SYSTEM_APP_BOOST_STATUS = "update " + uidTableName +
+                " set " + UidDAO.BOOST_STATUS_COLUMN + "=" + UidInfo.BoostStatus.NON_BOOSTABLE +
+                " where " + UidDAO.SYSTEM_APP_COLUMN + "=1";
+
+        String UPDATE_NON_SYSTEM_APP_BOOST_STATUS = "update " + uidTableName +
+                " set " + UidDAO.BOOST_STATUS_COLUMN + "=" + UidInfo.BoostStatus.UNBOOSTED +
+                " where " + UidDAO.SYSTEM_APP_COLUMN + "=0";
+
+        db.execSQL(RENAME_OLD_UID_TABLE);
+        db.execSQL(UidDAO.CREATE_TABLE);
+        db.execSQL(BoosterWhiteListDAO.CREATE_TABLE);
+        db.execSQL(BoosterWhiteListVersionDAO.CREATE_TABLE);
+        db.execSQL(COPY_OLD_UID_DATA_TO_NEW_UID_TABLE);
+        db.execSQL(DROP_UID_OLD_TEMP_TABLE);
+        db.execSQL(UPDATE_SYSTEM_APP_BOOST_STATUS);
+        db.execSQL(UPDATE_NON_SYSTEM_APP_BOOST_STATUS);
     }
 
 }
