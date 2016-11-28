@@ -258,6 +258,9 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 boolean isChecked = ((CheckBox) v).isChecked();
                 if (isChecked) {
+                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
+                    editor.putBoolean(PREF_ENABLE_BOOSTER, true);
+                    editor.apply();
                     showEnableBoosterDialog();
                 } else {
                     mEnableBooster.setChecked(true);
