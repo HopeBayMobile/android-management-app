@@ -147,9 +147,10 @@ public class MainFragment extends Fragment {
         if (mViewPager != null) {
             mViewPager.setOffscreenPageLimit(3);
             mViewPager.setAdapter(new ViewPagerAdapter(getFragmentManager()));
-            boolean isBoosterEnabled = PreferenceManager.getDefaultSharedPreferences(mContext)
-                    .getBoolean(SettingsFragment.PREF_ENABLE_BOOSTER, false);
-            if (isBoosterEnabled) {
+
+            SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+            if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
                 addBoosterPage(getString(R.string.nav_settings), false /* moveToAddedPage */);
             }
         }

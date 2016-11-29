@@ -153,19 +153,24 @@ public class SettingsFragment extends Fragment {
                     isAllowPinUnpinApps = Boolean.valueOf(settingsInfo.getValue());
                 }
 
+                boolean isBoosterEnabled = false;
+                settingsInfo = settingsDAO.get(PREF_ENABLE_BOOSTER);
+                if (settingsInfo != null) {
+                    isBoosterEnabled = Boolean.valueOf(settingsInfo.getValue());
+                }
+
                 final String finalRatio = ratio;
                 final boolean finalIsSyncWifiOnly = isSyncWifiOnly;
                 final boolean finalIsNotifyConnFailedRecovery = isNotifyConnFailedRecovery;
                 final boolean finalIsAllowPinUnpinApps = isAllowPinUnpinApps;
-                final boolean isBoosterEnabled = PreferenceManager.getDefaultSharedPreferences(mContext)
-                        .getBoolean(PREF_ENABLE_BOOSTER, false);
+                final boolean finalIsBoosterEnabled = isBoosterEnabled;
                 UiHandler.getInstance().post(new Runnable() {
                     @Override
                     public void run() {
                         mSyncWifiOnly.setChecked(finalIsSyncWifiOnly);
                         mNotifyConnFailedRecovery.setChecked(finalIsNotifyConnFailedRecovery);
                         mAllowPinUnpinApps.setChecked(finalIsAllowPinUnpinApps);
-                        mEnableBooster.setChecked(isBoosterEnabled);
+                        mEnableBooster.setChecked(finalIsBoosterEnabled);
 
                         if (isAdded()) {
                             String summary = getString(R.string.settings_local_storage_used_ratio, finalRatio);
@@ -258,9 +263,7 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 boolean isChecked = ((CheckBox) v).isChecked();
                 if (isChecked) {
-                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
-                    editor.putBoolean(PREF_ENABLE_BOOSTER, true);
-                    editor.apply();
+
                     showEnableBoosterDialog();
                 } else {
                     mEnableBooster.setChecked(true);
