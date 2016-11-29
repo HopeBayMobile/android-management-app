@@ -18,15 +18,12 @@ import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +52,7 @@ public class Booster {
      *
      * @param packageName The package name needs to be checked
      * @return 0 if boosted, 1 if unboosted, error otherwise.
-     * */
+     */
     public static boolean isPackageBoosted(String packageName) {
         boolean isBoosted = false;
         try {
@@ -200,30 +197,43 @@ public class Booster {
         Logs.i(CLASSNAME, "enableApp", "packageName=" + packageName);
         PackageManager pm = context.getPackageManager();
         pm.setApplicationEnabledSetting(packageName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.ENABLED_COLUMN, 1);
+        UidDAO uidDAO = UidDAO.getInstance(context);
+        uidDAO.update(packageName, cv);
     }
 
+    /**
+     * Disable all non-system apps with disabled status
+     */
     public static void enableApps(Context context) {
         Logs.i(CLASSNAME, "enableApps", null);
 
         ContentValues cv = new ContentValues();
-        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
+        cv.put(UidDAO.SYSTEM_APP_COLUMN, 0);
+        cv.put(UidDAO.ENABLED_COLUMN, 0);
 
         UidDAO uidDAO = UidDAO.getInstance(context);
         List<UidInfo> disabledList = uidDAO.get(cv);
-        for (UidInfo uidInfo: disabledList) {
+        for (UidInfo uidInfo : disabledList) {
             enableApp(context, uidInfo.getPackageName());
         }
     }
 
+    /**
+     * Disable all non-system apps with enabled status
+     */
     public static void disableApps(Context context) {
         Logs.i(CLASSNAME, "disableApps", null);
 
         ContentValues cv = new ContentValues();
-        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
+        cv.put(UidDAO.SYSTEM_APP_COLUMN, 0);
+        cv.put(UidDAO.ENABLED_COLUMN, 1);
 
         UidDAO uidDAO = UidDAO.getInstance(context);
         List<UidInfo> enabledList = uidDAO.get(cv);
-        for (UidInfo uidInfo: enabledList) {
+        for (UidInfo uidInfo : enabledList) {
             disableApp(context, uidInfo.getPackageName());
         }
     }
@@ -232,12 +242,17 @@ public class Booster {
      * disable a single app. The package manager service will kill all
      * processes of the app disabled, and then disables the app.
      *
-     * @param pkgName the app needed to be disabled
+     * @param packageName the app needed to be disabled
      */
-    public static void disableApp(Context context, String pkgName) {
-        Logs.i(CLASSNAME, "disableApp", "pkgName=" + pkgName);
+    public static void disableApp(Context context, String packageName) {
+        Logs.i(CLASSNAME, "disableApp", "pkgName=" + packageName);
         PackageManager pm = context.getPackageManager();
-        pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+        pm.setApplicationEnabledSetting(packageName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
+
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.ENABLED_COLUMN, 0);
+        UidDAO uidDAO = UidDAO.getInstance(context);
+        uidDAO.update(packageName, cv);
     }
 
     /**
@@ -525,7 +540,7 @@ public class Booster {
         List<AppInfo> appInfoList = new ArrayList<>();
         PackageManager pm = context.getPackageManager();
         if (uidInfoList != null) {
-            for (UidInfo uidInfo: uidInfoList) {
+            for (UidInfo uidInfo : uidInfoList) {
                 try {
                     PackageInfo packageInfo = pm.getPackageInfo(uidInfo.getPackageName(), 0);
 

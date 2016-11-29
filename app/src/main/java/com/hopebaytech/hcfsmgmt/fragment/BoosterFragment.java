@@ -514,8 +514,9 @@ public class BoosterFragment extends Fragment {
                             return;
                         }
                     }
-                    Booster.removeBoostStatusInXml(mContext);
 
+                    // Processing failed due to insufficient space
+                    Booster.removeBoostStatusInXml(mContext);
                     UiHandler.getInstance().post(new Runnable() {
                         @Override
                         public void run() {
