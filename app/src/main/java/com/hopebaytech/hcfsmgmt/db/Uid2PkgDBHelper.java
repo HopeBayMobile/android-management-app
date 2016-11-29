@@ -55,7 +55,8 @@ public class Uid2PkgDBHelper extends SQLiteOpenHelper {
         String NEW_COLUMNS = UidDAO.KEY_ID + ", " +
                 UidDAO.PIN_STATUS_COLUMN + ", " +
                 UidDAO.SYSTEM_APP_COLUMN + ", " +
-                UidInfo.BoostStatus.NON_BOOSTABLE + ", " + // set default value
+                UidInfo.EnabledStatus.ENABLED + ", " + // ENABLED_COLUMN, set default value
+                UidInfo.BoostStatus.NON_BOOSTABLE + ", " + // BOOST_STATUS_COLUMN, set default value
                 UidDAO.UID_COLUMN + ", " +
                 UidDAO.PACKAGE_NAME_COLUMN + ", " +
                 UidDAO.EXTERNAL_DIR_COLUMN;

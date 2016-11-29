@@ -16,9 +16,15 @@ public class UidInfo {
         public static final int BOOST_FAILED = 8;
     }
 
+    public static class EnabledStatus {
+        public static final int DISABLED = 0;
+        public static final int ENABLED = 1;
+    }
+
     private int id;
     private boolean isPinned;
     private boolean isSystemApp;
+    private boolean isEnabled;
     private int uid;
     private String packageName;
     private List<String> externalDir;
@@ -78,6 +84,14 @@ public class UidInfo {
 
     public void setSystemApp(boolean isSystemApp) {
         this.isSystemApp = isSystemApp;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
     }
 
     public boolean isPinned() {
