@@ -50,6 +50,10 @@ public class Booster {
     }
 
     /**
+     * This method is used for checking the status whether
+     * an installed package is boosted or unboosted.
+     *
+     * @param packageName The package name needs to be checked
      * @return 0 if boosted, 1 if unboosted, error otherwise.
      * */
     public static boolean isPackageBoosted(String packageName) {
@@ -75,6 +79,13 @@ public class Booster {
         return isPackageBoosted(packageName) ? UidInfo.BoostStatus.BOOSTED : UidInfo.BoostStatus.UNBOOSTED;
     }
 
+    /**
+     * This method will create the environment of booster. The booster
+     * will be created with boosterSize and be mounted to /data/mnt/hcfsblock/ .
+     *
+     * @param boosterSize The initial size of booster.
+     * @return true if success, false otherwise.
+     */
     public static boolean enableBooster(long boosterSize) {
         Logs.i(CLASSNAME, "enableBooster", "boosterSize=" + boosterSize);
         boolean isSuccess = false;
@@ -93,6 +104,12 @@ public class Booster {
         return isSuccess;
     }
 
+    /**
+     * This method will destroy the environment of booster. The booster
+     * will be unmounted and the existed booster image file will be deleted.
+     *
+     * @return true if success, false otherwise.
+     */
     public static boolean disableBooster() {
         Logs.i(CLASSNAME, "disableBooster", null);
         boolean isSuccess = false;
@@ -111,6 +128,16 @@ public class Booster {
         return isSuccess;
     }
 
+    /**
+     * This method tirgger the hcfsapid to start to move all packages selected
+     * from /data/data/ to booster. The list of packages will stored in
+     * database, uid.db table uid, maintained by Tera Mgmt APP.
+     * <strong>Note:</strong> This API will return immediately when called.
+     * hcfsapid will send an event to notify the result after "boost"
+     * finished/failed.
+     *
+     * @return true if success, false otherwise.
+     */
     public static boolean triggerBoost() {
         Logs.i(CLASSNAME, "triggerBoost", null);
         boolean isTriggered = false;
@@ -132,6 +159,16 @@ public class Booster {
         return isTriggered;
     }
 
+    /**
+     * This method tirgger the hcfsapid to start to move all packages selected
+     * from booster to /data/data/. The list of packages will stored in
+     * database, uid.db table uid, maintained by Tera Mgmt APP.
+     * <strong>Note:</strong> This API will return immediately when called.
+     * hcfsapid will send an event to notify the result after "unboost"
+     * finished/failed.
+     *
+     * @return true if success, false otherwise.
+     */
     public static boolean triggerUnboost() {
         Logs.i(CLASSNAME, "triggerUnboost", null);
         boolean isTriggered = false;
@@ -153,6 +190,12 @@ public class Booster {
         return isTriggered;
     }
 
+    /**
+     * enable a single app. The package manager service will enable
+     * the app.
+     *
+     * @param packageName the app needed to be enaabled
+     */
     public static void enableApp(Context context, String packageName) {
         Logs.i(CLASSNAME, "enableApp", "packageName=" + packageName);
         PackageManager pm = context.getPackageManager();
@@ -185,12 +228,23 @@ public class Booster {
         }
     }
 
+    /**
+     * disable a single app. The package manager service will kill all
+     * processes of the app disabled, and then disables the app.
+     *
+     * @param pkgName the app needed to be disabled
+     */
     public static void disableApp(Context context, String pkgName) {
         Logs.i(CLASSNAME, "disableApp", "pkgName=" + pkgName);
         PackageManager pm = context.getPackageManager();
         pm.setApplicationEnabledSetting(pkgName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER, 0);
     }
 
+    /**
+     * Get the minimum available booster space.
+     *
+     * @return the available minimum space of the booster
+     */
     public static long getMinimumAvailableBoosterSpace() {
         return 100 * 1024 * 1024; // 100 MB
     }
@@ -280,16 +334,31 @@ public class Booster {
         return appDataSize < freeSpace;
     }
 
+    /**
+     * Get the free space of the booster.
+     *
+     * @return the free space in bytes
+     */
     public static long getBoosterFreeSpace() {
         File partition = new File(BOOSTER_PARTITION);
         return partition.getFreeSpace();
     }
 
+    /**
+     * Get the used space of the booster.
+     *
+     * @return the used space in bytes
+     */
     public static long getBoosterUsedSpace() {
         File partition = new File(BOOSTER_PARTITION);
         return partition.getTotalSpace() - partition.getFreeSpace();
     }
 
+    /**
+     * Get the total space of the booster.
+     *
+     * @return the total space in bytes
+     */
     public static long getBoosterTotalSpace() {
         File partition = new File(BOOSTER_PARTITION);
         return partition.getTotalSpace();
@@ -349,6 +418,18 @@ public class Booster {
     }
     */
 
+    /**
+     * This method will clear up the remaining symbolic link and empty folder of
+     * the booster. This method is called when the Tera App receive
+     * Intent.ACTION_PACKAGE_REMOVED from PackageMangerService. This
+     * method is used to clear the remaining symlink, /data/data/<pkgName>, and
+     * the empty folder, /data/mnt/hcfsblock/<pkgName>/, after the APP is
+     * uninstalled.
+     *
+     * @param packageName The package name of the uninstalled app
+     * @return true if the remaining symbolic link and the empty folder is
+     *         removed successfully, false otherwise.
+     */
     public static boolean clearBoosterPackageRemaining(String packageName) {
         boolean isSuccess = false;
         try {
@@ -468,6 +549,13 @@ public class Booster {
         return appInfoList;
     }
 
+    /**
+     * This method will unmount the booster.
+     * <strong>Note:</strong> Before calling this method, ALL APPS NEEDED
+     * TO BE BOOSTED SHOULD BE DIABLED.
+     *
+     * @return true if the booster is successfully unmounted, false otherwise.
+     */
     public static boolean umountBooster() {
         Logs.i(CLASSNAME, "umountBooster", null);
         boolean isSuccess = false;
@@ -486,6 +574,11 @@ public class Booster {
         return isSuccess;
     }
 
+    /**
+     * This method will mount the booster.
+     *
+     * @return true if the booster is successfully mounted, false otherwise.
+     */
     public static boolean mountBooster() {
         Logs.i(CLASSNAME, "mountBooster", null);
         boolean isSuccess = false;
@@ -504,6 +597,11 @@ public class Booster {
         return isSuccess;
     }
 
+    /**
+     * This method will check whether the booster is mouted or not.
+     *
+     * @return true if the booster is mounted, false f the booster is not mounted.
+     */
     public static boolean isBoosterMounted() {
         boolean isMounted = false;
         try {
