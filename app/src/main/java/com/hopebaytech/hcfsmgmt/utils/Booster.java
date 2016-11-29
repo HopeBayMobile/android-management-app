@@ -196,7 +196,7 @@ public class Booster {
     public static void enableApp(Context context, String packageName) {
         Logs.i(CLASSNAME, "enableApp", "packageName=" + packageName);
         PackageManager pm = context.getPackageManager();
-        pm.setApplicationEnabledSetting(packageName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, 0);
+        pm.setApplicationEnabledSetting(packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
 
         ContentValues cv = new ContentValues();
         cv.put(UidDAO.ENABLED_COLUMN, 1);
