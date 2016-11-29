@@ -53,6 +53,8 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
+import java.util.Locale;
+
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -102,6 +104,7 @@ public class ActivateWoCodeFragment extends Fragment {
     private ProgressDialogUtils mProgressDialogUtils;
     private LinearLayout mGoogleActivate;
     private TextView mErrorMessage;
+    private TextView mTeraVersion;
 
     public static ActivateWoCodeFragment newInstance() {
         return new ActivateWoCodeFragment();
@@ -138,11 +141,20 @@ public class ActivateWoCodeFragment extends Fragment {
 
         mGoogleActivate = (LinearLayout) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
+        mTeraVersion = (TextView) view.findViewById(R.id.version);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        mTeraVersion.setText(
+                String.format(
+                        Locale.getDefault(),
+                        getString(R.string.tera_version_info),
+                        getString(R.string.tera_version)
+                )
+        );
 
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override

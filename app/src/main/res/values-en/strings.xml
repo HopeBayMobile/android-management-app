@@ -1,6 +1,7 @@
 <resources>
 
     <string name="app_name">Tera</string>
+    <string name="tera_version_info">Version: %s</string>
 
     <string name="require_read_external_storage_permission">Reading file list must enable the "Storage" permission.</string>
     <string name="require_write_external_storage_permission">Collecting log must enable the "Storage" permission.</string>

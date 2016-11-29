@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Tera</string>
+    <string name="tera_version_info">版本: %s</string>
+
     <string name="require_read_external_storage_permission">讀取檔案清單需啟用 "儲存" 權限。</string>
     <string name="require_write_external_storage_permission">產生日誌需啟用 "儲存" 權限。</string>
     <string name="require_read_phone_state_permission">讀取 IMEI 值需啟用 "電話" 權限。</string>
