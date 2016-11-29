@@ -35,7 +35,9 @@ public class TeraIntent {
     public static final String ACTION_CHECK_RESTORE_STATUS = "hbt.intent.action.CHECK_RESTORE_STATUS";
     public static final String ACTION_FACTORY_RESET = "hbt.intent.action.FACTORY_RESET";
     public static final String ACTION_RETRY_RESTORE_WHEN_CONN_FAILED = "hbt.intent.action.RETRY_RESTORE_WHEN_CONN_FAILED";
-    public static final String ACTION_ALLOW_PIN_UNPIN = "hbt.intent.action.allowpinunpin";
+    public static final String ACTION_ALLOW_PIN_UNPIN = "hbt.intent.action.ALLOW_PIN_UNPIN";
+    public static final String ACTION_BOOSTER_PROCESS_COMPLETED = "hbt.intent.action.BOOSTER_PROCESS_COMPLETED";
+    public static final String ACTION_BOOSTER_PROCESS_FAILED = "hbt.intent.action.BOOSTER_PROCESS_FAILED";
 
     // Intent key
     public static final String KEY_UID = "intent_key_uid";
@@ -45,5 +47,5 @@ public class TeraIntent {
     public static final String KEY_GOOGLE_SIGN_IN_EMAIL = "intent_key_google_sign_in_email";
     public static final String KEY_GOOGLE_SIGN_IN_PHOTO_URI = "intent_key_google_sign_in_photo_uri";
     public static final String KEY_RESTORE_ERROR_CODE = "intent_key_restore_error_code";
-    public static final String KEY_ALLOW_PIN_UNPIN = "pin_unpin_enalbed";
+    public static final String KEY_ALLOW_PIN_UNPIN = "pin_unpin_enabled";
 }

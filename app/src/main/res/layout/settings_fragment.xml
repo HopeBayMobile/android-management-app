@@ -64,7 +64,7 @@
 
         </RelativeLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -99,7 +99,7 @@
 
         </RelativeLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/notify_local_storage_used_ratio"
@@ -124,7 +124,7 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/transfer_content"
@@ -140,7 +140,7 @@
                 android:text="@string/settings_transfer_content" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/about"
@@ -156,7 +156,7 @@
                 android:text="@string/settings_about" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/extra_log_for_ba_layout"
@@ -193,32 +193,35 @@
                     android:button="@drawable/toggle_btn_background" />
             </RelativeLayout>
 
-            <View style="@style/Divider" />
+            <View style="@style/HorizontalDivider" />
         </LinearLayout>
 
         <RelativeLayout
+            android:id="@+id/advanced_settings"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="?android:attr/selectableItemBackground">
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/advanced_settings_title"
                 style="@style/F4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
+                android:text="@string/settings_advanced_settings"
                 android:layout_centerVertical="true"
-                android:text="@string/settings_advanced_settings" />
+                android:layout_alignParentStart="true" />
 
-            <CheckBox
-                android:id="@+id/advanced_settings"
+            <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
-                android:button="@drawable/toggle_btn_background" />
+                android:tint="@color/colorF4"
+                android:layout_toEndOf="@+id/advanced_settings_title"
+                android:src="@drawable/ic_arrow_drop_down_white_24dp" />
+
         </RelativeLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/advanced_settings_layout"
@@ -226,6 +229,42 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="56dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                        style="@style/F6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_booster_title" />
+
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/settings_booster_subtitle"
+                        android:textColor="@color/C5"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <CheckBox
+                    android:id="@+id/enable_booster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:button="@drawable/toggle_btn_background" />
+
+            </RelativeLayout>
+
+            <View style="@style/HorizontalDivider" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -249,7 +288,7 @@
                     android:button="@drawable/toggle_btn_background" />
             </RelativeLayout>
 
-            <View style="@style/Divider" />
+            <View style="@style/HorizontalDivider" />
         </LinearLayout>
 
     </LinearLayout>

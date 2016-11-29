@@ -19,6 +19,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.content.pm.IPackageStatsObserver;
+import android.content.pm.PackageStats;
+import android.os.RemoteException;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
@@ -43,6 +46,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import java.lang.reflect.Method;
 
 public class HCFSMgmtUtils {
 
@@ -77,7 +82,6 @@ public class HCFSMgmtUtils {
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
-        Logs.d(CLASSNAME, "isAppPinned", appInfo.getName());
         UidDAO uidDAO = UidDAO.getInstance(context);
         UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
         return uidInfo != null && uidInfo.isPinned();
@@ -940,5 +944,6 @@ public class HCFSMgmtUtils {
         }
         return isSuccess;
     }
+
 
 }

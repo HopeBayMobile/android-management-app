@@ -12,7 +12,13 @@ public class ExecutorFactory {
 
     public static ThreadPoolExecutor createThreadPoolExecutor() {
         int N = Runtime.getRuntime().availableProcessors();
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(N, N * 2, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                N,
+                N * 2,
+                60,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>()
+        );
         executor.allowCoreThreadTimeOut(true);
         executor.prestartCoreThread();
         return executor;

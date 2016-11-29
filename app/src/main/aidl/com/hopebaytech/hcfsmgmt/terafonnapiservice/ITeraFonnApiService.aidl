@@ -85,4 +85,6 @@ interface ITeraFonnApiService {
     /** Check the allow pin/unpin apps flag in advanced settings **/
     boolean isAllowPinUnpinApps();
 
+    /** Get app boost status **/
+    int getAppBoostStatus(String packageName);
 }

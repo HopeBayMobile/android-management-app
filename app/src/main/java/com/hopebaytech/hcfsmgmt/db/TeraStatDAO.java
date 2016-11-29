@@ -29,19 +29,22 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
                     KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     ENABLED_COLUMN + " INTEGER NOT NULL)";
 
-    private static TeraStatDAO mTeraStatDAO;
-    private static SQLiteDatabase mDataBase;
+    private static TeraStatDAO sTeraStatDAO;
+    private static SQLiteDatabase sSqLiteDatabase;
+
+    private TeraStatDAO() {
+    }
 
     public static TeraStatDAO getInstance(Context context) {
-        if (mTeraStatDAO == null) {
+        if (sTeraStatDAO == null) {
             synchronized (TeraStatDAO.class) {
-                if (mTeraStatDAO == null) {
-                    mTeraStatDAO = new TeraStatDAO();
+                if (sTeraStatDAO == null) {
+                    sTeraStatDAO = new TeraStatDAO();
                 }
             }
         }
-        mDataBase = TeraDBHelper.getDataBase(context);
-        return mTeraStatDAO;
+        sSqLiteDatabase = TeraDBHelper.getDataBase(context);
+        return sTeraStatDAO;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
 
     @Override
     public int getCount() {
-        Cursor cursor = mDataBase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+        Cursor cursor = sSqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
         int count = cursor.getCount();
         cursor.close();
         return count;
@@ -63,7 +66,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
     @Override
     public List<TeraStatInfo> getAll() {
         List<TeraStatInfo> teraStatInfoList = new ArrayList<>();
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         while (cursor.moveToNext()) {
             teraStatInfoList.add(getRecord(cursor));
         }
@@ -74,7 +77,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
     @Nullable
     public TeraStatInfo getFirst() {
         TeraStatInfo teraStatInfo = null;
-        Cursor cursor = mDataBase.query(TABLE_NAME, null, null, null, null, null, null, null);
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             teraStatInfo = getRecord(cursor);
         }
@@ -88,7 +91,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
         ContentValues cv = new ContentValues();
         cv.put(ENABLED_COLUMN, isEnabled);
 
-        boolean isSuccess = mDataBase.insert(TABLE_NAME, null, cv) != -1;
+        boolean isSuccess = sSqLiteDatabase.insert(TABLE_NAME, null, cv) != -1;
         if (isSuccess) {
             Logs.d(CLASSNAME, "insert", "isEnabled=" + isEnabled);
         } else {
@@ -104,7 +107,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
 
     @Override
     public void clear() {
-        mDataBase.delete(TABLE_NAME, null, null);
+        sSqLiteDatabase.delete(TABLE_NAME, null, null);
     }
 
     @Override
@@ -118,7 +121,7 @@ public class TeraStatDAO implements IGenericDAO<TeraStatInfo> {
         cv.put(ENABLED_COLUMN, info.isEnabled());
 
         String where = KEY_ID + "=" + info.getId();
-        boolean isSuccess = mDataBase.update(TABLE_NAME, cv, where, null) > 0;
+        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
         Logs.d(CLASSNAME, "update", "id=" + info.getId() +
                 ", isEnabled=" + info.isEnabled() +
                 ", isSuccess=" + isSuccess);

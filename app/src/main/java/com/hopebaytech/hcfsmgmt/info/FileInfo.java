@@ -145,6 +145,80 @@ public class FileInfo extends ItemInfo implements Cloneable {
     }
 
     @Nullable
+    @Override
+    public Drawable getIconDrawable() {
+        Drawable iconDrawable = null;
+        if (mIsDirectory) {
+            iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_folder_default);
+        } else {
+            String filePath = mFilePath;
+            String mimeType = getMimeType();
+            Logs.d(CLASSNAME, "getIconImage", "filePath=" + filePath + ", mimeType=" + mimeType);
+            if (mimeType != null) {
+                int width, height;
+                width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
+                try {
+                    if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
+                        if (mimeType.contains(MIME_SUBTYPE_PNG)) {
+                            // Show PNG file with alpha supported
+                            Bitmap image = BitmapFactory.decodeFile(filePath);
+                            Bitmap thumbnail = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                            iconDrawable = new BitmapDrawable(mContext.getResources(), thumbnail);
+                        } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
+                            // TODO show svg file
+                        } else {
+                            Bitmap thumbnail = getImageThumbnail(filePath);
+                            if (thumbnail == null) {
+                                Bitmap image = BitmapFactory.decodeFile(filePath);
+                                thumbnail = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                            }
+                            iconDrawable = new BitmapDrawable(mContext.getResources(), thumbnail);
+                        }
+                    } else if (mimeType.startsWith(MIME_TYPE_VIDEO)) {
+                        Bitmap thumbnail = getVideoThumbnail(filePath);
+                        if (thumbnail == null) {
+                            Bitmap image = ThumbnailUtils.createVideoThumbnail(filePath, MediaStore.Video.Thumbnails.MICRO_KIND);
+                            thumbnail = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+                        }
+                        iconDrawable = new BitmapDrawable(mContext.getResources(), thumbnail);
+                    } else if (mimeType.startsWith(MIME_TYPE_APPLICATION)) {
+                        if (mimeType.contains(MIME_SUBTYPE_APK)) {
+                            String archiveFilePath = filePath;
+                            PackageManager pm = mContext.getPackageManager();
+                            PackageInfo packageInfo = pm.getPackageArchiveInfo(archiveFilePath, PackageManager.GET_ACTIVITIES);
+                            ApplicationInfo appInfo = packageInfo.applicationInfo;
+                            appInfo.sourceDir = archiveFilePath;
+                            appInfo.publicSourceDir = archiveFilePath;
+                            iconDrawable = appInfo.loadIcon(pm);
+                        }
+//						else if (mimeType.contains(MIME_SUBTYPE_OGG)) {
+//							Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_audio_white);
+//							return ((BitmapDrawable) drawable).getBitmap();
+//							// return ContextCompat.getDrawable(mContext, R.drawable.ic_audio_white);
+//						}
+                    }
+//					else if (mimeType.contains(MIME_TYPE_AUDIO)) {
+//						Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.ic_audio_white);
+//						return ((BitmapDrawable) drawable).getBitmap();
+//						// return ContextCompat.getDrawable(mContext, R.drawable.ic_audio_white);
+//					}
+//					Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+//                    iconImage = ((BitmapDrawable) drawable).getBitmap();
+                    // return ContextCompat.getDrawable(mContext, R.drawable.ic_file_black);
+                } catch (Exception e) {
+                    Logs.e(CLASSNAME, "getIconImage", Log.getStackTraceString(e));
+                }
+            }
+        }
+
+        // Unknown file type
+        if (iconDrawable == null) {
+            iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+        }
+        return iconDrawable;
+    }
+
+    @Nullable
     private Bitmap getImageThumbnail(String path) {
         Bitmap thumbnail = null;
         ContentResolver cr = mContext.getContentResolver();

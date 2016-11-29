@@ -16,14 +16,19 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
 import com.hopebaytech.hcfsmgmt.service.TransferDataPollingService;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 /**
  * @author Aaron
@@ -36,8 +41,8 @@ public class TransferContentWaitingFragment extends Fragment {
 
     private TransferCompletedReceiver mTransferCompletedReceiver;
 
-    private ProgressDialog mProgressDialog;
     private Context mContext;
+    private ProgressDialog mProgressDialog;
 
     public static TransferContentWaitingFragment newInstance() {
         return new TransferContentWaitingFragment();
@@ -88,8 +93,30 @@ public class TransferContentWaitingFragment extends Fragment {
                             @Override
                             public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
                                 Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
-                                dismissProgressDialog();
-                                ((Activity) mContext).finish();
+                                ThreadPool.getInstance().execute(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+                                        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+                                        if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
+                                            if (!Booster.isBoosterMounted()) {
+                                                Booster.mountBooster();
+                                                Booster.enableApps(mContext);
+                                            }
+                                            settingsInfo = new SettingsInfo();
+                                            settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                                            settingsInfo.setValue(String.valueOf(true));
+                                            settingsDAO.update(settingsInfo);
+                                        }
+                                        UiHandler.getInstance().post(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                dismissProgressDialog();
+                                                ((Activity) mContext).finish();
+                                            }
+                                        });
+                                    }
+                                });
                             }
 
                             @Override

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fragment_title_bar_height"
+        android:background="@drawable/img_subtitle_bkg"
+        android:paddingBottom="@dimen/fragment_title_bar_padding_bottom"
+        android:paddingEnd="@dimen/fragment_title_bar_padding_right"
+        android:paddingStart="@dimen/fragment_title_bar_padding_left"
+        android:paddingTop="@dimen/fragment_title_bar_padding_top">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:text="@string/booster_title_bar"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/colorWhite" />
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F6"
+            android:id="@+id/used_space_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@+id/refresh"
+            android:padding="@dimen/M6"
+            tools:text="@string/booster_used_space_info" />
+
+        <ImageView
+            android:id="@+id/refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="@dimen/M6"
+            android:src="@drawable/icon_btn_tab_refresh_light" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/boost_unboost_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="30dp">
+
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:background="@color/C1">
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    android:id="@+id/unboost_tab"
+                    style="@style/F5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="@string/booster_tab_unboost" />
+            </LinearLayout>
+
+            <View
+                style="@style/VerticalDivider"
+                android:background="@android:color/white" />
+
+            <LinearLayout
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:background="@color/C5">
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    android:id="@+id/boost_tab"
+                    style="@style/F5"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="@string/booster_tab_boost" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            style="@style/HorizontalDivider"
+            android:layout_above="@+id/recycler_view" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/action_layout"
+            android:layout_below="@+id/boost_unboost_layout"
+            android:background="@android:color/transparent"
+            android:overScrollMode="never"
+            android:scrollbars="vertical" />
+
+        <View
+            style="@style/HorizontalDivider"
+            android:layout_below="@+id/recycler_view" />
+
+        <RelativeLayout
+            android:id="@+id/action_layout"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_alignParentBottom="true">
+
+            <LinearLayout
+                android:id="@+id/action_button_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="20dp"
+                    android:background="@color/C5">
+
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                        android:id="@+id/cancel"
+                        style="@style/F1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="Cancel" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:background="@color/C1">
+
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                        android:id="@+id/action"
+                        style="@style/F1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="@string/booster_action_boost" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/hint_message"
+                style="@style/F3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/booster_boost_hint_tap_app_to_boost"
+                android:visibility="visible" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>
+

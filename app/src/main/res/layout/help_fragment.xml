@@ -47,7 +47,7 @@
                 android:text="@string/help_user_manual_title" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/faq"
@@ -63,7 +63,7 @@
                 android:text="@string/help_faq_title" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/quick_tour"
@@ -79,7 +79,7 @@
                 android:text="@string/quick_tour_title" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/customer_center"
@@ -95,7 +95,7 @@
                 android:text="@string/help_customer_center_title" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
         <LinearLayout
             android:id="@+id/email_feedback"
@@ -111,7 +111,7 @@
                 android:text="@string/help_email_feedback_title" />
         </LinearLayout>
 
-        <View style="@style/Divider" />
+        <View style="@style/HorizontalDivider" />
 
     </LinearLayout>
 </LinearLayout>

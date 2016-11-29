@@ -13,7 +13,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
-        android:id="@+id/message"
+        android:id="@+id/hint_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/M3"

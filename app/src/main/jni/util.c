@@ -1,4 +1,6 @@
 #include "util.h"
+#include "stdio.h"
+#include "string.h"
 
 int hex_print(char* title, unsigned char* input, int size)
 {

@@ -22,10 +22,8 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.main.ChangeAccountActivity;
 import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 
 /**
  * @author Aaron
@@ -59,7 +57,7 @@ public class TransContentNetworkDialogFragment extends DialogFragment {
         LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
         View view = inflater.inflate(R.layout.transfer_content_network_dialog, null);
         TextView title = (TextView) view.findViewById(R.id.title);
-        TextView message = (TextView) view.findViewById(R.id.message);
+        TextView message = (TextView) view.findViewById(R.id.hint_message);
         CheckBox askCheckbox = (CheckBox) view.findViewById(R.id.ask_checkbox);
 
         askCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {

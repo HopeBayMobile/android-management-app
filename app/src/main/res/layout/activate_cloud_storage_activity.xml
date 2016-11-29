@@ -41,7 +41,7 @@
                 android:singleLine="true" />
 
             <View
-                style="@style/Divider"
+                style="@style/HorizontalDivider"
                 android:layout_width="match_parent" />
 
             <com.hopebaytech.hcfsmgmt.customview.FontEditText
@@ -88,7 +88,7 @@
             android:layout_height="wrap_content">
 
             <View
-                style="@style/Divider"
+                style="@style/HorizontalDivider"
                 android:layout_centerVertical="true"
                 android:layout_toStartOf="@+id/or" />
 
@@ -105,7 +105,7 @@
                 android:text="@string/activate_or" />
 
             <View
-                style="@style/Divider"
+                style="@style/HorizontalDivider"
                 android:layout_width="match_parent"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/or" />

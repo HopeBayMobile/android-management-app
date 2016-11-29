@@ -19,6 +19,7 @@ import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreMajorInstallFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestorePreparingFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;

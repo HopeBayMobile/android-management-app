@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
+import android.media.ThumbnailUtils;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
@@ -14,6 +15,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.List;
 
@@ -30,6 +32,8 @@ public class AppInfo extends ItemInfo implements Cloneable {
     private String[] sharedLibraryFiles;
     private int appSize;
     private boolean isSystemApp;
+    private boolean isEnabled;
+    private int boostStatus;
     private Context context;
 
     /**
@@ -49,6 +53,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     @Nullable
     public Bitmap getIconImage() {
         Bitmap iconImage = null;
+
         Drawable drawable = context.getPackageManager().getApplicationIcon(applicationInfo);
         if (!(drawable instanceof VectorDrawable)) {
             iconImage = ((BitmapDrawable) drawable).getBitmap();
@@ -57,8 +62,29 @@ public class AppInfo extends ItemInfo implements Cloneable {
         if (iconImage == null) {
             drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
             iconImage = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            int width;
+            int height;
+            width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
+            if (!iconImage.isRecycled()) {
+                iconImage = ThumbnailUtils.extractThumbnail(iconImage, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            }
         }
+
         return iconImage;
+    }
+
+    public Drawable getIconDrawable() {
+        Drawable iconDrawable = context.getPackageManager().getApplicationIcon(applicationInfo);
+        if (iconDrawable == null) {
+            iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+        }
+
+        int width = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
+        int height = (int) mContext.getResources().getDimension(R.dimen.icon_image_height);
+        Bitmap bitmap = ((BitmapDrawable) iconDrawable).getBitmap();
+        Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, width, height, false);
+        return new BitmapDrawable(mContext.getResources(), bitmapResized);
     }
 
     public PackageInfo getPackageInfo() {
@@ -196,6 +222,22 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
     public void setSystemApp(boolean systemApp) {
         isSystemApp = systemApp;
+    }
+
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        isEnabled = enabled;
+    }
+
+    public int getBoostStatus() {
+        return boostStatus;
+    }
+
+    public void setBoostStatus(int boostStatus) {
+        boostStatus = boostStatus;
     }
 
     @Override

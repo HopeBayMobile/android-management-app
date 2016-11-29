@@ -18,6 +18,7 @@ import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterDeviceInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +28,8 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -41,6 +44,7 @@ public class MgmtCluster {
     public static final String SOCIAL_AUTH_API = "https://" + DOMAIN_NAME + "/api/social-auth/";
     public static final String USER_AUTH_API = "https://" + DOMAIN_NAME + "/api/auth/";
     public static final String DEVICE_API = "https://" + DOMAIN_NAME + "/api/user/v1/devices/";
+    public static final String BOOSTER_WHITE_LIST_API = "https://" + DOMAIN_NAME + "/api/user/v1/devices/";
 
     public static final String KEY_AUTH_CODE = "code";
     public static final String KEY_ERROR_CODE = "error_code";
@@ -857,6 +861,8 @@ public class MgmtCluster {
             deviceServiceInfo.setBackend(_backend);
         }
 
+        int white_list_latest_version = result.getInt("white_list_latest_version");
+        deviceServiceInfo.setWhiteListLatestVersion(white_list_latest_version);
     }
 
     /**
@@ -1217,6 +1223,108 @@ public class MgmtCluster {
             return deviceListInfo;
         }
 
+    }
+
+    public static class GetBoosterWhiteListInfoProxy {
+
+        private String jwtToken;
+        private String imei;
+
+        private OnGetBoosterWhiteListInfoListener listener;
+
+        public GetBoosterWhiteListInfoProxy(String jwtToken, String imei) {
+            this.jwtToken = jwtToken;
+            this.imei = imei;
+        }
+
+        public void get() {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Handler uiHandler = new Handler(Looper.getMainLooper());
+                    final BoosterDeviceInfo boosterDeviceInfo = getBoosterWhiteListInfo(jwtToken, imei);
+                    if (boosterDeviceInfo.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetBoosterWhiteListInfoSuccessful(boosterDeviceInfo);
+                            }
+                        });
+                    } else {
+                        uiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onGetBoosterWhiteListInfoFailed(boosterDeviceInfo);
+                            }
+                        });
+                    }
+                }
+            }).start();
+        }
+
+        public void setOnGetBoosterWhiteListInfoListener(OnGetBoosterWhiteListInfoListener listener) {
+            this.listener = listener;
+        }
+
+        public interface OnGetBoosterWhiteListInfoListener {
+
+            void onGetBoosterWhiteListInfoSuccessful(BoosterDeviceInfo boosterDeviceInfo);
+
+            void onGetBoosterWhiteListInfoFailed(BoosterDeviceInfo boosterDeviceInfo);
+
+        }
+
+        private BoosterDeviceInfo getBoosterWhiteListInfo(String jwtToken, String imei) {
+            IHttpProxy httpProxyImpl = null;
+            BoosterDeviceInfo boosterDeviceInfo = new BoosterDeviceInfo();
+            try {
+                String url = BOOSTER_WHITE_LIST_API + imei + "/white_list/";
+
+                httpProxyImpl = HttpProxy.newInstance();
+                httpProxyImpl.setUrl(url);
+
+                ContentValues header = new ContentValues();
+                header.put(KEY_AUTHORIZATION, "JWT " + jwtToken);
+                httpProxyImpl.setHeaders(header);
+                httpProxyImpl.connect();
+
+                int responseCode = httpProxyImpl.get();
+                boosterDeviceInfo.setResponseCode(responseCode);
+                String responseContent = httpProxyImpl.getResponseContent();
+                if (responseCode == HttpsURLConnection.HTTP_OK) {
+                    parseWhiteListInfo(boosterDeviceInfo, responseContent);
+                }
+                boosterDeviceInfo.setResponseContent(responseContent);
+                Logs.d(CLASSNAME, "getBoosterWhiteListInfo", "responseCode=" + responseCode + ", responseContent=" + responseContent);
+            } catch (Exception e) {
+                Logs.e(CLASSNAME, "getBoosterWhiteListInfo", Log.getStackTraceString(e));
+            } finally {
+                if (httpProxyImpl != null) {
+                    httpProxyImpl.disconnect();
+                }
+            }
+            return boosterDeviceInfo;
+        }
+
+    }
+
+    private static void parseWhiteListInfo(BoosterDeviceInfo boosterDeviceInfo,
+                                               String responseContent) throws JSONException {
+
+        JSONObject result = new JSONObject(responseContent);
+        int whiteListVersion = result.getInt("version");
+        boosterDeviceInfo.setWhiteListVersion(whiteListVersion);
+
+        List<String> whiteList = new ArrayList<>();
+        //if "data":[], arrayLength = 0(empty array)
+        JSONArray whiteListDataArray = result.getJSONArray("data");
+        int arrayLength = whiteListDataArray.length();
+
+        for (int i = 0; i < arrayLength; i++) {
+            if (whiteListDataArray.isNull(i)) { continue; }
+            whiteList.add(whiteListDataArray.getString(i));
+        }
+        boosterDeviceInfo.setWhiteList(whiteList);
     }
 
     public static boolean verifyActivationCode(String activationCode) {

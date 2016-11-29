@@ -140,13 +140,8 @@ public class HCFSStatInfo {
         this.teraUsed = teraUsed;
     }
 
-
     public String getFormatCacheTotal() {
         return UnitConverter.convertByteToProperUnit(cacheTotal);
-    }
-
-    public long getRawCacheTotal() {
-        return cacheTotal;
     }
 
     public void setCacheTotal(long cacheTotal) {

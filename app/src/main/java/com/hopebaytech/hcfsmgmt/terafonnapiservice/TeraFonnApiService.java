@@ -16,11 +16,11 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
@@ -35,15 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.RunnableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class TeraFonnApiService extends Service {
 
@@ -279,12 +272,35 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int startUploadTeraData() throws RemoteException {
+            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
+            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+            if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
+                if (Booster.isBoosterMounted()) {
+                    Booster.disableApps(TeraFonnApiService.this);
+                    Booster.umountBooster();
+                }
+                settingsInfo.setValue(String.valueOf(false));
+                settingsDAO.update(settingsInfo);
+            }
             return HCFSMgmtUtils.startUploadTeraData();
         }
 
         @Override
         public int stopUploadTeraData() throws RemoteException {
-            return HCFSMgmtUtils.stopUploadTeraData();
+            int code = HCFSMgmtUtils.stopUploadTeraData();
+            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
+            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+            if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
+                if (!Booster.isBoosterMounted()) {
+                    Booster.mountBooster();
+                    Booster.enableApps(TeraFonnApiService.this);
+                }
+                settingsInfo = new SettingsInfo();
+                settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                settingsInfo.setValue(String.valueOf(true));
+                settingsDAO.update(settingsInfo);
+            }
+            return code;
         }
 
         @Override
@@ -330,6 +346,16 @@ public class TeraFonnApiService extends Service {
                 isAllowPinUnpinApps = Boolean.valueOf(settingsInfo.getValue());
             }
             return isAllowPinUnpinApps;
+        }
+
+        @Override
+        public int getAppBoostStatus(String packageName) throws RemoteException {
+            int status = UidInfo.BoostStatus.UNBOOSTED;
+            UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
+            UidInfo uidInfo = uidDAO.get(packageName);
+            if (uidInfo != null)
+                status = uidInfo.getBoostStatus();
+            return status;
         }
     };
 
@@ -504,7 +530,8 @@ public class TeraFonnApiService extends Service {
             } else {
                 PackageManager pm = getPackageManager();
                 ApplicationInfo packageInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-                uidDAO.insert(new UidInfo(pinOP, false, packageInfo.uid, packageName));
+                int boostStatus = Booster.getInstalledAppBoostStatus(packageName);
+                uidDAO.insert(new UidInfo(pinOP, false, boostStatus, packageInfo.uid, packageName));
             }
         } catch (Exception e) {
             Logs.e(CLASSNAME, "updateDB", e.toString());

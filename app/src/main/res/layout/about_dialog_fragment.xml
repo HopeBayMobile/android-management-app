@@ -36,7 +36,7 @@
                 tools:text="2.0.6.0513" />
 
             <View
-                style="@style/Divider"
+                style="@style/HorizontalDivider"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp" />
 
@@ -63,7 +63,7 @@
                 tools:text="7947584920752" />
 
             <View
-                style="@style/Divider"
+                style="@style/HorizontalDivider"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp" />
 
@@ -90,7 +90,7 @@
                 tools:text="7947584920753" />
 
             <View
-                style="@style/Divider"
+                style="@style/HorizontalDivider"
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="10dp" />
         </LinearLayout>

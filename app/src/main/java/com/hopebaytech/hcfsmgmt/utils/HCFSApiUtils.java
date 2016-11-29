@@ -57,6 +57,13 @@ public class HCFSApiUtils {
 
     public static native String collectSysLogs();
 
+    /**
+     * This method initiate a the HCFS to start the restoration process.
+     *  Restoration process stage-1 will start immediately after this method
+     *  called.
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
     public static native String triggerRestore();
 
     /**
@@ -75,5 +82,94 @@ public class HCFSApiUtils {
      */
     public static native String checkRestoreStatus();
 
+    /**
+     * This method trigger the HCFS to backup package
+     * list, /data/system/packages.xml.
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
     public static native String notifyApplistChange();
+
+    /**
+     * This method is used for checking the status whether
+     * an installed package is boosted or unboosted.
+     *
+     * @param packageName The package name needs to be checked
+     * @return a json string contains:
+     * <li>0 the package is boosted</li>
+     * <li>1 the package is unboosted</li>
+     * <li>others: false</li>
+     */
+    public static native String checkPackageBoostStatus(String packageName);
+
+    /**
+     * This method will create the environment of booster. The booster
+     * will be created with boosterSize and be mounted to /data/mnt/hcfsblock/ .
+     *
+     * @param boosterSize The initial size of booster.
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String enableBooster(long boosterSize);
+
+    /**
+     * This method will destroy the environment of booster. The booster
+     * will be unmounted and the existed booster image file will be deleted.
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String disableBooster();
+
+    /**
+     * This method tirgger the hcfsapid to start to move all packages selected
+     * from /data/data/ to booster. The list of packages will stored in
+     * database, uid.db table uid, maintained by Tera Mgmt APP.
+     * <strong>Note:</strong> This API will return immediately when called.
+     * hcfsapid will send an event to notify the result after "boost"
+     * finished/failed.
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String triggerBoost();
+
+    /**
+     * This method tirgger the hcfsapid to start to move all packages selected
+     * from booster to /data/data/. The list of packages will stored in
+     * database, uid.db table uid, maintained by Tera Mgmt APP.
+     * <strong>Note:</strong> This API will return immediately when called.
+     * hcfsapid will send an event to notify the result after "unboost"
+     * finished/failed.
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String triggerUnboost();
+
+    /**
+     * This method will clear up the remaining symbolic link and empty folder of
+     * the booster. This method is called when the Tera App receive
+     * Intent.ACTION_PACKAGE_REMOVED from PackageMangerService. This
+     * method is used to clear the remaining symlink, /data/data/<pkgName>, and
+     * the empty folder, /data/mnt/hcfsblock/<pkgName>/, after the APP is
+     * uninstalled.
+     *
+     * @param packageName The package name of the uninstalled app
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String clearBoosterPackageRemaining(String packageName);
+
+    /**
+     * This method will unmount the booster.
+     * <strong>Note:</strong> Before calling this method, ALL APPS NEEDED
+     * TO BE BOOSTED SHOULD BE DIABLED.
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String umountBooster();
+
+    /**
+     * This method will mount the booster.
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String mountBooster();
+
 }

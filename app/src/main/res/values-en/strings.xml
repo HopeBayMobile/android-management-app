@@ -1,6 +1,7 @@
 <resources>
 
     <string name="app_name">Tera</string>
+    <string name="tera_version_info">Version: %s</string>
 
     <string name="require_read_external_storage_permission">Reading file list must enable the "Storage" permission.</string>
     <string name="require_write_external_storage_permission">Collecting log must enable the "Storage" permission.</string>
@@ -47,6 +48,7 @@
     <string name="nav_sdcard1">SD card</string>
     <string name="nav_add_mountpoint">Add Shared Space</string>
     <string name="nav_settings">SETTINGS</string>
+    <string name="nav_booster">BOOSTER</string>
     <string name="nav_about">ABOUT</string>
     <string name="nav_help">HELP</string>
 
@@ -195,6 +197,9 @@
     <string name="settings_confirm_when_turn_off_wifi_only_message">Using mobile data connection while transferring data can result in additional charges. Please check your data plan with mobile carrier.</string>
     <string name="settings_advanced_settings">Advanced Settings</string>
     <string name="settings_allow_pin_unpin_apps">Allow pin/unpin apps</string>
+    <string name="settings_booster_title">Booster</string>
+    <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
+    <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
 
     <string name="change_account_require_new_account">Same as the current account. Changing account operation will not be performed.</string>
     <string name="change_account_start_to_change">Change</string>
@@ -270,6 +275,39 @@
     <string name="help_user_manual_title">User manual</string>
     <string name="help_customer_center_title">Customer Center</string>
     <string name="help_email_feedback_title">User Feedback</string>
+
+    <!-- booster page -->
+    <string name="booster_title_bar">Boost Zone</string>
+    <string name="booster_action_boost">Boost</string>
+    <string name="booster_action_unboost">Unboost</string>
+    <string name="booster_tab_boost">Boosted</string>
+    <string name="booster_tab_unboost">Unboosted</string>
+    <string name="booster_boost_hint_tap_app_to_boost">Tap app to boost.</string>
+    <string name="booster_boost_hint_tap_app_to_unboost">Tap app to unboost.</string>
+    <string name="booster_boost_hint_boosting">Boosting</string>
+    <string name="booster_boost_hint_unboosting">Unboosting</string>
+    <string name="booster_dialog_boost_title">App Boosted</string>
+    <string name="booster_dialog_boost_message">All selected apps have been boosted.</string>
+    <string name="booster_dialog_unboost_title">App Unboosted</string>
+    <string name="booster_dialog_unboost_message">All selected apps have been unboosted.</string>
+    <string name="booster_dialog_disable_apps_title">Disable Apps</string>
+    <string name="booster_dialog_disable_apps_message_while_unboosting">The following apps will be temporarily disabled while unboosting.</string>
+    <string name="booster_dialog_disable_apps_message_while_boosting">The following apps will be temporarily disabled while boosting.</string>
+    <string name="booster_enable_dialog_title">Enlarge Boost Zone Size</string>
+    <string name="booster_enable_dialog_message">Please enlarge Boost Zone size to release more spaces for boosting apps.</string>
+    <string name="booster_enable_dialog_success">Enable boost zone successful.</string>
+    <string name="booster_enable_dialog_insufficient_space">Insufficient space for enabling booster zone.</string>
+    <string name="booster_enable_dialog_failed">Enable boost zone failed.</string>
+    <string name="booster_disable_dialog_title">Disable Boost Zone</string>
+    <string name="booster_disable_dialog_content_message">Disable boost zone will unboost any boosted apps. Are you sure you want to continue?</string>
+    <string name="booster_disable_dialog_check_message">@string/settings_transfer_content_desc_check</string>
+    <string name="booster_disable_dialog_success">Disable boost zone successful.</string>
+    <string name="booster_disable_dialog_failed">Disable boost zone failed.</string>
+    <string name="booster_boost_apps_insufficient_space">Insufficient space to boost apps.</string>
+    <string name="booster_boost_apps_failed">Boost apps failed.</string>
+    <string name="booster_unboost_apps_insufficient_space">Insufficient space to unboost apps.</string>
+    <string name="booster_unboost_apps_failed">Unboost apps failed.</string>
+    <string name="booster_used_space_info">Used Space: %1$s / %2$s</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 
