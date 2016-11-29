@@ -306,10 +306,10 @@ public class MainFragment extends Fragment {
         if (fragment != null && fragment instanceof AppFileFragment) {
             boolean isProcessed = ((AppFileFragment) fragment).onBackPressed();
             if (!isProcessed) {
-                exitApp();
+                ((Activity) mContext).finish();
             }
         } else {
-            exitApp();
+            ((Activity) mContext).finish();
         }
     }
 
