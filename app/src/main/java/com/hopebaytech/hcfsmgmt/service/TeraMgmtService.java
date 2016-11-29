@@ -749,7 +749,7 @@ public class TeraMgmtService extends Service {
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) == null) {
             int boostStatus = Booster.getInstalledAppBoostStatus(packageName);
-            mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, uid, packageName, boostStatus));
+            mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, boostStatus, uid, packageName));
         }
     }
 

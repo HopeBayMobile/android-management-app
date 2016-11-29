@@ -42,16 +42,24 @@ public class UidInfo {
     }
 
     public UidInfo(boolean isPinned, boolean isSystemApp, int uid, String packageName) {
-        this(isPinned, isSystemApp, uid, packageName,
-                isSystemApp ? BoostStatus.NON_BOOSTABLE : BoostStatus.UNBOOSTED);
+        this(isPinned,
+                isSystemApp,
+                isSystemApp ? BoostStatus.NON_BOOSTABLE : BoostStatus.UNBOOSTED,
+                uid,
+                packageName);
     }
 
-    public UidInfo(boolean isPinned, boolean isSystemApp, int uid, String packageName, int boostStatus) {
+    public UidInfo(boolean isPinned, boolean isSystemApp, int boostStatus, int uid, String packageName) {
+        this(isPinned, isSystemApp, true /* isEnabled */, boostStatus, uid, packageName);
+    }
+
+    public UidInfo(boolean isPinned, boolean isSystemApp, boolean isEnabled, int boostStatus, int uid, String packageName) {
         this.isPinned = isPinned;
+        this.isSystemApp = isSystemApp;
+        this.isEnabled = isEnabled;
+        this.boostStatus = boostStatus;
         this.uid = uid;
         this.packageName = packageName;
-        this.isSystemApp = isSystemApp;
-        this.boostStatus = boostStatus;
     }
 
     public void setId(int id) {
