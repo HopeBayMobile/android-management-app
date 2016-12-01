@@ -550,35 +550,42 @@ public class TeraMgmtService extends Service {
 
     private void notifyInsufficientPinSpace() {
         HCFSStatInfo statInfo = HCFSMgmtUtils.getHCFSStatInfo();
-        if (statInfo != null) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
-
-            long pinTotal = statInfo.getPinTotal();
-            long pinMax = statInfo.getPinMax();
-            int notifyRatio = HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD;
-            double ratio = ((double) pinTotal / pinMax) * 100;
-            Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio + ", ratio=" + ratio);
-            if (ratio >= notifyRatio) {
-                if (!isNotified) {
-                    int flag = NotificationEvent.FLAG_OPEN_APP;
-                    int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
-                    String notifyTitle = getString(R.string.app_name);
-                    String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
-                    Bundle extras = new Bundle();
-                    extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
-                    NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, flag, extras);
-
-                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
-                }
-            } else {
-                if (isNotified) {
-                    editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
-                }
-            }
-            editor.apply();
+        if (statInfo == null) {
+            return;
         }
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(TeraMgmtService.this);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        boolean isNotified = sharedPreferences.getBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
+        boolean isRestoring = HCFSMgmtUtils.checkRestoreStatus() != 0;
+
+        long pinTotal = statInfo.getPinTotal();
+        long pinMax = statInfo.getPinMax();
+        int notifyRatio = HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD;
+        double ratio = ((double) pinTotal / pinMax) * 100;
+        Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio
+                + ", ratio=" + ratio
+                + ", pinTotal=" + pinTotal
+                + ", pinMax=" + pinMax);
+        if (ratio >= notifyRatio) {
+            if (!isNotified && !isRestoring) {
+                int flag = NotificationEvent.FLAG_OPEN_APP;
+                int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+                String notifyTitle = getString(R.string.app_name);
+                String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
+                Bundle extras = new Bundle();
+                extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
+                NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, flag, extras);
+
+                editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
+            }
+        } else {
+            if (isNotified) {
+                editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, false);
+            }
+        }
+        editor.apply();
+
     }
 
     /**
@@ -946,7 +953,6 @@ public class TeraMgmtService extends Service {
         String notifyTitle = getString(R.string.app_name);
         String notifyContent = getString(R.string.notify_exceed_pin_max);
 
-
         int flag = NotificationEvent.FLAG_OPEN_APP;
         Bundle extras = new Bundle();
         extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
@@ -1025,7 +1031,7 @@ public class TeraMgmtService extends Service {
         Booster.removeBoostStatusInXml(this);
     }
 
-    private void updateBoosterWhiteList(DeviceServiceInfo deviceServiceInfo,final String jwtToken) {
+    private void updateBoosterWhiteList(DeviceServiceInfo deviceServiceInfo, final String jwtToken) {
         Logs.d(CLASSNAME, "updateBoosterWhiteList", null);
         BoosterWhiteListVersionInfo boosterWhiteListVersionInfo = mBoosterWhiteListVersionDAO.getFirst(); //if the table is empty, then return null
 
@@ -1047,7 +1053,7 @@ public class TeraMgmtService extends Service {
         final String imei = HCFSMgmtUtils.getDeviceImei(TeraMgmtService.this);
         MgmtCluster.GetBoosterWhiteListInfoProxy getBoosterWhiteListInfoProxy = new MgmtCluster.GetBoosterWhiteListInfoProxy(jwtToken, imei);
         getBoosterWhiteListInfoProxy.setOnGetBoosterWhiteListInfoListener(new MgmtCluster.
-                                            GetBoosterWhiteListInfoProxy.OnGetBoosterWhiteListInfoListener() {
+                GetBoosterWhiteListInfoProxy.OnGetBoosterWhiteListInfoListener() {
             @Override
             public void onGetBoosterWhiteListInfoSuccessful(final BoosterDeviceInfo boosterDeviceInfo) {
                 Logs.e(CLASSNAME, "onGetBoosterWhiteListInfoSuccessful", null);
@@ -1063,7 +1069,7 @@ public class TeraMgmtService extends Service {
                 mBoosterWhiteListDAO.clear();
 
                 List<String> whiteList = boosterDeviceInfo.getWhiteList();
-                if(!whiteList.isEmpty()) {
+                if (!whiteList.isEmpty()) {
                     for (String packageName : whiteList) {
                         boosterWhiteListInfo.setPackageName(packageName);
                         mBoosterWhiteListDAO.insert(boosterWhiteListInfo);

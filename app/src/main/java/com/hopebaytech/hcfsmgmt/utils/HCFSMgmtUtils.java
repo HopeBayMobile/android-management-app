@@ -683,8 +683,6 @@ public class HCFSMgmtUtils {
 
         Intent intent = new Intent(context, HCFSMgmtReceiver.class);
         intent.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
 
         int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
         int flags = PendingIntent.FLAG_UPDATE_CURRENT;
