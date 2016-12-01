@@ -610,4 +610,18 @@ public class ActivateWoCodeFragment extends Fragment {
         registerProxy.register();
     }
 
+    public void setIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+
+        Bundle extras = intent.getExtras();
+        if (extras == null) {
+            return;
+        }
+
+        String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
+        mErrorMessage.setText(cause);
+    }
+
 }

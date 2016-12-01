@@ -86,6 +86,10 @@ public class RestoreFailedFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        init();
+    }
+
+    private void init() {
         CharSequence message = getString(R.string.restore_failed_conn_failed);
         int actionButtonResId = R.string.restore_failed_conn_failed_btn;
         switch (mErrorCode) {

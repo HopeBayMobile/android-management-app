@@ -251,7 +251,11 @@ public class MainFragment extends Fragment {
 
         @Nullable
         Fragment getFragment(int position) {
-            return fragmentMap.get(titleList.get(position)).get();
+            WeakReference<Fragment> fragmentWeakRef = fragmentMap.get(titleList.get(position));
+            if (fragmentWeakRef == null) {
+                return null;
+            }
+            return fragmentWeakRef.get();
         }
 
         private List<String> getTitleList() {
@@ -344,6 +348,10 @@ public class MainFragment extends Fragment {
         intentService.putExtra(TeraIntent.KEY_ONGOING, false);
         mContext.startService(intentService);
 
+        moveToSpecifiedPage();
+    }
+
+    private void moveToSpecifiedPage() {
         if (mArguments == null) {
             return;
         }
@@ -383,7 +391,6 @@ public class MainFragment extends Fragment {
                                     }
                                 }
                             });
-
                             mArguments = null;
                             break;
                         }
@@ -393,7 +400,6 @@ public class MainFragment extends Fragment {
                 }
             }
         });
-
     }
 
     @Override
@@ -521,6 +527,15 @@ public class MainFragment extends Fragment {
         titleList.remove(boosterTitle);
         ((ViewPagerAdapter) mViewPager.getAdapter()).setBoosterEnabled(false);
         mViewPager.getAdapter().notifyDataSetChanged();
+    }
+
+    public void setIntent(Intent intent) {
+        if (intent == null) {
+            return;
+        }
+
+        mArguments = intent.getExtras();
+        moveToSpecifiedPage();
     }
 
 }
