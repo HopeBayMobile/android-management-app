@@ -925,7 +925,7 @@ public class TeraMgmtService extends Service {
             case 0:
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_COMPLETED);
 
-                int flag = NotificationEvent.FLAG_HEADS_UP;
+                int flag = NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP;
                 int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
                 String title = getString(R.string.restore_done_title);
                 String message = getString(R.string.restore_done_message);
