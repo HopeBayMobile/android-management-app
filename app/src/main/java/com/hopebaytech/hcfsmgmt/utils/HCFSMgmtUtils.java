@@ -606,8 +606,6 @@ public class HCFSMgmtUtils {
         }
     }
 
-
-
 //    @Nullable
 //    public static String getEncryptedDeviceImei() {
 //        String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI());
