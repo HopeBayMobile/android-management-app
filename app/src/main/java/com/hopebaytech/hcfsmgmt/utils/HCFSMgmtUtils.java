@@ -59,13 +59,6 @@ public class HCFSMgmtUtils {
 
     public static final boolean DEFAULT_PINNED_STATUS = false;
 
-    public static final int NOTIFY_ID_NETWORK_STATUS_CHANGED = 0;
-    public static final int NOTIFY_ID_PIN_UNPIN_FAILURE = 1;
-    public static final int NOTIFY_ID_ONGOING = 2;
-    public static final int NOTIFY_ID_LOCAL_STORAGE_USED_RATIO = 3;
-    public static final int NOTIFY_ID_CHECK_DEVICE_STATUS = 4;
-    public static final int NOTIFY_ID_INSUFFICIENT_PIN_SPACE = 5;
-
     public static final String BUNDLE_KEY_VIEW_PAGER_INDEX = "ViewPagerIndex"; // ViewPagerIndex cannot be renamed.
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";

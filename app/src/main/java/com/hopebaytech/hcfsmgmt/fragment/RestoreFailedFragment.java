@@ -190,7 +190,7 @@ public class RestoreFailedFragment extends Fragment {
     }
 
     private void cancelInProgressNotification() {
-        NotificationEvent.cancel(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+        NotificationEvent.cancel(mContext, NotificationEvent.ID_ONGOING);
     }
 
     /**
@@ -319,7 +319,7 @@ public class RestoreFailedFragment extends Fragment {
         String title = context.getString(R.string.restore_failed_title);
         String message = getRestorationFailedMessage(context, status);
         NotificationCompat.Action action = getNotificationAction(context, status);
-        NotificationEvent.notify(context, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, message, action, flag);
+        NotificationEvent.notify(context, NotificationEvent.ID_ONGOING, title, message, action, flag);
     }
 
     private static void showNormalNotification(Context context, int status) {
@@ -329,7 +329,7 @@ public class RestoreFailedFragment extends Fragment {
         String title = context.getString(R.string.restore_failed_title);
         String message = getRestorationFailedMessage(context, status);
         NotificationCompat.Action action = getNotificationAction(context, status);
-        NotificationEvent.notify(context, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, message, action, flag);
+        NotificationEvent.notify(context, NotificationEvent.ID_ONGOING, title, message, action, flag);
     }
 
 }

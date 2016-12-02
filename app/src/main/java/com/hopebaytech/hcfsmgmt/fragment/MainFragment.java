@@ -30,13 +30,16 @@ import android.widget.ImageView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
@@ -386,6 +389,32 @@ public class MainFragment extends Fragment {
         intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
         intentService.putExtra(TeraIntent.KEY_ONGOING, true);
         mContext.startService(intentService);
+
+        int boostStatus = Booster.currentProcessBoostStatus(mContext);
+        if (boostStatus != 0) {
+            int notifyId = NotificationEvent.ID_BOOSTER;
+            int flag = NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP;
+            switch (boostStatus) {
+                case UidInfo.BoostStatus.BOOSTING:
+                    NotificationEvent.notify(
+                            mContext,
+                            notifyId,
+                            getString(R.string.booster_notification_boosting_title),
+                            getString(R.string.booster_notification_boosting_message),
+                            flag
+                    );
+                    break;
+                case UidInfo.BoostStatus.UNBOOSTING:
+                    NotificationEvent.notify(
+                            mContext,
+                            notifyId,
+                            getString(R.string.booster_notification_unboosting_title),
+                            getString(R.string.booster_notification_unboosting_message),
+                            flag
+                    );
+                    break;
+            }
+        }
     }
 
     @Override

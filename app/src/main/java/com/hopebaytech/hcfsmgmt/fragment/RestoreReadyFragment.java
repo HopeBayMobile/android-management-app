@@ -19,7 +19,6 @@ import android.widget.TextView;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PowerUtils;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
@@ -84,7 +83,7 @@ public class RestoreReadyFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        NotificationEvent.cancel(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+        NotificationEvent.cancel(mContext, NotificationEvent.ID_ONGOING);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -194,7 +193,7 @@ public class RestoreReadyFragment extends Fragment {
         PendingIntent pendingIntent = PendingIntent.getService(mContext, 0, rebootIntent, 0);
         NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
 
-        int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+        int notifyId = NotificationEvent.ID_ONGOING;
         int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
         if (headsUp) {
             flag |= NotificationEvent.FLAG_HEADS_UP;

@@ -22,16 +22,19 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListDAO;
+import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListVersionDAO;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
-import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListDAO;
-import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListVersionDAO;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterDeviceInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterWhiteListInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterWhiteListVersionInfo;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.FileInfo;
@@ -42,9 +45,6 @@ import com.hopebaytech.hcfsmgmt.info.ServiceFileDirInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.BoosterWhiteListInfo;
-import com.hopebaytech.hcfsmgmt.info.BoosterWhiteListVersionInfo;
-import com.hopebaytech.hcfsmgmt.info.BoosterDeviceInfo;
 import com.hopebaytech.hcfsmgmt.interfaces.IMgmtBinder;
 import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
@@ -391,7 +391,7 @@ public class TeraMgmtService extends Service {
                     notify_message.append("\n");
                 }
             }
-            int notify_id = HCFSMgmtUtils.NOTIFY_ID_PIN_UNPIN_FAILURE;
+            int notify_id = NotificationEvent.ID_PIN_UNPIN_FAILURE;
             NotificationEvent.notify(this, notify_id, notify_title, notify_message.toString());
         }
     }
@@ -460,7 +460,7 @@ public class TeraMgmtService extends Service {
             @Override
             public void onGetDeviceServiceInfoFailed(DeviceServiceInfo deviceServiceInfo) {
                 Logs.e(CLASSNAME, "onGetDeviceServiceInfoFailed", null);
-                int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
+                int id_notify = NotificationEvent.ID_CHECK_DEVICE_STATUS;
                 String notify_title = getString(R.string.app_name);
                 String notify_content = getString(R.string.auth_at_bootup_auth_get_device_info);
                 NotificationEvent.notify(TeraMgmtService.this, id_notify, notify_title, notify_content);
@@ -490,10 +490,10 @@ public class TeraMgmtService extends Service {
                                 Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
                                 if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
                                     TeraCloudConfig.stopSyncToCloud();
-                                    NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+                                    NotificationEvent.cancel(TeraMgmtService.this, NotificationEvent.ID_ONGOING);
 
                                     int flag = NotificationEvent.FLAG_OPEN_APP;
-                                    int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
+                                    int id_notify = NotificationEvent.ID_CHECK_DEVICE_STATUS;
                                     String notify_title = getString(R.string.app_name);
                                     String notify_content = getString(R.string.auth_at_bootup_auth_failed_mgmt_auth);
                                     Bundle extras = new Bundle();
@@ -526,10 +526,10 @@ public class TeraMgmtService extends Service {
                         }
 
                         TeraCloudConfig.stopSyncToCloud();
-                        NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+                        NotificationEvent.cancel(TeraMgmtService.this, NotificationEvent.ID_ONGOING);
 
                         int flag = NotificationEvent.FLAG_OPEN_APP;
-                        int id_notify = HCFSMgmtUtils.NOTIFY_ID_CHECK_DEVICE_STATUS;
+                        int id_notify = NotificationEvent.ID_CHECK_DEVICE_STATUS;
                         String notify_title = getString(R.string.app_name);
                         String notify_content = getString(R.string.auth_at_bootup_auth_failed_google_auth);
                         Bundle extras = new Bundle();
@@ -570,7 +570,7 @@ public class TeraMgmtService extends Service {
         if (ratio >= notifyRatio) {
             if (!isNotified && !isRestoring) {
                 int flag = NotificationEvent.FLAG_OPEN_APP;
-                int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+                int idNotify = NotificationEvent.ID_INSUFFICIENT_PIN_SPACE;
                 String notifyTitle = getString(R.string.app_name);
                 String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
                 Bundle extras = new Bundle();
@@ -599,7 +599,7 @@ public class TeraMgmtService extends Service {
                 mOngoingThread.interrupt();
                 mOngoingThread = null;
             }
-            NotificationEvent.cancel(TeraMgmtService.this, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+            NotificationEvent.cancel(TeraMgmtService.this, NotificationEvent.ID_ONGOING);
             return;
         }
 
@@ -646,7 +646,7 @@ public class TeraMgmtService extends Service {
                                 statInfo.getFormatTeraTotal();
                         int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
                         NotificationEvent.notify(TeraMgmtService.this,
-                                HCFSMgmtUtils.NOTIFY_ID_ONGOING,
+                                NotificationEvent.ID_ONGOING,
                                 notifyTitle,
                                 notifyMsg,
                                 drawableId,
@@ -688,7 +688,7 @@ public class TeraMgmtService extends Service {
                     ", pinPlusUnpinButDirty=" + pinPlusUnpinButDirtyRatio);
             if (pinPlusUnpinButDirtyRatio >= Double.valueOf(storageUsedRatio)) {
                 if (!isNotified) {
-                    int notify_id = HCFSMgmtUtils.NOTIFY_ID_LOCAL_STORAGE_USED_RATIO;
+                    int notify_id = NotificationEvent.ID_LOCAL_STORAGE_USED_RATIO;
                     String notify_title = getString(R.string.app_name);
                     String notify_message = String.format(getString(R.string.notify_exceed_local_storage_used_ratio), storageUsedRatio);
                     NotificationEvent.notify(mContext, notify_id, notify_title, notify_message);
@@ -883,7 +883,7 @@ public class TeraMgmtService extends Service {
                 PendingIntent pendingIntent = PendingIntent.getService(TeraMgmtService.this, 0, rebootIntent, 0);
                 NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
 
-                int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+                int notifyId = NotificationEvent.ID_ONGOING;
                 int flag = NotificationEvent.FLAG_ON_GOING
                         | NotificationEvent.FLAG_HEADS_UP
                         | NotificationEvent.FLAG_OPEN_APP;
@@ -926,7 +926,7 @@ public class TeraMgmtService extends Service {
                 editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_COMPLETED);
 
                 int flag = NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP;
-                int notifyId = HCFSMgmtUtils.NOTIFY_ID_ONGOING;
+                int notifyId = NotificationEvent.ID_ONGOING;
                 String title = getString(R.string.restore_done_title);
                 String message = getString(R.string.restore_done_message);
                 NotificationEvent.notify(mContext, notifyId, title, message, flag);
@@ -949,7 +949,7 @@ public class TeraMgmtService extends Service {
     }
 
     private void notifyUserExceedPinMax() {
-        int idNotify = HCFSMgmtUtils.NOTIFY_ID_INSUFFICIENT_PIN_SPACE;
+        int idNotify = NotificationEvent.ID_INSUFFICIENT_PIN_SPACE;
         String notifyTitle = getString(R.string.app_name);
         String notifyContent = getString(R.string.notify_exceed_pin_max);
 
@@ -1018,17 +1018,71 @@ public class TeraMgmtService extends Service {
         if (MainApplication.Foreground.get().isForeground()) {
             return;
         }
+
+        // Must be called before Booster.removeBoostStatusInSharedPreferenceXml() to make sure the boosStatus in
+        // shared preference xml is not removed.
+        int boostStatus = Booster.currentProcessBoostStatus(this);
+
         Booster.enableApps(this);
-        Booster.removeBoostStatusInXml(this);
+        Booster.removeBoostStatusInSharedPreferenceXml(this);
+
+        String title = null;
+        String message = null;
+        switch (boostStatus) {
+            case UidInfo.BoostStatus.BOOSTING:
+                title = getString(R.string.booster_notification_boost_completed_title);
+                message = getString(R.string.booster_notification_boost_completed_message);
+                break;
+            case UidInfo.BoostStatus.UNBOOSTING:
+                title = getString(R.string.booster_notification_unboost_completed_title);
+                message = getString(R.string.booster_notification_unboost_completed_message);
+                break;
+        }
+        if (title != null && message != null) {
+            NotificationEvent.notify(
+                    mContext,
+                    NotificationEvent.ID_BOOSTER,
+                    title,
+                    message,
+                    NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP
+            );
+        }
     }
 
     private void onBoosterProcessFailed() {
         if (MainApplication.Foreground.get().isForeground()) {
             return;
         }
+
+        // Must be called before Booster.removeBoostStatusInSharedPreferenceXml() to make sure the boosStatus in
+        // shared preference xml is not removed.
+        int boostStatus = Booster.currentProcessBoostStatus(this);
+
         Booster.enableApps(this);
         Booster.recoverBoostStatusWhenFailed(this);
-        Booster.removeBoostStatusInXml(this);
+        Booster.removeBoostStatusInSharedPreferenceXml(this);
+
+        String title = null;
+        String message = null;
+        switch (boostStatus) {
+            case UidInfo.BoostStatus.BOOSTING:
+                title = getString(R.string.booster_notification_boost_failed_title);
+                message = getString(R.string.booster_notification_boost_failed_message);
+                break;
+            case UidInfo.BoostStatus.UNBOOSTING:
+                title = getString(R.string.booster_notification_unboost_failed_title);
+                message = getString(R.string.booster_notification_unboost_failed_message);
+                break;
+        }
+        if (title != null && message != null) {
+            NotificationEvent.notify(
+                    mContext,
+                    NotificationEvent.ID_BOOSTER,
+                    title,
+                    message,
+                    NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP
+            );
+        }
     }
 
     private void updateBoosterWhiteList(DeviceServiceInfo deviceServiceInfo, final String jwtToken) {
