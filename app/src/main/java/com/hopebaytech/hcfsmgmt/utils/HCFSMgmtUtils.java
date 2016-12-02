@@ -746,10 +746,6 @@ public class HCFSMgmtUtils {
         am.cancel(pi);
     }
 
-    public static Drawable getPinUnpinImage(Context context, boolean isPinned) {
-        return ContextCompat.getDrawable(context, isPinned ? R.drawable.icon_btn_app_pin : R.drawable.icon_btn_app_unpin);
-    }
-
 //    @Nullable
 //    public static String getEncryptedDeviceImei() {
 //        String encryptedIMEI = new String(HCFSApiUtils.getEncryptedIMEI());

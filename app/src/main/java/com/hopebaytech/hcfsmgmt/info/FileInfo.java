@@ -41,6 +41,7 @@ public class FileInfo extends ItemInfo implements Cloneable {
     private String mFilePath;
     private long mLastModified;
     private long mSize;
+    private int mHashCode;
 
     public FileInfo(Context context) {
         super(context);
@@ -144,7 +145,6 @@ public class FileInfo extends ItemInfo implements Cloneable {
         return iconImage;
     }
 
-    @Nullable
     @Override
     public Drawable getIconDrawable() {
         Drawable iconDrawable = null;
@@ -304,13 +304,11 @@ public class FileInfo extends ItemInfo implements Cloneable {
     }
 
     @Override
-    public Drawable getPinUnpinImage(boolean isPinned) {
-        return HCFSMgmtUtils.getPinUnpinImage(mContext, isPinned);
-    }
-
-    @Override
     public int hashCode() {
-        return getFilePath().hashCode();
+        if (mHashCode == 0) {
+            mHashCode = getFilePath().hashCode();
+        }
+        return mHashCode;
     }
 
     @Override

@@ -449,7 +449,7 @@ public class BoosterFragment extends Fragment {
                         UiHandler.getInstance().post(new Runnable() {
                             @Override
                             public void run() {
-                                holder.pinView.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
+                                holder.pinView.setImageDrawable(appInfo.getPinViewImage(isPinned));
                             }
                         });
                     }

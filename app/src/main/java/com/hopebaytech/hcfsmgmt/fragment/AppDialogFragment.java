@@ -86,14 +86,14 @@ public class AppDialogFragment extends DialogFragment {
             isAllowPinUnpinApps = args.getBoolean(AppFileFragment.KEY_ARGUMENT_ALLOW_PIN_UNPIN_APPS);
         }
         if (isAllowPinUnpinApps) {
-            appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(appInfo.isPinned()));
+            appPinIcon.setImageDrawable(appInfo.getPinViewImage(appInfo.isPinned()));
             appPinIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     boolean isPinned = !appInfo.isPinned();
                     boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
                     if (allowPinUnpin) {
-                        appPinIcon.setImageDrawable(appInfo.getPinUnpinImage(isPinned));
+                        appPinIcon.setImageDrawable(appInfo.getPinViewImage(isPinned));
                     }
                 }
             });

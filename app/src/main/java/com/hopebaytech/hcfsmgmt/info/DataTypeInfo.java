@@ -36,12 +36,6 @@ public class DataTypeInfo extends ItemInfo {
 		return null;
 	}
 
-	@Nullable
-	@Override
-	public Drawable getPinUnpinImage(boolean isPinned) {
-		return HCFSMgmtUtils.getPinUnpinImage(context, isPinned);
-	}
-
 	public void setIconImage(int icon_drawable_res_id) {
 		this.icon_drawable_res_id = icon_drawable_res_id;
 	}

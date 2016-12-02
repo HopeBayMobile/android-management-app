@@ -15,7 +15,6 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
-import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.List;
 
@@ -34,6 +33,8 @@ public class AppInfo extends ItemInfo implements Cloneable {
     private boolean isSystemApp;
     private boolean isEnabled;
     private int boostStatus;
+    private int mHashCode;
+
     private Context context;
 
     /**
@@ -194,13 +195,11 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     @Override
-    public Drawable getPinUnpinImage(boolean isPinned) {
-        return HCFSMgmtUtils.getPinUnpinImage(context, isPinned);
-    }
-
-    @Override
     public int hashCode() {
-        return getSourceDir().hashCode();
+        if (mHashCode == 0) {
+            mHashCode = getSourceDir().hashCode();
+        }
+        return mHashCode;
     }
 
     @Override

@@ -4,8 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 
+import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.AppFileFragment;
+import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 public abstract class ItemInfo {
 
@@ -80,11 +84,14 @@ public abstract class ItemInfo {
     @Nullable
     public abstract Bitmap getIconImage();
 
-    @Nullable
     public abstract Drawable getIconDrawable();
 
-    @Nullable
-    public abstract Drawable getPinUnpinImage(boolean isPinned);
+    public Drawable getPinViewImage(boolean isPinned) {
+        return ContextCompat.getDrawable(
+                mContext,
+                isPinned ? R.drawable.icon_btn_app_pin : R.drawable.icon_btn_app_unpin
+        );
+    }
 
     public abstract int hashCode();
 

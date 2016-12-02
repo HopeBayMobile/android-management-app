@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -114,8 +113,6 @@ public class AppFileFragment extends Fragment {
     private Context mContext;
     private RecyclerView mRecyclerView;
     private ProgressBar mProgressCircle;
-    private ProgressDialog mProgressDialog;
-    //    private LinearLayout mEmptyFolder;
     private TextView mNoDataMsg;
     private Spinner mSpinner;
     private ImageView mRefresh;
@@ -136,17 +133,43 @@ public class AppFileFragment extends Fragment {
     private Handler mUiHandler = new Handler();
 
     private SparseArray<ItemInfo> mWaitToExecuteSparseArr = new SparseArray<>();
+    private SparseArray<Boolean> mPinStatusSparseArr = new SparseArray<>();
     private Map<String, Boolean> mPinUnpinFileMap = new ConcurrentHashMap<>();
     private Map<String, AppInfo> mPinUnpinAppMap = new ConcurrentHashMap<>();
     private Map<String, Boolean> mPinUnpinTypeMap = new ConcurrentHashMap<>();
     private String mFileRootDirPath;
     private String mFileRootDirName;
     private boolean isSDCard1 = false;
+
+    /**
+     * Recycler view is scrolled down or not
+     */
     private boolean mRecyclerViewScrollDown;
-    private boolean mCurrentVisible;
+
+    /**
+     * The current fragment is visible or not
+     */
+    private boolean mFragmentVisible;
+
+    /**
+     * The {@link TeraMgmtService} is bound or not
+     */
     private boolean mServiceBound;
+
+    /**
+     * Need to filter pin status or not
+     */
     private boolean mFilterByPin;
+
+    /**
+     * Allow users to pin/unpin apps or not
+     */
     private boolean mAllowPinUnpinApps;
+
+    /**
+     * Show app/file content process is now executing or not
+     */
+    private boolean mShowingContent;
 
     private TeraMgmtService mMgmtService;
 
@@ -219,7 +242,8 @@ public class AppFileFragment extends Fragment {
                             mRecyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE &&
                             mWaitToExecuteSparseArr.size() == 0 &&
                             mPinUnpinAppMap.size() == 0 &&
-                            mPinUnpinFileMap.size() == 0) {
+                            mPinUnpinFileMap.size() == 0 &&
+                            !mShowingContent) {
                         notifyRecyclerViewItemChanged();
                     }
                     Thread.sleep(Interval.AUTO_REFRESH_UI);
@@ -327,14 +351,14 @@ public class AppFileFragment extends Fragment {
                             pinIcon = (ImageView) appDialogFragment.getDialog().findViewById(R.id.app_pin_icon);
                         }
                         boolean isPinned = itemInfo.isPinned();
-                        pinIcon.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                        pinIcon.setImageDrawable(itemInfo.getPinViewImage(isPinned));
                         pinIcon.setContentDescription(getPinViewContentDescription(isPinned));
                     } else {
                         if (itemInfo.getViewHolder() instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
                             boolean isPinned = itemInfo.isPinned();
                             LinearRecyclerViewAdapter.LinearRecyclerViewHolder holder =
                                     (LinearRecyclerViewAdapter.LinearRecyclerViewHolder) itemInfo.getViewHolder();
-                            holder.pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                            holder.pinView.setImageDrawable(itemInfo.getPinViewImage(isPinned));
                             holder.pinView.setContentDescription(getPinViewContentDescription(isPinned));
                         }
                     }
@@ -347,59 +371,70 @@ public class AppFileFragment extends Fragment {
             List<Integer> removeList = new ArrayList<>();
             for (int i = 0; i < mWaitToExecuteSparseArr.size(); i++) {
                 int key = mWaitToExecuteSparseArr.keyAt(i);
-                final ItemInfo itemInfo = mWaitToExecuteSparseArr.get(key);
-                long lastProcessTime = itemInfo.getLastProcessTime();
-                if (itemInfo instanceof AppInfo) {
+                final ItemInfo cloneItemInfo = mWaitToExecuteSparseArr.get(key);
+                long lastProcessTime = cloneItemInfo.getLastProcessTime();
+                if (cloneItemInfo instanceof AppInfo) {
                     final UidDAO uidDAO = UidDAO.getInstance(mContext);
-                    AppInfo appInfo = (AppInfo) itemInfo;
+                    AppInfo appInfo = (AppInfo) cloneItemInfo;
                     UidInfo uidInfo = new UidInfo(appInfo);
                     uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
-                    mMgmtService.pinOrUnpinApp((AppInfo) itemInfo, new IPinUnpinListener() {
+                    mMgmtService.pinOrUnpinApp((AppInfo) cloneItemInfo, new IPinUnpinListener() {
                         @Override
-                        public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
-                            showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                        public void onPinUnpinSuccessful(final ItemInfo cloneItemInfo) {
+                            showPinUnpinResultToast(true /* isSuccess */, cloneItemInfo.isPinned());
+
+                            ItemInfo realItemInfo = mSectionedRecyclerViewAdapter
+                                    .getSubAdapterItemInfoList()
+                                    .get(cloneItemInfo.getPosition());
+                            realItemInfo.setProcessing(false);
                         }
 
                         @Override
-                        public void onPinUnpinFailed(final ItemInfo itemInfo) {
-                            showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+                        public void onPinUnpinFailed(final ItemInfo cloneItemInfo) {
+                            showPinUnpinResultToast(false /* isSuccess */, cloneItemInfo.isPinned());
 
-                            mSectionedRecyclerViewAdapter.
-                                    getSubAdapterItemInfoList().
-                                    get(itemInfo.getPosition()).
-                                    setPinned(!itemInfo.isPinned());
-
-                            itemInfo.setPinned(!itemInfo.isPinned());
+                            ItemInfo realItemInfo = mSectionedRecyclerViewAdapter
+                                    .getSubAdapterItemInfoList()
+                                    .get(cloneItemInfo.getPosition());
+                            realItemInfo.setPinned(!cloneItemInfo.isPinned());
 
                             // Update pin status to uid.db
-                            UidInfo uidInfo = new UidInfo((AppInfo) itemInfo);
+                            cloneItemInfo.setPinned(!cloneItemInfo.isPinned());
+                            UidInfo uidInfo = new UidInfo((AppInfo) cloneItemInfo);
                             uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
-                            processPinUnpinFailed(itemInfo);
+                            processPinUnpinFailed(cloneItemInfo);
+                            realItemInfo.setProcessing(false);
                         }
                     });
-                } else if (itemInfo instanceof DataTypeInfo) {
+                } else if (cloneItemInfo instanceof DataTypeInfo) {
                     // Nothing to do here
-                } else if (itemInfo instanceof FileInfo) {
-                    FileInfo fileDirInfo = (FileInfo) itemInfo;
+                } else if (cloneItemInfo instanceof FileInfo) {
+                    FileInfo fileDirInfo = (FileInfo) cloneItemInfo;
                     mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
                         @Override
-                        public void onPinUnpinSuccessful(final ItemInfo itemInfo) {
-                            showPinUnpinResultToast(true /* isSuccess */, itemInfo.isPinned());
+                        public void onPinUnpinSuccessful(final ItemInfo cloneItemInfo) {
+                            showPinUnpinResultToast(true /* isSuccess */, cloneItemInfo.isPinned());
+
+                            ItemInfo realItemInfo = mSectionedRecyclerViewAdapter
+                                    .getSubAdapterItemInfoList()
+                                    .get(cloneItemInfo.getPosition());
+                            realItemInfo.setProcessing(false);
                         }
 
                         @Override
-                        public void onPinUnpinFailed(final ItemInfo itemInfo) {
-                            showPinUnpinResultToast(false /* isSuccess */, itemInfo.isPinned());
+                        public void onPinUnpinFailed(final ItemInfo cloneItemInfo) {
+                            showPinUnpinResultToast(false /* isSuccess */, cloneItemInfo.isPinned());
 
-                            mSectionedRecyclerViewAdapter.
-                                    getSubAdapterItemInfoList().
-                                    get(itemInfo.getPosition()).
-                                    setPinned(!itemInfo.isPinned());
+                            ItemInfo realItemInfo = mSectionedRecyclerViewAdapter
+                                    .getSubAdapterItemInfoList()
+                                    .get(cloneItemInfo.getPosition());
+                            realItemInfo.setPinned(!cloneItemInfo.isPinned());
 
-                            itemInfo.setPinned(!itemInfo.isPinned());
-                            processPinUnpinFailed(itemInfo);
+                            cloneItemInfo.setPinned(!cloneItemInfo.isPinned());
+                            processPinUnpinFailed(cloneItemInfo);
+                            cloneItemInfo.setProcessing(false);
                         }
                     });
                 }
@@ -682,7 +717,7 @@ public class AppFileFragment extends Fragment {
         // Start mAutoUiRefreshThread
         if (mAutoUiRefreshThread == null) {
             if (mAutoUiRefreshRunnable != null) {
-                if (mCurrentVisible) {
+                if (mFragmentVisible) {
                     mAutoUiRefreshThread = new Thread(mAutoUiRefreshRunnable);
                     mAutoUiRefreshThread.start();
                 }
@@ -692,7 +727,7 @@ public class AppFileFragment extends Fragment {
         // Start mProcessPinThread
         if (mProcessPinThread == null) {
             if (mCheckPinStatusRunnable != null) {
-                if (mCurrentVisible) {
+                if (mFragmentVisible) {
                     mProcessPinThread = new Thread(mCheckPinStatusRunnable);
                     mProcessPinThread.start();
                 }
@@ -702,7 +737,7 @@ public class AppFileFragment extends Fragment {
         // Start mApiExecutorThread
         if (mApiExecutorThread == null) {
             if (mApiExecutorRunnable != null) {
-                if (mCurrentVisible) {
+                if (mFragmentVisible) {
                     mApiExecutorThread = new Thread(mApiExecutorRunnable);
                     mApiExecutorThread.start();
                 }
@@ -885,6 +920,7 @@ public class AppFileFragment extends Fragment {
             return;
         }
 
+        mShowingContent = true;
         mWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -906,6 +942,7 @@ public class AppFileFragment extends Fragment {
                     public void run() {
                         mSectionedRecyclerViewAdapter.setSubAdapterItems(finalItemInfoList);
                         mSectionedRecyclerViewAdapter.notifySubAdapterDataSetChanged();
+                        mShowingContent = false;
 
                         if (finalItemInfoList == null) {
                             return;
@@ -1021,7 +1058,7 @@ public class AppFileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (v.getId() == R.id.gridItemLayout) {
-                    onItemClick(itemInfo);
+                    onItemClick(this, itemInfo);
                 }
             }
 
@@ -1038,6 +1075,16 @@ public class AppFileFragment extends Fragment {
             @Override
             public void setIconAlpha(int alpha) {
                 iconView.setImageAlpha(alpha);
+            }
+
+            @Override
+            ImageView getPinView() {
+                return pinView;
+            }
+
+            @Override
+            View getItemView() {
+                return rootView;
             }
 
             @Override
@@ -1123,6 +1170,7 @@ public class AppFileFragment extends Fragment {
 
         class LinearRecyclerViewHolder extends RecyclerViewHolder implements OnClickListener, OnLongClickListener {
 
+            private View rootView;
             private TextView itemName;
             private ImageView iconView;
             private ImageView pinView;
@@ -1130,6 +1178,7 @@ public class AppFileFragment extends Fragment {
             private LinearRecyclerViewHolder(View itemView) {
                 super(itemView);
 
+                rootView = itemView;
                 itemName = (TextView) itemView.findViewById(R.id.item_name);
                 iconView = (ImageView) itemView.findViewById(R.id.item_icon);
                 pinView = (ImageView) itemView.findViewById(R.id.pinView);
@@ -1142,15 +1191,18 @@ public class AppFileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (v.getId() == R.id.pinView) {
-                    // Pin/Unpin the selected item */
+                    itemInfo.setProcessing(true);
+
+                    // Pin/unpin the selected item
                     boolean isPinned = !itemInfo.isPinned();
-                    Logs.d(CLASSNAME, "onClick", "isPinned=" + isPinned);
                     boolean allowPinUnpin = pinUnpinItem(isPinned);
                     if (allowPinUnpin) {
-                        pinView.setImageDrawable(itemInfo.getPinUnpinImage(isPinned));
+                        pinView.setImageDrawable(itemInfo.getPinViewImage(isPinned));
+                    } else {
+                        itemInfo.setProcessing(false);
                     }
                 } else if (v.getId() == R.id.linearItemLayout) {
-                    onItemClick(itemInfo);
+                    onItemClick(this, itemInfo);
                 }
             }
 
@@ -1178,6 +1230,16 @@ public class AppFileFragment extends Fragment {
             @Override
             public void setIconAlpha(int alpha) {
                 iconView.setImageAlpha(alpha);
+            }
+
+            @Override
+            ImageView getPinView() {
+                return pinView;
+            }
+
+            @Override
+            View getItemView() {
+                return rootView;
             }
 
         }
@@ -1817,7 +1879,7 @@ public class AppFileFragment extends Fragment {
         super.setMenuVisibility(menuVisible);
 
         if (menuVisible) {
-            mCurrentVisible = true;
+            mFragmentVisible = true;
             if (mApiExecutorThread == null) {
                 mApiExecutorThread = new Thread(mApiExecutorRunnable);
                 mApiExecutorThread.start();
@@ -1868,7 +1930,7 @@ public class AppFileFragment extends Fragment {
                 }
             });
         } else {
-            mCurrentVisible = false;
+            mFragmentVisible = false;
             if (mApiExecutorThread != null && !mApiExecutorThread.isInterrupted()) {
                 mApiExecutorThread.interrupt();
                 mApiExecutorThread = null;
@@ -2013,7 +2075,7 @@ public class AppFileFragment extends Fragment {
         return isPinned;
     }
 
-    private void onItemClick(ItemInfo itemInfo) {
+    private void onItemClick(RecyclerViewHolder holder, ItemInfo itemInfo) {
         if (itemInfo instanceof AppInfo) {
             Bundle args = new Bundle();
             args.putBoolean(KEY_ARGUMENT_ALLOW_PIN_UNPIN_APPS, mAllowPinUnpinApps);
@@ -2051,6 +2113,9 @@ public class AppFileFragment extends Fragment {
 
                 // Show the file list of the entered directory
                 showContent();
+
+                // Disable the item view to prevent user click many times at the same time
+                holder.getItemView().setEnabled(false);
             } else {
                 // Build the intent
                 String mimeType = fileInfo.getMimeType();
@@ -2100,6 +2165,7 @@ public class AppFileFragment extends Fragment {
         boolean pinUnpinItem(final boolean isPinned) {
             boolean allowPinUnpin = true;
             itemInfo.setPinned(isPinned);
+            mPinStatusSparseArr.put(itemInfo.hashCode(), isPinned);
             if (itemInfo instanceof AppInfo) {
                 showProgress();
 
@@ -2137,9 +2203,6 @@ public class AppFileFragment extends Fragment {
                 if (isNeedToProcess) {
                     showProgress();
                     fileInfo.setLastProcessTime(System.currentTimeMillis());
-
-                    Logs.d(CLASSNAME, "pinUnpinItem", "itemInfo.isPinned()=" + itemInfo.isPinned()
-                            + ", fileInfo.isPinned()=" + fileInfo.isPinned() + ", isPinned=" + isPinned);
                     mPinUnpinFileMap.put(fileInfo.getFilePath(), isPinned);
                     try {
                         // The subject to clone AppInfo is in order to keep the pin status.
@@ -2149,6 +2212,7 @@ public class AppFileFragment extends Fragment {
                     }
                 } else {
                     fileInfo.setPinned(!isPinned);
+                    mPinStatusSparseArr.put(itemInfo.hashCode(), !isPinned);
                     allowPinUnpin = false;
                 }
 
@@ -2162,17 +2226,14 @@ public class AppFileFragment extends Fragment {
 
         abstract void setIconAlpha(int alpha);
 
+        abstract ImageView getPinView();
+
+        abstract View getItemView();
+
     }
 
-    private void displayPinView(RecyclerViewHolder holder, ItemInfo
-            itemInfo) {
-
-        ImageView pinView;
-        if (holder instanceof LinearRecyclerViewAdapter.LinearRecyclerViewHolder) {
-            pinView = ((LinearRecyclerViewAdapter.LinearRecyclerViewHolder) holder).pinView;
-        } else {
-            pinView = ((GridRecyclerViewAdapter.GridRecyclerViewHolder) holder).pinView;
-        }
+    private void displayPinView(RecyclerViewHolder holder, ItemInfo itemInfo) {
+        ImageView pinView = holder.getPinView();
 
         if (!mAllowPinUnpinApps && itemInfo instanceof AppInfo) {
             pinView.setVisibility(View.GONE);
@@ -2189,110 +2250,115 @@ public class AppFileFragment extends Fragment {
         } else {
             // Display pinned/unpinned item image
             pinView.setVisibility(View.VISIBLE);
-            pinView.setImageDrawable(itemInfo.getPinUnpinImage(itemInfo.isPinned()));
+            pinView.setImageDrawable(itemInfo.getPinViewImage(itemInfo.isPinned()));
             pinView.setContentDescription(getPinViewContentDescription(itemInfo.isPinned()));
         }
     }
 
     private void displayItem(final int position,
                              final RecyclerViewHolder holder,
-                             final LruCache<Integer, Drawable> memoryCache, ThreadPoolExecutor
-                                     executor) {
-
-        if (!isPositionVisible(position)) {
-            return;
-        }
+                             final LruCache<Integer, Drawable> memoryCache,
+                             ThreadPoolExecutor executor) {
 
         final ItemInfo itemInfo = holder.getItemInfo();
-        final Drawable cacheDrawable = memoryCache.get(itemInfo.hashCode());
-        if (cacheDrawable != null) {
-            holder.setIconDrawable(cacheDrawable);
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    if (!holder.getItemInfo().getName().equals(itemInfo.getName())) {
-                        return;
-                    }
-
-                    final int alpha = itemInfo.getIconAlpha();
-                    Drawable drawable = cacheDrawable;
-                    if (alpha != cacheDrawable.getAlpha()) {
-                        if (alpha == ItemInfo.ICON_COLORFUL) {
-                            drawable = itemInfo.getIconDrawable();
-                        } else {
-                            Drawable adjustDrawable = adjustImageSaturation(drawable);
-                            if (adjustDrawable != null) {
-                                drawable = adjustDrawable;
-                            }
-                        }
-                    }
-
-                    boolean isPinned = isItemPinned(itemInfo);
-                    // A workaround to solve the problem that pin icons refresh abnormally when
-                    // user pin/unpin items.
-                    if (mWaitToExecuteSparseArr.get(itemInfo.hashCode()) != null) {
-                        return;
-                    }
-                    itemInfo.setPinned(isPinned);
-                    itemInfo.setPosition(position);
-
-                    final Drawable finalCacheDrawable = drawable;
-                    mUiHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            holder.setIconAlpha(alpha);
-                            holder.setIconDrawable(finalCacheDrawable);
-
-                            displayPinView(holder, itemInfo);
-                        }
-                    });
-                }
-            });
+        holder.getItemView().setEnabled(true);
+        if (holder.getItemInfo().hashCode() != itemInfo.hashCode() || itemInfo.isProcessing()) {
             return;
         }
 
-        // Item icon cache miss, get latest item icon.
-        holder.setIconDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));
+        // Display cached item icon or set default icon if icon is not cached.
+        final Drawable cacheDrawable = memoryCache.get(itemInfo.hashCode());
+        if (cacheDrawable == null) {
+            holder.setIconDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));
+        } else {
+            holder.setIconDrawable(cacheDrawable);
+        }
+
+        // Display cached pin view image or hide pin view by default if not cached.
+        Boolean isPinned = mPinStatusSparseArr.get(itemInfo.hashCode());
+        if (isPinned == null) {
+            holder.getPinView().setVisibility(View.GONE);
+        } else {
+            // Set the cached pin status to a clone item info to prevent from changing the real pin
+            // status.
+            ItemInfo cloneItem = cloneItemInfo(itemInfo);
+            cloneItem.setPinned(isPinned);
+            displayPinView(holder, cloneItem);
+        }
+
+        // Get latest image of item icon and pin view
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                if (!holder.getItemInfo().getName().equals(itemInfo.getName())) {
+                if (holder.getItemInfo().hashCode() != itemInfo.hashCode() || itemInfo.isProcessing()) {
                     return;
                 }
 
+                final int alpha = itemInfo.getIconAlpha();
                 final boolean isPinned = isItemPinned(itemInfo);
                 itemInfo.setPinned(isPinned);
                 itemInfo.setPosition(position);
 
-                final int alpha = itemInfo.getIconAlpha();
-                final Drawable iconDrawable = itemInfo.getIconDrawable();
-                mUiHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Drawable drawable = iconDrawable;
-                        if (alpha == ItemInfo.ICON_TRANSPARENT) {
-                            Drawable adjustDrawable = adjustImageSaturation(drawable);
-                            if (adjustDrawable != null) {
-                                drawable = adjustDrawable;
-                            }
+                // Display image of item icon
+                Drawable drawable;
+                if (alpha == ItemInfo.ICON_TRANSPARENT) {
+                    if (cacheDrawable == null) {
+                        drawable = itemInfo.getIconDrawable();
+                    } else {
+                        drawable = cacheDrawable;
+                    }
+                    drawable = adjustImageSaturation(drawable);
+                } else { // ItemInfo.ICON_COLORFUL
+                    if (cacheDrawable != null) {
+                        if (cacheDrawable.getAlpha() == ItemInfo.ICON_TRANSPARENT) {
+                            // The cache drawable is transparent, so we need to get colorful
+                            // drawable.
+                            drawable = itemInfo.getIconDrawable();
+                        } else { // ItemInfo.ICON_COLORFUL
+                            drawable = cacheDrawable;
                         }
-                        holder.setIconAlpha(alpha);
-                        holder.setIconDrawable(drawable);
-                        memoryCache.put(itemInfo.hashCode(), drawable);
+                    } else {
+                        drawable = itemInfo.getIconDrawable();
                     }
-                });
+                }
 
-                // Display pinned/unpinned item image
+                final Drawable iconDrawable = drawable;
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        if (holder.getItemInfo().hashCode() != itemInfo.hashCode() || itemInfo.isProcessing()) {
+                            return;
+                        }
+
+                        holder.setIconAlpha(alpha);
+                        holder.setIconDrawable(iconDrawable);
+                        memoryCache.put(itemInfo.hashCode(), iconDrawable);
+
+                        // Display image of item pin view
                         displayPinView(holder, itemInfo);
+                        mPinStatusSparseArr.put(itemInfo.hashCode(), isPinned);
                     }
                 });
-
             }
         });
 
+    }
+
+    private ItemInfo cloneItemInfo(ItemInfo itemInfo) {
+        if (itemInfo instanceof AppInfo) {
+            try {
+                itemInfo = (AppInfo) ((AppInfo) itemInfo).clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        } else if (itemInfo instanceof FileInfo) {
+            try {
+                itemInfo = (FileInfo) ((FileInfo) itemInfo).clone();
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
+        return itemInfo;
     }
 
     @Override

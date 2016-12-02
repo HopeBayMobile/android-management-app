@@ -95,14 +95,14 @@ public class FileDialogFragment extends DialogFragment {
             fileDirPinIcon.setVisibility(View.GONE);
         } else {
             fileDirPinIcon.setVisibility(View.VISIBLE);
-            fileDirPinIcon.setImageDrawable(fileDirInfo.getPinUnpinImage(fileDirInfo.isPinned()));
+            fileDirPinIcon.setImageDrawable(fileDirInfo.getPinViewImage(fileDirInfo.isPinned()));
             fileDirPinIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     boolean isPinned = !fileDirInfo.isPinned();
                     boolean allowPinUnpin = mViewHolder.pinUnpinItem(isPinned);
                     if (allowPinUnpin) {
-                        fileDirPinIcon.setImageDrawable(fileDirInfo.getPinUnpinImage(isPinned));
+                        fileDirPinIcon.setImageDrawable(fileDirInfo.getPinViewImage(isPinned));
                     }
                 }
             });
