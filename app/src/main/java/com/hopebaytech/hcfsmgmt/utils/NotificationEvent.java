@@ -21,6 +21,14 @@ public class NotificationEvent {
 
     private static final String CLASSNAME = NotificationEvent.class.getSimpleName();
 
+    public static final int ID_NETWORK_STATUS_CHANGED = 0;
+    public static final int ID_PIN_UNPIN_FAILURE = 1;
+    public static final int ID_ONGOING = 2;
+    public static final int ID_LOCAL_STORAGE_USED_RATIO = 3;
+    public static final int ID_CHECK_DEVICE_STATUS = 4;
+    public static final int ID_INSUFFICIENT_PIN_SPACE = 5;
+    public static final int ID_BOOSTER = 6;
+
     private static final int FLAG_DEFAULT = 0;
     public static final int FLAG_ON_GOING = 1;
     public static final int FLAG_OPEN_APP = 1 << 1;
@@ -96,9 +104,6 @@ public class NotificationEvent {
         boolean headsUp = (flag & FLAG_HEADS_UP) != 0;
         boolean inProgress = (flag & FLAG_IN_PROGRESS) != 0;
 
-        NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
-        bigStyle.bigText(notifyMessage);
-
         Intent intent = new Intent(context, MainActivity.class);
         if (extras != null) {
             String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
@@ -114,10 +119,17 @@ public class NotificationEvent {
                 .setSmallIcon(iconDrawableId)
                 .setLargeIcon(largeIcon)
                 .setTicker(notifyTitle)
-                .setContentTitle(notifyTitle)
-                .setContentText(notifyMessage)
-                .setTicker(notifyMessage)
-                .setStyle(bigStyle);
+                .setContentTitle(notifyTitle);
+
+        if (notifyMessage != null) {
+            NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
+            bigStyle.bigText(notifyMessage);
+
+            builder.setContentText(notifyMessage)
+                    .setTicker(notifyMessage)
+                    .setStyle(bigStyle);
+        }
+
         if (action != null) {
             builder.addAction(action);
         }

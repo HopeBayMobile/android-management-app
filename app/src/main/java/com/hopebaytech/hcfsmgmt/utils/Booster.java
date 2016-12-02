@@ -443,7 +443,7 @@ public class Booster {
      *
      * @param packageName The package name of the uninstalled app
      * @return true if the remaining symbolic link and the empty folder is
-     *         removed successfully, false otherwise.
+     * removed successfully, false otherwise.
      */
     public static boolean clearBoosterPackageRemaining(String packageName) {
         boolean isSuccess = false;
@@ -496,19 +496,24 @@ public class Booster {
         }
     }
 
+    /**
+     * @return <li>{@link UidInfo.BoostStatus#BOOSTING}</li>
+     * <li>{@link UidInfo.BoostStatus#UNBOOSTING}</li>
+     * <li> 0 if no boost/unboost is processing</li>
+     */
     public static int currentProcessBoostStatus(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         return sharedPreferences.getInt(SettingsFragment.PREF_BOOSTER_STATUS, 0);
     }
 
-    public static void removeBoostStatusInXml(Context context) {
+    public static void removeBoostStatusInSharedPreferenceXml(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(SettingsFragment.PREF_BOOSTER_STATUS);
         editor.apply();
     }
 
-    public static void updateBoostStatusInXml(Context context, int boostStatus) {
+    public static void updateBoostStatusInSharedPreferenceXml(Context context, int boostStatus) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(SettingsFragment.PREF_BOOSTER_STATUS, boostStatus);

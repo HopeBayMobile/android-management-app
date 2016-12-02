@@ -33,6 +33,7 @@ import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
@@ -487,7 +488,7 @@ public class BoosterFragment extends Fragment {
                 public void run() {
                     if (mCurrentTab == Tab.UNBOOSTED) {
                         if (Booster.isEnoughBoosterSpace(mContext, checkedApps)) {
-                            Booster.updateBoostStatusInXml(mContext, UidInfo.BoostStatus.BOOSTING);
+                            Booster.updateBoostStatusInSharedPreferenceXml(mContext, UidInfo.BoostStatus.BOOSTING);
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
@@ -501,7 +502,7 @@ public class BoosterFragment extends Fragment {
                         }
                     } else { // Tab.BOOSTED
                         if (Booster.isEnoughUnboosterSpace(mContext, checkedApps)) {
-                            Booster.updateBoostStatusInXml(mContext, UidInfo.BoostStatus.UNBOOSTING);
+                            Booster.updateBoostStatusInSharedPreferenceXml(mContext, UidInfo.BoostStatus.UNBOOSTING);
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
@@ -516,7 +517,7 @@ public class BoosterFragment extends Fragment {
                     }
 
                     // Processing failed due to insufficient space
-                    Booster.removeBoostStatusInXml(mContext);
+                    Booster.removeBoostStatusInSharedPreferenceXml(mContext);
                     UiHandler.getInstance().post(new Runnable() {
                         @Override
                         public void run() {
@@ -546,7 +547,7 @@ public class BoosterFragment extends Fragment {
                 public void run() {
                     Booster.enableApps(mContext);
                     Booster.recoverBoostStatusWhenFailed(mContext);
-                    Booster.removeBoostStatusInXml(mContext);
+                    Booster.removeBoostStatusInSharedPreferenceXml(mContext);
 
                     UiHandler.getInstance().post(new Runnable() {
                         @Override
@@ -570,7 +571,7 @@ public class BoosterFragment extends Fragment {
 
         private void notifyProcessingAppsCompleted() {
             Booster.enableApps(mContext);
-            Booster.removeBoostStatusInXml(mContext);
+            Booster.removeBoostStatusInSharedPreferenceXml(mContext);
 
             List<Integer> removePositionList = new ArrayList<>();
             for (int i = 0; i < mCheckedPosition.size(); i++) {
@@ -798,6 +799,7 @@ public class BoosterFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            NotificationEvent.cancel(mContext, NotificationEvent.ID_BOOSTER);
             BoosterAdapter adapter = ((BoosterAdapter) mRecycleView.getAdapter());
             switch (intent.getAction()) {
                 case TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED:

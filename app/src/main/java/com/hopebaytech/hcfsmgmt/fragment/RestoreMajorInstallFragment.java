@@ -125,7 +125,7 @@ public class RestoreMajorInstallFragment extends Fragment {
     }
 
     private void cancelInProgressNotification() {
-        NotificationEvent.cancel(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING);
+        NotificationEvent.cancel(mContext, NotificationEvent.ID_ONGOING);
     }
 
     private void showHeadsUpNotification() {
@@ -135,7 +135,7 @@ public class RestoreMajorInstallFragment extends Fragment {
                 | NotificationEvent.FLAG_OPEN_APP
                 | NotificationEvent.FLAG_IN_PROGRESS;
         String title = mContext.getString(R.string.restore_notification_title);
-        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title, null, flag);
+        NotificationEvent.notify(mContext, NotificationEvent.ID_ONGOING, title, null, flag);
     }
 
     private void showNormalNotification() {
@@ -145,7 +145,7 @@ public class RestoreMajorInstallFragment extends Fragment {
                 | NotificationEvent.FLAG_IN_PROGRESS;
         int restoreIconId = R.drawable.restore_icon_anim;
         String title = mContext.getString(R.string.restore_notification_title);
-        NotificationEvent.notify(mContext, HCFSMgmtUtils.NOTIFY_ID_ONGOING, title,
+        NotificationEvent.notify(mContext, NotificationEvent.ID_ONGOING, title,
                 null /* message*/, restoreIconId, null /* action */, flag, null /* extras */);
     }
 
