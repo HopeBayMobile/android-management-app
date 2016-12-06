@@ -19,6 +19,7 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.BitmapFactoryUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
@@ -93,14 +94,14 @@ public class FileInfo extends ItemInfo implements Cloneable {
                     if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
                         if (mimeType.contains(MIME_SUBTYPE_PNG)) {
                             // Show PNG file with alpha supported
-                            Bitmap image = BitmapFactory.decodeFile(filePath);
+                            Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                             iconImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                         } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
                             // TODO show svg file
                         } else {
                             Bitmap thumbImage = getImageThumbnail(filePath);
                             if (thumbImage == null) {
-                                Bitmap image = BitmapFactory.decodeFile(filePath);
+                                Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                                 thumbImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             }
                             iconImage = thumbImage;
@@ -166,7 +167,7 @@ public class FileInfo extends ItemInfo implements Cloneable {
                     if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
                         if (mimeType.contains(MIME_SUBTYPE_PNG)) {
                             // Show PNG file with alpha supported
-                            Bitmap image = BitmapFactory.decodeFile(filePath);
+                            Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                             Bitmap thumbnail = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             iconDrawable = new BitmapDrawable(mContext.getResources(), thumbnail);
                         } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
@@ -174,7 +175,7 @@ public class FileInfo extends ItemInfo implements Cloneable {
                         } else {
                             Bitmap thumbnail = getImageThumbnail(filePath);
                             if (thumbnail == null) {
-                                Bitmap image = BitmapFactory.decodeFile(filePath);
+                                Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                                 thumbnail = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             }
                             iconDrawable = new BitmapDrawable(mContext.getResources(), thumbnail);

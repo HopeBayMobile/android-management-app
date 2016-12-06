@@ -28,7 +28,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
+import com.hopebaytech.hcfsmgmt.utils.BitmapFactoryUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -119,7 +119,7 @@ public class UserInfoDialogFragment extends DialogFragment {
         if (System.currentTimeMillis() <= accountInfo.getImgExpiringTime()) {
             String imgBase64 = accountInfo.getImgBase64();
             if (imgBase64 != null) {
-                mUserIcon.setImageBitmap(BitmapBase64Factory.decodeBase64(imgBase64));
+                mUserIcon.setImageBitmap(BitmapFactoryUtils.decodeBase64(imgBase64));
             }
             return;
         }
@@ -180,8 +180,8 @@ public class UserInfoDialogFragment extends DialogFragment {
                                 }
                             });
 
-                            String imgBase64 = BitmapBase64Factory.encodeToBase64(
-                                    circularIconBitmap,
+                            String imgBase64 = BitmapFactoryUtils.encodeToBase64(
+                                    iconBitmap,
                                     Bitmap.CompressFormat.PNG,
                                     100);
                             accountInfo.setImgBase64(imgBase64);
