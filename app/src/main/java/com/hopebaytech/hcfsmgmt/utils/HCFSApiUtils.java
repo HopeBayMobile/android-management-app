@@ -182,7 +182,9 @@ public class HCFSApiUtils {
     public static native String createMinimalApk(String packagePath, int blocking);
 
     /**
-     * @param packagePath Check minimal base apk is existed
+     * This method will check minimal base apk is existed
+     *
+     * @param packagePath package path in /data/app
      * @return a json string contains: true if success, false otherwise.
      * <li>0 not existed</li>
      * <li>1 existed</li>
