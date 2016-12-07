@@ -389,3 +389,27 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_mount
     free((char *)json_res);
     return result;
 }
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_createMinimalApk(
+ 		JNIEnv *jEnv, jobject jObject, jstring jPkgPath, jint jBlocking) {
+ 	const char *json_res;
+    const char *pkg_path = (*jEnv)->GetStringUTFChars(jEnv, jPkgPath, 0);
+    int blocking = jBlocking;
+    HCFS_create_minimal_apk(&json_res, pkg_path, blocking);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pkg_path);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_checkMinimalApk(
+ 		JNIEnv *jEnv, jobject jObject, jstring jPkgPath, jint jBlocking) {
+ 	const char *json_res;
+    const char *pkg_path = (*jEnv)->GetStringUTFChars(jEnv, jPkgPath, 0);
+    int blocking = jBlocking;
+    HCFS_check_minimal_apk(&json_res, pkg_path, blocking);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pkg_path);
+    return result;
+}

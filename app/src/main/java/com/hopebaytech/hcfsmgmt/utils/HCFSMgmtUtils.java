@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -922,7 +923,7 @@ public class HCFSMgmtUtils {
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
             }
@@ -932,5 +933,55 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
+    public static boolean createMinimalApk(Context context, String packageName, boolean blocking) {
+        boolean isSuccess = false;
+        try {
+            String sourceDir = getSourceDir(context, packageName);
+            if (sourceDir.startsWith("/data/app")) {
+                String jsonResult = HCFSApiUtils.createMinimalApk(sourceDir, blocking ? 1 : 0);
+                JSONObject jObject = new JSONObject(jsonResult);
+                isSuccess = jObject.getBoolean("result");
+                if (isSuccess) {
+                    Logs.d(CLASSNAME, "createMinimalApk", "jObject=" + jObject);
+                } else {
+                    Logs.e(CLASSNAME, "createMinimalApk", "jObject=" + jObject);
+                }
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "createMinimalApk", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
 
+    public static boolean checkMinimalApk(Context context, String packageName, boolean blocking) {
+        boolean exist = false;
+        try {
+            String sourceDir = getSourceDir(context, packageName);
+            if (sourceDir.startsWith("/data/app")) {
+                String jsonResult = HCFSApiUtils.checkMinimalApk(sourceDir, blocking ? 1 : 0);
+                JSONObject jObject = new JSONObject(jsonResult);
+                if (jObject.getBoolean("result")) {
+                    exist = jObject.getInt("code") == 1;
+                    Logs.d(CLASSNAME, "checkMinimalApk", "jObject=" + jObject);
+                } else {
+                    Logs.e(CLASSNAME, "checkMinimalApk", "jObject=" + jObject);
+                }
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "checkMinimalApk", Log.getStackTraceString(e));
+        }
+        return exist;
+    }
+
+    private static String getSourceDir(Context context, String packageName) {
+        String sourceDir = null;
+        try {
+            PackageInfo p = context.getPackageManager().getPackageInfo(packageName, 0);
+            sourceDir = p.applicationInfo.sourceDir;
+            sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
+        } catch (PackageManager.NameNotFoundException e) {
+            Logs.e(CLASSNAME, "createMinimalApk", e.toString());
+        }
+        return sourceDir;
+    }
 }
