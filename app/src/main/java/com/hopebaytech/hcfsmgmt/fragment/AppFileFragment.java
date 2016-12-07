@@ -812,7 +812,6 @@ public class AppFileFragment extends Fragment {
                 mSectionedRecyclerViewAdapter = new SectionedRecyclerViewAdapter(new LinearRecyclerViewAdapter());
                 break;
             case GRID:
-                Logs.w(CLASSNAME, "onActivityCreated", null);
                 mChangeLayout.setImageResource(R.drawable.icon_btn_tab_listview_light);
                 mRecyclerView.setLayoutManager(new GridLayoutManager(mContext, GRID_LAYOUT_SPAN_COUNT));
                 mSectionedRecyclerViewAdapter = new SectionedRecyclerViewAdapter(new GridRecyclerViewAdapter());

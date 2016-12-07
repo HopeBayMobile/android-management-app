@@ -93,6 +93,11 @@ public class ChangeAccountActivity extends AppCompatActivity {
     private boolean mResolvingError;
 
     /**
+     * Account has been changed or not.
+     */
+    private boolean mAccountChanged;
+
+    /**
      * Request code to use when launching the resolution activity
      */
     private static final int REQUEST_RESOLVE_ERROR = 1001;
@@ -451,6 +456,8 @@ public class ChangeAccountActivity extends AppCompatActivity {
         proxy.setOnChangeAccountListener(new MgmtCluster.ChangeAccountProxy.OnChangeAccountListener() {
             @Override
             public void onChangeAccountSuccessful(DeviceServiceInfo deviceServiceInfo) {
+                mAccountChanged = true;
+
                 AccountInfo accountInfo = new AccountInfo();
                 accountInfo.setName(mAccountName);
                 accountInfo.setEmail(mAccountEmail);
@@ -618,6 +625,12 @@ public class ChangeAccountActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        signOut();
+
+        // If user don't complete the change account process then leave Tera app, we need to sign
+        // out the current user so that the google account chooser dialog will appear when user
+        // click the Google login icon in login page.
+        if (!mAccountChanged) {
+            signOut();
+        }
     }
 }

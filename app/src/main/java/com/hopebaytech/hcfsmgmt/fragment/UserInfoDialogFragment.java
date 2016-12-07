@@ -4,8 +4,13 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.Nullable;
@@ -30,6 +35,8 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -123,7 +130,6 @@ public class UserInfoDialogFragment extends DialogFragment {
                 serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
             @Override
             public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-
                 if (result == null || !result.isSuccess()) {
                     return;
                 }
@@ -150,19 +156,37 @@ public class UserInfoDialogFragment extends DialogFragment {
                     public void run() {
                         final Bitmap iconBitmap = downloadUserIconWithRetry(finalIconUrl);
                         if (iconBitmap != null) {
+                            int radius = iconBitmap.getWidth() / 2;
+                            BitmapShader bitmapShader = new BitmapShader(
+                                    iconBitmap,
+                                    Shader.TileMode.CLAMP,
+                                    Shader.TileMode.CLAMP
+                            );
+                            final Bitmap circularIconBitmap = Bitmap.createBitmap(
+                                    iconBitmap.getWidth(),
+                                    iconBitmap.getHeight(),
+                                    Bitmap.Config.ARGB_8888
+                            );
+                            Canvas canvas = new Canvas(circularIconBitmap);
+                            Paint paint = new Paint();
+                            paint.setAntiAlias(true);
+                            paint.setShader(bitmapShader);
+                            canvas.drawCircle(radius, radius, radius, paint);
+
                             mUiHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mUserIcon.setImageBitmap(iconBitmap);
+                                    mUserIcon.setImageBitmap(circularIconBitmap);
                                 }
                             });
 
                             String imgBase64 = BitmapBase64Factory.encodeToBase64(
-                                    iconBitmap,
+                                    circularIconBitmap,
                                     Bitmap.CompressFormat.PNG,
                                     100);
                             accountInfo.setImgBase64(imgBase64);
                             accountInfo.setImgExpiringTime(System.currentTimeMillis() + Interval.DAY);
+
                             accountDAO.update(accountInfo);
                         }
                     }
@@ -172,10 +196,12 @@ public class UserInfoDialogFragment extends DialogFragment {
             @Override
             public void onAuthFailed(@Nullable GoogleSignInResult result) {
                 Logs.e(CLASSNAME, "onAuthFailed", "result=" + result);
+                if (result != null) {
+                    Logs.e(CLASSNAME, "onAuthFailed", "status=" + result.getStatus());
+                }
             }
         });
         silentAuthProxy.auth();
-
     }
 
     private Bitmap downloadUserIconWithRetry(String iconUrl) {
