@@ -70,7 +70,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     intentService.setAction(TeraIntent.ACTION_ONGOING_NOTIFICATION);
                     intentService.putExtra(TeraIntent.KEY_ONGOING, true);
                     context.startService(intentService);
-                    return;
+                    break;
                 }
                 case ConnectivityManager.CONNECTIVITY_ACTION: {
                     // Detect network status changed and enable/disable data sync to cloud
@@ -97,31 +97,31 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                             context.startService(intentService);
                         }
                     }
-                    return;
+                    break;
                 }
                 case TeraIntent.ACTION_TOKEN_EXPIRED: {
                     Intent intentService = new Intent(context, TeraMgmtService.class);
                     intentService.setAction(TeraIntent.ACTION_TOKEN_EXPIRED);
                     context.startService(intentService);
-                    return;
+                    break;
                 }
                 case TeraIntent.ACTION_EXCEED_PIN_MAX: {
                     Intent intentService = new Intent(context, TeraMgmtService.class);
                     intentService.setAction(TeraIntent.ACTION_EXCEED_PIN_MAX);
                     context.startService(intentService);
-                    return;
+                    break;
                 }
                 case TeraIntent.ACTION_TRANSFER_COMPLETED: {
                     Intent intentService = new Intent(context, TeraMgmtService.class);
                     intentService.setAction(TeraIntent.ACTION_TRANSFER_COMPLETED);
                     context.startService(intentService);
-                    return;
+                    break;
                 }
             }
         }
 
         switch (action) {
-            case Intent.ACTION_BOOT_COMPLETED:
+            case Intent.ACTION_BOOT_COMPLETED: {
                 // Add uid and pin system app and update app external dir list in uid.db
                 Intent bootCompletedIntent = new Intent(context, TeraMgmtService.class);
                 bootCompletedIntent.setAction(Intent.ACTION_BOOT_COMPLETED);
@@ -145,7 +145,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 Intent checkAndFixBoosterIntent = new Intent(context, TeraMgmtService.class);
                 checkAndFixBoosterIntent.setAction(TeraIntent.ACTION_CHECK_AND_FIX_BOOSTER);
                 context.startService(checkAndFixBoosterIntent);
-                return;
+                break;
+            }
             case Intent.ACTION_PACKAGE_ADDED: {
                 // Add uid info of new installed app to database and unpin user app on /data/data and /data/app
                 boolean isReplacing = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
@@ -159,7 +160,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                     context.startService(intentService);
                 }
-                return;
+                break;
             }
             case Intent.ACTION_PACKAGE_REPLACED: {
                 // Pin or unpin an update app according to pin_status field in uid.db
@@ -171,7 +172,7 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 intentService.putExtra(TeraIntent.KEY_UID, uid);
                 intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                 context.startService(intentService);
-                return;
+                break;
             }
             case Intent.ACTION_PACKAGE_REMOVED: {
                 // Remove uid info of uninstalled app from database
@@ -188,21 +189,21 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                     context.startService(intentService);
                 }
-                return;
+                break;
             }
             case TeraIntent.ACTION_RESTORE_STAGE_1: {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 intentService.setAction(TeraIntent.ACTION_RESTORE_STAGE_1);
                 intentService.putExtras(intent.getExtras());
                 context.startService(intentService);
-                return;
+                break;
             }
             case TeraIntent.ACTION_RESTORE_STAGE_2: {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
                 intentService.setAction(TeraIntent.ACTION_RESTORE_STAGE_2);
                 intentService.putExtras(intent.getExtras());
                 context.startService(intentService);
-                return;
+                break;
             }
             case TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED: {
                 Intent intentService = new Intent(context, TeraMgmtService.class);
