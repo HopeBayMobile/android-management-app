@@ -191,6 +191,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 intentService.putExtra(TeraIntent.KEY_UID, uid);
                 intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                 context.startService(intentService);
+
+                HCFSMgmtUtils.createMinimalApk(context, packageName, false /*blocking*/);
                 return;
             }
             case Intent.ACTION_PACKAGE_REMOVED: {
