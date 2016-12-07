@@ -160,6 +160,11 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                         PollingServiceUtils.JOB_ID_PIN_ANDROID_FOLDER,
                         PinAndroidFolderService.class
                 );
+
+                // Check booster is valid or not. If not, fix it.
+                Intent checkAndFixBoosterIntent = new Intent(context, TeraMgmtService.class);
+                checkAndFixBoosterIntent.setAction(TeraIntent.ACTION_CHECK_AND_FIX_BOOSTER);
+                context.startService(checkAndFixBoosterIntent);
                 return;
             case Intent.ACTION_PACKAGE_ADDED: {
                 // Add uid info of new installed app to database and unpin user app on /data/data and /data/app

@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -194,6 +195,9 @@ public class TeraMgmtService extends Service {
                             break;
                         case TeraIntent.ACTION_BOOSTER_PROCESS_FAILED:
                             onBoosterProcessFailed();
+                            break;
+                        case TeraIntent.ACTION_CHECK_AND_FIX_BOOSTER:
+                            checkAndFixBooster();
                             break;
                     }
 
@@ -1138,4 +1142,127 @@ public class TeraMgmtService extends Service {
         });
         getBoosterWhiteListInfoProxy.get();
     }
+
+    /**
+     * Check booster is valid or not. If not, fix it.
+     */
+    private void checkAndFixBooster() {
+        boolean isBoosterEnabled = false;
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+        if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
+            isBoosterEnabled = true;
+        }
+        if (Booster.isBoosterMounted()) {
+            if (!isBoosterEnabled) {
+                // Set ENABLE_BOOSTER flag to true if booster is mounted.
+                if (settingsInfo == null) {
+                    settingsInfo = new SettingsInfo();
+                    settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                }
+                settingsInfo.setValue(String.valueOf(true));
+                settingsDAO.update(settingsInfo);
+            }
+            fixBoostStatusIfInvalid();
+            proceedBoosterProcessIfNotCompleted();
+        } else {
+            if (isBoosterEnabled) {
+                // Set ENABLE_BOOSTER flag to false if booster is not mounted.
+                settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                settingsInfo.setValue(String.valueOf(false));
+                settingsDAO.update(settingsInfo);
+            }
+            resetUserBoosterStatus();
+        }
+    }
+
+    /**
+     * Reset the booster status of user packages in uid.db to {@link UidInfo.BoostStatus#UNBOOSTED}
+     */
+    private void resetUserBoosterStatus() {
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.SYSTEM_APP_COLUMN, 0);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        for (UidInfo uidInfo : uidDAO.get(cv)) {
+            uidInfo.setBoostStatus(UidInfo.BoostStatus.UNBOOSTED);
+            uidDAO.update(uidInfo);
+        }
+    }
+
+    /**
+     * Proceed processing booster process if not completed
+     */
+    private void proceedBoosterProcessIfNotCompleted() {
+        ContentValues cv = new ContentValues();
+        UidDAO uidDAO = UidDAO.getInstance(this);
+
+        // if one record with BoostStatus.BOOSTING is found, proceed the boost process
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTING);
+        List<UidInfo> uidInfoList = uidDAO.get(cv);
+        if (!uidInfoList.isEmpty()) {
+            for (UidInfo uidInfo : uidInfoList) {
+                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_BOOST);
+                uidDAO.update(uidInfo);
+            }
+            Booster.triggerBoost();
+            return;
+        }
+
+        // if one record with BoostStatus.UNBOOSTING is found, proceed the unboost process
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.UNBOOSTING);
+        uidInfoList = uidDAO.get(cv);
+        if (!uidInfoList.isEmpty()) {
+            for (UidInfo uidInfo : uidInfoList) {
+                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_UNBOOST);
+                uidDAO.update(uidInfo);
+            }
+            Booster.triggerUnboost();
+            return;
+        }
+
+        // if one record with BoostStatus.BOOST_FAILED is found, proceed the boost process
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOST_FAILED);
+        uidInfoList = uidDAO.get(cv);
+        if (!uidInfoList.isEmpty()) {
+            for (UidInfo uidInfo : uidInfoList) {
+                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_BOOST);
+                uidDAO.update(uidInfo);
+            }
+            Booster.triggerBoost();
+            return;
+        }
+
+        // if one record with BoostStatus.UNBOOST_FAILED is found, proceed the unboost process
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.UNBOOST_FAILED);
+        uidInfoList = uidDAO.get(cv);
+        if (!uidInfoList.isEmpty()) {
+            for (UidInfo uidInfo : uidInfoList) {
+                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_UNBOOST);
+                uidDAO.update(uidInfo);
+            }
+            Booster.triggerUnboost();
+        }
+    }
+
+    /**
+     * Check apps with BoostStatus.BOOSTED have the same boostStatus as the checkPackageBoostStatus()
+     * or not. If not, it means the booster has corrupted. We need to fix the boostStatus of these
+     * apps.
+     */
+    private void fixBoostStatusIfInvalid() {
+        ContentValues cv = new ContentValues();
+        UidDAO uidDAO = UidDAO.getInstance(this);
+
+        cv.clear();
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
+        for (UidInfo uidInfo : uidDAO.get(cv)) {
+            boolean isBoosted = Booster.isPackageBoosted(uidInfo.getPackageName());
+            if (!isBoosted) {
+                uidInfo.setBoostStatus(UidInfo.BoostStatus.UNBOOSTED);
+                uidDAO.update(uidInfo);
+            }
+        }
+    }
+
 }

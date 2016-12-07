@@ -263,7 +263,6 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 boolean isChecked = ((CheckBox) v).isChecked();
                 if (isChecked) {
-
                     showEnableBoosterDialog();
                 } else {
                     mEnableBooster.setChecked(true);

@@ -1,9 +1,11 @@
 package com.hopebaytech.hcfsmgmt.info;
 
 /**
- * Created by daniel on 2016/8/19.
+ * @author Daniel
+ *         Created by Daniel on 2016/8/19.
  */
 public class SettingsInfo {
+
     private int id;
 
     private boolean isEnabled;
@@ -35,4 +37,5 @@ public class SettingsInfo {
     public void setValue(String value) {
         this.value = value;
     }
+
 }
