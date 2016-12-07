@@ -127,7 +127,9 @@
     <string name="app_file_dialog_app_remove">解除安裝</string>
     <string name="app_file_dialog_app_cancel">取消</string>
     <string name="app_file_dialog_calculating">計算中&#8230;</string>
-    <string name="app_dialog_unavailable">應用程式無法使用，請檢查網路狀態。</string>
+    <string name="app_dialog_unavailable">無法執行程式。請檢查您的 Wi-Fi 連線是否正常，或者請您停用位於 \"同步\" 設定中的 \"只有連接 Wi-Fi 時才存取雲端\" 的選項並使用您的行動資費方案。</string>
+    <string name="file_unavailable">無法開啟檔案。請檢查您的 Wi-Fi 連線是否正常，或者請您停用位於 \"同步\" 設定中的 \"只有連接 Wi-Fi 時才存取雲端\" 的選項並使用您的行動資費方案。</string>
+
     <string name="hcfs_mgmt_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
     <string name="hcfs_mgmt_service_video_failed_to_pin">影片類型釘選失敗數量</string>
     <string name="hcfs_mgmt_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>

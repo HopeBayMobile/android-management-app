@@ -43,6 +43,11 @@ public class FileInfo extends ItemInfo implements Cloneable {
     private long mSize;
     private int mHashCode;
 
+    /**
+     * NOT real time data status of this file, only be updated when {@link #getFileDirStatus()} is called.
+     */
+    private int mFileDataStatus;
+
     public FileInfo(Context context) {
         super(context);
     }
@@ -153,7 +158,7 @@ public class FileInfo extends ItemInfo implements Cloneable {
         } else {
             String filePath = mFilePath;
             String mimeType = getMimeType();
-            Logs.d(CLASSNAME, "getIconImage", "filePath=" + filePath + ", mimeType=" + mimeType);
+            Logs.d(CLASSNAME, "getIconDrawable", "filePath=" + filePath + ", mimeType=" + mimeType);
             if (mimeType != null) {
                 int width, height;
                 width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
@@ -214,6 +219,10 @@ public class FileInfo extends ItemInfo implements Cloneable {
         // Unknown file type
         if (iconDrawable == null) {
             iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+        } else {
+            if (((BitmapDrawable) iconDrawable).getBitmap() == null) {
+                iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+            }
         }
         return iconDrawable;
     }
@@ -281,16 +290,26 @@ public class FileInfo extends ItemInfo implements Cloneable {
     }
 
     private int getFileDirStatus() {
+        int fileDataStatus;
         int locationStatus = getFileDirLocationStatus();
         if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return DataStatus.AVAILABLE;
+            fileDataStatus = DataStatus.AVAILABLE;
         } else {
             if (locationStatus == LocationStatus.LOCAL) {
-                return DataStatus.AVAILABLE;
+                fileDataStatus = DataStatus.AVAILABLE;
             } else {
-                return DataStatus.UNAVAILABLE;
+                fileDataStatus = DataStatus.UNAVAILABLE;
             }
         }
+        mFileDataStatus = fileDataStatus;
+        return fileDataStatus;
+    }
+
+    /**
+     * @return The data status of this file, but the data status is not guaranteed to be correct.
+     */
+    public int getLayzyDataStatus() {
+        return mFileDataStatus;
     }
 
     private int getFileDirLocationStatus() {

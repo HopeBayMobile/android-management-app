@@ -168,10 +168,9 @@ public class AppInfo extends ItemInfo implements Cloneable {
         if (isSourceDirInLocal &&
                 HCFSMgmtUtils.getDirLocationStatus(getDataDir()) == LocationStatus.LOCAL &&
                 getExternalDirLocationStatus() == LocationStatus.LOCAL) {
-            return DataStatus.AVAILABLE;
+            return (dataStatus = DataStatus.AVAILABLE);
         }
-        this.dataStatus = dataStatus;
-        return dataStatus;
+        return (dataStatus = DataStatus.UNAVAILABLE);
     }
 
     /**

@@ -69,6 +69,7 @@ import com.hopebaytech.hcfsmgmt.customview.CircleDisplay;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
+import com.hopebaytech.hcfsmgmt.info.DataStatus;
 import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.FileInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
@@ -1078,6 +1079,11 @@ public class AppFileFragment extends Fragment {
             }
 
             @Override
+            int getIconAlpha() {
+                return iconView.getImageAlpha();
+            }
+
+            @Override
             ImageView getPinView() {
                 return pinView;
             }
@@ -1230,6 +1236,11 @@ public class AppFileFragment extends Fragment {
             @Override
             public void setIconAlpha(int alpha) {
                 iconView.setImageAlpha(alpha);
+            }
+
+            @Override
+            int getIconAlpha() {
+                return iconView.getImageAlpha();
             }
 
             @Override
@@ -2117,30 +2128,34 @@ public class AppFileFragment extends Fragment {
                 // Disable the item view to prevent user click many times at the same time
                 holder.getItemView().setEnabled(false);
             } else {
-                // Build the intent
-                String mimeType = fileInfo.getMimeType();
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                File file = new File(fileInfo.getFilePath());
-                Logs.d(CLASSNAME, "onItemClick", "Uri.fromFile(file)=" + Uri.fromFile(file));
-                if (mimeType != null) {
-                    intent.setDataAndType(Uri.fromFile(file), mimeType);
-                } else {
-                    intent.setData(Uri.fromFile(file));
-                }
-
-                // Verify it resolves
-                PackageManager packageManager = mContext.getPackageManager();
-                List<ResolveInfo> activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-                boolean isIntentSafe = activities.size() > 0;
-
-                // Start an activity if it's safe
-                if (isIntentSafe) {
-                    startActivity(intent);
-                } else {
-                    View view = getView();
-                    if (view != null) {
-                        Snackbar.make(view, mContext.getString(R.string.app_file_snackbar_unknown_type_file), Snackbar.LENGTH_SHORT).show();
+                if (fileInfo.getLayzyDataStatus() == DataStatus.AVAILABLE) {
+                    // Build the intent
+                    String mimeType = fileInfo.getMimeType();
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    File file = new File(fileInfo.getFilePath());
+                    Logs.d(CLASSNAME, "onItemClick", "Uri.fromFile(file)=" + Uri.fromFile(file));
+                    if (mimeType != null) {
+                        intent.setDataAndType(Uri.fromFile(file), mimeType);
+                    } else {
+                        intent.setData(Uri.fromFile(file));
                     }
+
+                    // Verify it resolves
+                    PackageManager packageManager = mContext.getPackageManager();
+                    List<ResolveInfo> activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                    boolean isIntentSafe = activities.size() > 0;
+
+                    // Start an activity if it's safe
+                    if (isIntentSafe) {
+                        startActivity(intent);
+                    } else {
+                        View view = getView();
+                        if (view != null) {
+                            Snackbar.make(view, mContext.getString(R.string.app_file_snackbar_unknown_type_file), Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    Toast.makeText(mContext, R.string.file_unavailable, Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -2226,6 +2241,8 @@ public class AppFileFragment extends Fragment {
 
         abstract void setIconAlpha(int alpha);
 
+        abstract int getIconAlpha();
+
         abstract ImageView getPinView();
 
         abstract View getItemView();
@@ -2307,7 +2324,6 @@ public class AppFileFragment extends Fragment {
                     } else {
                         drawable = cacheDrawable;
                     }
-                    drawable = adjustImageSaturation(drawable);
                 } else { // ItemInfo.ICON_COLORFUL
                     if (cacheDrawable != null) {
                         if (cacheDrawable.getAlpha() == ItemInfo.ICON_TRANSPARENT) {
@@ -2322,7 +2338,7 @@ public class AppFileFragment extends Fragment {
                     }
                 }
 
-                final Drawable iconDrawable = drawable;
+                final Drawable imageDrawable = drawable;
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -2330,6 +2346,10 @@ public class AppFileFragment extends Fragment {
                             return;
                         }
 
+                        Drawable iconDrawable = imageDrawable;
+                        if (alpha == ItemInfo.ICON_TRANSPARENT) {
+                            iconDrawable = adjustImageSaturation(imageDrawable);
+                        }
                         holder.setIconAlpha(alpha);
                         holder.setIconDrawable(iconDrawable);
                         memoryCache.put(itemInfo.hashCode(), iconDrawable);

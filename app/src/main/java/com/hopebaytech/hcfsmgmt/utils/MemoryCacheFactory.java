@@ -1,5 +1,6 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.LruCache;
@@ -17,7 +18,12 @@ public class MemoryCacheFactory {
             @Override
             protected int sizeOf(Integer key, Drawable drawable) {
                 // The cache size will be measured in kilobytes rather than number of items.
-                return ((BitmapDrawable) drawable).getBitmap().getByteCount() / 1024;
+                Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
+                if (bitmap == null) {
+                    return 0;
+                } else {
+                    return bitmap.getByteCount() / 1024;
+                }
             }
         };
     }
