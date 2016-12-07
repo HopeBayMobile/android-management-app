@@ -953,15 +953,15 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
-    public static boolean checkMinimalApk(Context context, String packageName, boolean blocking) {
-        boolean exist = false;
+    public static int checkMinimalApk(Context context, String packageName, boolean blocking) {
+        int code = -1;
         try {
             String sourceDir = getSourceDir(context, packageName);
             if (sourceDir.startsWith("/data/app")) {
                 String jsonResult = HCFSApiUtils.checkMinimalApk(sourceDir, blocking ? 1 : 0);
                 JSONObject jObject = new JSONObject(jsonResult);
                 if (jObject.getBoolean("result")) {
-                    exist = jObject.getInt("code") == 1;
+                    code = jObject.getInt("code");
                     Logs.d(CLASSNAME, "checkMinimalApk", "jObject=" + jObject);
                 } else {
                     Logs.e(CLASSNAME, "checkMinimalApk", "jObject=" + jObject);
@@ -970,7 +970,7 @@ public class HCFSMgmtUtils {
         } catch (JSONException e) {
             Logs.e(CLASSNAME, "checkMinimalApk", Log.getStackTraceString(e));
         }
-        return exist;
+        return code;
     }
 
     private static String getSourceDir(Context context, String packageName) {
