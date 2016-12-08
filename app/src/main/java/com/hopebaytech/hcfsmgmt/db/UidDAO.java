@@ -248,7 +248,6 @@ public class UidDAO {
         return result;
     }
 
-    @NonNull
     public List<UidInfo> get(ContentValues cv) {
         List<UidInfo> uidInfoList = new ArrayList<>();
 

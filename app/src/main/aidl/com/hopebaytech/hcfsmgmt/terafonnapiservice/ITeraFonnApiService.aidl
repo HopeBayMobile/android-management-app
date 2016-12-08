@@ -87,4 +87,13 @@ interface ITeraFonnApiService {
 
     /** Get app boost status **/
     int getAppBoostStatus(String packageName);
+
+    /**
+     * The activate status of boost or unboost
+     *
+     * @return <li>0, not boost or unboost is activated.</li>
+     * <li>1, unboost is activated.</li>
+     * <li>2, boost is activated.</li>
+     **/
+    int getBoostUnboostActivateStatus();
 }
