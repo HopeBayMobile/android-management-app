@@ -17,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.misc.BoostUnboostActivateStatus;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
@@ -367,16 +368,16 @@ public class TeraFonnApiService extends Service {
             keyValueMap.put(UidDAO.BOOST_STATUS_COLUMN,
                     new Integer[]{UidInfo.BoostStatus.INIT_UNBOOST, UidInfo.BoostStatus.UNBOOSTING});
             if (!uidDAO.get(keyValueMap).isEmpty()) {
-                return 1; // unboost is activated.
+                return BoostUnboostActivateStatus.UNBOOST_ACTIVATED;
             }
 
             keyValueMap.put(UidDAO.BOOST_STATUS_COLUMN,
                     new Integer[]{UidInfo.BoostStatus.INIT_BOOST, UidInfo.BoostStatus.BOOSTING});
             if (!uidDAO.get(keyValueMap).isEmpty()) {
-                return 2; // boost is activated.
+                return BoostUnboostActivateStatus.BOOST_ACTIVATED;
             }
 
-            return 0; // not boost or unboost is activated
+            return BoostUnboostActivateStatus.NOT_BOOST_UNBOOST;
         }
     };
 
