@@ -633,7 +633,7 @@ public class HCFSMgmtUtils {
                 Logs.d(CLASSNAME, "changeCloudSyncStatus", "type=" + netInfo.getType()
                         + ", state=" + netInfo.getState()
                         + ", detailedState=" + netInfo.getDetailedState());
-                
+
                 if (netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                     String logMsg = "Current wifi network is active";
                     TeraCloudConfig.startSyncToCloud(context, logMsg);
@@ -953,6 +953,18 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
+    /**
+     * Check the minimal base apk is exist or not
+     *
+     * @param context
+     * @param packageName the package name to be checked
+     * @param blocking    the method is blocking or not
+     * @return a json string contains: true if success, false otherwise.
+     * <li>-1, error</li>
+     * <li>0, not existed</li>
+     * <li>1, existed</li>
+     * <li>2, create minimal base apk in progress</li>
+     */
     public static int checkMinimalApk(Context context, String packageName, boolean blocking) {
         int code = -1;
         try {

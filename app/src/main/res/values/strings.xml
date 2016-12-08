@@ -116,6 +116,7 @@
     <string name="app_file_alert_dialog_message_unpin_datatype">之後新增的檔案將自動被取消釘選，是否也同時取消釘選現存的檔案？</string>
     <string name="app_file_date_since_pinned">自 %1$s 開始釘選</string>
     <string name="app_file_cannot_unpin_files_in_android_folder">Android 目錄下的檔案不可取消釘選</string>
+    <string name="app_file_cannot_unpin_apps">Cannot unpin this app due to something error. Please try again later.</string>
     <string name="app_file_popup_menu_pin">釘選</string>
     <string name="app_file_popup_menu_unpin">取消釘選</string>
     <string name="app_file_popup_menu_app_type_more_info">更多資訊</string>
