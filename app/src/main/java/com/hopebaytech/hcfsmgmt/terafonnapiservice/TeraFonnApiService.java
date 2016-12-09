@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -16,6 +17,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.misc.BoostUnboostActivateStatus;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.ExecutorFactory;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
@@ -31,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -231,7 +234,6 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public void postCheckAppAvailable(final String packageName, final ICheckAppAvailableListener mListener) throws RemoteException {
-
             mExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -356,6 +358,26 @@ public class TeraFonnApiService extends Service {
             if (uidInfo != null)
                 status = uidInfo.getBoostStatus();
             return status;
+        }
+
+        @Override
+        public int getBoostUnboostActivateStatus() throws RemoteException {
+            UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
+
+            Map<String, Object> keyValueMap = new HashMap<>();
+            keyValueMap.put(UidDAO.BOOST_STATUS_COLUMN,
+                    new Integer[]{UidInfo.BoostStatus.INIT_UNBOOST, UidInfo.BoostStatus.UNBOOSTING});
+            if (!uidDAO.get(keyValueMap).isEmpty()) {
+                return BoostUnboostActivateStatus.UNBOOST_ACTIVATED;
+            }
+
+            keyValueMap.put(UidDAO.BOOST_STATUS_COLUMN,
+                    new Integer[]{UidInfo.BoostStatus.INIT_BOOST, UidInfo.BoostStatus.BOOSTING});
+            if (!uidDAO.get(keyValueMap).isEmpty()) {
+                return BoostUnboostActivateStatus.BOOST_ACTIVATED;
+            }
+
+            return BoostUnboostActivateStatus.NOT_BOOST_UNBOOST;
         }
     };
 
