@@ -12,6 +12,7 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UidDAO {
 
@@ -262,6 +263,56 @@ public class UidDAO {
         while (cursor.moveToNext()) {
             uidInfoList.add(getRecord(cursor));
         }
+        cursor.close();
+        return uidInfoList;
+    }
+
+    public List<UidInfo> get(Map<String, Object> queryMap) {
+        List<UidInfo> uidInfoList = new ArrayList<>();
+
+        final String AND = " and ";
+        final String IN = " in ";
+        final String LEFT_PARENTHESIS = "(";
+        final String RIGHT_PARENTHESIS = ")";
+        final String COMMA = ",";
+        final String SINGLE_QUOTE = "'";
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String key : queryMap.keySet()) {
+            Object value = queryMap.get(key);
+            if (value instanceof List || value instanceof Object[]) {
+                StringBuilder inConditionBuilder = new StringBuilder();
+                inConditionBuilder.append(LEFT_PARENTHESIS);
+                if (value instanceof List) {
+                    for (Object inValue : (List) value) {
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(inValue.toString());
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(COMMA);
+                    }
+                } else { // Object[]
+                    for (Object inValue : (Object[]) value) {
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(inValue.toString());
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(COMMA);
+                    }
+                }
+                inConditionBuilder.delete(inConditionBuilder.length() - COMMA.length(), inConditionBuilder.length());
+                inConditionBuilder.append(RIGHT_PARENTHESIS);
+
+                stringBuilder.append(key).append(IN).append(inConditionBuilder.toString()).append(AND);
+            } else {
+                stringBuilder.append(key).append("=").append(SINGLE_QUOTE).append(value).append(SINGLE_QUOTE).append(AND);
+            }
+        }
+
+        String where = stringBuilder.substring(0, stringBuilder.length() - AND.length());
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            uidInfoList.add(getRecord(cursor));
+        }
+
         cursor.close();
         return uidInfoList;
     }

@@ -73,8 +73,10 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -1164,7 +1166,11 @@ public class TeraMgmtService extends Service {
                 settingsDAO.update(settingsInfo);
             }
             fixBoostStatusIfInvalid();
-            proceedBoosterProcessIfNotCompleted();
+            if (isBoosterProcessCompleted()) {
+                Booster.enableApps(this);
+            } else {
+                proceedNotCompletedBoosterProcess();
+            }
         } else {
             if (isBoosterEnabled) {
                 // Set ENABLE_BOOSTER flag to false if booster is not mounted.
@@ -1173,7 +1179,22 @@ public class TeraMgmtService extends Service {
                 settingsDAO.update(settingsInfo);
             }
             resetUserBoosterStatus();
+            Booster.enableApps(this);
         }
+    }
+
+    private boolean isBoosterProcessCompleted() {
+        Map<String, Object> queryMap = new HashMap<>();
+        Integer[] queryBoostStatus = new Integer[]{
+                UidInfo.BoostStatus.BOOSTING,
+                UidInfo.BoostStatus.BOOST_FAILED,
+                UidInfo.BoostStatus.UNBOOSTING,
+                UidInfo.BoostStatus.UNBOOST_FAILED
+        };
+        queryMap.put(UidDAO.BOOST_STATUS_COLUMN, queryBoostStatus);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        return uidDAO.get(queryMap).isEmpty();
     }
 
     /**
@@ -1191,57 +1212,64 @@ public class TeraMgmtService extends Service {
     }
 
     /**
-     * Proceed processing booster process if not completed
+     * If one record with the queryBoostStatus is found, update the {@link UidInfo} of query result
+     * then proceed the boost/unboost process.
+     *
+     * @param queryBoostStatus  the boost status used to query the booster process is completed or not.
+     *                          See {@link UidInfo.BoostStatus#BOOSTING}, {@link UidInfo.BoostStatus#BOOST_FAILED}
+     *                          , {@link UidInfo.BoostStatus#UNBOOSTING} and {@link UidInfo.BoostStatus#UNBOOST_FAILED}
+     * @param updateBoostStatus the boost status used to update the query result of {@link UidInfo}
+     *                          according to the queryBoostStatus
+     * @return true if booster process is proceeded, false otherwise.
      */
-    private void proceedBoosterProcessIfNotCompleted() {
+    private boolean proceedBoosterProcess(int queryBoostStatus, int updateBoostStatus) {
+        boolean isProceeded = false;
         ContentValues cv = new ContentValues();
-        UidDAO uidDAO = UidDAO.getInstance(this);
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, queryBoostStatus);
 
-        // if one record with BoostStatus.BOOSTING is found, proceed the boost process
-        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTING);
+        UidDAO uidDAO = UidDAO.getInstance(this);
         List<UidInfo> uidInfoList = uidDAO.get(cv);
         if (!uidInfoList.isEmpty()) {
             for (UidInfo uidInfo : uidInfoList) {
-                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_BOOST);
+                uidInfo.setBoostStatus(updateBoostStatus);
                 uidDAO.update(uidInfo);
             }
-            Booster.triggerBoost();
-            return;
-        }
 
-        // if one record with BoostStatus.UNBOOSTING is found, proceed the unboost process
-        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.UNBOOSTING);
-        uidInfoList = uidDAO.get(cv);
-        if (!uidInfoList.isEmpty()) {
-            for (UidInfo uidInfo : uidInfoList) {
-                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_UNBOOST);
-                uidDAO.update(uidInfo);
+            if (queryBoostStatus == UidInfo.BoostStatus.BOOSTING ||
+                    queryBoostStatus == UidInfo.BoostStatus.BOOST_FAILED) {
+                Booster.triggerBoost();
+                isProceeded = true;
+            } else if (queryBoostStatus == UidInfo.BoostStatus.UNBOOSTING ||
+                    queryBoostStatus == UidInfo.BoostStatus.UNBOOST_FAILED) {
+                Booster.triggerUnboost();
+                isProceeded = true;
             }
-            Booster.triggerUnboost();
+        }
+        return isProceeded;
+    }
+
+    /**
+     * Proceed processing the not completed boost/unboost process
+     */
+    private void proceedNotCompletedBoosterProcess() {
+        // if one record with BoostStatus.BOOSTING is found, proceed the boost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.BOOSTING, UidInfo.BoostStatus.INIT_BOOST)) {
             return;
         }
 
         // if one record with BoostStatus.BOOST_FAILED is found, proceed the boost process
-        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOST_FAILED);
-        uidInfoList = uidDAO.get(cv);
-        if (!uidInfoList.isEmpty()) {
-            for (UidInfo uidInfo : uidInfoList) {
-                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_BOOST);
-                uidDAO.update(uidInfo);
-            }
-            Booster.triggerBoost();
+        if (proceedBoosterProcess(UidInfo.BoostStatus.BOOST_FAILED, UidInfo.BoostStatus.INIT_BOOST)) {
+            return;
+        }
+
+        // if one record with BoostStatus.UNBOOSTING is found, proceed the unboost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.UNBOOSTING, UidInfo.BoostStatus.INIT_UNBOOST)) {
             return;
         }
 
         // if one record with BoostStatus.UNBOOST_FAILED is found, proceed the unboost process
-        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.UNBOOST_FAILED);
-        uidInfoList = uidDAO.get(cv);
-        if (!uidInfoList.isEmpty()) {
-            for (UidInfo uidInfo : uidInfoList) {
-                uidInfo.setBoostStatus(UidInfo.BoostStatus.INIT_UNBOOST);
-                uidDAO.update(uidInfo);
-            }
-            Booster.triggerUnboost();
+        if (proceedBoosterProcess(UidInfo.BoostStatus.UNBOOST_FAILED, UidInfo.BoostStatus.INIT_UNBOOST)) {
+            return;
         }
     }
 
