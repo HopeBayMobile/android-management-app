@@ -12,15 +12,16 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UidDAO {
 
     private final String CLASSNAME = getClass().getSimpleName();
     public static final String TABLE_NAME = "uid";
     public static final String KEY_ID = "_id";
-    public static final String PIN_STATUS_COLUMN = "pin_status";
-    public static final String SYSTEM_APP_COLUMN = "system_app";
-    public static final String ENABLED_COLUMN = "enabled";
+    public static final String PIN_STATUS_COLUMN = "pin_status"; // 0 unpin, 1 normal pin, 2 priority pin
+    public static final String SYSTEM_APP_COLUMN = "system_app"; // 0 user app, 1 system app
+    public static final String ENABLED_COLUMN = "enabled"; // 0 disabled, 1 enabled
     public static final String UID_COLUMN = "uid";
     public static final String PACKAGE_NAME_COLUMN = "package_name";
     public static final String EXTERNAL_DIR_COLUMN = "external_dir";
@@ -262,6 +263,56 @@ public class UidDAO {
         while (cursor.moveToNext()) {
             uidInfoList.add(getRecord(cursor));
         }
+        cursor.close();
+        return uidInfoList;
+    }
+
+    public List<UidInfo> get(Map<String, Object> queryMap) {
+        List<UidInfo> uidInfoList = new ArrayList<>();
+
+        final String AND = " and ";
+        final String IN = " in ";
+        final String LEFT_PARENTHESIS = "(";
+        final String RIGHT_PARENTHESIS = ")";
+        final String COMMA = ",";
+        final String SINGLE_QUOTE = "'";
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String key : queryMap.keySet()) {
+            Object value = queryMap.get(key);
+            if (value instanceof List || value instanceof Object[]) {
+                StringBuilder inConditionBuilder = new StringBuilder();
+                inConditionBuilder.append(LEFT_PARENTHESIS);
+                if (value instanceof List) {
+                    for (Object inValue : (List) value) {
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(inValue.toString());
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(COMMA);
+                    }
+                } else { // Object[]
+                    for (Object inValue : (Object[]) value) {
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(inValue.toString());
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(COMMA);
+                    }
+                }
+                inConditionBuilder.delete(inConditionBuilder.length() - COMMA.length(), inConditionBuilder.length());
+                inConditionBuilder.append(RIGHT_PARENTHESIS);
+
+                stringBuilder.append(key).append(IN).append(inConditionBuilder.toString()).append(AND);
+            } else {
+                stringBuilder.append(key).append("=").append(SINGLE_QUOTE).append(value).append(SINGLE_QUOTE).append(AND);
+            }
+        }
+
+        String where = stringBuilder.substring(0, stringBuilder.length() - AND.length());
+        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
+        while (cursor.moveToNext()) {
+            uidInfoList.add(getRecord(cursor));
+        }
+
         cursor.close();
         return uidInfoList;
     }

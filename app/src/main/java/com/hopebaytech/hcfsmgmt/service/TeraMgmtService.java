@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -72,8 +73,10 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -194,6 +197,9 @@ public class TeraMgmtService extends Service {
                             break;
                         case TeraIntent.ACTION_BOOSTER_PROCESS_FAILED:
                             onBoosterProcessFailed();
+                            break;
+                        case TeraIntent.ACTION_CHECK_AND_FIX_BOOSTER:
+                            checkAndFixBooster();
                             break;
                     }
 
@@ -1138,4 +1144,153 @@ public class TeraMgmtService extends Service {
         });
         getBoosterWhiteListInfoProxy.get();
     }
+
+    /**
+     * Check booster is valid or not. If not, fix it.
+     */
+    private void checkAndFixBooster() {
+        boolean isBoosterEnabled = false;
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+        if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
+            isBoosterEnabled = true;
+        }
+        if (Booster.isBoosterMounted()) {
+            if (!isBoosterEnabled) {
+                // Set ENABLE_BOOSTER flag to true if booster is mounted.
+                if (settingsInfo == null) {
+                    settingsInfo = new SettingsInfo();
+                    settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                }
+                settingsInfo.setValue(String.valueOf(true));
+                settingsDAO.update(settingsInfo);
+            }
+            fixBoostStatusIfInvalid();
+            if (isBoosterProcessCompleted()) {
+                Booster.enableApps(this);
+            } else {
+                proceedNotCompletedBoosterProcess();
+            }
+        } else {
+            if (isBoosterEnabled) {
+                // Set ENABLE_BOOSTER flag to false if booster is not mounted.
+                settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                settingsInfo.setValue(String.valueOf(false));
+                settingsDAO.update(settingsInfo);
+            }
+            resetUserBoosterStatus();
+            Booster.enableApps(this);
+        }
+    }
+
+    private boolean isBoosterProcessCompleted() {
+        Map<String, Object> queryMap = new HashMap<>();
+        Integer[] queryBoostStatus = new Integer[]{
+                UidInfo.BoostStatus.BOOSTING,
+                UidInfo.BoostStatus.BOOST_FAILED,
+                UidInfo.BoostStatus.UNBOOSTING,
+                UidInfo.BoostStatus.UNBOOST_FAILED
+        };
+        queryMap.put(UidDAO.BOOST_STATUS_COLUMN, queryBoostStatus);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        return uidDAO.get(queryMap).isEmpty();
+    }
+
+    /**
+     * Reset the booster status of user packages in uid.db to {@link UidInfo.BoostStatus#UNBOOSTED}
+     */
+    private void resetUserBoosterStatus() {
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.SYSTEM_APP_COLUMN, 0);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        for (UidInfo uidInfo : uidDAO.get(cv)) {
+            uidInfo.setBoostStatus(UidInfo.BoostStatus.UNBOOSTED);
+            uidDAO.update(uidInfo);
+        }
+    }
+
+    /**
+     * If one record with the queryBoostStatus is found, update the {@link UidInfo} of query result
+     * then proceed the boost/unboost process.
+     *
+     * @param queryBoostStatus  the boost status used to query the booster process is completed or not.
+     *                          See {@link UidInfo.BoostStatus#BOOSTING}, {@link UidInfo.BoostStatus#BOOST_FAILED}
+     *                          , {@link UidInfo.BoostStatus#UNBOOSTING} and {@link UidInfo.BoostStatus#UNBOOST_FAILED}
+     * @param updateBoostStatus the boost status used to update the query result of {@link UidInfo}
+     *                          according to the queryBoostStatus
+     * @return true if booster process is proceeded, false otherwise.
+     */
+    private boolean proceedBoosterProcess(int queryBoostStatus, int updateBoostStatus) {
+        boolean isProceeded = false;
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, queryBoostStatus);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        List<UidInfo> uidInfoList = uidDAO.get(cv);
+        if (!uidInfoList.isEmpty()) {
+            for (UidInfo uidInfo : uidInfoList) {
+                uidInfo.setBoostStatus(updateBoostStatus);
+                uidDAO.update(uidInfo);
+            }
+
+            if (queryBoostStatus == UidInfo.BoostStatus.BOOSTING ||
+                    queryBoostStatus == UidInfo.BoostStatus.BOOST_FAILED) {
+                Booster.triggerBoost();
+                isProceeded = true;
+            } else if (queryBoostStatus == UidInfo.BoostStatus.UNBOOSTING ||
+                    queryBoostStatus == UidInfo.BoostStatus.UNBOOST_FAILED) {
+                Booster.triggerUnboost();
+                isProceeded = true;
+            }
+        }
+        return isProceeded;
+    }
+
+    /**
+     * Proceed processing the not completed boost/unboost process
+     */
+    private void proceedNotCompletedBoosterProcess() {
+        // if one record with BoostStatus.BOOSTING is found, proceed the boost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.BOOSTING, UidInfo.BoostStatus.INIT_BOOST)) {
+            return;
+        }
+
+        // if one record with BoostStatus.BOOST_FAILED is found, proceed the boost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.BOOST_FAILED, UidInfo.BoostStatus.INIT_BOOST)) {
+            return;
+        }
+
+        // if one record with BoostStatus.UNBOOSTING is found, proceed the unboost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.UNBOOSTING, UidInfo.BoostStatus.INIT_UNBOOST)) {
+            return;
+        }
+
+        // if one record with BoostStatus.UNBOOST_FAILED is found, proceed the unboost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.UNBOOST_FAILED, UidInfo.BoostStatus.INIT_UNBOOST)) {
+            return;
+        }
+    }
+
+    /**
+     * Check apps with BoostStatus.BOOSTED have the same boostStatus as the checkPackageBoostStatus()
+     * or not. If not, it means partial apps in the booster has corrupted. We need to fix the
+     * boostStatus of these apps.
+     */
+    private void fixBoostStatusIfInvalid() {
+        ContentValues cv = new ContentValues();
+        UidDAO uidDAO = UidDAO.getInstance(this);
+
+        cv.clear();
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
+        for (UidInfo uidInfo : uidDAO.get(cv)) {
+            boolean isBoosted = Booster.isPackageBoosted(uidInfo.getPackageName());
+            if (!isBoosted) {
+                uidInfo.setBoostStatus(UidInfo.BoostStatus.UNBOOSTED);
+                uidDAO.update(uidInfo);
+            }
+        }
+    }
+
 }

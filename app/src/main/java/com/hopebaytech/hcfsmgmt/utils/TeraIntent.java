@@ -38,6 +38,7 @@ public class TeraIntent {
     public static final String ACTION_ALLOW_PIN_UNPIN = "hbt.intent.action.ALLOW_PIN_UNPIN";
     public static final String ACTION_BOOSTER_PROCESS_COMPLETED = "hbt.intent.action.BOOSTER_PROCESS_COMPLETED";
     public static final String ACTION_BOOSTER_PROCESS_FAILED = "hbt.intent.action.BOOSTER_PROCESS_FAILED";
+    public static final String ACTION_CHECK_AND_FIX_BOOSTER = "hbt.intent.action.CHECK_AND_FIX_BOOSTER";
 
     // Intent key
     public static final String KEY_UID = "intent_key_uid";
