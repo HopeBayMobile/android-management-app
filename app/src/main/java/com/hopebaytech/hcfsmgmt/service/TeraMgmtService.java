@@ -1275,8 +1275,8 @@ public class TeraMgmtService extends Service {
 
     /**
      * Check apps with BoostStatus.BOOSTED have the same boostStatus as the checkPackageBoostStatus()
-     * or not. If not, it means the booster has corrupted. We need to fix the boostStatus of these
-     * apps.
+     * or not. If not, it means partial apps in the booster has corrupted. We need to fix the
+     * boostStatus of these apps.
      */
     private void fixBoostStatusIfInvalid() {
         ContentValues cv = new ContentValues();
