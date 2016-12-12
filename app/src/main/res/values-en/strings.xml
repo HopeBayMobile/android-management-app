@@ -202,11 +202,12 @@
     <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
     <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
 
-    <string name="change_account_require_new_account">Same as the current account. Changing account operation will not be performed.</string>
+    <string name="change_account_require_new_account">Same as the current account.\nChanging account operation has stopped.</string>
     <string name="change_account_start_to_change">Change</string>
-    <string name="change_account_failed">Changing account failed. Please try again or tap the Return key to quit.</string>
-    <string name="change_account_another_account"><u>Choose Another Account</u></string>
+    <string name="change_account_failed">Changing account failed. Please quit and run the app again by logging in with your previous account to execute the process of changing account.</string>
+    <string name="change_account_another_account"><u>Choose another Google account</u></string>
     <string name="change_account_require_read_phone_state_permission">Changing account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
+    <string name="change_account_auth_code_expired">Account authentication is not valid or expired. Please quit and run the app again by logging in with your previous account to execute the process of changing account.</string>
 
     <string name="auth_at_bootup_auth_failed_google_auth">Unable to access cloud data, because Google account authentication failed.</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Unable to access cloud data, because Tera account authentication failed.</string>

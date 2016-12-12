@@ -53,7 +53,9 @@ import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
+import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 
+import java.net.HttpURLConnection;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -77,8 +79,9 @@ public class ChangeAccountActivity extends AppCompatActivity {
     private TextView mSwitchAccount;
     private LinearLayout mSwitchAccountLayoutIcon;
     private GoogleSignInOptions mGoogleSignInOptions;
-    //    private ProgressDialog mProgressDialog;
     private ProgressDialogUtils mProgressDialog;
+    private ImageView mChooseAccountIcon;
+    private TextView mChooseAccountText;
 
     private String mServerClientId;
     private String mOldServerAuthCode;
@@ -115,92 +118,84 @@ public class ChangeAccountActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.change_account_activity);
 
-        mProgressDialog = new ProgressDialogUtils(this);
-        mProgressDialog.setMessage(getString(R.string.processing_msg));
+        init();
+        setupListener();
+    }
 
-        View contentView = findViewById(android.R.id.content);
-        if (contentView != null) {
-            mSnackbar = Snackbar.make(contentView, R.string.change_account_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE);
-            mSnackbar.setAction(R.string.go, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String packageName = getPackageName();
-                    Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
-                    teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
-                    teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(teraPermissionSettings);
-                }
-            });
-        }
+    private void findViews() {
         mCurrentAccount = (TextView) findViewById(R.id.current_account);
         mTargetAccount = (TextView) findViewById(R.id.target_account);
         mErrorMsg = (TextView) findViewById(R.id.error_msg);
         mTargetAccountLayout = (LinearLayout) findViewById(R.id.target_account_layout);
-        if (mTargetAccountLayout != null) {
-            mTargetAccountLayout.setVisibility(View.INVISIBLE);
-        }
         mSwitchAccountLayoutText = (LinearLayout) findViewById(R.id.switch_account_layout_text);
-        if (mSwitchAccountLayoutText != null) {
-            mSwitchAccountLayoutText.setVisibility(View.INVISIBLE);
-        }
         mSwitchAccountLayoutIcon = (LinearLayout) findViewById(R.id.switch_account_layout_icon);
-        if (mSwitchAccountLayoutIcon != null) {
-            mSwitchAccountLayoutIcon.setVisibility(View.VISIBLE);
-        }
-
         mSwitchAccount = (TextView) findViewById(R.id.switch_account);
-        if (mSwitchAccount != null) {
-            mSwitchAccount.setEnabled(false);
-            mSwitchAccount.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (ContextCompat.checkSelfPermission(ChangeAccountActivity.this,
-                            Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                        mProgressDialog.show();
+        mChooseAccountIcon = (ImageView) findViewById(R.id.choose_account_icon);
+        mChooseAccountText = (TextView) findViewById(R.id.choose_account_text);
+    }
 
-                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(mOldServerAuthCode);
-                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                            @Override
-                            public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
-                                changeAccount(authResultInfo.getToken());
-                            }
+    private void setupListener() {
+        mSwitchAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (ContextCompat.checkSelfPermission(ChangeAccountActivity.this,
+                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                    mProgressDialog.show();
 
-                            @Override
-                            public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                Logs.e(CLASSNAME, "onAuthFailed",
-                                        "responseCode=" + authResultInfo.getResponseCode() +
-                                                ", responseContent=" + authResultInfo.getMessage());
-                                signOut();
+                    MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(mOldServerAuthCode);
+                    MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+                    authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
+                        @Override
+                        public void onAuthSuccessful(final AuthResultInfo authResultInfo) {
+                            changeAccount(authResultInfo.getToken());
+                        }
+
+                        @Override
+                        public void onAuthFailed(AuthResultInfo authResultInfo) {
+                            Logs.e(CLASSNAME, "onAuthFailed",
+                                    "responseCode=" + authResultInfo.getResponseCode() +
+                                            ", responseContent=" + authResultInfo.getResponseContent());
+
+                            if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
+                                // Auth code is expired so that authenticate with Google failed
+                                mErrorMsg.setText(R.string.change_account_auth_code_expired);
+                            } else if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
+                                mErrorMsg.setText(
+                                        MgmtCluster.ErrorCode.getErrorMessage(
+                                                ChangeAccountActivity.this,
+                                                authResultInfo.getErrorCode()
+                                        )
+                                );
+                            } else {
                                 mErrorMsg.setText(R.string.change_account_failed);
-                                mProgressDialog.dismiss();
                             }
-                        });
-                        authProxy.auth();
-                    } else {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ChangeAccountActivity.this);
-                        builder.setTitle(R.string.alert_dialog_title_warning);
-                        builder.setMessage(R.string.change_account_require_read_phone_state_permission);
-                        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (ActivityCompat.shouldShowRequestPermissionRationale(ChangeAccountActivity.this, Manifest.permission.READ_PHONE_STATE)) {
-                                    ActivityCompat.requestPermissions(ChangeAccountActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-                                } else {
-                                    View contentView = findViewById(android.R.id.content);
-                                    if (contentView != null) {
-                                        Snackbar.make(contentView, R.string.require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE).show();
-                                    }
+                            signOut();
+                            mProgressDialog.dismiss();
+                        }
+                    });
+                    authProxy.auth();
+                } else {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ChangeAccountActivity.this);
+                    builder.setTitle(R.string.alert_dialog_title_warning);
+                    builder.setMessage(R.string.change_account_require_read_phone_state_permission);
+                    builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (ActivityCompat.shouldShowRequestPermissionRationale(ChangeAccountActivity.this, Manifest.permission.READ_PHONE_STATE)) {
+                                ActivityCompat.requestPermissions(ChangeAccountActivity.this, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                            } else {
+                                View contentView = findViewById(android.R.id.content);
+                                if (contentView != null) {
+                                    Snackbar.make(contentView, R.string.require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE).show();
                                 }
                             }
-                        });
-                        builder.setCancelable(false);
-                        builder.show();
-                    }
-
+                        }
+                    });
+                    builder.setCancelable(false);
+                    builder.show();
                 }
-            });
-        }
+            }
+        });
 
         View.OnClickListener chooseAccountListener = new View.OnClickListener() {
             @Override
@@ -266,23 +261,38 @@ public class ChangeAccountActivity extends AppCompatActivity {
                 }).start();
             }
         };
-
-        ImageView chooseAccountIcon = (ImageView) findViewById(R.id.choose_account_icon);
-        if (chooseAccountIcon != null) {
-            chooseAccountIcon.setOnClickListener(chooseAccountListener);
-        }
-        TextView chooseAccountText = (TextView) findViewById(R.id.choose_account_text);
-        if (chooseAccountText != null) {
-            chooseAccountText.setOnClickListener(chooseAccountListener);
-        }
-
-        init();
+        mChooseAccountIcon.setOnClickListener(chooseAccountListener);
+        mChooseAccountText.setOnClickListener(chooseAccountListener);
     }
 
     private void init() {
-        mProgressDialog.show();
+        findViews();
 
-        new Thread(new Runnable() {
+        mProgressDialog = new ProgressDialogUtils(this);
+        mProgressDialog.setMessage(getString(R.string.processing_msg));
+
+        View contentView = findViewById(android.R.id.content);
+        if (contentView != null) {
+            mSnackbar = Snackbar.make(contentView, R.string.change_account_require_read_phone_state_permission, Snackbar.LENGTH_INDEFINITE);
+            mSnackbar.setAction(R.string.go, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String packageName = getPackageName();
+                    Intent teraPermissionSettings = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + packageName));
+                    teraPermissionSettings.addCategory(Intent.CATEGORY_DEFAULT);
+                    teraPermissionSettings.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(teraPermissionSettings);
+                }
+            });
+        }
+
+        mTargetAccountLayout.setVisibility(View.INVISIBLE);
+        mSwitchAccountLayoutText.setVisibility(View.INVISIBLE);
+        mSwitchAccountLayoutIcon.setVisibility(View.VISIBLE);
+        mSwitchAccount.setEnabled(false);
+
+        mProgressDialog.show();
+        ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 AccountDAO accountDAO = AccountDAO.getInstance(ChangeAccountActivity.this);
@@ -298,7 +308,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
                     });
                 }
             }
-        }).start();
+        });
 
         mServerClientId = MgmtCluster.getServerClientId();
         GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
@@ -481,11 +491,12 @@ public class ChangeAccountActivity extends AppCompatActivity {
 
             @Override
             public void onChangeAccountFailed(DeviceServiceInfo deviceServiceInfo) {
+                Logs.e(CLASSNAME, "onChangeAccountFailed", "deviceServiceInfo=" + deviceServiceInfo);
                 if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
                     changeAccountWithoutJwtToken();
                 } else if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    mErrorMsg.setText(MgmtCluster.ErrorCode.getErrorMessage(ChangeAccountActivity.this,
-                            deviceServiceInfo.getErrorCode()));
+                    mErrorMsg.setText(deviceServiceInfo.getErrorMessage(ChangeAccountActivity.this));
+                    mProgressDialog.dismiss();
                 } else {
                     signOut();
                     mErrorMsg.setText(R.string.change_account_failed);

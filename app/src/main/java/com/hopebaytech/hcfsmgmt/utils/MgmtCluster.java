@@ -1024,8 +1024,17 @@ public class MgmtCluster {
                     Logs.d(CLASSNAME, "auth", "jwtToken=" + jwtToken);
                     authResultInfo.setToken(jwtToken);
                 } else {
-                    authResultInfo.setMessage(responseContent);
+                    try {
+                        JSONObject jsonObj = new JSONObject(responseContent);
+                        if (responseCode != HttpsURLConnection.HTTP_INTERNAL_ERROR) {
+                            String errorCode = jsonObj.getString("error_code");
+                            authResultInfo.setErrorCode(errorCode);
+                        }
+                    } catch (JSONException e) {
+                        Logs.e(CLASSNAME, "auth", Log.getStackTraceString(e));
+                    }
                 }
+                authResultInfo.setResponseContent(responseContent);
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "auth", Log.getStackTraceString(e));
             } finally {

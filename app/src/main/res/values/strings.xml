@@ -48,8 +48,10 @@
     <string name="nav_booster">BOOSTER</string>
     <string name="nav_about">關於</string>
     <string name="nav_help">幫助</string>
-    <string name="user_info_current_account">Current account:</string>
-    <string name="user_info_change_account_button">Change Account</string>
+
+    <string name="user_info_current_account">目前帳戶:</string>
+    <string name="user_info_change_account_button">更改帳戶</string>
+
     <string name="notify_cloud_connected">雲端連線已恢復</string>
     <string name="notify_cloud_disconnected">雲端連線中斷，請檢查。</string>
     <string name="notify_upload_completed">本地端資料已上傳至雲端空間。</string>
@@ -192,11 +194,12 @@
     <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
     <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
 
-    <string name="change_account_require_new_account">與目前帳戶相同。變更帳戶操作已經停止。</string>
-    <string name="change_account_start_to_change">確認變更</string>
-    <string name="change_account_failed">更換帳戶失敗，請重試或點選返回鍵以離開應用程式。</string>
-    <string name="change_account_another_account"><u>選擇其他帳戶</u></string>
-    <string name="change_account_require_read_phone_state_permission">更換帳戶需啟用 Tera 的電話權限，請點選右方鍵繼續。</string>
+    <string name="change_account_require_new_account">與目前帳戶相同。\n更改帳戶操作已經停止。</string>
+    <string name="change_account_start_to_change">確認更改</string>
+    <string name="change_account_failed">更改帳戶失敗。請退出並再次使用您原先的帳戶來登入此應用程式，以執行更改帳戶的程序。</string>
+    <string name="change_account_another_account"><u>選擇其他 Google 帳戶</u></string>
+    <string name="change_account_require_read_phone_state_permission">更改帳戶需啟用 Tera 的電話權限，請點選右方鍵繼續。</string>
+    <string name="change_account_auth_code_expired">帳戶認證失效或者已逾期。請退出並再次使用您原先的帳戶來登入此應用程式，以執行更改帳戶的程序。</string>
 
     <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗， 無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗，無法存取雲端資料。</string>

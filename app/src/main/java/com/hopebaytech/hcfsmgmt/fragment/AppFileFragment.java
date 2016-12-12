@@ -1161,7 +1161,6 @@ public class AppFileFragment extends Fragment {
         @Nullable
         @Override
         public LinearRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            Logs.d(CLASSNAME, "LinearRecyclerViewAdapter", "onCreateViewHolder");
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.app_file_linear_item, parent, false);
             return new LinearRecyclerViewHolder(view);
         }
