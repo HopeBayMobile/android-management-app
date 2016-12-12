@@ -17,7 +17,8 @@ public class ExecutorFactory {
                 N * 2,
                 60,
                 TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>()
+                new LinkedBlockingQueue<Runnable>(),
+                new ThreadPoolExecutor.CallerRunsPolicy()
         );
         executor.allowCoreThreadTimeOut(true);
         executor.prestartCoreThread();

@@ -924,14 +924,21 @@ public class AppFileFragment extends Fragment {
         mWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
-
                 ArrayList<ItemInfo> itemInfoList = null;
                 switch (mDisplayType) {
                     case DisplayType.BY_APP:
-                        itemInfoList = DisplayTypeFactory.getListOfInstalledApps(mContext, DisplayTypeFactory.APP_USER, mFilterByPin);
+                        itemInfoList = DisplayTypeFactory.getListOfInstalledApps(
+                                mContext,
+                                DisplayTypeFactory.APP_USER,
+                                mFilterByPin
+                        );
                         break;
                     case DisplayType.BY_FILE:
-                        itemInfoList = DisplayTypeFactory.getListOfFileDirs(mContext, mCurrentFile, mFilterByPin);
+                        itemInfoList = DisplayTypeFactory.getListOfFileDirs(
+                                mContext,
+                                mCurrentFile,
+                                mFilterByPin
+                        );
                         break;
                 }
                 DisplayTypeFactory.sort(itemInfoList, mSortType);
@@ -1545,6 +1552,10 @@ public class AppFileFragment extends Fragment {
 
             @Override
             public void onClick(View v) {
+                if (mShowingContent) {
+                    return;
+                }
+
                 Drawable unSelectedDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_btn_unselected);
                 allItemImage.setImageDrawable(unSelectedDrawable);
                 pinnedItemImage.setImageDrawable(unSelectedDrawable);
@@ -2132,7 +2143,6 @@ public class AppFileFragment extends Fragment {
                     String mimeType = fileInfo.getMimeType();
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     File file = new File(fileInfo.getFilePath());
-                    Logs.d(CLASSNAME, "onItemClick", "Uri.fromFile(file)=" + Uri.fromFile(file));
                     if (mimeType != null) {
                         intent.setDataAndType(Uri.fromFile(file), mimeType);
                     } else {
