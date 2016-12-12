@@ -78,7 +78,7 @@ public class RestoreFailedFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mMessage = (TextView) view.findViewById(R.id.hint_message);
+        mMessage = (TextView) view.findViewById(R.id.message);
         mActionButton = (TextView) view.findViewById(R.id.action_btn);
     }
 

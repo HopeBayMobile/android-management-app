@@ -22,17 +22,17 @@ public class Interval {
      * Interval for updating the external app dir path to database, such as
      * /storage/emulated/0/Android/data/<package_name>, /storage/emulated/0/Android/obb/<package_name>, etc.
      */
-    public static final int UPDATE_EXTERNAL_APP_DIR = DAY;
+    public static final int MONITOR_EXTERNAL_APP_DIR = DAY;
 
     /**
      * Interval for checking whether the local storage used ratio exceed the threshold set by user.
      */
-    public static final int NOTIFY_LOCAL_STORAGE_USED_RATIO = HOUR;
+    public static final int MONITOR_LOCAL_STORAGE_USED_SPACE = HOUR;
 
     /**
      * Interval for checking whether the pin space is insufficient.
      */
-    public static final int NOTIFY_INSUFFICIENT_PIN_SPACE = 10 * MINUTE;
+    public static final int MONITOR_PINNED_SPACE = 10 * MINUTE;
 
     /**
      * Interval checking device service when receiving token expired event from hcfs.
@@ -88,5 +88,10 @@ public class Interval {
      * Interval for delaying the movement from settings page to smart cache page
      */
     public static final int MOVE_TO_SMART_PAGE_DELAY_TIME = (int) (1.2f * SECOND);
+
+    /**
+     * Interval for monitoring the booster used space.
+     */
+    public static final int MONITOR_BOOSTER_USED_SPACE = 10 * MINUTE;
 
 }

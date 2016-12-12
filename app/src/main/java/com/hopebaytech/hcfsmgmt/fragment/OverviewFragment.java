@@ -18,6 +18,7 @@ import com.hopebaytech.hcfsmgmt.customview.UsageIcon;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+import com.hopebaytech.hcfsmgmt.misc.Threshold;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -132,7 +133,7 @@ public class OverviewFragment extends Fragment {
         RelativeLayout pinnedSpace = (RelativeLayout) view.findViewById(R.id.pinned_space);
         UsageIcon pinnedSpaceIcon = (UsageIcon) pinnedSpace.findViewById(R.id.pinned_space_icon);
         TextView pinnedSpaceValue = (TextView) pinnedSpace.findViewById(R.id.pinned_space_value);
-        pinnedSpaceIcon.setWarningPercentage(HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD);
+        pinnedSpaceIcon.setWarningPercentage(Threshold.PINNED_SPACE);
         mPinnedSpaceUsage = new Usage(pinnedSpaceIcon, pinnedSpaceValue);
 
         // Initialized data wait to upload view

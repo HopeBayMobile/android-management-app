@@ -12,6 +12,7 @@ import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.service.PinAndroidFolderService;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.AlarmUtils;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -40,16 +41,19 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
             switch (action) {
                 case Intent.ACTION_BOOT_COMPLETED: {
                     // Start an alarm to reset xfer
-                    HCFSMgmtUtils.startResetXferAlarm(context);
+                    AlarmUtils.startResetDataXferAlarm(context);
 
-                    // Start an alarm to notify local storage used ratio
-                    HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(context);
+                    // Start an alarm to monitor local storage used space
+                    AlarmUtils.startMonitorLocalStorageUsedSpace(context);
 
-                    // Start an alarm to notify insufficient pin space
-                    HCFSMgmtUtils.startNotifyInsufficientPinSpaceAlarm(context);
+                    // Start an alarm to monitor pin space
+                    AlarmUtils.startMonitorPinnedSpace(context);
 
                     // Start an alarm to update external app dir
-                    HCFSMgmtUtils.startUpdateExternalAppDirAlarm(context);
+                    AlarmUtils.startMonitorExternalAppDirAlarm(context);
+
+                    // Start an alarm to monitor booster used space
+                    AlarmUtils.startMonitorBoosterUsedSpace(context);
 
                     // Set silent Google sign-in to false
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
@@ -93,30 +97,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                             context.startService(intentService);
                         }
                     }
-                    return;
-                }
-                case TeraIntent.ACTION_RESET_DATA_XFER: {
-                    Intent intentService = new Intent(context, TeraMgmtService.class);
-                    intentService.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
-                    context.startService(intentService);
-                    return;
-                }
-                case TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR: {
-                    Intent intentService = new Intent(context, TeraMgmtService.class);
-                    intentService.setAction(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR);
-                    context.startService(intentService);
-                    return;
-                }
-                case TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO: {
-                    Intent intentService = new Intent(context, TeraMgmtService.class);
-                    intentService.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-                    context.startService(intentService);
-                    return;
-                }
-                case TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE: {
-                    Intent intentService = new Intent(context, TeraMgmtService.class);
-                    intentService.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
-                    context.startService(intentService);
                     return;
                 }
                 case TeraIntent.ACTION_TOKEN_EXPIRED: {
