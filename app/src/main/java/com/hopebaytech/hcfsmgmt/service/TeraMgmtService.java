@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -16,7 +17,14 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -51,7 +59,9 @@ import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
+import com.hopebaytech.hcfsmgmt.misc.Threshold;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.misc.ViewPage;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
@@ -70,6 +80,7 @@ import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -148,9 +159,9 @@ public class TeraMgmtService extends Service {
                             removeUidFromDatabase(intent, action);
                             break;
                         case TeraIntent.ACTION_RESET_DATA_XFER:
-                            HCFSMgmtUtils.resetXfer();
+                            HCFSMgmtUtils.resetDataXfer();
                             break;
-                        case TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO:
+                        case TeraIntent.ACTION_MONITOR_LOCAL_STORAGE_USED_SPACE:
                             notifyLocalStorageUsedRatio();
                             break;
                         case TeraIntent.ACTION_ONGOING_NOTIFICATION:
@@ -159,10 +170,10 @@ public class TeraMgmtService extends Service {
                         case TeraIntent.ACTION_CHECK_DEVICE_STATUS:
                             checkDeviceStatus();
                             break;
-                        case TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE:
+                        case TeraIntent.ACTION_MONITOR_PINNED_SPACE:
                             notifyInsufficientPinSpace();
                             break;
-                        case TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR:
+                        case TeraIntent.ACTION_MONITOR_EXTERNAL_APP_DIR:
                             HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
                             break;
                         case TeraIntent.ACTION_TOKEN_EXPIRED:
@@ -200,6 +211,8 @@ public class TeraMgmtService extends Service {
                             break;
                         case TeraIntent.ACTION_CHECK_AND_FIX_BOOSTER:
                             checkAndFixBooster();
+                        case TeraIntent.ACTION_MONITOR_BOOSTER_USED_SPACE:
+                            checkBoosterUsedSpace();
                             break;
                     }
 
@@ -567,20 +580,21 @@ public class TeraMgmtService extends Service {
 
         long pinTotal = statInfo.getPinTotal();
         long pinMax = statInfo.getPinMax();
-        int notifyRatio = HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD;
-        double ratio = ((double) pinTotal / pinMax) * 100;
-        Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio
-                + ", ratio=" + ratio
+        int notifyThreshold = Threshold.PINNED_SPACE;
+        double pinnedPercentage = ((double) pinTotal / pinMax) * 100;
+        Logs.d(CLASSNAME, "onStartCommand", "notifyThreshold=" + notifyThreshold
+                + ", percentage=" + pinnedPercentage
                 + ", pinTotal=" + pinTotal
                 + ", pinMax=" + pinMax);
-        if (ratio >= notifyRatio) {
+        if (pinnedPercentage >= notifyThreshold) {
             if (!isNotified && !isRestoring) {
+                Bundle extras = new Bundle();
+                extras.putInt(ViewPage.KEY, ViewPage.APP);
+
                 int flag = NotificationEvent.FLAG_OPEN_APP;
                 int idNotify = NotificationEvent.ID_INSUFFICIENT_PIN_SPACE;
                 String notifyTitle = getString(R.string.app_name);
-                String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
-                Bundle extras = new Bundle();
-                extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
+                String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyThreshold);
                 NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, flag, extras);
 
                 editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
@@ -961,7 +975,7 @@ public class TeraMgmtService extends Service {
 
         int flag = NotificationEvent.FLAG_OPEN_APP;
         Bundle extras = new Bundle();
-        extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
+        extras.putInt(ViewPage.KEY, ViewPage.APP);
         NotificationEvent.notify(this, idNotify, notifyTitle, notifyContent, flag, extras);
     }
 
@@ -1291,6 +1305,64 @@ public class TeraMgmtService extends Service {
                 uidDAO.update(uidInfo);
             }
         }
+    }
+
+    /**
+     * Check the booster used space is larger than {@link Threshold#BOOSTER_USED_SPACE} of booster
+     * size or not. If yes, pop up a warning dialog to notify user.
+     */
+    private void checkBoosterUsedSpace() {
+        double boosterUsedSpace = Booster.getBoosterUsedSpace();
+        double boosterTotalSpace = Booster.getBoosterTotalSpace();
+        double usedPercentage = (boosterUsedSpace / boosterTotalSpace) * 100;
+        if (usedPercentage > Threshold.BOOSTER_USED_SPACE) {
+            UiHandler.getInstance().post(new Runnable() {
+                @Override
+                public void run() {
+                    getFullBoosterZoneAlertDialog().show();
+                }
+            });
+        }
+    }
+
+    private AlertDialog getFullBoosterZoneAlertDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.message_dialog_fragment, null);
+        ((TextView) view.findViewById(R.id.title)).setText(R.string.booster_full_space_alert_title);
+        ((TextView) view.findViewById(R.id.message)).setText(R.string.booster_full_space_alert_message);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatDialog);
+        builder.setView(view);
+        builder.setPositiveButton(R.string.unboost_apps, null);
+        builder.setNegativeButton(R.string.cancel, null);
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button removeApps = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                removeApps.setTextColor(ContextCompat.getColor(TeraMgmtService.this, R.color.colorAccent));
+                removeApps.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle extras = new Bundle();
+                        extras.putInt(ViewPage.KEY, ViewPage.BOOSTER);
+
+                        Intent intent = new Intent(TeraMgmtService.this, MainActivity.class);
+                        // Require to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtras(extras);
+                        startActivity(intent);
+
+                        alertDialog.dismiss();
+                    }
+                });
+                Button cancel = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                cancel.setTextColor(ContextCompat.getColor(TeraMgmtService.this, R.color.colorAccent));
+            }
+        });
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
+        }
+        return alertDialog;
     }
 
 }

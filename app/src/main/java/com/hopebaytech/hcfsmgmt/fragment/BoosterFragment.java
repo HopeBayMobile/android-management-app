@@ -107,7 +107,7 @@ public class BoosterFragment extends Fragment {
         mUnboostTab = (TextView) view.findViewById(R.id.unboost_tab);
         mCancel = (TextView) view.findViewById(R.id.cancel);
         mAction = (TextView) view.findViewById(R.id.action);
-        mHintMessage = (TextView) view.findViewById(R.id.hint_message);
+        mHintMessage = (TextView) view.findViewById(R.id.message);
         mActionButtonLayout = (LinearLayout) view.findViewById(R.id.action_button_layout);
     }
 

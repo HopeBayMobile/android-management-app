@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,17 +30,17 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
-import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
+import com.hopebaytech.hcfsmgmt.misc.ViewPage;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -116,35 +115,6 @@ public class MainFragment extends Fragment {
         mWorkerThread = new HandlerThread(CLASSNAME);
         mWorkerThread.start();
         mWorkHandler = new Handler(mWorkerThread.getLooper());
-
-        // Start ResetXferAlarm if it doesn't exist
-        Intent intent = new Intent(mContext, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
-        boolean isResetXferAlarmExist = PendingIntent.getBroadcast(mContext, RequestCode.RESET_XFER,
-                intent, PendingIntent.FLAG_NO_CREATE) != null;
-        if (!isResetXferAlarmExist) {
-            HCFSMgmtUtils.startResetXferAlarm(mContext);
-        }
-
-        // Start NotifyLocalStorageUsedRatioAlarm if it doesn't exist
-        intent = new Intent(mContext, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-        boolean isNotifyLocalStorageUsedRatioAlarmExist = PendingIntent.getBroadcast(mContext,
-                RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO,
-                intent, PendingIntent.FLAG_NO_CREATE) != null;
-        if (!isNotifyLocalStorageUsedRatioAlarmExist) {
-            HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
-        }
-
-        // Start NotifyInsufficientPinSpaceAlarm if it doesn't exist
-        intent = new Intent(mContext, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
-        boolean isNotifyInsufficientPinSpaceAlarmExist = PendingIntent.getBroadcast(mContext,
-                RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE,
-                intent, PendingIntent.FLAG_NO_CREATE) != null;
-        if (!isNotifyInsufficientPinSpaceAlarmExist) {
-            HCFSMgmtUtils.startNotifyInsufficientPinSpaceAlarm(mContext);
-        }
 
         // Initialize ViewPager with CustomPagerTabStrip
         if (mViewPager != null) {
@@ -288,8 +258,8 @@ public class MainFragment extends Fragment {
             return titleList;
         }
 
-        public void setBoosterEnabled(boolean smartCacheEnabled) {
-            isBoosterEnabled = smartCacheEnabled;
+        public void setBoosterEnabled(boolean boosterEnabled) {
+            isBoosterEnabled = boosterEnabled;
         }
 
         public int getFragmentPosition(String title) {
@@ -299,6 +269,39 @@ public class MainFragment extends Fragment {
                 }
             }
             return -1;
+        }
+
+        /**
+         * @param toViewPage the view page to move. {@link ViewPage#NONE}, {@link ViewPage#APP}
+         *                   , {@link ViewPage#FILE}, {@link ViewPage#BOOSTER}, {@link ViewPage#SETTINGS}
+         *                   , {@link ViewPage#HELP}
+         * @return -1 if the view page not found, else the view page position in the view pager.
+         */
+        public int getMoveFragmentPosition(int toViewPage) {
+            int titleResId;
+            switch (toViewPage) {
+                case ViewPage.OVERVIEW:
+                    titleResId = R.string.nav_overview;
+                    break;
+                case ViewPage.APP:
+                    titleResId = R.string.nav_apps;
+                    break;
+                case ViewPage.FILE:
+                    titleResId = R.string.nav_files;
+                    break;
+                case ViewPage.BOOSTER:
+                    titleResId = R.string.nav_booster;
+                    break;
+                case ViewPage.SETTINGS:
+                    titleResId = R.string.nav_settings;
+                    break;
+                case ViewPage.HELP:
+                    titleResId = R.string.nav_help;
+                    break;
+                default:
+                    return -1;
+            }
+            return getFragmentPosition(getString(titleResId));
         }
 
     }
@@ -344,13 +347,13 @@ public class MainFragment extends Fragment {
         if (mArguments == null) {
             return;
         }
-        final int toViewPager = mArguments.getInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, -1);
 
-        if (toViewPager <= -1 || toViewPager >= mViewPager.getAdapter().getCount()) {
+        final int toViewPage = mArguments.getInt(ViewPage.KEY, ViewPage.NONE);
+        if (toViewPage == ViewPage.NONE) {
             return;
         }
 
-        // Move to specific page, 0 Overview, 1 FILE/APP, 2 SETTINGS, 3 HELP.
+        // Move to the specified page
         mWorkHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -359,8 +362,9 @@ public class MainFragment extends Fragment {
                         Thread.sleep(500);
 
                         boolean hasFragmentVisible = false;
-                        for (int i = 0; i < mViewPager.getAdapter().getCount(); i++) {
-                            Fragment fragment = ((ViewPagerAdapter) mViewPager.getAdapter()).getFragment(i);
+                        ViewPagerAdapter adapter = (ViewPagerAdapter) mViewPager.getAdapter();
+                        for (int i = 0; i < adapter.getCount(); i++) {
+                            Fragment fragment = adapter.getFragment(i);
                             if (fragment != null && fragment.isVisible()) {
                                 hasFragmentVisible = true;
                                 break;
@@ -369,7 +373,17 @@ public class MainFragment extends Fragment {
 
                         if (hasFragmentVisible) {
                             Thread.sleep(500);
-                            mViewPager.setCurrentItem(toViewPager, true);
+
+                            final int position = adapter.getMoveFragmentPosition(toViewPage);
+                            UiHandler.getInstance().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (position != -1) {
+                                        mViewPager.setCurrentItem(position, true);
+                                    }
+                                }
+                            });
+
                             mArguments = null;
                             break;
                         }

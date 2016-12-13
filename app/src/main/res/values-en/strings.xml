@@ -247,6 +247,8 @@
     <string name="restore_failed_device_in_use">您選擇的備份已經使用中，請選擇其餘備份還原。</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
+
+    <!-- Button text for dialog -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="confirm">Confirm</string>
@@ -259,6 +261,7 @@
     <string name="sync_settings">SYNC SETTINGS</string>
     <string name="settings">SETTINGS</string>
     <string name="_continue">CONTINUE</string>
+    <string name="unboost_apps">UNBOOST APPS</string>
 
     <string name="pref_download_to_run">pref_download_to_run</string>
     <string name="tera_version_title">Tera Version</string>
@@ -320,6 +323,8 @@
     <string name="booster_notification_boost_completed_message">The selected apps are enabled and available to use.</string>
     <string name="booster_notification_boost_failed_title">Boosting apps failed.</string>
     <string name="booster_notification_boost_failed_message">Some apps might not be boosted successfully. Please try again.</string>
+    <string name="booster_full_space_alert_title">Boost Zone Full</string>
+    <string name="booster_full_space_alert_message">To release more spaces for boost zone, please remove some apps first.</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 

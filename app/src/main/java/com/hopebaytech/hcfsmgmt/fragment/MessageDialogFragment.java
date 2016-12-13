@@ -52,7 +52,7 @@ public class MessageDialogFragment extends DialogFragment {
             ((TextView) view.findViewById(R.id.title)).setText(mTitle);
         }
         if (mMessage != null) {
-            TextView message = (TextView) view.findViewById(R.id.hint_message);
+            TextView message = (TextView) view.findViewById(R.id.message);
             message.setMovementMethod(new ScrollingMovementMethod());
             message.setText(mMessage);
         }
