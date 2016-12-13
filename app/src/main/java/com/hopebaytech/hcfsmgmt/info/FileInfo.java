@@ -231,15 +231,19 @@ public class FileInfo extends ItemInfo implements Cloneable {
     @Nullable
     private Bitmap getImageThumbnail(String path) {
         Bitmap thumbnail = null;
-        ContentResolver cr = mContext.getContentResolver();
-        Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
-                MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-                thumbnail = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+        try {
+            ContentResolver cr = mContext.getContentResolver();
+            Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
+                    MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+                    thumbnail = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                }
+                cursor.close();
             }
-            cursor.close();
+        } catch (Exception e) {
+            Logs.w(CLASSNAME, "getImageThumbnail", Log.getStackTraceString(e));
         }
         return thumbnail;
     }
@@ -247,15 +251,19 @@ public class FileInfo extends ItemInfo implements Cloneable {
     @Nullable
     private Bitmap getVideoThumbnail(String path) {
         Bitmap thumbnail = null;
-        ContentResolver cr = mContext.getContentResolver();
-        Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
-                MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-                thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
+        try {
+            ContentResolver cr = mContext.getContentResolver();
+            Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
+                    MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+                    thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
+                }
+                cursor.close();
             }
-            cursor.close();
+        } catch (Exception e) {
+            Logs.w(CLASSNAME, "getVideoThumbnail", Log.getStackTraceString(e));
         }
         return thumbnail;
     }
