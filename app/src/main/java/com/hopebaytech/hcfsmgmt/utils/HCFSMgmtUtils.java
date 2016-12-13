@@ -75,6 +75,8 @@ public class HCFSMgmtUtils {
 
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
+    private static final String DATA_APP_PATH = "/data/app";
+
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
         UidDAO uidDAO = UidDAO.getInstance(context);
         UidInfo uidInfo = uidDAO.get(appInfo.getPackageName());
@@ -937,7 +939,7 @@ public class HCFSMgmtUtils {
         boolean isSuccess = false;
         try {
             String sourceDir = getSourceDir(context, packageName);
-            if (sourceDir.startsWith("/data/app")) {
+            if (sourceDir != null) {
                 String jsonResult = HCFSApiUtils.createMinimalApk(sourceDir, blocking ? 1 : 0);
                 JSONObject jObject = new JSONObject(jsonResult);
                 isSuccess = jObject.getBoolean("result");
@@ -969,7 +971,7 @@ public class HCFSMgmtUtils {
         int code = -1;
         try {
             String sourceDir = getSourceDir(context, packageName);
-            if (sourceDir.startsWith("/data/app")) {
+            if (sourceDir != null) {
                 String jsonResult = HCFSApiUtils.checkMinimalApk(sourceDir, blocking ? 1 : 0);
                 JSONObject jObject = new JSONObject(jsonResult);
                 if (jObject.getBoolean("result")) {
@@ -991,8 +993,12 @@ public class HCFSMgmtUtils {
             PackageInfo p = context.getPackageManager().getPackageInfo(packageName, 0);
             sourceDir = p.applicationInfo.sourceDir;
             sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
+            if (sourceDir.startsWith(DATA_APP_PATH)) {
+                sourceDir = sourceDir.substring(DATA_APP_PATH.length() + 1, sourceDir.length());
+                Logs.d(CLASSNAME, "getSourceDir", "package name: " + packageName + " package path: " + sourceDir);
+            }
         } catch (PackageManager.NameNotFoundException e) {
-            Logs.e(CLASSNAME, "createMinimalApk", e.toString());
+            Logs.e(CLASSNAME, "getSourceDir", e.toString());
         }
         return sourceDir;
     }
