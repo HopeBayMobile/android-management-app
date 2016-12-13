@@ -365,7 +365,6 @@ public class HCFSMgmtUtils {
         if (sourceDir != null) {
             Logs.d(CLASSNAME, "pinApp", "sourceDir=" + sourceDir);
             if (sourceDir.startsWith("/data/app")) {
-//                isSourceDirSuccess = pinFileOrDirectory(sourceDir, pinType);
                 // Priority pin for /data/app no matter pin or unpin
                 isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
             }
@@ -391,11 +390,14 @@ public class HCFSMgmtUtils {
         String dataDir = info.getDataDir();
         List<String> externalDirList = info.getExternalDirList();
 
+        boolean isMinApkSuccess = false;
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             if (sourceDir.startsWith("/data/app")) {
-                // Priority pin for /data/app no matter pin or unpin
-                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
+                isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
+
+                // Priority pin /data/app/<pkg-folder>/.basemin
+                isMinApkSuccess = (pinFileOrDirectory(sourceDir + "/.basemin", PinType.PRIORITY) == 0);
             }
         }
         boolean isDataDirSuccess = true;
@@ -411,7 +413,7 @@ public class HCFSMgmtUtils {
             }
         }
 
-        return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
+        return isSourceDirSuccess & isMinApkSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
     /**
