@@ -222,13 +222,14 @@ public class Booster {
     }
 
     /**
-     * Disable all non-system apps with enabled status
+     * Disable all non-system apps with enabled status and {@link UidInfo.BoostStatus#BOOSTED}
      */
     public static void disableApps(Context context) {
         Logs.i(CLASSNAME, "disableApps", null);
 
         ContentValues cv = new ContentValues();
         cv.put(UidDAO.SYSTEM_APP_COLUMN, 0);
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
         cv.put(UidDAO.ENABLED_COLUMN, 1);
 
         UidDAO uidDAO = UidDAO.getInstance(context);
