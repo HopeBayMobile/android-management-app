@@ -94,4 +94,9 @@ public class Interval {
      */
     public static final int MONITOR_BOOSTER_USED_SPACE = 10 * MINUTE;
 
+    /**
+     * Interval for retrying the previous database operation.
+     */
+    public static final int DATABASE_OPERATION_RETRY_TIME = 10;
+
 }
