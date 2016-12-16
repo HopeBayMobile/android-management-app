@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.terafonnapiservice;
 
 import android.app.Service;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -53,6 +54,42 @@ public class TeraFonnApiService extends Service {
     private Map<String, Integer> mPackageStatusMap = new ConcurrentHashMap<>();
     private ExecutorService mExecutor = ExecutorFactory.createThreadPoolExecutor();
     private TrackAppStatusThread mTrackAppStatusThread = new TrackAppStatusThread();
+    private Object executorLock = new Object();
+    private Object packageStatusMapLock = new Object();
+    private Object trackAppStatusThreadLock = new Object();
+
+    public ExecutorService getExecutor() {
+        if (mExecutor == null) {
+            synchronized (executorLock) {
+                if (mExecutor == null) {
+                    mExecutor = ExecutorFactory.createThreadPoolExecutor();
+                }
+            }
+        }
+        return mExecutor;
+    }
+
+    public Map<String, Integer> getPackageStatusMap() {
+        if (mPackageStatusMap == null) {
+            synchronized (packageStatusMapLock) {
+                if (mPackageStatusMap == null) {
+                    mPackageStatusMap = new ConcurrentHashMap<>();
+                }
+            }
+        }
+        return mPackageStatusMap;
+    }
+
+    public TrackAppStatusThread getTrackAppStatusThread() {
+        if (mTrackAppStatusThread == null) {
+            synchronized (trackAppStatusThreadLock) {
+                if (mTrackAppStatusThread == null) {
+                    mTrackAppStatusThread = new TrackAppStatusThread();
+                }
+            }
+        }
+        return mTrackAppStatusThread;
+    }
 
     private final ITeraFonnApiService.Stub mBinder = new ITeraFonnApiService.Stub() {
 
@@ -63,7 +100,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean getJWTandIMEI() throws RemoteException {
-            mExecutor.execute(new Runnable() {
+            getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     MgmtCluster.getJwtToken(TeraFonnApiService.this, new MgmtCluster.OnFetchJwtTokenListener() {
@@ -99,7 +136,7 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean fetchAppData(final String packageName) throws RemoteException {
-            mExecutor.execute(new Runnable() {
+            getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     if (mFetchAppDataListener == null) {
@@ -146,18 +183,19 @@ public class TeraFonnApiService extends Service {
                     return false;
                 }
                 for (final String packageName : packageNameList) {
-                    if (mPackageStatusMap.containsKey(packageName)) {
+                    if (getPackageStatusMap().containsKey(packageName)) {
                         continue;
                     }
                     // Given a default app status for the package, the status will be changed later
                     // in TrackAppStatusRunnable.
-                    mPackageStatusMap.put(packageName, AppStatus.UNKNOWN /* default app status */);
+                    getPackageStatusMap().put(packageName, AppStatus.UNKNOWN /* default app status */);
                 }
                 isSuccess = true;
             } catch (Exception e) {
                 Logs.e(CLASSNAME, "addTrackAppStatus", Log.getStackTraceString(e));
+            } finally {
+                getTrackAppStatusThread()._continue();
             }
-            mTrackAppStatusThread._continue();
             return isSuccess;
         }
 
@@ -169,7 +207,7 @@ public class TeraFonnApiService extends Service {
                     return false;
                 }
                 for (String packageName : packageNameList) {
-                    mPackageStatusMap.remove(packageName);
+                    getPackageStatusMap().remove(packageName);
                 }
                 isSuccess = true;
             } catch (Exception e) {
@@ -180,10 +218,10 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public boolean clearTrackAppStatus() throws RemoteException {
-            mTrackAppStatusThread.pause();
+            getTrackAppStatusThread().pause();
             boolean isSuccess;
             try {
-                mPackageStatusMap.clear();
+                getPackageStatusMap().clear();
                 isSuccess = true;
             } catch (Exception e) {
                 isSuccess = false;
@@ -228,13 +266,13 @@ public class TeraFonnApiService extends Service {
             } else {
                 status = getPackageStatus(packageName);
             }
-            mPackageStatusMap.put(packageName, status);
+            getPackageStatusMap().put(packageName, status);
             return status;
         }
 
         @Override
         public void postCheckAppAvailable(final String packageName, final ICheckAppAvailableListener mListener) throws RemoteException {
-            mExecutor.execute(new Runnable() {
+            getExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     int status;
@@ -245,7 +283,7 @@ public class TeraFonnApiService extends Service {
                     } else {
                         status = getPackageStatus(packageName);
                     }
-                    mPackageStatusMap.put(packageName, status);
+                    getPackageStatusMap().put(packageName, status);
                     try {
                         mListener.onCheckCompleted(packageName, status);
                     } catch (RemoteException e) {
@@ -395,7 +433,7 @@ public class TeraFonnApiService extends Service {
             return super.onStartCommand(intent, flags, startId);
         } else {
             isServiceRunning = true;
-            mTrackAppStatusThread.start();
+            getTrackAppStatusThread().start();
         }
 
         return START_STICKY;
@@ -700,15 +738,15 @@ public class TeraFonnApiService extends Service {
                         continue;
                     }
 
-                    final Set<String> packageKeySet = mPackageStatusMap.keySet();
+                    final Set<String> packageKeySet = getPackageStatusMap().keySet();
                     HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
                     final boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
                     for (final String packageName : packageKeySet) {
-                        mExecutor.execute(new Runnable() {
+                        getExecutor().execute(new Runnable() {
                             @Override
                             public void run() {
                                 try {
-                                    Integer appStatus = mPackageStatusMap.get(packageName);
+                                    Integer appStatus = getPackageStatusMap().get(packageName);
 
                                     int reportStatus;
                                     if (isAvailable) {
@@ -719,7 +757,7 @@ public class TeraFonnApiService extends Service {
 
                                     if (appStatus != null && appStatus != reportStatus) {
                                         mTrackAppStatusListener.onStatusChanged(packageName, reportStatus);
-                                        mPackageStatusMap.put(packageName, reportStatus);
+                                        getPackageStatusMap().put(packageName, reportStatus);
                                     }
                                 } catch (Exception e) {
                                     Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
