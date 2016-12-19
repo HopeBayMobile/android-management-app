@@ -36,6 +36,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
@@ -87,6 +88,7 @@ import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import java.io.File;
@@ -2192,9 +2194,38 @@ public class AppFileFragment extends Fragment {
             if (itemInfo instanceof AppInfo) {
                 showProgress();
 
+                // Before unpin apps, check minimal apk is exist or not. If not, not allow user to
+                // unpin this app.
                 final AppInfo appInfo = (AppInfo) itemInfo;
-                appInfo.setLastProcessTime(System.currentTimeMillis());
+                if (!isPinned) {
+                    int messageResId = 0;
+                    int code = HCFSMgmtUtils.checkMinimalApk(mContext, appInfo.getPackageName(), true);
+                    switch (code) {
+                        case 0: // minimal apk is not exist
+                            HCFSMgmtUtils.createMinimalApk(mContext, appInfo.getPackageName(), false);
+                        case -1: // unknown error
+                        case 2: // create minimal apk in progress
+                            allowPinUnpin = false;
+                            messageResId = R.string.app_file_cannot_unpin_apps;
+                            break;
+                        case 1: // minimal apk is exist
+                            break;
+                    }
 
+                    if (!allowPinUnpin) {
+                        itemInfo.setPinned(!isPinned);
+
+                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                        builder.setTitle(appInfo.getName());
+                        builder.setMessage(mContext.getString(messageResId));
+                        builder.setPositiveButton(mContext.getString(R.string.confirm), null);
+                        builder.setCancelable(false);
+                        builder.show();
+                        return allowPinUnpin;
+                    }
+                }
+
+                appInfo.setLastProcessTime(System.currentTimeMillis());
                 mPinUnpinAppMap.put(appInfo.getPackageName(), appInfo);
                 try {
                     // The subject to clone AppInfo is in order to keep the pin status.
@@ -2413,6 +2444,5 @@ public class AppFileFragment extends Fragment {
         }
 
     }
-
 
 }

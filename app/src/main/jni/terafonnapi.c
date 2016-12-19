@@ -35,6 +35,8 @@ extern void HCFS_trigger_unboost(const char **json_res);
 extern void HCFS_clear_booster_package_remaining(const char **json_res, const char *package_name);
 extern void HCFS_mount_smart_cache(const char **json_res);
 extern void HCFS_umount_smart_cache(const char **json_res);
+extern void HCFS_check_minimal_apk(const char **json_res, const char *package_path, int blocking);
+extern void HCFS_create_minimal_apk(const char **json_res, const char *package_path, int blocking);
 
 //extern void HCFS_collect_sys_logs(const char **json_res);
 
@@ -387,5 +389,29 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_mount
     HCFS_mount_smart_cache(&json_res);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_createMinimalApk(
+ 		JNIEnv *jEnv, jobject jObject, jstring jPkgPath, jint jBlocking) {
+ 	const char *json_res;
+    const char *pkg_path = (*jEnv)->GetStringUTFChars(jEnv, jPkgPath, 0);
+    int blocking = jBlocking;
+    HCFS_create_minimal_apk(&json_res, pkg_path, blocking);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pkg_path);
+    return result;
+}
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_checkMinimalApk(
+ 		JNIEnv *jEnv, jobject jObject, jstring jPkgPath, jint jBlocking) {
+ 	const char *json_res;
+    const char *pkg_path = (*jEnv)->GetStringUTFChars(jEnv, jPkgPath, 0);
+    int blocking = jBlocking;
+    HCFS_check_minimal_apk(&json_res, pkg_path, blocking);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)pkg_path);
     return result;
 }

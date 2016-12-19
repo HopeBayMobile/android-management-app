@@ -59,8 +59,8 @@ public class HCFSApiUtils {
 
     /**
      * This method initiate a the HCFS to start the restoration process.
-     *  Restoration process stage-1 will start immediately after this method
-     *  called.
+     * Restoration process stage-1 will start immediately after this method
+     * called.
      *
      * @return a json string contains: true if success, false otherwise.
      */
@@ -171,5 +171,26 @@ public class HCFSApiUtils {
      * @return a json string contains: true if success, false otherwise.
      */
     public static native String mountBooster();
+
+    /**
+     * This method will make minimal base apk
+     *
+     * @param packagePath package path in /data/app
+     * @param blocking    quick return
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String createMinimalApk(String packagePath, int blocking);
+
+    /**
+     * Check the minimal base apk is exist or not
+     *
+     * @param packagePath package path in /data/app
+     * @param blocking    quick return
+     * @return a json string contains: true if success, false otherwise.
+     * <li>0, not existed</li>
+     * <li>1, existed</li>
+     * <li>2, create minimal base apk in progress</li>
+     */
+    public static native String checkMinimalApk(String packagePath, int blocking);
 
 }

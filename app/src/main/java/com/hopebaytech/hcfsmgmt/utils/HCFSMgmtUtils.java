@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -69,6 +70,8 @@ public class HCFSMgmtUtils {
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
 
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
+
+    private static final String DATA_APP_PATH = "/data/app";
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
         UidDAO uidDAO = UidDAO.getInstance(context);
@@ -297,7 +300,6 @@ public class HCFSMgmtUtils {
         if (sourceDir != null) {
             Logs.d(CLASSNAME, "pinApp", "sourceDir=" + sourceDir);
             if (sourceDir.startsWith("/data/app")) {
-//                isSourceDirSuccess = pinFileOrDirectory(sourceDir, pinType);
                 // Priority pin for /data/app no matter pin or unpin
                 isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
             }
@@ -323,11 +325,14 @@ public class HCFSMgmtUtils {
         String dataDir = info.getDataDir();
         List<String> externalDirList = info.getExternalDirList();
 
+        boolean isMinApkSuccess = false;
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             if (sourceDir.startsWith("/data/app")) {
-                // Priority pin for /data/app no matter pin or unpin
-                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
+                isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
+
+                // Priority pin /data/app/<pkg-folder>/.basemin
+                isMinApkSuccess = (pinFileOrDirectory(sourceDir + "/.basemin", PinType.PRIORITY) == 0);
             }
         }
         boolean isDataDirSuccess = true;
@@ -343,7 +348,7 @@ public class HCFSMgmtUtils {
             }
         }
 
-        return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
+        return isSourceDirSuccess & isMinApkSuccess & isDataDirSuccess & isExternalDirSuccess;
     }
 
     /**
@@ -567,7 +572,7 @@ public class HCFSMgmtUtils {
                 Logs.d(CLASSNAME, "changeCloudSyncStatus", "type=" + netInfo.getType()
                         + ", state=" + netInfo.getState()
                         + ", detailedState=" + netInfo.getDetailedState());
-                
+
                 if (netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                     String logMsg = "Current wifi network is active";
                     TeraCloudConfig.startSyncToCloud(context, logMsg);
@@ -791,7 +796,7 @@ public class HCFSMgmtUtils {
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Logs.i(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
+                Logs.d(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
             } else {
                 Logs.e(CLASSNAME, "notifyAppListChange", "jObject=" + jObject);
             }
@@ -801,5 +806,71 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
+    public static boolean createMinimalApk(Context context, String packageName, boolean blocking) {
+        boolean isSuccess = false;
+        try {
+            String sourceDir = getSourceDir(context, packageName);
+            if (sourceDir != null) {
+                String jsonResult = HCFSApiUtils.createMinimalApk(sourceDir, blocking ? 1 : 0);
+                JSONObject jObject = new JSONObject(jsonResult);
+                isSuccess = jObject.getBoolean("result");
+                if (isSuccess) {
+                    Logs.d(CLASSNAME, "createMinimalApk", "jObject=" + jObject);
+                } else {
+                    Logs.e(CLASSNAME, "createMinimalApk", "jObject=" + jObject);
+                }
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "createMinimalApk", Log.getStackTraceString(e));
+        }
+        return isSuccess;
+    }
 
+    /**
+     * Check the minimal base apk is exist or not
+     *
+     * @param context
+     * @param packageName the package name to be checked
+     * @param blocking    the method is blocking or not
+     * @return a json string contains: true if success, false otherwise.
+     * <li>-1, error</li>
+     * <li>0, not existed</li>
+     * <li>1, existed</li>
+     * <li>2, create minimal base apk in progress</li>
+     */
+    public static int checkMinimalApk(Context context, String packageName, boolean blocking) {
+        int code = -1;
+        try {
+            String sourceDir = getSourceDir(context, packageName);
+            if (sourceDir != null) {
+                String jsonResult = HCFSApiUtils.checkMinimalApk(sourceDir, blocking ? 1 : 0);
+                JSONObject jObject = new JSONObject(jsonResult);
+                if (jObject.getBoolean("result")) {
+                    code = jObject.getInt("code");
+                    Logs.d(CLASSNAME, "checkMinimalApk", "jObject=" + jObject);
+                } else {
+                    Logs.e(CLASSNAME, "checkMinimalApk", "jObject=" + jObject);
+                }
+            }
+        } catch (JSONException e) {
+            Logs.e(CLASSNAME, "checkMinimalApk", Log.getStackTraceString(e));
+        }
+        return code;
+    }
+
+    private static String getSourceDir(Context context, String packageName) {
+        String sourceDir = null;
+        try {
+            PackageInfo p = context.getPackageManager().getPackageInfo(packageName, 0);
+            sourceDir = p.applicationInfo.sourceDir;
+            sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
+            if (sourceDir.startsWith(DATA_APP_PATH)) {
+                sourceDir = sourceDir.substring(DATA_APP_PATH.length() + 1, sourceDir.length());
+                Logs.d(CLASSNAME, "getSourceDir", "package name: " + packageName + " package path: " + sourceDir);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Logs.e(CLASSNAME, "getSourceDir", e.toString());
+        }
+        return sourceDir;
+    }
 }

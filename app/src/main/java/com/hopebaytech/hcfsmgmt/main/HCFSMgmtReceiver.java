@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 
@@ -159,6 +162,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     intentService.putExtra(TeraIntent.KEY_UID, uid);
                     intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                     context.startService(intentService);
+
+                    HCFSMgmtUtils.createMinimalApk(context, packageName, false /*blocking*/);
                 }
                 break;
             }
@@ -172,6 +177,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 intentService.putExtra(TeraIntent.KEY_UID, uid);
                 intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                 context.startService(intentService);
+
+                HCFSMgmtUtils.createMinimalApk(context, packageName, false /*blocking*/);
                 break;
             }
             case Intent.ACTION_PACKAGE_REMOVED: {
