@@ -166,7 +166,7 @@
             </LinearLayout>
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/hint_message"
+                android:id="@+id/message"
                 style="@style/F3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

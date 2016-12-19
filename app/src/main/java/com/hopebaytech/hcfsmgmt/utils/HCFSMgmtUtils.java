@@ -56,11 +56,7 @@ public class HCFSMgmtUtils {
     public static final String CLASSNAME = "HCFSMgmtUtils";
 //    public static final String ACTION_HCFS_MANAGEMENT_ALARM = "com.hopebaytech.hcfsmgmt.HCFSMgmtReceiver";
 
-    public static final int PINNED_SPACE_WARNING_THRESHOLD = 80; // Unit: percentage
-
     public static final boolean DEFAULT_PINNED_STATUS = false;
-
-    public static final String BUNDLE_KEY_VIEW_PAGER_INDEX = "ViewPagerIndex"; // ViewPagerIndex cannot be renamed.
 
     public static final String PREF_CHECK_DEVICE_STATUS = "pref_silent_sign_in";
     public static final String PREF_TERA_APP_LOGIN = "pref_tera_app_login";
@@ -94,67 +90,6 @@ public class HCFSMgmtUtils {
             }
         }
         return isPinned;
-    }
-
-    public static void startResetXferAlarm(Context context) {
-        Logs.d(CLASSNAME, "startResetXferAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
-
-        int requestCode = RequestCode.RESET_XFER;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long intervalMillis = Interval.RESET_DATA_XFER;
-        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
-    }
-
-    public static void startUpdateExternalAppDirAlarm(Context context) {
-        Logs.d(CLASSNAME, "startUpdateExternalAppDirAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR);
-
-        int requestCode = RequestCode.UPDATE_EXTERNAL_APP_DIR;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long intervalMillis = Interval.UPDATE_EXTERNAL_APP_DIR;
-        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), intervalMillis, pi);
-    }
-
-    public static void stopResetXferAlarm(Context context) {
-        Logs.d(CLASSNAME, "stopResetXferAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_RESET_DATA_XFER);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_RESET_XFER);
-
-        int requestCode = RequestCode.RESET_XFER;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-        pi.cancel();
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(pi);
     }
 
     @Nullable
@@ -570,16 +505,16 @@ public class HCFSMgmtUtils {
     /**
      * Reset xfer at 23:59:59 everyday
      */
-    public static boolean resetXfer() {
+    public static boolean resetDataXfer() {
         boolean isSuccess = false;
         try {
             String jsonResult = HCFSApiUtils.resetXfer();
             JSONObject jObject = new JSONObject(jsonResult);
             isSuccess = jObject.getBoolean("result");
             if (isSuccess) {
-                Log.i(TAG, "resetXfer: " + jsonResult);
+                Log.i(TAG, "resetDataXfer: " + jsonResult);
             } else {
-                Log.e(TAG, "resetXfer: " + jsonResult);
+                Log.e(TAG, "resetDataXfer: " + jsonResult);
             }
         } catch (JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -674,72 +609,6 @@ public class HCFSMgmtUtils {
         if (notifyConnFailedRecoveryPref) {
             NotificationEvent.notify(context, notify_id, notify_title, notify_content);
         }
-    }
-
-    public static void startNotifyInsufficientPinSpaceAlarm(Context context) {
-        Logs.d(CLASSNAME, "startNotifyInsufficientPinSpaceAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
-
-        int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = Interval.NOTIFY_INSUFFICIENT_PIN_SPACE;
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
-    }
-
-    public static void stopNotifyInsufficientPinSpaceAlarm(Context context) {
-        Logs.d(CLASSNAME, "stopNotifyInsufficientPinSpaceAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_INSUFFICIENT_PIN_SPACE);
-
-        int requestCode = RequestCode.NOTIFY_INSUFFICIENT_PIN_SPACE;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-        pi.cancel();
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(pi);
-    }
-
-    public static void startNotifyLocalStorageUsedRatioAlarm(Context context) {
-        Logs.d(CLASSNAME, "startNotifyLocalStorageUsedRatioAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-
-        int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        long triggerAtMillis = SystemClock.elapsedRealtime();
-        long intervalMillis = Interval.NOTIFY_LOCAL_STORAGE_USED_RATIO;
-        am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
-    }
-
-    public static void stopNotifyLocalStorageUsedRatioAlarm(Context context) {
-        Logs.d(CLASSNAME, "stopNotifyLocalStorageUsedRatioAlarm", null);
-
-        Intent intent = new Intent(context, HCFSMgmtReceiver.class);
-        intent.setAction(TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-//        intent.setAction(ACTION_HCFS_MANAGEMENT_ALARM);
-//        intent.putExtra(TeraIntent.KEY_OPERATION, TeraIntent.VALUE_NOTIFY_LOCAL_STORAGE_USED_RATIO);
-
-        int requestCode = RequestCode.NOTIFY_LOCAL_STORAGE_USED_RATIO;
-        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
-        PendingIntent pi = PendingIntent.getBroadcast(context, requestCode, intent, flags);
-        pi.cancel();
-
-        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.cancel(pi);
     }
 
 //    @Nullable

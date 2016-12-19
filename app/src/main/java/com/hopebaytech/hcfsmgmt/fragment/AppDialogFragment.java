@@ -16,9 +16,11 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -171,14 +173,24 @@ public class AppDialogFragment extends DialogFragment {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
         builder.setView(view)
-                .setPositiveButton(R.string.app_file_dialog_app_open, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.app_file_dialog_app_open, null)
+                .setNegativeButton(R.string.app_file_dialog_app_remove, null);
+
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final Button open = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                if (appInfo.getLazyAppStatus() == DataStatus.UNAVAILABLE) {
+                    open.setTextColor(ContextCompat.getColor(mContext, R.color.C5));
+                }
+                open.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(View v) {
+                        // Check lazy data status again to make sure the lazy data status is correct
                         if (appInfo.getLazyAppStatus() == DataStatus.UNAVAILABLE) {
-                            Toast.makeText(mContext,
-                                    R.string.app_dialog_unavailable,
-                                    Toast.LENGTH_LONG)
-                                    .show();
+                            open.setTextColor(ContextCompat.getColor(mContext, R.color.C5));
+                            Toast.makeText(mContext, R.string.app_dialog_unavailable, Toast.LENGTH_LONG).show();
                             return;
                         }
 
@@ -186,17 +198,23 @@ public class AppDialogFragment extends DialogFragment {
                                 .getLaunchIntentForPackage(appInfo.getPackageName());
                         mContext.startActivity(launchIntent);
                     }
-                })
-                .setNegativeButton(R.string.app_file_dialog_app_remove, new DialogInterface.OnClickListener() {
+                });
+
+                Button uninstall = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                uninstall.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    public void onClick(View v) {
                         Intent intent = new Intent(Intent.ACTION_DELETE);
                         intent.setData(Uri.parse("package:" + appInfo.getPackageName()));
                         intent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
                         startActivity(intent);
+
+                        dismiss();
                     }
                 });
-        return builder.create();
+            }
+        });
+        return alertDialog;
     }
 
     private String getAppDataRatio(AppInfo appInfo) {

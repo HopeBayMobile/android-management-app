@@ -23,7 +23,7 @@
 
     <color name="colorDefaultBackground">#FAFAFA</color>
 
-    <color name="colorUserIconNormalBackground">#e9faf4</color>
+    <color name="colorUserIconNormalBackground">#c7f5d0</color>
     <color name="colorUserIconNormalValue">@color/C1</color>
     <color name="colorUserIconWarningBackground">#ffe5e5</color>
     <color name="colorUserIconWarningValue">#ff9000</color>

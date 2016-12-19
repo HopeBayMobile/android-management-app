@@ -55,7 +55,7 @@ public class RestoreDialogFragment extends DialogFragment {
 
         LayoutInflater inflater = ((Activity) mContext).getLayoutInflater();
         View view = inflater.inflate(R.layout.restore_dialog_fragment, null);
-        TextView message = (TextView) view.findViewById(R.id.hint_message);
+        TextView message = (TextView) view.findViewById(R.id.message);
         message.setText(resId);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);

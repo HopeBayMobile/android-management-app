@@ -2,7 +2,9 @@ package com.hopebaytech.hcfsmgmt.service;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -15,7 +17,14 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -50,7 +59,9 @@ import com.hopebaytech.hcfsmgmt.interfaces.IPinUnpinListener;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
+import com.hopebaytech.hcfsmgmt.misc.Threshold;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.misc.ViewPage;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
@@ -69,11 +80,14 @@ import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -145,9 +159,9 @@ public class TeraMgmtService extends Service {
                             removeUidFromDatabase(intent, action);
                             break;
                         case TeraIntent.ACTION_RESET_DATA_XFER:
-                            HCFSMgmtUtils.resetXfer();
+                            HCFSMgmtUtils.resetDataXfer();
                             break;
-                        case TeraIntent.ACTION_NOTIFY_LOCAL_STORAGE_USED_RATIO:
+                        case TeraIntent.ACTION_MONITOR_LOCAL_STORAGE_USED_SPACE:
                             notifyLocalStorageUsedRatio();
                             break;
                         case TeraIntent.ACTION_ONGOING_NOTIFICATION:
@@ -156,10 +170,10 @@ public class TeraMgmtService extends Service {
                         case TeraIntent.ACTION_CHECK_DEVICE_STATUS:
                             checkDeviceStatus();
                             break;
-                        case TeraIntent.ACTION_NOTIFY_INSUFFICIENT_PIN_SPACE:
+                        case TeraIntent.ACTION_MONITOR_PINNED_SPACE:
                             notifyInsufficientPinSpace();
                             break;
-                        case TeraIntent.ACTION_UPDATE_EXTERNAL_APP_DIR:
+                        case TeraIntent.ACTION_MONITOR_EXTERNAL_APP_DIR:
                             HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
                             break;
                         case TeraIntent.ACTION_TOKEN_EXPIRED:
@@ -194,6 +208,11 @@ public class TeraMgmtService extends Service {
                             break;
                         case TeraIntent.ACTION_BOOSTER_PROCESS_FAILED:
                             onBoosterProcessFailed();
+                            break;
+                        case TeraIntent.ACTION_CHECK_AND_FIX_BOOSTER:
+                            checkAndFixBooster();
+                        case TeraIntent.ACTION_MONITOR_BOOSTER_USED_SPACE:
+                            checkBoosterUsedSpace();
                             break;
                     }
 
@@ -561,20 +580,21 @@ public class TeraMgmtService extends Service {
 
         long pinTotal = statInfo.getPinTotal();
         long pinMax = statInfo.getPinMax();
-        int notifyRatio = HCFSMgmtUtils.PINNED_SPACE_WARNING_THRESHOLD;
-        double ratio = ((double) pinTotal / pinMax) * 100;
-        Logs.d(CLASSNAME, "onStartCommand", "notifyRatio=" + notifyRatio
-                + ", ratio=" + ratio
+        int notifyThreshold = Threshold.PINNED_SPACE;
+        double pinnedPercentage = ((double) pinTotal / pinMax) * 100;
+        Logs.d(CLASSNAME, "onStartCommand", "notifyThreshold=" + notifyThreshold
+                + ", percentage=" + pinnedPercentage
                 + ", pinTotal=" + pinTotal
                 + ", pinMax=" + pinMax);
-        if (ratio >= notifyRatio) {
+        if (pinnedPercentage >= notifyThreshold) {
             if (!isNotified && !isRestoring) {
+                Bundle extras = new Bundle();
+                extras.putInt(ViewPage.KEY, ViewPage.APP);
+
                 int flag = NotificationEvent.FLAG_OPEN_APP;
                 int idNotify = NotificationEvent.ID_INSUFFICIENT_PIN_SPACE;
                 String notifyTitle = getString(R.string.app_name);
-                String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyRatio);
-                Bundle extras = new Bundle();
-                extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
+                String notifyContent = String.format(getString(R.string.notify_exceed_pin_used_ratio), notifyThreshold);
                 NotificationEvent.notify(TeraMgmtService.this, idNotify, notifyTitle, notifyContent, flag, extras);
 
                 editor.putBoolean(SettingsFragment.PREF_INSUFFICIENT_PIN_SPACE_NOTIFIED, true);
@@ -955,7 +975,7 @@ public class TeraMgmtService extends Service {
 
         int flag = NotificationEvent.FLAG_OPEN_APP;
         Bundle extras = new Bundle();
-        extras.putInt(HCFSMgmtUtils.BUNDLE_KEY_VIEW_PAGER_INDEX, 1 /* APP/FILE page */);
+        extras.putInt(ViewPage.KEY, ViewPage.APP);
         NotificationEvent.notify(this, idNotify, notifyTitle, notifyContent, flag, extras);
     }
 
@@ -1138,4 +1158,211 @@ public class TeraMgmtService extends Service {
         });
         getBoosterWhiteListInfoProxy.get();
     }
+
+    /**
+     * Check booster is valid or not. If not, fix it.
+     */
+    private void checkAndFixBooster() {
+        boolean isBoosterEnabled = false;
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+        if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
+            isBoosterEnabled = true;
+        }
+        if (Booster.isBoosterMounted()) {
+            if (!isBoosterEnabled) {
+                // Set ENABLE_BOOSTER flag to true if booster is mounted.
+                if (settingsInfo == null) {
+                    settingsInfo = new SettingsInfo();
+                    settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                }
+                settingsInfo.setValue(String.valueOf(true));
+                settingsDAO.update(settingsInfo);
+            }
+            fixBoostStatusIfInvalid();
+            if (isBoosterProcessCompleted()) {
+                Booster.enableApps(this);
+            } else {
+                proceedNotCompletedBoosterProcess();
+            }
+        } else {
+            if (isBoosterEnabled) {
+                // Set ENABLE_BOOSTER flag to false if booster is not mounted.
+                settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
+                settingsInfo.setValue(String.valueOf(false));
+                settingsDAO.update(settingsInfo);
+            }
+            resetUserBoosterStatus();
+            Booster.enableApps(this);
+        }
+    }
+
+    private boolean isBoosterProcessCompleted() {
+        Map<String, Object> queryMap = new HashMap<>();
+        Integer[] queryBoostStatus = new Integer[]{
+                UidInfo.BoostStatus.BOOSTING,
+                UidInfo.BoostStatus.BOOST_FAILED,
+                UidInfo.BoostStatus.UNBOOSTING,
+                UidInfo.BoostStatus.UNBOOST_FAILED
+        };
+        queryMap.put(UidDAO.BOOST_STATUS_COLUMN, queryBoostStatus);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        return uidDAO.get(queryMap).isEmpty();
+    }
+
+    /**
+     * Reset the booster status of user packages in uid.db to {@link UidInfo.BoostStatus#UNBOOSTED}
+     */
+    private void resetUserBoosterStatus() {
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.SYSTEM_APP_COLUMN, 0);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        for (UidInfo uidInfo : uidDAO.get(cv)) {
+            uidInfo.setBoostStatus(UidInfo.BoostStatus.UNBOOSTED);
+            uidDAO.update(uidInfo);
+        }
+    }
+
+    /**
+     * If one record with the queryBoostStatus is found, update the {@link UidInfo} of query result
+     * then proceed the boost/unboost process.
+     *
+     * @param queryBoostStatus  the boost status used to query the booster process is completed or not.
+     *                          See {@link UidInfo.BoostStatus#BOOSTING}, {@link UidInfo.BoostStatus#BOOST_FAILED}
+     *                          , {@link UidInfo.BoostStatus#UNBOOSTING} and {@link UidInfo.BoostStatus#UNBOOST_FAILED}
+     * @param updateBoostStatus the boost status used to update the query result of {@link UidInfo}
+     *                          according to the queryBoostStatus
+     * @return true if booster process is proceeded, false otherwise.
+     */
+    private boolean proceedBoosterProcess(int queryBoostStatus, int updateBoostStatus) {
+        boolean isProceeded = false;
+        ContentValues cv = new ContentValues();
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, queryBoostStatus);
+
+        UidDAO uidDAO = UidDAO.getInstance(this);
+        List<UidInfo> uidInfoList = uidDAO.get(cv);
+        if (!uidInfoList.isEmpty()) {
+            for (UidInfo uidInfo : uidInfoList) {
+                uidInfo.setBoostStatus(updateBoostStatus);
+                uidDAO.update(uidInfo);
+            }
+
+            if (queryBoostStatus == UidInfo.BoostStatus.BOOSTING ||
+                    queryBoostStatus == UidInfo.BoostStatus.BOOST_FAILED) {
+                Booster.triggerBoost();
+                isProceeded = true;
+            } else if (queryBoostStatus == UidInfo.BoostStatus.UNBOOSTING ||
+                    queryBoostStatus == UidInfo.BoostStatus.UNBOOST_FAILED) {
+                Booster.triggerUnboost();
+                isProceeded = true;
+            }
+        }
+        return isProceeded;
+    }
+
+    /**
+     * Proceed processing the not completed boost/unboost process
+     */
+    private void proceedNotCompletedBoosterProcess() {
+        // if one record with BoostStatus.BOOSTING is found, proceed the boost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.BOOSTING, UidInfo.BoostStatus.INIT_BOOST)) {
+            return;
+        }
+
+        // if one record with BoostStatus.BOOST_FAILED is found, proceed the boost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.BOOST_FAILED, UidInfo.BoostStatus.INIT_BOOST)) {
+            return;
+        }
+
+        // if one record with BoostStatus.UNBOOSTING is found, proceed the unboost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.UNBOOSTING, UidInfo.BoostStatus.INIT_UNBOOST)) {
+            return;
+        }
+
+        // if one record with BoostStatus.UNBOOST_FAILED is found, proceed the unboost process
+        if (proceedBoosterProcess(UidInfo.BoostStatus.UNBOOST_FAILED, UidInfo.BoostStatus.INIT_UNBOOST)) {
+            return;
+        }
+    }
+
+    /**
+     * Check apps with BoostStatus.BOOSTED have the same boostStatus as the checkPackageBoostStatus()
+     * or not. If not, it means partial apps in the booster has corrupted. We need to fix the
+     * boostStatus of these apps.
+     */
+    private void fixBoostStatusIfInvalid() {
+        ContentValues cv = new ContentValues();
+        UidDAO uidDAO = UidDAO.getInstance(this);
+
+        cv.clear();
+        cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
+        for (UidInfo uidInfo : uidDAO.get(cv)) {
+            boolean isBoosted = Booster.isPackageBoosted(uidInfo.getPackageName());
+            if (!isBoosted) {
+                uidInfo.setBoostStatus(UidInfo.BoostStatus.UNBOOSTED);
+                uidDAO.update(uidInfo);
+            }
+        }
+    }
+
+    /**
+     * Check the booster used space is larger than {@link Threshold#BOOSTER_USED_SPACE} of booster
+     * size or not. If yes, pop up a warning dialog to notify user.
+     */
+    private void checkBoosterUsedSpace() {
+        double boosterUsedSpace = Booster.getBoosterUsedSpace();
+        double boosterTotalSpace = Booster.getBoosterTotalSpace();
+        double usedPercentage = (boosterUsedSpace / boosterTotalSpace) * 100;
+        if (usedPercentage > Threshold.BOOSTER_USED_SPACE) {
+            UiHandler.getInstance().post(new Runnable() {
+                @Override
+                public void run() {
+                    getFullBoosterZoneAlertDialog().show();
+                }
+            });
+        }
+    }
+
+    private AlertDialog getFullBoosterZoneAlertDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.message_dialog_fragment, null);
+        ((TextView) view.findViewById(R.id.title)).setText(R.string.booster_full_space_alert_title);
+        ((TextView) view.findViewById(R.id.message)).setText(R.string.booster_full_space_alert_message);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatDialog);
+        builder.setView(view);
+        builder.setPositiveButton(R.string.unboost_apps, null);
+        builder.setNegativeButton(R.string.cancel, null);
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button removeApps = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                removeApps.setTextColor(ContextCompat.getColor(TeraMgmtService.this, R.color.colorAccent));
+                removeApps.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Bundle extras = new Bundle();
+                        extras.putInt(ViewPage.KEY, ViewPage.BOOSTER);
+
+                        Intent intent = new Intent(TeraMgmtService.this, MainActivity.class);
+                        // Require to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        intent.putExtras(extras);
+                        startActivity(intent);
+
+                        alertDialog.dismiss();
+                    }
+                });
+                Button cancel = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
+                cancel.setTextColor(ContextCompat.getColor(TeraMgmtService.this, R.color.colorAccent));
+            }
+        });
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
+        }
+        return alertDialog;
+    }
+
 }

@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class DisplayTypeFactory {
 
@@ -133,26 +134,39 @@ public class DisplayTypeFactory {
         return itemInfoList;
     }
 
-    public static ArrayList<ItemInfo> getListOfFileDirs(Context context, File currentFile, boolean filterByPin) {
-        ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
+    public static ArrayList<ItemInfo> getListOfFileDirs(final Context context, File currentFile, final boolean filterByPin) {
+        final ArrayList<ItemInfo> itemInfoList = new ArrayList<>();
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
             File[] fileList = currentFile.listFiles();
-            for (File file : fileList) {
-                FileInfo fileInfo = new FileInfo(context);
-                fileInfo.setFilePath(file.getAbsolutePath());
-                if (filterByPin) {
-                    boolean isPinned = HCFSMgmtUtils.isPathPinned(fileInfo.getFilePath());
-                    if (!isPinned) {
-                        continue;
-                    }
-                }
-                fileInfo.setName(file.getName());
-                fileInfo.setDirectory(file.isDirectory());
-                fileInfo.setLastModified(file.lastModified());
-                fileInfo.setSize(file.length());
+            final CountDownLatch countDownLatch = new CountDownLatch(fileList.length);
+            for (final File file : fileList) {
+                ThreadPool.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        FileInfo fileInfo = new FileInfo(context);
+                        fileInfo.setFilePath(file.getAbsolutePath());
+                        if (filterByPin) {
+                            boolean isPinned = HCFSMgmtUtils.isPathPinned(fileInfo.getFilePath());
+                            if (!isPinned) {
+                                countDownLatch.countDown();
+                                return;
+                            }
+                        }
+                        fileInfo.setName(file.getName());
+                        fileInfo.setDirectory(file.isDirectory());
+                        fileInfo.setLastModified(file.lastModified());
+                        fileInfo.setSize(file.length());
 
-                itemInfoList.add(fileInfo);
+                        itemInfoList.add(fileInfo);
+                        countDownLatch.countDown();
+                    }
+                });
+            }
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         return itemInfoList;

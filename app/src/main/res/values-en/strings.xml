@@ -137,7 +137,8 @@
     <string name="app_file_dialog_data_size">Size: %s</string>
     <string name="app_file_dialog_app_version">Version: %s</string>
     <string name="app_file_dialog_calculating">Calculating&#8230;</string>
-    <string name="app_dialog_unavailable">The app is not available. Please check the network status.</string>
+    <string name="app_dialog_unavailable">Launch app failed. Please check if your Wi-Fi connection is OK, or turn off \"Wi-Fi only\" under \"Sync\" settings and use mobile data plan</string>
+    <string name="file_unavailable">Open file failed. Please check if your Wi-Fi connection is OK, or turn off \"Wi-Fi only\" under \"Sync\" settings and use mobile data plan</string>
 
     <string name="hcfs_mgmt_service_image_failed_to_pin">Number of failed pinned images</string>
     <string name="hcfs_mgmt_service_video_failed_to_pin">Number of failed pinned videos</string>
@@ -202,11 +203,12 @@
     <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
     <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
 
-    <string name="change_account_require_new_account">Same as the current account. Changing account operation will not be performed.</string>
+    <string name="change_account_require_new_account">Same as the current account.\nChanging account operation has stopped.</string>
     <string name="change_account_start_to_change">Change</string>
-    <string name="change_account_failed">Changing account failed. Please try again or tap the Return key to quit.</string>
-    <string name="change_account_another_account"><u>Choose Another Account</u></string>
+    <string name="change_account_failed">Changing account failed. Please quit and run the app again by logging in with your previous account to execute the process of changing account.</string>
+    <string name="change_account_another_account"><u>Choose another Google account</u></string>
     <string name="change_account_require_read_phone_state_permission">Changing account must enable the Phone permission on Tera first. Tap the key on the right to continue.</string>
+    <string name="change_account_auth_code_expired">Account authentication is not valid or expired. Please quit and run the app again by logging in with your previous account to execute the process of changing account.</string>
 
     <string name="auth_at_bootup_auth_failed_google_auth">Unable to access cloud data, because Google account authentication failed.</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Unable to access cloud data, because Tera account authentication failed.</string>
@@ -248,6 +250,8 @@
     <string name="restore_failed_device_in_use">您選擇的備份已經使用中，請選擇其餘備份還原。</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
+
+    <!-- Button text for dialog -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="confirm">Confirm</string>
@@ -260,6 +264,7 @@
     <string name="sync_settings">SYNC SETTINGS</string>
     <string name="settings">SETTINGS</string>
     <string name="_continue">CONTINUE</string>
+    <string name="unboost_apps">UNBOOST APPS</string>
 
     <string name="pref_download_to_run">pref_download_to_run</string>
     <string name="tera_version_title">Tera Version</string>
@@ -321,6 +326,8 @@
     <string name="booster_notification_boost_completed_message">The selected apps are enabled and available to use.</string>
     <string name="booster_notification_boost_failed_title">Boosting apps failed.</string>
     <string name="booster_notification_boost_failed_message">Some apps might not be boosted successfully. Please try again.</string>
+    <string name="booster_full_space_alert_title">Boost Zone Full</string>
+    <string name="booster_full_space_alert_message">To release more spaces for boost zone, please remove some apps first.</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 

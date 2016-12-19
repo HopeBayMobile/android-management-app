@@ -4,8 +4,13 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Shader;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.Nullable;
@@ -23,13 +28,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
-import com.hopebaytech.hcfsmgmt.utils.BitmapBase64Factory;
+import com.hopebaytech.hcfsmgmt.utils.BitmapFactoryUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import java.io.BufferedInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -112,7 +119,7 @@ public class UserInfoDialogFragment extends DialogFragment {
         if (System.currentTimeMillis() <= accountInfo.getImgExpiringTime()) {
             String imgBase64 = accountInfo.getImgBase64();
             if (imgBase64 != null) {
-                mUserIcon.setImageBitmap(BitmapBase64Factory.decodeBase64(imgBase64));
+                mUserIcon.setImageBitmap(BitmapFactoryUtils.decodeBase64(imgBase64));
             }
             return;
         }
@@ -123,7 +130,6 @@ public class UserInfoDialogFragment extends DialogFragment {
                 serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
             @Override
             public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-
                 if (result == null || !result.isSuccess()) {
                     return;
                 }
@@ -150,19 +156,37 @@ public class UserInfoDialogFragment extends DialogFragment {
                     public void run() {
                         final Bitmap iconBitmap = downloadUserIconWithRetry(finalIconUrl);
                         if (iconBitmap != null) {
+                            int radius = iconBitmap.getWidth() / 2;
+                            BitmapShader bitmapShader = new BitmapShader(
+                                    iconBitmap,
+                                    Shader.TileMode.CLAMP,
+                                    Shader.TileMode.CLAMP
+                            );
+                            final Bitmap circularIconBitmap = Bitmap.createBitmap(
+                                    iconBitmap.getWidth(),
+                                    iconBitmap.getHeight(),
+                                    Bitmap.Config.ARGB_8888
+                            );
+                            Canvas canvas = new Canvas(circularIconBitmap);
+                            Paint paint = new Paint();
+                            paint.setAntiAlias(true);
+                            paint.setShader(bitmapShader);
+                            canvas.drawCircle(radius, radius, radius, paint);
+
                             mUiHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    mUserIcon.setImageBitmap(iconBitmap);
+                                    mUserIcon.setImageBitmap(circularIconBitmap);
                                 }
                             });
 
-                            String imgBase64 = BitmapBase64Factory.encodeToBase64(
+                            String imgBase64 = BitmapFactoryUtils.encodeToBase64(
                                     iconBitmap,
                                     Bitmap.CompressFormat.PNG,
                                     100);
                             accountInfo.setImgBase64(imgBase64);
                             accountInfo.setImgExpiringTime(System.currentTimeMillis() + Interval.DAY);
+
                             accountDAO.update(accountInfo);
                         }
                     }
@@ -172,10 +196,12 @@ public class UserInfoDialogFragment extends DialogFragment {
             @Override
             public void onAuthFailed(@Nullable GoogleSignInResult result) {
                 Logs.e(CLASSNAME, "onAuthFailed", "result=" + result);
+                if (result != null) {
+                    Logs.e(CLASSNAME, "onAuthFailed", "status=" + result.getStatus());
+                }
             }
         });
         silentAuthProxy.auth();
-
     }
 
     private Bitmap downloadUserIconWithRetry(String iconUrl) {

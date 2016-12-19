@@ -117,7 +117,6 @@ public class SettingsDAO implements IGenericDAO<SettingsInfo> {
         cv.put(VALUE, info.getValue());
 
         String where = KEY + "='" + info.getKey() + "'";
-
         boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
         if (!isSuccess) {
             Logs.d(CLASSNAME, "update", "Update item no exist. Try to insert.");

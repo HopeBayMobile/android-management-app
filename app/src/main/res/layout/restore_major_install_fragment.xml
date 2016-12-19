@@ -34,7 +34,7 @@
         android:text="@string/restore_major_install_title" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
-        android:id="@+id/hint_message"
+        android:id="@+id/message"
         style="@style/F6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

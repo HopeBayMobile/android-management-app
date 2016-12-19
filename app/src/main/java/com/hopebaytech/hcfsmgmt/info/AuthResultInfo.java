@@ -1,10 +1,15 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import android.support.annotation.Nullable;
+import android.content.Context;
 import android.util.Log;
+
+import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
+import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
@@ -12,9 +17,10 @@ import org.json.JSONObject;
  */
 public class AuthResultInfo {
 
-    private String message;
     private String token;
     private int responseCode;
+    private String responseContent;
+    private String errorCode;
 
     public int getResponseCode() {
         return responseCode;
@@ -22,15 +28,6 @@ public class AuthResultInfo {
 
     public void setResponseCode(int responseCode) {
         this.responseCode = responseCode;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    @Nullable
-    public void setMessage(@Nullable String message) {
-        this.message = message;
     }
 
     public String getToken() {
@@ -41,13 +38,30 @@ public class AuthResultInfo {
         this.token = token;
     }
 
+    public String getResponseContent() {
+        return responseContent;
+    }
+
+    public void setResponseContent(String responseContent) {
+        this.responseContent = responseContent;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+    
     @Override
     public String toString() {
         JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("message", message);
             jsonObject.put("token", token);
+            jsonObject.put("responseContent", responseContent);
             jsonObject.put("responseCode", responseCode);
+            jsonObject.put("errorCode", errorCode);
         } catch (JSONException e) {
             return Log.getStackTraceString(e);
         }

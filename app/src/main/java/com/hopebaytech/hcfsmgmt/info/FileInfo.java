@@ -19,6 +19,7 @@ import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.utils.BitmapFactoryUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
@@ -42,6 +43,11 @@ public class FileInfo extends ItemInfo implements Cloneable {
     private long mLastModified;
     private long mSize;
     private int mHashCode;
+
+    /**
+     * NOT real time data status of this file, only be updated when {@link #getFileDirStatus()} is called.
+     */
+    private int mFileDataStatus;
 
     public FileInfo(Context context) {
         super(context);
@@ -88,14 +94,14 @@ public class FileInfo extends ItemInfo implements Cloneable {
                     if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
                         if (mimeType.contains(MIME_SUBTYPE_PNG)) {
                             // Show PNG file with alpha supported
-                            Bitmap image = BitmapFactory.decodeFile(filePath);
+                            Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                             iconImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                         } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
                             // TODO show svg file
                         } else {
                             Bitmap thumbImage = getImageThumbnail(filePath);
                             if (thumbImage == null) {
-                                Bitmap image = BitmapFactory.decodeFile(filePath);
+                                Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                                 thumbImage = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             }
                             iconImage = thumbImage;
@@ -153,7 +159,7 @@ public class FileInfo extends ItemInfo implements Cloneable {
         } else {
             String filePath = mFilePath;
             String mimeType = getMimeType();
-            Logs.d(CLASSNAME, "getIconImage", "filePath=" + filePath + ", mimeType=" + mimeType);
+            Logs.d(CLASSNAME, "getIconDrawable", "filePath=" + filePath + ", mimeType=" + mimeType);
             if (mimeType != null) {
                 int width, height;
                 width = height = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
@@ -161,7 +167,7 @@ public class FileInfo extends ItemInfo implements Cloneable {
                     if (mimeType.startsWith(MIME_TYPE_IMAGE)) {
                         if (mimeType.contains(MIME_SUBTYPE_PNG)) {
                             // Show PNG file with alpha supported
-                            Bitmap image = BitmapFactory.decodeFile(filePath);
+                            Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                             Bitmap thumbnail = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             iconDrawable = new BitmapDrawable(mContext.getResources(), thumbnail);
                         } else if (mimeType.contains(MIME_SUBTYPE_SVG)) {
@@ -169,7 +175,7 @@ public class FileInfo extends ItemInfo implements Cloneable {
                         } else {
                             Bitmap thumbnail = getImageThumbnail(filePath);
                             if (thumbnail == null) {
-                                Bitmap image = BitmapFactory.decodeFile(filePath);
+                                Bitmap image = BitmapFactoryUtils.decodeFile(filePath, width, height);
                                 thumbnail = ThumbnailUtils.extractThumbnail(image, width, height, ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
                             }
                             iconDrawable = new BitmapDrawable(mContext.getResources(), thumbnail);
@@ -214,6 +220,10 @@ public class FileInfo extends ItemInfo implements Cloneable {
         // Unknown file type
         if (iconDrawable == null) {
             iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+        } else {
+            if (((BitmapDrawable) iconDrawable).getBitmap() == null) {
+                iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
+            }
         }
         return iconDrawable;
     }
@@ -221,15 +231,19 @@ public class FileInfo extends ItemInfo implements Cloneable {
     @Nullable
     private Bitmap getImageThumbnail(String path) {
         Bitmap thumbnail = null;
-        ContentResolver cr = mContext.getContentResolver();
-        Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
-                MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-                thumbnail = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+        try {
+            ContentResolver cr = mContext.getContentResolver();
+            Cursor cursor = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
+                    MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+                    thumbnail = MediaStore.Images.Thumbnails.getThumbnail(cr, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                }
+                cursor.close();
             }
-            cursor.close();
+        } catch (Exception e) {
+            Logs.w(CLASSNAME, "getImageThumbnail", Log.getStackTraceString(e));
         }
         return thumbnail;
     }
@@ -237,15 +251,19 @@ public class FileInfo extends ItemInfo implements Cloneable {
     @Nullable
     private Bitmap getVideoThumbnail(String path) {
         Bitmap thumbnail = null;
-        ContentResolver cr = mContext.getContentResolver();
-        Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
-                MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-                thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
+        try {
+            ContentResolver cr = mContext.getContentResolver();
+            Cursor cursor = cr.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, new String[]{MediaStore.MediaColumns._ID},
+                    MediaStore.MediaColumns.DATA + "=?", new String[]{path}, null);
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+                    thumbnail = MediaStore.Video.Thumbnails.getThumbnail(cr, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
+                }
+                cursor.close();
             }
-            cursor.close();
+        } catch (Exception e) {
+            Logs.w(CLASSNAME, "getVideoThumbnail", Log.getStackTraceString(e));
         }
         return thumbnail;
     }
@@ -281,16 +299,26 @@ public class FileInfo extends ItemInfo implements Cloneable {
     }
 
     private int getFileDirStatus() {
+        int fileDataStatus;
         int locationStatus = getFileDirLocationStatus();
         if (HCFSConnStatus.isAvailable(mContext, HCFSMgmtUtils.getHCFSStatInfo())) {
-            return DataStatus.AVAILABLE;
+            fileDataStatus = DataStatus.AVAILABLE;
         } else {
             if (locationStatus == LocationStatus.LOCAL) {
-                return DataStatus.AVAILABLE;
+                fileDataStatus = DataStatus.AVAILABLE;
             } else {
-                return DataStatus.UNAVAILABLE;
+                fileDataStatus = DataStatus.UNAVAILABLE;
             }
         }
+        mFileDataStatus = fileDataStatus;
+        return fileDataStatus;
+    }
+
+    /**
+     * @return The data status of this file, but the data status is not guaranteed to be correct.
+     */
+    public int getLayzyDataStatus() {
+        return mFileDataStatus;
     }
 
     private int getFileDirLocationStatus() {

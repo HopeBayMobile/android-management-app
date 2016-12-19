@@ -87,9 +87,6 @@ public class TransferContentDescDialogFragment extends DialogFragment {
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-//                        TransferContentConfirmDialogFragment dialogFragment = TransferContentConfirmDialogFragment.newInstance();
-//                        dialogFragment.show(getFragmentManager(), TransferContentConfirmDialogFragment.TAG);
-
                         int networkCond = 0;
                         boolean showNetworkDialog = true;
                         boolean wifiOnlyEnabled = false;
@@ -138,7 +135,7 @@ public class TransferContentDescDialogFragment extends DialogFragment {
                     }
                 });
 
-                negativeButton.setTextColor(ContextCompat.getColor(mContext, R.color.C5));
+                negativeButton.setTextColor(ContextCompat.getColor(mContext, R.color.colorAccent));
                 negativeButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

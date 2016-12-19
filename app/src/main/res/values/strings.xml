@@ -48,8 +48,10 @@
     <string name="nav_booster">BOOSTER</string>
     <string name="nav_about">關於</string>
     <string name="nav_help">幫助</string>
-    <string name="user_info_current_account">Current account:</string>
-    <string name="user_info_change_account_button">Change Account</string>
+
+    <string name="user_info_current_account">目前帳戶:</string>
+    <string name="user_info_change_account_button">更改帳戶</string>
+
     <string name="notify_cloud_connected">雲端連線已恢復</string>
     <string name="notify_cloud_disconnected">雲端連線中斷，請檢查。</string>
     <string name="notify_upload_completed">本地端資料已上傳至雲端空間。</string>
@@ -128,7 +130,9 @@
     <string name="app_file_dialog_app_remove">解除安裝</string>
     <string name="app_file_dialog_app_cancel">取消</string>
     <string name="app_file_dialog_calculating">計算中&#8230;</string>
-    <string name="app_dialog_unavailable">應用程式無法使用，請檢查網路狀態。</string>
+    <string name="app_dialog_unavailable">無法執行程式。請檢查您的 Wi-Fi 連線是否正常，或者請您停用位於 \"同步\" 設定中的 \"只有連接 Wi-Fi 時才存取雲端\" 的選項並使用您的行動資費方案。</string>
+    <string name="file_unavailable">無法開啟檔案。請檢查您的 Wi-Fi 連線是否正常，或者請您停用位於 \"同步\" 設定中的 \"只有連接 Wi-Fi 時才存取雲端\" 的選項並使用您的行動資費方案。</string>
+
     <string name="hcfs_mgmt_service_image_failed_to_pin">圖片類型釘選失敗數量</string>
     <string name="hcfs_mgmt_service_video_failed_to_pin">影片類型釘選失敗數量</string>
     <string name="hcfs_mgmt_service_audio_failed_to_pin">音樂類型釘選失敗數量</string>
@@ -191,11 +195,12 @@
     <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
     <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
 
-    <string name="change_account_require_new_account">與目前帳戶相同。變更帳戶操作已經停止。</string>
-    <string name="change_account_start_to_change">確認變更</string>
-    <string name="change_account_failed">更換帳戶失敗，請重試或點選返回鍵以離開應用程式。</string>
-    <string name="change_account_another_account"><u>選擇其他帳戶</u></string>
-    <string name="change_account_require_read_phone_state_permission">更換帳戶需啟用 Tera 的電話權限，請點選右方鍵繼續。</string>
+    <string name="change_account_require_new_account">與目前帳戶相同。\n更改帳戶操作已經停止。</string>
+    <string name="change_account_start_to_change">確認更改</string>
+    <string name="change_account_failed">更改帳戶失敗。請退出並再次使用您原先的帳戶來登入此應用程式，以執行更改帳戶的程序。</string>
+    <string name="change_account_another_account"><u>選擇其他 Google 帳戶</u></string>
+    <string name="change_account_require_read_phone_state_permission">更改帳戶需啟用 Tera 的電話權限，請點選右方鍵繼續。</string>
+    <string name="change_account_auth_code_expired">帳戶認證失效或者已逾期。請退出並再次使用您原先的帳戶來登入此應用程式，以執行更改帳戶的程序。</string>
 
     <string name="auth_at_bootup_auth_failed_google_auth">Google 帳戶認證失敗， 無法存取雲端資料。</string>
     <string name="auth_at_bootup_auth_failed_mgmt_auth">Tera 帳戶認證失敗，無法存取雲端資料。</string>
@@ -250,21 +255,26 @@
     <string name="connect_to_wifi">CONNECT TO WI-FI</string>
     <string name="sync_settings">SYNC SETTINGS</string>
     <string name="settings">SETTINGS</string>
-    <string name="_continue">CONTINUE</string>
+    <string name="_continue">繼續</string>
+    <string name="unboost_apps">UNBOOST APPS</string>
+
     <string name="pref_download_to_run">pref_download_to_run</string>
     <string name="tera_version_title">Tera 版本</string>
+
     <string name="cancel_processing_msg">取消中，請稍候&#8230;</string>
+
     <string name="toast_pin_success">釘選成功</string>
     <string name="toast_pin_failure">釘選應用程式/檔案失敗，因為可用釘選空間不足。請取消釘選一些應用程式或檔案。</string>
     <string name="toast_unpin_success">取消釘選成功</string>
     <string name="toast_unpin_failure">取消釘選失敗</string>
+
     <string name="help_title_bar">說明中心</string>
     <string name="help_faq_title">常見問題與解答</string>
     <string name="help_user_manual_title">使用手冊</string>
     <string name="help_customer_center_title">客戶服務</string>
     <string name="help_email_feedback_title">意見回饋</string>
 
-    <!-- booster page -->
+    <!-- booster zone -->
     <string name="booster_title_bar">Boost Zone</string>
     <string name="booster_action_boost">Boost</string>
     <string name="booster_action_unboost">Unboost</string>
@@ -308,6 +318,8 @@
     <string name="booster_notification_boost_completed_message">The selected apps are enabled and available to use.</string>
     <string name="booster_notification_boost_failed_title">Boosting apps failed</string>
     <string name="booster_notification_boost_failed_message">Some apps might not be boosted successfully. Please try again.</string>
+    <string name="booster_full_space_alert_title">Boost Zone Full</string>
+    <string name="booster_full_space_alert_message">To release more spaces for boost zone, please remove some apps first.</string>
 
     <string name="quick_tour_title">Quick Tour</string>
     <string name="http_gateway_timeout">閘道器逾時：此伺服器乃作為閘道器或者代理伺服器並且嘗試執行請求時，未能從上游伺服器及時收到回應。</string>

@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+import com.hopebaytech.hcfsmgmt.utils.AlarmUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
@@ -263,7 +264,6 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 boolean isChecked = ((CheckBox) v).isChecked();
                 if (isChecked) {
-
                     showEnableBoosterDialog();
                 } else {
                     mEnableBooster.setChecked(true);
@@ -319,8 +319,8 @@ public class SettingsFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_RATIO) {
             if (resultCode == Activity.RESULT_OK) {
-                HCFSMgmtUtils.stopNotifyLocalStorageUsedRatioAlarm(mContext);
-                HCFSMgmtUtils.startNotifyLocalStorageUsedRatioAlarm(mContext);
+                AlarmUtils.stopMonitorLocalStorageUsedSpace(mContext);
+                AlarmUtils.startMonitorLocalStorageUsedSpace(mContext);
 
                 final String ratio = data.getStringExtra(KEY_RATIO);
                 String summary = getString(R.string.settings_local_storage_used_ratio, ratio);

@@ -4,23 +4,27 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.NonNull;
+import android.database.sqlite.SQLiteDatabaseLockedException;
+import android.database.sqlite.SQLiteTableLockedException;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UidDAO {
 
     private final String CLASSNAME = getClass().getSimpleName();
     public static final String TABLE_NAME = "uid";
     public static final String KEY_ID = "_id";
-    public static final String PIN_STATUS_COLUMN = "pin_status";
-    public static final String SYSTEM_APP_COLUMN = "system_app";
-    public static final String ENABLED_COLUMN = "enabled";
+    public static final String PIN_STATUS_COLUMN = "pin_status"; // 0 unpin, 1 normal pin, 2 priority pin
+    public static final String SYSTEM_APP_COLUMN = "system_app"; // 0 user app, 1 system app
+    public static final String ENABLED_COLUMN = "enabled"; // 0 disabled, 1 enabled
     public static final String UID_COLUMN = "uid";
     public static final String PACKAGE_NAME_COLUMN = "package_name";
     public static final String EXTERNAL_DIR_COLUMN = "external_dir";
@@ -54,10 +58,6 @@ public class UidDAO {
         return sUidDAO;
     }
 
-    public void close() {
-        sSqLiteDatabase.close();
-    }
-
     public boolean insert(UidInfo uidInfo) {
         ContentValues cv = new ContentValues();
         int pinStatus = 0;
@@ -88,31 +88,60 @@ public class UidDAO {
             cv.put(EXTERNAL_DIR_COLUMN, sb.toString());
         }
 
-        boolean isInserted = sSqLiteDatabase.insert(TABLE_NAME, null, cv) > -1;
-        String logMsg = "isPinned=" + uidInfo.isPinned() +
-                ", pinStatus=" + pinStatus +
-                ", isSystemApp=" + uidInfo.isSystemApp() +
-                ", boostStatus=" + uidInfo.getBoostStatus() +
-                ", uid=" + uidInfo.getUid() +
-                ", packageName=" + uidInfo.getPackageName() +
-                ", externalDir=" + uidInfo.getExternalDir();
-        if (isInserted) {
-            Logs.d(CLASSNAME, "insert", logMsg);
-            return true;
-        } else {
-            Logs.e(CLASSNAME, "insert", logMsg);
-            return false;
-        }
+        boolean isSuccess = false;
+        boolean isDatabaseLocked;
+        do {
+            try {
+                isSuccess = sSqLiteDatabase.insert(TABLE_NAME, null, cv) > -1;
+                String logMsg = "isPinned=" + uidInfo.isPinned() +
+                        ", pinStatus=" + pinStatus +
+                        ", isSystemApp=" + uidInfo.isSystemApp() +
+                        ", boostStatus=" + uidInfo.getBoostStatus() +
+                        ", uid=" + uidInfo.getUid() +
+                        ", packageName=" + uidInfo.getPackageName() +
+                        ", externalDir=" + uidInfo.getExternalDir();
+                if (isSuccess) {
+                    Logs.d(CLASSNAME, "insert", logMsg);
+                } else {
+                    Logs.e(CLASSNAME, "insert", logMsg);
+                }
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "insert", Log.getStackTraceString(e));
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
+        return isSuccess;
     }
 
     public boolean update(String packageName, ContentValues cv) {
+        boolean isSuccess = false;
+        boolean isDatabaseLocked;
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
-        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
-        if (isSuccess) {
-            Logs.d(CLASSNAME, "update", "packageName=" + packageName + ", cv: " + cv.toString());
-        } else {
-            Logs.e(CLASSNAME, "update", "packageName=" + packageName + ", cv: " + cv.toString());
-        }
+        do {
+            try {
+                isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
+                if (isSuccess) {
+                    Logs.d(CLASSNAME, "update", "packageName=" + packageName + ", cv: " + cv.toString());
+                } else {
+                    Logs.e(CLASSNAME, "update", "packageName=" + packageName + ", cv: " + cv.toString());
+                }
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "update", Log.getStackTraceString(e));
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
         return isSuccess;
     }
 
@@ -140,12 +169,27 @@ public class UidDAO {
         cv.put(BOOST_STATUS_COLUMN, uidInfo.getBoostStatus());
 
         String where = KEY_ID + "='" + uidInfo.getId() + "'";
-        boolean isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
-        if (isSuccess) {
-            Logs.d(CLASSNAME, "update", cv.toString());
-        } else {
-            Logs.e(CLASSNAME, "update", cv.toString());
-        }
+        boolean isSuccess = false;
+        boolean isDatabaseLocked;
+        do {
+            try {
+                isSuccess = sSqLiteDatabase.update(TABLE_NAME, cv, where, null) > 0;
+                if (isSuccess) {
+                    Logs.d(CLASSNAME, "update", cv.toString());
+                } else {
+                    Logs.e(CLASSNAME, "update", cv.toString());
+                }
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "update", Log.getStackTraceString(e));
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
         return isSuccess;
     }
 
@@ -209,45 +253,86 @@ public class UidDAO {
                 contentValues.put(EXTERNAL_DIR_COLUMN, sb.toString());
             }
             String where = PACKAGE_NAME_COLUMN + "='" + uidInfo.getPackageName() + "'";
-            boolean isSuccess;
-            if (get(uidInfo.getPackageName()) != null) {
-                isSuccess = sSqLiteDatabase.update(TABLE_NAME, contentValues, where, null) > 0;
-                if (!isSuccess) {
-                    Logs.e(CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
+
+            boolean isDatabaseLocked;
+            boolean isSuccess = false;
+            do {
+                try {
+                    if (get(uidInfo.getPackageName()) != null) {
+                        isSuccess = sSqLiteDatabase.update(TABLE_NAME, contentValues, where, null) > 0;
+                        if (!isSuccess) {
+                            Logs.e(CLASSNAME, "update", "isSuccess=" + isSuccess + ", uidInfo=" + uidInfo);
+                        }
+                    } else {
+                        isSuccess = insert(uidInfo);
+                    }
+                    isDatabaseLocked = false;
+                } catch (SQLiteDatabaseLockedException e) {
+                    Logs.w(CLASSNAME, "update", Log.getStackTraceString(e));
+                    isDatabaseLocked = true;
                 }
-            } else {
-                isSuccess = insert(uidInfo);
-            }
+                try {
+                    Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } while (isDatabaseLocked);
             return isSuccess;
         }
     }
 
     public boolean delete(String packageName) {
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
-        boolean isDeleted = sSqLiteDatabase.delete(TABLE_NAME, where, null) > 0;
-        if (isDeleted) {
-            Logs.d(CLASSNAME, "delete", "packageName=" + packageName);
-        } else {
-            Logs.e(CLASSNAME, "delete", "packageName=" + packageName);
-        }
-        return isDeleted;
-    }
 
-    public boolean deleteAll() {
-        return sSqLiteDatabase.delete(TABLE_NAME, null, null) > 0;
+        boolean isSuccess = false;
+        boolean isDatabaseLocked;
+        do {
+            try {
+                isSuccess = sSqLiteDatabase.delete(TABLE_NAME, where, null) > 0;
+                if (isSuccess) {
+                    Logs.d(CLASSNAME, "delete", "packageName=" + packageName);
+                } else {
+                    Logs.e(CLASSNAME, "delete", "packageName=" + packageName);
+                }
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "delete", Log.getStackTraceString(e));
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
+        return isSuccess;
     }
 
     public List<UidInfo> getAll() {
-        List<UidInfo> result = new ArrayList<UidInfo>();
-        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
-        while (cursor.moveToNext()) {
-            result.add(getRecord(cursor));
-        }
-        cursor.close();
+        List<UidInfo> result = new ArrayList<>();
+        boolean isDatabaseLocked;
+        do {
+            try {
+                Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, null, null, null, null, null, null);
+                while (cursor.moveToNext()) {
+                    result.add(getRecord(cursor));
+                }
+                cursor.close();
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "getAll", Log.getStackTraceString(e));
+                result.clear();
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
         return result;
     }
 
-    @NonNull
     public List<UidInfo> get(ContentValues cv) {
         List<UidInfo> uidInfoList = new ArrayList<>();
 
@@ -256,13 +341,91 @@ public class UidDAO {
         for (String key : cv.keySet()) {
             stringBuilder.append(key).append("='").append(cv.get(key)).append("'").append(AND);
         }
-
         String where = stringBuilder.substring(0, stringBuilder.length() - AND.length());
-        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
-        while (cursor.moveToNext()) {
-            uidInfoList.add(getRecord(cursor));
+
+        boolean isDatabaseLocked;
+        do {
+            try {
+                Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
+                while (cursor.moveToNext()) {
+                    uidInfoList.add(getRecord(cursor));
+                }
+                cursor.close();
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "get", Log.getStackTraceString(e));
+                uidInfoList.clear();
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
+        return uidInfoList;
+    }
+
+    public List<UidInfo> get(Map<String, Object> queryMap) {
+        List<UidInfo> uidInfoList = new ArrayList<>();
+
+        final String AND = " and ";
+        final String IN = " in ";
+        final String LEFT_PARENTHESIS = "(";
+        final String RIGHT_PARENTHESIS = ")";
+        final String COMMA = ",";
+        final String SINGLE_QUOTE = "'";
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String key : queryMap.keySet()) {
+            Object value = queryMap.get(key);
+            if (value instanceof List || value instanceof Object[]) {
+                StringBuilder inConditionBuilder = new StringBuilder();
+                inConditionBuilder.append(LEFT_PARENTHESIS);
+                if (value instanceof List) {
+                    for (Object inValue : (List) value) {
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(inValue.toString());
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(COMMA);
+                    }
+                } else { // Object[]
+                    for (Object inValue : (Object[]) value) {
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(inValue.toString());
+                        inConditionBuilder.append(SINGLE_QUOTE);
+                        inConditionBuilder.append(COMMA);
+                    }
+                }
+                inConditionBuilder.delete(inConditionBuilder.length() - COMMA.length(), inConditionBuilder.length());
+                inConditionBuilder.append(RIGHT_PARENTHESIS);
+
+                stringBuilder.append(key).append(IN).append(inConditionBuilder.toString()).append(AND);
+            } else {
+                stringBuilder.append(key).append("=").append(SINGLE_QUOTE).append(value).append(SINGLE_QUOTE).append(AND);
+            }
         }
-        cursor.close();
+        String where = stringBuilder.substring(0, stringBuilder.length() - AND.length());
+
+        boolean isDatabaseLocked;
+        do {
+            try {
+                Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
+                while (cursor.moveToNext()) {
+                    uidInfoList.add(getRecord(cursor));
+                }
+                cursor.close();
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "get", Log.getStackTraceString(e));
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
         return uidInfoList;
     }
 
@@ -270,11 +433,26 @@ public class UidDAO {
     public UidInfo get(String packageName) {
         UidInfo uidInfo = null;
         String where = PACKAGE_NAME_COLUMN + "='" + packageName + "'";
-        Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
-        if (cursor.moveToFirst()) {
-            uidInfo = getRecord(cursor);
-        }
-        cursor.close();
+
+        boolean isDatabaseLocked;
+        do {
+            try {
+                Cursor cursor = sSqLiteDatabase.query(TABLE_NAME, null, where, null, null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    uidInfo = getRecord(cursor);
+                }
+                cursor.close();
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "get", Log.getStackTraceString(e));
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
         return uidInfo;
     }
 
@@ -297,14 +475,28 @@ public class UidDAO {
             }
             result.setExternalDir(externalDirList);
         }
-
         return result;
     }
 
     public long getCount() {
-        Cursor cursor = sSqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
-        int count = cursor.getCount();
-        cursor.close();
+        int count = 0;
+        boolean isDatabaseLocked;
+        do {
+            try {
+                Cursor cursor = sSqLiteDatabase.rawQuery("SELECT * FROM " + TABLE_NAME, null);
+                count = cursor.getCount();
+                cursor.close();
+                isDatabaseLocked = false;
+            } catch (SQLiteDatabaseLockedException e) {
+                Logs.w(CLASSNAME, "getCount", Log.getStackTraceString(e));
+                isDatabaseLocked = true;
+            }
+            try {
+                Thread.sleep(Interval.DATABASE_OPERATION_RETRY_TIME);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } while (isDatabaseLocked);
         return count;
     }
 
