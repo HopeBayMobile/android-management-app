@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -17,14 +16,8 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -71,6 +64,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
@@ -1179,7 +1173,12 @@ public class TeraMgmtService extends Service {
                 settingsInfo.setValue(String.valueOf(true));
                 settingsDAO.update(settingsInfo);
             }
-            fixBoostStatusIfInvalid();
+            if (fixBoostStatusIfInvalid()) {
+                // Booster has partially corrupted, show error message.
+                MessageDialog.getDialog(mContext,
+                        R.string.booster_full_partial_crash_alert_title,
+                        R.string.booster_partial_crash_alert_message).show();
+            }
             if (isBoosterProcessCompleted()) {
                 Booster.enableApps(this);
             } else {
@@ -1187,6 +1186,11 @@ public class TeraMgmtService extends Service {
             }
         } else {
             if (isBoosterEnabled) {
+                // Booster has fully corrupted, show error message.
+                MessageDialog.getDialog(mContext,
+                        R.string.booster_full_partial_crash_alert_title,
+                        R.string.booster_full_crash_alert_message).show();
+
                 // Set ENABLE_BOOSTER flag to false if booster is not mounted.
                 settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
                 settingsInfo.setValue(String.valueOf(false));
@@ -1291,20 +1295,26 @@ public class TeraMgmtService extends Service {
      * Check apps with BoostStatus.BOOSTED have the same boostStatus as the checkPackageBoostStatus()
      * or not. If not, it means partial apps in the booster has corrupted. We need to fix the
      * boostStatus of these apps.
+     *
+     * @return true if partial apps corrupted, false otherwise.
      */
-    private void fixBoostStatusIfInvalid() {
+    private boolean fixBoostStatusIfInvalid() {
         ContentValues cv = new ContentValues();
         UidDAO uidDAO = UidDAO.getInstance(this);
 
         cv.clear();
         cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.BOOSTED);
+        boolean isPartialCorrupted = false;
         for (UidInfo uidInfo : uidDAO.get(cv)) {
             boolean isBoosted = Booster.isPackageBoosted(uidInfo.getPackageName());
             if (!isBoosted) {
                 uidInfo.setBoostStatus(UidInfo.BoostStatus.UNBOOSTED);
                 uidDAO.update(uidInfo);
+
+                isPartialCorrupted = true;
             }
         }
+        return isPartialCorrupted;
     }
 
     /**
@@ -1319,50 +1329,28 @@ public class TeraMgmtService extends Service {
             UiHandler.getInstance().post(new Runnable() {
                 @Override
                 public void run() {
-                    getFullBoosterZoneAlertDialog().show();
+                    MessageDialog.getDialog(mContext,
+                            R.string.booster_full_space_alert_title,
+                            R.string.booster_full_space_alert_message,
+                            R.string.unboost_apps,
+                            new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Bundle extras = new Bundle();
+                                    extras.putInt(ViewPage.KEY, ViewPage.BOOSTER);
+
+                                    Intent intent = new Intent(TeraMgmtService.this, MainActivity.class);
+                                    // Require to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    intent.putExtras(extras);
+                                    startActivity(intent);
+                                }
+                            },
+                            R.string.cancel,
+                            null).show();
                 }
             });
         }
-    }
-
-    private AlertDialog getFullBoosterZoneAlertDialog() {
-        View view = LayoutInflater.from(this).inflate(R.layout.message_dialog_fragment, null);
-        ((TextView) view.findViewById(R.id.title)).setText(R.string.booster_full_space_alert_title);
-        ((TextView) view.findViewById(R.id.message)).setText(R.string.booster_full_space_alert_message);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AppCompatDialog);
-        builder.setView(view);
-        builder.setPositiveButton(R.string.unboost_apps, null);
-        builder.setNegativeButton(R.string.cancel, null);
-        final AlertDialog alertDialog = builder.create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-                Button removeApps = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
-                removeApps.setTextColor(ContextCompat.getColor(TeraMgmtService.this, R.color.colorAccent));
-                removeApps.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Bundle extras = new Bundle();
-                        extras.putInt(ViewPage.KEY, ViewPage.BOOSTER);
-
-                        Intent intent = new Intent(TeraMgmtService.this, MainActivity.class);
-                        // Require to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        intent.putExtras(extras);
-                        startActivity(intent);
-
-                        alertDialog.dismiss();
-                    }
-                });
-                Button cancel = alertDialog.getButton(DialogInterface.BUTTON_NEGATIVE);
-                cancel.setTextColor(ContextCompat.getColor(TeraMgmtService.this, R.color.colorAccent));
-            }
-        });
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
-        }
-        return alertDialog;
     }
 
 }
