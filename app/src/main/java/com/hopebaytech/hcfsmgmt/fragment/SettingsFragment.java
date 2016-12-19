@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,9 +25,11 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.utils.AlarmUtils;
+import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 /**
@@ -61,9 +63,7 @@ public class SettingsFragment extends Fragment {
 
     private Handler mWorkHandler;
 
-    private View mView;
     private Context mContext;
-    private Snackbar mSnackbar;
     private CheckBox mSyncWifiOnly;
     private CheckBox mNotifyConnFailedRecovery;
     private CheckBox mAllowPinUnpinApps;
@@ -75,6 +75,7 @@ public class SettingsFragment extends Fragment {
     private LinearLayout mNotifyLocalStorageUsedRatio;
     private TextView mSummaryText;
     private RelativeLayout mAdvancedSettings;
+    private ProgressBar mProgressCircle;
 
     public static SettingsFragment newInstance() {
         return new SettingsFragment();
@@ -106,7 +107,6 @@ public class SettingsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Logs.d(CLASSNAME, "onViewCreated", null);
 
-        mView = view;
         mSyncWifiOnly = (CheckBox) view.findViewById(R.id.sync_wifi_only);
         mAllowPinUnpinApps = (CheckBox) view.findViewById(R.id.allow_pin_unpin_apps);
         mEnableBooster = (CheckBox) view.findViewById(R.id.enable_booster);
@@ -118,6 +118,7 @@ public class SettingsFragment extends Fragment {
         mNotifyLocalStorageUsedRatio = (LinearLayout) view.findViewById(R.id.notify_local_storage_used_ratio);
         mSummaryText = (TextView) mNotifyLocalStorageUsedRatio.findViewById(R.id.notify_local_storage_used_ratio_summary);
         mAdvancedSettings = (RelativeLayout) view.findViewById(R.id.advanced_settings);
+        mProgressCircle = (ProgressBar) view.findViewById(R.id.progress_circle);
 
     }
 
@@ -263,13 +264,33 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 boolean isChecked = ((CheckBox) v).isChecked();
-                if (isChecked) {
-                    showEnableBoosterDialog();
-                } else {
+                if (!isChecked) {
                     mEnableBooster.setChecked(true);
                     Toast.makeText(mContext, R.string.settings_booster_cannot_disable, Toast.LENGTH_LONG).show();
 //                    showDisableBoosterDialog();
+                    return;
                 }
+
+                mProgressCircle.setVisibility(View.VISIBLE);
+                ThreadPool.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        final boolean isEnoughSpace =
+                                Booster.getAvailableBoosterSpace() >= Booster.getMinimumBoosterSpace();
+                        UiHandler.getInstance().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressCircle.setVisibility(View.GONE);
+                                if (isEnoughSpace) {
+                                    showEnableBoosterDialog();
+                                } else {
+                                    mEnableBooster.setChecked(false);
+                                    Toast.makeText(mContext, R.string.settings_booster_insufficient_pinned_space, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
+                    }
+                });
             }
         });
 

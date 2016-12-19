@@ -200,7 +200,8 @@
     <string name="settings_allow_pin_unpin_apps">Allow pin/unpin apps</string>
     <string name="settings_booster_title">Booster</string>
     <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
-    <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
+    <string name="settings_booster_cannot_disable">Once Booster is enabled, it cannot be disabled.</string>
+    <string name="settings_booster_insufficient_pinned_space">Booster cannot be enabled due to insufficient pinned space.</string>
 
     <string name="change_account_require_new_account">Same as the current account.\nChanging account operation has stopped.</string>
     <string name="change_account_start_to_change">Change</string>

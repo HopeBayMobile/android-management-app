@@ -257,12 +257,12 @@ public class Booster {
     }
 
     /**
-     * Get the minimum available booster space.
+     * Get the minimum booster space Tera supports.
      *
-     * @return the available minimum space of the booster
+     * @return the minimum space of the booster
      */
-    public static long getMinimumAvailableBoosterSpace() {
-        return 100 * 1024 * 1024; // 100 MB
+    public static long getMinimumBoosterSpace() {
+        return 100L * 1024 * 1024; // 100 MB
     }
 
     /**
