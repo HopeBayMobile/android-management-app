@@ -98,5 +98,5 @@ interface ITeraFonnApiService {
     int getBoostUnboostActivateStatus();
 
     /** Check if app is boosting **/
-    boolean isBoosting(String packageName);
+    boolean isBoostOrUnboostInProgress(String packageName);
 }

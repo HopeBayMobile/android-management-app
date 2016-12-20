@@ -419,7 +419,7 @@ public class TeraFonnApiService extends Service {
         }
 
         @Override
-        public boolean isBoosting(String packageName) throws RemoteException {
+        public boolean isBoostOrUnboostInProgress(String packageName) throws RemoteException {
             boolean status = false;
             UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
             UidInfo uidInfo = uidDAO.get(packageName);
