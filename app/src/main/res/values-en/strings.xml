@@ -331,6 +331,9 @@
     <string name="booster_notification_boost_failed_message">Some apps might not be boosted successfully. Please try again.</string>
     <string name="booster_full_space_alert_title">Boost Zone Full</string>
     <string name="booster_full_space_alert_message">To release more spaces for boost zone, please remove some apps first.</string>
+    <string name="booster_full_partial_crash_alert_title">Notice</string>
+    <string name="booster_partial_crash_alert_message">During restoration, user data and settings of some boosted apps were lost. Thus, these apps have been reset and unboosted. </string>
+    <string name="booster_full_crash_alert_message">During restoration, user data and settings of all boosted apps were lost. Thus, these apps have been reset and unboosted.</string>
 
     <string name="quick_tour_title">Quick Tour</string>
 

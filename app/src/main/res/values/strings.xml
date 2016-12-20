@@ -323,6 +323,9 @@
     <string name="booster_notification_boost_failed_message">Some apps might not be boosted successfully. Please try again.</string>
     <string name="booster_full_space_alert_title">Boost Zone Full</string>
     <string name="booster_full_space_alert_message">To release more spaces for boost zone, please remove some apps first.</string>
+    <string name="booster_full_partial_crash_alert_title">注意</string>
+    <string name="booster_partial_crash_alert_message">在還原過程中，某些已加速的應用程式的使用者資料以及設定已經遺失。 因此，這些應用程式已經被重設並停止加速。 </string>
+    <string name="booster_full_crash_alert_message">在還原過程中，所有已加速的應用程式的使用者資料以及設定已經遺失。 因此，這些應用程式已經被重設並停止加速。</string>
 
     <string name="quick_tour_title">Quick Tour</string>
     <string name="http_gateway_timeout">閘道器逾時：此伺服器乃作為閘道器或者代理伺服器並且嘗試執行請求時，未能從上游伺服器及時收到回應。</string>
