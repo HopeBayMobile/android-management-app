@@ -189,11 +189,12 @@
     <string name="settings_snackbar_no_available_email_app_found">無可用的 email 應用程式和/或設定好的 email 帳戶。請至少安裝一個 email 應用程式，並且設定一組可用的 email 帳戶。</string>
     <string name="settings_confirm_when_turn_off_wifi_only_title">Turn on mobile data for transferring data?</string>
     <string name="settings_confirm_when_turn_off_wifi_only_message">Using mobile data connection while transferring data can result in additional charges. Please check your data plan with mobile carrier.</string>
-    <string name="settings_advanced_settings">Advanced Settings</string>
-    <string name="settings_allow_pin_unpin_apps">Allow pin/unpin apps</string>
-    <string name="settings_booster_title">Booster</string>
-    <string name="settings_booster_subtitle">Boost apps to enhance app performance</string>
-    <string name="settings_booster_cannot_disable">Booster cannot be disabled since it is already enabled.</string>
+    <string name="settings_advanced_settings">進階設定</string>
+    <string name="settings_allow_pin_unpin_apps">允許釘選/取消釘選應用程式</string>
+    <string name="settings_booster_title">加速器</string>
+    <string name="settings_booster_subtitle">加速應用程式以提高應用程式的效能</string>
+    <string name="settings_booster_cannot_disable">一旦啟用加速器之後，就無法停用。</string>
+    <string name="settings_booster_insufficient_pinned_space">釘選空間不足，因此無法啟用加速器。</string>
 
     <string name="change_account_require_new_account">與目前帳戶相同。\n更改帳戶操作已經停止。</string>
     <string name="change_account_start_to_change">確認更改</string>

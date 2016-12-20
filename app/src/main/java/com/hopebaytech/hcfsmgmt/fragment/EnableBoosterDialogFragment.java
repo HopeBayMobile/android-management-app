@@ -22,7 +22,6 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
@@ -69,7 +68,7 @@ public class EnableBoosterDialogFragment extends DialogFragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                final long minimumBoosterSpace = Booster.getMinimumAvailableBoosterSpace();
+                final long minimumBoosterSpace = Booster.getMinimumBoosterSpace();
                 final long maximumBoosterSpace = Booster.getAvailableBoosterSpace();
                 UiHandler.getInstance().post(new Runnable() {
                     @Override
@@ -122,7 +121,7 @@ public class EnableBoosterDialogFragment extends DialogFragment {
         progressBar.setVisibility(View.VISIBLE);
 
         final double boosterSize = boosterSeekBar.getValue();
-        if (boosterSize < Booster.getMinimumAvailableBoosterSpace()) {
+        if (boosterSize < Booster.getMinimumBoosterSpace()) {
             Toast.makeText(mContext, R.string.booster_enable_dialog_insufficient_space, Toast.LENGTH_LONG).show();
             cancelBoost();
             return;
