@@ -310,7 +310,9 @@
     <string name="booster_disable_dialog_check_message">@string/settings_transfer_content_desc_check</string>
     <string name="booster_disable_dialog_success">Disable boost zone successful.</string>
     <string name="booster_disable_dialog_failed">Disable boost zone failed.</string>
-    <string name="booster_boost_apps_insufficient_space">Insufficient space to boost apps.</string>
+    <string name="booster_boost_apps_insufficient_space_title">Not Enough Boosted Space</string>
+    <string name="booster_unboost_apps_insufficient_space_title">Not Enough Unboosted Space</string>
+    <string name="booster_insufficient_space_message">Please unselect some apps, and then try again.</string>
     <string name="booster_boost_apps_failed">Boost apps failed.</string>
     <string name="booster_unboost_apps_insufficient_space">Insufficient space to unboost apps.</string>
     <string name="booster_unboost_apps_failed">Unboost apps failed.</string>

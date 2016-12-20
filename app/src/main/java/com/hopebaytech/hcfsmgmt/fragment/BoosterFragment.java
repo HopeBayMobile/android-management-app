@@ -534,11 +534,21 @@ public class BoosterFragment extends Fragment {
             uncheckAllApps();
             stopProcessingTextAnim();
 
-            if (mCurrentTab == Tab.UNBOOSTED) {
-                Toast.makeText(mContext, R.string.booster_boost_apps_insufficient_space, Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(mContext, R.string.booster_unboost_apps_insufficient_space, Toast.LENGTH_LONG).show();
+            if (!isAdded()) {
+                return;
             }
+
+            String title;
+            String message = getString(R.string.booster_insufficient_space_message);
+            if (mCurrentTab == Tab.UNBOOSTED) {
+                title = getString(R.string.booster_boost_apps_insufficient_space_title);
+            } else {
+                title = getString(R.string.booster_unboost_apps_insufficient_space);
+            }
+            MessageDialogFragment dialog = MessageDialogFragment.newInstance();
+            dialog.setTitle(title);
+            dialog.setMessage(message);
+            dialog.show(getFragmentManager(), MessageDialogFragment.TAG);
         }
 
         private void notifyProcessingAppsFailed() {
