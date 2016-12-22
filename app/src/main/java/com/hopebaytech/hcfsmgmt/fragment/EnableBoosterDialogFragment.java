@@ -135,6 +135,7 @@ public class EnableBoosterDialogFragment extends DialogFragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
+
                 boolean isSuccess = Booster.enableBooster((long) boosterSize);
 
                 final int resultCode;

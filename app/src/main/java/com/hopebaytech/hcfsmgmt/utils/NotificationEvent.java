@@ -28,6 +28,7 @@ public class NotificationEvent {
     public static final int ID_CHECK_DEVICE_STATUS = 4;
     public static final int ID_INSUFFICIENT_PIN_SPACE = 5;
     public static final int ID_BOOSTER = 6;
+    public static final int ID_TRANSFER_DATA = 7;
 
     private static final int FLAG_DEFAULT = 0;
     public static final int FLAG_ON_GOING = 1;

@@ -139,6 +139,7 @@
     <string name="hcfs_mgmt_service_image_failed_to_unpin">圖片類型取消釘選失敗數量</string>
     <string name="hcfs_mgmt_service_video_failed_to_unpin">影片類型取消釘選失敗數量</string>
     <string name="hcfs_mgmt_service_audio_failed_to_unpin">音樂類型取消釘選失敗數量</string>
+
     <string name="settings_title_bar">一般設定</string>
     <string name="settings_synchronization">同步</string>
     <string name="settings_sync_wifi_only">只有連接 Wi-Fi 時才存取雲端</string>
@@ -175,6 +176,9 @@
     <string name="settings_transfer_content_use_mobile_network_title">Use your mobile data plan to sync data?</string>
     <string name="settings_transfer_content_use_mobile_network_message">This action may incur additional costs, depending on your mobile data plan. You can also turn on Wi-Fi in settings page.</string>
     <string name="settings_transfer_content_do_not_ask_again">Do not ask me again.</string>
+    <string name="settings_transfer_content_failed_booster_initializing">資料移轉失敗，因為加速器正在初始化，請稍後再試。</string>
+    <string name="settings_transfer_content_failed_booster_boost_unboost_in_process">資料移轉失敗，因為應用程式正在加速/取消加速中，請稍後再試。</string>
+
     <string name="settings_feedback">意見回饋</string>
     <string name="settings_feedback_log_collecting_title">日誌收集中</string>
     <string name="settings_feedback_log_collecting_message">收集日誌需要一點時間，取決於資料量的多寡</string>

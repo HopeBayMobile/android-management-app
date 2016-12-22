@@ -177,12 +177,14 @@
     <string name="settings_transfer_content_done_title">Done</string>
     <string name="settings_transfer_content_done_message">Data on this current device has been successfully uploaded to the Tera cloud, and is being restored to another device. This current device will be reset soon.</string>
     <string name="settings_transfer_content_done_factory_reset">Factory reset will start in %s seconds.</string>
-    <string name="settings_transfer_content_failed">Transferring data failed.</string>
+    <string name="settings_transfer_content_failed">Data Transfer Failed</string>
     <string name="settings_transfer_content_syc_data_stopped_title">Sync Data Stopped</string>
     <string name="settings_transfer_content_syc_data_stopped_message">This action cannot be executed because sync data is set to Wi-Fi only mode. Please tap "Sync Settings" to turn off Wi-Fi only or connect to available Wi-Fi network to continue.</string>
     <string name="settings_transfer_content_use_mobile_network_title">Use your mobile data plan to sync data?</string>
     <string name="settings_transfer_content_use_mobile_network_message">This action may incur additional costs, depending on your mobile data plan. You can also turn on Wi-Fi in settings page.</string>
     <string name="settings_transfer_content_do_not_ask_again">Do not ask me again.</string>
+    <string name="settings_transfer_content_failed_booster_initializing">Data transfer failed, because booster is initializing. Please try again later.</string>
+    <string name="settings_transfer_content_failed_booster_boost_unboost_in_process">Data transfer failed, because app is boosting/unboosting. Please try again later.</string>
     <string name="settings_feedback">Feedback</string>
     <string name="settings_feedback_content_mail_contact">Contact:</string>
     <string name="settings_feedback_content_mail_description">Description</string>

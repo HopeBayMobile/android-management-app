@@ -16,19 +16,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
-import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
-import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
-import com.hopebaytech.hcfsmgmt.service.TransferDataPollingService;
-import com.hopebaytech.hcfsmgmt.utils.Booster;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.main.MainApplication;
+import com.hopebaytech.hcfsmgmt.misc.JobServiceId;
+import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.service.CheckDeviceTransferredPeriodicService;
+import com.hopebaytech.hcfsmgmt.service.UnlockDeviceService;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
+import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
-import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
-import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 /**
  * @author Aaron
@@ -37,7 +34,7 @@ import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 public class TransferContentWaitingFragment extends Fragment {
 
     public static final String TAG = TransferContentWaitingFragment.class.getSimpleName();
-    private final String CLASSNAME = TransferContentWaitingFragment.class.getSimpleName();
+    private final String CLASSNAME = TAG;
 
     private TransferCompletedReceiver mTransferCompletedReceiver;
 
@@ -51,6 +48,7 @@ public class TransferContentWaitingFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Logs.d(CLASSNAME, "onCreate", null);
 
         mContext = getActivity();
 
@@ -59,92 +57,68 @@ public class TransferContentWaitingFragment extends Fragment {
         mTransferCompletedReceiver = new TransferCompletedReceiver(mContext);
         mTransferCompletedReceiver.registerReceiver(filter);
 
-        // Start polling service to check device status (need to register a BroadcastReceiver for
-        // receiving intent with TeraIntent.ACTION_TRANSFER_COMPLETED action.)
-        PollingServiceUtils.startPollingService(
+        // Start periodic service to check device is transferred or not. If the device is transferred
+        // , CheckDeviceTransferredPeriodicService will broadcast a TeraIntent.ACTION_TRANSFER_COMPLETED.
+        PeriodicServiceUtils.startPeriodicService(
                 mContext,
                 Interval.WAIT_RESTORE_AFTER_TRANSFER_DEVICE,
-                PollingServiceUtils.JOB_ID_TRANSFER_DATA,
-                TransferDataPollingService.class
+                JobServiceId.CHECK_DEVICE_TRANSFERRED,
+                CheckDeviceTransferredPeriodicService.class
         );
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Logs.d(CLASSNAME, "onCreateView", null);
         return inflater.inflate(R.layout.transfer_content_waiting_fragment, container, false);
     }
 
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        Logs.d(CLASSNAME, "onViewCreated", null);
 
         TextView cancel = (TextView) view.findViewById(R.id.cancel);
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProgressDialog();
-                final String imei = HCFSMgmtUtils.getDeviceImei(mContext);
-                MgmtCluster.getJwtToken(mContext, new MgmtCluster.OnFetchJwtTokenListener() {
-                    @Override
-                    public void onFetchSuccessful(String jwtToken) {
-                        MgmtCluster.UnlockDeviceProxy unlockDeviceProxy = new MgmtCluster.UnlockDeviceProxy(jwtToken, imei);
-                        unlockDeviceProxy.setOnUnlockDeviceListener(new MgmtCluster.UnlockDeviceProxy.OnUnlockDeviceListener() {
-                            @Override
-                            public void onUnlockDeviceSuccessful(UnlockDeviceInfo unlockDeviceInfo) {
-                                Logs.d(CLASSNAME, "onUnlockDeviceSuccessful", null);
-                                ThreadPool.getInstance().execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
-                                        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-                                        if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
-                                            if (!Booster.isBoosterMounted()) {
-                                                Booster.mountBooster();
-                                                Booster.enableApps(mContext);
-                                            }
-                                            settingsInfo = new SettingsInfo();
-                                            settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
-                                            settingsInfo.setValue(String.valueOf(true));
-                                            settingsDAO.update(settingsInfo);
-                                        }
-                                        UiHandler.getInstance().post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                dismissProgressDialog();
-                                                ((Activity) mContext).finish();
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void onUnlockDeviceFailed(UnlockDeviceInfo unlockDeviceInfo) {
-                                Logs.e(CLASSNAME, "onUnlockDeviceFailed", null);
-                                dismissProgressDialog();
-                                ((Activity) mContext).finish();
-                            }
-                        });
-                        unlockDeviceProxy.unlock();
-                    }
-
-                    @Override
-                    public void onFetchFailed() {
-                        Logs.e(CLASSNAME, "onFetchFailed", null);
-                        dismissProgressDialog();
-                        ((Activity) mContext).finish();
-                    }
-                });
+                ((Activity) mContext).finish();
             }
         });
-
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Logs.d(CLASSNAME, "onDestroy", null);
         mTransferCompletedReceiver.unregisterReceiver();
+
+        // Stop the transfer data service.
+        PeriodicServiceUtils.stopPeriodicService(
+                mContext,
+                JobServiceId.CHECK_DEVICE_TRANSFERRED
+        );
+
+        // If data is restored from another device, the transfer status will be set to
+        // TransferStatus.TRANSFERRED and then the TransferContentWaitingFragment will be
+        // replaced with TransferContentTransferringFragment or TransferContentDoneFragment, which
+        // triggers the onDestroy() callback of TransferContentWaitingFragment to be called.
+        int transferStatus = TransferStatus.getTransferStatus(mContext);
+        if (transferStatus != TransferStatus.TRANSFERRED) {
+            // Remove task from recent apps or cancel by user, it means user don't want to continue
+            // the transfer data process. In this case, don't show TransferContentWaitingFragment
+            // when launch Tera app.
+            TransferStatus.removeTransferStatus(mContext);
+
+            // Start a service to unlock device until device is unlocked.
+            PeriodicServiceUtils.startPeriodicService(
+                    mContext,
+                    Interval.UNLOCK_DEVICE,
+                    JobServiceId.UNLOCK_DEVICE,
+                    UnlockDeviceService.class
+            );
+        }
     }
 
     public class TransferCompletedReceiver extends BroadcastReceiver {
@@ -159,18 +133,38 @@ public class TransferContentWaitingFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-
             String action = intent.getAction();
-            if (action.equals(TeraIntent.ACTION_TRANSFER_COMPLETED)) {
-                Logs.d(CLASSNAME, "onReceive", TeraIntent.ACTION_TRANSFER_COMPLETED);
+            Logs.d(CLASSNAME, "onReceive", "action=" + action);
+            if (!action.equals(TeraIntent.ACTION_TRANSFER_COMPLETED)) {
+                return;
+            }
 
+            TransferStatus.setTransferStatus(mContext, TransferStatus.TRANSFERRED);
+            if (MainApplication.Foreground.get().isForeground()) {
                 Logs.d(CLASSNAME, "onReceive", "Replace with TransferContentTransferringFragment");
                 TransferContentTransferringFragment fragment = TransferContentTransferringFragment.newInstance();
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.fragment_container, fragment, TransferContentTransferringFragment.TAG);
-                ft.commit();
-            }
+                ft.commitAllowingStateLoss();
+            } else {
+                Logs.d(CLASSNAME, "onReceive", "Replace with TransferContentDoneFragment");
+                // If Tera app is in background, skip the transferring interlude animation of
+                // TransferContentTransferringFragment to TransferContentDoneFragment.
+                TransferContentDoneFragment fragment = TransferContentDoneFragment.newInstance();
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.fragment_container, fragment, TransferContentDoneFragment.TAG);
+                ft.commitAllowingStateLoss();
 
+                int flags = NotificationEvent.FLAG_HEADS_UP |
+                        NotificationEvent.FLAG_OPEN_APP;
+                NotificationEvent.notify(
+                        mContext,
+                        NotificationEvent.ID_TRANSFER_DATA,
+                        "完成轉移程序", Data Catched
+                        "系統將於五秒後自動回復到原廠初始狀態。",
+                        flags
+                );
+            }
         }
 
         public void registerReceiver(IntentFilter intentFilter) {

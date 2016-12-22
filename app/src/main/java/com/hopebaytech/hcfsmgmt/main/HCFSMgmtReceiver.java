@@ -4,15 +4,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
 
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+import com.hopebaytech.hcfsmgmt.misc.JobServiceId;
 import com.hopebaytech.hcfsmgmt.service.PinAndroidFolderService;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.AlarmUtils;
@@ -21,7 +19,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
@@ -114,12 +112,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     context.startService(intentService);
                     break;
                 }
-                case TeraIntent.ACTION_TRANSFER_COMPLETED: {
-                    Intent intentService = new Intent(context, TeraMgmtService.class);
-                    intentService.setAction(TeraIntent.ACTION_TRANSFER_COMPLETED);
-                    context.startService(intentService);
-                    break;
-                }
             }
         }
 
@@ -137,10 +129,10 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 context.startService(checkRestoreStatusIntent);
 
                 // Start a job service to pin /storage/emulated/0/android folder until pin success
-                PollingServiceUtils.startPollingService(
+                PeriodicServiceUtils.startPeriodicService(
                         context,
                         Interval.PIN_ANDROID_FOLDER,
-                        PollingServiceUtils.JOB_ID_PIN_ANDROID_FOLDER,
+                        JobServiceId.PIN_ANDROID_FOLDER,
                         PinAndroidFolderService.class
                 );
 

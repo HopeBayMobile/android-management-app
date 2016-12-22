@@ -133,11 +133,11 @@ public class BoosterFragment extends Fragment {
             // boost/unboost was triggered before. If it has been triggered, we have to show the
             // processing UI.
             boolean isProcessing = true;
-            switch (Booster.currentProcessBoostStatus(mContext)) {
-                case UidInfo.BoostStatus.UNBOOSTING:
+            switch (Booster.currentBoosterStatus(mContext)) {
+                case Booster.Status.UNBOOSTING:
                     setCurrentTab(Tab.BOOSTED);
                     break;
-                case UidInfo.BoostStatus.BOOSTING:
+                case Booster.Status.BOOSTING:
                     setCurrentTab(Tab.UNBOOSTED);
                     break;
                 default:
@@ -243,32 +243,37 @@ public class BoosterFragment extends Fragment {
                     return;
                 }
 
-                String title = getString(R.string.booster_dialog_disable_apps_title);
-                StringBuilder builder = new StringBuilder();
-                if (mCurrentTab == Tab.UNBOOSTED) {
-                    builder.append(getString(R.string.booster_dialog_disable_apps_message_while_boosting));
-                } else {
-                    builder.append(getString(R.string.booster_dialog_disable_apps_message_while_unboosting));
-                }
-                builder.append("\n\n");
-
-                BoosterAdapter adapter = ((BoosterAdapter) mRecycleView.getAdapter());
-                for (int i = 0; i < adapter.mCheckedPosition.size(); i++) {
-                    int position = adapter.mCheckedPosition.keyAt(i);
-                    builder.append(adapter.getAppList().get(position).getName());
-                    builder.append("\n");
-                }
-
-                MessageDialogFragment dialog = MessageDialogFragment.newInstance();
-                dialog.setTitle(title);
-                dialog.setMessage(builder.toString());
-                dialog.setOnclickListener(new DialogInterface.OnClickListener() {
+                ThreadPool.getInstance().execute(new Runnable() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        executeAction();
+                    public void run() {
+                        String title = getString(R.string.booster_dialog_disable_apps_title);
+                        StringBuilder builder = new StringBuilder();
+                        if (mCurrentTab == Tab.UNBOOSTED) {
+                            builder.append(getString(R.string.booster_dialog_disable_apps_message_while_boosting));
+                        } else {
+                            builder.append(getString(R.string.booster_dialog_disable_apps_message_while_unboosting));
+                        }
+                        builder.append("\n\n");
+
+                        BoosterAdapter adapter = ((BoosterAdapter) mRecycleView.getAdapter());
+                        for (int i = 0; i < adapter.mCheckedPosition.size(); i++) {
+                            int position = adapter.mCheckedPosition.keyAt(i);
+                            builder.append(adapter.getAppList().get(position).getName());
+                            builder.append("\n");
+                        }
+
+                        MessageDialogFragment dialog = MessageDialogFragment.newInstance();
+                        dialog.setTitle(title);
+                        dialog.setMessage(builder.toString());
+                        dialog.setOnclickListener(new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                executeAction();
+                            }
+                        });
+                        dialog.show(getFragmentManager(), MessageDialogFragment.TAG);
                     }
                 });
-                dialog.show(getFragmentManager(), MessageDialogFragment.TAG);
             }
         });
     }
@@ -489,7 +494,7 @@ public class BoosterFragment extends Fragment {
                 public void run() {
                     if (mCurrentTab == Tab.UNBOOSTED) {
                         if (Booster.isEnoughBoosterSpace(mContext, checkedApps)) {
-                            Booster.updateBoostStatusInSharedPreferenceXml(mContext, UidInfo.BoostStatus.BOOSTING);
+                            Booster.updateBoosterStatusInSharedPreferenceXml(mContext, Booster.Status.BOOSTING);
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
@@ -503,7 +508,7 @@ public class BoosterFragment extends Fragment {
                         }
                     } else { // Tab.BOOSTED
                         if (Booster.isEnoughUnboosterSpace(mContext, checkedApps)) {
-                            Booster.updateBoostStatusInSharedPreferenceXml(mContext, UidInfo.BoostStatus.UNBOOSTING);
+                            Booster.updateBoosterStatusInSharedPreferenceXml(mContext, Booster.Status.UNBOOSTING);
 
                             UidDAO uidDAO = UidDAO.getInstance(mContext);
                             ContentValues cv = new ContentValues();
@@ -518,7 +523,7 @@ public class BoosterFragment extends Fragment {
                     }
 
                     // Processing failed due to insufficient space
-                    Booster.removeBoostStatusInSharedPreferenceXml(mContext);
+                    Booster.removeBoosterStatusInSharedPreferenceXml(mContext);
                     UiHandler.getInstance().post(new Runnable() {
                         @Override
                         public void run() {
@@ -560,7 +565,7 @@ public class BoosterFragment extends Fragment {
                 public void run() {
                     Booster.enableApps(mContext);
                     Booster.recoverBoostStatusWhenFailed(mContext);
-                    Booster.removeBoostStatusInSharedPreferenceXml(mContext);
+                    Booster.removeBoosterStatusInSharedPreferenceXml(mContext);
 
                     UiHandler.getInstance().post(new Runnable() {
                         @Override
@@ -584,7 +589,7 @@ public class BoosterFragment extends Fragment {
 
         private void notifyProcessingAppsCompleted() {
             Booster.enableApps(mContext);
-            Booster.removeBoostStatusInSharedPreferenceXml(mContext);
+            Booster.removeBoosterStatusInSharedPreferenceXml(mContext);
 
             List<Integer> removePositionList = new ArrayList<>();
             for (int i = 0; i < mCheckedPosition.size(); i++) {

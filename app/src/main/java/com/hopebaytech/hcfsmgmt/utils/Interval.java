@@ -99,4 +99,14 @@ public class Interval {
      */
     public static final int DATABASE_OPERATION_RETRY_TIME = 10;
 
+    /**
+     * Interval for updating tera connection status in TransferContentUploadingFragment
+     */
+    public static final int UPDATE_TERA_CONN_STATUS_IN_TRANSFER_CONTENT = 5000;
+
+    /**
+     * Interval for unlocking device until the device is unlocked.
+     */
+    public static final int UNLOCK_DEVICE = 500;
+
 }

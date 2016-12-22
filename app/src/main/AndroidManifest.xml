@@ -77,7 +77,6 @@
                 <action android:name="hbt.intent.action.MINI_RESTORE_COMPLETED" />
                 <action android:name="hbt.intent.action.FULL_RESTORE_COMPLETED" />
                 <action android:name="hbt.intent.action.CHECK_RESTORE_STATUS" />
-                <action android:name="hbt.intent.action.TRANSFER_COMPLETED" />
                 <action android:name="hbt.intent.action.BOOSTER_PROCESS_COMPLETED" />
                 <action android:name="hbt.intent.action.BOOSTER_PROCESS_FAILED" />
 
@@ -95,10 +94,13 @@
         <service android:name=".service.TeraMgmtService" />
         <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
         <service
-            android:name="com.hopebaytech.hcfsmgmt.service.TransferDataPollingService"
+            android:name="com.hopebaytech.hcfsmgmt.service.CheckDeviceTransferredPeriodicService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name="com.hopebaytech.hcfsmgmt.service.PinAndroidFolderService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name="com.hopebaytech.hcfsmgmt.service.UnlockDeviceService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service

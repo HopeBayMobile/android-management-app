@@ -1,5 +1,7 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,6 +15,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
+import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
@@ -27,6 +31,8 @@ public class SplashFragment extends Fragment {
     public static final String TAG = SplashFragment.class.getSimpleName();
     private final String CLASSNAME = SplashFragment.class.getSimpleName();
 
+    private Context mContext;
+
     public static SplashFragment newInstance() {
         return new SplashFragment();
     }
@@ -37,7 +43,14 @@ public class SplashFragment extends Fragment {
         public void run() {
             try {
                 Thread.sleep(2000);
-                switchFragment();
+                int transferStatus = TransferStatus.getTransferStatus(mContext);
+                if (transferStatus == TransferStatus.NONE) {
+                    switchFragment();
+                } else {
+                    // Transfer process is not completed, show the transfer data page to continue the
+                    // remaining process.
+                    startActivity(new Intent(mContext, TransferContentActivity.class));
+                }
             } catch (InterruptedException e) {
                 Logs.d(CLASSNAME, "mSplashScreenRunnable", Log.getStackTraceString(e));
             }
@@ -48,6 +61,7 @@ public class SplashFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        mContext = getContext();
     }
 
     @Nullable

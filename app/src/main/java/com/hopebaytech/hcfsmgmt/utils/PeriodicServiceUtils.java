@@ -12,17 +12,14 @@ import android.content.Intent;
  *         Created by Vince on 2016/7/14.
  */
 
-public class PollingServiceUtils {
+public class PeriodicServiceUtils {
 
-    private static final String CLASSNAME = PollingServiceUtils.class.getSimpleName();
+    private static final String CLASSNAME = PeriodicServiceUtils.class.getSimpleName();
 
     public static final String KEY_INTERVAL = "key_interval";
 
-    public static final int JOB_ID_TRANSFER_DATA = 1;
-    public static final int JOB_ID_PIN_ANDROID_FOLDER = 2;
-
     // Not allowed to initialize this class
-    private PollingServiceUtils() {
+    private PeriodicServiceUtils() {
     }
 
     /**
@@ -50,18 +47,18 @@ public class PollingServiceUtils {
     }
 
     /**
-     * Start a polling service with given class
+     * Start a periodic service
      *
      * @param context        A Context of the application package implementing this class.
      * @param intervalMillis Interval in milliseconds between subsequent repeats of the service.
      * @param jobId          The job id of the starting polling service.
      * @param cls            The component class that is to be used for the service.
      */
-    public static void startPollingService(Context context, int intervalMillis, int jobId, Class<? extends JobService> cls) {
-        Logs.d(CLASSNAME, "startPollingService",
+    public static void startPeriodicService(Context context, int intervalMillis, int jobId, Class<? extends JobService> cls) {
+        Logs.d(CLASSNAME, "startPeriodicService",
                 "intervalMillis=" + intervalMillis
                         + ", jobId=" + jobId
-                        + ", cls=" + cls);
+                        + ", cls=" + cls.getCanonicalName());
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         JobInfo.Builder builder = new JobInfo.Builder(jobId, new ComponentName(context.getPackageName(), cls.getName()));
         builder.setPeriodic(intervalMillis);
@@ -69,16 +66,15 @@ public class PollingServiceUtils {
     }
 
     /**
-     * Stop a polling service with given class
+     * Stop a periodic service
      *
      * @param context A Context of the application package implementing this class.
      * @param jobId   The job id to be canceled.
      */
-    public static void stopPollingService(Context context, int jobId) {
-        Logs.d(CLASSNAME, "startPollingService", "jobId=" + jobId);
+    public static void stopPeriodicService(Context context, int jobId) {
+        Logs.d(CLASSNAME, "stopPeriodicService", "jobId=" + jobId);
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.cancel(jobId);
     }
-
 
 }

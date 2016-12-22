@@ -1,8 +1,6 @@
 package com.hopebaytech.hcfsmgmt.main;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.WindowManager;
@@ -10,6 +8,7 @@ import android.view.WindowManager;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.TransferContentDoneFragment;
 import com.hopebaytech.hcfsmgmt.fragment.TransferContentUploadingFragment;
+import com.hopebaytech.hcfsmgmt.fragment.TransferContentWaitingFragment;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
@@ -29,13 +28,14 @@ public class TransferContentActivity extends AppCompatActivity {
     }
 
     private void switchFragment() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int status = sharedPreferences.getInt(PREF_TRANSFER_STATUS, TransferStatus.NONE);
-        switch (status) {
+        int transferStatus = TransferStatus.getTransferStatus(this);
+        switch (transferStatus) {
+            case TransferStatus.WAIT_DEVICE:
+                gotoTransferContentWaitingFragment();
             case TransferStatus.TRANSFERRED:
                 gotoTransferContentDoneFragment();
                 break;
-            default: // TransferStatus.NONE
+            default: // TransferStatus.NONE or TransferStatus.TRANSFERRING
                 gotoTransferContentUploadingFragment();
                 break;
         }
@@ -50,6 +50,15 @@ public class TransferContentActivity extends AppCompatActivity {
         ft.commit();
     }
 
+    private void gotoTransferContentWaitingFragment() {
+        Logs.d(CLASSNAME, "gotoTransferContentWaitingFragment", "Replace with TransferContentUploadingFragment");
+
+        TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
+        ft.commit();
+    }
+
     private void gotoTransferContentDoneFragment() {
         Logs.d(CLASSNAME, "gotoTransferContentDoneFragment", "Replace with gotoTransferContentDoneFragment");
 
@@ -61,7 +70,7 @@ public class TransferContentActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
+        // Override this function and without calling super.onBackPressed() to disable back key
     }
 
 }

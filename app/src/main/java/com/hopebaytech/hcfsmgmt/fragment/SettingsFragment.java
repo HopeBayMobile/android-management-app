@@ -23,7 +23,9 @@ import android.widget.Toast;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
+import com.hopebaytech.hcfsmgmt.info.UidInfo;
 import com.hopebaytech.hcfsmgmt.utils.AlarmUtils;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -31,6 +33,9 @@ import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Aaron
@@ -119,7 +124,6 @@ public class SettingsFragment extends Fragment {
         mSummaryText = (TextView) mNotifyLocalStorageUsedRatio.findViewById(R.id.notify_local_storage_used_ratio_summary);
         mAdvancedSettings = (RelativeLayout) view.findViewById(R.id.advanced_settings);
         mProgressCircle = (ProgressBar) view.findViewById(R.id.progress_circle);
-
     }
 
     @Override
@@ -234,8 +238,51 @@ public class SettingsFragment extends Fragment {
         mTransferContent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TransferContentDescDialogFragment dialogFragment = TransferContentDescDialogFragment.newInstance();
-                dialogFragment.show(getFragmentManager(), TransferContentDescDialogFragment.TAG);
+                ThreadPool.getInstance().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        // If booster is initializing, prohibit user from transferring data
+                        int boosterStatus = Booster.currentBoosterStatus(mContext);
+                        if (boosterStatus == Booster.Status.INIT) {
+                            if (isAdded()) {
+                                MessageDialogFragment dialog = MessageDialogFragment.newInstance();
+                                dialog.setTitle(getString(R.string.settings_transfer_content_failed));
+                                dialog.setMessage(getString(R.string.settings_transfer_content_failed_booster_initializing));
+                                dialog.show(getFragmentManager(), MessageDialogFragment.TAG);
+                            }
+                            return;
+                        }
+
+                        // If booster is boosting/unboosting apps, prohibit user from transferring data
+                        UidDAO uidDAO = UidDAO.getInstance(mContext);
+                        Integer[] queryBoostStatus = new Integer[]{
+                                UidInfo.BoostStatus.INIT_UNBOOST,
+                                UidInfo.BoostStatus.UNBOOSTING,
+                                UidInfo.BoostStatus.INIT_BOOST,
+                                UidInfo.BoostStatus.BOOSTING
+                        };
+                        Map<String, Object> keyValueMap = new HashMap<>();
+                        keyValueMap.put(UidDAO.BOOST_STATUS_COLUMN, queryBoostStatus);
+                        if (!uidDAO.get(keyValueMap).isEmpty()) {
+                            if (isAdded()) {
+                                MessageDialogFragment dialog = MessageDialogFragment.newInstance();
+                                dialog.setTitle(getString(R.string.settings_transfer_content_failed));
+                                dialog.setMessage(getString(R.string.settings_transfer_content_failed_booster_boost_unboost_in_process));
+                                dialog.show(getFragmentManager(), MessageDialogFragment.TAG);
+                            }
+                            return;
+                        }
+
+                        // No booster process is running, allow user to transfer data
+                        UiHandler.getInstance().post(new Runnable() {
+                            @Override
+                            public void run() {
+                                TransferContentDescDialogFragment dialogFragment = TransferContentDescDialogFragment.newInstance();
+                                dialogFragment.show(getFragmentManager(), TransferContentDescDialogFragment.TAG);
+                            }
+                        });
+                    }
+                });
             }
         });
 

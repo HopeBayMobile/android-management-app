@@ -312,34 +312,14 @@ public class TeraFonnApiService extends Service {
 
         @Override
         public int startUploadTeraData() throws RemoteException {
-            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
-            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-            if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
-                if (Booster.isBoosterMounted()) {
-                    Booster.disableApps(TeraFonnApiService.this);
-                    Booster.umountBooster();
-                }
-                settingsInfo.setValue(String.valueOf(false));
-                settingsDAO.update(settingsInfo);
-            }
+            Booster.disableBoosterWhenSyncData(TeraFonnApiService.this);
             return HCFSMgmtUtils.startUploadTeraData();
         }
 
         @Override
         public int stopUploadTeraData() throws RemoteException {
             int code = HCFSMgmtUtils.stopUploadTeraData();
-            SettingsDAO settingsDAO = SettingsDAO.getInstance(TeraFonnApiService.this);
-            SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-            if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
-                if (!Booster.isBoosterMounted()) {
-                    Booster.mountBooster();
-                    Booster.enableApps(TeraFonnApiService.this);
-                }
-                settingsInfo = new SettingsInfo();
-                settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
-                settingsInfo.setValue(String.valueOf(true));
-                settingsDAO.update(settingsInfo);
-            }
+            Booster.enableBoosterAfterSyncData(TeraFonnApiService.this);
             return code;
         }
 

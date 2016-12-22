@@ -14,7 +14,7 @@ import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 
 /**
@@ -42,7 +42,7 @@ public class MgmtPollingService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        int interval = intent.getIntExtra(PollingServiceUtils.KEY_INTERVAL, -1);
+        int interval = intent.getIntExtra(PeriodicServiceUtils.KEY_INTERVAL, -1);
         Logs.i(CLASSNAME, this.getClass().getName(), String.valueOf(interval));
 
         new PollingThread(interval).start();
@@ -93,14 +93,14 @@ public class MgmtPollingService extends Service {
                                             case GetDeviceInfo.Category.LOCK:
                                                 action.showMessageWhenLock(piggyback.getMessage());
                                                 break;
-                                            case GetDeviceInfo.Category. RESET:
+                                            case GetDeviceInfo.Category.RESET:
                                                 action.reset();
                                                 break;
                                             case GetDeviceInfo.Category.TX_WAITING:
                                                 break;
                                             case GetDeviceInfo.Category.UNREGISTERED:
                                                 // The UNREGISTERED category is processed by
-                                                // TransferDataPollingService
+                                                // CheckDeviceTransferredPeriodicService
 //                                                action.unregistered();
                                                 break;
                                             default:

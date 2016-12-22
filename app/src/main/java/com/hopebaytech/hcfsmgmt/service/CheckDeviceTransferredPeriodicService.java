@@ -6,33 +6,32 @@ import android.content.Intent;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.GetDeviceInfo;
+import com.hopebaytech.hcfsmgmt.misc.JobServiceId;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
-
-import static com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils.JOB_ID_TRANSFER_DATA;
 
 /**
  * @author Aaron
  *         Created by Aaron on 2016/11/21.
  */
-public class TransferDataPollingService extends JobService {
+public class CheckDeviceTransferredPeriodicService extends JobService {
 
-    private final String CLASSNAME = TransferDataPollingService.class.getSimpleName();
+    private final String CLASSNAME = CheckDeviceTransferredPeriodicService.class.getSimpleName();
 
     @Override
     public boolean onStartJob(JobParameters params) {
-        Logs.d(CLASSNAME, "onStartJob", "params=" + params);
+        Logs.d(CLASSNAME, "onStartJob", "jobId=" + params.getJobId());
         checkDeviceServiceStatus(params);
         return true;
     }
 
     @Override
     public boolean onStopJob(JobParameters params) {
-        Logs.d(CLASSNAME, "onStopJob", "params=" + params);
+        Logs.d(CLASSNAME, "onStopJob", "jobId=" + params.getJobId());
         return false;
     }
 
@@ -44,7 +43,7 @@ public class TransferDataPollingService extends JobService {
         MgmtCluster.getJwtToken(this, new MgmtCluster.OnFetchJwtTokenListener() {
             @Override
             public void onFetchSuccessful(String jwt) {
-                String imei = HCFSMgmtUtils.getDeviceImei(TransferDataPollingService.this);
+                String imei = HCFSMgmtUtils.getDeviceImei(CheckDeviceTransferredPeriodicService.this);
                 MgmtCluster.GetDeviceServiceInfoProxy proxy = new MgmtCluster.GetDeviceServiceInfoProxy(jwt, imei);
                 proxy.setOnGetDeviceServiceInfoListener(new MgmtCluster.
                         GetDeviceServiceInfoProxy.OnGetDeviceServiceInfoListener() {
@@ -58,7 +57,10 @@ public class TransferDataPollingService extends JobService {
                                 sendBroadcast(new Intent(TeraIntent.ACTION_TRANSFER_COMPLETED));
 
                                 // Call stopPollingService to completely stop this job service
-                                PollingServiceUtils.stopPollingService(TransferDataPollingService.this, JOB_ID_TRANSFER_DATA);
+                                PeriodicServiceUtils.stopPeriodicService(
+                                        CheckDeviceTransferredPeriodicService.this,
+                                        JobServiceId.CHECK_DEVICE_TRANSFERRED
+                                );
                                 break;
                         }
 
