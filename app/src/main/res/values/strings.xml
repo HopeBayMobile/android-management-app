@@ -178,6 +178,10 @@
     <string name="settings_transfer_content_do_not_ask_again">Do not ask me again.</string>
     <string name="settings_transfer_content_failed_booster_initializing">資料移轉失敗，因為加速器正在初始化，請稍後再試。</string>
     <string name="settings_transfer_content_failed_booster_boost_unboost_in_process">資料移轉失敗，因為應用程式正在加速/取消加速中，請稍後再試。</string>
+    <string name="settings_transfer_content_notification_transfer_completed_title">資料移轉完成</string>
+    <string name="settings_transfer_content_notification_transfer_completed_message">等待另一裝置執行還原&#8230;</string>
+    <string name="settings_transfer_content_notification_another_device_start_title">開始轉移到另一裝置</string>
+    <string name="settings_transfer_content_notification_another_device_start_message">您的裝置將於 5 秒內開始重設為原廠設定。</string>
 
     <string name="settings_feedback">意見回饋</string>
     <string name="settings_feedback_log_collecting_title">日誌收集中</string>

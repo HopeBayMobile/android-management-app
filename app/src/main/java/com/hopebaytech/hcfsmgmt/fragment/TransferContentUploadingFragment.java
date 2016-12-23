@@ -211,24 +211,22 @@ public class TransferContentUploadingFragment extends Fragment {
                         public void onTransferSuccessful(TransferContentInfo transferContentInfo) {
                             TransferStatus.setTransferStatus(mContext, TransferStatus.WAIT_DEVICE);
 
-                            if (isAdded()) {
-                                Logs.d(CLASSNAME, "onTransferSuccessful", "Replace with TransferContentWaitingFragment");
-                                TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
-                                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
-                                ft.commitAllowingStateLoss();
+                            Logs.d(CLASSNAME, "onTransferSuccessful", "Replace with TransferContentWaitingFragment");
+                            TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
+                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
+                            ft.commitAllowingStateLoss();
 
-                                if (!MainApplication.Foreground.get().isForeground()) {
-                                    int flags = NotificationEvent.FLAG_HEADS_UP |
-                                            NotificationEvent.FLAG_OPEN_APP;
-                                    NotificationEvent.notify(
-                                            mContext,
-                                            NotificationEvent.ID_TRANSFER_DATA,
-                                            "轉移完成", Data Transferred
-                                            "正在等待另一台裝置信行還原程序", Waiting another device
-                                            flags
-                                    );
-                                }
+                            if (!MainApplication.Foreground.get().isForeground()) {
+                                int flags = NotificationEvent.FLAG_HEADS_UP |
+                                        NotificationEvent.FLAG_OPEN_APP;
+                                NotificationEvent.notify(
+                                        mContext,
+                                        NotificationEvent.ID_TRANSFER_DATA,
+                                        R.string.settings_transfer_content_notification_transfer_completed_title,
+                                        R.string.settings_transfer_content_notification_transfer_completed_message,
+                                        flags
+                                );
                             }
                         }
 

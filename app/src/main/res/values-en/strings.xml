@@ -185,6 +185,10 @@
     <string name="settings_transfer_content_do_not_ask_again">Do not ask me again.</string>
     <string name="settings_transfer_content_failed_booster_initializing">Data transfer failed, because booster is initializing. Please try again later.</string>
     <string name="settings_transfer_content_failed_booster_boost_unboost_in_process">Data transfer failed, because app is boosting/unboosting. Please try again later.</string>
+    <string name="settings_transfer_content_notification_transfer_completed_title">Data Transfer Complete</string>
+    <string name="settings_transfer_content_notification_transfer_completed_message">Waiting for another device to run restoration&#8230;</string>
+    <string name="settings_transfer_content_notification_another_device_start_title">Transfer to Another Device Starts</string>
+    <string name="settings_transfer_content_notification_another_device_start_message">Your device will factory reset in 5 sec.</string>
     <string name="settings_feedback">Feedback</string>
     <string name="settings_feedback_content_mail_contact">Contact:</string>
     <string name="settings_feedback_content_mail_description">Description</string>

@@ -135,6 +135,7 @@ public class TransferContentWaitingFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             Logs.d(CLASSNAME, "onReceive", "action=" + action);
+
             if (!action.equals(TeraIntent.ACTION_TRANSFER_COMPLETED)) {
                 return;
             }
@@ -155,13 +156,12 @@ public class TransferContentWaitingFragment extends Fragment {
                 ft.replace(R.id.fragment_container, fragment, TransferContentDoneFragment.TAG);
                 ft.commitAllowingStateLoss();
 
-                int flags = NotificationEvent.FLAG_HEADS_UP |
-                        NotificationEvent.FLAG_OPEN_APP;
+                int flags = NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP;
                 NotificationEvent.notify(
                         mContext,
                         NotificationEvent.ID_TRANSFER_DATA,
-                        "完成轉移程序", Data Catched
-                        "系統將於五秒後自動回復到原廠初始狀態。",
+                        R.string.settings_transfer_content_notification_another_device_start_title,
+                        R.string.settings_transfer_content_notification_another_device_start_message,
                         flags
                 );
             }
