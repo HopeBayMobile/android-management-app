@@ -283,10 +283,11 @@
     <string name="help_customer_center_title">Customer Center</string>
     <string name="help_email_feedback_title">User Feedback</string>
 
-    <!-- booster page -->
+    <!-- start: booster related i18n -->
     <string name="booster_title_bar">Boost Zone</string>
     <string name="booster_action_boost">Boost</string>
     <string name="booster_action_unboost">Unboost</string>
+    <string name="booster_action_cancel">Cancel</string>
     <string name="booster_tab_boost">Boosted</string>
     <string name="booster_tab_unboost">Unboosted</string>
     <string name="booster_boost_hint_tap_app_to_boost">Tap app to boost.</string>
@@ -297,43 +298,45 @@
     <string name="booster_dialog_boost_message">All selected apps have been boosted.</string>
     <string name="booster_dialog_unboost_title">App Unboosted</string>
     <string name="booster_dialog_unboost_message">All selected apps have been unboosted.</string>
-    <string name="booster_dialog_disable_apps_title">Disable Apps</string>
+    <string name="booster_dialog_disable_apps_title">Disable Running Apps</string>
     <string name="booster_dialog_disable_apps_message_while_unboosting">The following apps will be temporarily disabled while unboosting.</string>
     <string name="booster_dialog_disable_apps_message_while_boosting">The following apps will be temporarily disabled while boosting.</string>
-    <string name="booster_enable_dialog_title">Enlarge Boost Zone Size</string>
+    <string name="booster_enable_dialog_title">Select the size for boost zone before boosting apps.</string>
     <string name="booster_enable_dialog_message">Please enlarge Boost Zone size to release more spaces for boosting apps.</string>
     <string name="booster_enable_dialog_success">Enable boost zone successful.</string>
-    <string name="booster_enable_dialog_insufficient_space">Insufficient space for enabling booster zone.</string>
+    <string name="booster_enable_dialog_insufficient_pinned_space">Booster cannot be enabled due to insufficient pinned space.</string>
     <string name="booster_enable_dialog_failed">Enable boost zone failed.</string>
-    <string name="booster_disable_dialog_title">Disable Boost Zone</string>
-    <string name="booster_disable_dialog_content_message">Disable boost zone will unboost any boosted apps. Are you sure you want to continue?</string>
-    <string name="booster_disable_dialog_check_message">@string/settings_transfer_content_desc_check</string>
-    <string name="booster_disable_dialog_success">Disable boost zone successful.</string>
-    <string name="booster_disable_dialog_failed">Disable boost zone failed.</string>
-    <string name="booster_boost_apps_insufficient_space_title">Not Enough Boosted Space</string>
-    <string name="booster_unboost_apps_insufficient_space_title">Not Enough Unboosted Space</string>
-    <string name="booster_insufficient_space_message">Please unselect some apps, and then try again.</string>
-    <string name="booster_boost_apps_failed">Boost apps failed.</string>
-    <string name="booster_unboost_apps_insufficient_space">Insufficient space to unboost apps.</string>
-    <string name="booster_unboost_apps_failed">Unboost apps failed.</string>
+    <string name="booster_boost_apps_insufficient_space_title">Not Enough Space for Boosted Apps</string>
+    <string name="booster_unboost_apps_insufficient_space_title">Not Enough Space for Unboosted Apps</string>
+    <string name="booster_insufficient_space_message">Please deselect some apps and try again.</string>
+    <string name="booster_boost_apps_failed">Boosting apps failed.</string>
+    <string name="booster_unboost_apps_failed">Unboosting apps failed.</string>
     <string name="booster_used_space_info">Used Space: %1$s / %2$s</string>
     <string name="booster_notification_unboosting_title">Unboosting apps&#8230;</string>
-    <string name="booster_notification_unboosting_message">The selected apps are disabled until unboosting completed.</string>
+    <string name="booster_notification_unboosting_message">The selected apps are disabled until unboosting is complete.</string>
     <string name="booster_notification_unboost_completed_title">Apps have been unboosted</string>
     <string name="booster_notification_unboost_completed_message">The selected apps are enabled and available to use.</string>
     <string name="booster_notification_unboost_failed_title">Unboosting apps failed.</string>
     <string name="booster_notification_unboost_failed_message">Some apps might not be unboosted successfully. Please try again.</string>
     <string name="booster_notification_boosting_title">Boosting apps&#8230;</string>
-    <string name="booster_notification_boosting_message">The selected apps are disabled until boosting completed.</string>
+    <string name="booster_notification_boosting_message">The selected apps are disabled until boosting is complete.</string>
     <string name="booster_notification_boost_completed_title">Apps have been boosted</string>
     <string name="booster_notification_boost_completed_message">The selected apps are enabled and available to use.</string>
     <string name="booster_notification_boost_failed_title">Boosting apps failed.</string>
     <string name="booster_notification_boost_failed_message">Some apps might not be boosted successfully. Please try again.</string>
     <string name="booster_full_space_alert_title">Boost Zone Full</string>
-    <string name="booster_full_space_alert_message">To release more spaces for boost zone, please remove some apps first.</string>
+    <string name="booster_full_space_alert_message">To release more space for Boost Zone, please remove some apps first.</string>
     <string name="booster_full_partial_crash_alert_title">Notice</string>
     <string name="booster_partial_crash_alert_message">During restoration, user data and settings of some boosted apps were lost. Thus, these apps have been reset and unboosted. </string>
     <string name="booster_full_crash_alert_message">During restoration, user data and settings of all boosted apps were lost. Thus, these apps have been reset and unboosted.</string>
+    <!-- Disable booster is not supported now -->
+    <string name="booster_disable_dialog_title">Disable Boost Zone</string>
+    <string name="booster_disable_dialog_content_message">Disable boost zone will unboost any boosted apps. Are you sure you want to continue?</string>
+    <string name="booster_disable_dialog_check_message">@string/settings_transfer_content_desc_check</string>
+    <string name="booster_disable_dialog_success">Disable boost zone successful.</string>
+    <string name="booster_disable_dialog_failed">Disable boost zone failed.</string>
+    <!-- Disable booster is not supported now -->
+    <!-- end: booster related i18n -->
 
     <string name="quick_tour_title">Quick Tour</string>
 

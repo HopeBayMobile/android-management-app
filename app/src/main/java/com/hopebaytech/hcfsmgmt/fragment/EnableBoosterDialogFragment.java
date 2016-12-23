@@ -22,6 +22,7 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
+import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
@@ -122,7 +123,11 @@ public class EnableBoosterDialogFragment extends DialogFragment {
 
         final double boosterSize = boosterSeekBar.getValue();
         if (boosterSize < Booster.getMinimumBoosterSpace()) {
-            Toast.makeText(mContext, R.string.booster_enable_dialog_insufficient_space, Toast.LENGTH_LONG).show();
+            Toast.makeText(
+                    mContext,
+                    R.string.booster_enable_dialog_insufficient_pinned_space,
+                    Toast.LENGTH_LONG
+            ).show();
             cancelBoost();
             return;
         }

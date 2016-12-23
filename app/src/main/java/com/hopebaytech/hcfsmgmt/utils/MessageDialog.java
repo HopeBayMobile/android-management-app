@@ -32,6 +32,8 @@ public class MessageDialog {
      * @param positiveListener the {@link android.view.View.OnClickListener} of positive button
      * @param negativeText     the negative string resource id of negative button
      * @param negativeListener the {@link android.view.View.OnClickListener} of negative button
+     * @param isTypeToast      the window of alertDialog is set to {@link WindowManager.LayoutParams#TYPE_TOAST}
+     *                         or not
      * @return a customized alert dialog according the parameters given by caller.
      */
     public static AlertDialog getDialog(final Context context,
@@ -40,7 +42,8 @@ public class MessageDialog {
                                         @StringRes int positiveText,
                                         final View.OnClickListener positiveListener,
                                         @StringRes int negativeText,
-                                        final View.OnClickListener negativeListener) {
+                                        final View.OnClickListener negativeListener,
+                                        boolean isTypeToast) {
         View view = LayoutInflater.from(context).inflate(R.layout.message_dialog_fragment, null);
         ((TextView) view.findViewById(R.id.title)).setText(title);
         ((TextView) view.findViewById(R.id.message)).setText(message);
@@ -82,32 +85,46 @@ public class MessageDialog {
                 }
             }
         });
-        if (alertDialog.getWindow() != null) {
-            alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
+        if (isTypeToast) {
+            if (alertDialog.getWindow() != null) {
+                alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_TOAST);
+            }
         }
         return alertDialog;
     }
 
     /**
      * @return a alert dialog without negative button.
-     * @see MessageDialog#getDialog(Context, int, int, int, View.OnClickListener, int, View.OnClickListener)
+     * @see MessageDialog#getDialog(Context, int, int, int, View.OnClickListener, int, View.OnClickListener, boolean)
      */
     public static AlertDialog getDialog(final Context context,
                                         @StringRes int title,
                                         @StringRes int message,
                                         @StringRes int positiveText,
                                         final View.OnClickListener positiveListener) {
-        return getDialog(context, title, message, positiveText, positiveListener, 0, null);
+        return getDialog(context, title, message, positiveText, positiveListener, 0, null, false);
     }
 
     /**
      * @return a alert dialog which has default positive text and positive button, but without
      * negative button.
-     * @see MessageDialog#getDialog(Context, int, int, int, View.OnClickListener, int, View.OnClickListener)
+     * @see MessageDialog#getDialog(Context, int, int, int, View.OnClickListener, int, View.OnClickListener, boolean)
+     */
+    public static AlertDialog getDialog(final Context context,
+                                        @StringRes int title,
+                                        @StringRes int message,
+                                        boolean isTypeToast) {
+        return getDialog(context, title, message, R.string.ok, null, 0, null, isTypeToast);
+    }
+
+    /**
+     * @return a alert dialog which has default positive text and positive button, but without
+     * negative button.
+     * @see MessageDialog#getDialog(Context, int, int, int, View.OnClickListener, int, View.OnClickListener, boolean)
      */
     public static AlertDialog getDialog(final Context context,
                                         @StringRes int title,
                                         @StringRes int message) {
-        return getDialog(context, title, message, R.string.ok, null, 0, null);
+        return getDialog(context, title, message, R.string.ok, null, 0, null, false);
     }
 }
