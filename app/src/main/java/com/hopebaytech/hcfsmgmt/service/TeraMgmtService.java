@@ -1177,7 +1177,9 @@ public class TeraMgmtService extends Service {
                 // Booster has partially corrupted, show error message.
                 MessageDialog.getDialog(mContext,
                         R.string.booster_full_partial_crash_alert_title,
-                        R.string.booster_partial_crash_alert_message).show();
+                        R.string.booster_partial_crash_alert_message,
+                        true /* isTypeToast */
+                ).show();
             }
             if (isBoosterProcessCompleted()) {
                 Booster.enableApps(this);
@@ -1347,7 +1349,9 @@ public class TeraMgmtService extends Service {
                                 }
                             },
                             R.string.cancel,
-                            null).show();
+                            null,
+                            true /* isTypeToast */
+                    ).show();
                 }
             });
         }

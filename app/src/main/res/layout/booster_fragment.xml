@@ -143,7 +143,7 @@
                         android:background="?attr/selectableItemBackground"
                         android:gravity="center"
                         android:padding="10dp"
-                        android:text="Cancel" />
+                        android:text="@string/booster_action_cancel" />
                 </LinearLayout>
 
                 <LinearLayout

@@ -33,6 +33,7 @@ import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MemoryCacheFactory;
+import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
@@ -538,17 +539,19 @@ public class BoosterFragment extends Fragment {
                 return;
             }
 
-            String title;
-            String message = getString(R.string.booster_insufficient_space_message);
+            int titleResId;
+            int messageResId = R.string.booster_insufficient_space_message;
             if (mCurrentTab == Tab.UNBOOSTED) {
-                title = getString(R.string.booster_boost_apps_insufficient_space_title);
+                titleResId = R.string.booster_boost_apps_insufficient_space_title;
             } else {
-                title = getString(R.string.booster_unboost_apps_insufficient_space);
+                titleResId = R.string.booster_unboost_apps_insufficient_space_title;
             }
-            MessageDialogFragment dialog = MessageDialogFragment.newInstance();
-            dialog.setTitle(title);
-            dialog.setMessage(message);
-            dialog.show(getFragmentManager(), MessageDialogFragment.TAG);
+
+            MessageDialog.getDialog(
+                    mContext,
+                    titleResId,
+                    messageResId
+            ).show();
         }
 
         private void notifyProcessingAppsFailed() {
