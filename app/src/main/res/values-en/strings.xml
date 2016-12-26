@@ -228,7 +228,7 @@
     <string name="restore_preparing_title">Preparing&#8230;</string>
     <string name="restore_preparing_message">Preparing for restoration process. During the restoration, all changes you have made won\'t be saved after reboot.</string>
     <string name="restore_ready_title">Ready for restoration</string>
-    <string name="restore_ready_message">This restoration is ready, please tap "System reboot" to continue the process.</string>
+    <string name="restore_ready_message">This restoration is ready, please tap "System Reboot" to continue the process.</string>
     <string name="restore_major_install_title">Restoring&#8230;</string>
     <string name="restore_major_install_message">During restoration, please keep the network connected.</string>
     <string name="restore_done_title">Done</string>
