@@ -3,6 +3,7 @@ package com.hopebaytech.hcfsmgmt.utils;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -36,6 +37,7 @@ public class NotificationEvent {
     public static final int FLAG_OPEN_APP = 1 << 1;
     public static final int FLAG_HEADS_UP = 1 << 2;
     public static final int FLAG_IN_PROGRESS = 1 << 3;
+    public static final int FLAG_RESTART_ACTIVITY_TASK = 1 << 4;
 
     public static void notify(Context context,
                               int id,
@@ -114,8 +116,15 @@ public class NotificationEvent {
         boolean openApp = (flag & FLAG_OPEN_APP) != 0;
         boolean headsUp = (flag & FLAG_HEADS_UP) != 0;
         boolean inProgress = (flag & FLAG_IN_PROGRESS) != 0;
+        boolean restartActivityTask = (flag & FLAG_RESTART_ACTIVITY_TASK) != 0;
 
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent;
+        if (restartActivityTask) {
+            intent = Intent.makeRestartActivityTask(new ComponentName(context, MainActivity.class));
+        } else {
+            intent = new Intent(context, MainActivity.class);
+        }
+
         if (extras != null) {
             String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
             Logs.w(CLASSNAME, "notify", "cause=" + cause);

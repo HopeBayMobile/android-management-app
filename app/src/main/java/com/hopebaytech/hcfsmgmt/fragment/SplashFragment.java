@@ -111,6 +111,11 @@ public class SplashFragment extends Fragment {
                 fragment = RestoreMajorInstallFragment.newInstance();
                 TAG = RestoreMajorInstallFragment.TAG;
                 break;
+            case RestoreStatus.FULL_RESTORE_COMPLETED:
+                Logs.d(CLASSNAME, "switchFragment", "Replace with RestoreDoneFragment");
+                fragment = RestoreDoneFragment.newInstance();
+                TAG = RestoreDoneFragment.TAG;
+                break;
             case RestoreStatus.Error.CONN_FAILED:
             case RestoreStatus.Error.OUT_OF_SPACE:
             case RestoreStatus.Error.DAMAGED_BACKUP:
