@@ -1,5 +1,10 @@
 package com.hopebaytech.hcfsmgmt.info;
 
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * @author Aaron
  *         Created by Aaron on 2016/7/12.
@@ -25,4 +30,15 @@ public class UnlockDeviceInfo {
         this.responseCode = responseCode;
     }
 
+    @Override
+    public String toString() {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("message", message);
+            jsonObject.put("responseCode", responseCode);
+        } catch (JSONException e) {
+            return Log.getStackTraceString(e);
+        }
+        return jsonObject.toString();
+    }
 }

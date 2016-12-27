@@ -16,16 +16,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
-import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
+import com.hopebaytech.hcfsmgmt.main.MainApplication;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
@@ -38,8 +39,6 @@ public class TransferContentUploadingFragment extends Fragment {
 
     public static final String TAG = TransferContentUploadingFragment.class.getSimpleName();
     private final String CLASSNAME = TAG;
-
-    private final int INTERVAL_TERA_CONN_STATUS = 5000;
 
     private UploadCompletedReceiver mUploadCompletedReceiver;
     private Thread mTeraConnStatusThread;
@@ -73,32 +72,7 @@ public class TransferContentUploadingFragment extends Fragment {
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ThreadPool.getInstance().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        HCFSMgmtUtils.stopUploadTeraData();
-
-                        SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
-                        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-                        if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
-                            if (!Booster.isBoosterMounted()) {
-                                Booster.mountBooster();
-                                Booster.enableApps(mContext);
-                            }
-                            settingsInfo = new SettingsInfo();
-                            settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
-                            settingsInfo.setValue(String.valueOf(true));
-                            settingsDAO.update(settingsInfo);
-                        }
-
-                        UiHandler.getInstance().post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ((Activity) mContext).finish();
-                            }
-                        });
-                    }
-                });
+                ((Activity) mContext).finish();
             }
         });
 
@@ -114,29 +88,21 @@ public class TransferContentUploadingFragment extends Fragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
-                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-                if (settingsInfo != null && Boolean.valueOf(settingsInfo.getValue())) {
-                    if (Booster.isBoosterMounted()) {
-                        Booster.disableApps(mContext);
-                        Booster.umountBooster();
-                    }
-                    settingsInfo.setValue(String.valueOf(false));
-                    settingsDAO.update(settingsInfo);
-                }
+                TransferStatus.setTransferStatus(mContext, TransferStatus.TRANSFERRING);
+                Booster.disableBoosterWhenSyncData(mContext);
 
                 final int code = HCFSMgmtUtils.startUploadTeraData();
                 UiHandler.getInstance().post(new Runnable() {
                     @Override
                     public void run() {
-                        if (code == 1) {
+                        if (code == 1) { // The system is clean now. That is, there is no dirty data.
                             TransferContentWaitingFragment fragment = TransferContentWaitingFragment.newInstance();
 
                             Logs.d(CLASSNAME, "onActivityCreated", "Replace with TransferContentWaitingFragment");
                             FragmentTransaction ft = getFragmentManager().beginTransaction();
                             ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
                             ft.commit();
-                        } else if (code == 0) {
+                        } else if (code == 0) { // Setting sync point completed, data start to be synced.
                             IntentFilter filter = new IntentFilter();
                             filter.addAction(TeraIntent.ACTION_UPLOAD_COMPLETED);
                             mUploadCompletedReceiver = new UploadCompletedReceiver(mContext);
@@ -171,7 +137,7 @@ public class TransferContentUploadingFragment extends Fragment {
                                     displayNetworkStatus(connStatus);
                                 }
                             });
-                            Thread.sleep(INTERVAL_TERA_CONN_STATUS);
+                            Thread.sleep(Interval.UPDATE_TERA_CONN_STATUS_IN_TRANSFER_CONTENT);
                         }
                     } catch (InterruptedException e) {
                         Logs.d(CLASSNAME, "onStart", "mTeraConnStatusThread is interrupted.");
@@ -200,23 +166,21 @@ public class TransferContentUploadingFragment extends Fragment {
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                HCFSMgmtUtils.stopUploadTeraData();
-
-                SettingsDAO settingsDAO = SettingsDAO.getInstance(mContext);
-                SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
-                if (settingsInfo == null || !Boolean.valueOf(settingsInfo.getValue())) {
-                    if (!Booster.isBoosterMounted()) {
-                        Booster.mountBooster();
-                        Booster.enableApps(mContext);
-                    }
-                    settingsInfo = new SettingsInfo();
-                    settingsInfo.setKey(SettingsFragment.PREF_ENABLE_BOOSTER);
-                    settingsInfo.setValue(String.valueOf(true));
-                    settingsDAO.update(settingsInfo);
+                // If sync all data completed, the transfer status will be set to
+                // TransferStatus.WAIT_DEVICE and then the TransferContentUploadingFragment will be
+                // replaced with TransferContentWaitingFragment, which trigger the onDestroy()
+                // callback of TransferContentUploadingFragment to be called. In this case, we don't
+                // need to remove the transfer status. It makes sure that Tera app can show the
+                // TransferContentWaitingFragment if user launch Tera app again.
+                int transferStatus = TransferStatus.getTransferStatus(mContext);
+                if (transferStatus != TransferStatus.WAIT_DEVICE) {
+                    TransferStatus.removeTransferStatus(mContext);
                 }
+
+                HCFSMgmtUtils.stopUploadTeraData();
+                Booster.enableBoosterAfterSyncData(mContext);
             }
         });
-
     }
 
     public class UploadCompletedReceiver extends BroadcastReceiver {
@@ -252,6 +216,18 @@ public class TransferContentUploadingFragment extends Fragment {
                             FragmentTransaction ft = getFragmentManager().beginTransaction();
                             ft.replace(R.id.fragment_container, fragment, TransferContentWaitingFragment.TAG);
                             ft.commitAllowingStateLoss();
+
+                            if (!MainApplication.Foreground.get().isForeground()) {
+                                int flags = NotificationEvent.FLAG_HEADS_UP |
+                                        NotificationEvent.FLAG_OPEN_APP;
+                                NotificationEvent.notify(
+                                        mContext,
+                                        NotificationEvent.ID_TRANSFER_DATA,
+                                        R.string.settings_transfer_content_notification_transfer_completed_title,
+                                        R.string.settings_transfer_content_notification_transfer_completed_message,
+                                        flags
+                                );
+                            }
                         }
 
                         @Override
@@ -271,8 +247,6 @@ public class TransferContentUploadingFragment extends Fragment {
                     mProgressLayout.setVisibility(View.GONE);
                 }
             });
-
-
         }
 
         public void registerReceiver(IntentFilter intentFilter) {
@@ -310,6 +284,5 @@ public class TransferContentUploadingFragment extends Fragment {
                 break;
         }
     }
-
 
 }

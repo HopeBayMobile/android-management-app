@@ -13,7 +13,12 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SplashFragment;
+import com.hopebaytech.hcfsmgmt.misc.JobServiceId;
+import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.service.UnlockDeviceService;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
 
 /**
  * @author Aaron
@@ -37,7 +42,12 @@ public class MainActivity extends AppCompatActivity {
         super.onNewIntent(intent);
         Logs.d(CLASSNAME, "onNewIntent", null);
 
-        passIntentToFragments(intent);
+        int transferStatus = TransferStatus.getTransferStatus(this);
+        if (transferStatus == TransferStatus.NONE) {
+            passIntentToFragments(intent);
+        } else {
+            startActivity(new Intent(this, TransferContentActivity.class));
+        }
     }
 
     /**

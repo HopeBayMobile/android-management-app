@@ -69,7 +69,7 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
 import com.hopebaytech.hcfsmgmt.utils.PinType;
-import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
@@ -193,9 +193,6 @@ public class TeraMgmtService extends Service {
                             break;
                         case TeraIntent.ACTION_RETRY_RESTORE_WHEN_CONN_FAILED:
                             openPreparingOrRestoringPage();
-                            break;
-                        case TeraIntent.ACTION_TRANSFER_COMPLETED:
-                            showCompletedPageThenExecuteFactoryReset();
                             break;
                         case TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED:
                             onBoosterProcessCompleted();
@@ -851,10 +848,10 @@ public class TeraMgmtService extends Service {
                             updateBoosterWhiteList(deviceServiceInfo, jwtTokenArg);
                         } else { // Other situation is handled by MgmtPollingService.
                             // Stop the the running service if exists.
-                            PollingServiceUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
+                            PeriodicServiceUtils.stopPollingService(TeraMgmtService.this, MgmtPollingService.class);
 
                             // Start a new polling service
-                            PollingServiceUtils.startPollingService(TeraMgmtService.this,
+                            PeriodicServiceUtils.startPollingService(TeraMgmtService.this,
                                     Interval.CHECK_DEVICE_SERVICE_WHEN_TOKEN_EXPIRED, MgmtPollingService.class);
                         }
                     }
@@ -1011,43 +1008,26 @@ public class TeraMgmtService extends Service {
         checkRestoreStatus();
     }
 
-    private void showCompletedPageThenExecuteFactoryReset() {
-        if (MainApplication.Foreground.get().isForeground()) {
-            return;
-        }
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int status = sharedPreferences.getInt(TransferContentActivity.PREF_TRANSFER_STATUS, TransferStatus.NONE);
-        if (status == TransferStatus.WAIT_DEVICE) {
-            TransferStatus.setTransferStatus(this, TransferStatus.TRANSFERRED);
-
-            Intent intent = new Intent(this, TransferContentActivity.class);
-            // Require to add Intent.FLAG_ACTIVITY_NEW_TASK flag if starting activity from service.
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
-    }
-
     private void onBoosterProcessCompleted() {
         if (MainApplication.Foreground.get().isForeground()) {
             return;
         }
 
-        // Must be called before Booster.removeBoostStatusInSharedPreferenceXml() to make sure the boosStatus in
-        // shared preference xml is not removed.
-        int boostStatus = Booster.currentProcessBoostStatus(this);
+        // Must be called before Booster.removeBoosterStatusInSharedPreferenceXml() to make sure the
+        // boosStatus in shared preference xml is not removed.
+        int boosterStatus = Booster.currentBoosterStatus(this);
 
         Booster.enableApps(this);
-        Booster.removeBoostStatusInSharedPreferenceXml(this);
+        Booster.removeBoosterStatusInSharedPreferenceXml(this);
 
         String title = null;
         String message = null;
-        switch (boostStatus) {
-            case UidInfo.BoostStatus.BOOSTING:
+        switch (boosterStatus) {
+            case Booster.Status.BOOSTING:
                 title = getString(R.string.booster_notification_boost_completed_title);
                 message = getString(R.string.booster_notification_boost_completed_message);
                 break;
-            case UidInfo.BoostStatus.UNBOOSTING:
+            case Booster.Status.UNBOOSTING:
                 title = getString(R.string.booster_notification_unboost_completed_title);
                 message = getString(R.string.booster_notification_unboost_completed_message);
                 break;
@@ -1068,22 +1048,22 @@ public class TeraMgmtService extends Service {
             return;
         }
 
-        // Must be called before Booster.removeBoostStatusInSharedPreferenceXml() to make sure the boosStatus in
-        // shared preference xml is not removed.
-        int boostStatus = Booster.currentProcessBoostStatus(this);
+        // Must be called before Booster.removeBoosterStatusInSharedPreferenceXml() to make sure the
+        // boosStatus in shared preference xml is not removed.
+        int boosterStatus = Booster.currentBoosterStatus(this);
 
         Booster.enableApps(this);
         Booster.recoverBoostStatusWhenFailed(this);
-        Booster.removeBoostStatusInSharedPreferenceXml(this);
+        Booster.removeBoosterStatusInSharedPreferenceXml(this);
 
         String title = null;
         String message = null;
-        switch (boostStatus) {
-            case UidInfo.BoostStatus.BOOSTING:
+        switch (boosterStatus) {
+            case Booster.Status.BOOSTING:
                 title = getString(R.string.booster_notification_boost_failed_title);
                 message = getString(R.string.booster_notification_boost_failed_message);
                 break;
-            case UidInfo.BoostStatus.UNBOOSTING:
+            case Booster.Status.UNBOOSTING:
                 title = getString(R.string.booster_notification_unboost_failed_title);
                 message = getString(R.string.booster_notification_unboost_failed_message);
                 break;
@@ -1124,7 +1104,7 @@ public class TeraMgmtService extends Service {
                 GetBoosterWhiteListInfoProxy.OnGetBoosterWhiteListInfoListener() {
             @Override
             public void onGetBoosterWhiteListInfoSuccessful(final BoosterDeviceInfo boosterDeviceInfo) {
-                Logs.e(CLASSNAME, "onGetBoosterWhiteListInfoSuccessful", null);
+                Logs.d(CLASSNAME, "onGetBoosterWhiteListInfoSuccessful", null);
 
                 BoosterWhiteListVersionInfo boosterWhiteListVersionInfo = new BoosterWhiteListVersionInfo();
                 mBoosterWhiteListVersionDAO.clear();

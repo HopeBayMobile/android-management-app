@@ -12,10 +12,12 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
+import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
 
 import org.json.JSONException;
@@ -40,6 +42,13 @@ public class Booster {
 
     private static final long BOOSTER_MAXIMUM_SPACE = 4L * 1024 * 1024 * 1024; // booster_size <= 4G
     private static final String BOOSTER_PARTITION = "/data/mnt/hcfsblock";
+
+    public static class Status {
+        public final static int NONE = 0;
+        public final static int INIT = 1;
+        public final static int BOOSTING = 2;
+        public final static int UNBOOSTING = 3;
+    }
 
     public static class Type {
         public static final int UNBOOSTED = 1;
@@ -468,8 +477,8 @@ public class Booster {
         ContentValues cv = new ContentValues();
         UidDAO uidDAO = UidDAO.getInstance(context);
         List<UidInfo> recoverList = null;
-        switch (Booster.currentProcessBoostStatus(context)) {
-            case UidInfo.BoostStatus.BOOSTING:
+        switch (Booster.currentBoosterStatus(context)) {
+            case Booster.Status.BOOSTING:
                 cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_BOOST);
                 recoverList = uidDAO.get(cv);
 
@@ -478,7 +487,7 @@ public class Booster {
 
                 recoverBoostStatus = UidInfo.BoostStatus.UNBOOSTED;
                 break;
-            case UidInfo.BoostStatus.UNBOOSTING:
+            case Booster.Status.UNBOOSTING:
                 cv.put(UidDAO.BOOST_STATUS_COLUMN, UidInfo.BoostStatus.INIT_UNBOOST);
                 recoverList = uidDAO.get(cv);
 
@@ -498,26 +507,34 @@ public class Booster {
     }
 
     /**
-     * @return <li>{@link UidInfo.BoostStatus#BOOSTING}</li>
-     * <li>{@link UidInfo.BoostStatus#UNBOOSTING}</li>
-     * <li> 0 if no boost/unboost is processing</li>
+     * @return <li>{@link Booster.Status#NONE}</li>
+     * <li>{@link Booster.Status#INIT}</li>
+     * <li>{@link Booster.Status#BOOSTING}</li>
+     * <li>{@link Booster.Status#UNBOOSTING}</li>
      */
-    public static int currentProcessBoostStatus(Context context) {
+    public static int currentBoosterStatus(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        return sharedPreferences.getInt(SettingsFragment.PREF_BOOSTER_STATUS, 0);
+        return sharedPreferences.getInt(SettingsFragment.PREF_BOOSTER_STATUS, Status.NONE);
     }
 
-    public static void removeBoostStatusInSharedPreferenceXml(Context context) {
+    public static void removeBoosterStatusInSharedPreferenceXml(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(SettingsFragment.PREF_BOOSTER_STATUS);
         editor.apply();
     }
 
-    public static void updateBoostStatusInSharedPreferenceXml(Context context, int boostStatus) {
+    /**
+     * Update the booster status in shared preference xml
+     *
+     * @param context
+     * @param boosterStatus is one of {@link Booster.Status#NONE}, {@link Booster.Status#INIT},
+     *                      {@link Booster.Status#BOOSTING} or {@link Booster.Status#UNBOOSTING}.
+     */
+    public static void updateBoosterStatusInSharedPreferenceXml(Context context, int boosterStatus) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(SettingsFragment.PREF_BOOSTER_STATUS, boostStatus);
+        editor.putInt(SettingsFragment.PREF_BOOSTER_STATUS, boosterStatus);
         editor.apply();
     }
 
@@ -610,7 +627,7 @@ public class Booster {
             if (isSuccess) {
                 Logs.d(CLASSNAME, "mountBooster", "jObject=" + jObject);
             } else {
-                Logs.e(CLASSNAME, "mountBooster", null);
+                Logs.e(CLASSNAME, "mountBooster", "jObject=" + jObject);
             }
         } catch (JSONException e) {
             Logs.e(CLASSNAME, "mountBooster", Log.getStackTraceString(e));
@@ -639,6 +656,59 @@ public class Booster {
             Logs.e(CLASSNAME, "isBoosterMounted", Log.getStackTraceString(e));
         }
         return isMounted;
+    }
+
+
+    /**
+     * Check the enable_booster value in settings table first. If this enable_booster value is true,
+     * umount booster if it has already mounted and disable apps in booster. Also, set the
+     * sync_all_data value in settings table  to <code>true</code>.
+     * <p>
+     * <strong>Note: This method should be called before {@link #enableBoosterAfterSyncData}.</strong>
+     */
+    public static void disableBoosterWhenSyncData(Context context) {
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+
+        boolean isBoosterEnabled;
+        if (settingsInfo == null) {
+            isBoosterEnabled = false;
+        } else {
+            isBoosterEnabled = Boolean.valueOf(settingsInfo.getValue());
+        }
+
+        if (isBoosterEnabled) {
+            if (Booster.isBoosterMounted()) {
+                Booster.disableApps(context);
+                Booster.umountBooster();
+            }
+        }
+    }
+
+    /**
+     * Check the enable_booster value in settings table first. If true, mount booster if it is not
+     * mounted and enable apps in booster. Also, set the enable_booster value in settings table to
+     * <code>false</code>.
+     * <p>
+     * <strong>Note: This method should be called after {@link #disableBoosterWhenSyncData}.</strong>
+     */
+    public static void enableBoosterAfterSyncData(Context context) {
+        SettingsDAO settingsDAO = SettingsDAO.getInstance(context);
+        SettingsInfo settingsInfo = settingsDAO.get(SettingsFragment.PREF_ENABLE_BOOSTER);
+
+        boolean isBoosterEnabled;
+        if (settingsInfo == null) {
+            isBoosterEnabled = false;
+        } else {
+            isBoosterEnabled = Boolean.valueOf(settingsInfo.getValue());
+        }
+
+        if (isBoosterEnabled) {
+            if (!Booster.isBoosterMounted()) {
+                Booster.mountBooster();
+                Booster.enableApps(context);
+            }
+        }
     }
 
 }

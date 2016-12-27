@@ -4,13 +4,11 @@ import android.app.job.JobParameters;
 import android.app.job.JobScheduler;
 import android.app.job.JobService;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 
+import com.hopebaytech.hcfsmgmt.misc.JobServiceId;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.PollingServiceUtils;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
 
 /**
@@ -36,7 +34,7 @@ public class PinAndroidFolderService extends JobService {
                 jobFinished(params, false);
                 if (code == 0) { // Pin successful
                     JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
-                    jobScheduler.cancel(PollingServiceUtils.JOB_ID_PIN_ANDROID_FOLDER);
+                    jobScheduler.cancel(JobServiceId.PIN_ANDROID_FOLDER);
                 }
             }
         });

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.hopebaytech.hcfsmgmt.R;
+import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.ThreadPool;
@@ -39,25 +40,28 @@ public class TransferContentDoneFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Logs.d(CLASSNAME, "onCreate", null);
         mContext = getActivity();
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Logs.d(CLASSNAME, "onCreateView", null);
         return inflater.inflate(R.layout.transfer_content_done_fragment, container, false);
     }
 
     @Override
     public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        Logs.d(CLASSNAME, "onViewCreated", null);
         mFactoryResetMsg = (TextView) view.findViewById(R.id.factory_reset_message);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Logs.d(CLASSNAME, "onActivityCreated", null);
 
         ThreadPool.getInstance().execute(new Runnable() {
             @Override
@@ -80,6 +84,7 @@ public class TransferContentDoneFragment extends Fragment {
                 } finally {
                     // Factory reset
                     FactoryResetUtils.reset(mContext);
+                    TransferStatus.removeTransferStatus(mContext);
 
                     isResetTriggered = true;
                 }
@@ -90,6 +95,7 @@ public class TransferContentDoneFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Logs.d(CLASSNAME, "onDestroy", null);
 
         if (!isResetTriggered) {
             // Factory reset

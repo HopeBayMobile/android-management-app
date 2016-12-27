@@ -24,4 +24,16 @@ public class TransferStatus {
         editor.apply();
     }
 
+    public static int getTransferStatus(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getInt(TransferContentActivity.PREF_TRANSFER_STATUS, NONE);
+    }
+
+    public static void removeTransferStatus(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(TransferContentActivity.PREF_TRANSFER_STATUS);
+        editor.apply();
+    }
+
 }

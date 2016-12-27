@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v7.app.NotificationCompat;
 
 import com.hopebaytech.hcfsmgmt.R;
@@ -28,6 +29,7 @@ public class NotificationEvent {
     public static final int ID_CHECK_DEVICE_STATUS = 4;
     public static final int ID_INSUFFICIENT_PIN_SPACE = 5;
     public static final int ID_BOOSTER = 6;
+    public static final int ID_TRANSFER_DATA = 7;
 
     private static final int FLAG_DEFAULT = 0;
     public static final int FLAG_ON_GOING = 1;
@@ -36,64 +38,73 @@ public class NotificationEvent {
     public static final int FLAG_IN_PROGRESS = 1 << 3;
 
     public static void notify(Context context,
-                              int notifyId,
-                              String notifyTitle,
-                              String notifyMessage) {
-        notify(context, notifyId, notifyTitle, notifyMessage, R.drawable.icon_tera_logo_status_bar,
+                              int id,
+                              String title,
+                              String message) {
+        notify(context, id, title, message, R.drawable.icon_tera_logo_status_bar,
                 null, FLAG_DEFAULT, null);
     }
 
     public static void notify(Context context,
-                              int notifyId,
-                              String notifyTitle,
-                              String notifyMessage,
+                              int id,
+                              String title,
+                              String message,
                               int flag) {
-        notify(context, notifyId, notifyTitle, notifyMessage, R.drawable.icon_tera_logo_status_bar,
+        notify(context, id, title, message, R.drawable.icon_tera_logo_status_bar,
                 null, flag, null);
     }
 
     public static void notify(Context context,
-                              int notifyId,
-                              String notifyTitle,
-                              String notifyMessage,
+                              int id,
+                              @StringRes int titleResId,
+                              @StringRes int messageResId,
+                              int flag) {
+        notify(context, id, context.getString(titleResId), context.getString(messageResId),
+                R.drawable.icon_tera_logo_status_bar, null, flag, null);
+    }
+
+    public static void notify(Context context,
+                              int id,
+                              String title,
+                              String message,
                               NotificationCompat.Action action,
                               int flag) {
-        notify(context, notifyId, notifyTitle, notifyMessage, R.drawable.icon_tera_logo_status_bar,
+        notify(context, id, title, message, R.drawable.icon_tera_logo_status_bar,
                 action, flag, null);
     }
 
     public static void notify(Context context,
-                              int notifyId,
-                              String notifyTitle,
-                              String notifyMessage,
+                              int id,
+                              String title,
+                              String message,
                               Bundle extras) {
-        notify(context, notifyId, notifyTitle, notifyMessage, R.drawable.icon_tera_logo_status_bar,
+        notify(context, id, title, message, R.drawable.icon_tera_logo_status_bar,
                 null, FLAG_DEFAULT, extras);
     }
 
     public static void notify(Context context,
-                              int notifyId,
-                              String notifyTitle,
-                              String notifyMessage,
+                              int id,
+                              String title,
+                              String message,
                               int flag,
                               Bundle extras) {
-        notify(context, notifyId, notifyTitle, notifyMessage, R.drawable.icon_tera_logo_status_bar,
+        notify(context, id, title, message, R.drawable.icon_tera_logo_status_bar,
                 null, flag, extras);
     }
 
     public static void notify(Context context,
-                              int notifyId,
-                              String notifyTitle,
-                              String notifyMessage,
+                              int id,
+                              String title,
+                              String message,
                               int iconDrawableId,
                               int flag) {
-        notify(context, notifyId, notifyTitle, notifyMessage, iconDrawableId, null, flag, null);
+        notify(context, id, title, message, iconDrawableId, null, flag, null);
     }
 
     public static void notify(Context context,
-                              int notifyId,
-                              String notifyTitle,
-                              String notifyMessage,
+                              int id,
+                              String title,
+                              String message,
                               int iconDrawableId,
                               NotificationCompat.Action action,
                               int flag,
@@ -110,7 +121,7 @@ public class NotificationEvent {
             Logs.w(CLASSNAME, "notify", "cause=" + cause);
             intent.putExtras(extras);
         }
-        PendingIntent contentIntent = PendingIntent.getActivity(context, notifyId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent contentIntent = PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.icon_tera_app_default);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
@@ -118,15 +129,15 @@ public class NotificationEvent {
                 .setCategory(Notification.CATEGORY_EVENT)
                 .setSmallIcon(iconDrawableId)
                 .setLargeIcon(largeIcon)
-                .setTicker(notifyTitle)
-                .setContentTitle(notifyTitle);
+                .setTicker(title)
+                .setContentTitle(title);
 
-        if (notifyMessage != null) {
+        if (message != null) {
             NotificationCompat.BigTextStyle bigStyle = new NotificationCompat.BigTextStyle();
-            bigStyle.bigText(notifyMessage);
+            bigStyle.bigText(message);
 
-            builder.setContentText(notifyMessage)
-                    .setTicker(notifyMessage)
+            builder.setContentText(message)
+                    .setTicker(message)
                     .setStyle(bigStyle);
         }
 
@@ -156,7 +167,7 @@ public class NotificationEvent {
         }
         NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(notifyId, builder.build());
+        notificationManager.notify(id, builder.build());
     }
 
     public static void cancel(Context context, int notifyId) {

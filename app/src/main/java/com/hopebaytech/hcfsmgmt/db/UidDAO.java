@@ -366,6 +366,10 @@ public class UidDAO {
         return uidInfoList;
     }
 
+    /**
+     * The value of queryMap can be {@link List} or <code>Object[]</code>. <strong>Note: the array of
+     * primitive data type is not supported, i.e. int[], double[]. Instead, use Integer[], Double[]</strong>.
+     */
     public List<UidInfo> get(Map<String, Object> queryMap) {
         List<UidInfo> uidInfoList = new ArrayList<>();
 
@@ -406,7 +410,6 @@ public class UidDAO {
             }
         }
         String where = stringBuilder.substring(0, stringBuilder.length() - AND.length());
-
         boolean isDatabaseLocked;
         do {
             try {

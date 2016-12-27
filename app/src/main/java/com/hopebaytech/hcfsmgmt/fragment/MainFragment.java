@@ -410,8 +410,8 @@ public class MainFragment extends Fragment {
         intentService.putExtra(TeraIntent.KEY_ONGOING, true);
         mContext.startService(intentService);
 
-        int boostStatus = Booster.currentProcessBoostStatus(mContext);
-        if (boostStatus != 0) {
+        int boostStatus = Booster.currentBoosterStatus(mContext);
+        if (boostStatus != Booster.Status.NONE) {
             int notifyId = NotificationEvent.ID_BOOSTER;
             int flag = NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP;
             switch (boostStatus) {
