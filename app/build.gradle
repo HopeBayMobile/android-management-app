@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId "com.hopebaytech.hcfsmgmt"
-        minSdkVersion 23
+        minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
         versionName "2.2.5.0001"
@@ -59,7 +59,14 @@ android {
         into getNdkDir() + "/platforms/android-21/arch-arm64/usr/lib"
     }
 
-    ndkBuild.dependsOn copyLibs
+    task copy32Libs(type: Copy) {
+        from('src/main/jni/mylibs/armeabi-v7a/system') {
+            include '*.so'
+        }
+        into getNdkDir() + "/platforms/android-19/arch-arm/usr/lib"
+    }
+
+    ndkBuild.dependsOn copy32Libs
 
     tasks.withType(JavaCompile) {
         compileTask -> compileTask.dependsOn ndkBuild

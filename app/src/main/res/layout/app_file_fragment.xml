@@ -122,6 +122,7 @@
         android:layout_alignParentBottom="true"
         android:background="@color/colorDefaultBackground" />
 
+
     <HorizontalScrollView
         android:id="@+id/file_path_navigation_scrollview"
         android:layout_width="match_parent"
@@ -129,7 +130,6 @@
         android:layout_alignParentBottom="true"
         android:background="@drawable/path_shadow_background"
         android:scrollbars="none">
-
         <LinearLayout
             android:id="@+id/file_path_layout"
             android:layout_width="wrap_content"
