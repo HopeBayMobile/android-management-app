@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -109,7 +110,7 @@ public class CircleDisplay extends View {
         mInnerCirclePaint = new Paint();
         mInnerCirclePaint.setStyle(Paint.Style.FILL);
         mInnerCirclePaint.setAntiAlias(true);
-        mInnerCirclePaint.setColor(getContext().getColor(R.color.colorDefaultBackground));
+        mInnerCirclePaint.setColor(getContext().getResources().getColor(R.color.colorDefaultBackground));
 
         mCapacityTextPaint = new Paint();
         mCapacityTextPaint.setStyle(Paint.Style.STROKE);
@@ -147,7 +148,9 @@ public class CircleDisplay extends View {
      */
     private void drawValue(Canvas canvas) {
         float angle = mAngle * mPhase;
-        canvas.drawArc(0, 0, getHeight(), getWidth(), mStartAngle, angle, true, mArcPaint);
+        RectF rectF = new RectF(0, 0, getHeight(), getWidth());
+//        canvas.drawArc(0, 0, getHeight(), getWidth(), mStartAngle, angle, true, mArcPaint);
+        canvas.drawArc(rectF, mStartAngle, angle, true, mArcPaint);
     }
 
     /**
