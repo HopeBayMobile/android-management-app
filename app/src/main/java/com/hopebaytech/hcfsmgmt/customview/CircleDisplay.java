@@ -154,8 +154,6 @@ public class CircleDisplay extends View {
      */
     private void drawValue(Canvas canvas) {
         float angle = mAngle * mPhase;
-
-        // TODO: Vince
         if (Build.VERSION.SDK_INT > 20) {
             canvas.drawArc(0, 0, getHeight(), getWidth(), mStartAngle, angle, true, mArcPaint);
         } else {

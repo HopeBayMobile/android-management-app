@@ -87,12 +87,11 @@ public class UsageIcon extends View {
         init(context, attrs, 0, 0);
     }
 
-    /*
-    public UsageIcon(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr, defStyleRes);
-    }
-    */
+//    public UsageIcon(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+//        super(context, attrs, defStyleAttr, defStyleRes);
+//        init(context, attrs, defStyleAttr, defStyleRes);
+//    }
+
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
 
         TypedArray typedArray = context.getTheme()
