@@ -12,7 +12,8 @@
         android:right="0dp"
         android:top="1dp">
         <shape android:shape="rectangle">
-            <solid android:color="?android:colorBackground" />
+            <!--<solid android:color="?android:colorBackground" />-->
+            <solid android:color="@android:color/white" />
         </shape>
     </item>
 </layer-list>

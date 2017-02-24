@@ -7,7 +7,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.Pair;
 import android.util.AttributeSet;
@@ -85,11 +87,12 @@ public class UsageIcon extends View {
         init(context, attrs, 0, 0);
     }
 
+    /*
     public UsageIcon(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs, defStyleAttr, defStyleRes);
     }
-
+    */
     private void init(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
 
         TypedArray typedArray = context.getTheme()
@@ -179,7 +182,13 @@ public class UsageIcon extends View {
         float top = centerY - wholeCircleRadius;
         float bottom = centerY + wholeCircleRadius;
         float sweepAngle = 360f * (mValuePercentage / 100f) * mPhase;
-        canvas.drawArc(left, top, right, bottom, START_ANGLE, sweepAngle, true, mValuePaint);
+
+        if (Build.VERSION.SDK_INT > 20) {
+            canvas.drawArc(left, top, right, bottom, START_ANGLE, sweepAngle, true, mValuePaint);
+        } else {
+            RectF rectF = new RectF(left, top, right, bottom);
+            canvas.drawArc(rectF, START_ANGLE, sweepAngle, true, mValuePaint);
+        }
     }
 
     private void drawIcon(Canvas canvas) {

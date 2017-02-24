@@ -10,10 +10,8 @@ import android.support.annotation.Nullable;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.plus.Plus;
+import com.google.android.gms.drive.Drive;
 
 /**
  * A wrapper to wrap the Google sign-in procedure to provide a user friendly API util
@@ -59,8 +57,10 @@ public class GoogleSignInApiClient {
 
         if (mGoogleSignInOptions == null) {
             mGoogleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                    .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                     .requestServerAuthCode(mServerClientId, false)
+                    //.requestScopes(new Scope("https://www.googleapis.com/auth/drive"), Drive.SCOPE_FILE, Drive.SCOPE_APPFOLDER)
+                    .requestScopes(Drive.SCOPE_FILE, Drive.SCOPE_APPFOLDER)
+                    .requestProfile()
                     .requestEmail()
                     .build();
         }
@@ -91,7 +91,7 @@ public class GoogleSignInApiClient {
                                 }
                             })
                             .addApi(Auth.GOOGLE_SIGN_IN_API, mGoogleSignInOptions)
-                            .addApi(Plus.API)
+                            .addApi(Drive.API)
                             .build();
                 }
                 if (mGoogleApiClient.isConnected() || mGoogleApiClient.isConnecting()) {

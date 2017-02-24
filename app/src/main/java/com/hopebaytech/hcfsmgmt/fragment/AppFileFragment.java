@@ -2197,6 +2197,7 @@ public class AppFileFragment extends Fragment {
                 final AppInfo appInfo = (AppInfo) itemInfo;
                 if (!isPinned) {
                     int messageResId = 0;
+                    /*
                     int code = HCFSMgmtUtils.checkMinimalApk(mContext, appInfo.getPackageName(), true);
                     switch (code) {
                         case 0: // minimal apk is not exist
@@ -2209,6 +2210,7 @@ public class AppFileFragment extends Fragment {
                         case 1: // minimal apk is exist
                             break;
                     }
+                    */
 
                     if (!allowPinUnpin) {
                         itemInfo.setPinned(!isPinned);
@@ -2328,6 +2330,8 @@ public class AppFileFragment extends Fragment {
             holder.setIconDrawable(cacheDrawable);
         }
 
+        //holder.setIconDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));
+
         // Display cached pin view image or hide pin view by default if not cached.
         Boolean isPinned = mPinStatusSparseArr.get(itemInfo.hashCode());
         if (isPinned == null) {
@@ -2340,6 +2344,7 @@ public class AppFileFragment extends Fragment {
             displayPinView(holder, cloneItem);
         }
 
+        // TODO: bug for kitkat
         // Get latest image of item icon and pin view
         executor.execute(new Runnable() {
             @Override
@@ -2361,6 +2366,7 @@ public class AppFileFragment extends Fragment {
                     } else {
                         drawable = cacheDrawable;
                     }
+                    //drawable = itemInfo.getIconDrawable();
                 } else { // ItemInfo.ICON_COLORFUL
                     if (cacheDrawable != null) {
                         if (cacheDrawable.getAlpha() == ItemInfo.ICON_TRANSPARENT) {
@@ -2373,6 +2379,7 @@ public class AppFileFragment extends Fragment {
                     } else {
                         drawable = itemInfo.getIconDrawable();
                     }
+                    //drawable = itemInfo.getIconDrawable();
                 }
 
                 final Drawable imageDrawable = drawable;
@@ -2395,10 +2402,11 @@ public class AppFileFragment extends Fragment {
                         displayPinView(holder, itemInfo);
                         mPinStatusSparseArr.put(itemInfo.hashCode(), isPinned);
                     }
+
                 });
+
             }
         });
-
     }
 
     private ItemInfo cloneItemInfo(ItemInfo itemInfo) {

@@ -8,7 +8,8 @@ public class RequestCode {
 
     public static final int NOTIFY_UPLOAD_COMPLETED = 100;
     public static final int PIN_DATA_TYPE_FILE = 101;
-    public static final int GOOGLE_SIGN_IN = 102;
+    //public static final int GOOGLE_SIGN_IN = 102;
+    public static final int GOOGLE_SIGN_IN = 9001;
     public static final int RESET_DATA_XFER = 103;
     public static final int MONITOR_LOCAL_STORAGE_USED_SPACE = 104;
     public static final int MONITOR_PIN_SPACE = 105;

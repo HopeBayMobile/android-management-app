@@ -25,10 +25,10 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
+        <!--android:launchMode="singleInstance"-->
         <activity
             android:name="com.hopebaytech.hcfsmgmt.main.MainActivity"
             android:exported="true"
-            android:launchMode="singleInstance"
             android:screenOrientation="portrait">
 
             <intent-filter>

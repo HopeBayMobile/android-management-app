@@ -253,7 +253,7 @@ public class MainFragment extends Fragment {
         Fragment getFragment(int position) {
             WeakReference<Fragment> fragmentWeakRef = fragmentMap.get(titleList.get(position));
             if (fragmentWeakRef == null) {
-                return null;
+               return null;
             }
             return fragmentWeakRef.get();
         }

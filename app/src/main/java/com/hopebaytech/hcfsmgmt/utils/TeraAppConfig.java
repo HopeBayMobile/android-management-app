@@ -16,8 +16,9 @@ public class TeraAppConfig {
 
     public static boolean isTeraAppLogin(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        //return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
-        return true;
+        return sharedPreferences.getBoolean(HCFSMgmtUtils.PREF_TERA_APP_LOGIN, false);
+        // Vince 可跳過 login
+        //return true;
     }
 
     public static void enableApp(Context context) {

@@ -3,14 +3,14 @@ import org.apache.tools.ant.taskdefs.condition.Os
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 25
     buildToolsVersion "23.0.3"
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.hopebaytech.hcfsmgmt"
         minSdkVersion 19
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 1
         versionName "2.2.5.0001"
 
@@ -86,13 +86,20 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     testCompile "org.robolectric:robolectric:3.0"
-    compile 'com.android.support:appcompat-v7:24.2.0'
-    compile 'com.android.support:recyclerview-v7:24.2.0'
-    compile 'com.android.support:design:24.2.0'
-    compile 'com.android.support:preference-v14:24.2.0'
-    compile 'com.google.android.gms:play-services-auth:9.4.0'
-    compile 'com.google.android.gms:play-services-gcm:9.4.0'
-    compile 'com.google.android.gms:play-services-plus:9.4.0'
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:recyclerview-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support:preference-v7:25.1.0'
+    compile 'com.android.support:support-v4:25.1.0'
+    //compile 'com.android.support:support-v4:24.2.0'
+    compile 'com.android.support:preference-v14:25.1.0'
+    //compile 'com.google.android.gms:play-services-auth:9.4.0'
+    //compile 'com.google.android.gms:play-services-gcm:9.4.0'
+    //compile 'com.google.android.gms:play-services-plus:9.4.0'
+    compile 'com.google.android.gms:play-services-auth:10.0.1'
+    compile 'com.google.android.gms:play-services-gcm:10.0.1'
+    compile 'com.google.android.gms:play-services-plus:10.0.1'
+    compile 'com.google.android.gms:play-services-drive:10.0.1'
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.17'
     compile 'io.apptik.widget:multislider:1.2'
 }

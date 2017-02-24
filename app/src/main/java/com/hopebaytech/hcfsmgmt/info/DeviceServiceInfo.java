@@ -1,7 +1,6 @@
 package com.hopebaytech.hcfsmgmt.info;
 
 import android.content.Context;
-import android.support.annotation.StringRes;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.utils.HTTPErrorMessage;
@@ -176,7 +175,7 @@ public class DeviceServiceInfo {
         }
 
         public String getBackendType() {
-            if (token != null) {
+            if (token != null && !backendType.equals("googledrive")) {
                 return backendType + "token";
             }
             return backendType;

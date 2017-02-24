@@ -6,7 +6,6 @@ import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.media.ThumbnailUtils;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -56,9 +55,10 @@ public class AppInfo extends ItemInfo implements Cloneable {
         Bitmap iconImage = null;
 
         Drawable drawable = context.getPackageManager().getApplicationIcon(applicationInfo);
-        if (!(drawable instanceof VectorDrawable)) {
-            iconImage = ((BitmapDrawable) drawable).getBitmap();
-        }
+        //if (!(drawable instanceof VectorDrawable)) {
+        //    iconImage = ((BitmapDrawable) drawable).getBitmap();
+        //}
+        iconImage = ((BitmapDrawable) drawable).getBitmap();
 
         if (iconImage == null) {
             drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);

@@ -287,7 +287,6 @@ public class ActivateWoCodeFragment extends Fragment {
                     });
             return permissionSnackbar;
         }
-
     }
 
     public static class PlayServiceSnackbar {
@@ -319,11 +318,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
     private void googleAuthFailed(String failedMsg) {
         Logs.e(CLASSNAME, "googleAuthFailed", "failedMsg=" + failedMsg);
-
         mProgressDialogUtils.dismiss();
-
         signOut();
-
         mErrorMessage.setText(R.string.activate_signin_google_account_failed);
     }
 
@@ -347,7 +343,6 @@ public class ActivateWoCodeFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Logs.d(CLASSNAME, "onActivityResult", "requestCode=" + requestCode + ", resultCode=" + resultCode);
-
         if (requestCode != RequestCode.GOOGLE_SIGN_IN || resultCode != Activity.RESULT_OK) {
             mProgressDialogUtils.dismiss();
             return;

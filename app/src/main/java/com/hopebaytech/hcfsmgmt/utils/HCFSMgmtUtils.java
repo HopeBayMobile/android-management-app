@@ -1,30 +1,22 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.Manifest;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.content.pm.IPackageStatsObserver;
-import android.content.pm.PackageStats;
-import android.os.RemoteException;
 
-import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.db.UidDAO;
@@ -34,21 +26,17 @@ import com.hopebaytech.hcfsmgmt.info.DataTypeInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.info.UidInfo;
-import com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import java.lang.reflect.Method;
 
 public class HCFSMgmtUtils {
 
@@ -69,6 +57,7 @@ public class HCFSMgmtUtils {
     // public static final String REPLACE_FILE_PATH_OLD = "/storage/emulated/0/";
     // public static final String REPLACE_FILE_PATH_NEW = "/mnt/shell/emulated/0/";
 
+    //public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
     private static final String DATA_APP_PATH = "/data/app";
@@ -331,8 +320,10 @@ public class HCFSMgmtUtils {
             if (sourceDir.startsWith("/data/app")) {
                 isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
 
+                // TODO: Vince -, support kitkat
                 // Priority pin /data/app/<pkg-folder>/.basemin
-                isMinApkSuccess = (pinFileOrDirectory(sourceDir + "/.basemin", PinType.PRIORITY) == 0);
+                //isMinApkSuccess = (pinFileOrDirectory(sourceDir + "/.basemin", PinType.PRIORITY) == 0);
+                isMinApkSuccess = true;
             }
         }
         boolean isDataDirSuccess = true;
@@ -640,8 +631,12 @@ public class HCFSMgmtUtils {
     public static String getDeviceImei(Context context) {
         String imei = "";
         TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (manager.getPhoneCount() != 0) {
-            imei = manager.getDeviceId(0);
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (manager.getPhoneCount() != 0) {
+                imei = manager.getDeviceId(0);
+            }
+        } else {
+            imei = manager.getDeviceId();
         }
 
         Logs.d(CLASSNAME, "getDeviceImei", "Imei=" + imei);
@@ -807,6 +802,7 @@ public class HCFSMgmtUtils {
     }
 
     public static boolean createMinimalApk(Context context, String packageName, boolean blocking) {
+        /*
         boolean isSuccess = false;
         try {
             String sourceDir = getSourceDir(context, packageName);
@@ -824,6 +820,9 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "createMinimalApk", Log.getStackTraceString(e));
         }
         return isSuccess;
+        */
+
+        return true;
     }
 
     /**
