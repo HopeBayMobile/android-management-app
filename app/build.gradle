@@ -10,11 +10,7 @@ android {
     defaultConfig {
         applicationId "com.hopebaytech.hcfsmgmt"
         minSdkVersion 19
-<<<<<<< HEAD
         targetSdkVersion 25
-=======
-        targetSdkVersion 19
->>>>>>> 2427ad1c992043d225b4b6be294a0c32f4b310de
         versionCode 1
         versionName "2.2.5.0001"
 
