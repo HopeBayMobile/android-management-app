@@ -2323,7 +2323,7 @@ public class AppFileFragment extends Fragment {
         }
 
         // Display cached item icon or set default icon if icon is not cached.
-        final Drawable cacheDrawable = memoryCache.get(itemInfo.hashCode());
+        final Drawable cacheDrawable = memoryCache.get(itemInfo.getName().hashCode());
         if (cacheDrawable == null) {
             holder.setIconDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default_gray));
         } else {
@@ -2396,7 +2396,7 @@ public class AppFileFragment extends Fragment {
                         }
                         holder.setIconAlpha(alpha);
                         holder.setIconDrawable(iconDrawable);
-                        memoryCache.put(itemInfo.hashCode(), iconDrawable);
+                        memoryCache.put(itemInfo.getName().hashCode(), iconDrawable);
 
                         // Display image of item pin view
                         displayPinView(holder, itemInfo);
