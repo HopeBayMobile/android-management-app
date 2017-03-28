@@ -17,8 +17,8 @@ public class HCFSStatInfo {
     public static final String STAT_DATA_XFER_DOWN = "xfer_down";
     public static final String STAT_DATA_CLOUD_CONN = "cloud_conn";
     public static final String STAT_DATA_DATA_TRANSFER = "data_transfer";
-    public static final int CLOUD_CONN = 0;
-    public static final int CLOUD_DISCONN = 1;
+    public static final int CLOUD_DISCONN = 0;
+    public static final int CLOUD_CONN = 1;
     public static final int CLOUD_CONN_RETRY = 2;
 
     /**
@@ -84,7 +84,7 @@ public class HCFSStatInfo {
     /**
      * unit: bytes
      */
-    private long cloudConn;
+    private int cloudConn;
 
     /**
      * unit: int
@@ -217,7 +217,7 @@ public class HCFSStatInfo {
             return false;
     }
 
-    public void setCloudConn(long cloudConn) {
+    public void setCloudConn(int cloudConn) {
         this.cloudConn = cloudConn;
     }
 
