@@ -20,6 +20,7 @@ public class HCFSConnStatus {
     public static final int TRANS_NORMAL = 1;
     public static final int TRANS_IN_PROGRESS = 2;
     public static final int TRANS_SLOW = 3;
+    public static final int TRANS_RECONNECTING = 4;
 
     private static final int DATA_TRANSFER_NONE = 0;
     private static final int DATA_TRANSFER_IN_PROGRESS = 1;

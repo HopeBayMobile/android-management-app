@@ -1,6 +1,8 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -8,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -176,11 +179,44 @@ public class OverviewFragment extends Fragment {
             }
         }).start();
 
+        mNetworkConnStatusImage.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (mConnStatus == HCFSConnStatus.TRANS_FAILED) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN: {
+                            mNetworkConnStatusImage.setColorFilter(Color.MAGENTA, PorterDuff.Mode.SRC_ATOP);
+                            break;
+                        }
+                        case MotionEvent.ACTION_UP: {
+                            mNetworkConnStatusImage.clearColorFilter();
+                            break;
+                        }
+                        case MotionEvent.ACTION_CANCEL: {
+                            mNetworkConnStatusImage.clearColorFilter();
+                            break;
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+
         mNetworkConnStatusImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mConnStatus == HCFSConnStatus.TRANS_FAILED) {
+                    mNetworkConnStatusImage.setEnabled(false);
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            mNetworkConnStatusImage.setEnabled(true);
+                        }
+                    }, 3000L);
+                    if (mConnStatus == HCFSConnStatus.TRANS_RECONNECTING) {
+                        return;
+                    }
                     Log.d("Rondou", "ConnStatus Buttom = " + mConnStatus);
+                    // TODO any thing and any where
                 }
             }
         });
@@ -256,6 +292,9 @@ public class OverviewFragment extends Fragment {
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_slow);
                 mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_slow));
                 break;
+            case HCFSConnStatus.TRANS_RECONNECTING:
+                mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_re_connecting));
         }
     }
 
