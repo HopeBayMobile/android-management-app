@@ -23,11 +23,15 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.misc.Threshold;
+import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -212,11 +216,17 @@ public class OverviewFragment extends Fragment {
                             mNetworkConnStatusImage.setEnabled(true);
                         }
                     }, 3000L);
-                    if (mConnStatus == HCFSConnStatus.TRANS_RECONNECTING) {
-                        return;
-                    }
                     Log.d("Rondou", "ConnStatus Buttom = " + mConnStatus);
-                    // TODO any thing and any where
+                    // Retry connection
+                    String jsonResult = HCFSApiUtils.retryConn();
+                    JSONObject jObject = null;
+                    try {
+                        jObject = new JSONObject(jsonResult);
+                        boolean isSuccess = jObject.getBoolean("result");
+                        Logs.d(CLASSNAME, "Retry connection: " + isSuccess, null);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });

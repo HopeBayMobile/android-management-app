@@ -193,4 +193,10 @@ public class HCFSApiUtils {
      */
     public static native String checkMinimalApk(String packagePath, int blocking);
 
+    /**
+     * Notify HCFS immediately re-connecting to backend
+     *
+     * @return a json string contains: true if success, false otherwise.
+     */
+    public static native String retryConn();
 }
