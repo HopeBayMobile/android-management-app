@@ -294,7 +294,7 @@ public class OverviewFragment extends Fragment {
                 break;
             case HCFSConnStatus.TRANS_RECONNECTING:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
-                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_re_connecting));
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_reconnecting));
         }
     }
 

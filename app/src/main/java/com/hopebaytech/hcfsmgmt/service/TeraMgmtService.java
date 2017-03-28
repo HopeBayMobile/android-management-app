@@ -637,6 +637,10 @@ public class TeraMgmtService extends Service {
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_failed);
                                 drawableId = R.drawable.icon_tera_logo_status_bar_02;
                                 break;
+                            case HCFSConnStatus.TRANS_RECONNECTING:
+                                notifyTitle = getString(R.string.overview_hcfs_conn_status_reconnecting);
+                                drawableId = R.drawable.icon_tera_logo_status_bar_02;
+                                break;
                             case HCFSConnStatus.TRANS_NOT_ALLOWED:
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_not_allowed);
                                 drawableId = R.drawable.icon_tera_logo_status_bar_02;

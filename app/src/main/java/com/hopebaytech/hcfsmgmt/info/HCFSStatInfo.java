@@ -17,6 +17,9 @@ public class HCFSStatInfo {
     public static final String STAT_DATA_XFER_DOWN = "xfer_down";
     public static final String STAT_DATA_CLOUD_CONN = "cloud_conn";
     public static final String STAT_DATA_DATA_TRANSFER = "data_transfer";
+    public static final int CLOUD_CONN = 0;
+    public static final int CLOUD_DISCONN = 1;
+    public static final int CLOUD_CONN_RETRY = 2;
 
     /**
      * unit: bytes
@@ -79,9 +82,9 @@ public class HCFSStatInfo {
     private long xferDownload;
 
     /**
-     * unit: boolean
+     * unit: bytes
      */
-    private boolean cloudConn;
+    private long cloudConn;
 
     /**
      * unit: int
@@ -201,10 +204,20 @@ public class HCFSStatInfo {
     }
 
     public boolean isCloudConn() {
-        return cloudConn;
+        if (cloudConn == CLOUD_CONN)
+            return true;
+        else
+            return false;
     }
 
-    public void setCloudConn(boolean cloudConn) {
+    public boolean isRetryConn() {
+        if (cloudConn == CLOUD_CONN_RETRY)
+            return true;
+        else
+            return false;
+    }
+
+    public void setCloudConn(long cloudConn) {
         this.cloudConn = cloudConn;
     }
 

@@ -53,7 +53,11 @@ public class HCFSConnStatus {
                                 return TRANS_NORMAL;
                         }
                     } else {
-                        return TRANS_FAILED;
+                        // Check if it is retrying connecting
+                        if (statInfo.isRetryConn())
+                            return TRANS_RECONNECTING;
+                        else
+                            return TRANS_FAILED;
                     }
                 }
             } else {
@@ -68,7 +72,11 @@ public class HCFSConnStatus {
                             return TRANS_NORMAL;
                     }
                 } else {
-                    return TRANS_FAILED;
+                    // Check if it is retrying connecting
+                    if (statInfo.isRetryConn())
+                        return TRANS_RECONNECTING;
+                    else
+                        return TRANS_FAILED;
                 }
             }
         }
