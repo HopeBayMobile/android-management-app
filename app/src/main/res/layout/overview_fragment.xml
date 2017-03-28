@@ -24,6 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/M5"
                 android:layout_marginStart="@dimen/M2"
+                android:onClick="onClick"
                 android:src="@drawable/icon_transmission_normal" />
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView

@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ public class OverviewFragment extends Fragment {
 
     public static final String TAG = OverviewFragment.class.getSimpleName();
     private static final String CLASSNAME = TAG;
+    public static int mConnStatus = HCFSConnStatus.TRANS_NOT_ALLOWED;
 
     private Thread mUiRefreshThread;
     private ImageView mNetworkConnStatusImage;
@@ -173,6 +175,15 @@ public class OverviewFragment extends Fragment {
                 });
             }
         }).start();
+
+        mNetworkConnStatusImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mConnStatus == HCFSConnStatus.TRANS_FAILED) {
+                    Log.d("Rondou", "ConnStatus Buttom = " + mConnStatus);
+                }
+            }
+        });
     }
 
     @Override
@@ -223,6 +234,7 @@ public class OverviewFragment extends Fragment {
     }
 
     private void updateNetworkStatus(int connStatus) {
+        mConnStatus = connStatus;
         switch (connStatus) {
             case HCFSConnStatus.TRANS_FAILED:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
