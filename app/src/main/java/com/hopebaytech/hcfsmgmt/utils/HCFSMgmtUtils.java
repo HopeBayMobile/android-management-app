@@ -267,13 +267,11 @@ public class HCFSMgmtUtils {
                 long phycialFreeSpace = PhoneStorageUsage.getDataFreeSize();
                 long phycialUsedSpace = phycialTotalSpace - phycialFreeSpace;
 
-                long systemTotalSpace = PhoneStorageUsage.getTotalSystemSize();
-                long systemFreeSpace = PhoneStorageUsage.getFreeSystemSize();
-                long systemUsedSpace = systemTotalSpace - systemFreeSpace;
+                long cacheTotal = hcfsStatInfo.getCacheTotal();
+                long systemUsedSpace = phycialTotalSpace - cacheTotal;
 
                 hcfsStatInfo.setPhycialTotal(phycialTotalSpace);
                 hcfsStatInfo.setPhycialUsed(phycialUsedSpace);
-                hcfsStatInfo.setSystemTotal(systemTotalSpace);
                 hcfsStatInfo.setSystemUsed(systemUsedSpace);
 
 

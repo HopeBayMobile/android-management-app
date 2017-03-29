@@ -86,11 +86,10 @@ public class OverviewFragment extends Fragment {
 
                             // Set System Space text
                             String systemSpaceText = String.format(Locale.getDefault(),
-                                    "%s / %s",
-                                    mStatInfo.getFormatSystemUsed(),
-                                    mStatInfo.getFormatSystemTotal());
+                                    "%s",
+                                    mStatInfo.getFormatSystemUsed());
 
-                            mSystemSpaceUsage.showUsage(mStatInfo.getSystemUsedPercentage(),
+                            mSystemSpaceUsage.showUsage(100,
                                     systemSpaceText);
 
                             // Set Cache Space text and
