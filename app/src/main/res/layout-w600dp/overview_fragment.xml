@@ -136,7 +136,7 @@
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/physical_space_name"
-                                style="F6"
+                                style="@style/F6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/overview_physical_space" />
@@ -176,7 +176,7 @@
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/system_space_name"
-                                style="F6"
+                                style="@style/F6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/overview_system_space" />
@@ -215,7 +215,7 @@
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/cache_space_name"
-                                style="F6"
+                                style="@style/F6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/overview_cache_space" />
@@ -265,7 +265,7 @@
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/used_space_name"
-                                style="F6"
+                                style="@style/F6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/overview_cloud_space" />
@@ -305,7 +305,7 @@
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/pinned_space_name"
-                                style="F6"
+                                style="@style/F6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/overview_pinned_storage" />
@@ -343,7 +343,7 @@
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/data_wait_to_upload_name"
-                                style="F6"
+                                style="@style/F6"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/overview_data_wait_to_uploaded" />
