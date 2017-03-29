@@ -75,6 +75,10 @@
     <string name="overview_hcfs_conn_status_failed">傳輸中斷</string>
     <string name="overview_hcfs_conn_status_slow">傳輸緩慢</string>
     <string name="overview_hcfs_conn_status_in_progress">傳輸中</string>
+    <string name="overview_physical_space">實體空間</string>
+    <string name="overview_system_space">系統空間</string>
+    <string name="overview_cache_space">緩存空間</string>
+    <string name="overview_cloud_space">雲端空間</string>
     <string name="overview_space_usage_title">空間使用量</string>
     <string name="overview_used_space">已使用空間</string>
     <string name="overview_local_storage">本地空間</string>
