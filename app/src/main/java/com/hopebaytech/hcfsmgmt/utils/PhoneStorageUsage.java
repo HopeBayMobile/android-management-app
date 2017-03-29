@@ -22,6 +22,18 @@ public class PhoneStorageUsage {
 //    static List<String> paths = Arrays.asList(system_path, cache_path, data_path, tera_path);
     static List<String> paths = Arrays.asList(system_path, cache_path, data_path);
 
+    private static long getPathTotalSpace(String targetPath) {
+        File path;
+        path = new File(targetPath);
+        return path.getTotalSpace();
+    }
+
+    private static long getPathFreeSpace(String targetPath) {
+        File path;
+        path = new File(targetPath);
+        return path.getFreeSpace();
+    }
+
     public static long getFreeSpace() {
         File path;
         long freeSpace = 0;
@@ -41,5 +53,23 @@ public class PhoneStorageUsage {
         }
         return totalSpace;
     }
+
+    public static long getDataTotalSize() {
+        return getPathTotalSpace(data_path);
+    }
+
+    public static long getDataFreeSize() {
+        return getPathFreeSpace(data_path);
+    }
+
+    public static long getTotalSystemSize() {
+        return getPathTotalSpace(system_path);
+    }
+
+    public static long getFreeSystemSize() {
+        return getPathFreeSpace(system_path);
+    }
+
+
 
 }
