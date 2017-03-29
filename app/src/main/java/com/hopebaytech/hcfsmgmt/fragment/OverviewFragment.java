@@ -6,6 +6,9 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.text.format.Formatter;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +28,7 @@ import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
 
+import java.text.Format;
 import java.util.Locale;
 
 public class OverviewFragment extends Fragment {
@@ -35,6 +39,9 @@ public class OverviewFragment extends Fragment {
     private Thread mUiRefreshThread;
     private ImageView mNetworkConnStatusImage;
     private TextView mNetworkConnStatusText;
+    private Usage mPhysicalSpaceUsage;
+    private Usage mSystemSpaceUsage;
+    private Usage mCacheSpaceUsage;
     private Usage mUsedSpaceUsage;
     private Usage mPinnedSpaceUsage;
     private Usage mDataWaitToUploadUsage;
@@ -55,6 +62,9 @@ public class OverviewFragment extends Fragment {
                         @Override
                         public void run() {
                             if (mStatInfo == null) {
+                                mPhysicalSpaceUsage.getValue().setText("-");
+                                mSystemSpaceUsage.getValue().setText("-");
+                                mCacheSpaceUsage.getValue().setText("-");
                                 mUsedSpaceUsage.getValue().setText("-");
                                 mPinnedSpaceUsage.getValue().setText("-");
                                 mDataWaitToUploadUsage.getValue().setText("-");
@@ -65,17 +75,45 @@ public class OverviewFragment extends Fragment {
 
                             updateNetworkStatus(HCFSConnStatus.getConnStatus(mContext, mStatInfo));
 
+                            // Set Physical Space text
+                            String physicalSpaceText = String.format(Locale.getDefault(),
+                                    "%s / %s",
+                                    mStatInfo.getFormatPhysicalUsed(),
+                                    mStatInfo.getFormatPhysicalTotal());
+
+                            mPhysicalSpaceUsage.showUsage(mStatInfo.getPhysicalUsedPercentage(),
+                                    physicalSpaceText);
+
+                            // Set System Space text
+                            String systemSpaceText = String.format(Locale.getDefault(),
+                                    "%s / %s",
+                                    mStatInfo.getFormatSystemUsed(),
+                                    mStatInfo.getFormatSystemTotal());
+
+                            mSystemSpaceUsage.showUsage(mStatInfo.getSystemUsedPercentage(),
+                                    systemSpaceText);
+
+                            // Set Cache Space text and
+                            String cacheSpaceText = String.format(Locale.getDefault(),
+                                    "%s / %s",
+                                    mStatInfo.getFormatCacheUsed(),
+                                    mStatInfo.getFormatCacheTotal());
+
+                            mCacheSpaceUsage.showUsage(mStatInfo.getCacheUsedPercentage(),
+                                    cacheSpaceText);
+
                             String usedSpaceText = String.format(Locale.getDefault(),
                                     "%s / %s",
-                                    mStatInfo.getFormatTeraUsed(),
-                                    mStatInfo.getFormatTeraTotal());
-                            mUsedSpaceUsage.showUsage(mStatInfo.getTeraUsedPercentage(),
+                                    mStatInfo.getFormatCloudUsed(),
+                                    mStatInfo.getFormatCloudTotal());
+                            mUsedSpaceUsage.showUsage(mStatInfo.getCloudUsedPercentage(),
                                     usedSpaceText);
 
                             String pinnedSpaceText = String.format(Locale.getDefault(),
                                     "%s / %s",
                                     mStatInfo.getFormatPinTotal(),
                                     mStatInfo.getFormatPinMax());
+
                             mPinnedSpaceUsage.showUsage(mStatInfo.getPinnedUsedPercentage(),
                                     pinnedSpaceText);
 
@@ -84,6 +122,7 @@ public class OverviewFragment extends Fragment {
 
                             String xferDownload = mStatInfo.getFormatXferDownload();
                             String xferUpload = mStatInfo.getFormatXferUpload();
+
                             mNetworkXferUp.setText(xferUpload);
                             mNetworkXferDown.setText(xferDownload);
                         }
@@ -112,7 +151,7 @@ public class OverviewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Logs.d(CLASSNAME, "onCreateView", null);
-        return inflater.inflate(R.layout.overview_fragment, container, false);
+        return inflater.inflate(R.layout.overview_fragment_grid, container, false);
     }
 
     @Override
@@ -124,7 +163,26 @@ public class OverviewFragment extends Fragment {
         mNetworkConnStatusImage = (ImageView) view.findViewById(R.id.network_conn_status_icon);
         mNetworkConnStatusText = (TextView) view.findViewById(R.id.network_conn_status);
 
-        // Initialized used space view
+        // Initialized physical space view
+        RelativeLayout physicalSpace = (RelativeLayout) view.findViewById(R.id.physical_space);
+        UsageIcon physicalSpaceIcon = (UsageIcon) physicalSpace.findViewById(R.id.physical_space_icon);
+        physicalSpaceIcon.getLayoutParams();
+        TextView physicalSpaceValue = (TextView) physicalSpace.findViewById(R.id.physical_space_value);
+        mPhysicalSpaceUsage = new Usage(physicalSpaceIcon, physicalSpaceValue);
+
+        // Initialized system space view
+        RelativeLayout systemSpace = (RelativeLayout) view.findViewById(R.id.system_space);
+        UsageIcon systemSpaceIcon = (UsageIcon) systemSpace.findViewById(R.id.system_space_icon);
+        TextView systemSpaceValue = (TextView) systemSpace.findViewById(R.id.system_space_value);
+        mSystemSpaceUsage = new Usage(systemSpaceIcon, systemSpaceValue);
+
+        // Initialized cache space view
+        RelativeLayout cacheSpace = (RelativeLayout) view.findViewById(R.id.cache_space);
+        UsageIcon cacheSpaceIcon = (UsageIcon) cacheSpace.findViewById(R.id.cache_space_icon);
+        TextView cacheSpaceValue = (TextView) cacheSpace.findViewById(R.id.cache_space_value);
+        mCacheSpaceUsage = new Usage(cacheSpaceIcon, cacheSpaceValue);
+
+        // Initialized cloud space view
         RelativeLayout usedSpace = (RelativeLayout) view.findViewById(R.id.used_space);
         UsageIcon usedSpaceIcon = (UsageIcon) usedSpace.findViewById(R.id.used_space_icon);
         TextView usedSpaceValue = (TextView) usedSpace.findViewById(R.id.used_space_value);
