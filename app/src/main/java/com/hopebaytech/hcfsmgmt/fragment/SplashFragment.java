@@ -31,6 +31,8 @@ public class SplashFragment extends Fragment {
     public static final String TAG = SplashFragment.class.getSimpleName();
     private final String CLASSNAME = SplashFragment.class.getSimpleName();
 
+    private final int SPLASH_TIME = 100;
+
     private Context mContext;
 
     public static SplashFragment newInstance() {
@@ -42,7 +44,7 @@ public class SplashFragment extends Fragment {
         @Override
         public void run() {
             try {
-                Thread.sleep(100);
+                Thread.sleep(SPLASH_TIME);
                 int transferStatus = TransferStatus.getTransferStatus(mContext);
                 if (transferStatus == TransferStatus.NONE) {
                     switchFragment();
