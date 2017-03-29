@@ -113,39 +113,26 @@
 
                     <RelativeLayout
                         android:id="@+id/physical_space"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        tools:ignore="NestedWeights">
+                        style="@style/overviewCardLayout">
 
                         <com.hopebaytech.hcfsmgmt.customview.UsageIcon
                             android:id="@+id/physical_space_icon"
-                            android:layout_width="@dimen/usage_icon_width"
-                            android:layout_height="@dimen/usage_icon_height"
-                            android:layout_centerVertical="true"
+                            style="@style/overviewStatIcon"
                             app:iconSrcNormal="@drawable/icon_physical_space"
                             app:iconSrcWarning="@drawable/icon_physical_space_red" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="10dp"
-                            android:layout_toEndOf="@+id/physical_space_icon"
-                            android:orientation="vertical">
+                            style="@style/overviewStatTextLayout"
+                            android:layout_below="@+id/physical_space_icon">
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/physical_space_name"
-                                style="F6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewTitleText"
                                 android:text="@string/overview_physical_space" />
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/physical_space_value"
-                                style="@style/F13"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewValueText"
                                 tools:text="4 GB / 16 GB" />
 
                         </LinearLayout>
@@ -153,38 +140,25 @@
 
                     <RelativeLayout
                         android:id="@+id/system_space"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginStart="0dp"
-                        android:layout_weight="1">
+                        style="@style/overviewCardLayout">
 
                         <com.hopebaytech.hcfsmgmt.customview.UsageIcon
                             android:id="@+id/system_space_icon"
-                            android:layout_width="@dimen/usage_icon_width"
-                            android:layout_height="@dimen/usage_icon_height"
-                            android:layout_centerVertical="true"
+                            style="@style/overviewStatIcon"
                             app:iconSrcNormal="@drawable/icon_system_local_space" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="10dp"
-                            android:layout_toEndOf="@+id/system_space_icon"
-                            android:orientation="vertical">
+                            style="@style/overviewStatTextLayout"
+                            android:layout_below="@+id/system_space_icon">
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/system_space_name"
-                                style="F6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewTitleText"
                                 android:text="@string/overview_system_space" />
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/system_space_value"
-                                style="@style/F13"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewValueText"
                                 tools:text="2 GB / 2 GB" />
 
                         </LinearLayout>
@@ -192,38 +166,26 @@
 
                     <RelativeLayout
                         android:id="@+id/cache_space"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
+                        style="@style/overviewCardLayout">
 
                         <com.hopebaytech.hcfsmgmt.customview.UsageIcon
                             android:id="@+id/cache_space_icon"
-                            android:layout_width="@dimen/usage_icon_width"
-                            android:layout_height="@dimen/usage_icon_height"
-                            android:layout_centerVertical="true"
+                            style="@style/overviewStatIcon"
                             app:iconSrcNormal="@drawable/icon_cache_space"
                             app:iconSrcWarning="@drawable/icon_cache_space_red" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="10dp"
-                            android:layout_toEndOf="@+id/cache_space_icon"
-                            android:orientation="vertical">
+                            style="@style/overviewStatTextLayout"
+                            android:layout_below="@+id/cache_space_icon">
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/cache_space_name"
-                                style="F6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewTitleText"
                                 android:text="@string/overview_cache_space" />
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/cache_space_value"
-                                style="@style/F13"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewValueText"
                                 tools:text="2 GB / 8 GB" />
 
                         </LinearLayout>
@@ -241,39 +203,27 @@
 
                     <RelativeLayout
                         android:id="@+id/used_space"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
+                        style="@style/overviewCardLayout"
                         tools:ignore="NestedWeights">
 
                         <com.hopebaytech.hcfsmgmt.customview.UsageIcon
                             android:id="@+id/used_space_icon"
-                            android:layout_width="@dimen/usage_icon_width"
-                            android:layout_height="@dimen/usage_icon_height"
-                            android:layout_centerVertical="true"
+                            style="@style/overviewStatIcon"
                             app:iconSrcNormal="@drawable/icon_system_used_space"
                             app:iconSrcWarning="@drawable/icon_system_used_space_red" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="10dp"
-                            android:layout_toEndOf="@+id/used_space_icon"
-                            android:orientation="vertical">
+                            style="@style/overviewStatTextLayout"
+                            android:layout_below="@+id/used_space_icon">
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/used_space_name"
-                                style="F6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewTitleText"
                                 android:text="@string/overview_cloud_space" />
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/used_space_value"
-                                style="@style/F13"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewValueText"
                                 tools:text="25 GB / 100 GB" />
 
                         </LinearLayout>
@@ -281,39 +231,26 @@
 
                     <RelativeLayout
                         android:id="@+id/pinned_space"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_marginStart="0dp"
-                        android:layout_weight="1">
+                        style="@style/overviewCardLayout">
 
                         <com.hopebaytech.hcfsmgmt.customview.UsageIcon
                             android:id="@+id/pinned_space_icon"
-                            android:layout_width="@dimen/usage_icon_width"
-                            android:layout_height="@dimen/usage_icon_height"
-                            android:layout_centerVertical="true"
+                            style="@style/overviewStatIcon"
                             app:iconSrcNormal="@drawable/icon_system_pinned_space"
                             app:iconSrcWarning="@drawable/icon_system_pinned_space_red" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="10dp"
-                            android:layout_toEndOf="@+id/pinned_space_icon"
-                            android:orientation="vertical">
+                            style="@style/overviewStatTextLayout"
+                            android:layout_below="@+id/pinned_space_icon">
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/pinned_space_name"
-                                style="F6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewTitleText"
                                 android:text="@string/overview_pinned_storage" />
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/pinned_space_value"
-                                style="@style/F13"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewValueText"
                                 tools:text="920.1 MB / 8 GB" />
 
                         </LinearLayout>
@@ -321,37 +258,25 @@
 
                     <RelativeLayout
                         android:id="@+id/data_wait_to_upload"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
+                        style="@style/overviewCardLayout">
 
                         <com.hopebaytech.hcfsmgmt.customview.UsageIcon
                             android:id="@+id/data_wait_to_upload_icon"
-                            android:layout_width="@dimen/usage_icon_width"
-                            android:layout_height="@dimen/usage_icon_height"
-                            android:layout_centerVertical="true"
+                            style="@style/overviewStatIcon"
                             app:iconSrcNormal="@drawable/icon_system_upload_data" />
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_marginStart="10dp"
-                            android:layout_toEndOf="@+id/data_wait_to_upload_icon"
-                            android:orientation="vertical">
+                            style="@style/overviewStatTextLayout"
+                            android:layout_below="@+id/data_wait_to_upload_icon">
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/data_wait_to_upload_name"
-                                style="F6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewTitleText"
                                 android:text="@string/overview_data_wait_to_uploaded" />
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 android:id="@+id/data_wait_to_upload_value"
-                                style="@style/F13"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                style="@style/overviewValueText"
                                 tools:text="571.6 MB" />
 
                         </LinearLayout>
