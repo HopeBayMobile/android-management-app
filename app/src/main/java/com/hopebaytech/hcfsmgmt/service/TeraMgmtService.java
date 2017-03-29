@@ -652,9 +652,9 @@ public class TeraMgmtService extends Service {
                         }
                         String notifyMsg = getString(R.string.overview_used_space) +
                                 ": " +
-                                statInfo.getFormatTeraUsed() +
+                                statInfo.getFormatCloudUsed() +
                                 " / " +
-                                statInfo.getFormatTeraTotal();
+                                statInfo.getFormatCloudTotal();
                         int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
                         NotificationEvent.notify(TeraMgmtService.this,
                                 NotificationEvent.ID_ONGOING,
