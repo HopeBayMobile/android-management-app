@@ -210,6 +210,8 @@ public class OverviewFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mConnStatus == HCFSConnStatus.TRANS_FAILED) {
+                    mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
+                    mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_reconnecting));
                     mNetworkConnStatusImage.setEnabled(false);
                     new Handler().postDelayed(new Runnable() {
                         public void run() {
