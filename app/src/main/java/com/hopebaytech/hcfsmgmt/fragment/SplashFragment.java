@@ -42,7 +42,7 @@ public class SplashFragment extends Fragment {
         @Override
         public void run() {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(100);
                 int transferStatus = TransferStatus.getTransferStatus(mContext);
                 if (transferStatus == TransferStatus.NONE) {
                     switchFragment();
