@@ -163,7 +163,8 @@
                             android:layout_width="@dimen/usage_icon_width"
                             android:layout_height="@dimen/usage_icon_height"
                             android:layout_centerVertical="true"
-                            app:iconSrcNormal="@drawable/icon_system_local_space" />
+                            app:iconSrcNormal="@drawable/icon_system_local_space"
+                            app:iconSrcWarning="@drawable/icon_system_local_space_red"/>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
