@@ -133,9 +133,9 @@
 
                         <com.hopebaytech.hcfsmgmt.customview.FontTextView
                             android:id="@+id/used_space_value"
+                            style="@style/F13"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            style="@style/F13"
                             tools:text="148 GB / 1TB" />
 
                     </LinearLayout>
@@ -145,7 +145,7 @@
                     android:id="@+id/pinned_space"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_marginStart="40dp"
+                    android:layout_marginStart="0dp"
                     android:layout_weight="1">
 
                     <com.hopebaytech.hcfsmgmt.customview.UsageIcon
@@ -173,9 +173,9 @@
 
                         <com.hopebaytech.hcfsmgmt.customview.FontTextView
                             android:id="@+id/pinned_space_value"
+                            style="@style/F13"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            style="@style/F13"
                             tools:text="920.1 MB / 8 GB" />
 
                     </LinearLayout>
@@ -211,9 +211,9 @@
 
                         <com.hopebaytech.hcfsmgmt.customview.FontTextView
                             android:id="@+id/data_wait_to_upload_value"
+                            style="@style/F13"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            style="@style/F13"
                             tools:text="571.6 MB" />
 
                     </LinearLayout>
