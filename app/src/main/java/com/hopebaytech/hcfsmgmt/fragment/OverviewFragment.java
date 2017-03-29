@@ -324,8 +324,8 @@ public class OverviewFragment extends Fragment {
         }
 
         private void showUsage(int percentage, String valueText) {
-            percentage = 80;
-            valueText = "test";
+            // percentage = 80;
+            // valueText = "test";
             icon.showPercentage(percentage);
             if (icon.isWarning()) {
                 value.setTextColor(ContextCompat.getColor(mContext, R.color.colorUserIconWarningValue));
