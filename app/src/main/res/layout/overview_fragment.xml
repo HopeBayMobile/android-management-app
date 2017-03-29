@@ -44,8 +44,8 @@
                 android:id="@+id/title_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/M2"
                 android:layout_marginStart="@dimen/M2"
+                android:layout_marginTop="@dimen/M2"
                 android:orientation="vertical">
 
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
@@ -55,13 +55,13 @@
                     android:text="@string/overview_space_usage_title" />
 
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    android:id="@+id/fontTextView"
                     style="@style/F6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="17dp"
                     android:layout_marginTop="6dp"
-                    android:text="@string/overview_data_transmission_today"
-                    android:id="@+id/fontTextView" />
+                    android:text="@string/overview_data_transmission_today" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -99,125 +99,266 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:weightSum="3">
+                android:baselineAligned="false"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-                <RelativeLayout
-                    android:id="@+id/used_space"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/M2"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:weightSum="3">
 
-                    <com.hopebaytech.hcfsmgmt.customview.UsageIcon
-                        android:id="@+id/used_space_icon"
-                        android:layout_width="@dimen/usage_icon_width"
-                        android:layout_height="@dimen/usage_icon_height"
-                        android:layout_centerInParent="true"
-                        app:iconSrcNormal="@drawable/icon_system_used_space"
-                        app:iconSrcWarning="@drawable/icon_system_used_space_red" />
+                    <RelativeLayout
+                        android:id="@+id/physical_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        tools:ignore="NestedWeights">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="10dp"
-                        android:layout_toEndOf="@+id/used_space_icon"
-                        android:orientation="vertical">
+                        <com.hopebaytech.hcfsmgmt.customview.UsageIcon
+                            android:id="@+id/physical_space_icon"
+                            android:layout_width="@dimen/usage_icon_width"
+                            android:layout_height="@dimen/usage_icon_height"
+                            android:layout_centerVertical="true"
+                            app:iconSrcNormal="@drawable/icon_physical_space"
+                            app:iconSrcWarning="@drawable/icon_physical_space_red" />
 
-                        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                            android:id="@+id/used_space_name"
-                            style="F6"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/overview_used_space" />
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_toEndOf="@+id/physical_space_icon"
+                            android:orientation="vertical">
 
-                        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                            android:id="@+id/used_space_value"
-                            style="@style/F13"
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/physical_space_name"
+                                style="F6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/overview_physical_space" />
+
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/physical_space_value"
+                                style="@style/F13"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="4 GB / 16 GB" />
+
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/system_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_weight="1">
+
+                        <com.hopebaytech.hcfsmgmt.customview.UsageIcon
+                            android:id="@+id/system_space_icon"
+                            android:layout_width="@dimen/usage_icon_width"
+                            android:layout_height="@dimen/usage_icon_height"
+                            android:layout_centerVertical="true"
+                            app:iconSrcNormal="@drawable/icon_system_local_space" />
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            tools:text="148 GB / 1TB" />
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_toEndOf="@+id/system_space_icon"
+                            android:orientation="vertical">
 
-                    </LinearLayout>
-                </RelativeLayout>
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/system_space_name"
+                                style="F6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/overview_system_space" />
 
-                <RelativeLayout
-                    android:id="@+id/pinned_space"
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/system_space_value"
+                                style="@style/F13"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="2 GB / 2 GB" />
+
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/cache_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1">
+
+                        <com.hopebaytech.hcfsmgmt.customview.UsageIcon
+                            android:id="@+id/cache_space_icon"
+                            android:layout_width="@dimen/usage_icon_width"
+                            android:layout_height="@dimen/usage_icon_height"
+                            android:layout_centerVertical="true"
+                            app:iconSrcNormal="@drawable/icon_cache_space"
+                            app:iconSrcWarning="@drawable/icon_cache_space_red" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_toEndOf="@+id/cache_space_icon"
+                            android:orientation="vertical">
+
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/cache_space_name"
+                                style="F6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/overview_cache_space" />
+
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/cache_space_value"
+                                style="@style/F13"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="2 GB / 8 GB" />
+
+                        </LinearLayout>
+                    </RelativeLayout>
+
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_marginStart="0dp"
-                    android:layout_weight="1">
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:weightSum="3">
 
-                    <com.hopebaytech.hcfsmgmt.customview.UsageIcon
-                        android:id="@+id/pinned_space_icon"
-                        android:layout_width="@dimen/usage_icon_width"
-                        android:layout_height="@dimen/usage_icon_height"
-                        android:layout_centerVertical="true"
-                        app:iconSrcNormal="@drawable/icon_system_pinned_space"
-                        app:iconSrcWarning="@drawable/icon_system_pinned_space_red" />
+                    <RelativeLayout
+                        android:id="@+id/used_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        tools:ignore="NestedWeights">
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="10dp"
-                        android:layout_toEndOf="@+id/pinned_space_icon"
-                        android:orientation="vertical">
+                        <com.hopebaytech.hcfsmgmt.customview.UsageIcon
+                            android:id="@+id/used_space_icon"
+                            android:layout_width="@dimen/usage_icon_width"
+                            android:layout_height="@dimen/usage_icon_height"
+                            android:layout_centerVertical="true"
+                            app:iconSrcNormal="@drawable/icon_system_used_space"
+                            app:iconSrcWarning="@drawable/icon_system_used_space_red" />
 
-                        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                            android:id="@+id/pinned_space_name"
-                            style="F6"
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/overview_pinned_storage" />
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_toEndOf="@+id/used_space_icon"
+                            android:orientation="vertical">
 
-                        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                            android:id="@+id/pinned_space_value"
-                            style="@style/F13"
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/used_space_name"
+                                style="F6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/overview_cloud_space" />
+
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/used_space_value"
+                                style="@style/F13"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="25 GB / 100 GB" />
+
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/pinned_space"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_weight="1">
+
+                        <com.hopebaytech.hcfsmgmt.customview.UsageIcon
+                            android:id="@+id/pinned_space_icon"
+                            android:layout_width="@dimen/usage_icon_width"
+                            android:layout_height="@dimen/usage_icon_height"
+                            android:layout_centerVertical="true"
+                            app:iconSrcNormal="@drawable/icon_system_pinned_space"
+                            app:iconSrcWarning="@drawable/icon_system_pinned_space_red" />
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            tools:text="920.1 MB / 8 GB" />
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_toEndOf="@+id/pinned_space_icon"
+                            android:orientation="vertical">
 
-                    </LinearLayout>
-                </RelativeLayout>
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/pinned_space_name"
+                                style="F6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/overview_pinned_storage" />
 
-                <RelativeLayout
-                    android:id="@+id/data_wait_to_upload"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1">
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/pinned_space_value"
+                                style="@style/F13"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="920.1 MB / 8 GB" />
 
-                    <com.hopebaytech.hcfsmgmt.customview.UsageIcon
-                        android:id="@+id/data_wait_to_upload_icon"
-                        android:layout_width="@dimen/usage_icon_width"
-                        android:layout_height="@dimen/usage_icon_height"
-                        android:layout_centerInParent="true"
-                        app:iconSrcNormal="@drawable/icon_system_upload_data" />
+                        </LinearLayout>
+                    </RelativeLayout>
 
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginStart="10dp"
-                        android:layout_toEndOf="@+id/data_wait_to_upload_icon"
-                        android:orientation="vertical">
+                    <RelativeLayout
+                        android:id="@+id/data_wait_to_upload"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1">
 
-                        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                            android:id="@+id/data_wait_to_upload_name"
-                            style="F6"
+                        <com.hopebaytech.hcfsmgmt.customview.UsageIcon
+                            android:id="@+id/data_wait_to_upload_icon"
+                            android:layout_width="@dimen/usage_icon_width"
+                            android:layout_height="@dimen/usage_icon_height"
+                            android:layout_centerVertical="true"
+                            app:iconSrcNormal="@drawable/icon_system_upload_data" />
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/overview_data_wait_to_uploaded" />
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="10dp"
+                            android:layout_toEndOf="@+id/data_wait_to_upload_icon"
+                            android:orientation="vertical">
 
-                        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                            android:id="@+id/data_wait_to_upload_value"
-                            style="@style/F13"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            tools:text="571.6 MB" />
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/data_wait_to_upload_name"
+                                style="F6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/overview_data_wait_to_uploaded" />
 
-                    </LinearLayout>
-                </RelativeLayout>
+                            <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                                android:id="@+id/data_wait_to_upload_value"
+                                style="@style/F13"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                tools:text="571.6 MB" />
+
+                        </LinearLayout>
+                    </RelativeLayout>
+
+
+                </LinearLayout>
 
             </LinearLayout>
 

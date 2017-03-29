@@ -151,7 +151,7 @@ public class OverviewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Logs.d(CLASSNAME, "onCreateView", null);
-        return inflater.inflate(R.layout.overview_fragment_grid, container, false);
+        return inflater.inflate(R.layout.overview_fragment, container, false);
     }
 
     @Override
