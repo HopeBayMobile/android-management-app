@@ -81,6 +81,10 @@
     <string name="overview_hcfs_conn_status_reconnecting">Retry Connection</string>
     <string name="overview_hcfs_conn_status_in_progress">Transmitting</string>
     <string name="overview_hcfs_conn_status_slow">Transmission slow</string>
+    <string name="overview_physical_space">Physical Usage</string>
+    <string name="overview_system_space">System Usage</string>
+    <string name="overview_cache_space">Cache Usage</string>
+    <string name="overview_cloud_space">Cloud Usage</string>
     <string name="overview_space_usage_title">Space Usage</string>
     <string name="overview_used_space">Used space</string>
     <string name="overview_local_storage">Local space</string>

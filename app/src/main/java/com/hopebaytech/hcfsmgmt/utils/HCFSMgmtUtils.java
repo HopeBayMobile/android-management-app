@@ -244,6 +244,7 @@ public class HCFSMgmtUtils {
             JSONObject jObject = new JSONObject(jsonResult);
             JSONObject dataObj = jObject.getJSONObject("data");
             boolean isSuccess = jObject.getBoolean("result");
+
             if (isSuccess) {
 //                Logs.d(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
 
@@ -261,11 +262,19 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
                 hcfsStatInfo.setCloudConn(dataObj.getInt(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
                 hcfsStatInfo.setDataTransfer(dataObj.getInt(HCFSStatInfo.STAT_DATA_DATA_TRANSFER));
-                long totalSpace = PhoneStorageUsage.getTotalSpace() + hcfsStatInfo.getCloudTotal();
-                long freeSpace = PhoneStorageUsage.getFreeSpace() +
-                        (hcfsStatInfo.getCloudTotal() - hcfsStatInfo.getCloudUsed());
-                hcfsStatInfo.setTeraTotal(totalSpace);
-                hcfsStatInfo.setTeraUsed(totalSpace - freeSpace);
+
+                long phycialTotalSpace = PhoneStorageUsage.getDataTotalSize();
+                long phycialFreeSpace = PhoneStorageUsage.getDataFreeSize();
+                long phycialUsedSpace = phycialTotalSpace - phycialFreeSpace;
+
+                long cacheTotal = hcfsStatInfo.getCacheTotal();
+                long systemUsedSpace = phycialTotalSpace - cacheTotal;
+
+                hcfsStatInfo.setPhycialTotal(phycialTotalSpace);
+                hcfsStatInfo.setPhycialUsed(phycialUsedSpace);
+                hcfsStatInfo.setSystemUsed(systemUsedSpace);
+
+
             } else {
                 Logs.e(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
             }

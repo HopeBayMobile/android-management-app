@@ -24,61 +24,21 @@ public class HCFSStatInfo {
     /**
      * unit: bytes
      */
+    private long physicalTotal;
+    private long physicalUsed;
+    private long systemTotal;
+    private long systemUsed;
     private long cloudTotal;
-
-    /**
-     * unit: bytes
-     */
     private long cloudUsed;
-
-    /**
-     * unit: bytes
-     */
     private long teraTotal;
-
-    /**
-     * unit: bytes
-     */
     private long teraUsed;
-
-    /**
-     * unit: bytes
-     */
     private long volUsed;
-
-    /**
-     * unit: bytes
-     */
     private long cacheTotal;
-
-    /**
-     * unit: bytes
-     */
     private long cacheDirtyUsed;
-
-    /**
-     * unit: bytes
-     */
     private long cacheUsed;
-
-    /**
-     * unit: bytes
-     */
     private long pinMax;
-
-    /**
-     * unit: bytes
-     */
     private long pinTotal;
-
-    /**
-     * unit: bytes
-     */
     private long xferUpload;
-
-    /**
-     * unit: bytes
-     */
     private long xferDownload;
 
     /**
@@ -102,13 +62,25 @@ public class HCFSStatInfo {
         this.volUsed = volUsed;
     }
 
-    public String getFormatCacheUsed() {
-        return UnitConverter.convertByteToProperUnit(cacheUsed);
-    }
+    public String getFormatPhysicalTotal() {
+        return UnitConverter.convertByteToProperUnit(physicalTotal); }
 
-    public void setCacheUsed(long cacheUsed) {
-        this.cacheUsed = cacheUsed;
-    }
+    public void setPhycialTotal(long physicalTotal) { this.physicalTotal = physicalTotal; }
+
+    public String getFormatPhysicalUsed() {
+        return UnitConverter.convertByteToProperUnit(physicalUsed); }
+
+    public void setPhycialUsed(long phycialUsed) { this.physicalUsed = phycialUsed; }
+
+    public String getFormatSystemTotal() {
+        return UnitConverter.convertByteToProperUnit(systemTotal); }
+
+    public void setSystemTotal(long systemTotal) { this.systemTotal = systemTotal; }
+
+    public String getFormatSystemUsed() {
+        return UnitConverter.convertByteToProperUnit(systemUsed); }
+
+    public void setSystemUsed(long systemUsed) { this.systemUsed = systemUsed; }
 
     public String getFormatCloudTotal() {
         return UnitConverter.convertByteToProperUnit(cloudTotal);
@@ -126,7 +98,6 @@ public class HCFSStatInfo {
         this.cloudUsed = cloudUsed;
     }
 
-    /** Tera Storage usage */
     public String getFormatTeraTotal() {
         return UnitConverter.convertByteToProperUnit(teraTotal);
     }
@@ -149,6 +120,14 @@ public class HCFSStatInfo {
 
     public void setCacheTotal(long cacheTotal) {
         this.cacheTotal = cacheTotal;
+    }
+
+    public String getFormatCacheUsed() {
+        return UnitConverter.convertByteToProperUnit(cacheUsed);
+    }
+
+    public void setCacheUsed(long cacheUsed) {
+        this.cacheUsed = cacheUsed;
     }
 
     public String getFormatCacheDirtyUsed() {
@@ -221,70 +200,38 @@ public class HCFSStatInfo {
         this.cloudConn = cloudConn;
     }
 
+
     public int getCloudUsedPercentage() {
-        int percentage;
-        float tmp = ((float) volUsed / cloudTotal * 100);
-        if (tmp > 0 && tmp < 1) {
-            percentage = 1;
-        } else {
-            percentage = (int) ((float) volUsed / cloudTotal * 100);
-        }
-        return percentage;
+        return UnitConverter.calculateUsagePercentage(cloudUsed, cloudTotal);
+    }
+
+    public int getPhysicalUsedPercentage() {
+        return UnitConverter.calculateUsagePercentage(physicalUsed, physicalTotal);
+    }
+
+    public int getSystemUsedPercentage(){
+        return UnitConverter.calculateUsagePercentage(systemUsed, systemTotal);
     }
 
     public int getTeraUsedPercentage() {
-        int percentage;
-        float tmp = ((float) teraUsed / teraTotal * 100);
-        if (tmp > 0 && tmp < 1) {
-            percentage = 1;
-        } else {
-            percentage = (int) ((float) teraUsed / teraTotal * 100);
-        }
-        return percentage;
+        return UnitConverter.calculateUsagePercentage(teraUsed, teraTotal);
     }
 
     public int getCacheUsedPercentage() {
-        int percentage;
-        float tmp = ((float) cacheUsed / cloudTotal * 100);
-        if (tmp > 0 && tmp < 1) {
-            percentage = 1;
-        } else {
-            percentage = (int) ((float) cacheUsed / cloudTotal * 100);
-        }
-        return percentage;
+        return UnitConverter.calculateUsagePercentage(cacheUsed, cacheTotal);
     }
 
     public int getPinnedUsedPercentage() {
-        int percentage;
-        float tmp = ((float) pinTotal / pinMax * 100);
-        if (tmp > 0 && tmp < 1) {
-            percentage = 1;
-        } else {
-            percentage = (int) ((float) pinTotal / pinMax * 100);
-        }
-        return percentage;
+        return UnitConverter.calculateUsagePercentage(pinTotal, pinMax);
     }
 
     public int getDirtyPercentage() {
-        int percentage;
-        float tmp = ((float) cacheDirtyUsed / cacheTotal * 100);
-        if (tmp > 0 && tmp < 1) {
-            percentage = 1;
-        } else {
-            percentage = (int) ((float) cacheDirtyUsed / cacheTotal * 100);
-        }
-        return percentage;
+        return UnitConverter.calculateUsagePercentage(cacheDirtyUsed, cacheTotal);
     }
 
     public int getXterDownloadPercentage() {
-        int percentage;
-        float tmp = ((float) xferDownload / (xferUpload + xferDownload) * 100);
-        if (tmp > 0 && tmp < 1) {
-            percentage = 1;
-        } else {
-            percentage = (int) ((float) xferDownload / (xferUpload + xferDownload) * 100);
-        }
-        return percentage;
+        float total = xferUpload + xferDownload;
+        return UnitConverter.calculateUsagePercentage(xferDownload, total);
     }
 
     public int getDataTransfer() {

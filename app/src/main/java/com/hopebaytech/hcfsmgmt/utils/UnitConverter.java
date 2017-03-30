@@ -18,6 +18,17 @@ public class UnitConverter {
 		return formatValue;
 	}
 
+	public static int calculateUsagePercentage(float used, float total) {
+		int percentage;
+		float tmp = ( used / total * 100);
+		if (tmp > 0 && tmp < 1) {
+			percentage = 1;
+		} else {
+			percentage = (int) ( used / total * 100);
+		}
+		return percentage;
+	}
+
 	public static String convertByteToProperUnit(long amount) {
 		float result = amount;
 		String[] unit = new String[] { "Byte", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };

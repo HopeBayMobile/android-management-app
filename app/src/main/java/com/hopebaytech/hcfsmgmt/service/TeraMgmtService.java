@@ -654,11 +654,11 @@ public class TeraMgmtService extends Service {
                             default: // HCFSConnStatus.TRANS_NORMAL
                                 notifyTitle = getString(R.string.overview_hcfs_conn_status_normal);
                         }
-                        String notifyMsg = getString(R.string.overview_used_space) +
+                        String notifyMsg = getString(R.string.overview_cloud_space) +
                                 ": " +
-                                statInfo.getFormatTeraUsed() +
+                                statInfo.getFormatCloudUsed() +
                                 " / " +
-                                statInfo.getFormatTeraTotal();
+                                statInfo.getFormatCloudTotal();
                         int flag = NotificationEvent.FLAG_ON_GOING | NotificationEvent.FLAG_OPEN_APP;
                         NotificationEvent.notify(TeraMgmtService.this,
                                 NotificationEvent.ID_ONGOING,
