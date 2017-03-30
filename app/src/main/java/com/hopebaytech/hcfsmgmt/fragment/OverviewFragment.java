@@ -1,6 +1,8 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -19,11 +21,14 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.misc.Threshold;
+import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Locale;
 
@@ -31,6 +36,7 @@ public class OverviewFragment extends Fragment {
 
     public static final String TAG = OverviewFragment.class.getSimpleName();
     private static final String CLASSNAME = TAG;
+    public static int mConnStatus = HCFSConnStatus.TRANS_NOT_ALLOWED;
 
     private Thread mUiRefreshThread;
     private ImageView mNetworkConnStatusImage;
@@ -173,6 +179,36 @@ public class OverviewFragment extends Fragment {
                 });
             }
         }).start();
+
+        mNetworkConnStatusImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mConnStatus == HCFSConnStatus.TRANS_FAILED) {
+                    mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
+                    mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_reconnecting));
+                    mNetworkConnStatusImage.setEnabled(false);
+
+                    new Handler().postDelayed(new Runnable() {
+                        public void run() {
+                            mNetworkConnStatusImage.setEnabled(true);
+                        }
+                    }, 3000L);
+
+                    Logs.d(CLASSNAME,"Backend connection: " + mConnStatus, null);
+                    // Retry connection
+                    String jsonResult = HCFSApiUtils.retryConn();
+                    JSONObject jObject = null;
+                    try {
+                        jObject = new JSONObject(jsonResult);
+                        boolean isSuccess = jObject.getBoolean("result");
+                        Logs.d(CLASSNAME, "Retry connection: " + isSuccess, null);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -223,6 +259,7 @@ public class OverviewFragment extends Fragment {
     }
 
     private void updateNetworkStatus(int connStatus) {
+        mConnStatus = connStatus;
         switch (connStatus) {
             case HCFSConnStatus.TRANS_FAILED:
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_failed);
@@ -244,6 +281,9 @@ public class OverviewFragment extends Fragment {
                 mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_slow);
                 mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_slow));
                 break;
+            case HCFSConnStatus.TRANS_RECONNECTING:
+                mNetworkConnStatusImage.setImageResource(R.drawable.icon_transmission_not_allow);
+                mNetworkConnStatusText.setText(mContext.getString(R.string.overview_hcfs_conn_status_reconnecting));
         }
     }
 

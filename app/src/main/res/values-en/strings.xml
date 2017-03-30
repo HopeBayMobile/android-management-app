@@ -78,6 +78,7 @@
     <string name="overview_hcfs_conn_status_normal">Connection is OK</string>
     <string name="overview_hcfs_conn_status_not_allowed">Cloud is disconnected</string>
     <string name="overview_hcfs_conn_status_failed">Transmission interrupted</string>
+    <string name="overview_hcfs_conn_status_reconnecting">Retry Connection</string>
     <string name="overview_hcfs_conn_status_in_progress">Transmitting</string>
     <string name="overview_hcfs_conn_status_slow">Transmission slow</string>
     <string name="overview_space_usage_title">Space Usage</string>

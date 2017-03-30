@@ -72,6 +72,7 @@
     <string name="active_cloud_storage_auth_fail">帳戶驗證失敗。</string>
     <string name="overview_hcfs_conn_status_normal">連線正常</string>
     <string name="overview_hcfs_conn_status_not_allowed">未連接雲端</string>
+    <string name="overview_hcfs_conn_status_reconnecting">重新連線中</string>
     <string name="overview_hcfs_conn_status_failed">傳輸中斷</string>
     <string name="overview_hcfs_conn_status_slow">傳輸緩慢</string>
     <string name="overview_hcfs_conn_status_in_progress">傳輸中</string>
