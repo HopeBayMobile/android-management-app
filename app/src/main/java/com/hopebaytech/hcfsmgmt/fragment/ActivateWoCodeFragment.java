@@ -684,10 +684,6 @@ public class ActivateWoCodeFragment extends Fragment {
         AuthorizationException error = AuthorizationException.fromIntent(intent);
         final AuthState authState = new AuthState(response, error);
 
-        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(response.authorizationCode);
-        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-        authProxy.auth();
-
         if (response != null) {
             AuthorizationService service = new AuthorizationService(getActivity());
             service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
