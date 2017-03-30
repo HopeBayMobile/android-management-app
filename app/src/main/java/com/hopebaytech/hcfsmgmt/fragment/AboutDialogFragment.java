@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -50,6 +51,7 @@ public class AboutDialogFragment extends DialogFragment {
 
     private View mView;
     private Context mContext;
+    private TextView mImeiOneTitle;
     private TextView mImeiOne;
     private TextView mImeiTwo;
     private LinearLayout mImeiTwoLayout;
@@ -87,6 +89,7 @@ public class AboutDialogFragment extends DialogFragment {
         mView = inflater.inflate(R.layout.about_dialog_fragment, null);
         mImeiOne = (TextView) mView.findViewById(R.id.device_imei_1);
         mImeiTwo = (TextView) mView.findViewById(R.id.device_imei_2);
+        mImeiOneTitle = (TextView) mView.findViewById(R.id.device_imei_1_title);
         mImeiTwoLayout = (LinearLayout) mView.findViewById(R.id.device_imei_2_layout);
 
         TextView teraVersion = (TextView) mView.findViewById(R.id.terafonn_version);
@@ -229,18 +232,25 @@ public class AboutDialogFragment extends DialogFragment {
 
     public void showImei() {
         TelephonyManager manager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        if (manager.getPhoneCount() == 0) {
-            mImeiOne.setText("-");
-            mImeiTwoLayout.setVisibility(View.GONE);
-        } else if (manager.getPhoneCount() == 1) {
-            mImeiOne.setText(manager.getDeviceId(0));
-            mImeiTwoLayout.setVisibility(View.GONE);
-            Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (manager.getPhoneCount() == 0) {
+                mImeiOne.setText("-");
+                mImeiTwoLayout.setVisibility(View.GONE);
+            } else if (manager.getPhoneCount() == 1) {
+                mImeiOne.setText(manager.getDeviceId(0));
+                mImeiTwoLayout.setVisibility(View.GONE);
+                Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
+            } else {
+                mImeiOne.setText(manager.getDeviceId(0));
+                mImeiTwo.setText(manager.getDeviceId(1));
+                Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
+                Logs.d(CLASSNAME, "onViewCreated", "imei_2=" + manager.getDeviceId(1));
+            }
         } else {
-            mImeiOne.setText(manager.getDeviceId(0));
-            mImeiTwo.setText(manager.getDeviceId(1));
-            Logs.d(CLASSNAME, "onViewCreated", "imei_1=" + manager.getDeviceId(0));
-            Logs.d(CLASSNAME, "onViewCreated", "imei_2=" + manager.getDeviceId(1));
+            mImeiOne.setText(manager.getDeviceId());
+            mImeiOneTitle.setText("IMEI");
+            mImeiTwoLayout.setVisibility(View.GONE);
+            Logs.d(CLASSNAME, "onViewCreated", "imei=" + manager.getDeviceId());
         }
         isImeiShown = true;
     }
