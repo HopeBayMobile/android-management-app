@@ -50,6 +50,7 @@
             android:orientation="vertical">
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                android:id="@+id/device_imei_1_title"
                 style="@style/F4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
