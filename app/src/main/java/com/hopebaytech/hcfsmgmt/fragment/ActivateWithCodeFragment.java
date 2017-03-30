@@ -124,7 +124,7 @@ public class ActivateWithCodeFragment extends Fragment {
                                     mWorkHandler.post(new Runnable() {
                                         @Override
                                         public void run() {
-                                            final boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+                                            final boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
                                             if (!isSuccess) {
                                                 TeraCloudConfig.resetHCFSConfig();
                                             } else {

@@ -510,7 +510,7 @@ public class ActivateWoCodeFragment extends Fragment {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
                         if (!isSuccess) {
                             signOut();
                             TeraCloudConfig.resetHCFSConfig();

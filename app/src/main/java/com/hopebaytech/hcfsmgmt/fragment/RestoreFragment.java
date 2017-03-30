@@ -505,7 +505,7 @@ public class RestoreFragment extends Fragment {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
                         if (!isSuccess) {
                             TeraCloudConfig.resetHCFSConfig();
                             mUiHandler.post(new Runnable() {
@@ -687,7 +687,7 @@ public class RestoreFragment extends Fragment {
                 mWorkHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo);
+                        TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
                         int code = HCFSMgmtUtils.triggerRestore();
                         if (code == RestoreStatus.Error.OUT_OF_SPACE) {
                             mUiHandler.post(new Runnable() {

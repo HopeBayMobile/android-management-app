@@ -477,7 +477,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
                 accountDAO.clear();
                 accountDAO.insert(accountInfo);
 
-                TeraCloudConfig.storeHCFSConfig(deviceServiceInfo);
+                TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, ChangeAccountActivity.this);
                 TeraAppConfig.enableApp(ChangeAccountActivity.this);
 
                 String url = deviceServiceInfo.getBackend().getUrl();

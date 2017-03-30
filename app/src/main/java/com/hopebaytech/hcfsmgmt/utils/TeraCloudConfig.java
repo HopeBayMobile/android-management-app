@@ -7,6 +7,7 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.TeraStatDAO;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraStatInfo;
+import com.hopebaytech.hcfsmgmt.service.MgmtPollingService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +28,8 @@ public class TeraCloudConfig {
     public static final String HCFS_CONFIG_SWIFT_URL = "swift_url";
     public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
     public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
+    public static final String HCFS_CONFIG_GOOGLEDRIVE_FOLDER = "googledrive_folder";
+    public static final String HCFS_BACKEND_GOOGLEDRIVE = "googledrive";
 
     public static void activateTeraCloud(Context context) {
         TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(context);
@@ -133,34 +136,42 @@ public class TeraCloudConfig {
         stopSyncToCloud();
     }
 
-    public static boolean storeHCFSConfig(DeviceServiceInfo deviceServiceInfo) {
+    public static boolean storeHCFSConfig(DeviceServiceInfo deviceServiceInfo, Context context) {
         boolean isSuccess = true;
-        if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, deviceServiceInfo.getBackend().getBackendType())) {
+
+        if (!storeHCFSConfigWithoutReload(deviceServiceInfo, context))
             isSuccess = false;
-        }
-        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, deviceServiceInfo.getBackend().getUser())) {
+
+        /* Let HCFS reload configuration */
+        if (!reloadConfig())
             isSuccess = false;
-        }
-        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, deviceServiceInfo.getBackend().getBucket())) {
-            isSuccess = false;
-        }
-        if (!reloadConfig()) {
-            isSuccess = false;
-        }
+
         return isSuccess;
     }
 
-    public static boolean storeHCFSConfigWithoutReload(DeviceServiceInfo deviceServiceInfo) {
+    public static boolean storeHCFSConfigWithoutReload(DeviceServiceInfo deviceServiceInfo, Context context) {
         boolean isSuccess = true;
-        if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, deviceServiceInfo.getBackend().getBackendType())) {
+        String nowBackend = deviceServiceInfo.getBackend().getBackendType();
+
+        if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, nowBackend))
             isSuccess = false;
+
+        if (nowBackend.equalsIgnoreCase(HCFS_BACKEND_GOOGLEDRIVE)) {
+            /* Check backend type and add google drive folder name. */
+            String rootFolderName = String.format("tera.%s", HCFSMgmtUtils.getDeviceImei(context));
+            if (!setHCFSConfig(HCFS_CONFIG_GOOGLEDRIVE_FOLDER, rootFolderName))
+                Logs.e(CLASSNAME, "setConfig", "Failed to set googledrive folder name");
+
+        } else {
+            /* Set swift backend info */
+            if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, deviceServiceInfo.getBackend().getUser())) {
+                isSuccess = false;
+            }
+            if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, deviceServiceInfo.getBackend().getBucket())) {
+                isSuccess = false;
+            }
         }
-        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, deviceServiceInfo.getBackend().getUser())) {
-            isSuccess = false;
-        }
-        if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, deviceServiceInfo.getBackend().getBucket())) {
-            isSuccess = false;
-        }
+
         return isSuccess;
     }
 
