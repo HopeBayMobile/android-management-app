@@ -2,6 +2,7 @@ package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,6 +23,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +54,14 @@ import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+
+import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationRequest;
+import net.openid.appauth.AuthorizationResponse;
+import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
+import net.openid.appauth.TokenResponse;
 
 import java.util.Locale;
 
@@ -94,6 +104,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
     public static final String KEY_GOOGLE_PHOTO_URL = "key_google_photo_url";
 
+    private static final String USED_INTENT = "USED_INTENT";
+
     private GoogleApiClient mGoogleApiClient;
     private Handler mWorkHandler;
     private Handler mUiHandler;
@@ -125,6 +137,12 @@ public class ActivateWoCodeFragment extends Fragment {
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
         mUiHandler = new Handler();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        checkIntent(getActivity().getIntent());
     }
 
     @Nullable
@@ -160,7 +178,8 @@ public class ActivateWoCodeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-                if (googleAPI.isGooglePlayServicesAvailable(mContext) == ConnectionResult.SERVICE_MISSING) {
+                if (googleAPI.isGooglePlayServicesAvailable(mContext) != ConnectionResult.SERVICE_MISSING) {
+                    appAuthorization();
                     mErrorMessage.setText(R.string.activate_without_google_play_services);
                     return;
                 }
@@ -618,5 +637,71 @@ public class ActivateWoCodeFragment extends Fragment {
         String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
         mErrorMessage.setText(cause);
     }
+    private void appAuthorization() {
+        AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
+                Uri.parse("https://accounts.google.com/o/oauth2/v2/auth"), /* auth endpoint */
+                Uri.parse("https://www.googleapis.com/oauth2/v4/token") /* token endpoint */
+        );
 
+        AuthorizationService authorizationService = new AuthorizationService(mView.getContext());
+        String clientId = "511828570984-fuprh0cm7665emlne3rnf9pk34kkn86s.apps.googleusercontent.com";
+        Uri redirectUri = Uri.parse("com.hopebaytech.hcfsmgmt:/oauth2callback");
+
+        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+                serviceConfiguration,
+                clientId,
+                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                redirectUri
+        );
+        builder.setScopes("profile");
+
+
+        AuthorizationRequest request = builder.build();
+        String action = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
+        Intent postAuthorizationIntent = new Intent(action);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mView.getContext(), request.hashCode(), postAuthorizationIntent, 0);
+        authorizationService.performAuthorizationRequest(request, pendingIntent);
+    }
+
+    private void checkIntent(@Nullable Intent intent) {
+        if (intent != null) {
+            String action = intent.getAction();
+            switch (action) {
+                case "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE":
+                    if (!intent.hasExtra(USED_INTENT)) {
+                        handleAuthorizationResponse(intent);
+                        intent.putExtra(USED_INTENT, true);
+                    }
+                    break;
+                default:
+                    // do nothing
+            }
+        }
+    }
+
+    private void handleAuthorizationResponse(@NonNull Intent intent) {
+        AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
+        AuthorizationException error = AuthorizationException.fromIntent(intent);
+        final AuthState authState = new AuthState(response, error);
+
+        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(response.authorizationCode);
+        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
+        authProxy.auth();
+
+        if (response != null) {
+            AuthorizationService service = new AuthorizationService(getActivity());
+            service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
+                @Override
+                public void onTokenRequestCompleted(@Nullable TokenResponse tokenResponse, @Nullable AuthorizationException exception) {
+                    if (exception != null) {
+                    } else {
+                        if (tokenResponse != null) {
+                            authState.update(tokenResponse, exception);
+                            Log.i("Rondou", String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
+                        }
+                    }
+                }
+            });
+        }
+    }
 }
