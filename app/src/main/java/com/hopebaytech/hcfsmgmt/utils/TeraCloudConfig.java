@@ -29,7 +29,12 @@ public class TeraCloudConfig {
     public static final String HCFS_CONFIG_SWIFT_CONTAINER = "swift_container";
     public static final String HCFS_CONFIG_SWIFT_PROTOCOL = "swift_protocol";
     public static final String HCFS_CONFIG_GOOGLEDRIVE_FOLDER = "googledrive_folder";
-    public static final String HCFS_BACKEND_GOOGLEDRIVE = "googledrive";
+
+    private class HCFSBackendType {
+        public static final String GOOGLEDRIVE = "googledrive";
+        public static final String SWIFT = "swift";
+        public static final String SWIFTTOKEN = "swifttoken";
+    }
 
     public static void activateTeraCloud(Context context) {
         TeraStatDAO teraStatDAO = TeraStatDAO.getInstance(context);
@@ -151,25 +156,33 @@ public class TeraCloudConfig {
 
     public static boolean storeHCFSConfigWithoutReload(DeviceServiceInfo deviceServiceInfo, Context context) {
         boolean isSuccess = true;
-        String nowBackend = deviceServiceInfo.getBackend().getBackendType();
+        String nowBackend = deviceServiceInfo.getBackend().getBackendType().toLowerCase();
 
         if (!setHCFSConfig(HCFS_CONFIG_CURRENT_BACKEND, nowBackend))
             isSuccess = false;
 
-        if (nowBackend.equalsIgnoreCase(HCFS_BACKEND_GOOGLEDRIVE)) {
-            /* Check backend type and add google drive folder name. */
-            String rootFolderName = String.format("tera.%s", HCFSMgmtUtils.getDeviceImei(context));
-            if (!setHCFSConfig(HCFS_CONFIG_GOOGLEDRIVE_FOLDER, rootFolderName))
-                Logs.e(CLASSNAME, "setConfig", "Failed to set googledrive folder name");
+        switch (nowBackend) {
+            case HCFSBackendType.GOOGLEDRIVE:
+                /* Check backend type and add google drive folder name. */
+                String rootFolderName = String.format("tera.%s", HCFSMgmtUtils.getDeviceImei(context));
+                if (!setHCFSConfig(HCFS_CONFIG_GOOGLEDRIVE_FOLDER, rootFolderName))
+                    Logs.e(CLASSNAME, "setConfig", "Failed to set googledrive folder name");
+                break;
 
-        } else {
-            /* Set swift backend info */
-            if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, deviceServiceInfo.getBackend().getUser())) {
+            case HCFSBackendType.SWIFTTOKEN:
+            case HCFSBackendType.SWIFT:
+                /* Set swift backend info */
+                if (!setHCFSConfig(HCFS_CONFIG_SWIFT_USER, deviceServiceInfo.getBackend().getUser())) {
+                    isSuccess = false;
+                }
+                if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, deviceServiceInfo.getBackend().getBucket())) {
+                    isSuccess = false;
+                }
+                break;
+
+            default:
+                Logs.e(CLASSNAME, "setConfig", "Unsupported backend type %s", nowBackend);
                 isSuccess = false;
-            }
-            if (!setHCFSConfig(HCFS_CONFIG_SWIFT_CONTAINER, deviceServiceInfo.getBackend().getBucket())) {
-                isSuccess = false;
-            }
         }
 
         return isSuccess;
