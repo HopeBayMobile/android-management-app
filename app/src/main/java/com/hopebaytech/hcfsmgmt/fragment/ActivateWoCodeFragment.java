@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -63,9 +64,15 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.TokenResponse;
 
+import org.json.JSONObject;
+
 import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * @author Aaron
@@ -118,6 +125,8 @@ public class ActivateWoCodeFragment extends Fragment {
     private TextView mErrorMessage;
     private TextView mTeraVersion;
 
+    private AuthState mAuthState;
+
     public static ActivateWoCodeFragment newInstance() {
         return new ActivateWoCodeFragment();
     }
@@ -142,6 +151,7 @@ public class ActivateWoCodeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        Log.d("Rondou", " ===== onStart ======= ");
         checkIntent(getActivity().getIntent());
     }
 
@@ -179,7 +189,8 @@ public class ActivateWoCodeFragment extends Fragment {
             public void onClick(View v) {
                 GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
                 if (googleAPI.isGooglePlayServicesAvailable(mContext) != ConnectionResult.SERVICE_MISSING) {
-                    appAuthorization();
+                    appAuthorization(v);
+                    Log.d("Rondou", " onClick ");
                     mErrorMessage.setText(R.string.activate_without_google_play_services);
                     return;
                 }
@@ -637,14 +648,15 @@ public class ActivateWoCodeFragment extends Fragment {
         String cause = extras.getString(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
         mErrorMessage.setText(cause);
     }
-    private void appAuthorization() {
+
+    private void appAuthorization(View v) {
         AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
                 Uri.parse("https://accounts.google.com/o/oauth2/v2/auth"), /* auth endpoint */
                 Uri.parse("https://www.googleapis.com/oauth2/v4/token") /* token endpoint */
         );
 
-        AuthorizationService authorizationService = new AuthorizationService(mView.getContext());
-        String clientId = "511828570984-fuprh0cm7665emlne3rnf9pk34kkn86s.apps.googleusercontent.com";
+        AuthorizationService authorizationService = new AuthorizationService(v.getContext());
+        String clientId = "795577377875-k5blp9vlffpe9s13sp6t4vqav0t6siss.apps.googleusercontent.com";
         Uri redirectUri = Uri.parse("com.hopebaytech.hcfsmgmt:/oauth2callback");
 
         AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
@@ -653,19 +665,19 @@ public class ActivateWoCodeFragment extends Fragment {
                 AuthorizationRequest.RESPONSE_TYPE_CODE,
                 redirectUri
         );
-        builder.setScopes("profile");
-
+        builder.setScopes("profile", "email", "https://www.googleapis.com/auth/drive");
 
         AuthorizationRequest request = builder.build();
         String action = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
         Intent postAuthorizationIntent = new Intent(action);
-        PendingIntent pendingIntent = PendingIntent.getActivity(mView.getContext(), request.hashCode(), postAuthorizationIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(v.getContext(), request.hashCode(), postAuthorizationIntent, 0);
         authorizationService.performAuthorizationRequest(request, pendingIntent);
     }
 
     private void checkIntent(@Nullable Intent intent) {
         if (intent != null) {
             String action = intent.getAction();
+            Log.d("Rondou", "action = " + action);
             switch (action) {
                 case "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE":
                     if (!intent.hasExtra(USED_INTENT)) {
@@ -685,6 +697,7 @@ public class ActivateWoCodeFragment extends Fragment {
         final AuthState authState = new AuthState(response, error);
 
         if (response != null) {
+            Log.d("Rondou", " response = " + response);
             AuthorizationService service = new AuthorizationService(getActivity());
             service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
                 @Override
@@ -693,11 +706,79 @@ public class ActivateWoCodeFragment extends Fragment {
                     } else {
                         if (tokenResponse != null) {
                             authState.update(tokenResponse, exception);
-                            Log.i("Rondou", String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
+                            mAuthState = authState;
+                            Log.d("Rondou", String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
                         }
                     }
+
+                    Log.d("Rondou", " mAuthState = " + mAuthState);
+                    registerTeraBattle(mAuthState);
                 }
             });
         }
+    }
+
+    private void registerTeraBattle(@NonNull AuthState authState) {
+
+        authState.performActionWithFreshTokens(new AuthorizationService(mContext), new AuthState.AuthStateAction() {
+            @Override
+            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException exception) {
+                new AsyncTask<String, Void, JSONObject>() {
+                    @Override
+                    protected JSONObject doInBackground(String... tokens) {
+                        Log.d("Rondou", "tokens = " + tokens);
+                        Log.d("Rondou", "token0 = " + tokens[0]);
+                        OkHttpClient client = new OkHttpClient();
+                        Request request = new Request.Builder()
+                                .url("https://www.googleapis.com/oauth2/v3/userinfo")
+                                .addHeader("Authorization", String.format("Bearer %s", tokens[0]))
+                                .build();
+
+                        try {
+                            Response response = client.newCall(request).execute();
+                            String jsonBody = response.body().string();
+                            JSONObject userinfo = new JSONObject(jsonBody);
+                            Log.d("Rondou", String.format("User Info Response %s", jsonBody));
+                            final String name = userinfo.get("name").toString();
+                            final String email = userinfo.get("email").toString();
+                            final String photoUrl = userinfo.get("picture").toString();
+
+                            AccountInfo accountInfo = new AccountInfo();
+                            accountInfo.setName(name);
+                            accountInfo.setEmail(email);
+                            accountInfo.setImgUrl(photoUrl);
+
+                            AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+                            accountDAO.clear();
+                            accountDAO.insert(accountInfo);
+
+                            TeraAppConfig.enableApp(mContext);
+                            TeraCloudConfig.activateTeraCloud(mContext);
+
+                            String url = "https://172.16.40.117";
+                            String token = tokens[0].toString();
+                            HCFSMgmtUtils.setSwiftToken(url, token);
+
+                            Bundle args = new Bundle();
+                            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+                            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
+                            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
+
+                            MainFragment mainFragment = MainFragment.newInstance();
+                            mainFragment.setArguments(args);
+
+                            Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
+                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
+                            ft.commit();
+                            return new JSONObject(jsonBody);
+                        } catch (Exception exception) {
+                            Log.d("Rondou", "exec = " + exception);
+                        }
+                        return null;
+                    }
+                }.execute(accessToken);
+            }
+        });
     }
 }
