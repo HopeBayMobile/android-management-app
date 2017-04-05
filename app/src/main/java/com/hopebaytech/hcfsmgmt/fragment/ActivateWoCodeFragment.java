@@ -665,7 +665,13 @@ public class ActivateWoCodeFragment extends Fragment {
                 AuthorizationRequest.RESPONSE_TYPE_CODE,
                 redirectUri
         );
-        builder.setScopes("profile", "email", "https://www.googleapis.com/auth/drive");
+        builder.setScopes("profile",
+                          "email",
+                          "https://www.googleapis.com/auth/drive",
+                          "https://www.googleapis.com/auth/drive.file",
+                          "https://www.googleapis.com/auth/drive.appdata",
+                          "https://www.googleapis.com/auth/presentations",
+                          "https://www.googleapis.com/auth/spreadsheets");
 
         AuthorizationRequest request = builder.build();
         String action = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
@@ -718,14 +724,61 @@ public class ActivateWoCodeFragment extends Fragment {
         }
     }
 
+    private void setDeviceServiceInfoBackend(JSONObject userinfo, String token) {
+        try {
+            DeviceServiceInfo deviceServiceInfo = new DeviceServiceInfo();
+            DeviceServiceInfo.Backend _backend = new DeviceServiceInfo.Backend();
+            _backend.setUrl("https://172.16.40.177");
+            _backend.setToken(token);
+            _backend.setBackendType("googledrive");
+            _backend.setBucket("akdjlaksdjglksjadlk");
+            _backend.setAccount(userinfo.get("email").toString());
+            deviceServiceInfo.setBackend(_backend);
+            boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
+        } catch (Exception exception) {
+            Log.d("Rondou", "exec = " + exception);
+        }
+    }
+
+    private Bundle setAccountDAOandHCFStoken(JSONObject userinfo, String token){
+        try {
+            final String name = userinfo.get("name").toString();
+            final String email = userinfo.get("email").toString();
+            final String photoUrl = userinfo.get("picture").toString();
+            AccountInfo accountInfo = new AccountInfo();
+            accountInfo.setName(name);
+            accountInfo.setEmail(email);
+            accountInfo.setImgUrl(photoUrl);
+
+            AccountDAO accountDAO = AccountDAO.getInstance(mContext);
+            accountDAO.clear();
+            accountDAO.insert(accountInfo);
+
+            TeraAppConfig.enableApp(mContext);
+            TeraCloudConfig.activateTeraCloud(mContext);
+
+            HCFSMgmtUtils.setSwiftToken("https://172.16.40.117", token);
+
+            Bundle args = new Bundle();
+            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
+            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
+            return args;
+
+        } catch (Exception exception) {
+            Log.d("Rondou", "exec = " + exception);
+        }
+        return null;
+    }
+
     private void registerTeraBattle(@NonNull AuthState authState) {
 
         authState.performActionWithFreshTokens(new AuthorizationService(mContext), new AuthState.AuthStateAction() {
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException exception) {
-                new AsyncTask<String, Void, JSONObject>() {
+                new AsyncTask<String, Void, Bundle>() {
                     @Override
-                    protected JSONObject doInBackground(String... tokens) {
+                    protected Bundle doInBackground(String... tokens) {
                         Log.d("Rondou", "tokens = " + tokens);
                         Log.d("Rondou", "token0 = " + tokens[0]);
                         OkHttpClient client = new OkHttpClient();
@@ -739,43 +792,26 @@ public class ActivateWoCodeFragment extends Fragment {
                             String jsonBody = response.body().string();
                             JSONObject userinfo = new JSONObject(jsonBody);
                             Log.d("Rondou", String.format("User Info Response %s", jsonBody));
-                            final String name = userinfo.get("name").toString();
-                            final String email = userinfo.get("email").toString();
-                            final String photoUrl = userinfo.get("picture").toString();
+                            final String token = tokens[0].toString();
+                            setDeviceServiceInfoBackend(userinfo, token);
+                            Bundle args = setAccountDAOandHCFStoken(userinfo, token);
 
-                            AccountInfo accountInfo = new AccountInfo();
-                            accountInfo.setName(name);
-                            accountInfo.setEmail(email);
-                            accountInfo.setImgUrl(photoUrl);
-
-                            AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-                            accountDAO.clear();
-                            accountDAO.insert(accountInfo);
-
-                            TeraAppConfig.enableApp(mContext);
-                            TeraCloudConfig.activateTeraCloud(mContext);
-
-                            String url = "https://172.16.40.117";
-                            String token = tokens[0].toString();
-                            HCFSMgmtUtils.setSwiftToken(url, token);
-
-                            Bundle args = new Bundle();
-                            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-                            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
-                            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
-
-                            MainFragment mainFragment = MainFragment.newInstance();
-                            mainFragment.setArguments(args);
-
-                            Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
-                            FragmentTransaction ft = getFragmentManager().beginTransaction();
-                            ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
-                            ft.commit();
-                            return new JSONObject(jsonBody);
+                            return args;
                         } catch (Exception exception) {
                             Log.d("Rondou", "exec = " + exception);
                         }
                         return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Bundle args) {
+                        MainFragment mainFragment = MainFragment.newInstance();
+                        mainFragment.setArguments(args);
+
+                        Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
+                        FragmentTransaction ft = getFragmentManager().beginTransaction();
+                        ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
+                        ft.commit();
                     }
                 }.execute(accessToken);
             }
