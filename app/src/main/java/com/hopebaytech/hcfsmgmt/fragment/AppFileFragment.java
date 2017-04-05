@@ -1422,8 +1422,8 @@ public class AppFileFragment extends Fragment {
                             @Override
                             public void run() {
                                 if (hcfsStatInfo != null) {
-                                    long totalSpace = hcfsStatInfo.getTeraTotal();
-                                    long freeSpace = totalSpace - hcfsStatInfo.getTeraUsed();
+                                    long totalSpace = hcfsStatInfo.getCloudTotal();
+                                    long freeSpace = totalSpace - hcfsStatInfo.getCloudUsed();
                                     updateSection(sectionViewHolder, totalSpace, freeSpace, isFirstCircleAnimated);
                                 }
                                 if (isFirstCircleAnimated) {
