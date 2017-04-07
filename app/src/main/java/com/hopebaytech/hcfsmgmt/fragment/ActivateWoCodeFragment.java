@@ -747,9 +747,9 @@ public class ActivateWoCodeFragment extends Fragment {
 
     private Bundle setAccountDAOandHCFStoken(JSONObject userinfo, String token){
         try {
-            final String name = userinfo.get("name").toString();
-            final String email = userinfo.get("email").toString();
-            final String photoUrl = userinfo.get("picture").toString();
+            final String name = userinfo.optString("name", null);
+            final String email = userinfo.optString("email", null);
+            final String photoUrl = userinfo.optString("picture", null);
             AccountInfo accountInfo = new AccountInfo();
             accountInfo.setName(name);
             accountInfo.setEmail(email);
