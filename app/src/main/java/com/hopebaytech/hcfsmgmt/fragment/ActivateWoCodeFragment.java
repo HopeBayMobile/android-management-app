@@ -45,6 +45,7 @@ import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
+import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -151,7 +152,6 @@ public class ActivateWoCodeFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d("Rondou", " ===== onStart ======= ");
         checkIntent(getActivity().getIntent());
     }
 
@@ -189,8 +189,8 @@ public class ActivateWoCodeFragment extends Fragment {
             public void onClick(View v) {
                 GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
                 if (googleAPI.isGooglePlayServicesAvailable(mContext) != ConnectionResult.SERVICE_MISSING) {
+                    Logs.d(CLASSNAME, "onClickGoogleSign", "fackToPassGoogleGmsSign");
                     appAuthorization(v);
-                    Log.d("Rondou", " onClick ");
                     mErrorMessage.setText(R.string.activate_without_google_play_services);
                     return;
                 }
@@ -683,7 +683,7 @@ public class ActivateWoCodeFragment extends Fragment {
     private void checkIntent(@Nullable Intent intent) {
         if (intent != null) {
             String action = intent.getAction();
-            Log.d("Rondou", "action = " + action);
+            Logs.d(CLASSNAME, "onStart checkIntent", "intentAction " + action);
             switch (action) {
                 case "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE":
                     if (!intent.hasExtra(USED_INTENT)) {
@@ -701,9 +701,10 @@ public class ActivateWoCodeFragment extends Fragment {
         AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
         AuthorizationException error = AuthorizationException.fromIntent(intent);
         final AuthState authState = new AuthState(response, error);
+        final AppAuthUtils appAuthUtils = new AppAuthUtils();
 
+        Logs.d(CLASSNAME, "onHandleAuthResponse", "Response state " + response.state);
         if (response != null) {
-            Log.d("Rondou", " response = " + response);
             AuthorizationService service = new AuthorizationService(getActivity());
             service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
                 @Override
@@ -713,11 +714,15 @@ public class ActivateWoCodeFragment extends Fragment {
                         if (tokenResponse != null) {
                             authState.update(tokenResponse, exception);
                             mAuthState = authState;
-                            Log.d("Rondou", String.format("Token Response [ Access Token: %s, ID Token: %s ]", tokenResponse.accessToken, tokenResponse.idToken));
+                            appAuthUtils.saveObjectToSharedPreference(mContext,
+                                                                      appAuthUtils.AUTH_STATUS_PERF_NAME,
+                                                                      appAuthUtils.AUTH_STATUS_PERF_KEYS,
+                                                                      mAuthState);
+                            Logs.d(CLASSNAME, "onTokenResponse", String.format(
+                                    "Token Response [ Access Token: %s, ID Token: %s ]",
+                                    tokenResponse.accessToken, tokenResponse.idToken));
                         }
                     }
-
-                    Log.d("Rondou", " mAuthState = " + mAuthState);
                     registerTeraBattle(mAuthState);
                 }
             });
@@ -736,7 +741,7 @@ public class ActivateWoCodeFragment extends Fragment {
             deviceServiceInfo.setBackend(_backend);
             boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
         } catch (Exception exception) {
-            Log.d("Rondou", "exec = " + exception);
+            Logs.e(CLASSNAME, "setDeviceServiceInfoBackend", Log.getStackTraceString(exception));
         }
     }
 
@@ -766,7 +771,7 @@ public class ActivateWoCodeFragment extends Fragment {
             return args;
 
         } catch (Exception exception) {
-            Log.d("Rondou", "exec = " + exception);
+            Logs.e(CLASSNAME, "setAccountDAOandHCFStoken", Log.getStackTraceString(exception));
         }
         return null;
     }
@@ -779,26 +784,25 @@ public class ActivateWoCodeFragment extends Fragment {
                 new AsyncTask<String, Void, Bundle>() {
                     @Override
                     protected Bundle doInBackground(String... tokens) {
-                        Log.d("Rondou", "tokens = " + tokens);
-                        Log.d("Rondou", "token0 = " + tokens[0]);
+                        Logs.d(CLASSNAME, "onAppAuthRegister", "firstTimeToken " + tokens[0]);
                         OkHttpClient client = new OkHttpClient();
                         Request request = new Request.Builder()
                                 .url("https://www.googleapis.com/oauth2/v3/userinfo")
                                 .addHeader("Authorization", String.format("Bearer %s", tokens[0]))
                                 .build();
+                        final String token = tokens[0].toString();
 
                         try {
                             Response response = client.newCall(request).execute();
                             String jsonBody = response.body().string();
+                            Logs.d(CLASSNAME, "onAppAuthRegister", String.format("User Info Response %s", jsonBody));
+
                             JSONObject userinfo = new JSONObject(jsonBody);
-                            Log.d("Rondou", String.format("User Info Response %s", jsonBody));
-                            final String token = tokens[0].toString();
                             setDeviceServiceInfoBackend(userinfo, token);
                             Bundle args = setAccountDAOandHCFStoken(userinfo, token);
-
                             return args;
                         } catch (Exception exception) {
-                            Log.d("Rondou", "exec = " + exception);
+                            Logs.e(CLASSNAME, "appAuthRegisterTera", Log.getStackTraceString(exception));
                         }
                         return null;
                     }
