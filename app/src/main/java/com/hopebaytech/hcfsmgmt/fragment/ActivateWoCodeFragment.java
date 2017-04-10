@@ -188,7 +188,12 @@ public class ActivateWoCodeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-                if (googleAPI.isGooglePlayServicesAvailable(mContext) != ConnectionResult.SERVICE_MISSING) {
+                int gmsAvailable = googleAPI.isGooglePlayServicesAvailable(mContext);
+                Logs.d(CLASSNAME, "onClickGoogleSign", "gmsAvailable = " + gmsAvailable);
+
+                boolean isGmsMissing = ConnectionResult.SERVICE_MISSING == gmsAvailable;
+                boolean isGmsInvalid = ConnectionResult.SERVICE_INVALID == gmsAvailable;
+                if (isGmsInvalid || isGmsMissing) {
                     Logs.d(CLASSNAME, "onClickGoogleSign", "fackToPassGoogleGmsSign");
                     appAuthorization(v);
                     mErrorMessage.setText(R.string.activate_without_google_play_services);
