@@ -7,6 +7,9 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
+import android.os.Build;
+import android.os.Environment;
+import android.os.FileObserver;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
@@ -14,7 +17,11 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.LocationStatus;
+import com.hopebaytech.hcfsmgmt.utils.Logs;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AppInfo extends ItemInfo implements Cloneable {
@@ -105,11 +112,19 @@ public class AppInfo extends ItemInfo implements Cloneable {
     }
 
     public String getSourceDir() {
-        // Default sourceDir = /data/app/<package-name>-1/base.apk
+        // TODO: split apk and source file
+
+        // Default Android 4.4 sourceDir = /data/app/<package-name>.apk
         String sourceDir = applicationInfo.sourceDir;
-        int lastIndex = sourceDir.lastIndexOf("/");
-        return sourceDir.substring(0, lastIndex); // source dir path without apk suffix, such as /data/app/<package-name>-1/
+
+        // Default Android 6.0 sourceDir = /data/app/<package-name>-1/base.apk
+        if (Build.VERSION.SDK_INT >= 23) {
+            int lastIndex = sourceDir.lastIndexOf("/");
+            return sourceDir.substring(0, lastIndex); // source dir path without apk suffix, such as /data/app/<package-name>-1/
+        }
+        return sourceDir;
     }
+
 
     @Nullable
     public List<String> getExternalDirList() {
@@ -131,6 +146,67 @@ public class AppInfo extends ItemInfo implements Cloneable {
     @Nullable
     public String[] getSharedLibraryFiles() {
         return sharedLibraryFiles;
+    }
+
+    /**
+    * Only for Android Kitkat now.
+    * Default path is "/data/dalvik-cache/"
+    * Name of dex file should like "prefix + package_name + postfix"
+    * prefix contain: data@app@, system@app@, system@framework@, system@priv-app@
+    * postfix contain: @classes.dex
+    *
+    * We only use data@app@ here.
+    */
+    public String getDalvikCacheFilePath() {
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            return null;
+        }
+
+        String dalvikCachePath = Environment.getDataDirectory().toString() + "/dalvik-cache/";
+        Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "dalvikCachePath=" + dalvikCachePath);
+        String pkgName = getPackageName();
+        Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "pkgName=" + pkgName);
+        String prefix = "data@app@";
+        String postfix = "-1.apk@classes.dex";
+        String filename = prefix + pkgName  + postfix;
+        String path = dalvikCachePath + filename;
+
+        File file = new File(path);
+
+        if (!file.exists()) {
+            Logs.d(CLASSNAME, "getDalvikCacheDirPath", "dalvik-cache is not exists for= " + pkgName);
+            return null;
+        }
+
+        return path;
+    }
+
+    /**
+     * Only for Android Kitkat now.
+     * Default path is "/data/app-lib/"
+     * Name of lib folder should like "<pkgName>-1"
+     */
+    public String getAppLibDirPath(){
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            return null;
+        }
+
+        String appLibPath = Environment.getDataDirectory().toString() + "/app-lib/";
+        Logs.d(CLASSNAME, "getAppLibDirPath", "appLibPath=" + appLibPath);
+        String pkgName = getPackageName();
+        Logs.d(CLASSNAME, "getAppLibDirPath", "pkgName=" + pkgName);
+        String path = appLibPath + pkgName + "-1";
+
+        File file = new File(path);
+
+        if (!file.exists()) {
+            Logs.d(CLASSNAME, "getAppLibDirPath", "app-lib is not exists=" + pkgName);
+            return null;
+        }
+
+        return path;
     }
 
     public int getAppSize() {
