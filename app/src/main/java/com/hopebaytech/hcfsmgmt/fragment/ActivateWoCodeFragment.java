@@ -112,6 +112,12 @@ public class ActivateWoCodeFragment extends Fragment {
 
     public static final String KEY_GOOGLE_PHOTO_URL = "key_google_photo_url";
 
+    public static final String GOOGLE_ENDPOINT_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
+
+    public static final String GOOGLE_ENDPOINT_TOKEN = "https://www.googleapis.com/oauth2/v4/token";
+
+    public static final String GOOGLE_CLIENT_ID = "795577377875-k5blp9vlffpe9s13sp6t4vqav0t6siss.apps.googleusercontent.com";
+
     private static final String USED_INTENT = "USED_INTENT";
 
     private GoogleApiClient mGoogleApiClient;
@@ -194,7 +200,7 @@ public class ActivateWoCodeFragment extends Fragment {
                 boolean isGmsMissing = ConnectionResult.SERVICE_MISSING == gmsAvailable;
                 boolean isGmsInvalid = ConnectionResult.SERVICE_INVALID == gmsAvailable;
                 if (isGmsInvalid || isGmsMissing) {
-                    Logs.d(CLASSNAME, "onClickGoogleSign", "fackToPassGoogleGmsSign");
+                    Logs.d(CLASSNAME, "onClickGoogleSign", "fakeToPassGoogleGmsSign");
                     appAuthorization(v);
                     mErrorMessage.setText(R.string.activate_without_google_play_services);
                     return;
@@ -656,12 +662,12 @@ public class ActivateWoCodeFragment extends Fragment {
 
     private void appAuthorization(View v) {
         AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
-                Uri.parse("https://accounts.google.com/o/oauth2/v2/auth"), /* auth endpoint */
-                Uri.parse("https://www.googleapis.com/oauth2/v4/token") /* token endpoint */
+                Uri.parse(GOOGLE_ENDPOINT_AUTH), /* auth endpoint */
+                Uri.parse(GOOGLE_ENDPOINT_TOKEN) /* token endpoint */
         );
 
         AuthorizationService authorizationService = new AuthorizationService(v.getContext());
-        String clientId = "795577377875-k5blp9vlffpe9s13sp6t4vqav0t6siss.apps.googleusercontent.com";
+        String clientId = GOOGLE_CLIENT_ID;
         Uri redirectUri = Uri.parse("com.hopebaytech.hcfsmgmt:/oauth2callback");
 
         AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
@@ -714,19 +720,16 @@ public class ActivateWoCodeFragment extends Fragment {
             service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
                 @Override
                 public void onTokenRequestCompleted(@Nullable TokenResponse tokenResponse, @Nullable AuthorizationException exception) {
-                    if (exception != null) {
-                    } else {
-                        if (tokenResponse != null) {
-                            authState.update(tokenResponse, exception);
-                            mAuthState = authState;
-                            appAuthUtils.saveObjectToSharedPreference(mContext,
-                                                                      appAuthUtils.AUTH_STATUS_PERF_NAME,
-                                                                      appAuthUtils.AUTH_STATUS_PERF_KEYS,
-                                                                      mAuthState);
-                            Logs.d(CLASSNAME, "onTokenResponse", String.format(
-                                    "Token Response [ Access Token: %s, ID Token: %s ]",
-                                    tokenResponse.accessToken, tokenResponse.idToken));
-                        }
+                    if (exception == null && tokenResponse != null) {
+                        authState.update(tokenResponse, exception);
+                        mAuthState = authState;
+                        appAuthUtils.saveObjectToSharedPreference(mContext,
+                                                                  appAuthUtils.AUTH_STATUS_PERF_NAME,
+                                                                  appAuthUtils.AUTH_STATUS_PERF_KEYS,
+                                                                  mAuthState);
+                        Logs.d(CLASSNAME, "onTokenResponse", String.format(
+                                "Token Response [ Access Token: %s, ID Token: %s ]",
+                                tokenResponse.accessToken, tokenResponse.idToken));
                     }
                     registerTeraBattle(mAuthState);
                 }
