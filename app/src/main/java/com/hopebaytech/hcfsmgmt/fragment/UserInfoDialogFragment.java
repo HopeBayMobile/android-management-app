@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Shader;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -114,6 +115,39 @@ public class UserInfoDialogFragment extends DialogFragment {
         final AccountInfo accountInfo = accountDAO.getFirst();
         mUserName.setText(accountInfo.getName());
         mUserEmail.setText(accountInfo.getEmail());
+        final String imgUrl = accountInfo.getImgUrl();
+
+        new AsyncTask<String, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(String... imgUrl) {
+                final Bitmap iconBitmap = downloadUserIconWithRetry(imgUrl[0]);
+                if (iconBitmap != null) {
+                    int radius = iconBitmap.getWidth() / 2;
+                    BitmapShader bitmapShader = new BitmapShader(
+                            iconBitmap,
+                            Shader.TileMode.CLAMP,
+                            Shader.TileMode.CLAMP
+                    );
+                    final Bitmap circularIconBitmap = Bitmap.createBitmap(
+                            iconBitmap.getWidth(),
+                            iconBitmap.getHeight(),
+                            Bitmap.Config.ARGB_8888
+                    );
+                    Canvas canvas = new Canvas(circularIconBitmap);
+                    Paint paint = new Paint();
+                    paint.setAntiAlias(true);
+                    paint.setShader(bitmapShader);
+                    canvas.drawCircle(radius, radius, radius, paint);
+                    mUiHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mUserIcon.setImageBitmap(circularIconBitmap);
+                        }
+                    });
+                }
+                return true;
+            }
+        }.execute(imgUrl);
 
         // User icon is not expired, reuse the prefetch base64 icon.
         if (System.currentTimeMillis() <= accountInfo.getImgExpiringTime()) {
