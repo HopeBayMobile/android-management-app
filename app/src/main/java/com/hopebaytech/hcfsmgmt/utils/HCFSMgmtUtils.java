@@ -291,9 +291,29 @@ public class HCFSMgmtUtils {
 
     public static boolean pinApp(AppInfo info, int pinType) {
         Logs.d(CLASSNAME, "pinApp", "AppName=" + info.getName());
+
         String sourceDir = info.getSourceDir();
         String dataDir = info.getDataDir();
         List<String> externalDirList = info.getExternalDirList();
+
+        // Only for Android 4.4
+        String dalvikCacheFile = info.getDalvikCacheFilePath();
+        String appLibDir = info.getAppLibDirPath();
+
+        // Start pin process.
+
+        boolean isDalvikCacheSuccess = true;
+        if (dalvikCacheFile != null) {
+            Logs.d(CLASSNAME, "pinApp", "dalvikCacheFile=" + dalvikCacheFile);
+            isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, PinType.PRIORITY) == 0);
+        }
+
+        boolean isAppLibSuccess = true;
+        if (appLibDir != null) {
+            Logs.d(CLASSNAME, "pinApp", "appLibDir=" + appLibDir);
+            isAppLibSuccess = (pinFileOrDirectory(appLibDir, PinType.PRIORITY) == 0);
+        }
+
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             Logs.d(CLASSNAME, "pinApp", "sourceDir=" + sourceDir);
@@ -302,19 +322,25 @@ public class HCFSMgmtUtils {
                 isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
             }
         }
+
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
                 isDataDirSuccess = (pinFileOrDirectory(dataDir, pinType) == 0);
             }
         }
+
         boolean isExternalDirSuccess = true;
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
                 isExternalDirSuccess &= (pinFileOrDirectory(externalDir, pinType) == 0);
             }
         }
-        return isSourceDirSuccess & isDataDirSuccess & isExternalDirSuccess;
+        return  isSourceDirSuccess &
+                isDataDirSuccess &
+                isExternalDirSuccess &
+                isDalvikCacheSuccess &
+                isAppLibSuccess;
     }
 
     public static boolean unpinApp(AppInfo info) {
@@ -324,6 +350,28 @@ public class HCFSMgmtUtils {
         List<String> externalDirList = info.getExternalDirList();
 
         boolean isMinApkSuccess = false;
+
+        // Only for Android 4.4
+        String dalvikCacheFile = info.getDalvikCacheFilePath();
+        String appLibDir = info.getAppLibDirPath();
+
+        // Start unpin process.
+        boolean isDalvikCacheSuccess = true;
+        if (dalvikCacheFile != null) {
+            Logs.d(CLASSNAME, "unpinApp", "dalvikCacheFile=" + dalvikCacheFile);
+            // not support unpin in 2.3.1
+            Logs.d(CLASSNAME, "unpinApp", "Not Support unpin dalvik-Cache=" + dalvikCacheFile);
+            //isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, PinType.PRIORITY) == 0);
+        }
+
+        boolean isAppLibSuccess = true;
+        if (appLibDir != null) {
+            Logs.d(CLASSNAME, "unpinApp", "appLibDir=" + appLibDir);
+            // not support unpin in 2.3.1
+            Logs.d(CLASSNAME, "unpinApp", "Not Support unpin app-lib =" + dalvikCacheFile);
+            //isAppLibSuccess = (pinFileOrDirectory(appLibDir, PinType.PRIORITY) == 0);
+        }
+
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             if (sourceDir.startsWith("/data/app")) {
@@ -335,12 +383,14 @@ public class HCFSMgmtUtils {
                 isMinApkSuccess = true;
             }
         }
+
         boolean isDataDirSuccess = true;
         if (dataDir != null) {
             if (dataDir.startsWith("/data/data") || dataDir.startsWith("/data/user")) {
                 isDataDirSuccess = (unpinFileOrDirectory(dataDir) == 0);
             }
         }
+
         boolean isExternalDirSuccess = true;
         if (externalDirList != null) {
             for (String externalDir : externalDirList) {
@@ -348,7 +398,12 @@ public class HCFSMgmtUtils {
             }
         }
 
-        return isSourceDirSuccess & isMinApkSuccess & isDataDirSuccess & isExternalDirSuccess;
+        return  isSourceDirSuccess &
+                isMinApkSuccess &
+                isDataDirSuccess &
+                isExternalDirSuccess &
+                isDalvikCacheSuccess &
+                isAppLibSuccess;
     }
 
     /**
