@@ -375,7 +375,9 @@ public class HCFSMgmtUtils {
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             if (sourceDir.startsWith("/data/app")) {
-                isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
+                // not support unpin in 2.3.1
+                Logs.d(CLASSNAME, "unpinApp", "Not Support unpin apk=" + sourceDir);
+                //isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
 
                 // TODO: Vince -, support kitkat
                 // Priority pin /data/app/<pkg-folder>/.basemin
