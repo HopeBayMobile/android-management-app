@@ -45,7 +45,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/M2"
-                android:layout_marginTop="@dimen/M2"
+                android:layout_marginTop="@dimen/M3"
                 android:orientation="vertical">
 
                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
@@ -54,20 +54,19 @@
                     android:layout_height="wrap_content"
                     android:text="@string/overview_space_usage_title" />
 
-                <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                    android:id="@+id/fontTextView"
-                    style="@style/F6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="17dp"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/overview_data_transmission_today" />
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
+
+                    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                        android:id="@+id/fontTextView"
+                        style="@style/F6"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:text="@string/overview_data_transmission_today" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -106,7 +105,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/M2"
                     android:layout_weight="1"
                     android:orientation="vertical"
                     android:weightSum="3">
