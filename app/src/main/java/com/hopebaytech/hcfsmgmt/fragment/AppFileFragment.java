@@ -2226,8 +2226,9 @@ public class AppFileFragment extends Fragment {
                 }
 
                 appInfo.setLastProcessTime(System.currentTimeMillis());
-                mPinUnpinAppMap.put(appInfo.getPackageName(), appInfo);
                 try {
+                    mPinUnpinAppMap.put(appInfo.getPackageName(), (AppInfo) appInfo.clone());
+
                     // The subject to clone AppInfo is in order to keep the pin status.
                     mWaitToExecuteSparseArr.put(appInfo.hashCode(), (AppInfo) appInfo.clone());
                 } catch (CloneNotSupportedException e) {
