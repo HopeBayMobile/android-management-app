@@ -8,8 +8,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/img_login_bkg"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/img_login_bkg" />
+        android:layout_alignParentStart="true" />
 
     <com.hopebaytech.hcfsmgmt.customview.FontTextView
         android:id="@+id/version"
@@ -24,56 +25,90 @@
 
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="80dp"
+        android:layout_width="200dp"
+        android:layout_height="100dp"
         android:layout_marginTop="100dp"
-        android:src="@drawable/icon_tera_logo_l_login" />
+        android:layout_marginBottom="110dp"
+        android:src="@drawable/icon_tera_logo_l_login"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <LinearLayout
         android:id="@+id/switch_account_layout_icon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/logo"
         android:layout_gravity="center"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_below="@+id/logo"
+        android:layout_alignParentStart="true">
 
         <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            style="@style/F8"
+            style="@style/F3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:text="@string/activate_with_google_account" />
 
-        <LinearLayout
-            android:id="@+id/google_activate"
-            android:layout_width="76dp"
-            android:layout_height="76dp"
-            android:layout_marginBottom="92dp"
-            android:layout_marginTop="7dp"
-            android:background="@drawable/white_background_gray_border"
+        <RelativeLayout
+            android:id="@+id/google_drive_activate"
+            android:layout_marginTop="15dp"
+            android:layout_width="250dp"
+            android:layout_height="55dp"
+            android:background="@drawable/button_shadow_normal"
             android:clickable="true">
 
-            <LinearLayout
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:padding="7dp"
+                android:layout_weight="1"
+                android:src="@drawable/icon_btn_google_account" />
+
+            <TextView
+                android:layout_weight="4"
+                android:id="@+id/google_drive_activate_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="?attr/selectableItemBackground"
-                android:gravity="center">
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:text="google drive"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true" />
+        </RelativeLayout>
 
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/icon_btn_google_account" />
 
-            </LinearLayout>
-        </LinearLayout>
+        <RelativeLayout
+            android:id="@+id/google_activate"
+            android:layout_marginTop="15dp"
+            android:layout_width="250dp"
+            android:layout_height="55dp"
+            android:background="@drawable/button_shadow_normal"
+            android:clickable="true">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="match_parent"
+                android:padding="7dp"
+                android:src="@drawable/icon_btn_google_account" />
+
+            <TextView
+                android:id="@+id/arkflex_activate_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:text="arkflex U"/>
+        </RelativeLayout>
+
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/switch_account_layout_icon"
+        android:layout_marginTop="50dp"
         android:layout_marginEnd="30dp"
         android:layout_marginStart="30dp"
         android:gravity="center">
