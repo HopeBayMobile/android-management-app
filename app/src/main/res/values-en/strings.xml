@@ -19,7 +19,7 @@
     <string name="activate_forget_password"><u>Forgot password</u></string>
     <string name="activate_or">or</string>
     <string name="activate_with_code_msg">The activation code has been used. If your old Tera device is lost or broken, please lock it on %s before activation.</string>
-    <string name="activate_with_google_account">Use Google account for activation</string>
+    <string name="activate_with_google_account">Activation with</string>
     <string name="activate_get_server_client_id_failed">Getting info on Google authentication from admin server failed.</string>
     <string name="activate_require_username_password">Enter user name &amp; password.</string>
     <string name="activate_without_google_play_services">Tera must run on Google Play services, which are missing on your phone.</string>
