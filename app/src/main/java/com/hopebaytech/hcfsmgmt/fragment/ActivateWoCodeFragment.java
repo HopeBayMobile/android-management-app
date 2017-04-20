@@ -197,13 +197,10 @@ public class ActivateWoCodeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (NetworkUtils.isNetworkConnected(mContext)) {
-                    mProgressDialogUtils.show(getString(R.string.processing_msg));
                     appAuthorization(v);
                 } else {
                     mErrorMessage.setText(R.string.activate_alert_dialog_message);
                 }
-
-                mProgressDialogUtils.dismiss();
             }
         });
 
