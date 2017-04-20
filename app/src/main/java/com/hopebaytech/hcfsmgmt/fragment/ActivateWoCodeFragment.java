@@ -9,10 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -32,10 +28,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.graphics.drawable.shapes.Shape;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -72,7 +66,6 @@ import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.TokenResponse;
 
 import org.json.JSONObject;
-import org.xmlpull.v1.XmlPullParser;
 
 import java.util.Locale;
 
@@ -81,8 +74,6 @@ import javax.net.ssl.HttpsURLConnection;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-
-import static com.hopebaytech.hcfsmgmt.R.id.or;
 
 /**
  * @author Aaron
@@ -200,52 +191,25 @@ public class ActivateWoCodeFragment extends Fragment {
                 )
         );
 
-        if (ContextCompat.checkSelfPermission(mContext,
-                Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-
-        } else {
-            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
-                builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-                    }
-                });
-                builder.setCancelable(false);
-                builder.show();
-            } else {
-                PermissionSnackbar.newInstance(mContext, mView).show();
-            }
-        }
-
+        grantPermission();
 
         mGoogleDriveActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // button press feedback
-                mGoogleDriveActivate.setBackgroundResource(R.drawable.button_shadow_pressed);
-
                 if (NetworkUtils.isNetworkConnected(mContext)) {
+                    mProgressDialogUtils.show(getString(R.string.processing_msg));
                     appAuthorization(v);
                 } else {
                     mErrorMessage.setText(R.string.activate_alert_dialog_message);
                 }
 
+                mProgressDialogUtils.dismiss();
             }
         });
 
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // button press feedback
-                mGoogleActivate.setBackgroundResource(R.drawable.button_shadow_pressed);
-
-                GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-                int gmsAvailable = googleAPI.isGooglePlayServicesAvailable(mContext);
-                Logs.d(CLASSNAME, "onClickGoogleSign", "gmsAvailable = " + gmsAvailable);
 
                 // It needs to sign out first in order to show google account chooser as user
                 // want to choose another Google account.
@@ -254,6 +218,8 @@ public class ActivateWoCodeFragment extends Fragment {
                 }
 
                 if (NetworkUtils.isNetworkConnected(mContext)) {
+                    mProgressDialogUtils.show(getString(R.string.processing_msg));
+
                     mWorkHandler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -276,6 +242,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
                                         int errorCode = result.getErrorCode();
                                         if (errorCode == ConnectionResult.SERVICE_MISSING) {
+                                            mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                        } else if (errorCode == ConnectionResult.SERVICE_INVALID) {
                                             mErrorMessage.setText(R.string.activate_without_google_play_services);
                                         } else if (errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
                                             mErrorMessage.setText(R.string.activate_update_google_play_services_required);
@@ -848,5 +816,32 @@ public class ActivateWoCodeFragment extends Fragment {
                 }.execute(accessToken);
             }
         });
+    }
+
+    private boolean checkPermission() {
+        boolean readPhoneState = ContextCompat.checkSelfPermission(mContext,
+                Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+
+        return readPhoneState;
+    }
+
+    private void grantPermission() {
+        if (!checkPermission()){
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle(getString(R.string.alert_dialog_title_warning));
+                builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
+                builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                    }
+                });
+                builder.setCancelable(false);
+                builder.show();
+            } else {
+                PermissionSnackbar.newInstance(mContext, mView).show();
+            }
+        }
     }
 }
