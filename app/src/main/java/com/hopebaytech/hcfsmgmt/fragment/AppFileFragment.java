@@ -2197,7 +2197,6 @@ public class AppFileFragment extends Fragment {
                 final AppInfo appInfo = (AppInfo) itemInfo;
                 if (!isPinned) {
                     int messageResId = 0;
-                    /*
                     int code = HCFSMgmtUtils.checkMinimalApk(mContext, appInfo.getPackageName(), true);
                     switch (code) {
                         case 0: // minimal apk is not exist
@@ -2210,7 +2209,6 @@ public class AppFileFragment extends Fragment {
                         case 1: // minimal apk is exist
                             break;
                     }
-                    */
 
                     if (!allowPinUnpin) {
                         itemInfo.setPinned(!isPinned);

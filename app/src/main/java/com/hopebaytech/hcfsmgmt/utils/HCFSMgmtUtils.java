@@ -868,7 +868,6 @@ public class HCFSMgmtUtils {
     }
 
     public static boolean createMinimalApk(Context context, String packageName, boolean blocking) {
-        /*
         boolean isSuccess = false;
         try {
             String sourceDir = getSourceDir(context, packageName);
@@ -886,9 +885,6 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "createMinimalApk", Log.getStackTraceString(e));
         }
         return isSuccess;
-        */
-
-        return true;
     }
 
     /**
@@ -930,6 +926,9 @@ public class HCFSMgmtUtils {
             sourceDir = p.applicationInfo.sourceDir;
             sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
             if (sourceDir.startsWith(DATA_APP_PATH)) {
+                //Kitkat pkgs do not have separate folders
+                if ((DATA_APP_PATH.length() + 1) >= sourceDir.length())
+                    sourceDir = p.applicationInfo.sourceDir;
                 sourceDir = sourceDir.substring(DATA_APP_PATH.length() + 1, sourceDir.length());
                 Logs.d(CLASSNAME, "getSourceDir", "package name: " + packageName + " package path: " + sourceDir);
             }

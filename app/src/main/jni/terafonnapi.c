@@ -393,7 +393,7 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_mount
     return result;
 }
 
-/*JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_createMinimalApk(
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_createMinimalApk(
  		JNIEnv *jEnv, jobject jObject, jstring jPkgPath, jint jBlocking) {
  	const char *json_res;
     const char *pkg_path = (*jEnv)->GetStringUTFChars(jEnv, jPkgPath, 0);
@@ -415,7 +415,7 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_check
     free((char *)json_res);
     free((char *)pkg_path);
     return result;
-}*/
+}
 
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_retryConn(
 		JNIEnv *jEnv, jobject jObject) {
