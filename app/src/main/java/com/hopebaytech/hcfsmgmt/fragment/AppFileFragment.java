@@ -2198,9 +2198,11 @@ public class AppFileFragment extends Fragment {
                 if (!isPinned) {
                     int messageResId = 0;
                     int code = HCFSMgmtUtils.checkMinimalApk(mContext, appInfo.getPackageName(), true);
+                    Logs.i(CLASSNAME, "pinUnpinItem", "Check min apk results: " + code);
                     switch (code) {
                         case 0: // minimal apk is not exist
                             HCFSMgmtUtils.createMinimalApk(mContext, appInfo.getPackageName(), false);
+                            break;
                         case -1: // unknown error
                         case 2: // create minimal apk in progress
                             allowPinUnpin = false;

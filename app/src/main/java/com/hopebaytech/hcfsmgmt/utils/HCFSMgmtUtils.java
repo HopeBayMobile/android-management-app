@@ -375,14 +375,20 @@ public class HCFSMgmtUtils {
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             if (sourceDir.startsWith("/data/app")) {
-                // not support unpin in 2.3.1
-                Logs.d(CLASSNAME, "unpinApp", "Not Support unpin apk=" + sourceDir);
-                //isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
+                Logs.i(CLASSNAME, "unpinApp", "Apk path=" + sourceDir);
+                isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
+                String minApkPath;
 
-                // TODO: Vince -, support kitkat
-                // Priority pin /data/app/<pkg-folder>/.basemin
-                //isMinApkSuccess = (pinFileOrDirectory(sourceDir + "/.basemin", PinType.PRIORITY) == 0);
-                isMinApkSuccess = true;
+                // Check the name of min apk (could be Kitkat)
+                if (sourceDir.equals(info.getApplicationInfo().sourceDir)) {
+                    // Reconstruct min apk path
+                    minApkPath = "/data/app/." + sourceDir.substring(sourceDir.lastIndexOf('/') + 1, sourceDir.length() - 4) + "min";
+                    Logs.i(CLASSNAME, "unpinApp", "Minapk path=" + minApkPath);
+                } else {
+                    minApkPath = sourceDir + "/.basemin";
+                }
+                // Priority pin minapk
+                isMinApkSuccess = (pinFileOrDirectory(minApkPath, PinType.PRIORITY) == 0);
             }
         }
 
