@@ -276,8 +276,13 @@ public class TeraFonnApiService extends Service {
                 @Override
                 public void run() {
                     int status;
+                    boolean isAvailable = false;
+
                     HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
-                    boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+                    if (hcfsStatInfo != null) {
+                        isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+                    }
+
                     if (isAvailable) {
                         status = AppStatus.AVAILABLE;
                     } else {
