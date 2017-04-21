@@ -35,8 +35,8 @@ extern void HCFS_trigger_unboost(const char **json_res);
 extern void HCFS_clear_booster_package_remaining(const char **json_res, const char *package_name);
 extern void HCFS_mount_smart_cache(const char **json_res);
 extern void HCFS_umount_smart_cache(const char **json_res);
-//extern void HCFS_check_minimal_apk(const char **json_res, const char *package_path, int blocking);
-//extern void HCFS_create_minimal_apk(const char **json_res, const char *package_path, int blocking);
+extern void HCFS_check_minimal_apk(const char **json_res, const char *package_path, int blocking);
+extern void HCFS_create_minimal_apk(const char **json_res, const char *package_path, int blocking);
 extern void HCFS_retry_backend(const char **json_res);
 
 //extern void HCFS_collect_sys_logs(const char **json_res);

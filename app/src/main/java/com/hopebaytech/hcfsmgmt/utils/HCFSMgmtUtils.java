@@ -872,6 +872,7 @@ public class HCFSMgmtUtils {
         try {
             String sourceDir = getSourceDir(context, packageName);
             if (sourceDir != null) {
+                Logs.i(CLASSNAME, "createMinimalApk", "Debug source" + sourceDir);
                 String jsonResult = HCFSApiUtils.createMinimalApk(sourceDir, blocking ? 1 : 0);
                 JSONObject jObject = new JSONObject(jsonResult);
                 isSuccess = jObject.getBoolean("result");
@@ -929,6 +930,7 @@ public class HCFSMgmtUtils {
                 //Kitkat pkgs do not have separate folders
                 if ((DATA_APP_PATH.length() + 1) >= sourceDir.length())
                     sourceDir = p.applicationInfo.sourceDir;
+                Logs.d(CLASSNAME, "getSourceDir", "org sourcedir " + sourceDir);
                 sourceDir = sourceDir.substring(DATA_APP_PATH.length() + 1, sourceDir.length());
                 Logs.d(CLASSNAME, "getSourceDir", "package name: " + packageName + " package path: " + sourceDir);
             }
