@@ -28,7 +28,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
@@ -128,7 +128,8 @@ public class ActivateWoCodeFragment extends Fragment {
     private View mView;
     private Context mContext;
     private ProgressDialogUtils mProgressDialogUtils;
-    private LinearLayout mGoogleActivate;
+    private RelativeLayout mGoogleDriveActivate;
+    private RelativeLayout mGoogleActivate;
     private TextView mErrorMessage;
     private TextView mTeraVersion;
 
@@ -172,8 +173,8 @@ public class ActivateWoCodeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mView = view;
-
-        mGoogleActivate = (LinearLayout) view.findViewById(R.id.google_activate);
+        mGoogleDriveActivate = (RelativeLayout) view.findViewById(R.id.google_drive_activate);
+        mGoogleActivate = (RelativeLayout) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
         mTeraVersion = (TextView) view.findViewById(R.id.version);
     }
@@ -190,105 +191,89 @@ public class ActivateWoCodeFragment extends Fragment {
                 )
         );
 
+        grantPermission();
+
+        mGoogleDriveActivate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (NetworkUtils.isNetworkConnected(mContext)) {
+                    appAuthorization(v);
+                } else {
+                    mErrorMessage.setText(R.string.activate_alert_dialog_message);
+                }
+            }
+        });
+
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-                int gmsAvailable = googleAPI.isGooglePlayServicesAvailable(mContext);
-                Logs.d(CLASSNAME, "onClickGoogleSign", "gmsAvailable = " + gmsAvailable);
 
-                boolean isGmsMissing = ConnectionResult.SERVICE_MISSING == gmsAvailable;
-                boolean isGmsInvalid = ConnectionResult.SERVICE_INVALID == gmsAvailable;
-                if (isGmsInvalid || isGmsMissing) {
-                    Logs.d(CLASSNAME, "onClickGoogleSign", "fakeToPassGoogleGmsSign");
-                    appAuthorization(v);
-                    mErrorMessage.setText(R.string.activate_without_google_play_services);
-                    return;
+                // It needs to sign out first in order to show google account chooser as user
+                // want to choose another Google account.
+                if (mGoogleApiClient != null) {
+                    signOut();
                 }
 
-                if (ContextCompat.checkSelfPermission(mContext,
-                        Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED)
-                    if (NetworkUtils.isNetworkConnected(mContext)) {
-                        mProgressDialogUtils.show(getString(R.string.processing_msg));
-                        // It needs to sign out first in order to show oogle account chooser as user
-                        // want to choose another Google account.
-                        if (mGoogleApiClient != null) {
-                            signOut();
+                if (NetworkUtils.isNetworkConnected(mContext)) {
+                    mProgressDialogUtils.show(getString(R.string.processing_msg));
+
+                    mWorkHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            String serverClientId = MgmtCluster.getServerClientId();
+                            if (serverClientId != null) {
+                                GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
+                                        mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
+
+                                    @Override
+                                    public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
+                                        Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
+                                        mGoogleApiClient = googleApiClient;
+                                        signIn();
+                                    }
+
+                                    @Override
+                                    public void onConnectionFailed(@NonNull ConnectionResult result) {
+                                        Logs.d(CLASSNAME, "onConnectionFailed", "result=" + result);
+                                        signOut();
+
+                                        int errorCode = result.getErrorCode();
+                                        if (errorCode == ConnectionResult.SERVICE_MISSING) {
+                                            mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                        } else if (errorCode == ConnectionResult.SERVICE_INVALID) {
+                                            mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                        } else if (errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
+                                            mErrorMessage.setText(R.string.activate_update_google_play_services_required);
+                                            PlayServiceSnackbar.newInstance(mContext, mView).show();
+                                        } else if (errorCode == ConnectionResult.SERVICE_MISSING_PERMISSION) {
+                                            mErrorMessage.setText(R.string.activate_update_google_play_service_missing_permission);
+                                        } else {
+                                            mErrorMessage.setText(R.string.activate_signin_google_account_failed);
+                                        }
+
+                                        mProgressDialogUtils.dismiss();
+                                    }
+
+                                    @Override
+                                    public void onConnectionSuspended(int cause) {
+                                        Logs.d(CLASSNAME, "onConnectionSuspended", "cause=" + cause);
+                                    }
+                                });
+                                signInApiClient.connect();
+                            } else {
+                                mUiHandler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mProgressDialogUtils.dismiss();
+                                        mErrorMessage.setText(R.string.activate_get_server_client_id_failed);
+                                    }
+                                });
+                            }
+
                         }
-                        mWorkHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                String serverClientId = MgmtCluster.getServerClientId();
-                                if (serverClientId != null) {
-                                    GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
-                                            mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
-
-                                        @Override
-                                        public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
-                                            Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
-                                            mGoogleApiClient = googleApiClient;
-
-                                            signIn();
-                                        }
-
-                                        @Override
-                                        public void onConnectionFailed(@NonNull ConnectionResult result) {
-                                            Logs.d(CLASSNAME, "onConnectionFailed", "result=" + result);
-
-                                            signOut();
-
-                                            int errorCode = result.getErrorCode();
-                                            if (errorCode == ConnectionResult.SERVICE_MISSING) {
-                                                mErrorMessage.setText(R.string.activate_without_google_play_services);
-                                            } else if (errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
-                                                mErrorMessage.setText(R.string.activate_update_google_play_services_required);
-                                                PlayServiceSnackbar.newInstance(mContext, mView).show();
-                                            } else if (errorCode == ConnectionResult.SERVICE_MISSING_PERMISSION) {
-                                                mErrorMessage.setText(R.string.activate_update_google_play_service_missing_permission);
-                                            } else {
-                                                mErrorMessage.setText(R.string.activate_signin_google_account_failed);
-                                            }
-
-                                            mProgressDialogUtils.dismiss();
-                                        }
-
-                                        @Override
-                                        public void onConnectionSuspended(int cause) {
-                                            Logs.d(CLASSNAME, "onConnectionSuspended", "cause=" + cause);
-                                        }
-                                    });
-                                    signInApiClient.connect();
-                                } else {
-                                    mUiHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mProgressDialogUtils.dismiss();
-                                            mErrorMessage.setText(R.string.activate_get_server_client_id_failed);
-                                        }
-                                    });
-                                }
-
-                            }
-                        });
-                    } else {
-                        mErrorMessage.setText(R.string.activate_alert_dialog_message);
-                    }
-                else {
-                    if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        builder.setTitle(getString(R.string.alert_dialog_title_warning));
-                        builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
-                        builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
-                            }
-                        });
-                        builder.setCancelable(false);
-                        builder.show();
-                    } else {
-                        PermissionSnackbar.newInstance(mContext, mView).show();
-                    }
+                    });
+                } else {
+                    mErrorMessage.setText(R.string.activate_alert_dialog_message);
                 }
             }
         });
@@ -828,5 +813,32 @@ public class ActivateWoCodeFragment extends Fragment {
                 }.execute(accessToken);
             }
         });
+    }
+
+    private boolean checkPermission() {
+        boolean readPhoneState = ContextCompat.checkSelfPermission(mContext,
+                Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+
+        return readPhoneState;
+    }
+
+    private void grantPermission() {
+        if (!checkPermission()){
+            if (ActivityCompat.shouldShowRequestPermissionRationale((Activity) mContext, Manifest.permission.READ_PHONE_STATE)) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                builder.setTitle(getString(R.string.alert_dialog_title_warning));
+                builder.setMessage(getString(R.string.activate_require_read_phone_state_permission));
+                builder.setPositiveButton(getString(R.string.confirm), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.READ_PHONE_STATE}, RequestCode.PERMISSIONS_REQUEST_READ_PHONE_STATE);
+                    }
+                });
+                builder.setCancelable(false);
+                builder.show();
+            } else {
+                PermissionSnackbar.newInstance(mContext, mView).show();
+            }
+        }
     }
 }

@@ -9,7 +9,7 @@
     <string name="go">GO</string>
     <string name="update">UPDATE</string>
 
-    <string name="activate_alert_dialog_message">Network connection failed. Please try again later.</string>
+    <string name="activate_alert_dialog_message">Network connection failed. Please check internet status or try again later.</string>
     <string name="processing_msg">Processing&#8230; Please wait.</string>
     <string name="activate_signin_google_account_failed">Google account authentication failed.</string>
     <string name="activate_hint_username">User name</string>
@@ -19,10 +19,10 @@
     <string name="activate_forget_password"><u>Forgot password</u></string>
     <string name="activate_or">or</string>
     <string name="activate_with_code_msg">The activation code has been used. If your old Tera device is lost or broken, please lock it on %s before activation.</string>
-    <string name="activate_with_google_account">Use Google account for activation</string>
+    <string name="activate_with_google_account">Activation with</string>
     <string name="activate_get_server_client_id_failed">Getting info on Google authentication from admin server failed.</string>
     <string name="activate_require_username_password">Enter user name &amp; password.</string>
-    <string name="activate_without_google_play_services">Tera must run on Google Play services, which are missing on your phone.</string>
+    <string name="activate_without_google_play_services">Ｔ must run on Google Play services, which are missing on your phone.</string>
     <string name="activate_update_google_play_services_required">Tera will not run unless you update Google Play services.</string>
     <string name="activate_update_google_play_services_go">Update Google Play services.</string>
     <string name="activate_update_google_play_service_missing_permission">Missing Google Play services permissions.</string>
