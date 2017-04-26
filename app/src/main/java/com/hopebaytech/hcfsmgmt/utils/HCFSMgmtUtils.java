@@ -305,21 +305,20 @@ public class HCFSMgmtUtils {
         boolean isDalvikCacheSuccess = true;
         if (dalvikCacheFile != null) {
             Logs.d(CLASSNAME, "pinApp", "dalvikCacheFile=" + dalvikCacheFile);
-            isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, PinType.PRIORITY) == 0);
+            isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, pinType) == 0);
         }
 
         boolean isAppLibSuccess = true;
         if (appLibDir != null) {
             Logs.d(CLASSNAME, "pinApp", "appLibDir=" + appLibDir);
-            isAppLibSuccess = (pinFileOrDirectory(appLibDir, PinType.PRIORITY) == 0);
+            isAppLibSuccess = (pinFileOrDirectory(appLibDir, pinType) == 0);
         }
 
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             Logs.d(CLASSNAME, "pinApp", "sourceDir=" + sourceDir);
             if (sourceDir.startsWith("/data/app")) {
-                // Priority pin for /data/app no matter pin or unpin
-                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
+                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, pinType) == 0);
             }
         }
 
@@ -359,17 +358,13 @@ public class HCFSMgmtUtils {
         boolean isDalvikCacheSuccess = true;
         if (dalvikCacheFile != null) {
             Logs.d(CLASSNAME, "unpinApp", "dalvikCacheFile=" + dalvikCacheFile);
-            // not support unpin in 2.3.1
-            Logs.d(CLASSNAME, "unpinApp", "Not Support unpin dalvik-Cache=" + dalvikCacheFile);
-            //isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, PinType.PRIORITY) == 0);
+            isDalvikCacheSuccess = (unpinFileOrDirectory(dalvikCacheFile) == 0);
         }
 
         boolean isAppLibSuccess = true;
         if (appLibDir != null) {
             Logs.d(CLASSNAME, "unpinApp", "appLibDir=" + appLibDir);
-            // not support unpin in 2.3.1
-            Logs.d(CLASSNAME, "unpinApp", "Not Support unpin app-lib =" + dalvikCacheFile);
-            //isAppLibSuccess = (pinFileOrDirectory(appLibDir, PinType.PRIORITY) == 0);
+            isAppLibSuccess = (unpinFileOrDirectory(appLibDir) == 0);
         }
 
         boolean isSourceDirSuccess = true;

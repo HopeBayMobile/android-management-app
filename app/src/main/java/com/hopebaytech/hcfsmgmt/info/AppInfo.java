@@ -195,14 +195,16 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
         String appLibPath = Environment.getDataDirectory().toString() + "/app-lib/";
         Logs.d(CLASSNAME, "getAppLibDirPath", "appLibPath=" + appLibPath);
-        String pkgName = getPackageName();
-        Logs.d(CLASSNAME, "getAppLibDirPath", "pkgName=" + pkgName);
-        String path = appLibPath + pkgName + "-1";
+        String folderName = getSourceDir();
+	/* Strip the apk name to get the lib folder name */
+	folderName = folderName.substring(folderName.lastIndexOf("/") + 1, folderName.length() - 4);
+        Logs.d(CLASSNAME, "getAppLibDirPath", "folderName=" + folderName);
+        String path = appLibPath + folderName;
 
         File file = new File(path);
 
         if (!file.exists()) {
-            Logs.d(CLASSNAME, "getAppLibDirPath", "app-lib is not exists=" + pkgName);
+            Logs.d(CLASSNAME, "getAppLibDirPath", "app-lib is not exists=" + folderName);
             return null;
         }
 
