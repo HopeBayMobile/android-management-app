@@ -167,9 +167,9 @@ public class AppInfo extends ItemInfo implements Cloneable {
         Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "dalvikCachePath=" + dalvikCachePath);
         String pkgName = getPackageName();
         Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "pkgName=" + pkgName);
-        String prefix = "data@app@";
-        String postfix = "-1.apk@classes.dex";
-        String filename = prefix + pkgName  + postfix;
+	/* It is possible that apk naming is not pkgname-1.apk */
+        String postfix = "@classes.dex";
+	String filename = getSourceDir().substring(1).replace('/','@') + postfix;
         String path = dalvikCachePath + filename;
 
         File file = new File(path);
