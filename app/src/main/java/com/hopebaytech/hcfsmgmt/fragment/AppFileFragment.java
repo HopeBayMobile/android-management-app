@@ -663,7 +663,9 @@ public class AppFileFragment extends Fragment {
                 return textView;
             }
         };
+
         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //mSpinnerAdapter.setDropDownViewResource(R.layout.spinner_item);
 
         // Initialized the worker handler
         mHandlerThread = new HandlerThread(AppFileFragment.class.getSimpleName());
@@ -1383,8 +1385,15 @@ public class AppFileFragment extends Fragment {
 
         private void updateSection(SectionedViewHolder sectionViewHolder, long totalSpace, long freeSpace, boolean showAnimation) {
             float toShowValue = ((totalSpace - freeSpace) * 1f / totalSpace) * 100f;
-            CircleDisplay cd = sectionViewHolder.circleDisplay;
-            cd.showValue(toShowValue, 100f, totalSpace, showAnimation);
+
+            // Support 2.4" kitkat without CircleDisplay
+            try {
+                CircleDisplay cd = sectionViewHolder.circleDisplay;
+                cd.showValue(toShowValue, 100f, totalSpace, showAnimation);
+            } catch (NullPointerException e) {
+                Logs.d(CLASSNAME,"updateSection", e.toString());
+            }
+
 
             if (isSDCard1) {
                 sectionViewHolder.totalSpace.setText(UnitConverter.convertByteToProperUnit(totalSpace));
@@ -1523,7 +1532,14 @@ public class AppFileFragment extends Fragment {
 
             private SectionedViewHolder(View itemView) {
                 super(itemView);
-                circleDisplay = (CircleDisplay) itemView.findViewById(R.id.circle_display_view);
+
+                // Support 2.4" kitkat without CircleDisplay
+                try {
+                    circleDisplay = (CircleDisplay) itemView.findViewById(R.id.circle_display_view);
+                } catch (NullPointerException e) {
+                    Logs.d(CLASSNAME, "SectionedViewHolder", e.toString());
+                }
+
                 storageType = (TextView) itemView.findViewById(R.id.storage_type);
                 totalSpace = (TextView) itemView.findViewById(R.id.total_space);
                 freeSpace = (TextView) itemView.findViewById(R.id.free_space);

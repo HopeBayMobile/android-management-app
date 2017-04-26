@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="nav_header_vertical_spacing">16dp</dimen>
+    <dimen name="nav_header_height">160dp</dimen>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="fragment_horizontal_padding">16dp</dimen>
+    <dimen name="fragment_vertical_padding">5dp</dimen>
+    <dimen name="fragment_horizontal_margin">16dp</dimen>
+    <dimen name="fragment_vertical_margin">5dp</dimen>
+    <dimen name="fab_right_margin">20dp</dimen>
+    <dimen name="fab_bottom_margin">20dp</dimen>
+
+    <dimen name="item_vertical_padding">5dp</dimen>
+    <dimen name="item_horizontal_padding">10dp</dimen>
+    <dimen name="item_image_horizontal_padding">10dp</dimen>
+    <dimen name="icon_image_height">40dp</dimen>
+    <dimen name="icon_image_width">40dp</dimen>
+
+    <dimen name="progressbar_home_page_height">5dp</dimen>
+    <dimen name="progressbar_home_page_vertical_margin">10dp</dimen>
+
+    <dimen name="activate_cloud_storage_horizontal_margin">40dp</dimen>
+    <dimen name="activate_cloud_storage_logo_horizontal_margin">45dp</dimen>
+    <dimen name="activate_cloud_storage_activate_textview_padding">5dp</dimen>
+    <dimen name="activate_cloud_storage_activate_linearlayout_vertical_margin">20dp</dimen>
+
+    <dimen name="fragment_title_bar_height">30dp</dimen>
+    <dimen name="fragment_title_bar_padding_left">16dp</dimen>
+    <dimen name="fragment_title_bar_padding_right">16dp</dimen>
+    <dimen name="fragment_title_bar_padding_top">5dp</dimen>
+    <dimen name="fragment_title_bar_padding_bottom">5dp</dimen>
+
+    <dimen name="navigation_view_width">267dp</dimen>
+    <dimen name="pager_tab_strip_height">32dp</dimen>
+    <dimen name="toolbar_height">56dp</dimen>
+    <dimen name="nav_drawer_menu_item_height">56dp</dimen>
+    <dimen name="nav_drawer_menu_item_img_end_margin">32dp</dimen>
+
+    <dimen name="usage_icon_width">45dp</dimen>
+    <dimen name="usage_icon_height">45dp</dimen>
+
+    <dimen name="M1">20dp</dimen>
+    <dimen name="M2">16dp</dimen>
+    <dimen name="M3">12dp</dimen>
+    <dimen name="M4">10dp</dimen>
+    <dimen name="M5">8dp</dimen>
+    <dimen name="M6">6dp</dimen>
+    <dimen name="M7">4dp</dimen>
+
+</resources>
