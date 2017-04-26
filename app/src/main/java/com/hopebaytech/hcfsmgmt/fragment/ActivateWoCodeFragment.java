@@ -680,15 +680,17 @@ public class ActivateWoCodeFragment extends Fragment {
         if (intent != null) {
             String action = intent.getAction();
             Logs.d(CLASSNAME, "onStart checkIntent", "intentAction " + action);
-            switch (action) {
-                case "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE":
-                    if (!intent.hasExtra(USED_INTENT)) {
-                        handleAuthorizationResponse(intent);
-                        intent.putExtra(USED_INTENT, true);
-                    }
-                    break;
-                default:
-                    // do nothing
+            if (action != null) {
+                switch (action) {
+                    case "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE":
+                        if (!intent.hasExtra(USED_INTENT)) {
+                            handleAuthorizationResponse(intent);
+                            intent.putExtra(USED_INTENT, true);
+                        }
+                        break;
+                    default:
+                        // do nothing
+                }
             }
         }
     }
