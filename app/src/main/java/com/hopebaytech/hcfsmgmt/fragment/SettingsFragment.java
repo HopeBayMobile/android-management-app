@@ -153,7 +153,7 @@ public class SettingsFragment extends Fragment {
                     ratio = settingsInfo.getValue().concat("%");
                 }
 
-                boolean isAllowPinUnpinApps = false;
+                boolean isAllowPinUnpinApps = true;
                 settingsInfo = settingsDAO.get(PREF_ALLOW_PIN_UNPIN_APPS);
                 if (settingsInfo != null) {
                     isAllowPinUnpinApps = Boolean.valueOf(settingsInfo.getValue());
