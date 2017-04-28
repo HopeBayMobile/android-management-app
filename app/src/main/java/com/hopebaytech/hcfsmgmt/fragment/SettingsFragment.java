@@ -157,6 +157,11 @@ public class SettingsFragment extends Fragment {
                 settingsInfo = settingsDAO.get(PREF_ALLOW_PIN_UNPIN_APPS);
                 if (settingsInfo != null) {
                     isAllowPinUnpinApps = Boolean.valueOf(settingsInfo.getValue());
+                } else {
+                    settingsInfo = new SettingsInfo();
+                    settingsInfo.setKey(PREF_ALLOW_PIN_UNPIN_APPS);
+                    settingsInfo.setValue(String.valueOf(isAllowPinUnpinApps));
+                    settingsDAO.update(settingsInfo);
                 }
 
                 boolean isBoosterEnabled = false;
