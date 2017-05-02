@@ -772,7 +772,7 @@ public class TeraMgmtService extends Service {
                 }
             }
         } catch (PackageManager.NameNotFoundException e) {
-            Logs.e(CLASSNAME, "onStartCommand", Log.getStackTraceString(e));
+            Logs.e(CLASSNAME, "pinUnpinAgainWhenAppUpdated", Log.getStackTraceString(e));
         }
     }
 
@@ -785,7 +785,33 @@ public class TeraMgmtService extends Service {
         String packageName = intent.getStringExtra(TeraIntent.KEY_PACKAGE_NAME);
         if (mUidDAO.get(packageName) == null) {
             int boostStatus = Booster.getInstalledAppBoostStatus(packageName);
-            mUidDAO.insert(new UidInfo(true /* isPinned */, false /* isSystemApp */, boostStatus, uid, packageName));
+            UidInfo uidInfo = new UidInfo(false /* isPinned */, false /* isSystemApp */, boostStatus, uid, packageName);
+            mUidDAO.insert(uidInfo);
+
+            // Unpin app by default
+            // First create min apk
+            HCFSMgmtUtils.createMinimalApk(mContext, packageName, true /*blocking*/);
+
+            boolean isPinned = uidInfo.isPinned();
+            PackageManager pm = getPackageManager();
+            try {
+                ApplicationInfo applicationInfo = pm.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+
+                AppInfo appInfo = new AppInfo(mContext);
+                appInfo.setPinned(isPinned);
+                appInfo.setUid(applicationInfo.uid);
+                appInfo.setApplicationInfo(applicationInfo);
+                appInfo.setName(applicationInfo.loadLabel(pm).toString());
+                appInfo.setExternalDirList(uidInfo.getExternalDir());
+                boolean success = pinOrUnpinApp(appInfo);
+                if (!success) {
+                    uidInfo = new UidInfo(true, false, boostStatus, uid, packageName);
+                    mUidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Logs.e(CLASSNAME, "addUidInfoToDatabase", Log.getStackTraceString(e));
+            }
+
         }
     }
 

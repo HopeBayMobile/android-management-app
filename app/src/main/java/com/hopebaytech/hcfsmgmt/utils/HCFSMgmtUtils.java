@@ -305,21 +305,20 @@ public class HCFSMgmtUtils {
         boolean isDalvikCacheSuccess = true;
         if (dalvikCacheFile != null) {
             Logs.d(CLASSNAME, "pinApp", "dalvikCacheFile=" + dalvikCacheFile);
-            isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, PinType.PRIORITY) == 0);
+            isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, pinType) == 0);
         }
 
         boolean isAppLibSuccess = true;
         if (appLibDir != null) {
             Logs.d(CLASSNAME, "pinApp", "appLibDir=" + appLibDir);
-            isAppLibSuccess = (pinFileOrDirectory(appLibDir, PinType.PRIORITY) == 0);
+            isAppLibSuccess = (pinFileOrDirectory(appLibDir, pinType) == 0);
         }
 
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             Logs.d(CLASSNAME, "pinApp", "sourceDir=" + sourceDir);
             if (sourceDir.startsWith("/data/app")) {
-                // Priority pin for /data/app no matter pin or unpin
-                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, PinType.PRIORITY) == 0);
+                isSourceDirSuccess = (pinFileOrDirectory(sourceDir, pinType) == 0);
             }
         }
 
@@ -359,30 +358,32 @@ public class HCFSMgmtUtils {
         boolean isDalvikCacheSuccess = true;
         if (dalvikCacheFile != null) {
             Logs.d(CLASSNAME, "unpinApp", "dalvikCacheFile=" + dalvikCacheFile);
-            // not support unpin in 2.3.1
-            Logs.d(CLASSNAME, "unpinApp", "Not Support unpin dalvik-Cache=" + dalvikCacheFile);
-            //isDalvikCacheSuccess = (pinFileOrDirectory(dalvikCacheFile, PinType.PRIORITY) == 0);
+            isDalvikCacheSuccess = (unpinFileOrDirectory(dalvikCacheFile) == 0);
         }
 
         boolean isAppLibSuccess = true;
         if (appLibDir != null) {
             Logs.d(CLASSNAME, "unpinApp", "appLibDir=" + appLibDir);
-            // not support unpin in 2.3.1
-            Logs.d(CLASSNAME, "unpinApp", "Not Support unpin app-lib =" + dalvikCacheFile);
-            //isAppLibSuccess = (pinFileOrDirectory(appLibDir, PinType.PRIORITY) == 0);
+            isAppLibSuccess = (unpinFileOrDirectory(appLibDir) == 0);
         }
 
         boolean isSourceDirSuccess = true;
         if (sourceDir != null) {
             if (sourceDir.startsWith("/data/app")) {
-                // not support unpin in 2.3.1
-                Logs.d(CLASSNAME, "unpinApp", "Not Support unpin apk=" + sourceDir);
-                //isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
+                Logs.i(CLASSNAME, "unpinApp", "Apk path=" + sourceDir);
+                isSourceDirSuccess = (unpinFileOrDirectory(sourceDir) == 0);
+                String minApkPath;
 
-                // TODO: Vince -, support kitkat
-                // Priority pin /data/app/<pkg-folder>/.basemin
-                //isMinApkSuccess = (pinFileOrDirectory(sourceDir + "/.basemin", PinType.PRIORITY) == 0);
-                isMinApkSuccess = true;
+                // Check the name of min apk (could be Kitkat)
+                if (sourceDir.equals(info.getApplicationInfo().sourceDir)) {
+                    // Reconstruct min apk path
+                    minApkPath = "/data/app/." + sourceDir.substring(sourceDir.lastIndexOf('/') + 1, sourceDir.length() - 4) + "min";
+                    Logs.i(CLASSNAME, "unpinApp", "Minapk path=" + minApkPath);
+                } else {
+                    minApkPath = sourceDir + "/.basemin";
+                }
+                // Priority pin minapk
+                isMinApkSuccess = (pinFileOrDirectory(minApkPath, PinType.PRIORITY) == 0);
             }
         }
 
@@ -868,11 +869,11 @@ public class HCFSMgmtUtils {
     }
 
     public static boolean createMinimalApk(Context context, String packageName, boolean blocking) {
-        /*
         boolean isSuccess = false;
         try {
             String sourceDir = getSourceDir(context, packageName);
             if (sourceDir != null) {
+                Logs.i(CLASSNAME, "createMinimalApk", "Debug source" + sourceDir);
                 String jsonResult = HCFSApiUtils.createMinimalApk(sourceDir, blocking ? 1 : 0);
                 JSONObject jObject = new JSONObject(jsonResult);
                 isSuccess = jObject.getBoolean("result");
@@ -886,9 +887,6 @@ public class HCFSMgmtUtils {
             Logs.e(CLASSNAME, "createMinimalApk", Log.getStackTraceString(e));
         }
         return isSuccess;
-        */
-
-        return true;
     }
 
     /**
@@ -930,6 +928,10 @@ public class HCFSMgmtUtils {
             sourceDir = p.applicationInfo.sourceDir;
             sourceDir = sourceDir.substring(0, sourceDir.lastIndexOf("/"));
             if (sourceDir.startsWith(DATA_APP_PATH)) {
+                //Kitkat pkgs do not have separate folders
+                if ((DATA_APP_PATH.length() + 1) >= sourceDir.length())
+                    sourceDir = p.applicationInfo.sourceDir;
+                Logs.d(CLASSNAME, "getSourceDir", "org sourcedir " + sourceDir);
                 sourceDir = sourceDir.substring(DATA_APP_PATH.length() + 1, sourceDir.length());
                 Logs.d(CLASSNAME, "getSourceDir", "package name: " + packageName + " package path: " + sourceDir);
             }

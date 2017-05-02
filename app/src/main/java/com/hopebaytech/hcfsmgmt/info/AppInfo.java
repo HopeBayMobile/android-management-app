@@ -167,9 +167,9 @@ public class AppInfo extends ItemInfo implements Cloneable {
         Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "dalvikCachePath=" + dalvikCachePath);
         String pkgName = getPackageName();
         Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "pkgName=" + pkgName);
-        String prefix = "data@app@";
-        String postfix = "-1.apk@classes.dex";
-        String filename = prefix + pkgName  + postfix;
+	/* It is possible that apk naming is not pkgname-1.apk */
+        String postfix = "@classes.dex";
+	String filename = getSourceDir().substring(1).replace('/','@') + postfix;
         String path = dalvikCachePath + filename;
 
         File file = new File(path);
@@ -195,14 +195,16 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
         String appLibPath = Environment.getDataDirectory().toString() + "/app-lib/";
         Logs.d(CLASSNAME, "getAppLibDirPath", "appLibPath=" + appLibPath);
-        String pkgName = getPackageName();
-        Logs.d(CLASSNAME, "getAppLibDirPath", "pkgName=" + pkgName);
-        String path = appLibPath + pkgName + "-1";
+        String folderName = getSourceDir();
+	/* Strip the apk name to get the lib folder name */
+	folderName = folderName.substring(folderName.lastIndexOf("/") + 1, folderName.length() - 4);
+        Logs.d(CLASSNAME, "getAppLibDirPath", "folderName=" + folderName);
+        String path = appLibPath + folderName;
 
         File file = new File(path);
 
         if (!file.exists()) {
-            Logs.d(CLASSNAME, "getAppLibDirPath", "app-lib is not exists=" + pkgName);
+            Logs.d(CLASSNAME, "getAppLibDirPath", "app-lib is not exists=" + folderName);
             return null;
         }
 

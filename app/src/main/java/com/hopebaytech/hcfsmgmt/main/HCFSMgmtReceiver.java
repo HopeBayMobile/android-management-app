@@ -155,7 +155,8 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     intentService.putExtra(TeraIntent.KEY_PACKAGE_NAME, packageName);
                     context.startService(intentService);
 
-                    HCFSMgmtUtils.createMinimalApk(context, packageName, false /*blocking*/);
+                    // Create min apk in service instead
+                    // HCFSMgmtUtils.createMinimalApk(context, packageName, false /*blocking*/);
                 }
                 break;
             }
