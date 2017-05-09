@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearItemLayout"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:paddingStart="@dimen/M6"
+    android:paddingEnd="@dimen/M6"
+    android:background="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@+id/pinLayout"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/item_icon"
+            android:layout_width="@dimen/icon_image_width"
+            android:layout_height="@dimen/icon_image_height"
+            android:layout_marginEnd="@dimen/M6"
+            android:src="@drawable/icon_doc_default_gray" />
+
+        <TextView
+            android:id="@+id/item_name"
+            style="@style/F6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/pinLayout"
+        android:layout_width="@dimen/icon_image_width"
+        android:layout_height="@dimen/icon_image_width"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true">
+
+        <ProgressBar
+            android:id="@+id/processView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/pinView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:src="@drawable/icon_btn_app_pin"
+            android:scaleType="centerInside" />
+    </RelativeLayout>
+
+</RelativeLayout>
