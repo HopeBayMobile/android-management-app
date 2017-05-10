@@ -1,0 +1,11 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <!-- This look like default focused colod -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/powderblue"/>
+            <stroke
+                android:color="@color/lightskyblue"
+                android:width="2dp"/>
+        </shape>
+    </item>
+</layer-list>

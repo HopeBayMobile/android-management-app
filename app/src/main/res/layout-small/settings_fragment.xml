@@ -46,6 +46,8 @@
                     android:orientation="vertical">
 
                     <RelativeLayout
+                        android:id="@+id/sync_wifi_only_container"
+                        android:nextFocusDown="@+id/notify_conn_failed_recovery_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/M6"
@@ -84,6 +86,7 @@
                     <View style="@style/HorizontalDivider" />
 
                     <RelativeLayout
+                        android:id="@+id/notify_conn_failed_recovery_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/M6"
@@ -123,6 +126,7 @@
 
                     <LinearLayout
                         android:id="@+id/notify_local_storage_used_ratio"
+                        android:focusable="true"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/M6"
@@ -150,6 +154,7 @@
 
                     <LinearLayout
                         android:id="@+id/transfer_content"
+                        android:focusable="true"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/M3"
@@ -168,6 +173,7 @@
 
                     <LinearLayout
                         android:id="@+id/about"
+                        android:focusable="true"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/M3"
@@ -186,6 +192,7 @@
 
                     <LinearLayout
                         android:id="@+id/extra_log_for_ba_layout"
+                        android:focusable="true"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="?android:attr/selectableItemBackground"
@@ -227,6 +234,7 @@
 
                     <RelativeLayout
                         android:id="@+id/advanced_settings"
+                        android:focusable="true"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/M3"
@@ -256,10 +264,12 @@
 
                     <LinearLayout
                         android:id="@+id/advanced_settings_layout"
+                        android:focusable="true"
+                        android:nextFocusDown="@+id/enable_booster"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:visibility="gone">
+                        android:background="@drawable/option_background">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -268,6 +278,7 @@
                             android:layout_marginBottom="@dimen/M3">
 
                             <LinearLayout
+                                android:id="@+id/enable_booster_container"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:gravity="center_vertical"
@@ -280,7 +291,7 @@
                                     android:text="@string/settings_booster_title" />
 
                                 <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                                    android:layout_width="wrap_content"
+                                    android:layout_width="160dp"
                                     android:layout_height="wrap_content"
                                     android:text="@string/settings_booster_subtitle"
                                     android:textColor="@color/C5"
@@ -300,15 +311,16 @@
                         <View style="@style/HorizontalDivider" />
 
                         <RelativeLayout
+                            android:id="@+id/allow_pin_unpin_apps_container"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/M3"
                             android:layout_marginBottom="@dimen/M3"
-                            android:background="?android:attr/selectableItemBackground">
+                            android:background="@drawable/option_background">
 
                             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                                 style="@style/F6"
-                                android:layout_width="wrap_content"
+                                android:layout_width="160dp"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
