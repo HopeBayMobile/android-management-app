@@ -50,6 +50,7 @@
 
                     <ImageView
                         android:id="@+id/search"
+                        android:focusable="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/M5"
@@ -60,6 +61,7 @@
 
                     <ImageView
                         android:id="@+id/refresh"
+                        android:focusable="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/M5"
@@ -70,6 +72,7 @@
 
                     <ImageView
                         android:id="@+id/change_layout"
+                        android:focusable="true"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="?android:attr/selectableItemBackground"
@@ -109,9 +112,10 @@
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentEnd="true"
                 android:overScrollMode="never"
-                android:scrollbars="vertical" />
+                android:scrollbars="vertical"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true" />
         </RelativeLayout>
 
     </LinearLayout>

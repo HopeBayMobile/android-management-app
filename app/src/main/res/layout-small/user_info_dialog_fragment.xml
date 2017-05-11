@@ -82,6 +82,7 @@
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
                 style="@style/F2"
                 android:id="@+id/change_account"
+                android:focusable="true"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"

@@ -37,6 +37,7 @@
 
             <ImageView
                 android:id="@+id/app_pin_icon"
+                android:focusable="true"
                 android:layout_width="@dimen/icon_image_width"
                 android:layout_height="@dimen/icon_image_width"
                 android:layout_alignParentEnd="true"

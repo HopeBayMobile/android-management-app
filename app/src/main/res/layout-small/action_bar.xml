@@ -17,12 +17,16 @@
 
     <ImageView
         android:id="@+id/user_icon"
-        android:layout_margin="@dimen/M6"
+        android:focusable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/icon_btn_id_default" />
+        android:src="@drawable/icon_btn_id_default"
+        android:layout_marginLeft="@dimen/M6"
+        android:layout_marginRight="@dimen/M6"
+        android:layout_marginTop="@dimen/M6"
+        android:layout_marginBottom="@dimen/M6" />
 
 </RelativeLayout>

@@ -63,9 +63,11 @@
 
                 <LinearLayout
                     android:id="@+id/all_item"
+                    android:focusable="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:background="@drawable/option_background">
 
                     <ImageView
                         android:id="@+id/all_item_img"
@@ -85,9 +87,11 @@
 
                 <LinearLayout
                     android:id="@+id/pinned_item"
+                    android:focusable="true"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:background="@drawable/option_background">
 
                     <ImageView
                         android:id="@+id/pinned_item_img"
