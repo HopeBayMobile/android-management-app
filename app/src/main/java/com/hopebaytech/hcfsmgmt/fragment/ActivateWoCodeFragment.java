@@ -672,6 +672,7 @@ public class ActivateWoCodeFragment extends Fragment {
         AuthorizationRequest request = builder.build();
         String action = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
         Intent postAuthorizationIntent = new Intent(action);
+        postAuthorizationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(v.getContext(), request.hashCode(), postAuthorizationIntent, 0);
         authorizationService.performAuthorizationRequest(request, pendingIntent);
     }
@@ -684,6 +685,7 @@ public class ActivateWoCodeFragment extends Fragment {
                 switch (action) {
                     case "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE":
                         if (!intent.hasExtra(USED_INTENT)) {
+                            mProgressDialogUtils.show(getString(R.string.processing_msg));
                             handleAuthorizationResponse(intent);
                             intent.putExtra(USED_INTENT, true);
                         }
@@ -710,10 +712,8 @@ public class ActivateWoCodeFragment extends Fragment {
                     if (exception == null && tokenResponse != null) {
                         authState.update(tokenResponse, exception);
                         mAuthState = authState;
-                        appAuthUtils.saveObjectToSharedPreference(mContext,
-                                                                  appAuthUtils.AUTH_STATUS_PERF_NAME,
-                                                                  appAuthUtils.AUTH_STATUS_PERF_KEYS,
-                                                                  mAuthState);
+                        appAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mAuthState);
+
                         Logs.d(CLASSNAME, "onTokenResponse", String.format(
                                 "Token Response [ Access Token: %s, ID Token: %s ]",
                                 tokenResponse.accessToken, tokenResponse.idToken));
@@ -806,6 +806,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     protected void onPostExecute(Bundle args) {
                         MainFragment mainFragment = MainFragment.newInstance();
                         mainFragment.setArguments(args);
+                        mProgressDialogUtils.dismiss();
 
                         Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
                         FragmentTransaction ft = getFragmentManager().beginTransaction();

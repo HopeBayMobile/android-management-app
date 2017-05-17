@@ -17,10 +17,14 @@ import android.view.WindowManager;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.main.TransferContentActivity;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
+import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
+
+import net.openid.appauth.AuthState;
 
 /**
  * @author Aaron
@@ -131,6 +135,16 @@ public class SplashFragment extends Fragment {
                 TAG = RestoreFailedFragment.TAG;
                 break;
             default:
+                AppAuthUtils appAuthUtils = new AppAuthUtils();
+                AuthState authState;
+                authState = appAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
+
+                if (authState != null) {
+                    TeraAppConfig.enableApp(mContext);
+                    TeraCloudConfig.activateTeraCloud(mContext);
+                    appAuthUtils.resetAccessTokeToHCFS(mContext, authState);
+                }
+
                 if (TeraAppConfig.isTeraAppLogin(getContext())) {
                     Logs.d(CLASSNAME, "switchFragment", "Replace with MainFragment");
                     fragment = MainFragment.newInstance();

@@ -3,6 +3,10 @@ package com.hopebaytech.hcfsmgmt.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,6 +17,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+
+import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationService;
 
 import java.lang.reflect.Type;
 
@@ -63,5 +71,29 @@ public class AppAuthUtils {
         String serializedObject = gson.toJson(object);
         sharedPreferencesEditor.putString(serializedObjectKey, serializedObject);
         sharedPreferencesEditor.apply();
+    }
+
+    public void saveAppAuthStatusToSharedPreference(Context context, Object object){
+        saveObjectToSharedPreference(context, AUTH_STATUS_PERF_NAME, AUTH_STATUS_PERF_KEYS, object);
+    }
+
+    public AuthState getSavedAppAuthStatusFromPreference(Context context){
+        return getSavedObjectFromPreference(context, AUTH_STATUS_PERF_NAME, AUTH_STATUS_PERF_KEYS, AuthState.class);
+    }
+
+    public void resetAccessTokeToHCFS(Context context, AuthState authstate) {
+        authstate.performActionWithFreshTokens(new AuthorizationService(context), new AuthState.AuthStateAction() {
+            @Override
+            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException exception) {
+                new AsyncTask<String, Void, Bundle>() {
+                    @Override
+                    protected Bundle doInBackground(String... tokens) {
+                        Log.d("Rondou", "wish have a new access token = " + tokens[0]);
+                        HCFSMgmtUtils.setSwiftToken("https://172.16.40.117", tokens[0]);
+                        return null;
+                    }
+                }.execute(accessToken);
+            }
+        });
     }
 }
