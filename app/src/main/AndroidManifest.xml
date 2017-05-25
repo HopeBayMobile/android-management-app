@@ -74,6 +74,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.hopebaytech.hcfsmgmt.utils.AppAvailableAlertActivity"
+                  android:theme="@style/Theme.AppCompat.DialogWhenLarge"/>
+
         <receiver
             android:name="com.hopebaytech.hcfsmgmt.main.HCFSMgmtReceiver"
             android:enabled="true"
