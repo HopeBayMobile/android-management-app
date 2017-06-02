@@ -362,4 +362,10 @@
     <string name="mgmt_server_error_msg_mapping_existed">此裝置已經被註冊，啟動失敗。</string>
     <string name="mgmt_server_error_msg_service_block">The device service is locked or expired.</string>
 
+    <string name="app_available_dialog_dont_show_again">Do not show me again !</string>
+    <string name="app_available_dialog_title">Oops ! What the hell is going on here ?</string>
+    <string name="app_available_dialog_positive">FIRE</string>
+    <string name="app_available_dialog_neutral">CANCEL</string>
+    <string name="app_available_dialog_negative">NOT FIRE</string>
+
 </resources>

@@ -27,6 +27,7 @@ public class AppAvailableDialogFragment extends AppCompatDialogFragment {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNeutralClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
+        public void onDialogSingleChoiceItemsClick(DialogFragment dialog, Boolean isChecked);
     }
 
     AppAvailableDialogListener mListener;
@@ -81,20 +82,27 @@ public class AppAvailableDialogFragment extends AppCompatDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        CharSequence[] checkBoxItem = {getString(R.string.app_available_dialog_dont_show_again)};
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage("Do you want to lunch app ?")
-                .setTitle("Oops ! What the hell is going on here ?")
-                .setPositiveButton("Fire", new DialogInterface.OnClickListener() {
+        builder.setTitle(R.string.app_available_dialog_title)
+                .setMultiChoiceItems(checkBoxItem, null, new DialogInterface.OnMultiChoiceClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which, boolean isChecked) {
+                        mListener.onDialogSingleChoiceItemsClick(AppAvailableDialogFragment.this, isChecked);
+                    }
+                })
+                .setPositiveButton(R.string.app_available_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         mListener.onDialogPositiveClick(AppAvailableDialogFragment.this);
                     }
                 })
-                .setNeutralButton("Don't any choice", new DialogInterface.OnClickListener() {
+                .setNeutralButton(R.string.app_available_dialog_neutral, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         mListener.onDialogNeutralClick(AppAvailableDialogFragment.this);
                     }
                 })
-                .setNegativeButton("Not Fire", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.app_available_dialog_negative, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         mListener.onDialogNegativeClick(AppAvailableDialogFragment.this);
                     }
