@@ -77,8 +77,11 @@ public class HelpFragment extends Fragment {
 
         mFAQ = (LinearLayout) view.findViewById(R.id.faq);
         mUserManual = (LinearLayout) view.findViewById(R.id.user_manual);
+        mUserManual.setVisibility(View.GONE); // lack content
         mQuickTour = (LinearLayout) view.findViewById(R.id.quick_tour);
+        mQuickTour.setVisibility(View.GONE); // lack content
         mCS = (LinearLayout) view.findViewById(R.id.customer_center);
+        mCS.setVisibility(View.GONE); // lack content
         mFeedback = (LinearLayout) view.findViewById(R.id.email_feedback);
     }
 
