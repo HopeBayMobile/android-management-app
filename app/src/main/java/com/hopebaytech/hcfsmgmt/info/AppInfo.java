@@ -153,7 +153,7 @@ public class AppInfo extends ItemInfo implements Cloneable {
     * Default path is "/data/dalvik-cache/"
     * Name of dex file should like "prefix + package_name + postfix"
     * prefix contain: data@app@, system@app@, system@framework@, system@priv-app@
-    * postfix contain: @classes.dex
+    * postfix contain: "-1.apk@classes.dex" or "-2.apk@classes.dex"
     *
     * We only use data@app@ here.
     */
@@ -167,25 +167,26 @@ public class AppInfo extends ItemInfo implements Cloneable {
         Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "dalvikCachePath=" + dalvikCachePath);
         String pkgName = getPackageName();
         Logs.d(CLASSNAME, "getDalvikCacheFIlePath", "pkgName=" + pkgName);
-	/* It is possible that apk naming is not pkgname-1.apk */
-        String postfix = "@classes.dex";
-	String filename = getSourceDir().substring(1).replace('/','@') + postfix;
-        String path = dalvikCachePath + filename;
+        String prefix = "data@app@";
 
-        File file = new File(path);
-
-        if (!file.exists()) {
-            Logs.d(CLASSNAME, "getDalvikCacheDirPath", "dalvik-cache is not exists for= " + pkgName);
-            return null;
+        String path;
+        String postfix[] = {"-1.apk@classes.dex", "-2.apk@classes.dex"};
+        for (String pf: postfix) {
+            String filename = prefix + pkgName + pf;
+            path = dalvikCachePath + filename;
+            final File file = new File(path);
+            if (file.exists()) {
+                return path;
+            }
         }
-
-        return path;
+        Logs.d(CLASSNAME, "getDalvikCacheDirPath", "dalvik-cache is not exists for= " + pkgName);
+        return null;
     }
 
     /**
      * Only for Android Kitkat now.
      * Default path is "/data/app-lib/"
-     * Name of lib folder should like "<pkgName>-1"
+     * Name of lib folder should like "<pkgName>-1" or "<pkgName>-2"
      */
     public String getAppLibDirPath(){
 
@@ -195,20 +196,19 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
         String appLibPath = Environment.getDataDirectory().toString() + "/app-lib/";
         Logs.d(CLASSNAME, "getAppLibDirPath", "appLibPath=" + appLibPath);
-        String folderName = getSourceDir();
-	/* Strip the apk name to get the lib folder name */
-	folderName = folderName.substring(folderName.lastIndexOf("/") + 1, folderName.length() - 4);
-        Logs.d(CLASSNAME, "getAppLibDirPath", "folderName=" + folderName);
-        String path = appLibPath + folderName;
+        String pkgName = getPackageName();
+        Logs.d(CLASSNAME, "getAppLibDirPath", "pkgName=" + pkgName);
 
-        File file = new File(path);
-
-        if (!file.exists()) {
-            Logs.d(CLASSNAME, "getAppLibDirPath", "app-lib is not exists=" + folderName);
-            return null;
+        String postfix[] = {"-1", "-2"};
+        for (String pf: postfix) {
+            String path = appLibPath + pkgName + pf;
+            File file = new File(path);
+            if (file.exists()) {
+                return path;
+            }
         }
-
-        return path;
+        Logs.d(CLASSNAME, "getAppLibDirPath", "app-lib is not exists=" + pkgName);
+        return null;
     }
 
     public int getAppSize() {

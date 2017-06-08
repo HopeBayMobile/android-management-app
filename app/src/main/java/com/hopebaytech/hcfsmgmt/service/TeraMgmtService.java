@@ -8,8 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,7 +15,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
@@ -26,12 +23,6 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParseException;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListDAO;
 import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListVersionDAO;
@@ -85,10 +76,7 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
-import net.openid.appauth.AuthorizationService;
 
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1385,24 +1373,10 @@ public class TeraMgmtService extends Service {
     private void setAccessTokenViaAppAuth() {
         AppAuthUtils appAuthUtils = new AppAuthUtils();
         AuthState authState;
-        authState = appAuthUtils.getSavedObjectFromPreference(mContext,
-                                                              appAuthUtils.AUTH_STATUS_PERF_NAME,
-                                                              appAuthUtils.AUTH_STATUS_PERF_KEYS,
-                                                              AuthState.class);
-        Logs.d(CLASSNAME, "onTokenExpire", "getAuthStateViaSharePreference" + authState);
 
-        authState.performActionWithFreshTokens(new AuthorizationService(mContext), new AuthState.AuthStateAction() {
-            @Override
-            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException exception) {
-                new AsyncTask<String, Void, Bundle>() {
-                    @Override
-                    protected Bundle doInBackground(String... tokens) {
-                        Logs.d(CLASSNAME, "onTokenExpire", "wish have a new access token = " + tokens[0]);
-                        HCFSMgmtUtils.setSwiftToken("https://172.16.40.117", tokens[0]);
-                        return null;
-                    }
-                }.execute(accessToken);
-            }
-        });
+        authState = appAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
+        appAuthUtils.resetAccessTokeToHCFS(mContext, authState);
+
+        Logs.d(CLASSNAME, "onTokenExpire", "getAuthStateViaSharePreference" + authState);
     }
 }

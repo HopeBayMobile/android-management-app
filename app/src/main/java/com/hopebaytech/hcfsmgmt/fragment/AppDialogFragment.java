@@ -223,6 +223,21 @@ public class AppDialogFragment extends DialogFragment {
         int numHybrid = 0;
         int numCloud = 0;
 
+
+        DirStatusInfo dalvikCacheDirInfo = getDirStatusInfo(appInfo.getDalvikCacheFilePath());
+        if (dalvikCacheDirInfo != null) {
+            numLocal += dalvikCacheDirInfo.getNumLocal();
+            numHybrid += dalvikCacheDirInfo.getNumHybrid();
+            numCloud += dalvikCacheDirInfo.getNumCloud();
+        }
+
+        DirStatusInfo appLibDirInfo = getDirStatusInfo(appInfo.getAppLibDirPath());
+        if (appLibDirInfo != null) {
+            numLocal += appLibDirInfo.getNumLocal();
+            numHybrid += appLibDirInfo.getNumHybrid();
+            numCloud += appLibDirInfo.getNumCloud();
+        }
+
         DirStatusInfo sourceDirInfo = getDirStatusInfo(appInfo.getSourceDir());
         if (sourceDirInfo != null) {
             numLocal += sourceDirInfo.getNumLocal();
