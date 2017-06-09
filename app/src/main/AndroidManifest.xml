@@ -76,7 +76,7 @@
         </activity>
 
         <activity android:name="com.hopebaytech.hcfsmgmt.utils.AppAvailableAlertActivity"
-            android:theme="@style/Theme.AppCompat.DialogWhenLarge"
+            android:theme="@style/Theme.AppCompat.Light.Dialog.Alert"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true"
             android:exported="true" />
