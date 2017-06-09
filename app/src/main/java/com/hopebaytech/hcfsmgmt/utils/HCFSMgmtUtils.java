@@ -479,7 +479,7 @@ public class HCFSMgmtUtils {
                     int num_hybrid = dataObj.getInt("num_hybrid");
                     int num_cloud = dataObj.getInt("num_cloud");
 
-                    if (num_cloud == 0 && num_hybrid == 0) {
+                    if (num_cloud <= 0 && num_hybrid <= 0) {
                         locationStatus = LocationStatus.LOCAL;
                     } else {
                         locationStatus = LocationStatus.NOT_LOCAL;

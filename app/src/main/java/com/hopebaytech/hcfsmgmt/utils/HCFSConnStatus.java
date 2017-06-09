@@ -26,6 +26,9 @@ public class HCFSConnStatus {
     private static final int DATA_TRANSFER_IN_PROGRESS = 1;
     private static final int DATA_TRANSFER_SLOW = 2;
 
+    /*
+    * First check network connection status of device, and then check HCFS conn.
+    * */
     public static int getConnStatus(Context context, HCFSStatInfo statInfo) {
         boolean syncWifiOnlyPref = true;
         SettingsDAO mSettingsDAO = SettingsDAO.getInstance(context);
@@ -42,48 +45,46 @@ public class HCFSConnStatus {
                 if (netInfo.getType() != ConnectivityManager.TYPE_WIFI) {
                     return TRANS_NOT_ALLOWED;
                 } else {
-                    if (statInfo.isCloudConn()) {
-                        int dataTransfer = statInfo.getDataTransfer();
-                        switch (dataTransfer) {
-                            case DATA_TRANSFER_IN_PROGRESS:
-                                return TRANS_IN_PROGRESS;
-                            case DATA_TRANSFER_SLOW:
-                                return TRANS_SLOW;
-                            default:
-                                return TRANS_NORMAL;
-                        }
-                    } else {
-                        // Check if it is retrying connecting
-                        if (statInfo.isRetryConn())
-                            return TRANS_RECONNECTING;
-                        else
-                            return TRANS_FAILED;
-                    }
+                    return getHCFSConnStatus(context, statInfo);
                 }
             } else {
-                if (statInfo.isCloudConn()) {
-                    int dataTransfer = statInfo.getDataTransfer();
-                    switch (dataTransfer) {
-                        case DATA_TRANSFER_IN_PROGRESS:
-                            return TRANS_IN_PROGRESS;
-                        case DATA_TRANSFER_SLOW:
-                            return TRANS_SLOW;
-                        default:
-                            return TRANS_NORMAL;
-                    }
-                } else {
-                    // Check if it is retrying connecting
-                    if (statInfo.isRetryConn())
-                        return TRANS_RECONNECTING;
-                    else
-                        return TRANS_FAILED;
-                }
+                return getHCFSConnStatus(context, statInfo);
             }
+        }
+    }
+
+    /*
+    * Just check Connection status of HCFS
+    * */
+    public static int getHCFSConnStatus(Context context, HCFSStatInfo statInfo) {
+        if (statInfo.isCloudConn()) {
+            int dataTransfer = statInfo.getDataTransfer();
+            switch (dataTransfer) {
+                case DATA_TRANSFER_IN_PROGRESS:
+                    return TRANS_IN_PROGRESS;
+                case DATA_TRANSFER_SLOW:
+                    return TRANS_SLOW;
+                default:
+                    return TRANS_NORMAL;
+            }
+        } else {
+            // Check if it is retrying connecting
+            if (statInfo.isRetryConn())
+                return TRANS_RECONNECTING;
+            else
+                return TRANS_FAILED;
         }
     }
 
     public static boolean isAvailable(Context context, HCFSStatInfo statInfo) {
         int connStatus = getConnStatus(context, statInfo);
+        return connStatus == HCFSConnStatus.TRANS_NORMAL ||
+                connStatus == HCFSConnStatus.TRANS_IN_PROGRESS ||
+                connStatus == HCFSConnStatus.TRANS_SLOW;
+    }
+
+    public static boolean isHCFSConnAvailable(Context context, HCFSStatInfo statInfo) {
+        int connStatus = getHCFSConnStatus(context, statInfo);
         return connStatus == HCFSConnStatus.TRANS_NORMAL ||
                 connStatus == HCFSConnStatus.TRANS_IN_PROGRESS ||
                 connStatus == HCFSConnStatus.TRANS_SLOW;

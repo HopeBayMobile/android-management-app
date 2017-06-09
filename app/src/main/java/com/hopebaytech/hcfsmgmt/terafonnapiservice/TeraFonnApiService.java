@@ -41,6 +41,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.Date;
+import java.sql.Timestamp;
 
 public class TeraFonnApiService extends Service {
 
@@ -260,13 +262,16 @@ public class TeraFonnApiService extends Service {
         public int checkAppAvailable(String packageName) throws RemoteException {
             int status;
             HCFSStatInfo hcfsStatInfo = HCFSMgmtUtils.getHCFSStatInfo();
-            boolean isAvailable = HCFSConnStatus.isAvailable(TeraFonnApiService.this, hcfsStatInfo);
+            boolean isAvailable = HCFSConnStatus.isHCFSConnAvailable(TeraFonnApiService.this, hcfsStatInfo);
             if (isAvailable) {
                 status = AppStatus.AVAILABLE;
             } else {
                 status = getPackageStatus(packageName);
             }
+            Date date = new Date();
+
             getPackageStatusMap().put(packageName, status);
+            Logs.e(CLASSNAME, "kewei", "put pkg name to map " + new Timestamp(date.getTime()));
             return status;
         }
 
@@ -501,6 +506,8 @@ public class TeraFonnApiService extends Service {
     }
 
     private int getPackageStatus(String packageName) {
+
+
         try {
             UidDAO uidDAO = UidDAO.getInstance(TeraFonnApiService.this);
             UidInfo uidInfo = uidDAO.get(packageName);
@@ -514,6 +521,7 @@ public class TeraFonnApiService extends Service {
                 appInfo.setExternalDirList(uidInfo.getExternalDir());
             }
             return appInfo.getAppStatus();
+            
         } catch (PackageManager.NameNotFoundException e) {
             Logs.e(CLASSNAME, "getPackageStatus", Log.getStackTraceString(e));
         }
