@@ -10,7 +10,6 @@ import com.hopebaytech.hcfsmgmt.fragment.AppAvailableDialogFragment;
 
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 /**
  * Created by rondou.chen on 2017/5/23.
@@ -19,6 +18,7 @@ import android.util.Log;
 public class AppAvailableAlertActivity extends FragmentActivity
                                         implements AppAvailableDialogFragment.AppAvailableDialogListener {
 
+    private static final String CLASSNAME = AppAvailableAlertActivity.class.getSimpleName();
     PendingIntent pendingIntent;
 
     public final String APP_AVAILABLE_DIALOG_DONT_SHOW_AGAIN = "app_available_dialog_dont_show_again";
@@ -33,7 +33,7 @@ public class AppAvailableAlertActivity extends FragmentActivity
 
     @Override
     public void onBackPressed() {
-        Log.d("Rondou", "onBackPressed");
+        Logs.d(CLASSNAME, "onBackPressed", "");
 
         super.onBackPressed();
     }
@@ -64,12 +64,14 @@ public class AppAvailableAlertActivity extends FragmentActivity
 
     @Override
     public void onDialogSingleChoiceItemsClick(DialogFragment dialog, Boolean isChecked) {
-        Log.d("Rondou", "isChecked = " + isChecked);
+        Logs.d(CLASSNAME, "onDialogSingleChoiceItemsClick", "isChecked = " + isChecked);
         if (isChecked) {
             Settings.System.putInt(getContentResolver(), APP_AVAILABLE_DIALOG_DONT_SHOW_AGAIN, 1);
         } else {
             Settings.System.putInt(getContentResolver(), APP_AVAILABLE_DIALOG_DONT_SHOW_AGAIN, 0);
         }
-        Log.d("Rondou", "FLAG  = " + Settings.System.getInt(getContentResolver(), APP_AVAILABLE_DIALOG_DONT_SHOW_AGAIN, 0));
+
+        Logs.d(CLASSNAME, "onDialogSingleChoiceItemsClick", "checkStatus = " +
+                Settings.System.getInt(getContentResolver(), APP_AVAILABLE_DIALOG_DONT_SHOW_AGAIN, 0));
     }
 }

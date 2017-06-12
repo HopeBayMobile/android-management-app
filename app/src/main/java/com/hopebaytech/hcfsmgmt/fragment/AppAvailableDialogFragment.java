@@ -97,11 +97,6 @@ public class AppAvailableDialogFragment extends AppCompatDialogFragment {
                         mListener.onDialogPositiveClick(AppAvailableDialogFragment.this);
                     }
                 })
-                .setNeutralButton(R.string.app_available_dialog_neutral, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        mListener.onDialogNeutralClick(AppAvailableDialogFragment.this);
-                    }
-                })
                 .setNegativeButton(R.string.app_available_dialog_negative, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         mListener.onDialogNegativeClick(AppAvailableDialogFragment.this);

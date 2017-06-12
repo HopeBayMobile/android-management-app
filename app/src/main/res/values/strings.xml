@@ -365,7 +365,6 @@
     <string name="app_available_dialog_dont_show_again">Do not show me again !</string>
     <string name="app_available_dialog_title">Oops ! What the hell is going on here ?</string>
     <string name="app_available_dialog_positive">FIRE</string>
-    <string name="app_available_dialog_neutral">CANCEL</string>
     <string name="app_available_dialog_negative">NOT FIRE</string>
 
 </resources>
