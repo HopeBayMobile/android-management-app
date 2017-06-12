@@ -369,8 +369,8 @@
     <string name="mgmt_server_error_msg_mapping_existed">The device has been registered.</string>
     <string name="mgmt_server_error_msg_service_block">The device service is locked or expired.</string>
     <string name="app_available_dialog_dont_show_again">Do not show me again !</string>
-    <string name="app_available_dialog_negative">NOT FIRE</string>
-    <string name="app_available_dialog_positive">FIRE</string>
-    <string name="app_available_dialog_title">Oops ! What the hell is going on here ?</string>
+    <string name="app_available_dialog_negative">Cancel</string>
+    <string name="app_available_dialog_positive">Launch</string>
+    <string name="app_available_dialog_title">Some app content is unavailable due to network connection issues. Launch the app ?</string>
 
 </resources>
