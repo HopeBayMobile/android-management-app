@@ -61,6 +61,7 @@ public class HCFSMgmtUtils {
     public static final String EXTERNAL_STORAGE_SDCARD0_PREFIX = "/storage/emulated";
 
     private static final String DATA_APP_PATH = "/data/app";
+    private static final int LINUX_NOENT = 2;
 
     public static boolean isAppPinned(Context context, AppInfo appInfo) {
         UidDAO uidDAO = UidDAO.getInstance(context);
@@ -425,13 +426,19 @@ public class HCFSMgmtUtils {
             String jsonResult = HCFSApiUtils.pin(filePath, pinType);
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
+            code = jObject.getInt("code");
             String logMsg = "operation=Pin, filePath=" + filePath + ", jsonResult=" + jsonResult;
             if (isSuccess) {
                 code = 0;
                 Logs.i(CLASSNAME, "pinFileOrDirectory", logMsg);
             } else {
-                code = jObject.getInt("code");
-                Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
+                if (code == LINUX_NOENT) {
+                    /* In case that returned code is NOENT, just ignore it and do nothing. */
+                    code = 0;
+                    Logs.i(CLASSNAME, "pinFileOrDirectory", filePath + " does not exist. Skip to pin it.");
+                } else {
+                    Logs.e(CLASSNAME, "pinFileOrDirectory", logMsg);
+                }
             }
         } catch (JSONException e) {
             Logs.e(CLASSNAME, "pinFileOrDirectory", Log.getStackTraceString(e));
@@ -448,15 +455,21 @@ public class HCFSMgmtUtils {
             String jsonResult = HCFSApiUtils.unpin(filePath);
             JSONObject jObject = new JSONObject(jsonResult);
             boolean isSuccess = jObject.getBoolean("result");
+            code = jObject.getInt("code");
             String logMsg = "operation=Unpin, filePath=" + filePath + ", jsonResult=" + jsonResult;
             if (isSuccess) {
                 code = 0;
                 logMsg += ", code=" + code;
                 Logs.i(CLASSNAME, "unpinFileOrDirectory", logMsg);
             } else {
-                code = jObject.getInt("code");
-                logMsg += ", code=" + code;
-                Logs.e(CLASSNAME, "unpinFileOrDirectory", logMsg);
+                if (code == LINUX_NOENT) {
+                    /* In case that returned code is NOENT, just ignore it and do nothing. */
+                    code = 0;
+                    Logs.i(CLASSNAME, "unpinFileOrDirectory", filePath + " does not exist. Skip to unpin it.");
+                } else {
+                    logMsg += ", code=" + code;
+                    Logs.e(CLASSNAME, "unpinFileOrDirectory", logMsg);
+                }
             }
         } catch (JSONException e) {
             Logs.e(CLASSNAME, "unpinFileOrDirectory", Log.getStackTraceString(e));
