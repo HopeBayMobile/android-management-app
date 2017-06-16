@@ -137,13 +137,16 @@ public class AppDialogFragment extends DialogFragment {
                     Logs.d(CLASSNAME, "onCreateDialog", "externalMediaSize=" + UnitConverter.convertByteToProperUnit(pStats.externalMediaSize));
                     Logs.d(CLASSNAME, "onCreateDialog", "externalObbSize=" + UnitConverter.convertByteToProperUnit(pStats.externalObbSize));
 
-                    ((Activity) mContext).runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String formatSize = UnitConverter.convertByteToProperUnit(totalSize);
-                            appSize.setText(String.format(getString(R.string.app_file_dialog_data_size), formatSize));
-                        }
-                    });
+                    if (isAdded()) {
+                        ((Activity) mContext).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                String formatSize = UnitConverter.convertByteToProperUnit(totalSize);
+                                appSize.setText(String.format(getString(
+                                        R.string.app_file_dialog_data_size), formatSize));
+                            }
+                        });
+                    }
 
                 }
             });
