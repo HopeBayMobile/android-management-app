@@ -263,6 +263,9 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
                 hcfsStatInfo.setCloudConn(dataObj.getInt(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
                 hcfsStatInfo.setDataTransfer(dataObj.getInt(HCFSStatInfo.STAT_DATA_DATA_TRANSFER));
+		/* Value for setting */
+		hcfsStatInfo.setTeraTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
+		hcfsStatInfo.setTeraUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
 
                 long phycialTotalSpace = PhoneStorageUsage.getDataTotalSize();
                 long phycialFreeSpace = PhoneStorageUsage.getDataFreeSize();
