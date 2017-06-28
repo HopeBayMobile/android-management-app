@@ -2116,10 +2116,14 @@ public class AppFileFragment extends Fragment {
             Bundle args = new Bundle();
             args.putBoolean(KEY_ARGUMENT_ALLOW_PIN_UNPIN_APPS, mAllowPinUnpinApps);
 
-            AppDialogFragment dialogFragment = AppDialogFragment.newInstance();
-            dialogFragment.setArguments(args);
-            dialogFragment.setViewHolder(itemInfo.getViewHolder());
-            dialogFragment.show(getFragmentManager(), AppDialogFragment.TAG);
+            Fragment previous = getFragmentManager().findFragmentByTag(AppDialogFragment.TAG);
+            if (previous == null) {
+                AppDialogFragment dialogFragment = AppDialogFragment.newInstance();
+                dialogFragment.setArguments(args);
+                dialogFragment.setViewHolder(itemInfo.getViewHolder());
+                dialogFragment.show(getFragmentManager(), AppDialogFragment.TAG);
+            }
+
         } else if (itemInfo instanceof DataTypeInfo) {
 
         } else if (itemInfo instanceof FileInfo) {
