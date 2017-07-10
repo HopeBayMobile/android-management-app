@@ -36,7 +36,8 @@ extern void HCFS_clear_booster_package_remaining(const char **json_res, const ch
 extern void HCFS_mount_smart_cache(const char **json_res);
 extern void HCFS_umount_smart_cache(const char **json_res);
 extern void HCFS_check_minimal_apk(const char **json_res, const char *package_path, int blocking);
-extern void HCFS_create_minimal_apk(const char **json_res, const char *package_path, int blocking);
+extern void HCFS_create_minimal_apk(const char **json_res, const char *package_path, int blocking, int num_icon, const char *icon_name_list);
+
 extern void HCFS_retry_backend(const char **json_res);
 
 //extern void HCFS_collect_sys_logs(const char **json_res);
@@ -393,12 +394,28 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_mount
     return result;
 }
 
+void *get_icon_name_list(JNIEnv *jEnv, char *icon_name_list, int icon_count,
+        jobjectArray jIconNames) {
+    int len = 0;
+    for (int i = 0; i < icon_count; i++) {
+        jstring jName = (jstring) (*jEnv)->GetObjectArrayElement(jEnv, jIconNames, i);
+        const char *name = (*jEnv)->GetStringUTFChars(jEnv, jName, 0);
+        int str_len = strlen(name);
+        memcpy(icon_name_list + len, name, str_len);
+        len += str_len + 1;
+        free((char *)name);
+    }
+}
+
 JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_createMinimalApk(
- 		JNIEnv *jEnv, jobject jObject, jstring jPkgPath, jint jBlocking) {
+        JNIEnv *jEnv, jobject jObject, jstring jPkgPath, jint jBlocking, jobjectArray jIconNames) {
  	const char *json_res;
     const char *pkg_path = (*jEnv)->GetStringUTFChars(jEnv, jPkgPath, 0);
     int blocking = jBlocking;
-    HCFS_create_minimal_apk(&json_res, pkg_path, blocking);
+    int icon_count = (*jEnv)->GetArrayLength(jEnv, jIconNames);
+    char icon_name_list[10240] = {0};
+    get_icon_name_list(jEnv, icon_name_list, icon_count, jIconNames);
+    HCFS_create_minimal_apk(&json_res, pkg_path, blocking, icon_count, icon_name_list);
     jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
     free((char *)json_res);
     free((char *)pkg_path);

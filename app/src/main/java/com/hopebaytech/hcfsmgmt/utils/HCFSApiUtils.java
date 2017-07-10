@@ -179,7 +179,8 @@ public class HCFSApiUtils {
      * @param blocking    quick return
      * @return a json string contains: true if success, false otherwise.
      */
-    public static native String createMinimalApk(String packagePath, int blocking);
+    public static native String createMinimalApk(
+            String packagePath, int blocking, String[] fileNames);
 
     /**
      * Check the minimal base apk is exist or not

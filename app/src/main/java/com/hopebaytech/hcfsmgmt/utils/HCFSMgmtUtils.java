@@ -890,7 +890,10 @@ public class HCFSMgmtUtils {
             String sourceDir = getSourceDir(context, packageName);
             if (sourceDir != null) {
                 Logs.i(CLASSNAME, "createMinimalApk", "Debug source" + sourceDir);
-                String jsonResult = HCFSApiUtils.createMinimalApk(sourceDir, blocking ? 1 : 0);
+                PackageResource packageResource = new PackageResource(context);
+                String jsonResult = HCFSApiUtils.createMinimalApk(
+                        sourceDir, blocking ? 1 : 0,
+                        packageResource.getMinimalApkResourceFileName(packageName));
                 JSONObject jObject = new JSONObject(jsonResult);
                 isSuccess = jObject.getBoolean("result");
                 if (isSuccess) {
