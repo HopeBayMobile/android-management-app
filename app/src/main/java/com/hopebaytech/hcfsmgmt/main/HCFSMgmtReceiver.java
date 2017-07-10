@@ -128,13 +128,14 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 checkRestoreStatusIntent.setAction(TeraIntent.ACTION_CHECK_RESTORE_STATUS);
                 context.startService(checkRestoreStatusIntent);
 
+                /*
                 // Start a job service to pin /storage/emulated/0/android folder until pin success
                 PeriodicServiceUtils.startPeriodicService(
                         context,
                         Interval.PIN_ANDROID_FOLDER,
                         JobServiceId.PIN_ANDROID_FOLDER,
                         PinAndroidFolderService.class
-                );
+                );*/
 
                 // Check booster is valid or not. If not, fix it.
                 Intent checkAndFixBoosterIntent = new Intent(context, TeraMgmtService.class);

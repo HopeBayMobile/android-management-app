@@ -2257,6 +2257,7 @@ public class AppFileFragment extends Fragment {
             } else if (itemInfo instanceof FileInfo) {
                 final FileInfo fileInfo = (FileInfo) itemInfo;
                 boolean isNeedToProcess = true;
+                /*
                 if (!isPinned) {
                     if (fileInfo.getFilePath().contains(EXTERNAL_ANDROID_PATH)) {
                         isNeedToProcess = false;
@@ -2273,7 +2274,7 @@ public class AppFileFragment extends Fragment {
                         builder.setCancelable(false);
                         builder.show();
                     }
-                }
+                }*/
 
                 if (isNeedToProcess) {
                     showProgress();
