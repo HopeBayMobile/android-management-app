@@ -275,7 +275,9 @@ public class AppInfo extends ItemInfo implements Cloneable {
     @Override
     public int hashCode() {
         if (mHashCode == 0) {
-            mHashCode = getSourceDir().hashCode();
+            String doHashString = Build.VERSION.SDK_INT > 19 ?
+                    getSourceDir() : getSourceDir() + packageName;
+            mHashCode = doHashString.hashCode();
         }
         return mHashCode;
     }
