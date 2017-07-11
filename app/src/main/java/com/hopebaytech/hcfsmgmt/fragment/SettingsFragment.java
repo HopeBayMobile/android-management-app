@@ -146,7 +146,7 @@ public class SettingsFragment extends Fragment {
                     isNotifyConnFailedRecovery = Boolean.valueOf(settingsInfo.getValue());
                 }
 
-                String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+                String defaultValue = getResources().getString(R.string.default_notify_used_ratio);
                 String ratio = defaultValue.concat("%");
                 settingsInfo = settingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);
                 if (settingsInfo != null) {
