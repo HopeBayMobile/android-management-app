@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -36,6 +37,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.preference.PreferenceManager;
@@ -64,6 +66,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hopebaytech.hcfsmgmt.BuildConfig;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.customview.CircleDisplay;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
@@ -2162,10 +2165,20 @@ public class AppFileFragment extends Fragment {
                     String mimeType = fileInfo.getMimeType();
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     File file = new File(fileInfo.getFilePath());
-                    if (mimeType != null) {
-                        intent.setDataAndType(Uri.fromFile(file), mimeType);
+
+                    Uri fileUri;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        fileUri = FileProvider.getUriForFile(mContext,
+                                mContext.getPackageName() + ".fileProvider", file);
+                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     } else {
-                        intent.setData(Uri.fromFile(file));
+                        fileUri = Uri.fromFile(file);
+                    }
+
+                    if (mimeType != null) {
+                        intent.setDataAndType(fileUri, mimeType);
+                    } else {
+                        intent.setData(fileUri);
                     }
 
                     // Verify it resolves
