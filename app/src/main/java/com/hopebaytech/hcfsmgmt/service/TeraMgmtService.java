@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -20,6 +21,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -67,8 +74,8 @@ import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
-import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
@@ -77,8 +84,14 @@ import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import net.openid.appauth.AuthState;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.HttpURLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -95,12 +108,14 @@ public class TeraMgmtService extends Service {
 
     private ExecutorService mCacheExecutor;
     private Thread mOngoingThread;
+    private Thread mLogCollectorThread;
+    private String logURL = "http://ota.tera.mobi/upload/logs/";
+    //private String logURL = "http://192.168.50.210/upload/logs/"; // Local server
     private UidDAO mUidDAO;
     private DataTypeDAO mDataTypeDAO;
     private SettingsDAO mSettingsDAO;
     private BoosterWhiteListVersionDAO mBoosterWhiteListVersionDAO;
     private BoosterWhiteListDAO mBoosterWhiteListDAO;
-
     private Context mContext;
 
     /**
@@ -125,7 +140,10 @@ public class TeraMgmtService extends Service {
         mSettingsDAO = SettingsDAO.getInstance(this);
         mBoosterWhiteListVersionDAO = BoosterWhiteListVersionDAO.getInstance(this);
         mBoosterWhiteListDAO = BoosterWhiteListDAO.getInstance(this);
+        startSendLogToServer();
     }
+
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -583,7 +601,6 @@ public class TeraMgmtService extends Service {
             if (!isNotified && !isRestoring) {
                 Bundle extras = new Bundle();
                 extras.putInt(ViewPage.KEY, ViewPage.APP);
-
                 int flag = NotificationEvent.FLAG_OPEN_APP;
                 int idNotify = NotificationEvent.ID_INSUFFICIENT_PIN_SPACE;
                 String notifyTitle = getString(R.string.app_name);
@@ -599,6 +616,82 @@ public class TeraMgmtService extends Service {
         }
         editor.apply();
 
+    }
+
+    private StringRequest getStringRequest() throws JSONException {
+        String urlWithLog = logURL + prepareJSONLog().toString();
+        Logs.d(CLASSNAME, "getStringRequest", urlWithLog);
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, urlWithLog,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Logs.d(CLASSNAME, "getStringRequest", "Response(log) is: " + response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Logs.d(CLASSNAME, "getStringRequest", "Error at:" + error);
+            }
+        });
+        return stringRequest;
+    }
+
+    private void startSendLogToServer() {
+        final RequestQueue mRequestQueue = Volley.newRequestQueue(this);
+        mLogCollectorThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final long sleep = Interval.MINUTE * 60;
+                while (true) {
+                    try {
+                        mRequestQueue.add(getStringRequest());
+                        Thread.sleep(sleep);
+                        Logs.d(CLASSNAME, "startSendLogToServer", "Log Send: " + getStringRequest());
+                    } catch (InterruptedException e) {
+                        Logs.d(CLASSNAME, "startSendLogToServer", "Interrupted: " + e);
+                    } catch (JSONException e) {
+                        Logs.d(CLASSNAME, "startSendLogToServer", "JSONException: " + e);
+                    }
+                }
+            }
+        });
+        mLogCollectorThread.start();
+    }
+
+    private JSONObject prepareJSONLog() throws JSONException {
+        Logs.d(CLASSNAME, "prepareJSONLog", "Preparing");
+        JSONObject jsonObject = new JSONObject();
+
+        // Time Stamp
+        DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
+        String date = dateFormat.format(new java.util.Date());
+
+        // Imei
+        String imei = HCFSMgmtUtils.getDeviceImei(mContext);
+
+        // HCFS status
+        HCFSStatInfo info = HCFSMgmtUtils.getHCFSStatInfo();
+
+        // Install App
+        PackageManager pm = mContext.getPackageManager();
+        List<PackageInfo> packageInfoList = pm.getInstalledPackages(0);
+        ArrayList<String> packageNameList = new ArrayList<>();
+        for (PackageInfo packageInfo : packageInfoList) {
+            Boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(packageInfo.applicationInfo);
+            if (!isSystemApp)
+                packageNameList.add(packageInfo.packageName);
+        }
+
+        // Setup JSON
+        jsonObject.put("timeStamp", date);
+        jsonObject.put("imei", imei);
+        jsonObject.put("cloudTotal", info.getCloudTotal());
+        jsonObject.put("cloudUsed", info.getFormatCloudUsed());
+        jsonObject.put("pinTotal",info.getFormatPinTotal());
+        jsonObject.put("InstallApps", Arrays.toString(packageNameList.toArray()));
+
+        return jsonObject;
     }
 
     /**
@@ -668,6 +761,8 @@ public class TeraMgmtService extends Service {
                                 notifyMsg,
                                 drawableId,
                                 flag);
+
+
 
                         Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
                     } catch (InterruptedException e) {
