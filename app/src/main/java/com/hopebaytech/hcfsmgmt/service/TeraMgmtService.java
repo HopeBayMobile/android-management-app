@@ -91,7 +91,6 @@ import java.net.HttpURLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -99,6 +98,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 
 public class TeraMgmtService extends Service {
 
@@ -687,9 +687,11 @@ public class TeraMgmtService extends Service {
         jsonObject.put("timeStamp", date);
         jsonObject.put("imei", imei);
         jsonObject.put("cloudTotal", info.getCloudTotal());
-        jsonObject.put("cloudUsed", info.getFormatCloudUsed());
-        jsonObject.put("pinTotal",info.getFormatPinTotal());
-        jsonObject.put("InstallApps", Arrays.toString(packageNameList.toArray()));
+        jsonObject.put("cloudUsed", info.getCloudUsed());
+        jsonObject.put("pinTotal",info.getPinTotal());
+        jsonObject.put("InstallAppsNumber", packageNameList.size());
+        jsonObject.put("DataDownloadToday", info.getXferDownload());
+        jsonObject.put("DataUploadToday", info.getXferDownload());
 
         return jsonObject;
     }
