@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -67,6 +68,8 @@ import net.openid.appauth.TokenResponse;
 
 import org.json.JSONObject;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -179,6 +182,57 @@ public class ActivateWoCodeFragment extends Fragment {
         mTeraVersion = (TextView) view.findViewById(R.id.version);
     }
 
+    private boolean isFullBrowser(ResolveInfo resolveInfo) {
+        if(resolveInfo.filter.hasAction("android.intent.action.VIEW") && resolveInfo.filter.hasCategory("android.intent.category.BROWSABLE") && resolveInfo.filter.schemesIterator() != null) {
+            if(resolveInfo.filter.authoritiesIterator() != null) {
+                return false;
+            } else {
+                boolean supportsHttp = false;
+                boolean supportsHttps = false;
+                Iterator schemeIter = resolveInfo.filter.schemesIterator();
+
+                do {
+                    if(!schemeIter.hasNext()) {
+                        return false;
+                    }
+
+                    String scheme = (String)schemeIter.next();
+                    supportsHttp |= "http".equals(scheme);
+                    supportsHttps |= "https".equals(scheme);
+                } while(!supportsHttp || !supportsHttps);
+
+                return true;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkGooglePlayServices() {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(mContext);
+        if(result != ConnectionResult.SUCCESS) {
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkBrowserAvailable() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.testTera.com.tw"));
+        PackageManager pm = mContext.getPackageManager();
+
+        List resolvedActivityList = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
+        Iterator var5 = resolvedActivityList.iterator();
+        while(var5.hasNext()) {
+            ResolveInfo info = (ResolveInfo)var5.next();
+
+            if (isFullBrowser(info)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -197,7 +251,12 @@ public class ActivateWoCodeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (NetworkUtils.isNetworkConnected(mContext)) {
-                    appAuthorization(v);
+                    if (checkBrowserAvailable()) {
+                        appAuthorization(v);
+                    } else if (checkGooglePlayServices()) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + "com.android.chrome"));
+                        mContext.startActivity(intent);
+                    }
                 } else {
                     mErrorMessage.setText(R.string.activate_alert_dialog_message);
                 }
