@@ -784,7 +784,7 @@ public class TeraMgmtService extends Service {
         if (statInfo != null) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-            String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+            String defaultValue = getResources().getString(R.string.default_notify_used_ratio);
             String storageUsedRatio = defaultValue;
 
             SettingsInfo settingsInfo = mSettingsDAO.get(SettingsFragment.PREF_NOTIFY_LOCAL_STORAGE_USAGE_RATIO);

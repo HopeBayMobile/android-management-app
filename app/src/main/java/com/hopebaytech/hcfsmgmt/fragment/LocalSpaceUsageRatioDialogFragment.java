@@ -47,7 +47,7 @@ public class LocalSpaceUsageRatioDialogFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String defaultValue = getResources().getStringArray(R.array.pref_notify_local_storage_used_ratio_value)[0];
+        String defaultValue = getResources().getString(R.string.default_notify_used_ratio);
         String getRatio = defaultValue.concat("%");
 
         SettingsDAO mSettingsDAO = SettingsDAO.getInstance(mContext);
