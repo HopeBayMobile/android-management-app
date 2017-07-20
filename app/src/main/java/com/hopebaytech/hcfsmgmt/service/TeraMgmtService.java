@@ -1372,11 +1372,11 @@ public class TeraMgmtService extends Service {
 
     private void setAccessTokenViaAppAuth() {
         AppAuthUtils appAuthUtils = new AppAuthUtils();
-        AuthState authState;
-
-        authState = appAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
-        appAuthUtils.resetAccessTokeToHCFS(mContext, authState);
+        AuthState authState = appAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
 
         Logs.d(CLASSNAME, "onTokenExpire", "getAuthStateViaSharePreference" + authState);
+        if (authState != null) {
+            appAuthUtils.resetAccessTokeToHCFS(mContext, authState);
+        }
     }
 }
