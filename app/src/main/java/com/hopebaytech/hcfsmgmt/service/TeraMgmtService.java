@@ -287,7 +287,7 @@ public class TeraMgmtService extends Service {
                             HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
                             break;
                         case TeraIntent.ACTION_TOKEN_EXPIRED:
-                            //setAccessTokenViaAppAuth();
+                            setAccessTokenViaAppAuth();
                             checkTokenExpiredCause();
                             break;
                         case TeraIntent.ACTION_EXCEED_PIN_MAX:
