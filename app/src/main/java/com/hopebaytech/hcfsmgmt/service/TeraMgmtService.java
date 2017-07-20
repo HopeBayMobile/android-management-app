@@ -166,17 +166,14 @@ public class TeraMgmtService extends Service {
         // String date = dateFormat.format(new java.util.Date());
         String dateOrigin = new java.util.Date().toString();
         String imei = HCFSMgmtUtils.getDeviceImei(mContext);
-        String accountName = accountInfo.getName();
-        String accountEmail = accountInfo.getEmail();
+        String accountName = accountInfo != null ? accountInfo.getName() : "UserName";
+        String accountEmail = accountInfo != null ? accountInfo.getEmail() : "UserEmail";
 
         // basic Info
         basicInfo.put("TimeStamp", dateOrigin);
         basicInfo.put("IMEI", imei);
-
-        if (accountInfo == null){
-            basicInfo.put("UserName", accountName);
-            basicInfo.put("UserEmail", accountEmail);
-        }
+        basicInfo.put("UserName", accountName);
+        basicInfo.put("UserEmail", accountEmail);
 
         // HCFS status
         HCFSStatInfo info = HCFSMgmtUtils.getHCFSStatInfo();
