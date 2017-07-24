@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -60,6 +61,7 @@ public class UserInfoDialogFragment extends DialogFragment {
     private TextView mUserName;
     private TextView mUserEmail;
     private TextView mChangeAccount;
+    private LinearLayout mChangeAccountContainer;
 
     public static UserInfoDialogFragment newInstance() {
         return new UserInfoDialogFragment();
@@ -90,12 +92,14 @@ public class UserInfoDialogFragment extends DialogFragment {
         mUserName = (TextView) view.findViewById(R.id.user_name);
         mUserEmail = (TextView) view.findViewById(R.id.user_email);
         mChangeAccount = (TextView) view.findViewById(R.id.change_account);
+        mChangeAccountContainer = (LinearLayout) view.findViewById(R.id.change_account_container);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         setUserIcon();
+        mChangeAccountContainer.setVisibility(View.GONE);
         mChangeAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
