@@ -115,7 +115,7 @@ public class HCFSStatInfo {
     }
 
     public String getFormatCacheTotal() {
-        return UnitConverter.convertByteToProperUnit(cacheTotal - 1073741824);
+        return UnitConverter.convertByteToProperUnit(cacheTotal);
     }
 
     public void setCacheTotal(long cacheTotal) {
