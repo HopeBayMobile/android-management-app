@@ -29,6 +29,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.UnitConverter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -104,8 +105,11 @@ public class OverviewFragment extends Fragment {
                                     mStatInfo.getFormatCacheUsed(),
                                     mStatInfo.getFormatCacheTotal());
 
-                            mCacheSpaceUsage.showUsage(mStatInfo.getCacheUsedPercentage(),
-                                    cacheSpaceText);
+                            // Can: get correct value for animation of circle
+                            int percentage = UnitConverter.calculateUsagePercentage(
+                                    mStatInfo.getCacheUsed(), mStatInfo.getCacheTotal());
+
+                            mCacheSpaceUsage.showUsage(percentage, cacheSpaceText);
 
                             String usedSpaceText = String.format(Locale.getDefault(),
                                     "%s / %s",
