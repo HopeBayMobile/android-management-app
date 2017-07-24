@@ -713,16 +713,22 @@ public class HCFSMgmtUtils {
 
     public static String getDeviceImei(Context context) {
         String imei = "";
-        TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (manager.getPhoneCount() != 0) {
-                imei = manager.getDeviceId(0);
+        try {
+            TelephonyManager manager =
+                    (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (manager.getPhoneCount() != 0) {
+                    imei = manager.getDeviceId(0);
+                }
+            } else {
+                imei = manager.getDeviceId();
             }
-        } else {
-            imei = manager.getDeviceId();
-        }
 
-        Logs.d(CLASSNAME, "getDeviceImei", "Imei=" + imei);
+            Logs.d(CLASSNAME, "getDeviceImei", "Imei=" + imei);
+        } catch (SecurityException e) {
+            Logs.w(CLASSNAME, "getDeviceImei", "need android.permission.READ_PHONE_STATE");
+
+        }
         return imei;
     }
 
