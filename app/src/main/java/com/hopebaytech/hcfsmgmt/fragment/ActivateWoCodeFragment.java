@@ -724,9 +724,7 @@ public class ActivateWoCodeFragment extends Fragment {
                           "email",
                           "https://www.googleapis.com/auth/drive",
                           "https://www.googleapis.com/auth/drive.file",
-                          "https://www.googleapis.com/auth/drive.appdata",
-                          "https://www.googleapis.com/auth/presentations",
-                          "https://www.googleapis.com/auth/spreadsheets");
+                          "https://www.googleapis.com/auth/drive.appdata");
 
         AuthorizationRequest request = builder.build();
         String action = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
