@@ -119,7 +119,7 @@ public class HCFSStatInfo {
     }
 
     public void setCacheTotal(long cacheTotal) {
-        this.cacheTotal = cacheTotal;
+        this.cacheTotal = cacheTotal - 1073741824;
     }
 
     public String getFormatCacheUsed() {
