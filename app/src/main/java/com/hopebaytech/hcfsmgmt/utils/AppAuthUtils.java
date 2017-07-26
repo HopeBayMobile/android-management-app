@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -31,7 +32,7 @@ import java.lang.reflect.Type;
 public class AppAuthUtils {
 
     public final String AUTH_STATUS_PERF_NAME = "RondouIsDangerous";
-    public final String AUTH_STATUS_PERF_KEYS = "mAuthStateKey";
+    public static final String AUTH_STATUS_PERF_KEYS = "mAuthStateKey";
 
     private class UriSerializer implements JsonSerializer<Uri> {
         public JsonElement serialize(Uri src, Type typeOfSrc, JsonSerializationContext context) {
@@ -73,8 +74,10 @@ public class AppAuthUtils {
         sharedPreferencesEditor.apply();
     }
 
-    public void saveAppAuthStatusToSharedPreference(Context context, Object object){
+    public void saveAppAuthStatusToSharedPreference(Context context, Object object) {
         saveObjectToSharedPreference(context, AUTH_STATUS_PERF_NAME, AUTH_STATUS_PERF_KEYS, object);
+        Settings.Global.putInt(context.getContentResolver(),
+                AppAuthUtils.AUTH_STATUS_PERF_KEYS, 1);
     }
 
     public AuthState getSavedAppAuthStatusFromPreference(Context context){
