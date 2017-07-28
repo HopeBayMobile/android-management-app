@@ -32,6 +32,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -250,8 +251,12 @@ public class HCFSMgmtUtils {
 //                Logs.d(CLASSNAME, "getHCFSStatInfo", "jsonResult=" + jsonResult);
 
                 hcfsStatInfo = new HCFSStatInfo();
+
                 hcfsStatInfo.setCloudTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
                 hcfsStatInfo.setCloudUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
+                // Set meta usage
+                hcfsStatInfo.setMetaTotal(dataObj.getLong(HCFSStatInfo.STAT_META_SIZE_TOTAL));
+                hcfsStatInfo.setMetaUsed(dataObj.getLong(HCFSStatInfo.STAT_META_SIZE_USED));
                 // Add the Tera storage scope.
                 hcfsStatInfo.setVolUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_VOL_USED));
                 hcfsStatInfo.setCacheTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_CACHE_TOTAL));
@@ -263,9 +268,9 @@ public class HCFSMgmtUtils {
                 hcfsStatInfo.setXferDownload(dataObj.getLong(HCFSStatInfo.STAT_DATA_XFER_DOWN));
                 hcfsStatInfo.setCloudConn(dataObj.getInt(HCFSStatInfo.STAT_DATA_CLOUD_CONN));
                 hcfsStatInfo.setDataTransfer(dataObj.getInt(HCFSStatInfo.STAT_DATA_DATA_TRANSFER));
-		/* Value for setting */
-		hcfsStatInfo.setTeraTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
-		hcfsStatInfo.setTeraUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
+		        /* Value for setting */
+		        hcfsStatInfo.setTeraTotal(dataObj.getLong(HCFSStatInfo.STAT_DATA_QUOTA));
+		        hcfsStatInfo.setTeraUsed(dataObj.getLong(HCFSStatInfo.STAT_DATA_CLOUD_USED));
 
                 long phycialTotalSpace = PhoneStorageUsage.getDataTotalSize();
                 long phycialFreeSpace = PhoneStorageUsage.getDataFreeSize();
@@ -581,6 +586,18 @@ public class HCFSMgmtUtils {
      */
     public static boolean resetDataXfer() {
         boolean isSuccess = false;
+        Calendar nowTime = Calendar.getInstance();
+        int nowHour = nowTime.get(Calendar.HOUR_OF_DAY);
+        int nowMinute = nowTime.get(Calendar.MINUTE);
+        /* Skip to reset xfer if it is not 23:59 */
+        if (!(nowHour == Interval.RESET_XFER_HOURS_OF_DAY &&
+                nowMinute == Interval.RESET_XFER_MINUTES_OF_DAY)) {
+            String logMsg = "Omit the reset data xfer api because it is " + String.valueOf(nowHour) +
+                            " : " + String.valueOf(nowMinute);
+            Logs.e(CLASSNAME, "resetDataXfer", logMsg);
+            return false;
+        }
+
         try {
             String jsonResult = HCFSApiUtils.resetXfer();
             JSONObject jObject = new JSONObject(jsonResult);
