@@ -15,6 +15,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -969,6 +970,12 @@ public class TeraMgmtService extends Service {
 
     private void checkTokenExpiredCause() {
         if (!NetworkUtils.isNetworkConnected(this)) {
+            return;
+        }
+
+        boolean isGoogleDriveBackend = Settings.Global.getInt(
+                mContext.getContentResolver(), AppAuthUtils.AUTH_STATUS_PERF_KEYS, 0) != 0;
+        if (isGoogleDriveBackend) {
             return;
         }
 
