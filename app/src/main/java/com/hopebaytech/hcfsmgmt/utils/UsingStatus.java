@@ -30,16 +30,12 @@ public class UsingStatus {
         //String logURL = "http://172.16.11.188:5555"; // Local Test server
 
         try {
-            Thread.sleep(Interval.MINUTE * 1);
-
             RequestBody body = RequestBody.create(JSON, getJSONStringLog(context));
             Request request = new Request.Builder().url(logURL).post(body).build();
             Response response = new OkHttpClient().newCall(request).execute();
             Logs.d(TAG, "sendLogs(can)", "response:" + response.body().string());
         } catch (IOException e) {
             Logs.d(TAG, "sendLogs(can)", "IOException: " + e);
-        } catch (InterruptedException e) {
-            Logs.d(TAG, "sendLogs(can)", "InterruptedException: " + e);
         } catch (JSONException e) {
             Logs.d(TAG, "sendLogs(can)", "JSONException: " + e);
         }
