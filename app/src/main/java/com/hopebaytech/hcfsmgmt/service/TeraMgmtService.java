@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListDAO;
 import com.hopebaytech.hcfsmgmt.db.BoosterWhiteListVersionDAO;
 import com.hopebaytech.hcfsmgmt.db.DataTypeDAO;
@@ -35,7 +33,6 @@ import com.hopebaytech.hcfsmgmt.db.UidDAO;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
 import com.hopebaytech.hcfsmgmt.fragment.RestoreReadyFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
-import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AppInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.BoosterDeviceInfo;
@@ -78,14 +75,10 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
+import com.hopebaytech.hcfsmgmt.utils.UsingStatus;
 
 import net.openid.appauth.AuthState;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,11 +88,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.RequestBody;
-
 
 public class TeraMgmtService extends Service {
 
@@ -115,11 +103,6 @@ public class TeraMgmtService extends Service {
     private BoosterWhiteListVersionDAO mBoosterWhiteListVersionDAO;
     private BoosterWhiteListDAO mBoosterWhiteListDAO;
     private Context mContext;
-
-    public static final MediaType JSON
-            = MediaType.parse("application/json; charset=utf-8");
-
-    OkHttpClient client = new OkHttpClient();
 
     /**
      * Class used for the client Binder.  Because we know this service always
@@ -143,101 +126,6 @@ public class TeraMgmtService extends Service {
         mSettingsDAO = SettingsDAO.getInstance(this);
         mBoosterWhiteListVersionDAO = BoosterWhiteListVersionDAO.getInstance(this);
         mBoosterWhiteListDAO = BoosterWhiteListDAO.getInstance(this);
-
-        try {
-            sendLogs();
-        } catch (JSONException e){
-            Logs.d(CLASSNAME, "JSONException", e.toString());
-        }
-    }
-
-    private String getJSONStringLog() throws JSONException {
-        Logs.d(CLASSNAME, "getJSONStringLog", "Preparing");
-        AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-        AccountInfo accountInfo = accountDAO.getFirst();
-
-        JSONObject basicInfo = new JSONObject();
-        JSONObject hcfsStatus = new JSONObject();
-        JSONArray installApps = new JSONArray();
-        JSONObject dataObject = new JSONObject();
-        JSONObject requestJSONObject = new JSONObject();
-
-        // Basic information
-        // DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
-        // String date = dateFormat.format(new java.util.Date());
-        String dateOrigin = new java.util.Date().toString();
-        String imei = HCFSMgmtUtils.getDeviceImei(mContext);
-        String accountName = accountInfo != null ? accountInfo.getName() : "UserName";
-        String accountEmail = accountInfo != null ? accountInfo.getEmail() : "UserEmail";
-
-        // basic Info
-        basicInfo.put("TimeStamp", dateOrigin);
-        basicInfo.put("IMEI", imei);
-        basicInfo.put("UserName", accountName);
-        basicInfo.put("UserEmail", accountEmail);
-
-        // HCFS status
-        HCFSStatInfo info = HCFSMgmtUtils.getHCFSStatInfo();
-        hcfsStatus.put("CloudTotal", info.getCloudTotal());
-        hcfsStatus.put("CloudUsed", info.getCloudUsed());
-        hcfsStatus.put("PinTotal", info.getPinTotal());
-        hcfsStatus.put("DirtyUsed", info.getCacheDirtyUsed());
-        hcfsStatus.put("CacheUsed", info.getCacheUsed());
-        hcfsStatus.put("CacheTotal", info.getCacheTotal());
-        hcfsStatus.put("DataDownloadToday", info.getXferDownload());
-        hcfsStatus.put("DataUploadToday", info.getXferDownload());
-
-        // Install App
-        PackageManager pm = mContext.getPackageManager();
-        List<PackageInfo> packageInfoList = pm.getInstalledPackages(0);
-        for (PackageInfo packageInfo : packageInfoList) {
-            Boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(packageInfo.applicationInfo);
-            if (!isSystemApp)
-                installApps.put(packageInfo.packageName);
-        }
-
-        // Setup Data JSON object
-        dataObject.put("basicInfo", basicInfo);
-        dataObject.put("HcfsStatus", hcfsStatus);
-        dataObject.put("InstallApps", installApps);
-
-        // Setup Final request JSON Object
-        requestJSONObject.put(imei, dataObject);
-
-        return requestJSONObject.toString();
-    }
-
-    private void sendLogs() throws JSONException {
-        Thread mLogCollectorThread;
-        final long sleep = Interval.MINUTE * 60;
-        String logURL = "http://ota.tera.mobi/upload/logs/HitRondou/";
-        //String logURL = "http://172.16.11.188:5555"; // Local Test server
-
-        RequestBody body = RequestBody.create(JSON, getJSONStringLog());
-        final okhttp3.Request request = new okhttp3.Request.Builder()
-                .url(logURL)
-                .post(body)
-                .build();
-
-        mLogCollectorThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Thread.sleep(sleep);
-                        okhttp3.Response response = client
-                                .newCall(request)
-                                .execute();
-                        Logs.d(CLASSNAME, "sendLogs(can)" ,"response:" + response.body().string());
-                    } catch (IOException e) {
-                        Logs.d(CLASSNAME, "sendLogs(can)", "IOException: " + e);
-                    } catch (InterruptedException e) {
-                        Logs.d(CLASSNAME, "sendLogs(can)", "InterruptedException: " + e);
-                    }
-                }
-            }
-        });
-        mLogCollectorThread.start();
     }
 
     @Override
@@ -319,6 +207,9 @@ public class TeraMgmtService extends Service {
                             checkAndFixBooster();
                         case TeraIntent.ACTION_MONITOR_BOOSTER_USED_SPACE:
                             checkBoosterUsedSpace();
+                            break;
+                        case TeraIntent.ACTION_SEND_LOGS:
+                            UsingStatus.sendLog(mContext);
                             break;
                     }
 
