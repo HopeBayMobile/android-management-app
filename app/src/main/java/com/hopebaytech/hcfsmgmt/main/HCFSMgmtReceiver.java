@@ -32,6 +32,9 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 
         if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED)) {
             Logs.init();
+
+            // Start an alarm to send logs
+            AlarmUtils.startSendLogsAlarm(context);
         }
 
         final String action = intent.getAction();
@@ -55,9 +58,6 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 
                     // Start an alarm to monitor booster used space
                     AlarmUtils.startMonitorBoosterUsedSpace(context);
-
-                    // Start an alarm to send logs
-                    AlarmUtils.startSendLogsAlarm(context);
 
                     // Set silent Google sign-in to false
                     SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
