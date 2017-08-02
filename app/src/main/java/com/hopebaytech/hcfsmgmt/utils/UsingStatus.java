@@ -3,6 +3,7 @@ package com.hopebaytech.hcfsmgmt.utils;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
@@ -13,6 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.List;
 
 import okhttp3.MediaType;
@@ -87,6 +92,7 @@ public class UsingStatus {
         }
 
         // Setup Data JSON object
+        dataObject.put("LocalIp", getIp());
         dataObject.put("basicInfo", basicInfo);
         dataObject.put("HcfsStatus", hcfsStatus);
         dataObject.put("InstallApps", installApps);
@@ -95,5 +101,24 @@ public class UsingStatus {
         requestJSONObject.put(imei, dataObject);
 
         return requestJSONObject.toString();
+    }
+
+    private static String getIp() {
+        try {
+            Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+            while (nis.hasMoreElements()) {
+                Enumeration<InetAddress> addresses = nis.nextElement().getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress inetAddress = addresses.nextElement();
+                    if (inetAddress.isSiteLocalAddress() && !inetAddress.isLoopbackAddress()) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+
+        return "null";
     }
 }
