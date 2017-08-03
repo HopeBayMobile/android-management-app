@@ -62,14 +62,14 @@ public class UsingStatus {
         // String date = dateFormat.format(new java.util.Date());
         String dateOrigin = new java.util.Date().toString();
         String imei = HCFSMgmtUtils.getDeviceImei(context);
-        String accountName = accountInfo != null ? accountInfo.getName() : "UserName";
-        String accountEmail = accountInfo != null ? accountInfo.getEmail() : "UserEmail";
+        //String accountName = accountInfo != null ? accountInfo.getName() : "UserName";
+        //String accountEmail = accountInfo != null ? accountInfo.getEmail() : "UserEmail";
 
         // basic Info
         basicInfo.put("TimeStamp", dateOrigin);
         basicInfo.put("IMEI", imei);
-        basicInfo.put("UserName", accountName);
-        basicInfo.put("UserEmail", accountEmail);
+        //basicInfo.put("UserName", accountName);
+        //basicInfo.put("UserEmail", accountEmail);
 
         // HCFS status
         HCFSStatInfo info = HCFSMgmtUtils.getHCFSStatInfo();
