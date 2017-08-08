@@ -47,6 +47,7 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -769,7 +770,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     if (exception == null && tokenResponse != null) {
                         authState.update(tokenResponse, exception);
                         mAuthState = authState;
-                        appAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mAuthState);
+                        //appAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mAuthState);
 
                         Logs.d(CLASSNAME, "onTokenResponse", String.format(
                                 "Token Response [ Access Token: %s, ID Token: %s ]",
@@ -837,6 +838,7 @@ public class ActivateWoCodeFragment extends Fragment {
                     @Override
                     protected Bundle doInBackground(String... tokens) {
                         Logs.d(CLASSNAME, "onAppAuthRegister", "firstTimeToken " + tokens[0]);
+                        Bundle args = null;
                         OkHttpClient client = new OkHttpClient();
                         Request request = new Request.Builder()
                                 .url("https://www.googleapis.com/oauth2/v3/userinfo")
@@ -844,31 +846,38 @@ public class ActivateWoCodeFragment extends Fragment {
                                 .build();
                         final String token = tokens[0].toString();
 
-                        try {
-                            Response response = client.newCall(request).execute();
-                            String jsonBody = response.body().string();
-                            Logs.d(CLASSNAME, "onAppAuthRegister", String.format("User Info Response %s", jsonBody));
+                        GoogleDriveAPI googledrive = new GoogleDriveAPI(token);
+                        if (googledrive.get("tera") == 0) {
+                            try {
+                                Response response = client.newCall(request).execute();
+                                String jsonBody = response.body().string();
+                                Logs.d(CLASSNAME, "onAppAuthRegister", String.format("User Info Response %s", jsonBody));
 
-                            JSONObject userinfo = new JSONObject(jsonBody);
-                            setDeviceServiceInfoBackend(userinfo, token);
-                            Bundle args = setAccountDAOandHCFStoken(userinfo, token);
-                            return args;
-                        } catch (Exception exception) {
-                            Logs.e(CLASSNAME, "appAuthRegisterTera", Log.getStackTraceString(exception));
+                                JSONObject userinfo = new JSONObject(jsonBody);
+                                setDeviceServiceInfoBackend(userinfo, token);
+                                args = setAccountDAOandHCFStoken(userinfo, token);
+                            } catch (Exception exception) {
+                                Logs.e(CLASSNAME, "appAuthRegisterTera", Log.getStackTraceString(exception));
+                            }
+                        } else {
+                            // Do Restore Here
+                            args = null;
                         }
-                        return null;
+                        return args;
                     }
 
                     @Override
                     protected void onPostExecute(Bundle args) {
-                        MainFragment mainFragment = MainFragment.newInstance();
-                        mainFragment.setArguments(args);
-                        mProgressDialogUtils.dismiss();
+                        if (args != null) {
+                            MainFragment mainFragment = MainFragment.newInstance();
+                            mainFragment.setArguments(args);
+                            mProgressDialogUtils.dismiss();
 
-                        Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
-                        FragmentTransaction ft = getFragmentManager().beginTransaction();
-                        ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
-                        ft.commit();
+                            Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
+                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
+                            ft.commit();
+                        }
                     }
                 }.execute(accessToken);
             }
