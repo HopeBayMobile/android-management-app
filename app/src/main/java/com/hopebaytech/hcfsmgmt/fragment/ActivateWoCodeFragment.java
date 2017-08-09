@@ -804,10 +804,10 @@ public class ActivateWoCodeFragment extends Fragment {
     private void setDeviceServiceInfoBackend(JSONObject userinfo, String token) {
         try {
             DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(
-                    "https://172.16.40.177",
+                    null,
                     token,
                     "googledrive",
-                    "akdjlaksdjglksjadlk",
+                    null,
                     userinfo.get("email").toString()
             );
             boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
@@ -868,10 +868,10 @@ public class ActivateWoCodeFragment extends Fragment {
     private void triggerRestore(String token) {
         // Do Restore Here
         DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(
-                "https://172.16.40.177",
+                null,
                 token,
                 "googledrive",
-                "akdjlaksdjglksjadlk",
+                null,
                 null
         );
         TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
@@ -904,7 +904,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                 .build();
                         final String token = tokens[0].toString();
 
-                        if (isCanRestore(token)) {
+                        if (!isCanRestore(token)) {
                             try {
                                 Response response = client.newCall(request).execute();
                                 String jsonBody = response.body().string();
