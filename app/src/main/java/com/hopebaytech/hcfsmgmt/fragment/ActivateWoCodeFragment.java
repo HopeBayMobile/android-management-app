@@ -55,6 +55,7 @@ import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
@@ -67,8 +68,11 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.TokenResponse;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -782,16 +786,29 @@ public class ActivateWoCodeFragment extends Fragment {
         }
     }
 
+    private DeviceServiceInfo buildDeviceServiceInfo(String url, String token, String backendtype, String bucket, String account) {
+        DeviceServiceInfo.Backend _backend = new DeviceServiceInfo.Backend();
+        _backend.setUrl(url);
+        _backend.setToken(token);
+        _backend.setBackendType(backendtype);
+        _backend.setBucket(bucket);
+        _backend.setAccount(account);
+
+        DeviceServiceInfo deviceServiceInfo = new DeviceServiceInfo();
+        deviceServiceInfo.setBackend(_backend);
+
+        return deviceServiceInfo;
+    }
+
     private void setDeviceServiceInfoBackend(JSONObject userinfo, String token) {
         try {
-            DeviceServiceInfo deviceServiceInfo = new DeviceServiceInfo();
-            DeviceServiceInfo.Backend _backend = new DeviceServiceInfo.Backend();
-            _backend.setUrl("https://172.16.40.177");
-            _backend.setToken(token);
-            _backend.setBackendType("googledrive");
-            _backend.setBucket("akdjlaksdjglksjadlk");
-            _backend.setAccount(userinfo.get("email").toString());
-            deviceServiceInfo.setBackend(_backend);
+            DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(
+                    "https://172.16.40.177",
+                    token,
+                    "googledrive",
+                    "akdjlaksdjglksjadlk",
+                    userinfo.get("email").toString()
+            );
             boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
         } catch (Exception exception) {
             Logs.e(CLASSNAME, "setDeviceServiceInfoBackend", Log.getStackTraceString(exception));
@@ -829,6 +846,46 @@ public class ActivateWoCodeFragment extends Fragment {
         return null;
     }
 
+    private boolean isCanRestore(String token) {
+        GoogleDriveAPI googledrive = new GoogleDriveAPI(token);
+        boolean is_can_restore = false;
+        try {
+            Response response = googledrive.get("tera");
+            String response_body = response.body().string();
+
+            JSONObject file_list_info = new JSONObject(response_body);
+            List<String> items = Arrays.asList(file_list_info.get("items").toString());
+            Log.d("Rondou", file_list_info.get("items").toString());
+            Log.d("Rondou", "item size = " + items.size());
+            is_can_restore = (items.size() == 1);
+        } catch (IOException e){
+        } catch (JSONException e) {
+        }
+        return is_can_restore;
+    }
+
+    private void triggerRestore(String token) {
+        // Do Restore Here
+        DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(
+                "https://172.16.40.177",
+                token,
+                "googledrive",
+                "akdjlaksdjglksjadlk",
+                null
+        );
+        TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
+        int code = HCFSMgmtUtils.triggerRestore();
+
+        TeraCloudConfig.reloadConfig();
+        HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
+                deviceServiceInfo.getBackend().getToken());
+
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+        editor.apply();
+    }
+
     private void registerTeraBattle(@NonNull AuthState authState) {
 
         authState.performActionWithFreshTokens(new AuthorizationService(mContext), new AuthState.AuthStateAction() {
@@ -846,8 +903,7 @@ public class ActivateWoCodeFragment extends Fragment {
                                 .build();
                         final String token = tokens[0].toString();
 
-                        GoogleDriveAPI googledrive = new GoogleDriveAPI(token);
-                        if (googledrive.get("tera") == 0) {
+                        if (isCanRestore(token)) {
                             try {
                                 Response response = client.newCall(request).execute();
                                 String jsonBody = response.body().string();
@@ -861,7 +917,7 @@ public class ActivateWoCodeFragment extends Fragment {
                             }
                         } else {
                             // Do Restore Here
-                            args = null;
+                            triggerRestore(token);
                         }
                         return args;
                     }

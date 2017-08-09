@@ -27,8 +27,8 @@ public class GoogleDriveAPI {
         mToken = token;
     }
 
-    public int get(String filename) {
-        int items_size = 0;
+    public Response get(String filename) {
+        Response response = null;
         String url = String.format("%s%s\'%s\'", GOOGLE_DRIVE_API_HOST_NAME_V2, "?q=title+contains+" ,filename);
 
         try {
@@ -36,19 +36,9 @@ public class GoogleDriveAPI {
                     .url(url)
                     .addHeader("Authorization", String.format("Bearer %s", mToken))
                     .build();
-            Response response = new OkHttpClient().newCall(request).execute();
-            String response_body = response.body().string();
-
-            JSONObject file_list_info = new JSONObject(response_body);
-            List<String> items = Arrays.asList(file_list_info.get("items").toString());
-            Log.d("Rondou", file_list_info.get("items").toString());
-            Log.d("Rondou", "item size = " + items.size());
-            items_size = items.size();
-
+            response = new OkHttpClient().newCall(request).execute();
         } catch (IOException e){
-        } catch (JSONException e) {
         }
-
-        return items_size;
+        return response;
     }
 }
