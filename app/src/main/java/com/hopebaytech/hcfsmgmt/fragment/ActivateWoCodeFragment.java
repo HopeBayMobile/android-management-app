@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -924,15 +925,23 @@ public class ActivateWoCodeFragment extends Fragment {
 
                     @Override
                     protected void onPostExecute(Bundle args) {
+                        mProgressDialogUtils.dismiss();
+                        FragmentManager fm = getFragmentManager();
                         if (args != null) {
                             MainFragment mainFragment = MainFragment.newInstance();
                             mainFragment.setArguments(args);
-                            mProgressDialogUtils.dismiss();
 
                             Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
-                            FragmentTransaction ft = getFragmentManager().beginTransaction();
+                            FragmentTransaction ft = fm.beginTransaction();
                             ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
                             ft.commit();
+                        } else {
+                            Logs.d(CLASSNAME, "onSwitchSuccessful", "Replace with RestorePreparingFragment");
+                            fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+                            FragmentTransaction ft = fm.beginTransaction();
+                            ft.replace(R.id.fragment_container, RestorePreparingFragment.newInstance());
+                            ft.commitAllowingStateLoss();
                         }
                     }
                 }.execute(accessToken);
