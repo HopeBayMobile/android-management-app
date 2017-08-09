@@ -764,7 +764,6 @@ public class ActivateWoCodeFragment extends Fragment {
         AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
         AuthorizationException error = AuthorizationException.fromIntent(intent);
         final AuthState authState = new AuthState(response, error);
-        final AppAuthUtils appAuthUtils = new AppAuthUtils();
 
         Logs.d(CLASSNAME, "onHandleAuthResponse", "Response state " + response.state);
         if (response != null) {
@@ -775,7 +774,6 @@ public class ActivateWoCodeFragment extends Fragment {
                     if (exception == null && tokenResponse != null) {
                         authState.update(tokenResponse, exception);
                         mAuthState = authState;
-                        //appAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mAuthState);
 
                         Logs.d(CLASSNAME, "onTokenResponse", String.format(
                                 "Token Response [ Access Token: %s, ID Token: %s ]",
@@ -927,11 +925,14 @@ public class ActivateWoCodeFragment extends Fragment {
                     protected void onPostExecute(Bundle args) {
                         mProgressDialogUtils.dismiss();
                         FragmentManager fm = getFragmentManager();
+                        final AppAuthUtils appAuthUtils = new AppAuthUtils();
+                        appAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mAuthState);
+
                         if (args != null) {
+                            Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
                             MainFragment mainFragment = MainFragment.newInstance();
                             mainFragment.setArguments(args);
 
-                            Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
                             FragmentTransaction ft = fm.beginTransaction();
                             ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
                             ft.commit();
