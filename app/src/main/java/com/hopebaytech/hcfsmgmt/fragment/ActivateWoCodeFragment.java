@@ -69,6 +69,7 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.TokenResponse;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -846,19 +847,19 @@ public class ActivateWoCodeFragment extends Fragment {
     }
 
     private boolean isCanRestore(String token) {
-        GoogleDriveAPI googledrive = new GoogleDriveAPI(token);
+        GoogleDriveAPI api = new GoogleDriveAPI(token);
         boolean is_can_restore = false;
         try {
-            Response response = googledrive.get("tera");
-            String response_body = response.body().string();
+            Response resp = api.get("tera");
+            String resp_body = resp.body().string();
 
-            JSONObject file_list_info = new JSONObject(response_body);
-            List<String> items = Arrays.asList(file_list_info.get("items").toString());
-            Log.d("Rondou", file_list_info.get("items").toString());
-            Log.d("Rondou", "item size = " + items.size());
-            is_can_restore = (items.size() == 1);
+            JSONObject file_list_info = new JSONObject(resp_body);
+            JSONArray items = file_list_info.getJSONArray("items");
+            is_can_restore = (items.length() >= 1);
         } catch (IOException e){
+            Logs.e(CLASSNAME, "isCanRestoreIOException", Log.getStackTraceString(e));
         } catch (JSONException e) {
+            Logs.e(CLASSNAME, "isCanRestoreJSONException", Log.getStackTraceString(e));
         }
         return is_can_restore;
     }
@@ -883,6 +884,8 @@ public class ActivateWoCodeFragment extends Fragment {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
         editor.apply();
+
+        TeraAppConfig.enableApp(mContext);
     }
 
     private void registerTeraBattle(@NonNull AuthState authState) {
