@@ -877,8 +877,11 @@ public class ActivateWoCodeFragment extends Fragment {
         int code = HCFSMgmtUtils.triggerRestore();
 
         TeraCloudConfig.reloadConfig();
-        HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
+        HCFSMgmtUtils.setSwiftToken("WTF https://172.16.40.117",
                 deviceServiceInfo.getBackend().getToken());
+
+        // Enable Tera app so that we are able to get new token when token expired
+        TeraAppConfig.enableApp(mContext);
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         SharedPreferences.Editor editor = sharedPreferences.edit();
