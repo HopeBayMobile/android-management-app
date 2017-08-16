@@ -11,18 +11,15 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -47,19 +44,14 @@ import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
-import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSignInApiClient;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
-import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -69,27 +61,17 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.TokenResponse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
 /**
  * @author Aaron
  *         Created by Aaron on 2016/5/24.
  */
-public class ActivateWoCodeFragment extends Fragment {
+public class ActivateWoCodeFragment extends RegisterFragment {
 
     public static final String TAG = ActivateWoCodeFragment.class.getSimpleName();
     private final String CLASSNAME = ActivateWoCodeFragment.class.getSimpleName();
@@ -131,45 +113,21 @@ public class ActivateWoCodeFragment extends Fragment {
     private static final String USED_INTENT = "USED_INTENT";
 
     private GoogleApiClient mGoogleApiClient;
-    private Handler mWorkHandler;
-    private Handler mUiHandler;
-    private HandlerThread mHandlerThread;
+    private Handler mWorkHandler = new Handler(Looper.getMainLooper());
 
     private View mView;
-    private Context mContext;
-    private ProgressDialogUtils mProgressDialogUtils;
     private RelativeLayout mGoogleDriveActivate;
     private RelativeLayout mGoogleActivate;
-    private TextView mErrorMessage;
     private TextView mTeraVersion;
-
-    private AuthState mAuthState;
 
     public static ActivateWoCodeFragment newInstance() {
         return new ActivateWoCodeFragment();
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mContext = context;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mProgressDialogUtils = new ProgressDialogUtils(mContext);
-        mHandlerThread = new HandlerThread(CLASSNAME);
-        mHandlerThread.start();
-        mWorkHandler = new Handler(mHandlerThread.getLooper());
-        mUiHandler = new Handler();
-    }
-
-    @Override
     public void onStart() {
         super.onStart();
-        checkIntent(getActivity().getIntent());
+        checkAuthorizationResponse();
     }
 
     @Nullable
@@ -185,13 +143,14 @@ public class ActivateWoCodeFragment extends Fragment {
         mView = view;
         mGoogleDriveActivate = (RelativeLayout) view.findViewById(R.id.google_drive_activate);
         mGoogleActivate = (RelativeLayout) view.findViewById(R.id.google_activate);
-        mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
         mTeraVersion = (TextView) view.findViewById(R.id.version);
     }
 
     private boolean isFullBrowser(ResolveInfo resolveInfo) {
-        if(resolveInfo.filter.hasAction("android.intent.action.VIEW") && resolveInfo.filter.hasCategory("android.intent.category.BROWSABLE") && resolveInfo.filter.schemesIterator() != null) {
-            if(resolveInfo.filter.authoritiesIterator() != null) {
+        if (resolveInfo.filter.hasAction("android.intent.action.VIEW") &&
+                resolveInfo.filter.hasCategory("android.intent.category.BROWSABLE") &&
+                resolveInfo.filter.schemesIterator() != null) {
+            if (resolveInfo.filter.authoritiesIterator() != null) {
                 return false;
             } else {
                 boolean supportsHttp = false;
@@ -199,14 +158,14 @@ public class ActivateWoCodeFragment extends Fragment {
                 Iterator schemeIter = resolveInfo.filter.schemesIterator();
 
                 do {
-                    if(!schemeIter.hasNext()) {
+                    if (!schemeIter.hasNext()) {
                         return false;
                     }
 
-                    String scheme = (String)schemeIter.next();
+                    String scheme = (String) schemeIter.next();
                     supportsHttp |= "http".equals(scheme);
                     supportsHttps |= "https".equals(scheme);
-                } while(!supportsHttp || !supportsHttps);
+                } while (!supportsHttp || !supportsHttps);
 
                 return true;
             }
@@ -218,7 +177,7 @@ public class ActivateWoCodeFragment extends Fragment {
     private boolean checkGooglePlayServices() {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(mContext);
-        if(result != ConnectionResult.SUCCESS) {
+        if (result != ConnectionResult.SUCCESS) {
             return false;
         }
         return true;
@@ -230,8 +189,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
         List resolvedActivityList = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
         Iterator var5 = resolvedActivityList.iterator();
-        while(var5.hasNext()) {
-            ResolveInfo info = (ResolveInfo)var5.next();
+        while (var5.hasNext()) {
+            ResolveInfo info = (ResolveInfo) var5.next();
 
             if (isFullBrowser(info)) {
                 return true;
@@ -501,22 +460,9 @@ public class ActivateWoCodeFragment extends Fragment {
                         args.putString(KEY_JWT_TOKEN, jwtToken);
                         args.putString(KEY_GOOGLE_NAME, acct.getDisplayName());
                         args.putString(KEY_GOOGLE_EMAIL, acct.getEmail());
-                        String photoUrl = null;
-                        if (acct.getPhotoUrl() != null) {
-                            photoUrl = acct.getPhotoUrl().toString();
-                        }
-                        args.putString(KEY_GOOGLE_PHOTO_URL, photoUrl);
-
-                        Fragment restorationFragment = RestoreFragment.newInstance();
-                        restorationFragment.setArguments(args);
-
-                        Logs.d(CLASSNAME, "onGetDeviceListSuccessful", "Replace with RestoreFragment");
-                        FragmentTransaction ft = getFragmentManager().beginTransaction();
-                        ft.replace(R.id.fragment_container, restorationFragment, RestoreFragment.TAG);
-                        ft.addToBackStack(null);
-                        ft.commit();
-
-                        mProgressDialogUtils.dismiss();
+                        args.putString(KEY_GOOGLE_PHOTO_URL,
+                                acct.getPhotoUrl() != null ? acct.getPhotoUrl().toString() : null);
+                        replaceWithRestoreFragment(args, null);
                     }
 
                     @Override
@@ -548,10 +494,6 @@ public class ActivateWoCodeFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        if (mHandlerThread != null) {
-            mHandlerThread.quit();
-        }
 
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
@@ -599,68 +541,15 @@ public class ActivateWoCodeFragment extends Fragment {
         registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
             @Override
             public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                mWorkHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
-                        if (!isSuccess) {
-                            signOut();
-                            TeraCloudConfig.resetHCFSConfig();
-                            mUiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mProgressDialogUtils.dismiss();
-                                    mErrorMessage.setText(R.string.activate_failed);
-                                }
-                            });
-                        } else {
-                            final String name = acct.getDisplayName();
-                            final String email = acct.getEmail();
-                            String photoUrl = null;
-                            if (acct.getPhotoUrl() != null) {
-                                photoUrl = acct.getPhotoUrl().toString();
-                            }
+                final String name = acct.getDisplayName();
+                final String email = acct.getEmail();
+                final String photoUrl = acct.getPhotoUrl() != null ?
+                        acct.getPhotoUrl().toString() : null;
 
-                            AccountInfo accountInfo = new AccountInfo();
-                            accountInfo.setName(name);
-                            accountInfo.setEmail(email);
-                            accountInfo.setImgUrl(photoUrl);
-
-                            AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-                            accountDAO.clear();
-                            accountDAO.insert(accountInfo);
-
-                            TeraAppConfig.enableApp(mContext);
-                            TeraCloudConfig.activateTeraCloud(mContext);
-
-                            String url = deviceServiceInfo.getBackend().getUrl();
-                            String token = deviceServiceInfo.getBackend().getToken();
-                            HCFSMgmtUtils.setSwiftToken(url, token);
-
-                            final String finalPhotoUrl = photoUrl;
-                            mUiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Bundle args = new Bundle();
-                                    args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-                                    args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
-                                    args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, finalPhotoUrl);
-
-                                    MainFragment mainFragment = MainFragment.newInstance();
-                                    mainFragment.setArguments(args);
-
-                                    Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
-                                    FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                    ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
-                                    ft.commit();
-
-                                    mProgressDialogUtils.dismiss();
-                                }
-                            });
-
-                        }
-                    }
-                });
+                if (!setConfigAndActivate(deviceServiceInfo,
+                        buildAccountInfo(name, email, photoUrl))) {
+                    signOut();
+                }
             }
 
             @Override
@@ -728,230 +617,58 @@ public class ActivateWoCodeFragment extends Fragment {
                 redirectUri
         );
         builder.setScopes("profile",
-                          "email",
-                          "https://www.googleapis.com/auth/drive",
-                          "https://www.googleapis.com/auth/drive.file",
-                          "https://www.googleapis.com/auth/drive.appdata");
+                "email",
+                "https://www.googleapis.com/auth/drive",
+                "https://www.googleapis.com/auth/drive.file",
+                "https://www.googleapis.com/auth/drive.appdata");
 
         AuthorizationRequest request = builder.build();
-        String action = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
-        Intent postAuthorizationIntent = new Intent(action);
+        Intent postAuthorizationIntent = new Intent(ACTION_AUTHORIZATION_RESPONSE);
         postAuthorizationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(v.getContext(), request.hashCode(), postAuthorizationIntent, 0);
         authorizationService.performAuthorizationRequest(request, pendingIntent);
     }
 
-    private void checkIntent(@Nullable Intent intent) {
-        if (intent != null) {
-            String action = intent.getAction();
-            Logs.d(CLASSNAME, "onStart checkIntent", "intentAction " + action);
-            if (action != null) {
-                switch (action) {
-                    case "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE":
-                        if (!intent.hasExtra(USED_INTENT)) {
-                            mProgressDialogUtils.show(getString(R.string.processing_msg));
-                            handleAuthorizationResponse(intent);
-                            intent.putExtra(USED_INTENT, true);
-                        }
-                        break;
-                    default:
-                        // do nothing
-                }
-            }
+    private void checkAuthorizationResponse() {
+        Intent intent = getActivity().getIntent();
+        if (intent == null) {
+            return;
+        }
+
+        if (ACTION_AUTHORIZATION_RESPONSE.equals(intent.getAction()) &&
+                !intent.hasExtra(USED_INTENT)) {
+            mProgressDialogUtils.show(getString(R.string.processing_msg));
+            handleAuthorizationResponse(intent);
+            intent.putExtra(USED_INTENT, true);
         }
     }
 
-    private void handleAuthorizationResponse(@NonNull Intent intent) {
-        AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
-        AuthorizationException error = AuthorizationException.fromIntent(intent);
-        final AuthState authState = new AuthState(response, error);
-
-        Logs.d(CLASSNAME, "onHandleAuthResponse", "Response state " + response.state);
-        if (response != null) {
-            AuthorizationService service = new AuthorizationService(getActivity());
-            service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
-                @Override
-                public void onTokenRequestCompleted(@Nullable TokenResponse tokenResponse, @Nullable AuthorizationException exception) {
-                    if (exception == null && tokenResponse != null) {
-                        authState.update(tokenResponse, exception);
-                        mAuthState = authState;
-
-                        Logs.d(CLASSNAME, "onTokenResponse", String.format(
-                                "Token Response [ Access Token: %s, ID Token: %s ]",
-                                tokenResponse.accessToken, tokenResponse.idToken));
-                    }
-                    registerTeraBattle(mAuthState);
-                }
-            });
+    protected void handleAuthorizationResponse(@NonNull final Intent intent) {
+        final AuthorizationResponse response = AuthorizationResponse.fromIntent(intent);
+        if (response == null) {
+            return;
         }
-    }
 
-    private DeviceServiceInfo buildDeviceServiceInfo(String url, String token, String backendtype, String bucket, String account) {
-        DeviceServiceInfo.Backend _backend = new DeviceServiceInfo.Backend();
-        _backend.setUrl(url);
-        _backend.setToken(token);
-        _backend.setBackendType(backendtype);
-        _backend.setBucket(bucket);
-        _backend.setAccount(account);
-
-        DeviceServiceInfo deviceServiceInfo = new DeviceServiceInfo();
-        deviceServiceInfo.setBackend(_backend);
-
-        return deviceServiceInfo;
-    }
-
-    private void setDeviceServiceInfoBackend(JSONObject userinfo, String token) {
-        try {
-            DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(
-                    null,
-                    token,
-                    "googledrive",
-                    null,
-                    userinfo.get("email").toString()
-            );
-            boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
-        } catch (Exception exception) {
-            Logs.e(CLASSNAME, "setDeviceServiceInfoBackend", Log.getStackTraceString(exception));
-        }
-    }
-
-    private Bundle setAccountDAOandHCFStoken(JSONObject userinfo, String token){
-        try {
-            final String name = userinfo.optString("name", null);
-            final String email = userinfo.optString("email", null);
-            final String photoUrl = userinfo.optString("picture", null);
-            AccountInfo accountInfo = new AccountInfo();
-            accountInfo.setName(name);
-            accountInfo.setEmail(email);
-            accountInfo.setImgUrl(photoUrl);
-
-            AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-            accountDAO.clear();
-            accountDAO.insert(accountInfo);
-
-            TeraAppConfig.enableApp(mContext);
-            TeraCloudConfig.activateTeraCloud(mContext);
-
-            HCFSMgmtUtils.setSwiftToken("https://172.16.40.117", token);
-
-            Bundle args = new Bundle();
-            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
-            args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
-            return args;
-
-        } catch (Exception exception) {
-            Logs.e(CLASSNAME, "setAccountDAOandHCFStoken", Log.getStackTraceString(exception));
-        }
-        return null;
-    }
-
-    private boolean isCanRestore(String token) {
-        GoogleDriveAPI api = new GoogleDriveAPI(token);
-        boolean is_can_restore = false;
-        try {
-            Response resp = api.get("tera");
-            String resp_body = resp.body().string();
-
-            JSONObject file_list_info = new JSONObject(resp_body);
-            JSONArray items = file_list_info.getJSONArray("items");
-            is_can_restore = (items.length() >= 1);
-        } catch (IOException e){
-            Logs.e(CLASSNAME, "isCanRestoreIOException", Log.getStackTraceString(e));
-        } catch (JSONException e) {
-            Logs.e(CLASSNAME, "isCanRestoreJSONException", Log.getStackTraceString(e));
-        }
-        return is_can_restore;
-    }
-
-    private void triggerRestore(String token) {
-        // Do Restore Here
-        DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(
-                null,
-                token,
-                "googledrive",
-                null,
-                null
-        );
-        TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
-        int code = HCFSMgmtUtils.triggerRestore();
-
-        TeraCloudConfig.reloadConfig();
-        HCFSMgmtUtils.setSwiftToken("WTF https://172.16.40.117",
-                deviceServiceInfo.getBackend().getToken());
-
-        // Enable Tera app so that we are able to get new token when token expired
-        TeraAppConfig.enableApp(mContext);
-
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
-        editor.apply();
-
-        TeraAppConfig.enableApp(mContext);
-    }
-
-    private void registerTeraBattle(@NonNull AuthState authState) {
-
-        authState.performActionWithFreshTokens(new AuthorizationService(mContext), new AuthState.AuthStateAction() {
+        new AuthorizationService(mContext).performTokenRequest(
+                response.createTokenExchangeRequest(),
+                new AuthorizationService.TokenResponseCallback() {
             @Override
-            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException exception) {
-                new AsyncTask<String, Void, Bundle>() {
-                    @Override
-                    protected Bundle doInBackground(String... tokens) {
-                        Logs.d(CLASSNAME, "onAppAuthRegister", "firstTimeToken " + tokens[0]);
-                        Bundle args = null;
-                        OkHttpClient client = new OkHttpClient();
-                        Request request = new Request.Builder()
-                                .url("https://www.googleapis.com/oauth2/v3/userinfo")
-                                .addHeader("Authorization", String.format("Bearer %s", tokens[0]))
-                                .build();
-                        final String token = tokens[0].toString();
+            public void onTokenRequestCompleted(final @Nullable TokenResponse tokenResponse,
+                    @Nullable AuthorizationException exception) {
+                if (exception != null) {
+                    exception.printStackTrace();
+                } else if (tokenResponse != null) {
+                    AuthState authState = new AuthState(response,
+                            AuthorizationException.fromIntent(intent));
+                    authState.update(tokenResponse, exception);
 
-                        if (!isCanRestore(token)) {
-                            try {
-                                Response response = client.newCall(request).execute();
-                                String jsonBody = response.body().string();
-                                Logs.d(CLASSNAME, "onAppAuthRegister", String.format("User Info Response %s", jsonBody));
+                    Logs.d(TAG, "onTokenResponse", String.format(
+                            "Token Response [ Access Token: %s, ID Token: %s ]",
+                            tokenResponse.accessToken, tokenResponse.idToken));
 
-                                JSONObject userinfo = new JSONObject(jsonBody);
-                                setDeviceServiceInfoBackend(userinfo, token);
-                                args = setAccountDAOandHCFStoken(userinfo, token);
-                            } catch (Exception exception) {
-                                Logs.e(CLASSNAME, "appAuthRegisterTera", Log.getStackTraceString(exception));
-                            }
-                        } else {
-                            // Do Restore Here
-                            triggerRestore(token);
-                        }
-                        return args;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Bundle args) {
-                        mProgressDialogUtils.dismiss();
-                        FragmentManager fm = getFragmentManager();
-                        final AppAuthUtils appAuthUtils = new AppAuthUtils();
-                        appAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mAuthState);
-
-                        if (args != null) {
-                            Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
-                            MainFragment mainFragment = MainFragment.newInstance();
-                            mainFragment.setArguments(args);
-
-                            FragmentTransaction ft = fm.beginTransaction();
-                            ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
-                            ft.commit();
-                        } else {
-                            Logs.d(CLASSNAME, "onSwitchSuccessful", "Replace with RestorePreparingFragment");
-                            fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-
-                            FragmentTransaction ft = fm.beginTransaction();
-                            ft.replace(R.id.fragment_container, RestorePreparingFragment.newInstance());
-                            ft.commitAllowingStateLoss();
-                        }
-                    }
-                }.execute(accessToken);
+                    doRestoreOrRegister(mContext, authState, tokenResponse.accessToken,
+                            true/* check restoration */);
+                }
             }
         });
     }
