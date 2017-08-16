@@ -180,6 +180,8 @@ public class ActivateWoCodeFragment extends Fragment {
         mGoogleActivate = (RelativeLayout) view.findViewById(R.id.google_activate);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
         mTeraVersion = (TextView) view.findViewById(R.id.version);
+
+        mGoogleActivate.setEnabled(false);
     }
 
     private boolean isFullBrowser(ResolveInfo resolveInfo) {
@@ -212,6 +214,8 @@ public class ActivateWoCodeFragment extends Fragment {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(mContext);
         if(result != ConnectionResult.SUCCESS) {
+            // add tip for install Browser
+            mErrorMessage.setText(R.string.activate_failed_browser_should_install);
             return false;
         }
         return true;
@@ -266,7 +270,6 @@ public class ActivateWoCodeFragment extends Fragment {
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 // It needs to sign out first in order to show google account chooser as user
                 // want to choose another Google account.
                 if (mGoogleApiClient != null) {
