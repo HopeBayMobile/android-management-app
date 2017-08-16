@@ -99,7 +99,7 @@
                 android:paddingStart="45dp"
                 android:paddingEnd="0dp"
                 android:textAllCaps="true"
-                android:text="Swift(In progress)"/>
+                android:text="Swift"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -123,7 +123,7 @@
                 android:paddingStart="45dp"
                 android:paddingEnd="0dp"
                 android:textAllCaps="true"
-                android:text="AWS S3(In progress)"/>
+                android:text="AWS S3"/>
         </RelativeLayout>
 
     </LinearLayout>

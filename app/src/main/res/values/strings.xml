@@ -366,5 +366,7 @@
     <string name="app_available_dialog_title">Some app content is unavailable due to network connection issues. Launch the app ?</string>
     <string name="app_available_dialog_positive">Launch</string>
     <string name="app_available_dialog_negative">Cancel</string>
+    <string name="activate_failed_browser_should_install">請安裝瀏覽器</string>
+    <string name="activate_failed_WIP">開發中</string>
 
 </resources>
