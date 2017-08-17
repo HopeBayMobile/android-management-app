@@ -12,6 +12,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
@@ -765,7 +766,7 @@ public class HCFSMgmtUtils {
         return occupiedSize;
     }
 
-    public static boolean setSwiftToken(String url, String token) {
+    public static boolean setSwiftToken(@NonNull String url, String token) {
         boolean isSuccess = false;
         try {
             String jsonResult = HCFSApiUtils.setSwiftToken(url, token);

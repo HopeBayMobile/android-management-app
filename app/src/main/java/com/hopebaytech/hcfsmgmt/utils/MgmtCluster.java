@@ -13,12 +13,12 @@ import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.httpproxy.HttpProxy;
 import com.hopebaytech.hcfsmgmt.httpproxy.IHttpProxy;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.info.BoosterDeviceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.TransferContentInfo;
 import com.hopebaytech.hcfsmgmt.info.UnlockDeviceInfo;
-import com.hopebaytech.hcfsmgmt.info.BoosterDeviceInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -1188,7 +1188,7 @@ public class MgmtCluster {
 
         }
 
-        private static void parseJson(DeviceListInfo deviceListInfo, String json) {
+        private static boolean parseSingleDeviceStatus(DeviceListInfo deviceListInfo, String json) {
             try {
                 JSONObject jObj = new JSONObject(json);
 
@@ -1201,9 +1201,17 @@ public class MgmtCluster {
                 deviceListInfo.setMessage(json);
                 deviceListInfo.addDeviceStatusInfo(info);
                 deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_MY_TERA);
-                return;
+                return true;
             } catch (JSONException e) {
                 Logs.w(CLASSNAME, "GetDeviceListProxy", "parseJson", Log.getStackTraceString(e));
+            }
+
+            return false;
+        }
+
+        private static void parseJson(DeviceListInfo deviceListInfo, String json) {
+            if (parseSingleDeviceStatus(deviceListInfo, json)) {
+                return;
             }
 
             try {
