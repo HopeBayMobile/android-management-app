@@ -107,9 +107,10 @@ public class AlarmUtils {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
+        /* 23:59:59 */
+        calendar.set(Calendar.HOUR_OF_DAY, Interval.RESET_XFER_HOURS_OF_DAY);
+        calendar.set(Calendar.MINUTE, Interval.RESET_XFER_MINUTES_OF_DAY);
+        calendar.set(Calendar.SECOND, Interval.RESET_XFER_SECOND_OF_DAY);
 
         AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         long intervalMillis = Interval.RESET_DATA_XFER;

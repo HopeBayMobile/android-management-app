@@ -17,6 +17,8 @@ public class HCFSStatInfo {
     public static final String STAT_DATA_XFER_DOWN = "xfer_down";
     public static final String STAT_DATA_CLOUD_CONN = "cloud_conn";
     public static final String STAT_DATA_DATA_TRANSFER = "data_transfer";
+    public static final String STAT_META_SIZE_TOTAL = "max_meta_size";
+    public static final String STAT_META_SIZE_USED = "meta_used_size";
     public static final int CLOUD_DISCONN = 0;
     public static final int CLOUD_CONN = 1;
     public static final int CLOUD_CONN_RETRY = 2;
@@ -40,6 +42,8 @@ public class HCFSStatInfo {
     private long pinTotal;
     private long xferUpload;
     private long xferDownload;
+    private long metaTotal;
+    private long metaUsed;
 
     /**
      * unit: bytes
@@ -119,7 +123,7 @@ public class HCFSStatInfo {
     }
 
     public void setCacheTotal(long cacheTotal) {
-        this.cacheTotal = cacheTotal - 1073741824;
+        this.cacheTotal = cacheTotal - this.metaTotal;
     }
 
     public String getFormatCacheUsed() {
@@ -127,7 +131,7 @@ public class HCFSStatInfo {
     }
 
     public void setCacheUsed(long cacheUsed) {
-        this.cacheUsed = cacheUsed;
+        this.cacheUsed = cacheUsed - this.metaUsed;
     }
 
     public String getFormatCacheDirtyUsed() {
@@ -289,4 +293,12 @@ public class HCFSStatInfo {
     public long getXferDownload() {
         return xferDownload;
     }
+
+    /* Set/Get meta total size */
+    public void setMetaTotal(long metaTotal) { this.metaTotal = metaTotal; }
+    public long getMetaTotal() { return this.metaTotal; }
+
+    /* Set/Get meta used size */
+    public void setMetaUsed(long metaUsed) { this.metaUsed = metaUsed; }
+    public long getMetaUsed() { return this.metaUsed; }
 }

@@ -1,14 +1,11 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -23,21 +20,20 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.db.AccountDAO;
-import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
-import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
-import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
-import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
+
+import net.openid.appauth.AuthState;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -49,7 +45,7 @@ import javax.net.ssl.HttpsURLConnection;
  * @author Aaron
  *         Created by Aaron on 2016/8/12.
  */
-public class RestoreFragment extends Fragment {
+public class RestoreFragment extends RegisterFragment {
 
     public static final String TAG = RestoreFragment.class.getSimpleName();
 
@@ -63,17 +59,13 @@ public class RestoreFragment extends Fragment {
     public static final int RESTORE_TYPE_LOCK_DEVICE = 3;
     public static final int RESTORE_TYPE_NON_LOCK_DEVICE = 4;
 
-    private Context mContext;
     private ExpandableListView mExpandableListView;
     private TextView mBackButton;
     private TextView mNextButton;
     private TextView mSearchBackup;
-    private TextView mErrorMessage;
 
     private RestoreListAdapter mRestoreListAdapter;
     private Checkable mPrevCheckableInfo;
-    private ProgressDialogUtils mProgressDialogUtils;
-    private Handler mUiHandler;
     private Handler mWorkHandler;
     private HandlerThread mHandlerThread;
 
@@ -82,25 +74,19 @@ public class RestoreFragment extends Fragment {
     private String mAccountName;
     private String mPhotoUrl;
 
+    private AuthState mGoogleDriveAuthState;
+
     public static RestoreFragment newInstance() {
         return new RestoreFragment();
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        mContext = context;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mProgressDialogUtils = new ProgressDialogUtils(mContext);
         mHandlerThread = new HandlerThread(CLASSNAME);
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
-        mUiHandler = new Handler();
 
         Bundle extras = getArguments();
         mJwtToken = extras.getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
@@ -485,6 +471,13 @@ public class RestoreFragment extends Fragment {
     }
 
     private void registerTera() {
+        if (mGoogleDriveAuthState != null) {
+            mProgressDialogUtils.show(getString(R.string.processing_msg));
+            doRestoreOrRegister(mContext, mGoogleDriveAuthState,
+                    mGoogleDriveAuthState.getAccessToken(), false/* check restoration */);
+            return;
+        }
+
         if (mJwtToken != null) {
             registerWithJwtToken(mJwtToken);
         } else {
@@ -502,62 +495,13 @@ public class RestoreFragment extends Fragment {
         registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
             @Override
             public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                mWorkHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
-                        if (!isSuccess) {
-                            TeraCloudConfig.resetHCFSConfig();
-                            mUiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mProgressDialogUtils.dismiss();
-                                    mErrorMessage.setText(R.string.activate_failed);
-                                }
-                            });
-                            return;
-                        }
-
-                        AccountInfo accountInfo = new AccountInfo();
-                        accountInfo.setName(mAccountName);
-                        accountInfo.setEmail(mAccountEmail);
-                        if (mPhotoUrl != null) {
-                            accountInfo.setImgUrl(mPhotoUrl);
-                        }
-
-                        AccountDAO accountDAO = AccountDAO.getInstance(mContext);
-                        accountDAO.clear();
-                        accountDAO.insert(accountInfo);
-
-                        TeraAppConfig.enableApp(mContext);
-                        TeraCloudConfig.activateTeraCloud(mContext);
-
-                        String url = deviceServiceInfo.getBackend().getUrl();
-                        String token = deviceServiceInfo.getBackend().getToken();
-                        HCFSMgmtUtils.setSwiftToken(url, token);
-
-                        mUiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bundle args = new Bundle();
-                                args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, mAccountName);
-                                args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, mAccountEmail);
-                                args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, mPhotoUrl);
-
-                                MainFragment mainFragment = MainFragment.newInstance();
-                                mainFragment.setArguments(args);
-
-                                Logs.d(CLASSNAME, "onRegisterSuccessful", "Replace with MainFragment");
-                                FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                ft.replace(R.id.fragment_container, mainFragment, MainFragment.TAG);
-                                ft.commitAllowingStateLoss();
-
-                                mProgressDialogUtils.dismiss();
-                            }
-                        });
-
-                    }
-                });
+                if (!setConfigAndActivate(deviceServiceInfo,
+                        buildAccountInfo(mAccountName, mAccountEmail, mPhotoUrl))) {
+                    /**
+                     * @see ActivateWoCodeFragment#registerTera(MgmtCluster.RegisterParam, String, GoogleSignInAccount)
+                     * need call signOut() here?
+                     */
+                }
             }
 
             @Override
@@ -660,13 +604,60 @@ public class RestoreFragment extends Fragment {
         googleAuthProxy.auth();
     }
 
+    private boolean restoreDeviceFromGoogleDrive() {
+        if (mGoogleDriveAuthState != null) {
+            DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(
+                    null, mGoogleDriveAuthState.getAccessToken(), "googledrive", null, null);
+            preRestoreSetup(deviceServiceInfo);
+            return true;
+        }
+        return false;
+    }
+
     private void restoreDevice(String sourceImei) {
         Logs.d(CLASSNAME, "restoreDevice", "sourceImei=" + sourceImei);
+        if (restoreDeviceFromGoogleDrive()) {
+            return;
+        }
         if (mJwtToken != null) {
             restoreDeviceWithJwtToken(mJwtToken, sourceImei);
         } else {
             restoreDeviceWithoutJwtToken(sourceImei);
         }
+
+    }
+
+    private void preRestoreSetup(final DeviceServiceInfo deviceServiceInfo) {
+        mWorkHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
+                int code = HCFSMgmtUtils.triggerRestore();
+                if (code == RestoreStatus.Error.OUT_OF_SPACE) {
+                    mUiHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mErrorMessage.setText(R.string.restore_pre_check_out_of_space);
+                            mProgressDialogUtils.dismiss();
+                        }
+                    });
+                    return;
+                }
+                TeraCloudConfig.reloadConfig();
+                HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
+                        deviceServiceInfo.getBackend().getToken());
+
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                editor.apply();
+
+                // Enable Tera app so that we are able to get new token when token expired
+                TeraAppConfig.enableApp(mContext);
+
+                replaceWithRestorePreparingFragment();
+            }
+        });
     }
 
     private void restoreDeviceWithJwtToken(final String jwtToken, final String sourceImei) {
@@ -683,50 +674,7 @@ public class RestoreFragment extends Fragment {
             @Override
             public void onSwitchSuccessful(final DeviceServiceInfo deviceServiceInfo) {
                 Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
-
-                mWorkHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
-                        int code = HCFSMgmtUtils.triggerRestore();
-                        if (code == RestoreStatus.Error.OUT_OF_SPACE) {
-                            mUiHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mErrorMessage.setText(R.string.restore_pre_check_out_of_space);
-                                    mProgressDialogUtils.dismiss();
-                                }
-                            });
-                            return;
-                        }
-                        TeraCloudConfig.reloadConfig();
-                        HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
-                                deviceServiceInfo.getBackend().getToken());
-
-                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
-                        editor.apply();
-
-                        // Enable Tera app so that we are able to get new token when token expired
-                        TeraAppConfig.enableApp(mContext);
-
-                        mUiHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProgressDialogUtils.dismiss();
-
-                                Logs.d(CLASSNAME, "onSwitchSuccessful", "Replace with RestorePreparingFragment");
-                                FragmentManager fm = getFragmentManager();
-                                fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                                FragmentTransaction ft = fm.beginTransaction();
-                                ft.replace(R.id.fragment_container, RestorePreparingFragment.newInstance());
-                                ft.commitAllowingStateLoss();
-                            }
-                        });
-                    }
-                });
-
+                preRestoreSetup(deviceServiceInfo);
             }
 
             @Override
@@ -964,4 +912,7 @@ public class RestoreFragment extends Fragment {
         return groupList;
     }
 
+    public void setGoogleDriveAuthState(AuthState authState) {
+        mGoogleDriveAuthState = authState;
+    }
 }

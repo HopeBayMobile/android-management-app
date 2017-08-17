@@ -13,6 +13,10 @@ public class Interval {
     public static final int DAY = 24 * HOUR;
 
     // Custom interval
+    public static final int RESET_XFER_HOURS_OF_DAY = 23;
+    public static final int RESET_XFER_MINUTES_OF_DAY = 59;
+    public static final int RESET_XFER_SECOND_OF_DAY = 59;
+
     /**
      * Interval for resetting the amount of data transfer.
      */
