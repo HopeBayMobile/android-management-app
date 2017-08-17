@@ -113,4 +113,9 @@ public class Interval {
      */
     public static final int UNLOCK_DEVICE = 500;
 
+    /**
+     * Interval for sending logs.
+     */
+    public static final int SEND_LOGS = HOUR;
+
 }

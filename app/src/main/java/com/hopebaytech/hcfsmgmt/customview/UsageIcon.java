@@ -71,7 +71,9 @@ public class UsageIcon extends View {
      * Unit: %
      */
     private int mValuePercentage;
-    private int mWarningPercentage = 100; // Default is 100%
+
+    // Can temporary make warning color disappear for cache Usage
+    private int mWarningPercentage = 200; // Default is 100%
 
     public UsageIcon(Context context) {
         super(context);

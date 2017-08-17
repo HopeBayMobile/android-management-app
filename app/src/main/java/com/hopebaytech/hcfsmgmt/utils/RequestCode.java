@@ -19,5 +19,6 @@ public class RequestCode {
     public static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 109;
     public static final int SHOW_ACCESS_CLOUD_SETTINGS = 110;
     public static final int MONITOR_BOOSTER_USED_SPACE = 111;
+    public static final int SEND_LOGS = 112;
 
 }

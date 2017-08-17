@@ -68,13 +68,14 @@ import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
-import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.PinType;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
+import com.hopebaytech.hcfsmgmt.utils.UsingStatus;
 
 import net.openid.appauth.AuthState;
 
@@ -101,7 +102,6 @@ public class TeraMgmtService extends Service {
     private SettingsDAO mSettingsDAO;
     private BoosterWhiteListVersionDAO mBoosterWhiteListVersionDAO;
     private BoosterWhiteListDAO mBoosterWhiteListDAO;
-
     private Context mContext;
 
     /**
@@ -207,6 +207,9 @@ public class TeraMgmtService extends Service {
                             checkAndFixBooster();
                         case TeraIntent.ACTION_MONITOR_BOOSTER_USED_SPACE:
                             checkBoosterUsedSpace();
+                            break;
+                        case TeraIntent.ACTION_SEND_LOGS:
+                            UsingStatus.sendLog(mContext);
                             break;
                     }
 
@@ -584,7 +587,6 @@ public class TeraMgmtService extends Service {
             if (!isNotified && !isRestoring) {
                 Bundle extras = new Bundle();
                 extras.putInt(ViewPage.KEY, ViewPage.APP);
-
                 int flag = NotificationEvent.FLAG_OPEN_APP;
                 int idNotify = NotificationEvent.ID_INSUFFICIENT_PIN_SPACE;
                 String notifyTitle = getString(R.string.app_name);
@@ -669,6 +671,8 @@ public class TeraMgmtService extends Service {
                                 notifyMsg,
                                 drawableId,
                                 flag);
+
+
 
                         Thread.sleep(FIVE_MINUTES_IN_MILLISECONDS);
                     } catch (InterruptedException e) {

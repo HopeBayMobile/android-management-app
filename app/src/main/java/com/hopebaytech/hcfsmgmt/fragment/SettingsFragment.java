@@ -240,6 +240,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        mTransferContent.setVisibility(View.GONE);
         mTransferContent.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

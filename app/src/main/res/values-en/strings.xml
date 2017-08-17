@@ -30,6 +30,8 @@
     <string name="activate_incorrect_activation_code">Incorrect activation code.</string>
     <string name="activate_auth_failed">Account authentication failed.</string>
     <string name="activate_failed">Activation failed.</string>
+    <string name="activate_failed_browser_should_install">Please Install Web Browser for authentication</string>
+    <string name="activate_failed_WIP">Working in progress</string>
     <string name="activate_failed_device_in_use">The device has been registered.</string>
     <string name="activate_failed_not_supported_device">This device is not supported. Activation failed.</string>
     <string name="activate_failed_device_expired">Tera expired. Activation failed.</string>

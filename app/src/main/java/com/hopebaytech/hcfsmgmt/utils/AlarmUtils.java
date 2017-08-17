@@ -179,4 +179,20 @@ public class AlarmUtils {
         am.setRepeating(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, intervalMillis, pi);
     }
 
+    public static void startSendLogsAlarm(Context context) {
+        Logs.d(CLASSNAME, "startSendLogAlarm", null);
+
+        Intent intent = new Intent(context, TeraMgmtService.class);
+        intent.setAction(TeraIntent.ACTION_SEND_LOGS);
+
+        int requestCode = RequestCode.SEND_LOGS;
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        PendingIntent pi = PendingIntent.getService(context, requestCode, intent, flags);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, 10);
+
+        AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), Interval.SEND_LOGS, pi);
+    }
 }

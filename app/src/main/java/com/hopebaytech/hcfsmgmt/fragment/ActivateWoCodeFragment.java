@@ -144,6 +144,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         mGoogleDriveActivate = (RelativeLayout) view.findViewById(R.id.google_drive_activate);
         mGoogleActivate = (RelativeLayout) view.findViewById(R.id.google_activate);
         mTeraVersion = (TextView) view.findViewById(R.id.version);
+
+        mGoogleActivate.setEnabled(false);
     }
 
     private boolean isFullBrowser(ResolveInfo resolveInfo) {
@@ -177,7 +179,9 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     private boolean checkGooglePlayServices() {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         int result = googleAPI.isGooglePlayServicesAvailable(mContext);
-        if (result != ConnectionResult.SUCCESS) {
+        if(result != ConnectionResult.SUCCESS) {
+            // add tip for install Browser
+            mErrorMessage.setText(R.string.activate_failed_browser_should_install);
             return false;
         }
         return true;
@@ -232,7 +236,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         mGoogleActivate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 // It needs to sign out first in order to show google account chooser as user
                 // want to choose another Google account.
                 if (mGoogleApiClient != null) {
