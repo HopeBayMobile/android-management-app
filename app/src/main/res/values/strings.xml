@@ -368,5 +368,13 @@
     <string name="app_available_dialog_negative">Cancel</string>
     <string name="activate_failed_browser_should_install">請安裝瀏覽器</string>
     <string name="activate_failed_WIP">開發中</string>
+    <string name="activate_swift_hint_ip">伺服器位置</string>
+    <string name="activate_swift_hint_account">帳號</string>
+    <string name="activate_swift_hint_key">密鑰</string>
+    <string name="activate_swift_hint_bucket_name">容器名稱</string>
+    <string name="layout_title_swift_info">Swift 帳號資訊</string>
+    <string name="alert_dialog_title_swift_choice">Swift 類別</string>
+    <string name="alert_dialog_choice_swfit_arkflexu">ArkFlexU</string>
+    <string name="alert_dialog_choice_swift_private">私人伺服器</string>
 
 </resources>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:layout_below="@+id/logo"
+    android:layout_alignParentStart="true"
+    android:visibility="gone">
+
+    <com.hopebaytech.hcfsmgmt.customview.FontTextView
+        android:id="@+id/swift_account_info_title"
+        style="@style/F3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="@string/layout_title_swift_info"/>
+
+    <EditText
+        style="@style/F12"
+        android:id="@+id/swift_ip_input"
+        android:inputType="numberSigned"
+        android:layout_width="244dp"
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:hint="@string/activate_swift_hint_ip"
+        android:background="@drawable/transparent_gray_border"/>
+
+    <EditText
+        style="@style/F12"
+        android:id="@+id/swift_account_input"
+        android:inputType="text"
+        android:layout_width="244dp"
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:hint="@string/activate_swift_hint_account"
+        android:background="@drawable/transparent_gray_border"/>
+
+    <EditText
+        style="@style/F12"
+        android:id="@+id/swift_key_input"
+        android:inputType="text"
+        android:layout_width="244dp"
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:hint="@string/activate_swift_hint_key"
+        android:background="@drawable/transparent_gray_border"/>
+
+    <EditText
+        style="@style/F12"
+        android:id="@+id/swift_bucket_name_input"
+        android:inputType="text"
+        android:layout_width="244dp"
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:hint="@string/activate_swift_hint_bucket_name"
+        android:background="@drawable/transparent_gray_border"/>
+
+    <LinearLayout
+        android:id="@+id/swift_activate_button"
+        android:layout_width="244dp"
+        android:layout_height="36dp"
+        android:layout_marginBottom="@dimen/M1"
+        android:layout_marginTop="@dimen/M1"
+        android:background="@color/colorAccent"
+        android:clickable="true"
+        android:gravity="center">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            style="@style/F2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="?android:attr/selectableItemBackground"
+            android:gravity="center"
+            android:text="@string/activate_enable"/>
+    </LinearLayout>
+</LinearLayout>

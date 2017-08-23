@@ -128,7 +128,7 @@ public class ChangeAccountActivity extends AppCompatActivity {
         mErrorMsg = (TextView) findViewById(R.id.error_msg);
         mTargetAccountLayout = (LinearLayout) findViewById(R.id.target_account_layout);
         mSwitchAccountLayoutText = (LinearLayout) findViewById(R.id.switch_account_layout_text);
-        mSwitchAccountLayoutIcon = (LinearLayout) findViewById(R.id.switch_account_layout_icon);
+        mSwitchAccountLayoutIcon = (LinearLayout) findViewById(R.id.swift_account_info_layout);
         mSwitchAccount = (TextView) findViewById(R.id.switch_account);
         mChooseAccountIcon = (ImageView) findViewById(R.id.choose_account_icon);
         mChooseAccountText = (TextView) findViewById(R.id.choose_account_text);

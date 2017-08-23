@@ -23,10 +23,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -76,38 +77,21 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     public static final String TAG = ActivateWoCodeFragment.class.getSimpleName();
     private final String CLASSNAME = ActivateWoCodeFragment.class.getSimpleName();
 
-    /**
-     * Google auth and User auth
-     */
+    //Google auth and User auth
     public static final String KEY_AUTH_TYPE = "auth_type";
 
-    /**
-     * Only for User authentication
-     */
+    //Only for User authentication
     public static final String KEY_PASSWORD = "password";
-
-    /**
-     * Only for User authentication
-     */
     public static final String KEY_USERNAME = "username";
-
-    /**
-     * Only for Google authentication
-     */
     public static final String KEY_AUTH_CODE = "auth_code";
 
     public static final String KEY_JWT_TOKEN = "jwt_token";
-
     public static final String KEY_GOOGLE_NAME = "key_google_name";
-
     public static final String KEY_GOOGLE_EMAIL = "key_google_email";
-
     public static final String KEY_GOOGLE_PHOTO_URL = "key_google_photo_url";
 
     public static final String GOOGLE_ENDPOINT_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
-
     public static final String GOOGLE_ENDPOINT_TOKEN = "https://www.googleapis.com/oauth2/v4/token";
-
     public static final String GOOGLE_CLIENT_ID = "795577377875-k5blp9vlffpe9s13sp6t4vqav0t6siss.apps.googleusercontent.com";
 
     private static final String USED_INTENT = "USED_INTENT";
@@ -116,9 +100,19 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     private Handler mWorkHandler = new Handler(Looper.getMainLooper());
 
     private View mView;
-    private RelativeLayout mGoogleDriveActivate;
-    private RelativeLayout mGoogleActivate;
+    // activation method layout
+    private LinearLayout mActivationMethodLayout;
+    private RelativeLayout mGoogleDriveActivationLayout;
+    private RelativeLayout mSwiftActivationLayout;
     private TextView mTeraVersion;
+    // swift connect layout
+    private LinearLayout mSwiftAccountInfoLayout;
+    private EditText mSwiftIpInputEditText;
+    private EditText mSwiftAccountInputEditText;
+    private EditText mSwiftKeyInputEditText;
+    private EditText mSwiftBucketNameInputEditText;
+    private LinearLayout mSwiftActivateButton;
+    private TextView mErrorMessage;
 
     public static ActivateWoCodeFragment newInstance() {
         return new ActivateWoCodeFragment();
@@ -141,11 +135,59 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         super.onViewCreated(view, savedInstanceState);
 
         mView = view;
-        mGoogleDriveActivate = (RelativeLayout) view.findViewById(R.id.google_drive_activate);
-        mGoogleActivate = (RelativeLayout) view.findViewById(R.id.google_activate);
+
+        mActivationMethodLayout = (LinearLayout) view.findViewById(R.id.activation_method_layout);
+        mGoogleDriveActivationLayout = (RelativeLayout) view.findViewById(R.id.google_drive_activate);
+        mSwiftActivationLayout = (RelativeLayout) view.findViewById(R.id.swift_activate);
+
+        mSwiftAccountInfoLayout = (LinearLayout) view.findViewById(R.id.swift_account_info_layout);
+        mSwiftIpInputEditText = (EditText) view.findViewById(R.id.swift_ip_input);
+        mSwiftAccountInputEditText = (EditText) view.findViewById(R.id.swift_ip_input);
+        mSwiftKeyInputEditText = (EditText) view.findViewById(R.id.swift_ip_input);
+        mSwiftBucketNameInputEditText = (EditText) view.findViewById(R.id.swift_ip_input);
+        mSwiftActivateButton = (LinearLayout) view.findViewById(R.id.swift_activate_button);
+
+        mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
         mTeraVersion = (TextView) view.findViewById(R.id.version);
 
-        mGoogleActivate.setEnabled(false);
+        setOnClickListenerForSwiftActivateButton();
+    }
+
+    private void setOnClickListenerForSwiftActivateButton() {
+        mSwiftActivateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: take input from edit text fields and try to connect to swift server
+                //TODO: error handling for activation
+            }
+        });
+    }
+
+    private void handlePrivateSwiftActivation() {
+        mActivationMethodLayout.setVisibility(View.GONE);
+        mSwiftAccountInfoLayout.setVisibility(View.VISIBLE);
+    }
+
+    private AlertDialog showSwiftChoiceDialog() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        dialogBuilder
+                .setTitle(R.string.alert_dialog_title_swift_choice)
+                .setItems(R.array.swift_choice, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int choiceIndex) {
+                        switch(choiceIndex) {
+                            case 0:
+                                handleArkFlexUActivation();
+                                break;
+                            case 1:
+                                handlePrivateSwiftActivation();
+                                break;
+                            default:
+                                // TODO: error handling
+                        }
+                    }
+        });
+
+        return dialogBuilder.show();
     }
 
     private boolean isFullBrowser(ResolveInfo resolveInfo) {
@@ -217,7 +259,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
 
         grantPermission();
 
-        mGoogleDriveActivate.setOnClickListener(new View.OnClickListener() {
+        mGoogleDriveActivationLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (NetworkUtils.isNetworkConnected(mContext)) {
@@ -233,76 +275,10 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             }
         });
 
-        mGoogleActivate.setOnClickListener(new View.OnClickListener() {
+        mSwiftActivationLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // It needs to sign out first in order to show google account chooser as user
-                // want to choose another Google account.
-                if (mGoogleApiClient != null) {
-                    signOut();
-                }
-
-                if (NetworkUtils.isNetworkConnected(mContext)) {
-                    mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-                    mWorkHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            String serverClientId = MgmtCluster.getServerClientId();
-                            if (serverClientId != null) {
-                                GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
-                                        mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
-
-                                    @Override
-                                    public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
-                                        Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
-                                        mGoogleApiClient = googleApiClient;
-                                        signIn();
-                                    }
-
-                                    @Override
-                                    public void onConnectionFailed(@NonNull ConnectionResult result) {
-                                        Logs.d(CLASSNAME, "onConnectionFailed", "result=" + result);
-                                        signOut();
-
-                                        int errorCode = result.getErrorCode();
-                                        if (errorCode == ConnectionResult.SERVICE_MISSING) {
-                                            mErrorMessage.setText(R.string.activate_without_google_play_services);
-                                        } else if (errorCode == ConnectionResult.SERVICE_INVALID) {
-                                            mErrorMessage.setText(R.string.activate_without_google_play_services);
-                                        } else if (errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
-                                            mErrorMessage.setText(R.string.activate_update_google_play_services_required);
-                                            PlayServiceSnackbar.newInstance(mContext, mView).show();
-                                        } else if (errorCode == ConnectionResult.SERVICE_MISSING_PERMISSION) {
-                                            mErrorMessage.setText(R.string.activate_update_google_play_service_missing_permission);
-                                        } else {
-                                            mErrorMessage.setText(R.string.activate_signin_google_account_failed);
-                                        }
-
-                                        mProgressDialogUtils.dismiss();
-                                    }
-
-                                    @Override
-                                    public void onConnectionSuspended(int cause) {
-                                        Logs.d(CLASSNAME, "onConnectionSuspended", "cause=" + cause);
-                                    }
-                                });
-                                signInApiClient.connect();
-                            } else {
-                                mUiHandler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mProgressDialogUtils.dismiss();
-                                        mErrorMessage.setText(R.string.activate_get_server_client_id_failed);
-                                    }
-                                });
-                            }
-
-                        }
-                    });
-                } else {
-                    mErrorMessage.setText(R.string.activate_alert_dialog_message);
-                }
+                showSwiftChoiceDialog();
             }
         });
 
@@ -320,7 +296,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 editor.apply();
             }
         }
-
     }
 
     public static class PermissionSnackbar {
@@ -674,6 +649,75 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 }
             }
         });
+    }
+
+    private void handleArkFlexUActivation() {
+        // It needs to sign out first in order to show google account chooser as user
+        // want to choose another Google account.
+        if (mGoogleApiClient != null) {
+            signOut();
+        }
+
+        if (NetworkUtils.isNetworkConnected(mContext)) {
+            mProgressDialogUtils.show(getString(R.string.processing_msg));
+
+            mWorkHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    String serverClientId = MgmtCluster.getServerClientId();
+                    if (serverClientId != null) {
+                        GoogleSignInApiClient signInApiClient = new GoogleSignInApiClient(
+                                mContext, serverClientId, new GoogleSignInApiClient.OnConnectionListener() {
+
+                            @Override
+                            public void onConnected(@Nullable Bundle bundle, GoogleApiClient googleApiClient) {
+                                Logs.d(CLASSNAME, "onConnected", "bundle=" + bundle);
+                                mGoogleApiClient = googleApiClient;
+                                signIn();
+                            }
+
+                            @Override
+                            public void onConnectionFailed(@NonNull ConnectionResult result) {
+                                Logs.d(CLASSNAME, "onConnectionFailed", "result=" + result);
+                                signOut();
+
+                                int errorCode = result.getErrorCode();
+                                if (errorCode == ConnectionResult.SERVICE_MISSING) {
+                                    mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                } else if (errorCode == ConnectionResult.SERVICE_INVALID) {
+                                    mErrorMessage.setText(R.string.activate_without_google_play_services);
+                                } else if (errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED) {
+                                    mErrorMessage.setText(R.string.activate_update_google_play_services_required);
+                                    PlayServiceSnackbar.newInstance(mContext, mView).show();
+                                } else if (errorCode == ConnectionResult.SERVICE_MISSING_PERMISSION) {
+                                    mErrorMessage.setText(R.string.activate_update_google_play_service_missing_permission);
+                                } else {
+                                    mErrorMessage.setText(R.string.activate_signin_google_account_failed);
+                                }
+
+                                mProgressDialogUtils.dismiss();
+                            }
+
+                            @Override
+                            public void onConnectionSuspended(int cause) {
+                                Logs.d(CLASSNAME, "onConnectionSuspended", "cause=" + cause);
+                            }
+                        });
+                        signInApiClient.connect();
+                    } else {
+                        mUiHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mProgressDialogUtils.dismiss();
+                                mErrorMessage.setText(R.string.activate_get_server_client_id_failed);
+                            }
+                        });
+                    }
+                }
+            });
+        } else {
+            mErrorMessage.setText(R.string.activate_alert_dialog_message);
+        }
     }
 
     private boolean checkPermission() {
