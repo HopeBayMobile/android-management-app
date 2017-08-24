@@ -144,5 +144,25 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
+        <receiver
+            android:name="com.hopebaytech.hcfsmgmt.receiver.TeraReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.teraservice.create.thumbnail" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.hopebaytech.hcfsmgmt.service.TeraApiServer"
+            android:exported="true"
+            android:enabled="true"
+            android:persistent="true"
+            android:process=":TeraApiServer"/>
     </application>
 </manifest>
