@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string-array name="swift_choice">
-        <item>@string/alert_dialog_choice_swfit_arkflexu</item>
-        <item>@string/alert_dialog_choice_swift_private</item>
-    </string-array>
-</resources>

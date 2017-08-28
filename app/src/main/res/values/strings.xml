@@ -373,8 +373,10 @@
     <string name="activate_swift_hint_key">密鑰</string>
     <string name="activate_swift_hint_bucket_name">容器名稱</string>
     <string name="layout_title_swift_info">Swift 帳號資訊</string>
-    <string name="alert_dialog_title_swift_choice">Swift 類別</string>
-    <string name="alert_dialog_choice_swfit_arkflexu">ArkFlexU</string>
-    <string name="alert_dialog_choice_swift_private">私人伺服器</string>
+    <string name="activate_swift_hint_port">埠</string>
+    <string name="activate_failed_bucket_error">無法找到目標容器</string>
+    <string name="activate_failed_swift_server_auth_error">Swift 伺服器認證失敗</string>
+    <string name="activate_failed_save_swift_config">Swift 設定存檔失敗</string>
+    <string name="activate_failed_reload_config">重新讀取 HCFS 設定檔失敗</string>
 
 </resources>

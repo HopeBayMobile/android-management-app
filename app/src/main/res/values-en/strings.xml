@@ -375,12 +375,14 @@
     <string name="app_available_dialog_positive">Launch</string>
     <string name="app_available_dialog_title">Some app content is unavailable due to network connection issues. Launch the app ?</string>
     <string name="activate_swift_hint_ip">Server IP</string>
-    <string name="activate_swift_hint_key">key</string>
+    <string name="activate_swift_hint_key">Key</string>
     <string name="activate_swift_hint_account">Account</string>
     <string name="activate_swift_hint_bucket_name">Bucket Name</string>
     <string name="layout_title_swift_info">Swift Account Info</string>
-    <string name="alert_dialog_title_swift_choice">Swift Type</string>
-    <string name="alert_dialog_choice_swfit_arkflexu">ArkFlexU</string>
-    <string name="alert_dialog_choice_swift_private">Private Server</string>
+    <string name="activate_swift_hint_port">Port</string>
+    <string name="activate_failed_reload_config">Failed to reload configuration file</string>
+    <string name="activate_failed_save_swift_config">Failed to save swift info to configuration</string>
+    <string name="activate_failed_bucket_error">Failed to retrieve target bucket from swift server</string>
+    <string name="activate_failed_swift_server_auth_error">Failed to auth on swift server</string>
 
 </resources>
