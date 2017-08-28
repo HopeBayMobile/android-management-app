@@ -24,6 +24,7 @@ import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
+import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -608,6 +609,7 @@ public class RestoreFragment extends RegisterFragment {
         if (mGoogleDriveAuthState != null) {
             DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(
                     null, mGoogleDriveAuthState.getAccessToken(), "googledrive", null, null);
+            new AppAuthUtils().saveAppAuthStatusToSharedPreference(mContext, mGoogleDriveAuthState);
             preRestoreSetup(deviceServiceInfo);
             return true;
         }
