@@ -84,4 +84,14 @@ public class Logs {
         }
     }
 
+    public static void d(String logMsg) {
+        StackTraceElement stackTraceElements[] = Thread.currentThread().getStackTrace();
+        StackTraceElement stackTraceElement = stackTraceElements[3];
+        String className = stackTraceElement.getClassName();
+        className = className.subSequence(
+                className.lastIndexOf(".") + 1, className.length()).toString();
+        String methodName = stackTraceElement.getMethodName();
+
+        Log.d(TAG, className + "(" + methodName + "): " + logMsg);
+    }
 }

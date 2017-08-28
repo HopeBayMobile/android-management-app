@@ -175,8 +175,6 @@ public class AppFileFragment extends Fragment {
      */
     private boolean mShowingContent;
 
-    private TeraMgmtService mMgmtService;
-
     /**
      * @see LayoutType#GRID
      * @see LayoutType#LINEAR
@@ -383,7 +381,7 @@ public class AppFileFragment extends Fragment {
                     UidInfo uidInfo = new UidInfo(appInfo);
                     uidDAO.update(uidInfo, UidDAO.PIN_STATUS_COLUMN);
 
-                    mMgmtService.pinOrUnpinApp((AppInfo) cloneItemInfo, new IPinUnpinListener() {
+                    TeraMgmtService.pinOrUnpinApp((AppInfo) cloneItemInfo, new IPinUnpinListener() {
                         @Override
                         public void onPinUnpinSuccessful(final ItemInfo cloneItemInfo) {
                             showPinUnpinResultToast(true /* isSuccess */, cloneItemInfo.isPinned());
@@ -416,7 +414,7 @@ public class AppFileFragment extends Fragment {
                     // Nothing to do here
                 } else if (cloneItemInfo instanceof FileInfo) {
                     FileInfo fileDirInfo = (FileInfo) cloneItemInfo;
-                    mMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
+                    TeraMgmtService.pinOrUnpinFileDirectory(fileDirInfo, new IPinUnpinListener() {
                         @Override
                         public void onPinUnpinSuccessful(final ItemInfo cloneItemInfo) {
                             showPinUnpinResultToast(true /* isSuccess */, cloneItemInfo.isPinned());
@@ -522,9 +520,6 @@ public class AppFileFragment extends Fragment {
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            IMgmtBinder binder = (IMgmtBinder) service;
-            mMgmtService = binder.getService();
             mServiceBound = true;
         }
 
