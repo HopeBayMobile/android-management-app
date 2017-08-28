@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -56,6 +57,7 @@ import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
+import com.hopebaytech.hcfsmgmt.utils.UsingStatus;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -120,6 +122,8 @@ public class ActivateWoCodeFragment extends Fragment {
 
     private static final String USED_INTENT = "USED_INTENT";
 
+    private static final String SEND_LOG_ALREADY = "send_log_already";
+
     private GoogleApiClient mGoogleApiClient;
     private Handler mWorkHandler;
     private Handler mUiHandler;
@@ -182,6 +186,8 @@ public class ActivateWoCodeFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        sendLogOneShot();
 
         mTeraVersion.setText(
                 String.format(
@@ -842,6 +848,15 @@ public class ActivateWoCodeFragment extends Fragment {
             } else {
                 PermissionSnackbar.newInstance(mContext, mView).show();
             }
+        }
+    }
+
+    private void sendLogOneShot() {
+        ContentResolver resolver = getContext().getContentResolver();
+
+        if (Settings.Global.getInt(resolver, SEND_LOG_ALREADY, 0) == 0) {
+            UsingStatus.sendLog(getContext());
+            Settings.Global.putInt(resolver, SEND_LOG_ALREADY, 1);
         }
     }
 }
