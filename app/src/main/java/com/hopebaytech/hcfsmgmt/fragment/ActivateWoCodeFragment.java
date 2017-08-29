@@ -24,9 +24,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -107,6 +109,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     private Handler mWorkHandler = new Handler(Looper.getMainLooper());
 
     private View mView;
+    private ImageView teraLogo;
     // activation method layout
     private LinearLayout mActivationMethodLayout;
     private RelativeLayout mGoogleDriveActivationLayout;
@@ -121,6 +124,15 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     private EditText mSwiftBucketNameInputEditText;
     private LinearLayout mSwiftActivateButton;
     private TextView mErrorMessage;
+
+    private int tapsOnLogo = 0;
+    private long startTime = 0L;
+
+    private static final String TEST_SWIFT_INFO_IP = "172.16.11.69";
+    private static final String TEST_SWIFT_INFO_PORT = "8010";
+    private static final String TEST_SWIFT_INFO_ACCOUNT = "hopebay:EKGKe3W3zW9IEul6zVjr";
+    private static final String TEST_SWIFT_INFO_KEY = "PZJeuN5xfIV2dQkq1MSKNQCztKgzkPpn";
+    private static final String TEST_SWIFT_INFO_BUCKET_NAME = "test1";
 
     public static ActivateWoCodeFragment newInstance() {
         return new ActivateWoCodeFragment();
@@ -143,6 +155,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         super.onViewCreated(view, savedInstanceState);
 
         mView = view;
+        teraLogo = (ImageView) view.findViewById(R.id.logo);
+        setOnClickListenerForTeraLogo();
 
         mActivationMethodLayout = (LinearLayout) view.findViewById(R.id.activation_method_layout);
         mGoogleDriveActivationLayout = (RelativeLayout) view.findViewById(R.id.google_drive_activate);
@@ -160,6 +174,35 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         mTeraVersion = (TextView) view.findViewById(R.id.version);
 
         setOnClickListenerForSwiftActivateButton();
+    }
+
+    private void setOnClickListenerForTeraLogo() {
+        // fill test swift info when user taps on Tera logo 5 times within 4 seconds
+        teraLogo.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    long currentTime = System.currentTimeMillis();
+
+                    if(startTime == 0 || currentTime - startTime > 4000) {
+                        startTime = currentTime;
+                        tapsOnLogo = 1;
+                    } else {
+                        tapsOnLogo++;
+                    }
+
+                    if(tapsOnLogo >= 5) {
+                        mSwiftIpInputEditText.setText(TEST_SWIFT_INFO_IP);
+                        mSwiftPortInputEditText.setText(TEST_SWIFT_INFO_PORT);
+                        mSwiftAccountInputEditText.setText(TEST_SWIFT_INFO_ACCOUNT);
+                        mSwiftKeyInputEditText.setText(TEST_SWIFT_INFO_KEY);
+                        mSwiftBucketNameInputEditText.setText(TEST_SWIFT_INFO_BUCKET_NAME);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override

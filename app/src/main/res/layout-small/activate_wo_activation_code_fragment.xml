@@ -34,7 +34,7 @@
         android:layout_centerHorizontal="true" />
 
     <LinearLayout
-        android:id="@+id/swift_account_info_layout"
+        android:id="@+id/switch_account_layout_icon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
