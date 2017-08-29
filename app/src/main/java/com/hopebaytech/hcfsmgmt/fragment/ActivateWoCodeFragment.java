@@ -156,7 +156,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
 
         mView = view;
         teraLogo = (ImageView) view.findViewById(R.id.logo);
-        setOnClickListenerForTeraLogo();
+        setOnTouchListenerForTeraLogo();
 
         mActivationMethodLayout = (LinearLayout) view.findViewById(R.id.activation_method_layout);
         mGoogleDriveActivationLayout = (RelativeLayout) view.findViewById(R.id.google_drive_activate);
@@ -176,15 +176,16 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         setOnClickListenerForSwiftActivateButton();
     }
 
-    private void setOnClickListenerForTeraLogo() {
-        // fill test swift info when user taps on Tera logo 5 times within 4 seconds
+    private void setOnTouchListenerForTeraLogo() {
+        // fill test swift info when user taps on Tera logo 5 times within 3 seconds
         teraLogo.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_UP) {
+                    Logs.d(TAG, "onTouch", "tapsOnLogo: " + tapsOnLogo);
                     long currentTime = System.currentTimeMillis();
 
-                    if(startTime == 0 || currentTime - startTime > 4000) {
+                    if(startTime == 0 || currentTime - startTime > 3000) {
                         startTime = currentTime;
                         tapsOnLogo = 1;
                     } else {
@@ -198,9 +199,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                         mSwiftKeyInputEditText.setText(TEST_SWIFT_INFO_KEY);
                         mSwiftBucketNameInputEditText.setText(TEST_SWIFT_INFO_BUCKET_NAME);
                     }
-                    return true;
                 }
-                return false;
+                return true;
             }
         });
     }
