@@ -118,7 +118,7 @@
             android:clickable="true">
 
             <com.hopebaytech.hcfsmgmt.customview.FontTextView
-                android:id="@+id/google_activate"
+                android:id="@+id/swift_activate"
                 style="@style/F9"
                 android:layout_width="244dp"
                 android:layout_height="36dp"

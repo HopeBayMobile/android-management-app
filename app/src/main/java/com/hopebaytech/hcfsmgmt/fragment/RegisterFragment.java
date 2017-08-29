@@ -42,7 +42,7 @@ public class RegisterFragment extends Fragment {
     protected static final String KEY_GOOGLE_DRIVE_TOKEN = "key_google_drive_token";
 
     private static final int DISMISS_PROGRESS_DIALOG = -1;
-    private static final int ACTIVATE_FAILED = 0;
+    protected static final int ACTIVATE_FAILED = 0;
 
     protected TextView mErrorMessage;
 
