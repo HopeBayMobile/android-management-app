@@ -237,7 +237,7 @@
     <string name="restore_item_backup">Restore from backup</string>
     <string name="restore_search_for_backup"><u>Search for backup</u></string>
     <string name="restore_preparing_title">Preparing&#8230;</string>
-    <string name="restore_preparing_message">Preparing to restore.  Changes you make during the restoration process will not be saved after reboot.</string>
+    <string name="restore_preparing_message">Preparing for restoration process. During the restoration, all changes you have made won\'t be saved after reboot.</string>
     <string name="restore_ready_title">Ready for restoration</string>
     <string name="restore_ready_message">This restoration is ready, please tap "System Reboot" to continue the process.</string>
     <string name="restore_major_install_title">Restoring&#8230;</string>
