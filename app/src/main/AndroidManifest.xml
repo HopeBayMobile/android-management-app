@@ -115,7 +115,8 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".service.TeraMgmtService" />
+        <service android:name=".service.TeraMgmtService"
+            android:process=":TeraMgmtService" />
         <service android:name="com.hopebaytech.hcfsmgmt.service.MgmtPollingService" />
         <service
             android:name="com.hopebaytech.hcfsmgmt.service.CheckDeviceTransferredPeriodicService"
@@ -131,7 +132,7 @@
             android:name="com.hopebaytech.hcfsmgmt.terafonnapiservice.TeraFonnApiService"
             android:enabled="true"
             android:exported="true"
-            android:process=":remote" />
+            android:process=":TeraFonnApiService" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

@@ -247,19 +247,19 @@ public class TeraMgmtService extends Service {
         return isSuccess;
     }
 
-    public void pinOrUnpinApp(AppInfo info, @NonNull IPinUnpinListener listener) {
+    public static void pinOrUnpinApp(AppInfo info, @NonNull IPinUnpinListener listener) {
         if (info.isPinned()) {
             if (HCFSMgmtUtils.pinApp(info)) {
                 listener.onPinUnpinSuccessful(info);
             } else {
-                revertPinStatus(info, getString(R.string.notify_pin_app_failure));
+                HCFSMgmtUtils.unpinApp(info);
                 listener.onPinUnpinFailed(info);
             }
         } else {
             if (HCFSMgmtUtils.unpinApp(info)) {
                 listener.onPinUnpinSuccessful(info);
             } else {
-                revertPinStatus(info, getString(R.string.notify_unpin_app_failure));
+                HCFSMgmtUtils.pinApp(info);
                 listener.onPinUnpinFailed(info);
             }
         }
@@ -409,12 +409,12 @@ public class TeraMgmtService extends Service {
         }
     }
 
-    public void pinOrUnpinFileDirectory(FileInfo info, IPinUnpinListener listener) {
+    public static void pinOrUnpinFileDirectory(FileInfo info, IPinUnpinListener listener) {
         ServiceFileDirInfo serviceFileDirInfo = new ServiceFileDirInfo();
         serviceFileDirInfo.setPinned(info.isPinned());
         serviceFileDirInfo.setFilePath(info.getFilePath());
         String filePath = info.getFilePath();
-        Logs.d(CLASSNAME, "pinOrUnpinFileOrDirectory", "filePath=" + filePath);
+        Logs.d("filePath=" + filePath);
         boolean isPinned = info.isPinned();
         if (isPinned) {
             int code = HCFSMgmtUtils.pinFileOrDirectory(filePath);
