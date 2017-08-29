@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -24,6 +25,8 @@ import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
 import com.hopebaytech.hcfsmgmt.misc.Threshold;
+import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
+import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSApiUtils;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
@@ -256,6 +259,11 @@ public class OverviewFragment extends Fragment {
                     }, 3000L);
 
                     Logs.d(CLASSNAME,"Backend connection: " + mConnStatus, null);
+                    // Refresh token
+                    Intent intentService = new Intent(mContext, TeraMgmtService.class);
+                    intentService.setAction(TeraIntent.ACTION_TOKEN_EXPIRED);
+                    mContext.startService(intentService);
+
                     // Retry connection
                     String jsonResult = HCFSApiUtils.retryConn();
                     JSONObject jObject = null;

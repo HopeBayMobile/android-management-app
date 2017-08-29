@@ -1036,12 +1036,14 @@ public class AppFileFragment extends Fragment {
         @Override
         public void onBindViewHolder(GridRecyclerViewHolder holder, int position) {
             final ItemInfo itemInfo = mItemInfoList.get(position);
-            itemInfo.setViewHolder(holder);
-            holder.setItemInfo(itemInfo);
-            holder.itemName.setText(itemInfo.getName());
-            holder.rootView.setContentDescription(itemInfo.getName());
+            if (itemInfo != null) {
+                itemInfo.setViewHolder(holder);
+                holder.setItemInfo(itemInfo);
+                holder.itemName.setText(itemInfo.getName());
+                holder.rootView.setContentDescription(itemInfo.getName());
 
-            displayItem(position, holder, mMemoryCache, mExecutor);
+                displayItem(position, holder, mMemoryCache, mExecutor);
+            }
         }
 
         @Override
@@ -1156,11 +1158,13 @@ public class AppFileFragment extends Fragment {
         @Override
         public void onBindViewHolder(final LinearRecyclerViewHolder holder, int position) {
             final ItemInfo itemInfo = mItemInfoList.get(position);
-            itemInfo.setViewHolder(holder);
-            holder.setItemInfo(itemInfo);
-            holder.itemName.setText(itemInfo.getName());
+            if (itemInfo != null) {
+                itemInfo.setViewHolder(holder);
+                holder.setItemInfo(itemInfo);
+                holder.itemName.setText(itemInfo.getName());
 
-            displayItem(position, holder, mMemoryCache, mExecutor);
+                displayItem(position, holder, mMemoryCache, mExecutor);
+            }
         }
 
         @Nullable
