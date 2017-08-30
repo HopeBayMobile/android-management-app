@@ -16,6 +16,7 @@ import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.View;
@@ -58,6 +59,7 @@ import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
@@ -77,6 +79,10 @@ import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
 
 import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationService;
+
+import org.json.JSONArray;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
@@ -207,6 +213,9 @@ public class TeraMgmtService extends Service {
                             checkAndFixBooster();
                         case TeraIntent.ACTION_MONITOR_BOOSTER_USED_SPACE:
                             checkBoosterUsedSpace();
+                            break;
+                        case TeraIntent.ACTION_ERASE_DATA:
+                            eraseDataOnGoogleDrive(mContext);
                             break;
                     }
 
@@ -1385,5 +1394,30 @@ public class TeraMgmtService extends Service {
         if (authState != null) {
             appAuthUtils.resetAccessTokeToHCFS(mContext, authState);
         }
+    }
+
+    private void eraseDataOnGoogleDrive(final Context context) {
+        AppAuthUtils appAuthUtils = new AppAuthUtils();
+        AuthState authState = appAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
+        if (authState == null) {
+            Logs.d("authState is null");
+            return;
+        }
+
+        authState.performActionWithFreshTokens(
+                new AuthorizationService(context), new AuthState.AuthStateAction() {
+            @Override
+            public void execute(final @Nullable String accessToken, @Nullable String idToken,
+                    @Nullable AuthorizationException exception) {
+                try {
+                    String imei = HCFSMgmtUtils.getDeviceImei(context);
+                    JSONArray items = GoogleDriveAPI.getTeraFolderItems(accessToken, imei);
+                    GoogleDriveAPI.deleteFile(
+                            accessToken, GoogleDriveAPI.getTeraFolderId(items));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 }

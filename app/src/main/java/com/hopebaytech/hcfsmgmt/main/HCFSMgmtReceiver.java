@@ -112,6 +112,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                     context.startService(intentService);
                     break;
                 }
+
+                case TeraIntent.ACTION_ERASE_DATA:
+                    Intent intentService = new Intent(context, TeraMgmtService.class);
+                    intentService.setAction(TeraIntent.ACTION_ERASE_DATA);
+                    context.startService(intentService);
+                    break;
             }
         }
 
