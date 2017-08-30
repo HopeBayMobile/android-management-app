@@ -58,9 +58,9 @@ function build_system() {
 function copy_lib_to_source_tree() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
 	rsync -arcv --no-owner --no-group --no-times --no-perms \
-	      $LIB_DIR/nexus-5x-hcfs/system/lib64/{libhcfsapi.so,libjansson.so} app/src/main/jni/mylibs/arm64-v8a/
+	      $LIB_DIR/nexus-5x-hcfs/system/lib64/{libHCFS_api.so,libjansson.so} app/src/main/jni/mylibs/arm64-v8a/	
         rsync -arcv --no-owner --no-group --no-times --no-perms \
-	      $LIB_DIR/nexus-7-hcfs/system/lib/{libhcfsapi.so,libjansson.so} app/src/main/jni/mylibs/armeabi-v7a/
+	      $LIB_DIR/nexus-7-hcfs/system/lib/{libHCFS_api.so,libjansson.so} app/src/main/jni/mylibs/armeabi-v7a/
 }
 function publish_apk() {
 	{ _hdr_inc - - Doing $FUNCNAME; } 2>/dev/null
