@@ -20,27 +20,20 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
 
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
 public class UsingStatus {
     private final static String TAG = "UsingStatus";
 
     public static void sendLog(Context context) {
-        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        String logURL = "http://ota.tera.mobi/upload/logs/Hit/";
-        //String logURL = "http://172.16.11.188:5555"; // Local Test server
-
         try {
-            RequestBody body = RequestBody.create(JSON, getJSONStringLog(context));
-            Request request = new Request.Builder().url(logURL).post(body).build();
-            Response response = new OkHttpClient().newCall(request).execute();
-            Logs.d(TAG, "sendLogs(can)", "response:" + response.body().string());
-        } catch (IOException e) {
-            Logs.d(TAG, "sendLogs(can)", "IOException: " + e);
+            String logURL = "http://ota.tera.mobi/upload/logs/Hit/";
+            //String logURL = "http://172.16.11.188:5555"; // Local Test server
+            HttpUtil.HttpRequestBody requestBody = HttpUtil.createRequestBody(
+                    "application/json; charset=utf-8",
+                    getJSONStringLog(context));
+
+            HttpUtil.HttpRequest request = HttpUtil.buildPostRequest(null, logURL, requestBody);
+            HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
+            Logs.d(TAG, "sendLogs(can)", "response:" + response.getBody());
         } catch (JSONException e) {
             Logs.d(TAG, "sendLogs(can)", "JSONException: " + e);
         }
