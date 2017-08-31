@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.utils;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
@@ -13,29 +12,30 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.List;
 
-public class UsingStatus {
-    private final static String TAG = "UsingStatus";
+public class LogServerUtils {
+    private final static String TAG = "LogServerUtils";
+
+    private static final String LOG_SERVER_URL = "http://ota.tera.mobi/upload/logs/Hit/";
+    //String LOG_SERVER_URL = "http://172.16.11.188:5555"; // Local Test server
 
     public static void sendLog(Context context) {
+
         try {
-            String logURL = "http://ota.tera.mobi/upload/logs/Hit/";
-            //String logURL = "http://172.16.11.188:5555"; // Local Test server
             HttpUtil.HttpRequestBody requestBody = HttpUtil.createRequestBody(
                     "application/json; charset=utf-8",
                     getJSONStringLog(context));
 
-            HttpUtil.HttpRequest request = HttpUtil.buildPostRequest(null, logURL, requestBody);
+            HttpUtil.HttpRequest request = HttpUtil.buildPostRequest(null, LOG_SERVER_URL, requestBody);
             HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
-            Logs.d(TAG, "sendLogs(can)", "response:" + response.getBody());
+            Logs.d(TAG, "sendLogs", "response:" + response.getBody());
         } catch (JSONException e) {
-            Logs.d(TAG, "sendLogs(can)", "JSONException: " + e);
+            Logs.d(TAG, "sendLogs", "JSONException: " + e);
         }
     }
 
@@ -46,7 +46,7 @@ public class UsingStatus {
 
         JSONObject basicInfo = new JSONObject();
         JSONObject hcfsStatus = new JSONObject();
-        JSONArray installApps = new JSONArray();
+        JSONArray nonSystemApps = new JSONArray();
         JSONObject dataObject = new JSONObject();
         JSONObject requestJSONObject = new JSONObject();
 
@@ -75,20 +75,20 @@ public class UsingStatus {
         hcfsStatus.put("DataDownloadToday", info.getXferDownload());
         hcfsStatus.put("DataUploadToday", info.getXferDownload());
 
-        // Install App
+        // get non-system Apps
         PackageManager pm = context.getPackageManager();
         List<PackageInfo> packageInfoList = pm.getInstalledPackages(0);
         for (PackageInfo packageInfo : packageInfoList) {
             Boolean isSystemApp = HCFSMgmtUtils.isSystemPackage(packageInfo.applicationInfo);
             if (!isSystemApp)
-                installApps.put(packageInfo.packageName);
+                nonSystemApps.put(packageInfo.packageName);
         }
 
         // Setup Data JSON object
         dataObject.put("LocalIp", getIp());
         dataObject.put("basicInfo", basicInfo);
         dataObject.put("HcfsStatus", hcfsStatus);
-        dataObject.put("InstallApps", installApps);
+        dataObject.put("InstalledApps", nonSystemApps);
 
         // Setup Final request JSON Object
         requestJSONObject.put(imei, dataObject);
