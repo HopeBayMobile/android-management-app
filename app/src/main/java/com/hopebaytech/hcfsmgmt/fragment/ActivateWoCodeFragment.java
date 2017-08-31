@@ -782,11 +782,15 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     }
 
     private void sendLogOneShot() {
-        ContentResolver resolver = getContext().getContentResolver();
-
+        final ContentResolver resolver = getContext().getContentResolver();
         if (Settings.Global.getInt(resolver, SEND_LOG_ALREADY, 0) == 0) {
-            LogServerUtils.sendLog(getContext());
-            Settings.Global.putInt(resolver, SEND_LOG_ALREADY, 1);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    LogServerUtils.sendLog(getContext());
+                    Settings.Global.putInt(resolver, SEND_LOG_ALREADY, 1);
+                }
+            }).start();
         }
     }
 }

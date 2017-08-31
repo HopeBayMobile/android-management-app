@@ -41,6 +41,7 @@ public class TeraIntent {
     public static final String ACTION_CHECK_AND_FIX_BOOSTER = "hbt.intent.action.CHECK_AND_FIX_BOOSTER";
     public static final String ACTION_MONITOR_BOOSTER_USED_SPACE = "hbt.intent.action.MONITOR_BOOSTER_USED_SPACE";
     public static final String ACTION_SEND_LOGS = "hbt.intent.action.SEND_LOGS";
+    public static final String ACTION_ERASE_DATA = "hbt.intent.action.ERASE_DATA";
 
     // Intent key
     public static final String KEY_UID = "intent_key_uid";
