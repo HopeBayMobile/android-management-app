@@ -77,7 +77,7 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
-import com.hopebaytech.hcfsmgmt.utils.UsingStatus;
+import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -215,7 +215,7 @@ public class TeraMgmtService extends Service {
                             checkBoosterUsedSpace();
                             break;
                         case TeraIntent.ACTION_SEND_LOGS:
-                            UsingStatus.sendLog(mContext);
+                            LogServerUtils.sendLog(mContext);
                             break;
                         case TeraIntent.ACTION_ERASE_DATA:
                             eraseDataOnGoogleDrive(mContext);

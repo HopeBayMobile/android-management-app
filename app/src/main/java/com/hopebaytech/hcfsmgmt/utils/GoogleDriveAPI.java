@@ -11,17 +11,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by rondou.chen on 2017/8/8.
  */
 
 public class GoogleDriveAPI {
-    private static String TAG = "GoogleDriveAPI";
+    private static String TAG = GoogleDriveAPI.class.getSimpleName();
 
     private static final String GOOGLE_DRIVE_API_HOST_NAME_V2 =
             "https://www.googleapis.com/drive/v2/files";
@@ -29,7 +27,10 @@ public class GoogleDriveAPI {
     private static final String GOOGLE_DRIVE_API_USER_INFO_V3 =
             "https://www.googleapis.com/oauth2/v3/userinfo";
 
-    private static final String GOOGLE_DRIVE_FOLDER_NAME = "tera";
+    private static final String GOOGLE_DRIVE_TERA_FOLDER_PREFIX = "tera";
+
+    private static final String GOOGLE_DRIVE_AUTH_HEADER_KEY = "Authorization";
+    private static final String GOOGLE_DRIVE_AUTH_HEADER_VALUE_PREFIX = "Bearer";
 
     public static DeviceServiceInfo buildDeviceServiceInfo(String url, String token,
             String backendType, String bucket, String account) {
@@ -61,9 +62,10 @@ public class GoogleDriveAPI {
         return deviceListInfo;
     }
 
-    private static Request.Builder getBuilder(String token) {
-        return new Request.Builder()
-                .addHeader("Authorization", String.format("Bearer %s", token));
+    private static Map<String, String> buildAuthHeaders(String token) {
+        Map<String, String> headers = new HashMap<String, String>();
+        headers.put(GOOGLE_DRIVE_AUTH_HEADER_KEY, String.format("%s %s",GOOGLE_DRIVE_AUTH_HEADER_VALUE_PREFIX, token));
+        return headers;
     }
 
     public static boolean isCanRestore(JSONArray items) throws IOException, JSONException {
@@ -83,39 +85,34 @@ public class GoogleDriveAPI {
 
     public static JSONArray getTeraFolderItems(String token, String imei)
             throws IOException, JSONException {
-        Response resp = GoogleDriveAPI.searchFile(token, GOOGLE_DRIVE_FOLDER_NAME + "." + imei);
-        JSONObject body = new JSONObject(resp.body().string());
-        return body.getJSONArray("items");
+        JSONObject fileInfo = GoogleDriveAPI.searchFile(token, GOOGLE_DRIVE_TERA_FOLDER_PREFIX + "." + imei);
+        return fileInfo.getJSONArray("items");
     }
 
     public static JSONObject getUserInfo(String token) throws IOException, JSONException {
-        Request request = getBuilder(token)
-                .url(GOOGLE_DRIVE_API_USER_INFO_V3)
-                .build();
+        Map<String, String> headers = buildAuthHeaders(token);
 
-        Response response = new OkHttpClient().newCall(request).execute();
-        return new JSONObject(response.body().string());
+        HttpUtil.HttpRequest request = HttpUtil.buildGetRequest(headers, GOOGLE_DRIVE_API_USER_INFO_V3);
+        HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
+        return new JSONObject(response.getBody());
     }
 
-    public static Response searchFile(String token, String filename) throws IOException {
+    public static JSONObject searchFile(String token, String filename) throws IOException, JSONException {
         String url = String.format(
                 "%s%s\'%s\'", GOOGLE_DRIVE_API_HOST_NAME_V2, "?q=title+contains+", filename);
+        Map<String, String> headers = buildAuthHeaders(token);
 
-        Request request = getBuilder(token)
-                .url(url)
-                .build();
-        return new OkHttpClient().newCall(request).execute();
+        HttpUtil.HttpRequest request = HttpUtil.buildGetRequest(headers, url);
+        HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
+        return new JSONObject(response.getBody());
     }
 
-    public static Response deleteFile(String token, String fileId) throws IOException {
+    public static HttpUtil.HttpResponse deleteFile(String token, String fileId) throws IOException, JSONException {
         String url = String.format("%s/%s", GOOGLE_DRIVE_API_HOST_NAME_V2, fileId);
+        Map<String, String> headers = buildAuthHeaders(token);
 
-        Request request = getBuilder(token)
-                .url(url)
-                .delete()
-                .build();
-        //If successful, this method returns an empty response body.
-        Response response = new OkHttpClient().newCall(request).execute();
+        HttpUtil.HttpRequest request = HttpUtil.buildDeleteRequest(headers, url, null);
+        HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
         return response;
     }
 }

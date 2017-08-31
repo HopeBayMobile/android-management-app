@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -57,7 +56,7 @@ import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
-import com.hopebaytech.hcfsmgmt.utils.UsingStatus;
+import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -788,7 +787,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    UsingStatus.sendLog(getContext());
+                    LogServerUtils.sendLog(getContext());
                     Settings.Global.putInt(resolver, SEND_LOG_ALREADY, 1);
                 }
             }).start();

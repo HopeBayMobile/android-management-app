@@ -15,7 +15,8 @@ public class HttpUtil {
 
     private static String MESSAGE_TAG = HttpUtil.class.getName();
 
-    public static HttpRequestBody createRequestBody(MediaType mediaType, String bodyContent) {
+    public static HttpRequestBody createRequestBody(String bodyType, String bodyContent) {
+        MediaType mediaType = MediaType.parse(bodyType);
         return new HttpRequestBody(mediaType, bodyContent);
     }
 
@@ -23,16 +24,16 @@ public class HttpUtil {
         return new HttpRequest(headers, url, "GET", null);
     }
 
-    public static HttpRequest buildPostRequest(Map<String, String> headers, String url, RequestBody requestBody) {
-        return new HttpRequest(headers, url, "POST", requestBody);
+    public static HttpRequest buildPostRequest(Map<String, String> headers, String url, HttpRequestBody httpRequestBody) {
+        return new HttpRequest(headers, url, "POST", httpRequestBody);
     }
 
-    public static HttpRequest buildPutRequest(Map<String, String> headers, String url, RequestBody requestBody) {
-        return new HttpRequest(headers, url, "PUT", requestBody);
+    public static HttpRequest buildPutRequest(Map<String, String> headers, String url, HttpRequestBody httpRequestBody) {
+        return new HttpRequest(headers, url, "PUT", httpRequestBody);
     }
 
-    public static HttpRequest buildDeleteRequest(Map<String, String> headers, String url, RequestBody requestBody) {
-        return new HttpRequest(headers, url, "DELETE", requestBody);
+    public static HttpRequest buildDeleteRequest(Map<String, String> headers, String url, HttpRequestBody httpRequestBody) {
+        return new HttpRequest(headers, url, "DELETE", httpRequestBody);
     }
 
     public static void executeAsynchronousRequest(final HttpRequest httpRequest) {
@@ -63,8 +64,8 @@ public class HttpUtil {
     public static class HttpRequest {
         Request request;
 
-        public HttpRequest(Map<String, String> headers, String url, String method, RequestBody requestBody) {
-            this.request = getRequestBuilderWithHeaders(headers).url(url).method(method, requestBody).build();
+        public HttpRequest(Map<String, String> headers, String url, String method, HttpRequestBody httpRequestBody) {
+            this.request = getRequestBuilderWithHeaders(headers).url(url).method(method, httpRequestBody == null? null : httpRequestBody.getRequestBody()).build();
         }
 
         public HttpResponse execute() {
@@ -87,7 +88,11 @@ public class HttpUtil {
         RequestBody requestBody;
 
         public HttpRequestBody(MediaType mediaType, String bodyContent) {
-            this.requestBody = RequestBody.create(mediaType, bodyContent);
+            requestBody = RequestBody.create(mediaType, bodyContent);
+        }
+
+        public RequestBody getRequestBody() {
+            return requestBody;
         }
     }
 
