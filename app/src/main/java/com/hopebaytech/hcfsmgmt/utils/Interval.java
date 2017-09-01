@@ -116,6 +116,6 @@ public class Interval {
     /**
      * Interval for sending logs.
      */
-    public static final int SEND_LOGS = HOUR;
+    public static final int SEND_LOGS = 10 * MINUTE;
 
 }

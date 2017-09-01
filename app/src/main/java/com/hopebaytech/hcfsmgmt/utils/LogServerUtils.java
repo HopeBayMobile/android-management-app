@@ -36,7 +36,7 @@ public class LogServerUtils {
             if (response != null) {
                 Logs.d(TAG, "sendLogs", "response:" + response.getBody());
             }
-        } catch (JSONException e) {
+        } catch (Exception e) {
             Logs.d(TAG, "sendLogs", "JSONException: " + e);
         }
     }
