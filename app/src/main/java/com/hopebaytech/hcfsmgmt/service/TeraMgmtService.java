@@ -1413,14 +1413,19 @@ public class TeraMgmtService extends Service {
             @Override
             public void execute(final @Nullable String accessToken, @Nullable String idToken,
                     @Nullable AuthorizationException exception) {
-                try {
-                    String imei = HCFSMgmtUtils.getDeviceImei(context);
-                    JSONArray items = GoogleDriveAPI.getTeraFolderItems(accessToken, imei);
-                    GoogleDriveAPI.deleteFile(
-                            accessToken, GoogleDriveAPI.getTeraFolderId(items));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String imei = HCFSMgmtUtils.getDeviceImei(context);
+                            JSONArray items = GoogleDriveAPI.getTeraFolderItems(accessToken, imei);
+                            GoogleDriveAPI.deleteFile(
+                                    accessToken, GoogleDriveAPI.getTeraFolderId(items));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
             }
         });
     }
