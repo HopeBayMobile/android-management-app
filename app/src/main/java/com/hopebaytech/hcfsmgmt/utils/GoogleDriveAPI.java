@@ -85,15 +85,8 @@ public class GoogleDriveAPI {
 
     public static JSONArray getTeraFolderItems(String token, String imei)
             throws IOException, JSONException {
-        JSONArray items;
         JSONObject fileInfo = GoogleDriveAPI.searchFile(token, GOOGLE_DRIVE_TERA_FOLDER_PREFIX + "." + imei);
-
-        if (fileInfo.has("items")) {
-            items = fileInfo.getJSONArray("items");
-        } else {
-            items = new JSONArray();
-        }
-        return items;
+        return fileInfo.has("items") ? fileInfo.getJSONArray("items") : new JSONArray();
     }
 
     public static JSONObject getUserInfo(String token) throws IOException, JSONException {
