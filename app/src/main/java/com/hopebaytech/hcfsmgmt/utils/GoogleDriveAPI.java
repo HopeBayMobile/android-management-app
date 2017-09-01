@@ -85,8 +85,15 @@ public class GoogleDriveAPI {
 
     public static JSONArray getTeraFolderItems(String token, String imei)
             throws IOException, JSONException {
+        JSONArray items;
         JSONObject fileInfo = GoogleDriveAPI.searchFile(token, GOOGLE_DRIVE_TERA_FOLDER_PREFIX + "." + imei);
-        return fileInfo.getJSONArray("items");
+
+        if (fileInfo.has("items")) {
+            items = fileInfo.getJSONArray("items");
+        } else {
+            items = new JSONArray();
+        }
+        return items;
     }
 
     public static JSONObject getUserInfo(String token) throws IOException, JSONException {
@@ -94,7 +101,7 @@ public class GoogleDriveAPI {
 
         HttpUtil.HttpRequest request = HttpUtil.buildGetRequest(headers, GOOGLE_DRIVE_API_USER_INFO_V3);
         HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
-        return new JSONObject(response.getBody());
+        return response == null ? new JSONObject() : new JSONObject(response.getBody());
     }
 
     public static JSONObject searchFile(String token, String filename) throws IOException, JSONException {
@@ -104,7 +111,7 @@ public class GoogleDriveAPI {
 
         HttpUtil.HttpRequest request = HttpUtil.buildGetRequest(headers, url);
         HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
-        return new JSONObject(response.getBody());
+        return response == null ? new JSONObject() : new JSONObject(response.getBody());
     }
 
     public static HttpUtil.HttpResponse deleteFile(String token, String fileId) throws IOException, JSONException {

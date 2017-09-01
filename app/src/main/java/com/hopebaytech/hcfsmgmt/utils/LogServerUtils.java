@@ -33,7 +33,9 @@ public class LogServerUtils {
 
             HttpUtil.HttpRequest request = HttpUtil.buildPostRequest(null, LOG_SERVER_URL, requestBody);
             HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
-            Logs.d(TAG, "sendLogs", "response:" + response.getBody());
+            if (response != null) {
+                Logs.d(TAG, "sendLogs", "response:" + response.getBody());
+            }
         } catch (JSONException e) {
             Logs.d(TAG, "sendLogs", "JSONException: " + e);
         }
