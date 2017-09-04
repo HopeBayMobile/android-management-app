@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/img_login_bkg" />
+        android:background="@drawable/img_login_bkg"
+        android:layout_below="@+id/expanded_list" />
 
     <RelativeLayout
         android:id="@+id/top_layout"
@@ -36,33 +37,6 @@
         android:layout_marginEnd="@dimen/M2"
         android:layout_marginStart="@dimen/M2"
         android:overScrollMode="never" />
-
-    <LinearLayout
-        android:id="@+id/error_msg_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/search_backup"
-        android:layout_below="@+id/expanded_list"
-        android:gravity="center">
-
-        <com.hopebaytech.hcfsmgmt.customview.FontTextView
-            android:id="@+id/error_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/M2"
-            android:layout_marginTop="@dimen/M2" />
-
-    </LinearLayout>
-
-    <com.hopebaytech.hcfsmgmt.customview.FontTextView
-        android:id="@+id/search_backup"
-        style="@style/F6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/button_layout"
-        android:layout_centerHorizontal="true"
-        android:background="?android:attr/selectableItemBackground"
-        android:text="@string/restore_search_for_backup" />
 
     <LinearLayout
         android:id="@+id/button_layout"
@@ -107,6 +81,24 @@
                 android:textColor="@android:color/white" />
 
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/error_msg_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_above="@+id/button_layout"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="10dp">
+
+        <com.hopebaytech.hcfsmgmt.customview.FontTextView
+            android:id="@+id/error_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/M2"
+            android:layout_marginTop="@dimen/M2" />
+
     </LinearLayout>
 
 </RelativeLayout>

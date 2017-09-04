@@ -63,17 +63,11 @@ public class RestoreFragment extends RegisterFragment {
     private ExpandableListView mExpandableListView;
     private TextView mBackButton;
     private TextView mNextButton;
-    private TextView mSearchBackup;
 
     private RestoreListAdapter mRestoreListAdapter;
     private Checkable mPrevCheckableInfo;
     private Handler mWorkHandler;
     private HandlerThread mHandlerThread;
-
-    private String mJwtToken;
-    private String mAccountEmail;
-    private String mAccountName;
-    private String mPhotoUrl;
 
     private AuthState mGoogleDriveAuthState;
 
@@ -90,10 +84,7 @@ public class RestoreFragment extends RegisterFragment {
         mWorkHandler = new Handler(mHandlerThread.getLooper());
 
         Bundle extras = getArguments();
-        mJwtToken = extras.getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
-        mAccountEmail = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_EMAIL);
-        mAccountName = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_NAME);
-        mPhotoUrl = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_PHOTO_URL);
+        // TODO: get info from previous view
     }
 
     @Nullable
@@ -109,7 +100,6 @@ public class RestoreFragment extends RegisterFragment {
         mExpandableListView = (ExpandableListView) view.findViewById(R.id.expanded_list);
         mBackButton = (TextView) view.findViewById(R.id.back_btn);
         mNextButton = (TextView) view.findViewById(R.id.next_btn);
-        mSearchBackup = (TextView) view.findViewById(R.id.search_backup);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
@@ -150,6 +140,7 @@ public class RestoreFragment extends RegisterFragment {
                 return true;
             }
         });
+
         mExpandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
@@ -199,13 +190,6 @@ public class RestoreFragment extends RegisterFragment {
             @Override
             public void onClick(View v) {
                 ((AppCompatActivity) mContext).onBackPressed();
-            }
-        });
-
-        mSearchBackup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                refreshDeviceList(mJwtToken);
             }
         });
     }
@@ -478,131 +462,6 @@ public class RestoreFragment extends RegisterFragment {
                     mGoogleDriveAuthState.getAccessToken(), false/* check restoration */);
             return;
         }
-
-        if (mJwtToken != null) {
-            registerWithJwtToken(mJwtToken);
-        } else {
-            registerWithoutJwtToken();
-        }
-    }
-
-    private void registerWithJwtToken(final String jwtToken) {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
-        registerParam.closeOldCloudSpace();
-
-        MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(registerParam, jwtToken);
-        registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
-            @Override
-            public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                if (!setConfigAndActivate(deviceServiceInfo,
-                        buildAccountInfo(mAccountName, mAccountEmail, mPhotoUrl))) {
-                    /**
-                     * @see ActivateWoCodeFragment#registerTera(MgmtCluster.RegisterParam, String, GoogleSignInAccount)
-                     * need call signOut() here?
-                     */
-                }
-            }
-
-            @Override
-            public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
-                Logs.e(CLASSNAME, "registerWithJwtToken", "onRegisterFailed",
-                        "deviceServiceInfo=" + deviceServiceInfo);
-
-                CharSequence errorMessage = mContext.getText(R.string.activate_failed);
-                if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    mProgressDialogUtils.dismiss();
-                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.ErrorCode.IMEI_NOT_FOUND)) {
-                        Bundle bundle = new Bundle();
-                        bundle.putInt(ActivateWoCodeFragment.KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
-                        bundle.putString(ActivateWoCodeFragment.KEY_USERNAME, mAccountEmail);
-                        bundle.putString(ActivateWoCodeFragment.KEY_JWT_TOKEN, jwtToken);
-
-                        ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                        fragment.setArguments(bundle);
-
-                        Logs.d(CLASSNAME, "onRegisterFailed", "Replace with ActivateWithCodeFragment");
-                        FragmentTransaction ft = getFragmentManager().beginTransaction();
-                        ft.replace(R.id.fragment_container, fragment);
-                        ft.commitAllowingStateLoss();
-                        return;
-                    }
-                    errorMessage = MgmtCluster.ErrorCode.getErrorMessage(mContext, deviceServiceInfo.getErrorCode());
-                    mErrorMessage.setText(errorMessage);
-                } else if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
-                    registerWithoutJwtToken();
-                } else {
-                    mErrorMessage.setText(errorMessage);
-                }
-            }
-
-        });
-        registerProxy.register();
-    }
-
-    /**
-     * Without jwtToken, register Tera with jwtToken from authenticating with Google to get
-     * serverAuthCode and then authenticating with mgmt server to get jwtToken.
-     */
-    private void registerWithoutJwtToken() {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        String serverClientId = MgmtCluster.getServerClientId();
-        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
-                new GoogleSilentAuthProxy.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                        GoogleSignInAccount acct = result.getSignInAccount();
-                        if (acct == null) {
-                            registerWithoutJwtToken();
-                            return;
-                        }
-                        String serverAuthCode = acct.getServerAuthCode();
-                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
-                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                            @Override
-                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                                String jwtToken = authResultInfo.getToken();
-                                registerWithJwtToken(jwtToken);
-                            }
-
-                            @Override
-                            public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed",
-                                        "authResultInfo=" + authResultInfo);
-                                int responseCode = authResultInfo.getResponseCode();
-                                if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-                                    registerWithoutJwtToken();
-                                } else {
-                                    mErrorMessage.setText(R.string.activate_failed);
-                                }
-                            }
-                        });
-                        authProxy.auth();
-                    }
-
-                    @Override
-                    public void onAuthFailed(GoogleSignInResult result) {
-                        Logs.e(CLASSNAME, "registerWithoutJwtToken",
-                                "onAuthFailed", "result=" + result);
-                        if (result != null) {
-                            String email = null;
-                            String status = result.getStatus().toString();
-                            GoogleSignInAccount account = result.getSignInAccount();
-                            if (account != null) {
-                                email = account.getEmail();
-                            }
-                            Logs.e(CLASSNAME, "registerWithoutJwtToken",
-                                    "onAuthFailed",
-                                    "email=" + email + ", status=" + status);
-                        }
-                        mProgressDialogUtils.dismiss();
-                    }
-
-                });
-        googleAuthProxy.auth();
     }
 
     private boolean restoreDeviceFromGoogleDrive() {
@@ -621,12 +480,8 @@ public class RestoreFragment extends RegisterFragment {
         if (restoreDeviceFromGoogleDrive()) {
             return;
         }
-        if (mJwtToken != null) {
-            restoreDeviceWithJwtToken(mJwtToken, sourceImei);
-        } else {
-            restoreDeviceWithoutJwtToken(sourceImei);
-        }
 
+        //TODO: ? restoreDeviceWithoutJwtToken(sourceImei);
     }
 
     private void preRestoreSetup(final DeviceServiceInfo deviceServiceInfo) {
@@ -662,111 +517,6 @@ public class RestoreFragment extends RegisterFragment {
         });
     }
 
-    private void restoreDeviceWithJwtToken(final String jwtToken, final String sourceImei) {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        String currentImei = HCFSMgmtUtils.getDeviceImei(mContext);
-        MgmtCluster.SwitchDeviceBackendParam param =
-                new MgmtCluster.SwitchDeviceBackendParam(mContext);
-        param.setSourceImei(sourceImei);
-        MgmtCluster.SwitchDeviceBackendProxy proxy =
-                new MgmtCluster.SwitchDeviceBackendProxy(param, currentImei, jwtToken);
-        proxy.setOnSwitchDeviceBackendListener(new MgmtCluster.SwitchDeviceBackendProxy.
-                OnSwitchDeviceBackendListener() {
-            @Override
-            public void onSwitchSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
-                preRestoreSetup(deviceServiceInfo);
-            }
-
-            @Override
-            public void onSwitchFailed(DeviceServiceInfo deviceServiceInfo) {
-                mProgressDialogUtils.dismiss();
-
-                if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                    // Jwt token is expired
-                    restoreDeviceWithoutJwtToken(sourceImei);
-                } else if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                    // If restore failed due to out of space, user choose another backup but not allow
-                    // to restore due to mapping error.
-                    mErrorMessage.setText(R.string.restore_failed_device_in_use);
-                } else {
-                    mErrorMessage.setText(R.string.restore_failed);
-                }
-            }
-        });
-        proxy.switchBackend();
-    }
-
-    /**
-     * Without jwtToken, switch device backend with jwtToken from authenticating with Google to get
-     * serverAuthCode and then authenticating with mgmt server to get jwtToken.
-     */
-    private void restoreDeviceWithoutJwtToken(final String sourceImei) {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        String serverClientId = MgmtCluster.getServerClientId();
-        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
-                new GoogleSilentAuthProxy.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                        GoogleSignInAccount acct = result.getSignInAccount();
-                        if (acct == null) {
-                            restoreDeviceWithoutJwtToken(sourceImei);
-                            return;
-                        }
-                        String serverAuthCode = acct.getServerAuthCode();
-                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
-                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                            @Override
-                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                                mProgressDialogUtils.dismiss();
-
-                                String jwtToken = authResultInfo.getToken();
-                                restoreDeviceWithJwtToken(jwtToken, sourceImei);
-                            }
-
-                            @Override
-                            public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken", "onAuthFailed",
-                                        "authResultInfo=" + authResultInfo);
-                                mProgressDialogUtils.dismiss();
-
-                                int responseCode = authResultInfo.getResponseCode();
-                                if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-                                    restoreDeviceWithoutJwtToken(sourceImei);
-                                } else {
-                                    mErrorMessage.setText(R.string.restore_failed);
-                                }
-                            }
-                        });
-                        authProxy.auth();
-                    }
-
-                    @Override
-                    public void onAuthFailed(GoogleSignInResult result) {
-                        Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken",
-                                "onAuthFailed",
-                                "result=" + result);
-                        if (result != null) {
-                            String email = null;
-                            String status = result.getStatus().toString();
-                            GoogleSignInAccount account = result.getSignInAccount();
-                            if (account != null) {
-                                email = account.getEmail();
-                            }
-                            Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken",
-                                    "onAuthFailed",
-                                    "email=" + email + ", status=" + status);
-                        }
-                        mProgressDialogUtils.dismiss();
-                    }
-
-                });
-        googleAuthProxy.auth();
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -775,105 +525,6 @@ public class RestoreFragment extends RegisterFragment {
             mHandlerThread.quit();
         }
     }
-
-    private void refreshDeviceList(String jwtToken) {
-        mProgressDialogUtils.show(R.string.processing_msg);
-        if (jwtToken == null) {
-            refreshDeviceListWithoutJwtToken();
-        } else {
-            refreshDeviceListWithJwtToken(jwtToken);
-        }
-    }
-
-    private void refreshDeviceListWithJwtToken(final String jwtToken) {
-        String imei = HCFSMgmtUtils.getDeviceImei(mContext);
-        MgmtCluster.GetDeviceListProxy proxy = new MgmtCluster.GetDeviceListProxy(jwtToken, imei);
-        proxy.setOnGetDeviceListListener(new MgmtCluster.GetDeviceListProxy.OnGetDeviceListListener() {
-            @Override
-            public void onGetDeviceListSuccessful(DeviceListInfo deviceListInfo) {
-                Logs.d(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListSuccessful",
-                        "deviceListInfo=" + deviceListInfo);
-
-                // No any device backup can be restored, directly register to Tera
-                if (deviceListInfo.getDeviceStatusInfoList().size() == 0) {
-                    Logs.d(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListSuccessful",
-                            "No any device backup can be restored, directly register to Tera");
-                    deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_NONE);
-                }
-
-                mRestoreListAdapter.setGroupList(createRestoreList(deviceListInfo));
-                mRestoreListAdapter.notifyDataSetChanged();
-
-                mProgressDialogUtils.dismiss();
-            }
-
-            @Override
-            public void onGetDeviceListFailed(DeviceListInfo deviceListInfo) {
-                Logs.e(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListFailed",
-                        "deviceListInfo=" + deviceListInfo);
-
-                if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    mErrorMessage.setText(R.string.activate_failed_device_in_use);
-                    mProgressDialogUtils.dismiss();
-                } else if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
-                    refreshDeviceListWithoutJwtToken();
-                } else {
-                    mErrorMessage.setText(R.string.activate_auth_failed);
-                    mProgressDialogUtils.dismiss();
-                }
-            }
-        });
-        proxy.get();
-    }
-
-    private void refreshDeviceListWithoutJwtToken() {
-        String serverClientId = MgmtCluster.getServerClientId();
-        GoogleSilentAuthProxy proxy = new GoogleSilentAuthProxy(mContext, serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
-            @Override
-            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-                MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
-                MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                        String jwtToken = authResultInfo.getToken();
-                        refreshDeviceListWithJwtToken(jwtToken);
-                    }
-
-                    @Override
-                    public void onAuthFailed(AuthResultInfo authResultInfo) {
-                        Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
-                        if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                            refreshDeviceListWithoutJwtToken();
-                        } else {
-                            mErrorMessage.setText(R.string.activate_auth_failed);
-                        }
-                    }
-                });
-                authProxy.auth();
-            }
-
-            @Override
-            public void onAuthFailed(GoogleSignInResult result) {
-                Logs.e(CLASSNAME, "refreshDeviceListWithoutJwtToken",
-                        "onAuthFailed", "result=" + result);
-                if (result != null) {
-                    String email = null;
-                    String status = result.getStatus().toString();
-                    GoogleSignInAccount account = result.getSignInAccount();
-                    if (account != null) {
-                        email = account.getEmail();
-                    }
-                    Logs.e(CLASSNAME, "refreshDeviceListWithoutJwtToken",
-                            "onAuthFailed",
-                            "email=" + email + ", status=" + status);
-                }
-            }
-        });
-        proxy.auth();
-    }
-
 
     private List<GroupInfo> createRestoreList(DeviceListInfo deviceListInfo) {
         List<GroupInfo> groupList = new ArrayList<>();
