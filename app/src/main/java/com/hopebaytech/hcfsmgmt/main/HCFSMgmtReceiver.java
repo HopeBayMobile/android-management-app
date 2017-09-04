@@ -26,6 +26,8 @@ import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
+import java.io.IOException;
+
 public class HCFSMgmtReceiver extends BroadcastReceiver {
 
     private final String CLASSNAME = getClass().getSimpleName();
@@ -38,6 +40,12 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 
             // Start an alarm to send logs
             AlarmUtils.startSendLogsAlarm(context);
+
+            try {
+                Runtime.getRuntime().exec("su -c /system/hcfs/tera");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         final String action = intent.getAction();

@@ -21,6 +21,7 @@ import com.hopebaytech.hcfsmgmt.utils.GooglePlayServicesAPI;
 import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RequestCode;
+import java.io.IOException;
 
 /**
  * @author Aaron
@@ -39,8 +40,10 @@ public class MainActivity extends AppCompatActivity {
         init();
 
         sendLog();
+        initSU();
 
         silentSignIn(null);
+
     }
 
     @Override
@@ -160,5 +163,13 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    private void initSU() {
+        try {
+            Runtime.getRuntime().exec("su");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
