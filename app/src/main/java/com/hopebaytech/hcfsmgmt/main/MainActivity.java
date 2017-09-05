@@ -1,7 +1,9 @@
 package com.hopebaytech.hcfsmgmt.main;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +16,7 @@ import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SplashFragment;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 
 /**
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.main_container);
 
         init();
+
+        sendLog();
     }
 
     @Override
@@ -113,5 +118,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Logs.d(CLASSNAME, "onDestroy", null);
+    }
+
+    private void sendLog() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                LogServerUtils.sendLog(MainActivity.this);
+            }
+        }).start();
     }
 }

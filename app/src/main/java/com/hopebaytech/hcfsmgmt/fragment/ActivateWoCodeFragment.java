@@ -213,8 +213,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        sendLogOneShot();
-
         mTeraVersion.setText(
                 String.format(
                         Locale.getDefault(),
@@ -779,18 +777,5 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
 
         return success;
-    }
-
-    private void sendLogOneShot() {
-        final ContentResolver resolver = getContext().getContentResolver();
-        if (Settings.Global.getInt(resolver, SEND_LOG_ALREADY, 0) == 0) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    LogServerUtils.sendLog(getContext());
-                    Settings.Global.putInt(resolver, SEND_LOG_ALREADY, 1);
-                }
-            }).start();
-        }
     }
 }
