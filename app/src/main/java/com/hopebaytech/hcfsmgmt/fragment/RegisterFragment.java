@@ -63,7 +63,7 @@ public class RegisterFragment extends Fragment {
                     mProgressDialogUtils.dismiss();
                     break;
                 case RESTORE_FAILED:
-                    mErrorMessage.setText("Restore failed");  // TODO: extract msg to string.xml
+                    mErrorMessage.setText(R.string.restore_failed);
                     mProgressDialogUtils.dismiss();
                     break;
                 case DISMISS_PROGRESS_DIALOG:

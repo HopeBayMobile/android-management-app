@@ -378,9 +378,9 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_BACKUP);
 
             if(deviceListInfo.isEmpty()) {
-                Logs.e(TAG, "handleRestoration", "Restore fail reload config"); // TODO: extract msg to string.xml
+                Logs.e(TAG, "handleRestoration", getString(R.string.restore_failed_upon_retrieve_backup));
                 TeraCloudConfig.resetHCFSConfig();
-                mUiHandler.sendEmptyMessage(RESTORE_FAILED);
+                mUiHandler.sendEmptyMessage(R.string.restore_failed_upon_retrieve_backup);
                 mProgressDialogUtils.dismiss();
                 return;
             }
@@ -437,7 +437,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             // set up as new device
             boolean bucketCreationSucceeded = SwiftServerUtil.createBucket(swiftAccount, swiftKey, swiftUrl, bucketName);
             if(!bucketCreationSucceeded) {
-                Logs.e(TAG, "doInBackground", "failed to create bucket"); //TODO: add this string to stirng.xml
+                Logs.e(TAG, "doInBackground", getString(R.string.activate_failed_cannot_create_bucket));
                 return false;
             }
 

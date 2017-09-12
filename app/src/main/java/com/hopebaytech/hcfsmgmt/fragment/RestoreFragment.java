@@ -114,16 +114,15 @@ public class RestoreFragment extends RegisterFragment {
             @Override
             public void onClick(View v) {
                 if(mRestoreListAdapter.getNumOfSelectedItems() == 0) {
-                    Logs.w(TAG, "onClick", "No bucket is selected for restore"); //TODO: extract to string.xml
-                    informErrorOccurred("No bucket is selected for restore");
+                    Logs.w(TAG, "onClick", "No backup is selected for restoration");
+                    informErrorOccurred(R.string.restore_failed_no_backup_selected);
                     return;
-                    //TODO: show error message if no item is selected
                 }
 
                 if(mRestoreListAdapter.getNumOfSelectedItems() > 1) {
                     //TODO: Radio button not set up properly
                     Logs.e(TAG, "onClick", String.format("Radio button not set up properly, %d items are selected", mRestoreListAdapter.getNumOfSelectedItems()));
-                    throw new RuntimeException("Radio button not set up properly"); //TODO: extract to string.xml
+                    throw new RuntimeException("Radio button not set up properly");
                 }
 
                 //TODO: should only restore
@@ -163,13 +162,15 @@ public class RestoreFragment extends RegisterFragment {
             // get swift info from parcel
             Bundle bundle = getArguments();
             if (bundle == null) {
-                Logs.e(CLASSNAME, "restoreDevice", "cannot get bundle for swift info"); //TODO: extract
-                return; //TODO: inform user for failure with error msg, informErrorOccurred();
+                Logs.e(CLASSNAME, "restoreDevice", "cannot get bundle for swift info");
+                informErrorOccurred(R.string.restore_failed);
+                return;
             }
             SwiftConfigInfo swiftConfigInfo = bundle.getParcelable(SwiftConfigInfo.PARCEL_KEY);
             if (swiftConfigInfo == null) {
-                Logs.e(CLASSNAME, "restoreDevice", "swiftConfigInfo == null"); //TODO: extract
-                return; //TODO: inform user for failure with error msg
+                Logs.e(CLASSNAME, "restoreDevice", "swiftConfigInfo == null");
+                informErrorOccurred(R.string.restore_failed);
+                return;
             }
 
             String deviceImei = mRestoreListAdapter.getSelectedItem().getImei();
@@ -192,22 +193,26 @@ public class RestoreFragment extends RegisterFragment {
             public void run() {
                 boolean writeToHCFSConfigSucceeded = writeSwiftInfoToHCFSConfig(swiftUrl, swiftAccount, swiftKey, swiftBucketName);
                 if(!writeToHCFSConfigSucceeded) {
-                    informErrorOccurred("Failed to write swift info to hcfs config prior to swift restoration"); //TODO: extract to string.xml
+                    informErrorOccurred(R.string.restore_failed_upon_save_hcfs_config);
                     return;
                 }
                 int code = HCFSMgmtUtils.triggerRestore();
                 if (code == RestoreStatus.Error.OUT_OF_SPACE) {
-                    informErrorOccurred(R.string.restore_pre_check_out_of_space);
+                    informErrorOccurred(R.string.restore_failed_out_of_space);
                     return;
                 }
-                if(code == RestoreStatus.Error.CONN_FAILED || code == RestoreStatus.Error.DAMAGED_BACKUP) {
-                    informErrorOccurred("Error upon trigger restoration"); //TODO: extract to string.xml
+                if(code == RestoreStatus.Error.DAMAGED_BACKUP) {
+                    informErrorOccurred(R.string.restore_failed_damaged_backup);
+                    return;
+                }
+                if(code == RestoreStatus.Error.CONN_FAILED) {
+                    informErrorOccurred(R.string.restore_failed_conn_failed);
                     return;
                 }
 
                 boolean reloadConfigSucceed = TeraCloudConfig.reloadConfig();
                 if (!reloadConfigSucceed) {
-                    informErrorOccurred("Failed to reload hcfs config prior to swift restoration"); //TODO: extract to string.xml
+                    informErrorOccurred(R.string.restore_failed_upon_reload_config);
                     return;
                 }
 
@@ -229,11 +234,15 @@ public class RestoreFragment extends RegisterFragment {
                 TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
                 int code = HCFSMgmtUtils.triggerRestore();
                 if (code == RestoreStatus.Error.OUT_OF_SPACE) {
-                    informErrorOccurred(R.string.restore_pre_check_out_of_space);
+                    informErrorOccurred(R.string.restore_failed_out_of_space);
                     return;
                 }
-                if(code == RestoreStatus.Error.CONN_FAILED || code == RestoreStatus.Error.DAMAGED_BACKUP) {
-                    informErrorOccurred("Error upon trigger restoration"); //TODO: extract to string.xml
+                if(code == RestoreStatus.Error.DAMAGED_BACKUP) {
+                    informErrorOccurred(R.string.restore_failed_damaged_backup);
+                    return;
+                }
+                if(code == RestoreStatus.Error.CONN_FAILED) {
+                    informErrorOccurred(R.string.restore_failed_conn_failed);
                     return;
                 }
 
