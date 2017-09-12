@@ -62,7 +62,7 @@ public class LogServerUtils {
 
         // basic Info
         basicInfo.put("TimeStamp", dateOrigin);
-        basicInfo.put("IMEI", imei);
+        basicInfo.put("IMEI", GeneratorHashUtils.generateSHA1(imei));
         //basicInfo.put("UserName", accountName);
         //basicInfo.put("UserEmail", accountEmail);
 
@@ -75,7 +75,7 @@ public class LogServerUtils {
         hcfsStatus.put("CacheUsed", info.getCacheUsed());
         hcfsStatus.put("CacheTotal", info.getCacheTotal());
         hcfsStatus.put("DataDownloadToday", info.getXferDownload());
-        hcfsStatus.put("DataUploadToday", info.getXferDownload());
+        hcfsStatus.put("DataUploadToday", info.getXferUpload());
 
         // get non-system Apps
         PackageManager pm = context.getPackageManager();
