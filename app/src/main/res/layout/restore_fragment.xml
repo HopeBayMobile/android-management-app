@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/img_login_bkg"
-        android:layout_below="@+id/expanded_list" />
+        android:layout_below="@+id/restore_list" />
 
     <RelativeLayout
         android:id="@+id/top_layout"
@@ -29,8 +29,8 @@
 
     </RelativeLayout>
 
-    <ExpandableListView
-        android:id="@+id/expanded_list"
+    <ListView
+        android:id="@+id/restore_list"
         android:layout_width="match_parent"
         android:layout_height="280dp"
         android:layout_below="@+id/top_layout"

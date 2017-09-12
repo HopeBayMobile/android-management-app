@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="restore_choice">
+        <item>@string/set_up_as_new_device</item>
+        <item>@string/restore_from_old_bucket</item>
+    </string-array>
+</resources>

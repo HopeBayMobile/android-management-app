@@ -32,17 +32,20 @@ import net.openid.appauth.AuthState;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class RegisterFragment extends Fragment {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    protected static final String ACTION_AUTHORIZATION_RESPONSE
-            = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
+    protected static final String ACTION_AUTHORIZATION_RESPONSE = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
 
     protected static final String KEY_GOOGLE_DRIVE_TOKEN = "key_google_drive_token";
 
     private static final int DISMISS_PROGRESS_DIALOG = -1;
     protected static final int ACTIVATE_FAILED = 0;
+    protected static final int RESTORE_FAILED = 1;
 
     protected TextView mErrorMessage;
 
@@ -59,7 +62,10 @@ public class RegisterFragment extends Fragment {
                     mErrorMessage.setText(R.string.activate_failed);
                     mProgressDialogUtils.dismiss();
                     break;
-
+                case RESTORE_FAILED:
+                    mErrorMessage.setText("Restore failed");  // TODO: extract msg to string.xml
+                    mProgressDialogUtils.dismiss();
+                    break;
                 case DISMISS_PROGRESS_DIALOG:
                 default:
                     mProgressDialogUtils.dismiss();
@@ -101,8 +107,7 @@ public class RegisterFragment extends Fragment {
                     if (checkRestoration && GoogleDriveAPI.isCanRestore(items)) {
                         // Do Restore Here
                         Bundle args = new Bundle();
-                        args.putParcelable(RestoreFragment.KEY_DEVICE_LIST,
-                                GoogleDriveAPI.buildDeviceListInfo(imei));
+                        args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, GoogleDriveAPI.buildDeviceListInfo(imei));
                         replaceWithRestoreFragment(args, authState);
                     } else {
                         GoogleDriveAPI.deleteFile(token, GoogleDriveAPI.getTeraFolderId(items));
@@ -130,7 +135,7 @@ public class RegisterFragment extends Fragment {
             );
 
             if (setConfigAndActivate(deviceServiceInfo, buildAccountInfo(name, email, photoUrl))) {
-                new AppAuthUtils().saveAppAuthStatusToSharedPreference(mContext, authState);
+                AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, authState);
             }
         } catch (Exception exception) {
             Logs.e(TAG, "registerTeraByGoogleDrive", Log.getStackTraceString(exception));
@@ -192,7 +197,7 @@ public class RegisterFragment extends Fragment {
 
         RestoreFragment restoreFragment = RestoreFragment.newInstance();
         restoreFragment.setArguments(args);
-        restoreFragment.setGoogleDriveAuthState(authState);
+        restoreFragment.setGoogleDriveAuthState(authState); //TODO: I don't like this, it makes this method google drive specific. Also, Rondou saved it to shared preference already.
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, restoreFragment, RestoreFragment.TAG);
@@ -213,5 +218,29 @@ public class RegisterFragment extends Fragment {
         ft.commitAllowingStateLoss();
 
         mUiHandler.sendEmptyMessage(DISMISS_PROGRESS_DIALOG);
+    }
+
+    protected boolean writeSwiftInfoToHCFSConfig(String url, String account, String key, String bucketName) {
+        String storageAccount = account.split(":")[0];
+        String accessKeyId = account.split(":")[1];
+
+        Map<String, String> swiftConfigs = new HashMap<String, String>();
+        swiftConfigs.put(TeraCloudConfig.HCFS_CONFIG_CURRENT_BACKEND, "SWIFT");
+        swiftConfigs.put(TeraCloudConfig.HCFS_CONFIG_SWIFT_URL, url);
+        swiftConfigs.put(TeraCloudConfig.HCFS_CONFIG_SWIFT_ACCOUNT, storageAccount);
+        swiftConfigs.put(TeraCloudConfig.HCFS_CONFIG_SWIFT_USER, accessKeyId);
+        swiftConfigs.put(TeraCloudConfig.HCFS_CONFIG_SWIFT_PASS, key);
+        swiftConfigs.put(TeraCloudConfig.HCFS_CONFIG_SWIFT_CONTAINER, bucketName);
+
+        return writeToHCFSConfig(swiftConfigs);
+    }
+
+    protected boolean writeToHCFSConfig(Map<String, String> configs) {
+        boolean success = true;
+        for (String key : configs.keySet()) {
+            success |= TeraCloudConfig.setHCFSConfig(key, configs.get(key));
+        }
+
+        return success;
     }
 }

@@ -99,6 +99,14 @@ public class DeviceListInfo implements Parcelable {
         this.responseContent = responseContent;
     }
 
+    public boolean isEmpty() {
+        return deviceStatusInfoList.isEmpty();
+    }
+
+    public int size() {
+        return deviceStatusInfoList.size();
+    }
+
     @Override
     public String toString() {
         JSONObject jsonObject = new JSONObject();

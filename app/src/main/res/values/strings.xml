@@ -225,7 +225,7 @@
     <string name="restore_content_desc_setup_as_new_device">選擇 \"設定為新裝置\" 將會移除位於目前裝置上的舊備份資料。</string>
     <string name="restore_content_desc_non_lock_device">選擇 \"還原備份\" 將會把所有資料從舊的裝置轉移到目前裝置，然後目前裝置就會重設為原廠設定。</string>
     <string name="restore_content_desc_lock_device">這個備份屬於一個被上鎖的裝置，因此此備份可能包含不完整的資料。</string>
-    <string name="restore_title">還原/設定為新裝置</string>
+    <string name="restore_title">還原</string>
     <string name="restore_item_setup_new_device">設定為新裝置</string>
     <string name="restore_item_my_tera">從 Tera 還原</string>
     <string name="restore_item_backup">還原備份</string>
@@ -371,12 +371,14 @@
     <string name="activate_swift_hint_ip">伺服器位置</string>
     <string name="activate_swift_hint_account">帳號</string>
     <string name="activate_swift_hint_key">密鑰</string>
-    <string name="activate_swift_hint_bucket_name">容器名稱</string>
     <string name="layout_title_swift_info">Swift 帳號資訊</string>
     <string name="activate_swift_hint_port">埠</string>
-    <string name="activate_failed_bucket_error">無法找到目標容器</string>
+    <string name="activate_failed_list_bucket_error">無法取得容器清單</string>
     <string name="activate_failed_swift_server_auth_error">Swift 伺服器認證失敗</string>
     <string name="activate_failed_save_swift_config">Swift 設定存檔失敗</string>
     <string name="activate_failed_reload_config">重新讀取 HCFS 設定檔失敗</string>
+    <string name="alert_dialog_title_restore_choice">在 Swift 伺服器找到 Tera 容器</string>
+    <string name="set_up_as_new_device">忽略, 設定為新裝置</string>
+    <string name="restore_from_old_bucket">還原舊容器的資料</string>
 
 </resources>

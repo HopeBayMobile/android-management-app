@@ -83,23 +83,23 @@ public class SwiftServerUtil {
         return teraBuckets;
     }
 
-    public static String createBucket(String account, String key, String url, String bucketPostFix) {
+    public static boolean createBucket(String account, String key, String url, String bucketName) {
         String swiftToken = SwiftServerUtil.getToken(account, key, url);
         String swiftStorageUrl = SwiftServerUtil.getStorageUrl(account, key, url);
         if (swiftToken == null || swiftStorageUrl == null) {
-            return null;
+            return false;
         }
 
-        String bucketName = String.format("%s%s", SWIFT_TERA_BUCKET_PREFIX, bucketPostFix);
         String createBucketUrl = String.format("%s/%s", swiftStorageUrl, bucketName);
         Map<String, String> createBucketHeaders = new HashMap<String, String>();
         createBucketHeaders.put(SWIFT_HEADER_KEY_TOKEN, swiftToken);
-        HttpUtil.HttpResponse createBucketResponse = HttpUtil.executeSynchronousRequest(HttpUtil.buildPutRequest(createBucketHeaders, createBucketUrl, null));
-        if (createBucketResponse == null || createBucketResponse.getCode() != 201) {
+        HttpUtil.HttpRequestBody emptyRequestBody = HttpUtil.createRequestBody("application/json; charset=utf-8","");
+        HttpUtil.HttpResponse createBucketResponse = HttpUtil.executeSynchronousRequest(HttpUtil.buildPutRequest(createBucketHeaders, createBucketUrl, emptyRequestBody));
+        if (createBucketResponse == null || !(createBucketResponse.getCode() >= 200 || createBucketResponse.getCode() < 300)) {
             Logs.e(TAG, "createBucket", String.format("Code: [%s], Msg: [%s], Body: [%s]", createBucketResponse.getCode(), createBucketResponse.getMessage(), createBucketResponse.getBody()));
-            return null;
+            return false;
         }
 
-        return bucketName;
+        return true;
     }
 }
