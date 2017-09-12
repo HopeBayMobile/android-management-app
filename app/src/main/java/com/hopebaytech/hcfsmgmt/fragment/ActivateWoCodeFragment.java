@@ -686,7 +686,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
     }
 
-    private boolean writeToHCFSConfig(Map<String, String> configs) {
+    protected boolean writeToHCFSConfig(Map<String, String> configs) {
         boolean success = true;
         for (String key : configs.keySet()) {
             success |= TeraCloudConfig.setHCFSConfig(key, configs.get(key));
