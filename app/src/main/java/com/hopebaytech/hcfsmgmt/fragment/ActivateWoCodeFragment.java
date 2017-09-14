@@ -197,20 +197,22 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             }
         });
 
-        mSwiftActivationLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!NetworkUtils.isNetworkConnected(mContext)) {
-                    mErrorMessage.setText(R.string.activate_alert_dialog_message);
-                    return;
-                }
+        if(mSwiftActivationLayout != null) {
+            mSwiftActivationLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!NetworkUtils.isNetworkConnected(mContext)) {
+                        mErrorMessage.setText(R.string.activate_alert_dialog_message);
+                        return;
+                    }
 
-                mProgressDialogUtils.show(R.string.processing_msg);
-                mActivationMethodLayout.setVisibility(View.GONE);
-                mSwiftAccountInfoLayout.setVisibility(View.VISIBLE);
-                mProgressDialogUtils.dismiss();
-            }
-        });
+                    mProgressDialogUtils.show(R.string.processing_msg);
+                    mActivationMethodLayout.setVisibility(View.GONE);
+                    mSwiftAccountInfoLayout.setVisibility(View.VISIBLE);
+                    mProgressDialogUtils.dismiss();
+                }
+            });
+        }
 
         Bundle extras = getArguments();
         if (extras != null) {
