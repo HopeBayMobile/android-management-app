@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -54,7 +53,7 @@ import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.SwiftServerUtil;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
-import com.hopebaytech.hcfsmgmt.utils.UsingStatus;
+import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -165,8 +164,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        sendOneTimeLog();
 
         mTeraVersion.setText(
                 String.format(
@@ -694,15 +691,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
 
         return success;
     }
-
-    private void sendOneTimeLog() {
-        final ContentResolver resolver = getContext().getContentResolver();
-        if (Settings.Global.getInt(resolver, SEND_LOG_ALREADY, 0) == 0) {
-            UsingStatus.sendLog(getContext());
-            Settings.Global.putInt(resolver, SEND_LOG_ALREADY, 1);
-        }
-    }
-
+    
     private void setOnTouchListenerForTeraLogo() {
         // fill test swift info when user taps on Tera logo 5 times within 3 seconds
         teraLogo.setOnTouchListener(new View.OnTouchListener() {

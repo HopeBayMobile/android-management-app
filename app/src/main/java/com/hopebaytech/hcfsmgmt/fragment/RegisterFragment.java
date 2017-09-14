@@ -131,7 +131,7 @@ public class RegisterFragment extends Fragment {
                     token,
                     "googledrive",
                     null,
-                    userInfo.get("email").toString()
+                    email
             );
 
             if (setConfigAndActivate(deviceServiceInfo, buildAccountInfo(name, email, photoUrl))) {
