@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
-import com.hopebaytech.hcfsmgmt.db.AccountDAO;
-import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.HCFSStatInfo;
 
 import org.json.JSONArray;
@@ -20,9 +18,8 @@ import java.util.List;
 
 public class LogServerUtils {
     private final static String TAG = "LogServerUtils";
-
     private static final String LOG_SERVER_URL = "http://ota.tera.mobi/upload/logs/Hit/";
-    //String LOG_SERVER_URL = "http://172.16.11.188:5555"; // Local Test server
+    //private static final String LOG_SERVER_URL = "http://172.16.11.188/upload/logs/Hit/"; // Local Test server
 
     public static void sendLog(Context context) {
 
@@ -43,41 +40,31 @@ public class LogServerUtils {
 
     private static String getJSONStringLog(Context context) throws JSONException {
         Logs.d(TAG, "getJSONStringLog", "Preparing");
-        AccountDAO accountDAO = AccountDAO.getInstance(context);
-        AccountInfo accountInfo = accountDAO.getFirst();
-
-        JSONObject basicInfo = new JSONObject();
-        JSONObject hcfsStatus = new JSONObject();
         JSONArray nonSystemApps = new JSONArray();
-        JSONObject dataObject = new JSONObject();
-        JSONObject requestJSONObject = new JSONObject();
+        JSONObject logContent = new JSONObject();
 
         // Basic information
-        // DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
-        // String date = dateFormat.format(new java.util.Date());
         String dateOrigin = new java.util.Date().toString();
         String imei = HCFSMgmtUtils.getDeviceImei(context);
-        //String accountName = accountInfo != null ? accountInfo.getName() : "UserName";
-        //String accountEmail = accountInfo != null ? accountInfo.getEmail() : "UserEmail";
-
-        // basic Info
-        basicInfo.put("TimeStamp", dateOrigin);
-        basicInfo.put("IMEI", GeneratorHashUtils.generateSHA1(imei));
-        //basicInfo.put("UserName", accountName);
-        //basicInfo.put("UserEmail", accountEmail);
+        logContent.put("LocalIp", getIp());
+        logContent.put("TimeStamp", dateOrigin);
+        logContent.put("IMEI", GeneratorHashUtils.generateSHA1(imei));
+        logContent.put("Source", "Change this value for different version of tera");
 
         // HCFS status
         HCFSStatInfo info = HCFSMgmtUtils.getHCFSStatInfo();
-        hcfsStatus.put("CloudTotal", info.getCloudTotal());
-        hcfsStatus.put("CloudUsed", info.getCloudUsed());
-        hcfsStatus.put("PinTotal", info.getPinTotal());
-        hcfsStatus.put("DirtyUsed", info.getCacheDirtyUsed());
-        hcfsStatus.put("CacheUsed", info.getCacheUsed());
-        hcfsStatus.put("CacheTotal", info.getCacheTotal());
-        hcfsStatus.put("DataDownloadToday", info.getXferDownload());
-        hcfsStatus.put("DataUploadToday", info.getXferUpload());
+        if (info != null) {
+            logContent.put("CloudTotal", info.getCloudTotal());
+            logContent.put("CloudUsed", info.getCloudUsed());
+            logContent.put("PinTotal", info.getPinTotal());
+            logContent.put("DirtyUsed", info.getCacheDirtyUsed());
+            logContent.put("CacheUsed", info.getCacheUsed());
+            logContent.put("CacheTotal", info.getCacheTotal());
+            logContent.put("DataDownloadToday", info.getXferDownload());
+            logContent.put("DataUploadToday", info.getXferUpload());
+        }
 
-        // get non-system Apps
+        // Get installed Apps(non-system)
         PackageManager pm = context.getPackageManager();
         List<PackageInfo> packageInfoList = pm.getInstalledPackages(0);
         for (PackageInfo packageInfo : packageInfoList) {
@@ -85,17 +72,9 @@ public class LogServerUtils {
             if (!isSystemApp)
                 nonSystemApps.put(packageInfo.packageName);
         }
+        logContent.put("InstalledApps", nonSystemApps);
 
-        // Setup Data JSON object
-        dataObject.put("LocalIp", getIp());
-        dataObject.put("basicInfo", basicInfo);
-        dataObject.put("HcfsStatus", hcfsStatus);
-        dataObject.put("InstalledApps", nonSystemApps);
-
-        // Setup Final request JSON Object
-        requestJSONObject.put(imei, dataObject);
-
-        return requestJSONObject.toString();
+        return logContent.toString();
     }
 
     private static String getIp() {
