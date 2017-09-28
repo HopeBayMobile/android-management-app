@@ -225,7 +225,7 @@
     <string name="restore_content_desc_setup_as_new_device">選擇 \"設定為新裝置\" 將會移除位於目前裝置上的舊備份資料。</string>
     <string name="restore_content_desc_non_lock_device">選擇 \"還原備份\" 將會把所有資料從舊的裝置轉移到目前裝置，然後目前裝置就會重設為原廠設定。</string>
     <string name="restore_content_desc_lock_device">這個備份屬於一個被上鎖的裝置，因此此備份可能包含不完整的資料。</string>
-    <string name="restore_title">還原/設定為新裝置</string>
+    <string name="restore_title">還原</string>
     <string name="restore_item_setup_new_device">設定為新裝置</string>
     <string name="restore_item_my_tera">從 Tera 還原</string>
     <string name="restore_item_backup">還原備份</string>
@@ -244,11 +244,10 @@
     <string name="restore_failed">還原失敗。</string>
     <string name="restore_system_reboot">System Reboot</string>
     <string name="restore_notification_title">Restoring Tera</string>
-    <string name="restore_pre_check_out_of_space">Device storage space is not enough. Please delete some apps or files, and then retry again.</string>
     <string name="restore_failed_title">Restoration failed</string>
-    <string name="restore_failed_out_of_space">Device storage space is not enough. Please delete some apps or files, and then restart the device to resume restoration.</string>
+    <string name="restore_failed_out_of_space">No enough space on the device. Uninstall apps or delete files before retry restoration.</string>
     <string name="restore_failed_out_of_space_btn">Exit</string>
-    <string name="restore_failed_damaged_backup">Some critical data was not backed up successfully. So, you must do a factory reset and then choose a different backup or set up as a new device.</string>
+    <string name="restore_failed_damaged_backup">Some critical data was not backed up successfully. Factory reset the device, then choose a different backup or set up as new device.</string>
     <string name="restore_failed_damaged_backup_btn">Factory Reset</string>
     <string name="restore_failed_conn_failed">Possible reasons may be an unstable/interrupted Internet connection, low battery, device issues, etc. If the problem persists, please contact %1$s.</string>
     <string name="restore_failed_conn_failed_btn">Retry</string>
@@ -371,12 +370,19 @@
     <string name="activate_swift_hint_ip">伺服器位置</string>
     <string name="activate_swift_hint_account">帳號</string>
     <string name="activate_swift_hint_key">密鑰</string>
-    <string name="activate_swift_hint_bucket_name">容器名稱</string>
     <string name="layout_title_swift_info">Swift 帳號資訊</string>
     <string name="activate_swift_hint_port">埠</string>
-    <string name="activate_failed_bucket_error">無法找到目標容器</string>
+    <string name="activate_failed_list_bucket_error">無法取得容器清單</string>
     <string name="activate_failed_swift_server_auth_error">Swift 伺服器認證失敗</string>
     <string name="activate_failed_save_swift_config">Swift 設定存檔失敗</string>
     <string name="activate_failed_reload_config">重新讀取 HCFS 設定檔失敗</string>
+    <string name="alert_dialog_title_restore_choice">在 Swift 伺服器找到 Tera 容器</string>
+    <string name="set_up_as_new_device">忽略, 設定為新裝置</string>
+    <string name="restore_from_old_bucket">還原舊容器的資料</string>
+    <string name="restore_failed_upon_reload_config">還原失敗: 無法重新讀取設定檔</string>
+    <string name="restore_failed_upon_save_hcfs_config">還原失敗: hcfs 設定存檔失敗</string>
+    <string name="restore_failed_no_backup_selected">還原失敗: 選擇一個備份以進行還原</string>
+    <string name="activate_failed_cannot_create_bucket">啟動失敗: 無法創建 Swift 容器</string>
+    <string name="restore_failed_upon_retrieve_backup">還原失敗: 無法取得備份清單</string>
 
 </resources>

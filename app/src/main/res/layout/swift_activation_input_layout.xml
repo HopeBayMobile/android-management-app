@@ -67,18 +67,6 @@
         android:background="@drawable/transparent_gray_border"
         android:singleLine="true"/>
 
-    <EditText
-        style="@style/F12"
-        android:id="@+id/swift_bucket_name_input"
-        android:inputType="text"
-        android:layout_width="244dp"
-        android:layout_height="36dp"
-        android:gravity="center_vertical"
-        android:padding="10dp"
-        android:hint="@string/activate_swift_hint_bucket_name"
-        android:background="@drawable/transparent_gray_border"
-        android:singleLine="true"/>
-
     <LinearLayout
         android:id="@+id/swift_activate_button"
         android:layout_width="244dp"

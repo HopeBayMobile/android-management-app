@@ -233,7 +233,7 @@
     <string name="restore_content_desc_setup_as_new_device">If you choose \"Setup as a new device\", the previous backup of this device will be removed.</string>
     <string name="restore_content_desc_non_lock_device">If you choose this backup, all the contents will be transferred from the previous device to this one. The previous device will also be factory reset.</string>
     <string name="restore_content_desc_lock_device">This backup belongs to a locked device, so it might contain incomplete contents.</string>
-    <string name="restore_title">Restore or setup as new device</string>
+    <string name="restore_title">Restore</string>
     <string name="restore_item_setup_new_device">Setup as a new devices</string>
     <string name="restore_item_my_tera">Restore from myTera</string>
     <string name="restore_item_backup">Restore from backup</string>
@@ -252,16 +252,15 @@
     <string name="restore_failed">Restore failed.</string>
     <string name="restore_system_reboot">System Reboot</string>
     <string name="restore_notification_title">Restoring Tera</string>
-    <string name="restore_pre_check_out_of_space">Device storage space is not enough. Please delete some apps or files, and then retry again.</string>
     <string name="restore_failed_title">Restoration failed</string>
-    <string name="restore_failed_out_of_space">Device storage space is not enough. Please delete some apps or files, and then restart the device to resume restoration.</string>
+    <string name="restore_failed_out_of_space">No enough space on the device. Uninstall apps or delete files before retry restoration.</string>
     <string name="restore_failed_out_of_space_btn">Exit</string>
     <string name="restore_failed_damaged_backup">Some critical data was not backed up successfully. So, you must do a factory reset and then choose a different backup or set up as a new device.</string>
     <string name="restore_failed_damaged_backup_btn">Factory Reset</string>
     <string name="restore_failed_conn_failed">Possible reasons may be an unstable/interrupted Internet connection, low battery, device issues, etc. If the problem persists, please contact %1$s.</string>
     <string name="restore_failed_conn_failed_btn">Retry</string>
     <string name="restore_failed_contact">Tera customer service</string>
-    <string name="restore_failed_device_in_use">您選擇的備份已經使用中，請選擇其餘備份還原。</string>
+    <string name="restore_failed_device_in_use">Selected backup is already in use, choose another one.</string>
 
     <string name="alert_dialog_title_warning">Alert</string>
 
@@ -377,12 +376,19 @@
     <string name="activate_swift_hint_ip">Server IP</string>
     <string name="activate_swift_hint_key">Key</string>
     <string name="activate_swift_hint_account">Account</string>
-    <string name="activate_swift_hint_bucket_name">Bucket Name</string>
     <string name="layout_title_swift_info">Swift Account Info</string>
     <string name="activate_swift_hint_port">Port</string>
     <string name="activate_failed_reload_config">Failed to reload configuration file</string>
     <string name="activate_failed_save_swift_config">Failed to save swift info to configuration</string>
-    <string name="activate_failed_bucket_error">Failed to retrieve target bucket from swift server</string>
+    <string name="activate_failed_list_bucket_error">Failed to retrieve bucket list from swift server</string>
     <string name="activate_failed_swift_server_auth_error">Failed to auth on swift server</string>
+    <string name="alert_dialog_title_restore_choice">Tera bucket found on the server</string>
+    <string name="set_up_as_new_device">Set up as new device anyway</string>
+    <string name="restore_from_old_bucket">Restore data from old bucket</string>
+    <string name="restore_failed_upon_reload_config">Restoration failed: cannot reload configuration file.</string>
+    <string name="restore_failed_upon_save_hcfs_config">Restoration faild: cannot save swift info into configuration file.</string>
+    <string name="restore_failed_no_backup_selected">Restore failed: no backup is selected for restoration.</string>
+    <string name="activate_failed_cannot_create_bucket">Activation failed: cannot create swift bucket</string>
+    <string name="restore_failed_upon_retrieve_backup">Restoration failed: cannot retrieve backup list</string>
 
 </resources>

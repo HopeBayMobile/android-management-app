@@ -6,41 +6,33 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
-import android.widget.ExpandableListView;
-import android.widget.ImageView;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.hopebaytech.hcfsmgmt.R;
-import com.hopebaytech.hcfsmgmt.info.AuthResultInfo;
+import com.hopebaytech.hcfsmgmt.customview.RestoreListAdapter;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
+import com.hopebaytech.hcfsmgmt.info.SwiftConfigInfo;
 import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
-import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
-import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
+import com.hopebaytech.hcfsmgmt.utils.SwiftServerUtil;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import net.openid.appauth.AuthState;
 
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * @author Aaron
@@ -60,20 +52,13 @@ public class RestoreFragment extends RegisterFragment {
     public static final int RESTORE_TYPE_LOCK_DEVICE = 3;
     public static final int RESTORE_TYPE_NON_LOCK_DEVICE = 4;
 
-    private ExpandableListView mExpandableListView;
+    private RestoreListAdapter mRestoreListAdapter;
+    private ListView mRestoreListView;
     private TextView mBackButton;
     private TextView mNextButton;
-    private TextView mSearchBackup;
 
-    private RestoreListAdapter mRestoreListAdapter;
-    private Checkable mPrevCheckableInfo;
     private Handler mWorkHandler;
     private HandlerThread mHandlerThread;
-
-    private String mJwtToken;
-    private String mAccountEmail;
-    private String mAccountName;
-    private String mPhotoUrl;
 
     private AuthState mGoogleDriveAuthState;
 
@@ -88,12 +73,6 @@ public class RestoreFragment extends RegisterFragment {
         mHandlerThread = new HandlerThread(CLASSNAME);
         mHandlerThread.start();
         mWorkHandler = new Handler(mHandlerThread.getLooper());
-
-        Bundle extras = getArguments();
-        mJwtToken = extras.getString(ActivateWoCodeFragment.KEY_JWT_TOKEN);
-        mAccountEmail = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_EMAIL);
-        mAccountName = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_NAME);
-        mPhotoUrl = extras.getString(ActivateWoCodeFragment.KEY_GOOGLE_PHOTO_URL);
     }
 
     @Nullable
@@ -106,10 +85,9 @@ public class RestoreFragment extends RegisterFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mExpandableListView = (ExpandableListView) view.findViewById(R.id.expanded_list);
+        mRestoreListView = (ListView) view.findViewById(R.id.restore_list);
         mBackButton = (TextView) view.findViewById(R.id.back_btn);
         mNextButton = (TextView) view.findViewById(R.id.next_btn);
-        mSearchBackup = (TextView) view.findViewById(R.id.search_backup);
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
@@ -128,70 +106,27 @@ public class RestoreFragment extends RegisterFragment {
             return;
         }
 
-        mRestoreListAdapter = new RestoreListAdapter(createRestoreList(deviceListInfo));
-        mExpandableListView.setGroupIndicator(null);
-        mExpandableListView.setAdapter(mRestoreListAdapter);
-        mExpandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-            @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                ChildInfo childInfo = (ChildInfo) v.getTag();
-                childInfo.setChecked(true);
-
-                if (mPrevCheckableInfo != null) {
-                    if (mPrevCheckableInfo != childInfo) {
-                        boolean isChecked = mPrevCheckableInfo.isChecked();
-                        mPrevCheckableInfo.setChecked(!isChecked);
-                    }
-                }
-                mRestoreListAdapter.notifyDataSetChanged();
-                mPrevCheckableInfo = childInfo;
-
-                showDialog(childInfo.getRestoreType());
-                return true;
-            }
-        });
-        mExpandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
-            @Override
-            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
-                GroupInfo groupInfo = (GroupInfo) v.getTag();
-                groupInfo.setChecked(true);
-                if (groupInfo.isCheckable()) {
-                    if (mPrevCheckableInfo != null) {
-                        if (mPrevCheckableInfo != groupInfo) {
-                            boolean isChecked = mPrevCheckableInfo.isChecked();
-                            mPrevCheckableInfo.setChecked(!isChecked);
-                        }
-                    }
-                    mRestoreListAdapter.notifyDataSetChanged();
-                    mPrevCheckableInfo = groupInfo;
-
-                    int restoreType = groupInfo.getRestoreType();
-                    if (restoreType != RESTORE_TYPE_MY_TERA) {
-                        showDialog(groupInfo.getRestoreType());
-                    }
-                }
-                return false;
-            }
-        });
+        mRestoreListAdapter = new RestoreListAdapter(getContext(), createRestoreList(deviceListInfo));
+        mRestoreListView.setAdapter(mRestoreListAdapter);
+        mRestoreListView.setOnItemClickListener(restoreListItemClickListener);
 
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mPrevCheckableInfo != null) {
-                    DeviceStatusInfo deviceStatusInfo = mPrevCheckableInfo.getDeviceStatusInfo();
-
-                    // Setup as new device
-                    if (mPrevCheckableInfo instanceof GroupInfo) {
-                        if (deviceStatusInfo == null) {
-                            registerTera();
-                            return;
-                        }
-                    }
-
-                    // Restore from myTera or backups
-                    String sourceImei = deviceStatusInfo.getImei();
-                    restoreDevice(sourceImei);
+                if(mRestoreListAdapter.getNumOfSelectedItems() == 0) {
+                    Logs.w(TAG, "onClick", "No backup is selected for restoration");
+                    informErrorOccurred(R.string.restore_failed_no_backup_selected);
+                    return;
                 }
+
+                if(mRestoreListAdapter.getNumOfSelectedItems() > 1) {
+                    //TODO: Radio button not set up properly
+                    Logs.e(TAG, "onClick", String.format("Radio button not set up properly, %d items are selected", mRestoreListAdapter.getNumOfSelectedItems()));
+                    throw new RuntimeException("Radio button not set up properly");
+                }
+
+                //TODO: should only restore
+                restoreDevice();
             }
         });
 
@@ -201,453 +136,118 @@ public class RestoreFragment extends RegisterFragment {
                 ((AppCompatActivity) mContext).onBackPressed();
             }
         });
+    }
 
-        mSearchBackup.setOnClickListener(new View.OnClickListener() {
+    private AdapterView.OnItemClickListener restoreListItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            for(RestoreListAdapter.ListItem listItem : mRestoreListAdapter.getListItems()) {
+                listItem.setSelected(false);
+            }
+
+            RestoreListAdapter.ListItem selectedItem = ((RestoreListAdapter.ListItem)mRestoreListAdapter.getItem(position));
+            selectedItem.setSelected(true);
+
+            mRestoreListAdapter.notifyDataSetChanged();
+        }
+    };
+
+    private void restoreDevice() {
+        Logs.d(CLASSNAME, "restoreDevice", String.format("sourceImei=%s", HCFSMgmtUtils.getDeviceImei(mContext)));
+        if (mGoogleDriveAuthState != null) {
+            DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(null, mGoogleDriveAuthState.getAccessToken(), "googledrive", null, null);
+            AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mGoogleDriveAuthState);
+            preRestoreSetupForGoogleDrive(deviceServiceInfo);
+        } else {
+            // get swift info from parcel
+            Bundle bundle = getArguments();
+            if (bundle == null) {
+                Logs.e(CLASSNAME, "restoreDevice", "cannot get bundle for swift info");
+                informErrorOccurred(R.string.restore_failed);
+                return;
+            }
+            SwiftConfigInfo swiftConfigInfo = bundle.getParcelable(SwiftConfigInfo.PARCEL_KEY);
+            if (swiftConfigInfo == null) {
+                Logs.e(CLASSNAME, "restoreDevice", "swiftConfigInfo == null");
+                informErrorOccurred(R.string.restore_failed);
+                return;
+            }
+
+            String deviceImei = mRestoreListAdapter.getSelectedItem().getImei();
+            String deviceModel = mRestoreListAdapter.getSelectedItem().getModel();
+            String oldBucketPostfix = String.format("%s_%s", deviceImei, deviceModel);
+
+            String swiftUrl = swiftConfigInfo.getUrl();
+            String swiftAccount = swiftConfigInfo.getAccount();
+            String swiftKey = swiftConfigInfo.getKey();
+            String swiftBucketName = String.format("%s%s", SwiftServerUtil.SWIFT_TERA_BUCKET_PREFIX, oldBucketPostfix);
+
+            preRestoreSetUpForSwift(swiftUrl, swiftAccount, swiftKey, swiftBucketName);
+        }
+
+    }
+
+    private void preRestoreSetUpForSwift(final String swiftUrl,final String swiftAccount,final String swiftKey,final String swiftBucketName) {
+        mWorkHandler.post(new Runnable() {
             @Override
-            public void onClick(View v) {
-                refreshDeviceList(mJwtToken);
+            public void run() {
+                boolean writeToHCFSConfigSucceeded = writeSwiftInfoToHCFSConfig(swiftUrl, swiftAccount, swiftKey, swiftBucketName);
+                if(!writeToHCFSConfigSucceeded) {
+                    informErrorOccurred(R.string.restore_failed_upon_save_hcfs_config);
+                    return;
+                }
+                int code = HCFSMgmtUtils.triggerRestore();
+                if (code == RestoreStatus.Error.OUT_OF_SPACE) {
+                    informErrorOccurred(R.string.restore_failed_out_of_space);
+                    return;
+                }
+                if(code == RestoreStatus.Error.DAMAGED_BACKUP) {
+                    informErrorOccurred(R.string.restore_failed_damaged_backup);
+                    return;
+                }
+                if(code == RestoreStatus.Error.CONN_FAILED) {
+                    informErrorOccurred(R.string.restore_failed_conn_failed);
+                    return;
+                }
+
+                boolean reloadConfigSucceed = TeraCloudConfig.reloadConfig();
+                if (!reloadConfigSucceed) {
+                    informErrorOccurred(R.string.restore_failed_upon_reload_config);
+                    return;
+                }
+
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_IN_PROGRESS);
+                editor.apply();
+
+                TeraAppConfig.enableApp(mContext);
+                replaceWithRestorePreparingFragment();
             }
         });
     }
 
-    private void showDialog(int deviceType) {
-        Bundle args = new Bundle();
-        args.putInt(KEY_RESTORE_TYPE, deviceType);
-
-        RestoreDialogFragment dialogFragment = RestoreDialogFragment.newInstance();
-        dialogFragment.setArguments(args);
-        dialogFragment.show(getFragmentManager(), RestoreDialogFragment.TAG);
-    }
-
-    public class RestoreListAdapter extends BaseExpandableListAdapter {
-
-        private List<GroupInfo> groupList;
-
-        public RestoreListAdapter(List<GroupInfo> groupList) {
-            this.groupList = groupList;
-        }
-
-        public List<GroupInfo> getGroupList() {
-            return groupList;
-        }
-
-        public void setGroupList(List<GroupInfo> groupList) {
-            this.groupList = groupList;
-        }
-
-        @Override
-        public int getGroupCount() {
-            return groupList.size();
-        }
-
-        @Override
-        public int getChildrenCount(int groupPosition) {
-            List<ChildInfo> childList = groupList.get(groupPosition).getChildList();
-            if (childList != null) {
-                return childList.size();
-            }
-            return 0;
-        }
-
-        @Override
-        public Object getGroup(int groupPosition) {
-            return groupList.get(groupPosition);
-        }
-
-        @Override
-        public Object getChild(int groupPosition, int childPosition) {
-            return groupList.get(groupPosition).getChildList().get(childPosition);
-        }
-
-        @Override
-        public long getGroupId(int groupPosition) {
-            return getGroup(groupPosition).hashCode();
-        }
-
-        @Override
-        public long getChildId(int groupPosition, int childPosition) {
-            return getChild(groupPosition, childPosition).hashCode();
-        }
-
-        @Override
-        public boolean hasStableIds() {
-            return true;
-        }
-
-        @Override
-        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-            GroupInfo groupInfo = (GroupInfo) getGroup(groupPosition);
-            if (groupInfo.isCheckable()) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(mContext).inflate(R.layout.restore_group_item_with_radio_btn, null);
-                } else {
-                    if (convertView.findViewById(R.id.radio_btn) == null) {
-                        convertView = LayoutInflater.from(mContext).inflate(R.layout.restore_group_item_with_radio_btn, null);
-                    }
-                }
-                TextView title = (TextView) convertView.findViewById(R.id.title);
-                title.setText(((GroupInfo) getGroup(groupPosition)).getTitle());
-
-                ImageView radioBtn = (ImageView) convertView.findViewById(R.id.radio_btn);
-                if (groupInfo.isChecked()) {
-                    radioBtn.setImageResource(R.drawable.icon_btn_selected);
-                } else {
-                    radioBtn.setImageResource(R.drawable.icon_btn_unselected);
-                }
-            } else {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(mContext).inflate(R.layout.restore_group_item_with_dropdown_arrow, null);
-                } else {
-                    if (convertView.findViewById(R.id.radio_btn) != null) {
-                        convertView = LayoutInflater.from(mContext).inflate(R.layout.restore_group_item_with_dropdown_arrow, null);
-                    }
-                }
-                TextView title = (TextView) convertView.findViewById(R.id.title);
-                title.setText(((GroupInfo) getGroup(groupPosition)).getTitle());
-            }
-            convertView.setTag(groupInfo);
-            return convertView;
-        }
-
-        @Override
-        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-            ChildInfo childInfo = (ChildInfo) getChild(groupPosition, childPosition);
-            if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.restore_child_item, null);
-            }
-
-            TextView model = (TextView) convertView.findViewById(R.id.model);
-            model.setText(childInfo.getModel());
-
-            TextView imei = (TextView) convertView.findViewById(R.id.imei);
-            imei.setText(childInfo.getImei());
-
-            ImageView lockedImg = (ImageView) convertView.findViewById(R.id.locked_img);
-            if (childInfo.getRestoreType() == RESTORE_TYPE_LOCK_DEVICE) {
-                lockedImg.setVisibility(View.VISIBLE);
-            } else {
-                lockedImg.setVisibility(View.GONE);
-            }
-
-            ImageView radioBtn = (ImageView) convertView.findViewById(R.id.radio_btn);
-            if (childInfo.isChecked()) {
-                radioBtn.setImageResource(R.drawable.icon_btn_selected);
-            } else {
-                radioBtn.setImageResource(R.drawable.icon_btn_unselected);
-            }
-
-            convertView.setTag(childInfo);
-            return convertView;
-        }
-
-        @Override
-        public boolean isChildSelectable(int groupPosition, int childPosition) {
-            return true;
-        }
-    }
-
-    private interface Checkable extends DeviceStatusGetterSetter {
-
-        boolean isChecked();
-
-        void setChecked(boolean isChecked);
-
-    }
-
-    private interface DeviceStatusGetterSetter {
-
-        DeviceStatusInfo getDeviceStatusInfo();
-
-        void setDeviceStatusInfo(DeviceStatusInfo deviceStatusInfo);
-
-    }
-
-    private class GroupInfo implements Checkable {
-
-        private String title;
-
-        private boolean isChecked;
-        private boolean isCheckable;
-        private int restoreType;
-
-        private List<ChildInfo> childList;
-
-        private DeviceStatusInfo deviceStatusInfo;
-
-        public void setCheckable(boolean checkable) {
-            isCheckable = checkable;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
-        }
-
-        public List<ChildInfo> getChildList() {
-            return childList;
-        }
-
-        public void setChildList(List<ChildInfo> childList) {
-            this.childList = childList;
-        }
-
-        @Override
-        public boolean isChecked() {
-            return isChecked;
-        }
-
-        @Override
-        public void setChecked(boolean isChecked) {
-            this.isChecked = isChecked;
-        }
-
-        public boolean isCheckable() {
-            return isCheckable;
-        }
-
-        public int getRestoreType() {
-            return restoreType;
-        }
-
-        public void setRestoreType(int restoreType) {
-            this.restoreType = restoreType;
-        }
-
-        @Override
-        public DeviceStatusInfo getDeviceStatusInfo() {
-            return deviceStatusInfo;
-        }
-
-        @Override
-        public void setDeviceStatusInfo(DeviceStatusInfo deviceStatusInfo) {
-            this.deviceStatusInfo = deviceStatusInfo;
-        }
-    }
-
-    public class ChildInfo implements Checkable {
-
-        private boolean isChecked;
-        private int restoreType;
-
-        private DeviceStatusInfo deviceStatusInfo;
-
-        public String getModel() {
-            return deviceStatusInfo.getModel();
-        }
-
-        public String getImei() {
-            return deviceStatusInfo.getImei();
-        }
-
-        @Override
-        public boolean isChecked() {
-            return isChecked;
-        }
-
-        @Override
-        public void setChecked(boolean checked) {
-            isChecked = checked;
-        }
-
-        @Override
-        public DeviceStatusInfo getDeviceStatusInfo() {
-            return deviceStatusInfo;
-        }
-
-        @Override
-        public void setDeviceStatusInfo(DeviceStatusInfo deviceStatusInfo) {
-            this.deviceStatusInfo = deviceStatusInfo;
-        }
-
-        public int getRestoreType() {
-            return restoreType;
-        }
-
-        public void setRestoreType(int restoreType) {
-            this.restoreType = restoreType;
-        }
-    }
-
-    private void registerTera() {
-        if (mGoogleDriveAuthState != null) {
-            mProgressDialogUtils.show(getString(R.string.processing_msg));
-            doRestoreOrRegister(mContext, mGoogleDriveAuthState,
-                    mGoogleDriveAuthState.getAccessToken(), false/* check restoration */);
-            return;
-        }
-
-        if (mJwtToken != null) {
-            registerWithJwtToken(mJwtToken);
-        } else {
-            registerWithoutJwtToken();
-        }
-    }
-
-    private void registerWithJwtToken(final String jwtToken) {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        MgmtCluster.RegisterParam registerParam = new MgmtCluster.RegisterParam(mContext);
-        registerParam.closeOldCloudSpace();
-
-        MgmtCluster.RegisterProxy registerProxy = new MgmtCluster.RegisterProxy(registerParam, jwtToken);
-        registerProxy.setOnRegisterListener(new MgmtCluster.RegisterListener() {
-            @Override
-            public void onRegisterSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                if (!setConfigAndActivate(deviceServiceInfo,
-                        buildAccountInfo(mAccountName, mAccountEmail, mPhotoUrl))) {
-                    /**
-                     * @see ActivateWoCodeFragment#registerTera(MgmtCluster.RegisterParam, String, GoogleSignInAccount)
-                     * need call signOut() here?
-                     */
-                }
-            }
-
-            @Override
-            public void onRegisterFailed(DeviceServiceInfo deviceServiceInfo) {
-                Logs.e(CLASSNAME, "registerWithJwtToken", "onRegisterFailed",
-                        "deviceServiceInfo=" + deviceServiceInfo);
-
-                CharSequence errorMessage = mContext.getText(R.string.activate_failed);
-                if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    mProgressDialogUtils.dismiss();
-                    if (deviceServiceInfo.getErrorCode().equals(MgmtCluster.ErrorCode.IMEI_NOT_FOUND)) {
-                        Bundle bundle = new Bundle();
-                        bundle.putInt(ActivateWoCodeFragment.KEY_AUTH_TYPE, MgmtCluster.GOOGLE_AUTH);
-                        bundle.putString(ActivateWoCodeFragment.KEY_USERNAME, mAccountEmail);
-                        bundle.putString(ActivateWoCodeFragment.KEY_JWT_TOKEN, jwtToken);
-
-                        ActivateWithCodeFragment fragment = ActivateWithCodeFragment.newInstance();
-                        fragment.setArguments(bundle);
-
-                        Logs.d(CLASSNAME, "onRegisterFailed", "Replace with ActivateWithCodeFragment");
-                        FragmentTransaction ft = getFragmentManager().beginTransaction();
-                        ft.replace(R.id.fragment_container, fragment);
-                        ft.commitAllowingStateLoss();
-                        return;
-                    }
-                    errorMessage = MgmtCluster.ErrorCode.getErrorMessage(mContext, deviceServiceInfo.getErrorCode());
-                    mErrorMessage.setText(errorMessage);
-                } else if (deviceServiceInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
-                    registerWithoutJwtToken();
-                } else {
-                    mErrorMessage.setText(errorMessage);
-                }
-            }
-
-        });
-        registerProxy.register();
-    }
-
-    /**
-     * Without jwtToken, register Tera with jwtToken from authenticating with Google to get
-     * serverAuthCode and then authenticating with mgmt server to get jwtToken.
-     */
-    private void registerWithoutJwtToken() {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        String serverClientId = MgmtCluster.getServerClientId();
-        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
-                new GoogleSilentAuthProxy.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                        GoogleSignInAccount acct = result.getSignInAccount();
-                        if (acct == null) {
-                            registerWithoutJwtToken();
-                            return;
-                        }
-                        String serverAuthCode = acct.getServerAuthCode();
-                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
-                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                            @Override
-                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                                String jwtToken = authResultInfo.getToken();
-                                registerWithJwtToken(jwtToken);
-                            }
-
-                            @Override
-                            public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                Logs.e(CLASSNAME, "registerWithoutJwtToken", "onAuthFailed",
-                                        "authResultInfo=" + authResultInfo);
-                                int responseCode = authResultInfo.getResponseCode();
-                                if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-                                    registerWithoutJwtToken();
-                                } else {
-                                    mErrorMessage.setText(R.string.activate_failed);
-                                }
-                            }
-                        });
-                        authProxy.auth();
-                    }
-
-                    @Override
-                    public void onAuthFailed(GoogleSignInResult result) {
-                        Logs.e(CLASSNAME, "registerWithoutJwtToken",
-                                "onAuthFailed", "result=" + result);
-                        if (result != null) {
-                            String email = null;
-                            String status = result.getStatus().toString();
-                            GoogleSignInAccount account = result.getSignInAccount();
-                            if (account != null) {
-                                email = account.getEmail();
-                            }
-                            Logs.e(CLASSNAME, "registerWithoutJwtToken",
-                                    "onAuthFailed",
-                                    "email=" + email + ", status=" + status);
-                        }
-                        mProgressDialogUtils.dismiss();
-                    }
-
-                });
-        googleAuthProxy.auth();
-    }
-
-    private boolean restoreDeviceFromGoogleDrive() {
-        if (mGoogleDriveAuthState != null) {
-            DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(
-                    null, mGoogleDriveAuthState.getAccessToken(), "googledrive", null, null);
-            new AppAuthUtils().saveAppAuthStatusToSharedPreference(mContext, mGoogleDriveAuthState);
-            preRestoreSetup(deviceServiceInfo);
-            return true;
-        }
-        return false;
-    }
-
-    private void restoreDevice(String sourceImei) {
-        Logs.d(CLASSNAME, "restoreDevice", "sourceImei=" + sourceImei);
-        if (restoreDeviceFromGoogleDrive()) {
-            return;
-        }
-        if (mJwtToken != null) {
-            restoreDeviceWithJwtToken(mJwtToken, sourceImei);
-        } else {
-            restoreDeviceWithoutJwtToken(sourceImei);
-        }
-
-    }
-
-    private void preRestoreSetup(final DeviceServiceInfo deviceServiceInfo) {
+    private void preRestoreSetupForGoogleDrive(final DeviceServiceInfo deviceServiceInfo) {
         mWorkHandler.post(new Runnable() {
             @Override
             public void run() {
                 TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
                 int code = HCFSMgmtUtils.triggerRestore();
                 if (code == RestoreStatus.Error.OUT_OF_SPACE) {
-                    mUiHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mErrorMessage.setText(R.string.restore_pre_check_out_of_space);
-                            mProgressDialogUtils.dismiss();
-                        }
-                    });
+                    informErrorOccurred(R.string.restore_failed_out_of_space);
                     return;
                 }
+                if(code == RestoreStatus.Error.DAMAGED_BACKUP) {
+                    informErrorOccurred(R.string.restore_failed_damaged_backup);
+                    return;
+                }
+                if(code == RestoreStatus.Error.CONN_FAILED) {
+                    informErrorOccurred(R.string.restore_failed_conn_failed);
+                    return;
+                }
+
                 TeraCloudConfig.reloadConfig();
-                HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
-                        deviceServiceInfo.getBackend().getToken());
+                HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(), deviceServiceInfo.getBackend().getToken());
 
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -662,109 +262,24 @@ public class RestoreFragment extends RegisterFragment {
         });
     }
 
-    private void restoreDeviceWithJwtToken(final String jwtToken, final String sourceImei) {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        String currentImei = HCFSMgmtUtils.getDeviceImei(mContext);
-        MgmtCluster.SwitchDeviceBackendParam param =
-                new MgmtCluster.SwitchDeviceBackendParam(mContext);
-        param.setSourceImei(sourceImei);
-        MgmtCluster.SwitchDeviceBackendProxy proxy =
-                new MgmtCluster.SwitchDeviceBackendProxy(param, currentImei, jwtToken);
-        proxy.setOnSwitchDeviceBackendListener(new MgmtCluster.SwitchDeviceBackendProxy.
-                OnSwitchDeviceBackendListener() {
+    private void informErrorOccurred(final String errorMsg) {
+        mUiHandler.post(new Runnable() {
             @Override
-            public void onSwitchSuccessful(final DeviceServiceInfo deviceServiceInfo) {
-                Logs.d(CLASSNAME, "restoreDeviceWithJwtToken", "onSwitchSuccessful", "deviceServiceInfo=" + deviceServiceInfo);
-                preRestoreSetup(deviceServiceInfo);
-            }
-
-            @Override
-            public void onSwitchFailed(DeviceServiceInfo deviceServiceInfo) {
+            public void run() {
+                mErrorMessage.setText(errorMsg);
                 mProgressDialogUtils.dismiss();
-
-                if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                    // Jwt token is expired
-                    restoreDeviceWithoutJwtToken(sourceImei);
-                } else if (deviceServiceInfo.getResponseCode() == HttpURLConnection.HTTP_BAD_REQUEST) {
-                    // If restore failed due to out of space, user choose another backup but not allow
-                    // to restore due to mapping error.
-                    mErrorMessage.setText(R.string.restore_failed_device_in_use);
-                } else {
-                    mErrorMessage.setText(R.string.restore_failed);
-                }
             }
         });
-        proxy.switchBackend();
     }
 
-    /**
-     * Without jwtToken, switch device backend with jwtToken from authenticating with Google to get
-     * serverAuthCode and then authenticating with mgmt server to get jwtToken.
-     */
-    private void restoreDeviceWithoutJwtToken(final String sourceImei) {
-        mProgressDialogUtils.show(getString(R.string.processing_msg));
-
-        String serverClientId = MgmtCluster.getServerClientId();
-        GoogleSilentAuthProxy googleAuthProxy = new GoogleSilentAuthProxy(mContext, serverClientId,
-                new GoogleSilentAuthProxy.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                        GoogleSignInAccount acct = result.getSignInAccount();
-                        if (acct == null) {
-                            restoreDeviceWithoutJwtToken(sourceImei);
-                            return;
-                        }
-                        String serverAuthCode = acct.getServerAuthCode();
-                        MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
-                        MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                        authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                            @Override
-                            public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                                mProgressDialogUtils.dismiss();
-
-                                String jwtToken = authResultInfo.getToken();
-                                restoreDeviceWithJwtToken(jwtToken, sourceImei);
-                            }
-
-                            @Override
-                            public void onAuthFailed(AuthResultInfo authResultInfo) {
-                                Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken", "onAuthFailed",
-                                        "authResultInfo=" + authResultInfo);
-                                mProgressDialogUtils.dismiss();
-
-                                int responseCode = authResultInfo.getResponseCode();
-                                if (responseCode == HttpURLConnection.HTTP_FORBIDDEN) {
-                                    restoreDeviceWithoutJwtToken(sourceImei);
-                                } else {
-                                    mErrorMessage.setText(R.string.restore_failed);
-                                }
-                            }
-                        });
-                        authProxy.auth();
-                    }
-
-                    @Override
-                    public void onAuthFailed(GoogleSignInResult result) {
-                        Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken",
-                                "onAuthFailed",
-                                "result=" + result);
-                        if (result != null) {
-                            String email = null;
-                            String status = result.getStatus().toString();
-                            GoogleSignInAccount account = result.getSignInAccount();
-                            if (account != null) {
-                                email = account.getEmail();
-                            }
-                            Logs.e(CLASSNAME, "restoreDeviceWithoutJwtToken",
-                                    "onAuthFailed",
-                                    "email=" + email + ", status=" + status);
-                        }
-                        mProgressDialogUtils.dismiss();
-                    }
-
-                });
-        googleAuthProxy.auth();
+    private void informErrorOccurred(final int errorMsgId) {
+        mUiHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mErrorMessage.setText(errorMsgId);
+                mProgressDialogUtils.dismiss();
+            }
+        });
     }
 
     @Override
@@ -776,142 +291,14 @@ public class RestoreFragment extends RegisterFragment {
         }
     }
 
-    private void refreshDeviceList(String jwtToken) {
-        mProgressDialogUtils.show(R.string.processing_msg);
-        if (jwtToken == null) {
-            refreshDeviceListWithoutJwtToken();
-        } else {
-            refreshDeviceListWithJwtToken(jwtToken);
+    private List<RestoreListAdapter.ListItem> createRestoreList(DeviceListInfo deviceListInfo) {
+        List<RestoreListAdapter.ListItem> restoreListItems = new ArrayList<>();
+
+        for (DeviceStatusInfo deviceStatusInfo : deviceListInfo.getDeviceStatusInfoList()) {
+            restoreListItems.add(new RestoreListAdapter.ListItem(deviceStatusInfo));
         }
-    }
 
-    private void refreshDeviceListWithJwtToken(final String jwtToken) {
-        String imei = HCFSMgmtUtils.getDeviceImei(mContext);
-        MgmtCluster.GetDeviceListProxy proxy = new MgmtCluster.GetDeviceListProxy(jwtToken, imei);
-        proxy.setOnGetDeviceListListener(new MgmtCluster.GetDeviceListProxy.OnGetDeviceListListener() {
-            @Override
-            public void onGetDeviceListSuccessful(DeviceListInfo deviceListInfo) {
-                Logs.d(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListSuccessful",
-                        "deviceListInfo=" + deviceListInfo);
-
-                // No any device backup can be restored, directly register to Tera
-                if (deviceListInfo.getDeviceStatusInfoList().size() == 0) {
-                    Logs.d(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListSuccessful",
-                            "No any device backup can be restored, directly register to Tera");
-                    deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_NONE);
-                }
-
-                mRestoreListAdapter.setGroupList(createRestoreList(deviceListInfo));
-                mRestoreListAdapter.notifyDataSetChanged();
-
-                mProgressDialogUtils.dismiss();
-            }
-
-            @Override
-            public void onGetDeviceListFailed(DeviceListInfo deviceListInfo) {
-                Logs.e(CLASSNAME, "refreshDeviceListWithJwtToken", "onGetDeviceListFailed",
-                        "deviceListInfo=" + deviceListInfo);
-
-                if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_BAD_REQUEST) {
-                    mErrorMessage.setText(R.string.activate_failed_device_in_use);
-                    mProgressDialogUtils.dismiss();
-                } else if (deviceListInfo.getResponseCode() == HttpsURLConnection.HTTP_FORBIDDEN) {
-                    refreshDeviceListWithoutJwtToken();
-                } else {
-                    mErrorMessage.setText(R.string.activate_auth_failed);
-                    mProgressDialogUtils.dismiss();
-                }
-            }
-        });
-        proxy.get();
-    }
-
-    private void refreshDeviceListWithoutJwtToken() {
-        String serverClientId = MgmtCluster.getServerClientId();
-        GoogleSilentAuthProxy proxy = new GoogleSilentAuthProxy(mContext, serverClientId, new GoogleSilentAuthProxy.OnAuthListener() {
-            @Override
-            public void onAuthSuccessful(GoogleSignInResult result, GoogleApiClient googleApiClient) {
-                String serverAuthCode = result.getSignInAccount().getServerAuthCode();
-                MgmtCluster.GoogleAuthParam authParam = new MgmtCluster.GoogleAuthParam(serverAuthCode);
-                MgmtCluster.AuthProxy authProxy = new MgmtCluster.AuthProxy(authParam);
-                authProxy.setOnAuthListener(new MgmtCluster.OnAuthListener() {
-                    @Override
-                    public void onAuthSuccessful(AuthResultInfo authResultInfo) {
-                        String jwtToken = authResultInfo.getToken();
-                        refreshDeviceListWithJwtToken(jwtToken);
-                    }
-
-                    @Override
-                    public void onAuthFailed(AuthResultInfo authResultInfo) {
-                        Logs.d(CLASSNAME, "GoogleSilentAuthProxy", "onAuthFailed", "authResultInfo=" + authResultInfo.toString());
-                        if (authResultInfo.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN) {
-                            refreshDeviceListWithoutJwtToken();
-                        } else {
-                            mErrorMessage.setText(R.string.activate_auth_failed);
-                        }
-                    }
-                });
-                authProxy.auth();
-            }
-
-            @Override
-            public void onAuthFailed(GoogleSignInResult result) {
-                Logs.e(CLASSNAME, "refreshDeviceListWithoutJwtToken",
-                        "onAuthFailed", "result=" + result);
-                if (result != null) {
-                    String email = null;
-                    String status = result.getStatus().toString();
-                    GoogleSignInAccount account = result.getSignInAccount();
-                    if (account != null) {
-                        email = account.getEmail();
-                    }
-                    Logs.e(CLASSNAME, "refreshDeviceListWithoutJwtToken",
-                            "onAuthFailed",
-                            "email=" + email + ", status=" + status);
-                }
-            }
-        });
-        proxy.auth();
-    }
-
-
-    private List<GroupInfo> createRestoreList(DeviceListInfo deviceListInfo) {
-        List<GroupInfo> groupList = new ArrayList<>();
-        GroupInfo setupNewDevice = new GroupInfo();
-        setupNewDevice.setCheckable(true);
-        setupNewDevice.setTitle(getString(R.string.restore_item_setup_new_device));
-        setupNewDevice.setRestoreType(RESTORE_TYPE_NEW_DEVICE);
-        groupList.add(setupNewDevice);
-
-        if (deviceListInfo.getType() == DeviceListInfo.TYPE_RESTORE_FROM_MY_TERA) {
-            GroupInfo restoreFromMyTera = new GroupInfo();
-            restoreFromMyTera.setCheckable(true);
-            restoreFromMyTera.setTitle(getString(R.string.restore_item_my_tera));
-            restoreFromMyTera.setRestoreType(RESTORE_TYPE_MY_TERA);
-            restoreFromMyTera.setDeviceStatusInfo(deviceListInfo.getDeviceStatusInfoList().get(0));
-            groupList.add(restoreFromMyTera);
-        } else if (deviceListInfo.getType() == DeviceListInfo.TYPE_RESTORE_FROM_BACKUP) {
-            List<ChildInfo> childList = new ArrayList<>();
-            List<DeviceStatusInfo> deviceStatusInfoList = deviceListInfo.getDeviceStatusInfoList();
-            for (DeviceStatusInfo info : deviceStatusInfoList) {
-                ChildInfo childInfo = new ChildInfo();
-                childInfo.setDeviceStatusInfo(info);
-                if (info.getServiceStatus().equals(MgmtCluster.ServiceState.DISABLED)) { // locked state
-                    childInfo.setRestoreType(RESTORE_TYPE_LOCK_DEVICE);
-                } else {
-                    childInfo.setRestoreType(RESTORE_TYPE_NON_LOCK_DEVICE);
-                }
-                childList.add(childInfo);
-            }
-
-            GroupInfo restoreFromBackup = new GroupInfo();
-            restoreFromBackup.setCheckable(false);
-            restoreFromBackup.setTitle(getString(R.string.restore_item_backup));
-            restoreFromBackup.setChildList(childList);
-
-            groupList.add(restoreFromBackup);
-        }
-        return groupList;
+        return restoreListItems;
     }
 
     public void setGoogleDriveAuthState(AuthState authState) {

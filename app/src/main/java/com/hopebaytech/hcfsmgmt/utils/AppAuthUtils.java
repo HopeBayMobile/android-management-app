@@ -31,10 +31,10 @@ import java.lang.reflect.Type;
 
 public class AppAuthUtils {
 
-    public final String AUTH_STATUS_PERF_NAME = "RondouIsDangerous";
+    public static final String AUTH_STATUS_PERF_NAME = "RondouIsDangerous";
     public static final String AUTH_STATUS_PERF_KEYS = "mAuthStateKey";
 
-    private class UriSerializer implements JsonSerializer<Uri> {
+    private static class UriSerializer implements JsonSerializer<Uri> {
         public JsonElement serialize(Uri src, Type typeOfSrc, JsonSerializationContext context) {
             return new JsonPrimitive(src.toString());
         }
@@ -63,7 +63,7 @@ public class AppAuthUtils {
         return null;
     }
 
-    public void saveObjectToSharedPreference(Context context, String preferenceName, String serializedObjectKey, Object object) {
+    public static void saveObjectToSharedPreference(Context context, String preferenceName, String serializedObjectKey, Object object) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(preferenceName, 0);
         SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
         final Gson gson = new GsonBuilder()
@@ -74,7 +74,7 @@ public class AppAuthUtils {
         sharedPreferencesEditor.apply();
     }
 
-    public void saveAppAuthStatusToSharedPreference(Context context, Object object) {
+    public static void saveAppAuthStatusToSharedPreference(Context context, Object object) {
         saveObjectToSharedPreference(context, AUTH_STATUS_PERF_NAME, AUTH_STATUS_PERF_KEYS, object);
         Settings.Global.putInt(context.getContentResolver(),
                 AppAuthUtils.AUTH_STATUS_PERF_KEYS, 1);
