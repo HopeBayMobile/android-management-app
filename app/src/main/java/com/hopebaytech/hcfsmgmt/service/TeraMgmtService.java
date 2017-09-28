@@ -65,6 +65,7 @@ import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
+import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MessageDialog;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -77,7 +78,6 @@ import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 import com.hopebaytech.hcfsmgmt.utils.UiHandler;
-import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -110,6 +110,14 @@ public class TeraMgmtService extends Service {
     private BoosterWhiteListDAO mBoosterWhiteListDAO;
     private Context mContext;
 
+    private Handler mHandler = new Handler();
+    private Runnable mRefreshAccessToken = new Runnable() {
+        @Override
+        public void run() {
+            setAccessTokenViaAppAuth();
+        }
+    };
+
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -132,6 +140,8 @@ public class TeraMgmtService extends Service {
         mSettingsDAO = SettingsDAO.getInstance(this);
         mBoosterWhiteListVersionDAO = BoosterWhiteListVersionDAO.getInstance(this);
         mBoosterWhiteListDAO = BoosterWhiteListDAO.getInstance(this);
+
+        setAccessTokenViaAppAuth();
     }
 
     @Override
@@ -1391,12 +1401,11 @@ public class TeraMgmtService extends Service {
     }
 
     private void setAccessTokenViaAppAuth() {
-        AppAuthUtils appAuthUtils = new AppAuthUtils();
-        AuthState authState = appAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
-
-        Logs.d(CLASSNAME, "onTokenExpire", "getAuthStateViaSharePreference" + authState);
-        if (authState != null) {
-            appAuthUtils.resetAccessTokeToHCFS(mContext, authState);
+        long expirationTime = AppAuthUtils.refreshAccessToken(getApplicationContext());
+        if (expirationTime != -1) {
+            long delay = expirationTime - AppAuthUtils.THRESHOLD_REFRESH_ACCESS_TOKEN;
+            mHandler.removeCallbacks(mRefreshAccessToken);
+            mHandler.postDelayed(mRefreshAccessToken, delay);
         }
     }
 
