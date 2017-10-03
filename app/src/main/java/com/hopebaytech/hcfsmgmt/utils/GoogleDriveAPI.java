@@ -1,10 +1,14 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
+
+import net.openid.appauth.AuthState;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -68,11 +72,9 @@ public class GoogleDriveAPI {
         return headers;
     }
 
-    public static boolean isCanRestore(JSONArray items) throws IOException, JSONException {
-        if (items.length() > 0) {
-            return true;
-        }
-        return false;
+    public static boolean hasTeraFolderItem(Context context, @NonNull AuthState authState) throws IOException, JSONException {
+        JSONArray teraFolderItems = GoogleDriveAPI.getTeraFolderItems(authState.getAccessToken(), HCFSMgmtUtils.getDeviceImei(context));
+        return teraFolderItems.length() > 0;
     }
 
     public static String getTeraFolderId(JSONArray items) throws IOException, JSONException {
