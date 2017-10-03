@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
@@ -21,6 +21,7 @@ import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.HttpUtil;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
@@ -94,81 +95,69 @@ public class RegisterFragment extends Fragment {
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
-    protected void doRestoreOrRegister(final Context context,
-            final @NonNull AuthState authState, final @NonNull String token,
-            final boolean checkRestoration) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String imei = HCFSMgmtUtils.getDeviceImei(context);
-                    JSONArray items = GoogleDriveAPI.getTeraFolderItems(token, imei);
-
-                    if (checkRestoration && GoogleDriveAPI.isCanRestore(items)) {
-                        // Do Restore Here
-                        Bundle args = new Bundle();
-                        args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, GoogleDriveAPI.buildDeviceListInfo(imei));
-                        replaceWithRestoreFragment(args, authState);
-                    } else {
-                        GoogleDriveAPI.deleteFile(token, GoogleDriveAPI.getTeraFolderId(items));
-                        registerTeraByGoogleDrive(authState, token);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-    }
-
-    protected void registerTeraByGoogleDrive(AuthState authState, String token) {
+    protected boolean deleteTeraFolderOnGoogleDrive(Context context, AuthState authState) {
+        String token = authState.getAccessToken();
+        String imei = HCFSMgmtUtils.getDeviceImei(context);
         try {
-            JSONObject userInfo = GoogleDriveAPI.getUserInfo(token);
-            final String name = userInfo.optString("name", null);
-            final String email = userInfo.optString("email", null);
-            final String photoUrl = userInfo.optString("picture", null);
-            final DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(
-                    null,
-                    token,
-                    "googledrive",
-                    null,
-                    email
-            );
+            JSONArray items = GoogleDriveAPI.getTeraFolderItems(token, imei);
+            HttpUtil.HttpResponse response = GoogleDriveAPI.deleteFile(token, GoogleDriveAPI.getTeraFolderId(items));
+            return response.getCode() == 200;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-            if (setConfigAndActivate(deviceServiceInfo, buildAccountInfo(name, email, photoUrl))) {
-                AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, authState);
-            }
-        } catch (Exception exception) {
+        return false;
+    }
+
+    protected boolean setGoogleDriveInfoToHcfsConfig(AuthState authState) {
+        JSONObject userInfo;
+        try {
+            userInfo = GoogleDriveAPI.getUserInfo(authState.getAccessToken());
+        }catch (Exception exception) {
             Logs.e(TAG, "registerTeraByGoogleDrive", Log.getStackTraceString(exception));
-        }
-    }
-
-    protected boolean setConfigAndActivate(DeviceServiceInfo deviceServiceInfo, Bundle args) {
-        boolean isSuccess = TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
-        if (isSuccess) {
-            saveAccountInfo(args);
-            TeraAppConfig.enableApp(mContext);
-            TeraCloudConfig.activateTeraCloud(mContext);
-            HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(),
-                    deviceServiceInfo.getBackend().getToken());
-            replaceWithMainFragment(args);
-        } else {
-            TeraCloudConfig.resetHCFSConfig();
-
-            mUiHandler.sendEmptyMessage(ACTIVATE_FAILED);
+            return false;
         }
 
-        return isSuccess;
+        final String email = userInfo.optString("email", null);
+        final DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(null, authState.getAccessToken(), "googledrive", null, email);
+
+        return TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
     }
 
-    protected Bundle buildAccountInfo(String name, String email, String photoUrl) {
-        Bundle args = new Bundle();
-        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
-        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
-        args.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
-        return args;
+    protected DeviceServiceInfo buildDeviceServiceInfo(AuthState authState) {
+        JSONObject userInfo;
+        try {
+            userInfo = GoogleDriveAPI.getUserInfo(authState.getAccessToken());
+        }catch (Exception exception) {
+            Logs.e(TAG, "registerTeraByGoogleDrive", Log.getStackTraceString(exception));
+            return null;
+        }
+
+        final String email = userInfo.optString("email", null);
+        return GoogleDriveAPI.buildDeviceServiceInfo(null, authState.getAccessToken(), "googledrive", null, email);
     }
 
-    private void saveAccountInfo(Bundle args) {
+    protected Bundle buildAccountInfoBundle(AuthState authState) {
+        JSONObject userInfo;
+        try {
+            userInfo = GoogleDriveAPI.getUserInfo(authState.getAccessToken());
+        }catch (Exception exception) {
+            Logs.e(TAG, "registerTeraByGoogleDrive", Log.getStackTraceString(exception));
+            return null;
+        }
+
+        final String name = userInfo.optString("name", null);
+        final String email = userInfo.optString("email", null);
+        final String photoUrl = userInfo.optString("picture", null);
+
+        Bundle bundle = new Bundle();
+        bundle.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME, name);
+        bundle.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL, email);
+        bundle.putString(TeraIntent.KEY_GOOGLE_SIGN_IN_PHOTO_URI, photoUrl);
+        return bundle;
+    }
+
+    protected boolean saveAccountInfo(Bundle args) {
         AccountInfo accountInfo = new AccountInfo();
         accountInfo.setName(args.getString(TeraIntent.KEY_GOOGLE_SIGN_IN_DISPLAY_NAME));
         accountInfo.setEmail(args.getString(TeraIntent.KEY_GOOGLE_SIGN_IN_EMAIL));
@@ -176,7 +165,7 @@ public class RegisterFragment extends Fragment {
 
         AccountDAO accountDAO = AccountDAO.getInstance(mContext);
         accountDAO.clear();
-        accountDAO.insert(accountInfo);
+        return accountDAO.insert(accountInfo);
     }
 
     protected void replaceWithMainFragment(Bundle args) {
@@ -220,7 +209,7 @@ public class RegisterFragment extends Fragment {
         mUiHandler.sendEmptyMessage(DISMISS_PROGRESS_DIALOG);
     }
 
-    protected boolean writeSwiftInfoToHCFSConfig(String url, String account, String key, String bucketName) {
+    public static boolean writeSwiftInfoToHCFSConfig(String url, String account, String key, String bucketName) {
         String storageAccount = account.split(":")[0];
         String accessKeyId = account.split(":")[1];
 
@@ -235,7 +224,7 @@ public class RegisterFragment extends Fragment {
         return writeToHCFSConfig(swiftConfigs);
     }
 
-    protected boolean writeToHCFSConfig(Map<String, String> configs) {
+    public static boolean writeToHCFSConfig(Map<String, String> configs) {
         boolean success = true;
         for (String key : configs.keySet()) {
             success |= TeraCloudConfig.setHCFSConfig(key, configs.get(key));

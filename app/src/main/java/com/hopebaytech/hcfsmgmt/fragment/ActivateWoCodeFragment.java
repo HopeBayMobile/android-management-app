@@ -3,7 +3,6 @@ package com.hopebaytech.hcfsmgmt.fragment;
 import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,8 +42,11 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
+import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.SwiftConfigInfo;
+import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
@@ -53,7 +55,6 @@ import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 import com.hopebaytech.hcfsmgmt.utils.SwiftServerUtil;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
-import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -63,11 +64,9 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.TokenResponse;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * @author Aaron
@@ -189,8 +188,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                         mContext.startActivity(intent);
                     } else {
                         mErrorMessage.setText(R.string.activate_alert_dialog_message);
-                        return;
                     }
+                    return;
                 }
 
                 appAuthorization(v);
@@ -288,6 +287,126 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         });
     }
 
+    private class GoogleDriveActivationTask extends AsyncTask<AuthState, Void, Boolean> {
+        AuthState authState;
+
+        @Override
+        protected Boolean doInBackground(AuthState... params) {
+            authState = params[0];
+            try {
+                return GoogleDriveAPI.hasTeraFolderItem(mContext, authState);
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        protected void onPostExecute(Boolean hasTeraFolderOnGoogleDrive) {
+            if(!hasTeraFolderOnGoogleDrive) {
+                setUpAsNewDevice();
+            } else {
+                showRestoreChoiceDialog();
+            }
+        }
+
+        private AlertDialog showRestoreChoiceDialog() {
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+            dialogBuilder
+                    .setTitle(R.string.alert_dialog_title_google_drive_restore_choice)
+                    .setItems(R.array.restore_choice, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int choiceIndex) {
+                            switch(choiceIndex) {
+                                case 0:
+                                    mProgressDialogUtils.show(R.string.processing_msg);
+                                    setUpAsNewDevice();
+                                    break;
+                                case 1:
+                                    mProgressDialogUtils.show(R.string.processing_msg);
+                                    handleRestoration();
+                                    break;
+                                default:
+                                    throw new RuntimeException("Implementation Error");
+                            }
+                        }
+                    });
+
+            return dialogBuilder.show();
+        }
+
+        private void setUpAsNewDevice() {
+            new ActivateAsNewDeviceViaGoogleDriveTask().execute(authState);
+        }
+
+        private void handleRestoration() {
+            Bundle args = new Bundle();
+            args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, GoogleDriveAPI.buildDeviceListInfo(HCFSMgmtUtils.getDeviceImei(mContext)));
+            replaceWithRestoreFragment(args, authState);
+        }
+    }
+
+    private class ActivateAsNewDeviceViaGoogleDriveTask extends AsyncTask<AuthState, Void, Boolean> {
+        AuthState authState;
+        Bundle accountInfo;
+
+        @Override
+        protected Boolean doInBackground(AuthState... params) {
+            authState = params[0];
+
+            deleteTeraFolderOnGoogleDrive(mContext, authState);
+
+            DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(authState);
+            if(deviceServiceInfo == null) {
+                Logs.e(TAG, "doInBackground", "Failed to build device service info"); //TODO: extract
+                return false;
+            }
+
+            AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, authState);
+            boolean saveAuthStatusToSharedPreferenceSucceeded = setGoogleDriveInfoToHcfsConfig(authState);
+            if (!saveAuthStatusToSharedPreferenceSucceeded) {
+                Logs.e(TAG, "doInBackground", "Failed to save AuthStatus to shared preference"); //TODO: extract
+                return false;
+            }
+
+            boolean writeToHCFSConfigSucceeded = setGoogleDriveInfoToHcfsConfig(authState);
+            if (!writeToHCFSConfigSucceeded) {
+                Logs.e(TAG, "doInBackground", "Failed to write google drive info to HCFS config"); //TODO: extract
+                return false;
+            }
+
+            accountInfo = buildAccountInfoBundle(authState);
+            if (accountInfo == null) {
+                Logs.e(TAG, "doInBackground", "Failed to build account info"); //TODO: extract
+                return false;
+            }
+
+            boolean saveAccountInfoSucceeded = saveAccountInfo(accountInfo);
+            if (!saveAccountInfoSucceeded) {
+                Logs.e(TAG, "doInBackground", "Failed to save account info"); //TODO: extract
+                return false;
+            }
+
+            boolean setTokenSucceeded = HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(), deviceServiceInfo.getBackend().getToken());
+            if (!setTokenSucceeded) {
+                Logs.e(TAG, "doInBackground", "Failed to set goolge drive token"); //TODO: extract
+                return false;
+            }
+
+            return true;
+        }
+
+        protected void onPostExecute(Boolean setUpSucceeded) {
+            if(setUpSucceeded) {
+                TeraAppConfig.enableApp(mContext);
+                TeraCloudConfig.activateTeraCloud(mContext);
+                replaceWithMainFragment(accountInfo);
+            } else {
+                TeraCloudConfig.resetHCFSConfig();
+                mUiHandler.sendEmptyMessage(ACTIVATE_FAILED);
+                mProgressDialogUtils.dismiss();
+            }
+        }
+    }
+
     private class SwiftActivationTask extends AsyncTask<String, Void, Boolean> {
         public final String TAG = SwiftActivationTask.class.getSimpleName();
         private String swiftIp;
@@ -326,7 +445,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         private AlertDialog showRestoreChoiceDialog() {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
             dialogBuilder
-                    .setTitle(R.string.alert_dialog_title_restore_choice)
+                    .setTitle(R.string.alert_dialog_title_swift_restore_choice)
                     .setItems(R.array.restore_choice, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int choiceIndex) {
                             switch(choiceIndex) {
@@ -348,7 +467,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
 
         private void setUpAsNewDevice() {
-            new ActivateAsNewDeviceTask().execute(swiftIp, swiftPort, swiftAccount, swiftKey);
+            new ActivateAsNewDeviceViaSwiftTask().execute(swiftIp, swiftPort, swiftAccount, swiftKey);
         }
 
         private void handleRestoration() {
@@ -405,14 +524,12 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
     }
 
-    private class ActivateAsNewDeviceTask extends AsyncTask<String, Void, Boolean> {
+    private class ActivateAsNewDeviceViaSwiftTask extends AsyncTask<String, Void, Boolean> {
         private String swiftIp;
         private String swiftPort;
         private String swiftAccount;
         private String swiftKey;
         private String swiftUrl;
-        //private String swiftStorageAccount;
-        //private String swiftAccessKeyId;
 
         @Override
         protected Boolean doInBackground(String... params) {
@@ -421,8 +538,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             swiftAccount = params[2];
             swiftKey = params[3];
             swiftUrl = String.format("%s:%s", swiftIp, swiftPort);
-            //swiftStorageAccount = swiftAccount.split(":")[0];
-            //swiftAccessKeyId = swiftAccount.split(":")[1];
 
             String deviceImei = HCFSMgmtUtils.getDeviceImei(mContext);
             String deviceModel = Build.MODEL == null? "UnknownModel" : Build.MODEL.replaceAll(" ", "");
@@ -640,18 +755,23 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                                                         @Nullable AuthorizationException exception) {
                         if (exception != null) {
                             exception.printStackTrace();
-                        } else if (tokenResponse != null) {
-                            AuthState authState = new AuthState(response,
-                                    AuthorizationException.fromIntent(intent));
-                            authState.update(tokenResponse, exception);
-
-                            Logs.d(TAG, "onTokenResponse", String.format(
-                                    "Token Response [ Access Token: %s, ID Token: %s ]",
-                                    tokenResponse.accessToken, tokenResponse.idToken));
-
-                            doRestoreOrRegister(mContext, authState, tokenResponse.accessToken,
-                                    true/* check restoration */);
+                            return;
                         }
+
+                        if(tokenResponse == null) {
+                            Logs.e(TAG, "onTokenRequestCompleted", "tokenResponse == null");
+                            return;
+                        }
+
+                        final AuthState authState = new AuthState(response,
+                                AuthorizationException.fromIntent(intent));
+                        authState.update(tokenResponse, exception);
+
+                        Logs.d(TAG, "onTokenRequestCompleted", String.format(
+                                "Token Response [ Access Token: %s, ID Token: %s ]",
+                                tokenResponse.accessToken, tokenResponse.idToken));
+
+                        new GoogleDriveActivationTask().execute(authState);
                     }
                 });
     }
@@ -683,15 +803,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
     }
 
-    protected boolean writeToHCFSConfig(Map<String, String> configs) {
-        boolean success = true;
-        for (String key : configs.keySet()) {
-            success |= TeraCloudConfig.setHCFSConfig(key, configs.get(key));
-        }
 
-        return success;
-    }
-    
     private void setOnTouchListenerForTeraLogo() {
         // fill test swift info when user taps on Tera logo 5 times within 3 seconds
         teraLogo.setOnTouchListener(new View.OnTouchListener() {

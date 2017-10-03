@@ -74,10 +74,9 @@ public class AppAuthUtils {
         sharedPreferencesEditor.apply();
     }
 
-    public static void saveAppAuthStatusToSharedPreference(Context context, Object object) {
+    public static boolean saveAppAuthStatusToSharedPreference(Context context, Object object) {
         saveObjectToSharedPreference(context, AUTH_STATUS_PERF_NAME, AUTH_STATUS_PERF_KEYS, object);
-        Settings.Global.putInt(context.getContentResolver(),
-                AppAuthUtils.AUTH_STATUS_PERF_KEYS, 1);
+        return Settings.Global.putInt(context.getContentResolver(), AppAuthUtils.AUTH_STATUS_PERF_KEYS, 1);
     }
 
     public AuthState getSavedAppAuthStatusFromPreference(Context context){

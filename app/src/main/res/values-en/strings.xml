@@ -382,13 +382,14 @@
     <string name="activate_failed_save_swift_config">Failed to save swift info to configuration</string>
     <string name="activate_failed_list_bucket_error">Failed to retrieve bucket list from swift server</string>
     <string name="activate_failed_swift_server_auth_error">Failed to auth on swift server</string>
-    <string name="alert_dialog_title_restore_choice">Tera bucket found on the server</string>
+    <string name="alert_dialog_title_swift_restore_choice">Tera bucket found on the server</string>
     <string name="set_up_as_new_device">Set up as new device anyway</string>
-    <string name="restore_from_old_bucket">Restore data from old bucket</string>
+    <string name="restore_from_old_data">Restore data from old bucket</string>
     <string name="restore_failed_upon_reload_config">Restoration failed: cannot reload configuration file.</string>
     <string name="restore_failed_upon_save_hcfs_config">Restoration faild: cannot save swift info into configuration file.</string>
     <string name="restore_failed_no_backup_selected">Restore failed: no backup is selected for restoration.</string>
     <string name="activate_failed_cannot_create_bucket">Activation failed: cannot create swift bucket</string>
     <string name="restore_failed_upon_retrieve_backup">Restoration failed: cannot retrieve backup list</string>
+    <string name="alert_dialog_title_google_drive_restore_choice">Tera data found on Google Drive</string>
 
 </resources>
