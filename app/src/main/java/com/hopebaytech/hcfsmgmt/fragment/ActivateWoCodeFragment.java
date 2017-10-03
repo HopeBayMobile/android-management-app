@@ -402,7 +402,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             } else {
                 TeraCloudConfig.resetHCFSConfig();
                 mUiHandler.sendEmptyMessage(ACTIVATE_FAILED);
-                mProgressDialogUtils.dismiss();
             }
         }
     }
@@ -580,7 +579,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             } else {
                 TeraCloudConfig.resetHCFSConfig();
                 mUiHandler.sendEmptyMessage(ACTIVATE_FAILED);
-                mProgressDialogUtils.dismiss();
             }
         }
     }
