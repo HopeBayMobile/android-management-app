@@ -362,8 +362,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 return false;
             }
 
-            AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, authState);
-            boolean saveAuthStatusToSharedPreferenceSucceeded = setGoogleDriveInfoToHcfsConfig(authState);
+            boolean saveAuthStatusToSharedPreferenceSucceeded = AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, authState);
             if (!saveAuthStatusToSharedPreferenceSucceeded) {
                 Logs.e(TAG, "doInBackground", "Failed to save AuthStatus to shared preference"); //TODO: extract
                 return false;
