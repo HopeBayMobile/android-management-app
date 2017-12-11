@@ -84,14 +84,29 @@ public class Logs {
         }
     }
 
-    public static void d(String logMsg) {
+    private static String getClassName() {
         StackTraceElement stackTraceElements[] = Thread.currentThread().getStackTrace();
-        StackTraceElement stackTraceElement = stackTraceElements[3];
+        StackTraceElement stackTraceElement = stackTraceElements[4];
         String className = stackTraceElement.getClassName();
-        className = className.subSequence(
+        return className.subSequence(
                 className.lastIndexOf(".") + 1, className.length()).toString();
-        String methodName = stackTraceElement.getMethodName();
+    }
 
-        Log.d(TAG, className + "(" + methodName + "): " + logMsg);
+    private static String getMethodName() {
+        StackTraceElement stackTraceElements[] = Thread.currentThread().getStackTrace();
+        StackTraceElement stackTraceElement = stackTraceElements[4];
+        return stackTraceElement.getMethodName();
+    }
+
+    public static void d(String logMsg) {
+        Log.d(TAG, getClassName() + "(" + getMethodName() + "): " + logMsg);
+    }
+
+    public static void e(String logMsg) {
+        Log.e(TAG, getClassName() + "(" + getMethodName() + "): " + logMsg);
+    }
+
+    public static void w(String logMsg) {
+        Log.w(TAG, getClassName() + "(" + getMethodName() + "): " + logMsg);
     }
 }

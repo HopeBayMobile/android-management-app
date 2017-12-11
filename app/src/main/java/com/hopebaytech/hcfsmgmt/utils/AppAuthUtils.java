@@ -1,6 +1,8 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.provider.Settings;
@@ -19,7 +21,9 @@ import com.google.gson.JsonSerializer;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
+import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationService;
+import net.openid.appauth.AuthorizationServiceConfiguration;
 
 import java.lang.reflect.Type;
 
@@ -75,7 +79,7 @@ public class AppAuthUtils {
                 .create();
         String serializedObject = gson.toJson(object);
         sharedPreferencesEditor.putString(serializedObjectKey, serializedObject);
-        sharedPreferencesEditor.apply();
+        sharedPreferencesEditor.commit();
     }
 
     public static boolean saveAppAuthStatusToSharedPreference(Context context, Object object) {
@@ -118,5 +122,33 @@ public class AppAuthUtils {
             }
         }
         return tokenExpirationTime;
+    }
+
+    public static void appAuthorization(Context context) {
+        AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
+                Uri.parse(GoogleDriveAPI.GOOGLE_ENDPOINT_AUTH), /* auth endpoint */
+                Uri.parse(GoogleDriveAPI.GOOGLE_ENDPOINT_TOKEN) /* token endpoint */
+        );
+
+        AuthorizationService authorizationService = new AuthorizationService(context);
+        Uri redirectUri = Uri.parse("com.hopebaytech.hcfsmgmt:/oauth2callback");
+
+        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
+                serviceConfiguration,
+                GoogleDriveAPI.GOOGLE_CLIENT_ID,
+                AuthorizationRequest.RESPONSE_TYPE_CODE,
+                redirectUri
+        );
+        builder.setScopes("profile",
+                "email",
+                "https://www.googleapis.com/auth/drive",
+                "https://www.googleapis.com/auth/drive.file",
+                "https://www.googleapis.com/auth/drive.appdata");
+
+        AuthorizationRequest request = builder.build();
+        Intent postAuthorizationIntent = new Intent(GoogleDriveAPI.ACTION_AUTHORIZATION_RESPONSE);
+        postAuthorizationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, request.hashCode(), postAuthorizationIntent, 0);
+        authorizationService.performAuthorizationRequest(request, pendingIntent);
     }
 }

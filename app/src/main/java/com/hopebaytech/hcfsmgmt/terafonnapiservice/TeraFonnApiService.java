@@ -271,7 +271,6 @@ public class TeraFonnApiService extends Service {
             Date date = new Date();
 
             getPackageStatusMap().put(packageName, status);
-            Logs.e(CLASSNAME, "kewei", "put pkg name to map " + new Timestamp(date.getTime()));
             return status;
         }
 

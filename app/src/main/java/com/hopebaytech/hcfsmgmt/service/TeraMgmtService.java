@@ -1410,8 +1410,7 @@ public class TeraMgmtService extends Service {
     }
 
     private void eraseDataOnGoogleDrive(final Context context) {
-        AppAuthUtils appAuthUtils = new AppAuthUtils();
-        AuthState authState = appAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
+        AuthState authState = AppAuthUtils.getSavedAppAuthStatusFromPreference(mContext);
         if (authState == null) {
             Logs.d("authState is null");
             return;

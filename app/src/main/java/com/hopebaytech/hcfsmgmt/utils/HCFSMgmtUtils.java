@@ -741,8 +741,6 @@ public class HCFSMgmtUtils {
             } else {
                 imei = manager.getDeviceId();
             }
-
-            Logs.d(CLASSNAME, "getDeviceImei", "Imei=" + imei);
         } catch (SecurityException e) {
             Logs.w(CLASSNAME, "getDeviceImei", "need android.permission.READ_PHONE_STATE");
 

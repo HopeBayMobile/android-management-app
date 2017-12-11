@@ -1,14 +1,10 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
-
-import net.openid.appauth.AuthState;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,22 +27,22 @@ public class GoogleDriveAPI {
     private static final String GOOGLE_DRIVE_API_USER_INFO_V3 =
             "https://www.googleapis.com/oauth2/v3/userinfo";
 
-    private static final String GOOGLE_DRIVE_TERA_FOLDER_PREFIX = "tera";
+    private static final String GOOGLE_DRIVE_TERA_FOLDER_PREFIX = "tera.";
 
     private static final String GOOGLE_DRIVE_AUTH_HEADER_KEY = "Authorization";
     private static final String GOOGLE_DRIVE_AUTH_HEADER_VALUE_PREFIX = "Bearer";
 
-    public static DeviceServiceInfo buildDeviceServiceInfo(String url, String token,
-            String backendType, String bucket, String account) {
+    public static final String GOOGLE_ENDPOINT_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
+    public static final String GOOGLE_ENDPOINT_TOKEN = "https://www.googleapis.com/oauth2/v4/token";
+    public static final String GOOGLE_CLIENT_ID = "795577377875-k5blp9vlffpe9s13sp6t4vqav0t6siss.apps.googleusercontent.com";
+
+    public static final String ACTION_AUTHORIZATION_RESPONSE = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
+
+    public static DeviceServiceInfo buildDeviceServiceInfo(String token, String account) {
         DeviceServiceInfo.Backend backend = new DeviceServiceInfo.Backend();
-        if (TextUtils.isEmpty(url)) {
-            /* You can write anything that you want, but it can not be null */
-            url = "https://127.0.0.1";
-        }
-        backend.setUrl(url);
+        backend.setUrl("https://127.0.0.1"/* You can write anything that you want, but it can not be null */);
         backend.setToken(token);
-        backend.setBackendType(backendType);
-        backend.setBucket(bucket);
+        backend.setBackendType("googledrive");
         backend.setAccount(account);
 
         DeviceServiceInfo deviceServiceInfo = new DeviceServiceInfo();
@@ -72,8 +68,8 @@ public class GoogleDriveAPI {
         return headers;
     }
 
-    public static boolean hasTeraFolderItem(Context context, @NonNull AuthState authState) throws IOException, JSONException {
-        JSONArray teraFolderItems = GoogleDriveAPI.getTeraFolderItems(authState.getAccessToken(), HCFSMgmtUtils.getDeviceImei(context));
+    public static boolean hasTeraFolderItem(Context context, String accessToken) throws IOException, JSONException {
+        JSONArray teraFolderItems = GoogleDriveAPI.getTeraFolderItems(accessToken, HCFSMgmtUtils.getDeviceImei(context));
         return teraFolderItems.length() > 0;
     }
 
@@ -87,7 +83,7 @@ public class GoogleDriveAPI {
 
     public static JSONArray getTeraFolderItems(String token, String imei)
             throws IOException, JSONException {
-        JSONObject fileInfo = GoogleDriveAPI.searchFile(token, GOOGLE_DRIVE_TERA_FOLDER_PREFIX + "." + imei);
+        JSONObject fileInfo = searchFile(token, GOOGLE_DRIVE_TERA_FOLDER_PREFIX + imei);
         return fileInfo.has("items") ? fileInfo.getJSONArray("items") : new JSONArray();
     }
 
@@ -101,7 +97,7 @@ public class GoogleDriveAPI {
 
     public static JSONObject searchFile(String token, String filename) throws IOException, JSONException {
         String url = String.format(
-                "%s%s\'%s\'", GOOGLE_DRIVE_API_HOST_NAME_V2, "?q=title+contains+", filename);
+                "%s%s\'%s\'", GOOGLE_DRIVE_API_HOST_NAME_V2, "?q=title contains ", filename);
         Map<String, String> headers = buildAuthHeaders(token);
 
         HttpUtil.HttpRequest request = HttpUtil.buildGetRequest(headers, url);
@@ -116,5 +112,18 @@ public class GoogleDriveAPI {
         HttpUtil.HttpRequest request = HttpUtil.buildDeleteRequest(headers, url, null);
         HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
         return response;
+    }
+
+    public static boolean deleteTeraFolderOnGoogleDrive(Context context, String accessToken) {
+        String imei = HCFSMgmtUtils.getDeviceImei(context);
+        try {
+            JSONArray items = getTeraFolderItems(accessToken, imei);
+            HttpUtil.HttpResponse response = deleteFile(accessToken, getTeraFolderId(items));
+            return response.getCode() == 204 || response.getCode() == 404;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

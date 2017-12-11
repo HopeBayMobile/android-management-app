@@ -37,10 +37,6 @@ public class PackageResource {
             e.printStackTrace();
         }
 
-        for (String name : resourceNameList) {
-            Log.d("xxxx", packageName + " resourceNameList = " + name);
-        }
-
         return resourceNameList.toArray(new String[resourceNameList.size()]);
     }
 

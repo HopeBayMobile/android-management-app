@@ -13,24 +13,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.Auth;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.AccountDAO;
 import com.hopebaytech.hcfsmgmt.info.AccountInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
-import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
-import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.HttpUtil;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
-import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
 import net.openid.appauth.AuthState;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -39,10 +33,6 @@ import java.util.Map;
 public class RegisterFragment extends Fragment {
 
     private final String TAG = this.getClass().getSimpleName();
-
-    protected static final String ACTION_AUTHORIZATION_RESPONSE = "com.hopebaytech.hcfsmgmt.HANDLE_AUTHORIZATION_RESPONSE";
-
-    protected static final String KEY_GOOGLE_DRIVE_TOKEN = "key_google_drive_token";
 
     private static final int DISMISS_PROGRESS_DIALOG = -1;
     protected static final int ACTIVATE_FAILED = 0;
@@ -95,47 +85,17 @@ public class RegisterFragment extends Fragment {
         mErrorMessage = (TextView) view.findViewById(R.id.error_msg);
     }
 
-    protected boolean deleteTeraFolderOnGoogleDrive(Context context, AuthState authState) {
-        String accessToken = authState.getAccessToken();
-        String imei = HCFSMgmtUtils.getDeviceImei(context);
-        try {
-            JSONArray items = GoogleDriveAPI.getTeraFolderItems(accessToken, imei);
-            HttpUtil.HttpResponse response = GoogleDriveAPI.deleteFile(
-                    accessToken, GoogleDriveAPI.getTeraFolderId(items));
-            return response.getCode() == 204 || response.getCode() == 404;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    protected boolean setGoogleDriveInfoToHcfsConfig(AuthState authState) {
+    protected DeviceServiceInfo buildDeviceServiceInfo(String accessToken) {
         JSONObject userInfo;
         try {
-            userInfo = GoogleDriveAPI.getUserInfo(authState.getAccessToken());
-        }catch (Exception exception) {
-            Logs.e(TAG, "registerTeraByGoogleDrive", Log.getStackTraceString(exception));
-            return false;
-        }
-
-        final String email = userInfo.optString("email", null);
-        final DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(null, authState.getAccessToken(), "googledrive", null, email);
-
-        return TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
-    }
-
-    protected DeviceServiceInfo buildDeviceServiceInfo(AuthState authState) {
-        JSONObject userInfo;
-        try {
-            userInfo = GoogleDriveAPI.getUserInfo(authState.getAccessToken());
+            userInfo = GoogleDriveAPI.getUserInfo(accessToken);
         }catch (Exception exception) {
             Logs.e(TAG, "registerTeraByGoogleDrive", Log.getStackTraceString(exception));
             return null;
         }
 
         final String email = userInfo.optString("email", null);
-        return GoogleDriveAPI.buildDeviceServiceInfo(null, authState.getAccessToken(), "googledrive", null, email);
+        return GoogleDriveAPI.buildDeviceServiceInfo(accessToken, email);
     }
 
     protected Bundle buildAccountInfoBundle(AuthState authState) {

@@ -2,19 +2,15 @@ package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -34,19 +30,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.SwiftConfigInfo;
 import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
+import com.hopebaytech.hcfsmgmt.utils.BrowserUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
+import com.hopebaytech.hcfsmgmt.utils.GooglePlayServicesAPI;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -59,13 +51,10 @@ import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
-import net.openid.appauth.AuthorizationRequest;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
-import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.TokenResponse;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
@@ -78,24 +67,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     public static final String TAG = ActivateWoCodeFragment.class.getSimpleName();
     private final String CLASSNAME = ActivateWoCodeFragment.class.getSimpleName();
 
-    //Google auth and User auth
-    public static final String KEY_AUTH_TYPE = "auth_type";
-
-    //Only for User authentication
-    public static final String KEY_PASSWORD = "password";
-    public static final String KEY_USERNAME = "username";
-    public static final String KEY_AUTH_CODE = "auth_code";
-
-    public static final String GOOGLE_ENDPOINT_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
-    public static final String GOOGLE_ENDPOINT_TOKEN = "https://www.googleapis.com/oauth2/v4/token";
-    public static final String GOOGLE_CLIENT_ID = "795577377875-k5blp9vlffpe9s13sp6t4vqav0t6siss.apps.googleusercontent.com";
-
     private static final String USED_INTENT = "USED_INTENT";
-
-    private static final String SEND_LOG_ALREADY = "send_log_already";
-
-    private GoogleApiClient mGoogleApiClient;
-    private Handler mWorkHandler = new Handler(Looper.getMainLooper());
 
     private View mView;
     private ImageView teraLogo;
@@ -183,17 +155,16 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                     return;
                 }
 
-                if (!isBrowserAvailable()) {
-                    if(hasGooglePlayServices()) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + "com.android.chrome"));
-                        mContext.startActivity(intent);
+                if (!BrowserUtils.isBrowserAvailable(mContext)) {
+                    if (GooglePlayServicesAPI.hasGooglePlayServices(mContext)) {
+                        BrowserUtils.toDownloadPage(mContext);
                     } else {
                         mErrorMessage.setText(R.string.activate_alert_dialog_message);
                     }
                     return;
                 }
 
-                appAuthorization(v);
+                AppAuthUtils.appAuthorization(getContext());
             }
         });
 
@@ -227,15 +198,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 editor.remove(HCFSMgmtUtils.PREF_AUTO_AUTH_FAILED_CAUSE);
                 editor.apply();
             }
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.disconnect();
         }
     }
 
@@ -297,7 +259,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         protected Boolean doInBackground(AuthState... params) {
             authState = params[0];
             try {
-                return GoogleDriveAPI.hasTeraFolderItem(mContext, authState);
+                return GoogleDriveAPI.hasTeraFolderItem(mContext, authState.getAccessToken());
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -354,10 +316,11 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         @Override
         protected Boolean doInBackground(AuthState... params) {
             authState = params[0];
+            String accessToken = authState.getAccessToken();
 
             boolean isDeleted = false;
             while (!isDeleted) {
-                isDeleted = deleteTeraFolderOnGoogleDrive(mContext, authState);
+                isDeleted = GoogleDriveAPI.deleteTeraFolderOnGoogleDrive(mContext, accessToken);
                 try {
                     Thread.sleep(Interval.DELETE_FOLDER_DELAY_TIME);
                 } catch (InterruptedException e) {
@@ -365,7 +328,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 }
             }
 
-            DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(authState);
+            DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(accessToken);
             if(deviceServiceInfo == null) {
                 Logs.e(TAG, "doInBackground", "Failed to build device service info"); //TODO: extract
                 return false;
@@ -377,7 +340,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 return false;
             }
 
-            boolean writeToHCFSConfigSucceeded = setGoogleDriveInfoToHcfsConfig(authState);
+            boolean writeToHCFSConfigSucceeded =
+                    TeraCloudConfig.storeHCFSConfig(deviceServiceInfo, mContext);
             if (!writeToHCFSConfigSucceeded) {
                 Logs.e(TAG, "doInBackground", "Failed to write google drive info to HCFS config"); //TODO: extract
                 return false;
@@ -593,61 +557,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
     }
 
-    private boolean hasGooglePlayServices() {
-        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-        int result = googleAPI.isGooglePlayServicesAvailable(mContext);
-        if (result != ConnectionResult.SUCCESS) {
-            // add tip for install Browser
-            mErrorMessage.setText(R.string.activate_failed_browser_should_install);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean isBrowserAvailable() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.testTera.com.tw"));
-        PackageManager pm = mContext.getPackageManager();
-
-        List resolvedActivityList = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
-        Iterator var5 = resolvedActivityList.iterator();
-        while (var5.hasNext()) {
-            ResolveInfo info = (ResolveInfo) var5.next();
-
-            if (hasUsableBrowser(info)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean hasUsableBrowser(ResolveInfo resolveInfo) {
-        if (resolveInfo.filter.hasAction("android.intent.action.VIEW") &&
-                resolveInfo.filter.hasCategory("android.intent.category.BROWSABLE") &&
-                resolveInfo.filter.schemesIterator() != null) {
-            if (resolveInfo.filter.authoritiesIterator() != null) {
-                return false;
-            } else {
-                boolean supportsHttp = false;
-                boolean supportsHttps = false;
-                Iterator schemeIter = resolveInfo.filter.schemesIterator();
-
-                do {
-                    if (!schemeIter.hasNext()) {
-                        return false;
-                    }
-
-                    String scheme = (String) schemeIter.next();
-                    supportsHttp |= "http".equals(scheme);
-                    supportsHttps |= "https".equals(scheme);
-                } while (!supportsHttp || !supportsHttps);
-
-                return true;
-            }
-        } else {
-            return false;
-        }
-    }
-
     public static class PermissionSnackbar {
 
         private static Snackbar permissionSnackbar;
@@ -668,30 +577,6 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
     }
 
-    private void googleAuthFailed(String failedMsg) {
-        Logs.e(CLASSNAME, "googleAuthFailed", "failedMsg=" + failedMsg);
-        mProgressDialogUtils.dismiss();
-        signOut();
-        mErrorMessage.setText(R.string.activate_signin_google_account_failed);
-    }
-
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        ((Activity) mContext).startActivityForResult(signInIntent, RequestCode.GOOGLE_SIGN_IN);
-    }
-
-    private void signOut() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient)
-                    .setResultCallback(new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(@NonNull Status status) {
-                            Logs.d(CLASSNAME, "signOut", "status=" + status);
-                        }
-                    });
-        }
-    }
-
     public void setIntent(Intent intent) {
         if (intent == null) {
             return;
@@ -706,42 +591,13 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         mErrorMessage.setText(cause);
     }
 
-    private void appAuthorization(View v) {
-        AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
-                Uri.parse(GOOGLE_ENDPOINT_AUTH), /* auth endpoint */
-                Uri.parse(GOOGLE_ENDPOINT_TOKEN) /* token endpoint */
-        );
-
-        AuthorizationService authorizationService = new AuthorizationService(v.getContext());
-        String clientId = GOOGLE_CLIENT_ID;
-        Uri redirectUri = Uri.parse("com.hopebaytech.hcfsmgmt:/oauth2callback");
-
-        AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
-                serviceConfiguration,
-                clientId,
-                AuthorizationRequest.RESPONSE_TYPE_CODE,
-                redirectUri
-        );
-        builder.setScopes("profile",
-                "email",
-                "https://www.googleapis.com/auth/drive",
-                "https://www.googleapis.com/auth/drive.file",
-                "https://www.googleapis.com/auth/drive.appdata");
-
-        AuthorizationRequest request = builder.build();
-        Intent postAuthorizationIntent = new Intent(ACTION_AUTHORIZATION_RESPONSE);
-        postAuthorizationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(v.getContext(), request.hashCode(), postAuthorizationIntent, 0);
-        authorizationService.performAuthorizationRequest(request, pendingIntent);
-    }
-
     private void checkAuthorizationResponse() {
         Intent intent = getActivity().getIntent();
         if (intent == null) {
             return;
         }
 
-        if (ACTION_AUTHORIZATION_RESPONSE.equals(intent.getAction()) &&
+        if (GoogleDriveAPI.ACTION_AUTHORIZATION_RESPONSE.equals(intent.getAction()) &&
                 !intent.hasExtra(USED_INTENT)) {
             mProgressDialogUtils.show(getString(R.string.processing_msg));
             handleAuthorizationResponse(intent);
@@ -771,7 +627,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                             return;
                         }
 
-                        final AuthState authState = new AuthState(response,
+                        AuthState authState = new AuthState(response,
                                 AuthorizationException.fromIntent(intent));
                         authState.update(tokenResponse, exception);
 
