@@ -118,4 +118,9 @@ public class Interval {
      */
     public static final int SEND_LOGS = 10 * MINUTE;
 
+    /**
+     * Interval for for deleting tera folder.
+     */
+    public static final int DELETE_FOLDER_DELAY_TIME = 500;
+
 }

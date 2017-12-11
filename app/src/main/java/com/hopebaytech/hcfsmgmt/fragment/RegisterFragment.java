@@ -96,12 +96,13 @@ public class RegisterFragment extends Fragment {
     }
 
     protected boolean deleteTeraFolderOnGoogleDrive(Context context, AuthState authState) {
-        String token = authState.getAccessToken();
+        String accessToken = authState.getAccessToken();
         String imei = HCFSMgmtUtils.getDeviceImei(context);
         try {
-            JSONArray items = GoogleDriveAPI.getTeraFolderItems(token, imei);
-            HttpUtil.HttpResponse response = GoogleDriveAPI.deleteFile(token, GoogleDriveAPI.getTeraFolderId(items));
-            return response.getCode() == 200;
+            JSONArray items = GoogleDriveAPI.getTeraFolderItems(accessToken, imei);
+            HttpUtil.HttpResponse response = GoogleDriveAPI.deleteFile(
+                    accessToken, GoogleDriveAPI.getTeraFolderId(items));
+            return response.getCode() == 204 || response.getCode() == 404;
         } catch (Exception e) {
             e.printStackTrace();
         }

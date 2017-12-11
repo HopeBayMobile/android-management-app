@@ -48,6 +48,7 @@ import com.hopebaytech.hcfsmgmt.info.SwiftConfigInfo;
 import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.MgmtCluster;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
@@ -354,7 +355,15 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         protected Boolean doInBackground(AuthState... params) {
             authState = params[0];
 
-            deleteTeraFolderOnGoogleDrive(mContext, authState);
+            boolean isDeleted = false;
+            while (!isDeleted) {
+                isDeleted = deleteTeraFolderOnGoogleDrive(mContext, authState);
+                try {
+                    Thread.sleep(Interval.DELETE_FOLDER_DELAY_TIME);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
 
             DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(authState);
             if(deviceServiceInfo == null) {
