@@ -1,25 +1,28 @@
 package com.hopebaytech.hcfsmgmt.main;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 
+import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.SettingsDAO;
+import com.hopebaytech.hcfsmgmt.fragment.RestoreFailedFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SettingsFragment;
 import com.hopebaytech.hcfsmgmt.info.SettingsInfo;
-import com.hopebaytech.hcfsmgmt.misc.JobServiceId;
-import com.hopebaytech.hcfsmgmt.service.PinAndroidFolderService;
 import com.hopebaytech.hcfsmgmt.service.TeraMgmtService;
 import com.hopebaytech.hcfsmgmt.utils.AlarmUtils;
 import com.hopebaytech.hcfsmgmt.utils.Booster;
+import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
-import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.NetworkUtils;
-import com.hopebaytech.hcfsmgmt.utils.PeriodicServiceUtils;
+import com.hopebaytech.hcfsmgmt.utils.NotificationEvent;
+import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
@@ -202,17 +205,11 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
                 break;
             }
             case TeraIntent.ACTION_RESTORE_STAGE_1: {
-                Intent intentService = new Intent(context, TeraMgmtService.class);
-                intentService.setAction(TeraIntent.ACTION_RESTORE_STAGE_1);
-                intentService.putExtras(intent.getExtras());
-                context.startService(intentService);
+                handleStage1RestoreEvent(context, intent);
                 break;
             }
             case TeraIntent.ACTION_RESTORE_STAGE_2: {
-                Intent intentService = new Intent(context, TeraMgmtService.class);
-                intentService.setAction(TeraIntent.ACTION_RESTORE_STAGE_2);
-                intentService.putExtras(intent.getExtras());
-                context.startService(intentService);
+                handleStage2RestoreEvent(context, intent);
                 break;
             }
             case TeraIntent.ACTION_BOOSTER_PROCESS_COMPLETED: {
@@ -231,4 +228,87 @@ public class HCFSMgmtReceiver extends BroadcastReceiver {
 
     }
 
+    private void handleStage1RestoreEvent(Context context, Intent intent) {
+        if (MainApplication.Foreground.get().isForeground()) {
+            Logs.d(CLASSNAME, "handleStage1RestoreEvent", "Application is not in foreground.");
+            return;
+        }
+
+        int status = RestoreStatus.NONE;
+        int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+        Logs.d(CLASSNAME, "handleStage1RestoreEvent", "errorCode=" + errorCode);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        switch (errorCode) {
+            case 0:
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.MINI_RESTORE_COMPLETED);
+
+                String rebootAction = context.getString(R.string.restore_system_reboot);
+                Intent rebootIntent = new Intent(context, TeraMgmtService.class);
+                rebootIntent.setAction(TeraIntent.ACTION_MINI_RESTORE_REBOOT_SYSTEM);
+                PendingIntent pendingIntent = PendingIntent.getService(context, 0, rebootIntent, 0);
+                NotificationCompat.Action action = new NotificationCompat.Action(0, rebootAction, pendingIntent);
+
+                int notifyId = NotificationEvent.ID_ONGOING;
+                int flag = NotificationEvent.FLAG_ON_GOING
+                        | NotificationEvent.FLAG_HEADS_UP
+                        | NotificationEvent.FLAG_OPEN_APP;
+                String title = context.getString(R.string.restore_ready_title);
+                String message = context.getString(R.string.restore_ready_message);
+                NotificationEvent.notify(context, notifyId, title, message, action, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENOENT:
+                status = RestoreStatus.Error.DAMAGED_BACKUP;
+                break;
+            case HCFSEvent.ErrorCode.ENOSPC:
+                status = RestoreStatus.Error.OUT_OF_SPACE;
+                break;
+            case HCFSEvent.ErrorCode.ENETDOWN:
+                status = RestoreStatus.Error.CONN_FAILED;
+                break;
+        }
+        if (errorCode != 0) {
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, status);
+            RestoreFailedFragment.startFailedNotification(context, status);
+        }
+        editor.apply();
+    }
+
+    private void handleStage2RestoreEvent(Context context, Intent intent) {
+        if (MainApplication.Foreground.get().isForeground()) {
+            Logs.d("Application is not in foreground.");
+            return;
+        }
+
+        int status = RestoreStatus.NONE;
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        int errorCode = intent.getIntExtra(TeraIntent.KEY_RESTORE_ERROR_CODE, -1);
+        switch (errorCode) {
+            case 0:
+                editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, RestoreStatus.FULL_RESTORE_COMPLETED);
+
+                int flag = NotificationEvent.FLAG_HEADS_UP | NotificationEvent.FLAG_OPEN_APP |
+                        NotificationEvent.FLAG_RESTART_ACTIVITY_TASK;
+                int notifyId = NotificationEvent.ID_ONGOING;
+                String title = context.getString(R.string.restore_done_title);
+                String message = context.getString(R.string.restore_done_message);
+                NotificationEvent.notify(context, notifyId, title, message, flag);
+                break;
+            case HCFSEvent.ErrorCode.ENOENT:
+                status = RestoreStatus.Error.DAMAGED_BACKUP;
+                break;
+            case HCFSEvent.ErrorCode.ENOSPC:
+                status = RestoreStatus.Error.OUT_OF_SPACE;
+                break;
+            case HCFSEvent.ErrorCode.ENETDOWN:
+                status = RestoreStatus.Error.CONN_FAILED;
+                break;
+        }
+        if (errorCode != 0) {
+            editor.putInt(HCFSMgmtUtils.PREF_RESTORE_STATUS, status);
+            RestoreFailedFragment.startFailedNotification(context, status);
+        }
+        editor.apply();
+    }
 }
