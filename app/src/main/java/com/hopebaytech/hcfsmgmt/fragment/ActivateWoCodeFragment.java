@@ -266,6 +266,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     private class GoogleDriveActivationTask extends AsyncTask<String, Void, Boolean> {
         String refreshToken;
         String accessToken;
+        List<String> folders;
 
         @Override
         protected Boolean doInBackground(String... params) {
@@ -273,7 +274,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             accessToken = params[1];
 
             try {
-                return GoogleDriveAPI.hasTeraFolderItem(mContext, accessToken);
+                folders = GoogleDriveAPI.getTeraFolderItems(accessToken);
+                return folders.size() != 0;
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -320,7 +322,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
 
         private void handleRestoration() {
             Bundle args = new Bundle();
-            args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, GoogleDriveAPI.buildDeviceListInfo(HCFSMgmtUtils.getDeviceImei(mContext)));
+            args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, GoogleDriveAPI.buildDeviceListInfo(folders));
             args.putString(RestoreFragment.KEY_GOOGLE_DRIVE_ACCESS_TOKEN, accessToken);
             replaceWithRestoreFragment(args);
         }
@@ -365,7 +367,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 return false;
             }
 
-            accountInfo = buildAccountInfoBundle(mAuthState);
+            accountInfo = buildAccountInfoBundle(accessToken);
             if (accountInfo == null) {
                 Logs.e(TAG, "doInBackground", "Failed to build account info"); //TODO: extract
                 return false;

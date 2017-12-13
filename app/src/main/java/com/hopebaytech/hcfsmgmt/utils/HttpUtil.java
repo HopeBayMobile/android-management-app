@@ -36,6 +36,11 @@ public class HttpUtil {
         return new HttpRequest(headers, url, "DELETE", httpRequestBody);
     }
 
+    public static HttpRequest buildPatchRequest(Map<String, String> headers, String url,
+            HttpRequestBody httpRequestBody) {
+        return new HttpRequest(headers, url, "PATCH", httpRequestBody);
+    }
+
     public static void executeAsynchronousRequest(final HttpRequest httpRequest) {
         new Thread(new Runnable() {
             @Override

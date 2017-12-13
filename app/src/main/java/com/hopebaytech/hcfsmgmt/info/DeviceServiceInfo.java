@@ -39,6 +39,8 @@ public class DeviceServiceInfo {
     private int whiteListLatestVersion;
     private String errorCode;
 
+    private String mImei;
+
     public CharSequence getErrorMessage(Context context) {
         CharSequence errorMessage;
         if (responseCode == HttpsURLConnection.HTTP_BAD_REQUEST) {
@@ -229,4 +231,11 @@ public class DeviceServiceInfo {
         return jsonObject.toString().replace("\\", "");
     }
 
+    public void setImei(String imei) {
+        mImei = imei;
+    }
+
+    public String getImei() {
+        return mImei;
+    }
 }

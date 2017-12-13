@@ -23,8 +23,6 @@ import com.hopebaytech.hcfsmgmt.utils.ProgressDialogUtils;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraIntent;
 
-import net.openid.appauth.AuthState;
-
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -34,7 +32,7 @@ public class RegisterFragment extends Fragment {
 
     private final String TAG = this.getClass().getSimpleName();
 
-    private static final int DISMISS_PROGRESS_DIALOG = -1;
+    protected static final int DISMISS_PROGRESS_DIALOG = -1;
     protected static final int ACTIVATE_FAILED = 0;
     protected static final int RESTORE_FAILED = 1;
 
@@ -98,10 +96,10 @@ public class RegisterFragment extends Fragment {
         return GoogleDriveAPI.buildDeviceServiceInfo(accessToken, email);
     }
 
-    protected Bundle buildAccountInfoBundle(AuthState authState) {
+    protected Bundle buildAccountInfoBundle(String accessToken) {
         JSONObject userInfo;
         try {
-            userInfo = GoogleDriveAPI.getUserInfo(authState.getAccessToken());
+            userInfo = GoogleDriveAPI.getUserInfo(accessToken);
         }catch (Exception exception) {
             Logs.e(TAG, "registerTeraByGoogleDrive", Log.getStackTraceString(exception));
             return null;

@@ -11,7 +11,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,6 +33,7 @@ public class GoogleDriveAPI {
 
     private static final String GOOGLE_DRIVE_AUTH_HEADER_KEY = "Authorization";
     private static final String GOOGLE_DRIVE_AUTH_HEADER_VALUE_PREFIX = "Bearer";
+    private static final String GOOGLE_DRIVE_CONTENT_TYPE_HEADER_KEY = "Content-Type";
 
     public static final String GOOGLE_ENDPOINT_AUTH = "https://accounts.google.com/o/oauth2/v2/auth";
     public static final String GOOGLE_ENDPOINT_TOKEN = "https://www.googleapis.com/oauth2/v4/token";
@@ -51,14 +54,15 @@ public class GoogleDriveAPI {
         return deviceServiceInfo;
     }
 
-    public static DeviceListInfo buildDeviceListInfo(String imei) {
-        DeviceStatusInfo info = new DeviceStatusInfo();
-        info.setImei(imei);
-
+    public static DeviceListInfo buildDeviceListInfo (List<String> folders) {
         DeviceListInfo deviceListInfo = new DeviceListInfo();
-        deviceListInfo.addDeviceStatusInfo(info);
         deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_GOOGLE_DRIVE);
 
+        for (String folder : folders) {
+            DeviceStatusInfo info = new DeviceStatusInfo();
+            info.setImei(folder);
+            deviceListInfo.addDeviceStatusInfo(info);
+        }
         return deviceListInfo;
     }
 
@@ -68,9 +72,10 @@ public class GoogleDriveAPI {
         return headers;
     }
 
-    public static boolean hasTeraFolderItem(Context context, String accessToken) throws IOException, JSONException {
-        JSONArray teraFolderItems = GoogleDriveAPI.getTeraFolderItems(accessToken, HCFSMgmtUtils.getDeviceImei(context));
-        return teraFolderItems.length() > 0;
+    private static Map<String, String> buildAuthWithContentTypeHeaders(String token, String type) {
+        Map<String, String> headers = buildAuthHeaders(token);
+        headers.put(GOOGLE_DRIVE_CONTENT_TYPE_HEADER_KEY, type);
+        return headers;
     }
 
     public static String getTeraFolderId(JSONArray items) throws IOException, JSONException {
@@ -85,6 +90,35 @@ public class GoogleDriveAPI {
             throws IOException, JSONException {
         JSONObject fileInfo = searchFile(token, GOOGLE_DRIVE_TERA_FOLDER_PREFIX + imei);
         return fileInfo.has("items") ? fileInfo.getJSONArray("items") : new JSONArray();
+    }
+
+    public static List<String> getTeraFolderItems(String accessToken)
+            throws IOException, JSONException {
+        List<String> teraFolder = new ArrayList<String>();
+        JSONObject fileInfo = searchFile(accessToken, GOOGLE_DRIVE_TERA_FOLDER_PREFIX);
+        if (fileInfo.has("items")) {
+            JSONArray items = fileInfo.getJSONArray("items");
+            for (int i = 0; i < items.length(); i++) {
+                JSONObject item = ((JSONObject) items.get(i));
+                String type = item.getString("mimeType");
+                if (!item.has("parents") || !type.equals("application/vnd.google-apps.folder")) {
+                    continue;
+                }
+
+                JSONArray parents = item.getJSONArray("parents");
+                if (parents.length() > 0) {
+                    String title = item.getString("title");
+                    boolean isRootFolder = ((JSONObject) parents.get(0)).getBoolean("isRoot");
+                    boolean matches = title.matches(GOOGLE_DRIVE_TERA_FOLDER_PREFIX + "[0-9]{15}");
+                    if (isRootFolder && matches) {
+                        teraFolder.add(title.replaceAll(GOOGLE_DRIVE_TERA_FOLDER_PREFIX, ""));
+                        Logs.d(">>>>> title = " + title + " type = " + type + " isRootFolder = " + isRootFolder);
+                    }
+                }
+            }
+        }
+
+        return teraFolder;
     }
 
     public static JSONObject getUserInfo(String token) throws IOException, JSONException {
@@ -114,12 +148,41 @@ public class GoogleDriveAPI {
         return response;
     }
 
+    public static HttpUtil.HttpResponse renameFile(String title, String token, String fileId)
+            throws IOException, JSONException {
+        String url = String.format("%s/%s", GOOGLE_DRIVE_API_HOST_NAME_V2, fileId);
+        Map<String, String> headers = buildAuthWithContentTypeHeaders(token, "application/json");
+
+        JSONObject content = new JSONObject();
+        content.put("title", title);
+
+        HttpUtil.HttpRequestBody requestBody = HttpUtil.createRequestBody(
+                "application/json; charset=utf-8", content.toString());
+        HttpUtil.HttpRequest request = HttpUtil.buildPatchRequest(headers, url, requestBody);
+        HttpUtil.HttpResponse response = HttpUtil.executeSynchronousRequest(request);
+        return response;
+    }
+
     public static boolean deleteTeraFolderOnGoogleDrive(Context context, String accessToken) {
         String imei = HCFSMgmtUtils.getDeviceImei(context);
         try {
             JSONArray items = getTeraFolderItems(accessToken, imei);
             HttpUtil.HttpResponse response = deleteFile(accessToken, getTeraFolderId(items));
             return response.getCode() == 204 || response.getCode() == 404;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static boolean resetTeraFolderOnGoogleDrive(
+            Context context, String accessToken, String targetImei) {
+        try {
+            JSONArray items = getTeraFolderItems(accessToken, targetImei);
+            String title = GOOGLE_DRIVE_TERA_FOLDER_PREFIX + HCFSMgmtUtils.getDeviceImei(context);
+            HttpUtil.HttpResponse response = renameFile(title , accessToken, getTeraFolderId(items));
+            return response.getCode() == 200;
         } catch (Exception e) {
             e.printStackTrace();
         }

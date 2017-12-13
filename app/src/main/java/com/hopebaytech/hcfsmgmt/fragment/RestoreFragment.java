@@ -1,6 +1,7 @@
 package com.hopebaytech.hcfsmgmt.fragment;
 
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -22,7 +23,9 @@ import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.SwiftConfigInfo;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveSignInAPI;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
+import com.hopebaytech.hcfsmgmt.utils.Interval;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
 import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.SwiftServerUtil;
@@ -123,7 +126,7 @@ public class RestoreFragment extends RegisterFragment {
                 }
 
                 //TODO: should only restore
-                restoreDevice();
+                restoreDevice(mRestoreListAdapter.getSelectedItem().getImei());
             }
         });
 
@@ -149,19 +152,18 @@ public class RestoreFragment extends RegisterFragment {
         }
     };
 
-    private void restoreDevice() {
-        Logs.d(CLASSNAME, "restoreDevice", String.format("sourceImei=%s", HCFSMgmtUtils.getDeviceImei(mContext)));
+    private void restoreDevice(String imei) {
+        Logs.d("sourceImei = " + imei);
+
         switch (mDeviceListInfo.getType()) {
             case DeviceListInfo.TYPE_RESTORE_FROM_GOOGLE_DRIVE:
                 String accessToken = getArguments().getString(KEY_GOOGLE_DRIVE_ACCESS_TOKEN);
-
                 if (TextUtils.isEmpty(accessToken)) {
                     informErrorOccurred(R.string.restore_failed);
                     return;
                 }
-                DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(
-                        accessToken, null);
-                preRestoreSetupForGoogleDrive(deviceServiceInfo);
+
+                preRestoreSetupForGoogleDrive(accessToken, imei);
                 break;
             case DeviceListInfo.TYPE_RESTORE_FROM_SWIFT:
                 // get swift info from parcel
@@ -232,27 +234,59 @@ public class RestoreFragment extends RegisterFragment {
         });
     }
 
-    private void preRestoreSetupForGoogleDrive(final DeviceServiceInfo deviceServiceInfo) {
-        mWorkHandler.post(new Runnable() {
+    private void preRestoreSetupForGoogleDrive(final String accessToken, final String imei) {
+        mProgressDialogUtils.show(R.string.processing_msg);
+        new AsyncTask<Void, Void, Boolean>() {
             @Override
-            public void run() {
-                TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
-                int code = HCFSMgmtUtils.triggerRestore();
-                if (code == RestoreStatus.Error.OUT_OF_SPACE) {
-                    informErrorOccurred(R.string.restore_failed_out_of_space);
-                    return;
+            protected Boolean doInBackground(Void... voids) {
+                if (!HCFSMgmtUtils.getDeviceImei(mContext).equals(imei)) {
+                    boolean isDeleted = false;
+                    while (!isDeleted) {
+                        isDeleted = GoogleDriveAPI.deleteTeraFolderOnGoogleDrive(mContext, accessToken);
+                        try {
+                            Thread.sleep(Interval.DELETE_FOLDER_DELAY_TIME);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (!GoogleDriveAPI.resetTeraFolderOnGoogleDrive(mContext, accessToken, imei)) {
+                        return false;
+                    }
                 }
-                if(code == RestoreStatus.Error.DAMAGED_BACKUP) {
-                    informErrorOccurred(R.string.restore_failed_damaged_backup);
-                    return;
+
+                DeviceServiceInfo deviceServiceInfo = buildDeviceServiceInfo(accessToken);
+                if(deviceServiceInfo == null) {
+                    return false;
                 }
-                if(code == RestoreStatus.Error.CONN_FAILED) {
-                    informErrorOccurred(R.string.restore_failed_conn_failed);
-                    return;
+
+                boolean writeToHCFSConfigSucceeded =
+                        TeraCloudConfig.storeHCFSConfigWithoutReload(deviceServiceInfo, mContext);
+                if (!writeToHCFSConfigSucceeded) {
+                    return false;
+                }
+
+                switch (HCFSMgmtUtils.triggerRestore()) {
+                    case RestoreStatus.Error.OUT_OF_SPACE:
+                        informErrorOccurred(R.string.restore_failed_out_of_space);
+                        return false;
+                    case RestoreStatus.Error.DAMAGED_BACKUP:
+                        informErrorOccurred(R.string.restore_failed_damaged_backup);
+                        return false;
+                    case RestoreStatus.Error.CONN_FAILED:
+                        informErrorOccurred(R.string.restore_failed_conn_failed);
+                        return false;
                 }
 
                 TeraCloudConfig.reloadConfig();
-                HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(), deviceServiceInfo.getBackend().getToken());
+                String refreshToken = GoogleDriveSignInAPI.getRefreshToken(getContext());
+                if (!TextUtils.isEmpty(refreshToken)) {
+                    HCFSMgmtUtils.setRefreshToken(refreshToken);
+                } else {
+                    HCFSMgmtUtils.setSwiftToken(
+                            deviceServiceInfo.getBackend().getUrl(),
+                            deviceServiceInfo.getBackend().getToken());
+                }
 
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -262,19 +296,17 @@ public class RestoreFragment extends RegisterFragment {
                 // Enable Tera app so that we are able to get new token when token expired
                 TeraAppConfig.enableApp(mContext);
 
-                replaceWithRestorePreparingFragment();
+                return true;
             }
-        });
-    }
 
-    private void informErrorOccurred(final String errorMsg) {
-        mUiHandler.post(new Runnable() {
             @Override
-            public void run() {
-                mErrorMessage.setText(errorMsg);
-                mProgressDialogUtils.dismiss();
+            protected void onPostExecute(Boolean succeeded) {
+                mUiHandler.sendEmptyMessage(DISMISS_PROGRESS_DIALOG);
+                if (succeeded) {
+                    replaceWithRestorePreparingFragment();
+                }
             }
-        });
+        }.execute();
     }
 
     private void informErrorOccurred(final int errorMsgId) {

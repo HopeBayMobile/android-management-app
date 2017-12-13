@@ -1,13 +1,13 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.db.TeraStatDAO;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.TeraStatInfo;
-import com.hopebaytech.hcfsmgmt.service.MgmtPollingService;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -164,9 +164,15 @@ public class TeraCloudConfig {
         switch (nowBackend) {
             case HCFSBackendType.GOOGLEDRIVE:
                 /* Check backend type and add google drive folder name. */
-                String rootFolderName = String.format("tera.%s", HCFSMgmtUtils.getDeviceImei(context));
-                if (!setHCFSConfig(HCFS_CONFIG_GOOGLEDRIVE_FOLDER, rootFolderName))
+                String imei = deviceServiceInfo.getImei();
+                if (TextUtils.isEmpty(imei)) {
+                    imei = HCFSMgmtUtils.getDeviceImei(context);
+                }
+                String rootFolderName = String.format("tera.%s", imei);
+                if (!setHCFSConfig(HCFS_CONFIG_GOOGLEDRIVE_FOLDER, rootFolderName)) {
+                    isSuccess = false;
                     Logs.e(CLASSNAME, "setConfig", "Failed to set googledrive folder name");
+                }
                 break;
 
             case HCFSBackendType.SWIFTTOKEN:
