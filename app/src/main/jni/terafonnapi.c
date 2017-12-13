@@ -442,3 +442,18 @@ JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_retry
 	free((char *)json_res);
 	return result;
 }
+
+JNIEXPORT jstring JNICALL Java_com_hopebaytech_hcfsmgmt_utils_HCFSApiUtils_setClient(
+        JNIEnv *jEnv, jobject jObject, jstring jId, jstring jSecret, jstring jToken) {
+    const char *json_res;
+    const char *id = (*jEnv)->GetStringUTFChars(jEnv, jId, 0);
+    const char *secret = (*jEnv)->GetStringUTFChars(jEnv, jSecret, 0);
+    const char *token = (*jEnv)->GetStringUTFChars(jEnv, jToken, 0);
+    HCFS_set_client(&json_res, id, secret, token);
+    jstring result = (*jEnv)->NewStringUTF(jEnv, json_res);
+    free((char *)json_res);
+    free((char *)id);
+    free((char *)secret);
+    free((char *)token);
+    return result;
+}

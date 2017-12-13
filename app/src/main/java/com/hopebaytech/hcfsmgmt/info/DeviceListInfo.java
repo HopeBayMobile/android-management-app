@@ -1,6 +1,5 @@
 package com.hopebaytech.hcfsmgmt.info;
 
-import android.content.ContentValues;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -21,6 +20,9 @@ public class DeviceListInfo implements Parcelable {
     public static final int TYPE_RESTORE_FROM_MY_TERA = 1;
     public static final int TYPE_RESTORE_FROM_BACKUP = 2;
 
+    public static final int TYPE_RESTORE_FROM_GOOGLE_DRIVE = 11;
+    public static final int TYPE_RESTORE_FROM_SWIFT = 12;
+
     /**
      * {@link #TYPE_RESTORE_FROM_MY_TERA}, {@link #TYPE_RESTORE_FROM_BACKUP}
      */
@@ -36,6 +38,7 @@ public class DeviceListInfo implements Parcelable {
     protected DeviceListInfo(Parcel in) {
         message = in.readString();
         responseCode = in.readInt();
+        type = in.readInt();
         in.readTypedList(deviceStatusInfoList, DeviceStatusInfo.CREATOR);
     }
 
@@ -128,7 +131,7 @@ public class DeviceListInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(message);
         dest.writeInt(responseCode);
+        dest.writeInt(type);
         dest.writeTypedList(deviceStatusInfoList);
     }
-
 }

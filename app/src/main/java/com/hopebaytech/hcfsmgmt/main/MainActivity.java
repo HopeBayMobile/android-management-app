@@ -1,23 +1,26 @@
 package com.hopebaytech.hcfsmgmt.main;
 
-import android.content.ContentResolver;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 
 import com.hopebaytech.hcfsmgmt.R;
 import com.hopebaytech.hcfsmgmt.fragment.ActivateWoCodeFragment;
 import com.hopebaytech.hcfsmgmt.fragment.MainFragment;
 import com.hopebaytech.hcfsmgmt.fragment.SplashFragment;
 import com.hopebaytech.hcfsmgmt.misc.TransferStatus;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveSignInAPI;
+import com.hopebaytech.hcfsmgmt.utils.GooglePlayServicesAPI;
 import com.hopebaytech.hcfsmgmt.utils.LogServerUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
+import com.hopebaytech.hcfsmgmt.utils.RequestCode;
 
 /**
  * @author Aaron
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
         init();
 
         sendLog();
+
+        silentSignIn(null);
     }
 
     @Override
@@ -90,6 +95,16 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+
+        switch (requestCode) {
+            case RequestCode.GOOGLE_SIGN_IN:
+                if (resultCode == Activity.RESULT_OK) {
+                    mGoogleDriveSignInAPI.handleSignInResult(data);
+                }
+                break;
+            case RequestCode.GOOGLE_SIGN_IN_RESOLVE_ERROR:
+                break;
+        }
     }
 
     @Override
@@ -127,5 +142,23 @@ public class MainActivity extends AppCompatActivity {
                 LogServerUtils.sendLog(MainActivity.this);
             }
         }).start();
+    }
+
+    private GoogleDriveSignInAPI mGoogleDriveSignInAPI;
+
+    public boolean silentSignIn(GoogleDriveSignInAPI.Callback callback) {
+        if (GooglePlayServicesAPI.hasGooglePlayServices(this)) {
+            if (mGoogleDriveSignInAPI == null) {
+                mGoogleDriveSignInAPI = new GoogleDriveSignInAPI(this, callback);
+            }
+            mGoogleDriveSignInAPI.setCallback(callback);
+
+            if (callback != null ||
+                    !TextUtils.isEmpty(GoogleDriveSignInAPI.getRefreshToken(this))) {
+                mGoogleDriveSignInAPI.silentSignIn();
+            }
+            return true;
+        }
+        return false;
     }
 }

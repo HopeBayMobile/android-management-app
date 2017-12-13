@@ -57,7 +57,7 @@ public class GoogleDriveAPI {
 
         DeviceListInfo deviceListInfo = new DeviceListInfo();
         deviceListInfo.addDeviceStatusInfo(info);
-        deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_MY_TERA);
+        deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_GOOGLE_DRIVE);
 
         return deviceListInfo;
     }

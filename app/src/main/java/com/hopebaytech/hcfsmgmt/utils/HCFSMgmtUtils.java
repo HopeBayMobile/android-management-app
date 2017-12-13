@@ -777,6 +777,22 @@ public class HCFSMgmtUtils {
         return isSuccess;
     }
 
+    public static boolean setRefreshToken(String refreshToken) {
+        boolean isSuccess = false;
+        try {
+            String jsonResult = HCFSApiUtils.setClient(
+                    GoogleDriveSignInAPI.GOOGLE_API_CONSOLE_CLIENT_ID,
+                    GoogleDriveSignInAPI.GOOGLE_API_CONSOLE_CLIENT_SRCRECT,
+                    refreshToken);
+            JSONObject jObject = new JSONObject(jsonResult);
+            isSuccess = jObject.getBoolean("result");
+            Logs.d("refreshToken =" + refreshToken + ", result=" + jsonResult);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return isSuccess;
+    }
+
     /***
      * @return <li>1 if system is clean now. That is, there is no dirty data.</li>
      * <li>0 when setting sync point completed.</li>

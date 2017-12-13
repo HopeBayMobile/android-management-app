@@ -7,6 +7,7 @@ import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,6 @@ import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.SwiftConfigInfo;
-import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Logs;
@@ -28,8 +28,6 @@ import com.hopebaytech.hcfsmgmt.utils.RestoreStatus;
 import com.hopebaytech.hcfsmgmt.utils.SwiftServerUtil;
 import com.hopebaytech.hcfsmgmt.utils.TeraAppConfig;
 import com.hopebaytech.hcfsmgmt.utils.TeraCloudConfig;
-
-import net.openid.appauth.AuthState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +44,7 @@ public class RestoreFragment extends RegisterFragment {
 
     public static final String KEY_DEVICE_LIST = "key_device_list";
     public static final String KEY_RESTORE_TYPE = "key_restore_type";
+    public static final String KEY_GOOGLE_DRIVE_ACCESS_TOKEN= "key_access_token";
 
     public static final int RESTORE_TYPE_NEW_DEVICE = 1;
     public static final int RESTORE_TYPE_MY_TERA = 2;
@@ -60,7 +59,7 @@ public class RestoreFragment extends RegisterFragment {
     private Handler mWorkHandler;
     private HandlerThread mHandlerThread;
 
-    private AuthState mGoogleDriveAuthState;
+    private DeviceListInfo mDeviceListInfo;
 
     public static RestoreFragment newInstance() {
         return new RestoreFragment();
@@ -95,18 +94,16 @@ public class RestoreFragment extends RegisterFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        DeviceListInfo deviceListInfo = null;
         Bundle args = getArguments();
         if (args != null) {
-            deviceListInfo = args.getParcelable(KEY_DEVICE_LIST);
+            mDeviceListInfo = args.getParcelable(KEY_DEVICE_LIST);
+            if (mDeviceListInfo == null) {
+                Logs.e(CLASSNAME, "onActivityCreated", "deviceListInfo == null");
+                return;
+            }
         }
 
-        if (deviceListInfo == null) {
-            Logs.e(CLASSNAME, "onActivityCreated", "deviceListInfo == null");
-            return;
-        }
-
-        mRestoreListAdapter = new RestoreListAdapter(getContext(), createRestoreList(deviceListInfo));
+        mRestoreListAdapter = new RestoreListAdapter(getContext(), createRestoreList(mDeviceListInfo));
         mRestoreListView.setAdapter(mRestoreListAdapter);
         mRestoreListView.setOnItemClickListener(restoreListItemClickListener);
 
@@ -154,37 +151,45 @@ public class RestoreFragment extends RegisterFragment {
 
     private void restoreDevice() {
         Logs.d(CLASSNAME, "restoreDevice", String.format("sourceImei=%s", HCFSMgmtUtils.getDeviceImei(mContext)));
-        if (mGoogleDriveAuthState != null) {
-            DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(null, mGoogleDriveAuthState.getAccessToken(), "googledrive", null, null);
-            AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mGoogleDriveAuthState);
-            preRestoreSetupForGoogleDrive(deviceServiceInfo);
-        } else {
-            // get swift info from parcel
-            Bundle bundle = getArguments();
-            if (bundle == null) {
-                Logs.e(CLASSNAME, "restoreDevice", "cannot get bundle for swift info");
-                informErrorOccurred(R.string.restore_failed);
-                return;
-            }
-            SwiftConfigInfo swiftConfigInfo = bundle.getParcelable(SwiftConfigInfo.PARCEL_KEY);
-            if (swiftConfigInfo == null) {
-                Logs.e(CLASSNAME, "restoreDevice", "swiftConfigInfo == null");
-                informErrorOccurred(R.string.restore_failed);
-                return;
-            }
+        switch (mDeviceListInfo.getType()) {
+            case DeviceListInfo.TYPE_RESTORE_FROM_GOOGLE_DRIVE:
+                String accessToken = getArguments().getString(KEY_GOOGLE_DRIVE_ACCESS_TOKEN);
 
-            String deviceImei = mRestoreListAdapter.getSelectedItem().getImei();
-            String deviceModel = mRestoreListAdapter.getSelectedItem().getModel();
-            String oldBucketPostfix = String.format("%s_%s", deviceImei, deviceModel);
+                if (TextUtils.isEmpty(accessToken)) {
+                    informErrorOccurred(R.string.restore_failed);
+                    return;
+                }
+                DeviceServiceInfo deviceServiceInfo = GoogleDriveAPI.buildDeviceServiceInfo(
+                        accessToken, null);
+                preRestoreSetupForGoogleDrive(deviceServiceInfo);
+                break;
+            case DeviceListInfo.TYPE_RESTORE_FROM_SWIFT:
+                // get swift info from parcel
+                Bundle bundle = getArguments();
+                if (bundle == null) {
+                    Logs.e(CLASSNAME, "restoreDevice", "cannot get bundle for swift info");
+                    informErrorOccurred(R.string.restore_failed);
+                    return;
+                }
+                SwiftConfigInfo swiftConfigInfo = bundle.getParcelable(SwiftConfigInfo.PARCEL_KEY);
+                if (swiftConfigInfo == null) {
+                    Logs.e(CLASSNAME, "restoreDevice", "swiftConfigInfo == null");
+                    informErrorOccurred(R.string.restore_failed);
+                    return;
+                }
 
-            String swiftUrl = swiftConfigInfo.getUrl();
-            String swiftAccount = swiftConfigInfo.getAccount();
-            String swiftKey = swiftConfigInfo.getKey();
-            String swiftBucketName = String.format("%s%s", SwiftServerUtil.SWIFT_TERA_BUCKET_PREFIX, oldBucketPostfix);
+                String deviceImei = mRestoreListAdapter.getSelectedItem().getImei();
+                String deviceModel = mRestoreListAdapter.getSelectedItem().getModel();
+                String oldBucketPostfix = String.format("%s_%s", deviceImei, deviceModel);
 
-            preRestoreSetUpForSwift(swiftUrl, swiftAccount, swiftKey, swiftBucketName);
+                String swiftUrl = swiftConfigInfo.getUrl();
+                String swiftAccount = swiftConfigInfo.getAccount();
+                String swiftKey = swiftConfigInfo.getKey();
+                String swiftBucketName = String.format("%s%s", SwiftServerUtil.SWIFT_TERA_BUCKET_PREFIX, oldBucketPostfix);
+
+                preRestoreSetUpForSwift(swiftUrl, swiftAccount, swiftKey, swiftBucketName);
+                break;
         }
-
     }
 
     private void preRestoreSetUpForSwift(final String swiftUrl,final String swiftAccount,final String swiftKey,final String swiftBucketName) {
@@ -299,9 +304,5 @@ public class RestoreFragment extends RegisterFragment {
         }
 
         return restoreListItems;
-    }
-
-    public void setGoogleDriveAuthState(AuthState authState) {
-        mGoogleDriveAuthState = authState;
     }
 }

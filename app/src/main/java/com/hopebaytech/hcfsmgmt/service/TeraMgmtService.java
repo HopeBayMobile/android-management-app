@@ -18,6 +18,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -60,6 +61,7 @@ import com.hopebaytech.hcfsmgmt.utils.Booster;
 import com.hopebaytech.hcfsmgmt.utils.DisplayTypeFactory;
 import com.hopebaytech.hcfsmgmt.utils.FactoryResetUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveSignInAPI;
 import com.hopebaytech.hcfsmgmt.utils.GoogleSilentAuthProxy;
 import com.hopebaytech.hcfsmgmt.utils.HCFSConnStatus;
 import com.hopebaytech.hcfsmgmt.utils.HCFSEvent;
@@ -110,14 +112,6 @@ public class TeraMgmtService extends Service {
     private BoosterWhiteListDAO mBoosterWhiteListDAO;
     private Context mContext;
 
-    private Handler mHandler = new Handler();
-    private Runnable mRefreshAccessToken = new Runnable() {
-        @Override
-        public void run() {
-            setAccessTokenViaAppAuth();
-        }
-    };
-
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -141,7 +135,9 @@ public class TeraMgmtService extends Service {
         mBoosterWhiteListVersionDAO = BoosterWhiteListVersionDAO.getInstance(this);
         mBoosterWhiteListDAO = BoosterWhiteListDAO.getInstance(this);
 
-        setAccessTokenViaAppAuth();
+        if (TeraAppConfig.isTeraAppLogin(this)) {
+            setRefreshToken();
+        }
     }
 
     @Override
@@ -189,8 +185,10 @@ public class TeraMgmtService extends Service {
                             HCFSMgmtUtils.updateAppExternalDir(TeraMgmtService.this);
                             break;
                         case TeraIntent.ACTION_TOKEN_EXPIRED:
-                            setAccessTokenViaAppAuth();
-                            checkTokenExpiredCause();
+                            if (!setRefreshToken()) {
+                                setAccessTokenViaAppAuth();
+                                checkTokenExpiredCause();
+                            }
                             break;
                         case TeraIntent.ACTION_EXCEED_PIN_MAX:
                             notifyUserExceedPinMax();
@@ -1401,12 +1399,16 @@ public class TeraMgmtService extends Service {
     }
 
     private void setAccessTokenViaAppAuth() {
-        long expirationTime = AppAuthUtils.refreshAccessToken(getApplicationContext());
-        if (expirationTime != -1) {
-            long delay = expirationTime - AppAuthUtils.THRESHOLD_REFRESH_ACCESS_TOKEN;
-            mHandler.removeCallbacks(mRefreshAccessToken);
-            mHandler.postDelayed(mRefreshAccessToken, delay);
+        AppAuthUtils.refreshAccessToken(getApplicationContext());
+    }
+
+    private boolean setRefreshToken() {
+        String refreshToken = GoogleDriveSignInAPI.getRefreshToken(this);
+        if (!TextUtils.isEmpty(refreshToken)) {
+            Logs.d("set refreshToken");
+            return HCFSMgmtUtils.setRefreshToken(refreshToken);
         }
+        return false;
     }
 
     private void eraseDataOnGoogleDrive(final Context context) {

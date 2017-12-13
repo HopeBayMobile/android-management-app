@@ -142,12 +142,11 @@ public class RegisterFragment extends Fragment {
         mUiHandler.sendEmptyMessage(DISMISS_PROGRESS_DIALOG);
     }
 
-    protected void replaceWithRestoreFragment(Bundle args, AuthState authState) {
+    protected void replaceWithRestoreFragment(Bundle args) {
         Logs.d(TAG, "replaceWithRestoreFragment", "Replace with RestoreFragment");
 
         RestoreFragment restoreFragment = RestoreFragment.newInstance();
         restoreFragment.setArguments(args);
-        restoreFragment.setGoogleDriveAuthState(authState); //TODO: I don't like this, it makes this method google drive specific. Also, Rondou saved it to shared preference already.
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.fragment_container, restoreFragment, RestoreFragment.TAG);
@@ -158,9 +157,8 @@ public class RegisterFragment extends Fragment {
     }
 
     protected void replaceWithRestorePreparingFragment() {
-        mProgressDialogUtils.dismiss();
-
         Logs.d(TAG, "replaceWithRestoreFragment", "Replace with RestorePreparingFragment");
+
         FragmentManager fm = getFragmentManager();
         fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         FragmentTransaction ft = fm.beginTransaction();

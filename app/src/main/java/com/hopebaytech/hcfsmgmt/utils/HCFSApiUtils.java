@@ -200,4 +200,6 @@ public class HCFSApiUtils {
      * @return a json string contains: true if success, false otherwise.
      */
     public static native String retryConn();
+
+    public static native String setClient(String clientId, String clientSecret, String refreshToken);
 }

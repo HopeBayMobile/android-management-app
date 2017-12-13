@@ -35,9 +35,11 @@ import com.hopebaytech.hcfsmgmt.info.DeviceListInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceServiceInfo;
 import com.hopebaytech.hcfsmgmt.info.DeviceStatusInfo;
 import com.hopebaytech.hcfsmgmt.info.SwiftConfigInfo;
+import com.hopebaytech.hcfsmgmt.main.MainActivity;
 import com.hopebaytech.hcfsmgmt.utils.AppAuthUtils;
 import com.hopebaytech.hcfsmgmt.utils.BrowserUtils;
 import com.hopebaytech.hcfsmgmt.utils.GoogleDriveAPI;
+import com.hopebaytech.hcfsmgmt.utils.GoogleDriveSignInAPI;
 import com.hopebaytech.hcfsmgmt.utils.GooglePlayServicesAPI;
 import com.hopebaytech.hcfsmgmt.utils.HCFSMgmtUtils;
 import com.hopebaytech.hcfsmgmt.utils.Interval;
@@ -91,6 +93,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     private static final String TEST_SWIFT_INFO_PORT = "8010";
     private static final String TEST_SWIFT_INFO_ACCOUNT = "hopebay:EKGKe3W3zW9IEul6zVjr";
     private static final String TEST_SWIFT_INFO_KEY = "PZJeuN5xfIV2dQkq1MSKNQCztKgzkPpn";
+
+    private AuthState mAuthState;
 
     public static ActivateWoCodeFragment newInstance() {
         return new ActivateWoCodeFragment();
@@ -153,6 +157,13 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 if (!NetworkUtils.isNetworkConnected(mContext)) {
                     mErrorMessage.setText(R.string.activate_alert_dialog_message);
                     return;
+                }
+
+                if (mContext instanceof MainActivity) {
+                    if (((MainActivity)mContext).silentSignIn(mCallback)) {
+                        mProgressDialogUtils.show(R.string.processing_msg);
+                        return;
+                    }
                 }
 
                 if (!BrowserUtils.isBrowserAvailable(mContext)) {
@@ -252,14 +263,17 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         });
     }
 
-    private class GoogleDriveActivationTask extends AsyncTask<AuthState, Void, Boolean> {
-        AuthState authState;
+    private class GoogleDriveActivationTask extends AsyncTask<String, Void, Boolean> {
+        String refreshToken;
+        String accessToken;
 
         @Override
-        protected Boolean doInBackground(AuthState... params) {
-            authState = params[0];
+        protected Boolean doInBackground(String... params) {
+            refreshToken = params[0];
+            accessToken = params[1];
+
             try {
-                return GoogleDriveAPI.hasTeraFolderItem(mContext, authState.getAccessToken());
+                return GoogleDriveAPI.hasTeraFolderItem(mContext, accessToken);
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -267,6 +281,8 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
 
         protected void onPostExecute(Boolean hasTeraFolderOnGoogleDrive) {
+            mProgressDialogUtils.dismiss();
+
             if(!hasTeraFolderOnGoogleDrive) {
                 setUpAsNewDevice();
             } else {
@@ -299,24 +315,26 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         }
 
         private void setUpAsNewDevice() {
-            new ActivateAsNewDeviceViaGoogleDriveTask().execute(authState);
+            new ActivateAsNewDeviceViaGoogleDriveTask().execute(refreshToken, accessToken);
         }
 
         private void handleRestoration() {
             Bundle args = new Bundle();
             args.putParcelable(RestoreFragment.KEY_DEVICE_LIST, GoogleDriveAPI.buildDeviceListInfo(HCFSMgmtUtils.getDeviceImei(mContext)));
-            replaceWithRestoreFragment(args, authState);
+            args.putString(RestoreFragment.KEY_GOOGLE_DRIVE_ACCESS_TOKEN, accessToken);
+            replaceWithRestoreFragment(args);
         }
     }
 
-    private class ActivateAsNewDeviceViaGoogleDriveTask extends AsyncTask<AuthState, Void, Boolean> {
-        AuthState authState;
+    private class ActivateAsNewDeviceViaGoogleDriveTask extends AsyncTask<String, Void, Boolean> {
+        String refreshToken;
+        String accessToken;
         Bundle accountInfo;
 
         @Override
-        protected Boolean doInBackground(AuthState... params) {
-            authState = params[0];
-            String accessToken = authState.getAccessToken();
+        protected Boolean doInBackground(String... params) {
+            refreshToken = params[0];
+            accessToken = params[1];
 
             boolean isDeleted = false;
             while (!isDeleted) {
@@ -334,7 +352,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 return false;
             }
 
-            boolean saveAuthStatusToSharedPreferenceSucceeded = AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, authState);
+            boolean saveAuthStatusToSharedPreferenceSucceeded = AppAuthUtils.saveAppAuthStatusToSharedPreference(mContext, mAuthState);
             if (!saveAuthStatusToSharedPreferenceSucceeded) {
                 Logs.e(TAG, "doInBackground", "Failed to save AuthStatus to shared preference"); //TODO: extract
                 return false;
@@ -347,7 +365,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 return false;
             }
 
-            accountInfo = buildAccountInfoBundle(authState);
+            accountInfo = buildAccountInfoBundle(mAuthState);
             if (accountInfo == null) {
                 Logs.e(TAG, "doInBackground", "Failed to build account info"); //TODO: extract
                 return false;
@@ -359,7 +377,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 return false;
             }
 
-            boolean setTokenSucceeded = HCFSMgmtUtils.setSwiftToken(deviceServiceInfo.getBackend().getUrl(), deviceServiceInfo.getBackend().getToken());
+            boolean setTokenSucceeded = HCFSMgmtUtils.setRefreshToken(refreshToken);
             if (!setTokenSucceeded) {
                 Logs.e(TAG, "doInBackground", "Failed to set goolge drive token"); //TODO: extract
                 return false;
@@ -464,7 +482,7 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                     continue;
                 }
             }
-            deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_BACKUP);
+            deviceListInfo.setType(DeviceListInfo.TYPE_RESTORE_FROM_SWIFT);
 
             if(deviceListInfo.isEmpty()) {
                 Logs.e(TAG, "handleRestoration", getString(R.string.restore_failed_upon_retrieve_backup));
@@ -627,15 +645,16 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                             return;
                         }
 
-                        AuthState authState = new AuthState(response,
+                        mAuthState = new AuthState(response,
                                 AuthorizationException.fromIntent(intent));
-                        authState.update(tokenResponse, exception);
+                        mAuthState.update(tokenResponse, exception);
 
                         Logs.d(TAG, "onTokenRequestCompleted", String.format(
                                 "Token Response [ Access Token: %s, ID Token: %s ]",
                                 tokenResponse.accessToken, tokenResponse.idToken));
 
-                        new GoogleDriveActivationTask().execute(authState);
+                        new GoogleDriveActivationTask().execute(
+                                tokenResponse.refreshToken, tokenResponse.accessToken);
                     }
                 });
     }
@@ -695,4 +714,20 @@ public class ActivateWoCodeFragment extends RegisterFragment {
             }
         });
     }
+
+    private GoogleDriveSignInAPI.Callback mCallback = new GoogleDriveSignInAPI.Callback() {
+        @Override
+        public void onSignIn(boolean isSuccess) {
+            if (!isSuccess) {
+                mErrorMessage.setText(R.string.activate_signin_google_account_failed);
+                mProgressDialogUtils.dismiss();
+            }
+        }
+
+        @Override
+        public void onTokenResponse(String refreshToken, String accessToken) {
+            Logs.d("refreshToken = " + refreshToken + " accessToken = " + accessToken);
+            new GoogleDriveActivationTask().execute(refreshToken, accessToken);
+        }
+    };
 }
