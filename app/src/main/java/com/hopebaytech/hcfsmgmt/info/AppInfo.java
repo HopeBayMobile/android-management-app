@@ -4,12 +4,14 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.os.Build;
 import android.os.Environment;
 import android.os.FileObserver;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 
@@ -65,7 +67,9 @@ public class AppInfo extends ItemInfo implements Cloneable {
         //if (!(drawable instanceof VectorDrawable)) {
         //    iconImage = ((BitmapDrawable) drawable).getBitmap();
         //}
-        iconImage = ((BitmapDrawable) drawable).getBitmap();
+
+        //iconImage = ((BitmapDrawable) drawable).getBitmap();
+        iconImage = getBitmapFromDrawable(drawable);
 
         if (iconImage == null) {
             drawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
@@ -84,15 +88,30 @@ public class AppInfo extends ItemInfo implements Cloneable {
 
     public Drawable getIconDrawable() {
         Drawable iconDrawable = context.getPackageManager().getApplicationIcon(applicationInfo);
+
         if (iconDrawable == null) {
             iconDrawable = ContextCompat.getDrawable(mContext, R.drawable.icon_doc_default);
         }
 
         int width = (int) mContext.getResources().getDimension(R.dimen.icon_image_width);
         int height = (int) mContext.getResources().getDimension(R.dimen.icon_image_height);
-        Bitmap bitmap = ((BitmapDrawable) iconDrawable).getBitmap();
+
+        Bitmap bitmap = getBitmapFromDrawable(iconDrawable);
+        //Bitmap bitmap = ((BitmapDrawable) iconDrawable).getBitmap();
+
         Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmap, width, height, false);
         return new BitmapDrawable(mContext.getResources(), bitmapResized);
+    }
+
+    @NonNull
+    private Bitmap getBitmapFromDrawable(@NonNull Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) { return ((BitmapDrawable) drawable).getBitmap(); }
+
+        final Bitmap bmp = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bmp);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bmp;
     }
 
     public PackageInfo getPackageInfo() {
