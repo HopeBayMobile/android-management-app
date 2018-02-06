@@ -1,6 +1,5 @@
 package com.hopebaytech.hcfsmgmt.utils;
 
-
 import com.hopebaytech.hcfsmgmt.R;
 
 import java.util.ArrayList;
@@ -12,10 +11,10 @@ import java.util.Map;
 public class SwiftServerUtil {
     private static final String TAG = SwiftServerUtil.class.getSimpleName();
 
-    private static final String TEST_SWIFT_INFO_IP = "172.16.11.69";
+    private static final String TEST_SWIFT_INFO_IP = "192.168.1.112";
     private static final String TEST_SWIFT_INFO_PORT = "8010";
-    private static final String TEST_SWIFT_INFO_ACCOUNT = "hopebay:EKGKe3W3zW9IEul6zVjr";
-    private static final String TEST_SWIFT_INFO_KEY = "PZJeuN5xfIV2dQkq1MSKNQCztKgzkPpn";
+    private static final String TEST_SWIFT_INFO_ACCOUNT = "tera:YXTOBAGLOcfZO4P8zHEg";
+    private static final String TEST_SWIFT_INFO_KEY = "f0uhszaCVkFdPilO9gR9CDj8zJBdNTf8";
     //private static final String TEST_SWIFT_INFO_BUCKET_NAME = "test1";
 
     public static final String SWIFT_HEADER_KEY_USER = "x-auth-user";
@@ -102,4 +101,22 @@ public class SwiftServerUtil {
 
         return true;
     }
+
+    public static boolean isContainerExist(String account, String key, String url, String bucketName) {
+        List<String> containers = listTeraBuckets(account, key, url);
+        return containers.contains(bucketName);
+    }
+
+    public static int getNumberOfContainersByThisIMEI(String account, String key, String url, String imei) {
+        List<String> allTeraContainers = listTeraBuckets(account, key, url);
+        ArrayList<String> containersWithThisIMEI = new ArrayList<>();
+
+        for (String container: allTeraContainers) {
+            if (container.contains(imei))
+                containersWithThisIMEI.add(container);
+        }
+
+        return containersWithThisIMEI.toArray().length;
+    }
+
 }

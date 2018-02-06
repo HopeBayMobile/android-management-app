@@ -49,6 +49,9 @@ public class RestoreListAdapter extends BaseAdapter{
         TextView imei = (TextView) view.findViewById(R.id.imei);
         imei.setText(((ListItem)getItem(position)).getImei());
 
+        TextView containerIndex = (TextView) view.findViewById(R.id.containerIndex);
+        containerIndex.setText((((ListItem)getItem(position)).getContainerIndex()));
+
         ImageView radioBtn = (ImageView) view.findViewById(R.id.radio_btn);
         radioBtn.setImageResource(((ListItem)getItem(position)).isSelected ? R.drawable.icon_btn_selected : R.drawable.icon_btn_unselected);
         radioBtn.setOnClickListener(new View.OnClickListener() {
@@ -110,6 +113,10 @@ public class RestoreListAdapter extends BaseAdapter{
 
         public String getImei() {
             return deviceStatusInfo.getImei();
+        }
+
+        public String getContainerIndex() {
+            return deviceStatusInfo.getContainerIndex();
         }
     }
 }

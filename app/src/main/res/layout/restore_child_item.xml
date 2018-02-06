@@ -42,6 +42,29 @@
                     android:layout_height="wrap_content"
                     tools:text="123-456-789"
                     android:textColor="@android:color/darker_gray" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    style="@style/F11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Index: "
+                    android:textColor="@android:color/darker_gray" />
+
+                <com.hopebaytech.hcfsmgmt.customview.FontTextView
+                    android:id="@+id/containerIndex"
+                    style="@style/F11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="123-456-789"
+                    android:textColor="@android:color/darker_gray" />
+
             </LinearLayout>
 
         </LinearLayout>

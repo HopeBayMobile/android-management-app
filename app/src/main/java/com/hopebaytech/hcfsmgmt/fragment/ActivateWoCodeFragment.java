@@ -20,6 +20,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -89,10 +90,11 @@ public class ActivateWoCodeFragment extends RegisterFragment {
     private int tapsOnLogo = 0;
     private long startTime = 0L;
 
-    private static final String TEST_SWIFT_INFO_IP = "172.16.11.69";
+    private static final String TEST_SWIFT_INFO_IP = "192.168.1.112";
     private static final String TEST_SWIFT_INFO_PORT = "8010";
-    private static final String TEST_SWIFT_INFO_ACCOUNT = "hopebay:EKGKe3W3zW9IEul6zVjr";
-    private static final String TEST_SWIFT_INFO_KEY = "PZJeuN5xfIV2dQkq1MSKNQCztKgzkPpn";
+    private static final String TEST_SWIFT_INFO_ACCOUNT = "tera:YXTOBAGLOcfZO4P8zHEg";
+    private static final String TEST_SWIFT_INFO_KEY = "f0uhszaCVkFdPilO9gR9CDj8zJBdNTf8";
+    private String containerName = "";
 
     private AuthState mAuthState;
 
@@ -259,6 +261,24 @@ public class ActivateWoCodeFragment extends RegisterFragment {
                 String swiftKey = mSwiftKeyInputEditText.getText().toString();
 
                 new SwiftActivationTask().execute(swiftIp, swiftPort, swiftAccount, swiftKey);
+            }
+        });
+
+        mSwiftActivateButton.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    mProgressDialogUtils.show(R.string.processing_msg);
+
+                    // collect user input
+                    String swiftIp = mSwiftIpInputEditText.getText().toString();
+                    String swiftPort = mSwiftPortInputEditText.getText().toString();
+                    String swiftAccount = mSwiftAccountInputEditText.getText().toString();
+                    String swiftKey = mSwiftKeyInputEditText.getText().toString();
+
+                    new SwiftActivationTask().execute(swiftIp, swiftPort, swiftAccount, swiftKey);
+                }
+                return true;
             }
         });
     }
@@ -466,21 +486,26 @@ public class ActivateWoCodeFragment extends RegisterFragment {
         private void handleRestoration() {
             // parse tera buckets into deviceListInfo
             DeviceListInfo deviceListInfo = new DeviceListInfo();
-            for(String bucketName : teraBuckets) {
+            for(String containerName : teraBuckets) {
                 String deviceImei;
                 String deviceModel;
+                String containerIndex;
                 try {
-                    String[] bucketNameFragments = bucketName.split("_");
+                    String[] bucketNameFragments = containerName.split("_");
                     deviceImei = bucketNameFragments[1];
                     deviceModel = bucketNameFragments[2];
+                    containerIndex = "1";
+                    if (bucketNameFragments.length == 4)
+                        containerIndex = bucketNameFragments[3];
 
                     DeviceStatusInfo statusInfo = new DeviceStatusInfo();
                     statusInfo.setImei(deviceImei);
                     statusInfo.setModel(deviceModel);
+                    statusInfo.setContainerIndex(containerIndex);
                     statusInfo.setServiceStatus(MgmtCluster.ServiceState.TX_READY); //Not sure if it will cause problem
                     deviceListInfo.addDeviceStatusInfo(statusInfo);
                 } catch (IndexOutOfBoundsException e) {
-                    Logs.w(TAG, "handleRestoration", String.format("Found swift bucket with tera prefix but incorrect format: %s", bucketName));
+                    Logs.w(TAG, "handleRestoration", String.format("Found swift bucket with tera prefix but incorrect format: %s", containerName));
                     continue;
                 }
             }
@@ -534,19 +559,26 @@ public class ActivateWoCodeFragment extends RegisterFragment {
 
             String deviceImei = HCFSMgmtUtils.getDeviceImei(mContext);
             String deviceModel = Build.MODEL == null? "UnknownModel" : Build.MODEL.replaceAll(" ", "");
-            String newBucketPostfix = String.format("%s_%s", deviceImei, deviceModel);
-            String bucketName = String.format("%s%s", SwiftServerUtil.SWIFT_TERA_BUCKET_PREFIX, newBucketPostfix);
+            String newContainerPostfix = String.format("%s_%s", deviceImei, deviceModel);
+            String containerName = String.format("%s%s", SwiftServerUtil.SWIFT_TERA_BUCKET_PREFIX, newContainerPostfix);
 
-            //TODO: delete old bucket... but how?
+            // if container "tera_imei_model" exists, append number to name
+            boolean containerExist = SwiftServerUtil.isContainerExist(swiftAccount, swiftKey, swiftUrl, containerName);
+            if(containerExist) {
+                Logs.d(TAG, "containerExist", String.format("[%s] container existed", containerName));
+                int numberOfContainersByIMEI = SwiftServerUtil.getNumberOfContainersByThisIMEI(swiftAccount, swiftKey, swiftUrl, deviceImei);
+                containerName = String.format("%s_%s", containerName, numberOfContainersByIMEI + 1);
+                Logs.d(TAG, "containerExist", String.format("use [%s] as new name ", containerName));
+            }
 
             // set up as new device
-            boolean bucketCreationSucceeded = SwiftServerUtil.createBucket(swiftAccount, swiftKey, swiftUrl, bucketName);
+            boolean bucketCreationSucceeded = SwiftServerUtil.createBucket(swiftAccount, swiftKey, swiftUrl, containerName);
             if(!bucketCreationSucceeded) {
                 Logs.e(TAG, "doInBackground", getString(R.string.activate_failed_cannot_create_bucket));
                 return false;
             }
 
-            boolean writeToHCFSConfigSucceeded = writeSwiftInfoToHCFSConfig(swiftUrl, swiftAccount, swiftKey,bucketName);
+            boolean writeToHCFSConfigSucceeded = writeSwiftInfoToHCFSConfig(swiftUrl, swiftAccount, swiftKey,containerName);
             if (!writeToHCFSConfigSucceeded) {
                 Logs.e(TAG, "doInBackground", getString(R.string.activate_failed_save_swift_config));
                 return false;

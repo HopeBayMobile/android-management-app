@@ -17,6 +17,7 @@ public class DeviceStatusInfo implements Parcelable {
     private String imei;
     private String serviceStatus;
     private String model;
+    private String containerIndex;
 
     public DeviceStatusInfo() {}
 
@@ -25,6 +26,7 @@ public class DeviceStatusInfo implements Parcelable {
         imei = in.readString();
         serviceStatus = in.readString();
         model = in.readString();
+        containerIndex = in.readString();
     }
 
     public static final Creator<DeviceStatusInfo> CREATOR = new Creator<DeviceStatusInfo>() {
@@ -80,6 +82,7 @@ public class DeviceStatusInfo implements Parcelable {
             jsonObject.put("imei", imei);
             jsonObject.put("serviceStatus", serviceStatus);
             jsonObject.put("model", model);
+            jsonObject.put("containerIndex", containerIndex);
         } catch (JSONException e) {
             return Log.getStackTraceString(e);
         }
@@ -97,5 +100,14 @@ public class DeviceStatusInfo implements Parcelable {
         dest.writeString(imei);
         dest.writeString(serviceStatus);
         dest.writeString(model);
+        dest.writeString(containerIndex);
+    }
+
+    public String getContainerIndex() {
+        return containerIndex;
+    }
+
+    public void setContainerIndex(String index) {
+        this.containerIndex = index;
     }
 }
