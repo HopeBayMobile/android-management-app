@@ -55,7 +55,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:padding="7dp"
-            android:src="@drawable/icon_btn_openstack_swift_disable" />
+            android:src="@drawable/icon_btn_openstack_swift" />
 
         <TextView
             android:id="@+id/swift_text"
@@ -68,27 +68,4 @@
             android:text="Swift"/>
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/aws_activate"
-        android:layout_marginTop="15dp"
-        android:layout_width="250dp"
-        android:layout_height="55dp"
-        android:background="@drawable/button_shadow_normal">
-
-        <ImageView
-            android:layout_width="50dp"
-            android:layout_height="match_parent"
-            android:padding="7dp"
-            android:src="@drawable/icon_btn_aws_s3_disable" />
-
-        <TextView
-            android:id="@+id/aws_activate_text"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:paddingStart="45dp"
-            android:paddingEnd="0dp"
-            android:textAllCaps="true"
-            android:text="AWS S3"/>
-    </RelativeLayout>
 </LinearLayout>

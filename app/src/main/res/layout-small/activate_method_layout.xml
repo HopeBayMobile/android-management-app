@@ -47,7 +47,7 @@
             android:layout_width="50dp"
             android:layout_height="match_parent"
             android:padding="7dp"
-            android:src="@drawable/icon_btn_openstack_swift_disable" />
+            android:src="@drawable/icon_btn_openstack_swift" />
 
         <TextView
             android:id="@+id/swift_text"
